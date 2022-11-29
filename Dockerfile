@@ -74,7 +74,10 @@ ENV NEO4J_USER="neo4j"
 ENV NEO4J_PASSWORD="rrr"
 ENV NEO4J_CURRENTDB="neo4j"
 
-COPY rbxz_bend ${DJANGO}
+# Be careful given that both the whole django project and the main module are called `rbxz_bend`. (hence not using the $DJANGO here)
+COPY rbxz_bend /home/backend
+ADD rbxz_bend /home/backend
+
 
 # start server
 WORKDIR ${DJANGO}
