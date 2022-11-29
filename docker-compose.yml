@@ -4,17 +4,15 @@ services:
     container_name: django
     restart: always
     build: .
-    # image: rbxz_bend
     ports:
       - 8000:8000
     volumes:
-      # - /home/rxz/dev/docker_together/rbxz_bend:/home/backend/django
       - type: bind
         source: ${RIBETL_DATA:?err}
-        target: /home/backend/django/ribetldata
+        target: /home/backend/api/ribetldata
 
       # FOR LIVE DEVELOPMENT -----------------------|
-      - ./rbxz_bend:/home/backend/rbxz_bend        #|  <--- DEV ONLY
+      - ./api:/home/backend/api        #|  <--- DEV ONLY
       # --------------------------------------------|
 
     environment:

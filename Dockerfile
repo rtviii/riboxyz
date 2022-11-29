@@ -3,7 +3,7 @@ FROM ubuntu:22.04
 
 # ----- SETUP -------------------
 # vars inside the container
-ENV DJANGO=/home/backend/rbxz_bend
+ENV DJANGO=/home/backend/api
 ENV PYMOL_SOURCE=/home/backend/pymol
 ENV INGRESS=/home/backend/ingress
 
@@ -57,7 +57,7 @@ RUN npm install -g ts-node
 
 
 # WORKDIR $DJANGO
-ADD rbxz_bend/reqs.txt $DJANGO
+ADD api/reqs.txt $DJANGO
 
 RUN python3 -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
@@ -76,8 +76,7 @@ ENV NEO4J_PASSWORD="rrr"
 ENV NEO4J_CURRENTDB="neo4j"
 
 # Be careful given that both the whole django project and the main module are called `rbxz_bend`. (hence not using the $DJANGO here)
-COPY rbxz_bend /home/backend
-ADD rbxz_bend /home/backend
+COPY api /home/backend/
 
 
 # start server
