@@ -1,0 +1,37 @@
+*********************
+PyMOL Packaging Guide
+*********************
+
+===========================
+PyMOL environment variables
+===========================
+
+Typical installations don't require any environment variables to run
+PyMOL. PyMOL will automatically assign the following variables if they
+are unset:
+
+PYMOL_PATH = First of:
+  - <pymol python module> + "/pymol_path"
+  - parent of the "modules" directory if launch script matches
+    "modules/pymol/__init__.py"
+  - sys.prefix + "/share/pymol"
+PYMOL_DATA = $PYMOL_PATH/data
+PYMOL_SCRIPTS = $PYMOL_PATH/scripts
+
+=======================================================
+Suggested File Locations (for package managed installs)
+=======================================================
+
+== pymol package ==
+
+modules/pymol  -> /usr/lib/pythonX.X/site-packages/pymol
+modules/chempy -> /usr/lib/pythonX.X/site-packages/chempy
+modules/pmg_tk -> /usr/lib/pythonX.X/site-packages/pmg_tk
+
+== pymol-data package ==
+
+scripts     -> /usr/share/pymol/scripts (RUNTIME REQUIREMENT)
+data        -> /usr/share/pymol/data (RUNTIME REQUIREMENT)
+
+Installable with:
+python setup.py install --pymol-path=/usr/share/pymol

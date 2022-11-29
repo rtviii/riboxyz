@@ -1,8 +1,7 @@
 version: '3.8'
 services:
   django:
-    build: ./rbxz_bend
-    image: rbxz_bend
+    build: .
     ports:
       - 8000:8000
     volumes:
