@@ -64,6 +64,7 @@ ENV PATH="/opt/venv/bin:$PATH"
 RUN pip3 install -r ${DJANGO}/reqs.txt
 RUN pip3 install pytz   --upgrade
 RUN pip3 install tzdata --upgrade
+RUN pip3 install gunicorn
 
 
 # port where the Django app runs
@@ -81,7 +82,9 @@ ADD rbxz_bend /home/backend
 
 # start server
 WORKDIR ${DJANGO}
-CMD python3 manage.py runserver  0.0.0.0:8000 --noreload
+# CMD python3 manage.py runserver  0.0.0.0:8000 --noreload
+CMD ["gunicorn", "--bind", ":8000", "--workers", "3", "rbxz_bend.wsgi:application","--reload"]
+
 
 # ------------------------------------
 # BIND THE ACTUAL STRUCTURES DATA TO SYSTEM FOLDER
