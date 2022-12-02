@@ -12,7 +12,8 @@ services:
         target: /home/backend/api/ribetldata
 
       # FOR LIVE DEVELOPMENT -----------------------|
-      - ./api:/home/backend/api        #|  <--- DEV ONLY
+      - ./api:/home/backend/api                    #|  <--- DEV ONLY
+      - ./__ingress:/home/backend/ingress          #|  
       # --------------------------------------------|
 
     environment:

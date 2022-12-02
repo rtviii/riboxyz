@@ -46,22 +46,6 @@ RUN python3 setup.py build install --home="${PYMOL_PATH}" --install-lib="${PYMOL
 # --- NEO4J ---------------------------------------------------------------------------------
 
 
-# -------------------------------------- NODE AND MODULES INSTALLATION
-COPY __ingress $INGRESS
-RUN chmod +x "${INGRESS}/src/update_riboxyz.ts"
-
-ENV NODE_VERSION=18.12.1
-RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
-ENV NVM_DIR=/root/.nvm
-RUN . "$NVM_DIR/nvm.sh" && nvm install ${NODE_VERSION}
-RUN . "$NVM_DIR/nvm.sh" && nvm use v${NODE_VERSION}
-RUN . "$NVM_DIR/nvm.sh" && nvm alias default v${NODE_VERSION}
-ENV PATH="/root/.nvm/versions/node/v${NODE_VERSION}/bin/:${PATH}"
-WORKDIR ${INGRESS}
-ADD __ingress/package.json ${INGRESS}
-RUN npm install --no-optional && npm cache clean --force
-RUN npm install -g ts-node
-# ----------------------------------------------------------------------
 
 
 # WORKDIR $DJANGO
@@ -80,6 +64,23 @@ ENV NEO4J_URI="bolt://neo:7687"
 ENV NEO4J_USER="neo4j"
 ENV NEO4J_PASSWORD="rrr"
 ENV NEO4J_CURRENTDB="neo4j"
+
+# -------------------------------------- NODE AND MODULES INSTALLATION
+COPY __ingress $INGRESS
+RUN chmod +x "${INGRESS}/src/update_riboxyz.ts"
+
+ENV NODE_VERSION=18.12.1
+RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+ENV NVM_DIR=/root/.nvm
+RUN . "$NVM_DIR/nvm.sh" && nvm install ${NODE_VERSION}
+RUN . "$NVM_DIR/nvm.sh" && nvm use v${NODE_VERSION}
+RUN . "$NVM_DIR/nvm.sh" && nvm alias default v${NODE_VERSION}
+ENV PATH="/root/.nvm/versions/node/v${NODE_VERSION}/bin/:${PATH}"
+WORKDIR ${INGRESS}
+ADD __ingress/package.json ${INGRESS}
+RUN npm install --no-optional && npm cache clean --force
+RUN npm install -g ts-node
+# ----------------------------------------------------------------------
 
 # Be careful given that both the whole django project and the main module are called `rbxz_bend`. (hence not using the $DJANGO here)
 COPY api /home/backend/api
