@@ -7,25 +7,37 @@ ENV DJANGO=/home/backend/api
 ENV PYMOL_SOURCE=/home/backend/pymol
 ENV INGRESS=/home/backend/ingress
 
+
 # set work directory
 RUN mkdir -p $DJANGO
 
 # --------------------------------------
 # ----- DEPENDENCIES -------------------
-RUN apt-get update -y  && apt-get install curl git vim \
-software-properties-common python3 \
+RUN apt-get update -y && apt-get install curl git vim \
+software-properties-common apt-transport-https python3 \
 build-essential python3-dev python3-pip python3-venv \
 libglew-dev libpng-dev libfreetype6-dev libxml2-dev \
 libmsgpack-dev python3-pyqt5.qtopengl libglm-dev libnetcdf-dev \
-apt-transport-https ca-certificates libssl-dev wget  -y
+apt-transport-https ca-certificates libssl-dev wget  -y 
+
+
+
+# --- NEO4J ----------------
+RUN add-apt-repository -y ppa:openjdk-r/ppa
+RUN apt-get update
+
+RUN add-apt-repository -y universe
+
+RUN wget -O neo.gpg.key https://debian.neo4j.com/neotechnology.gpg.key && apt-key add --no-tty neo.gpg.key
+RUN echo 'deb https://debian.neo4j.com stable latest' | tee -a /etc/apt/sources.list.d/neo4j.list
+RUN apt-get update
+RUN mkdir /etc/ssl/certs/java/
+RUN apt install -y --reinstall -o Dpkg::Options::="--force-confask,confnew,confmiss" --reinstall ca-certificates-java ssl-cert openssl ca-certificates
+RUN apt-get install -y neo4j
+# --- NEO4J ----------------
+
 
 RUN pip3 install virtualenv netCDF4
-
-# ------------------------------------
-# ----- DJANGO -----------------------
-# copy whole project to your docker home directory.
-# COPY rbxz_bend $DJANGO
-COPY __ingress $INGRESS
 COPY __pymol_source $PYMOL_SOURCE
 
 
@@ -41,6 +53,10 @@ WORKDIR $PYMOL_SOURCE
 RUN python3 setup.py build install --home="${PYMOL_PATH}" --install-lib="${PYMOL_PATH}/modules/" --install-scripts="${PYMOL_PATH}"
 
 
+# ------------------------------------
+# COPY rbxz_bend $DJANGO
+COPY __ingress $INGRESS
+RUN chmod +x "${INGRESS}/src/update_riboxyz.ts"
 # -------------------------------------- NODE AND MODULES INSTALLATION
 ENV NODE_VERSION=18.12.1
 RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
@@ -75,7 +91,8 @@ ENV NEO4J_PASSWORD="rrr"
 ENV NEO4J_CURRENTDB="neo4j"
 
 # Be careful given that both the whole django project and the main module are called `rbxz_bend`. (hence not using the $DJANGO here)
-COPY api /home/backend/
+COPY api /home/backend/api
+
 
 
 # start server
