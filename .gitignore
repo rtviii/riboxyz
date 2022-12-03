@@ -1,3 +1,8 @@
 volume/**
 volume/
 **/volume/
+
+*.cif
+**/*.cif
+**/volume
+volume/*
