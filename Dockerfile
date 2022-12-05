@@ -5,7 +5,7 @@ FROM ubuntu:22.04
 # vars inside the container
 ENV DJANGO=/home/backend/api
 ENV PYMOL_SOURCE=/home/backend/pymol
-ENV INGRESS=/home/backend/ingress
+ENV CLI=/home/backend/ingress
 
 # set work directory
 RUN mkdir -p $DJANGO
@@ -36,8 +36,8 @@ RUN apt-get install -y neo4j
 
 # ----- PYMOL_INSTALLATION -------------
 RUN pip3 install virtualenv netCDF4
-COPY __pymol_source $PYMOL_SOURCE
-ADD __pymol_source $PYMOL_SOURCE
+COPY pymol_source $PYMOL_SOURCE
+ADD pymol_source $PYMOL_SOURCE
 ENV PYMOL_PATH="${PYMOL_SOURCE}/__pymol_lib"
 ENV PYTHONPATH="${PYMOL_PATH}/modules" 
 RUN mkdir -p $PYMOL_PATH
@@ -60,14 +60,14 @@ RUN pip3 install gunicorn
 # port where the Django app runs
 EXPOSE 8000 8001 8002
 
-ENV NEO4J_URI="bolt://neo:7687"
-ENV NEO4J_USER="neo4j"
-ENV NEO4J_PASSWORD="rrr"
-ENV NEO4J_CURRENTDB="neo4j"
+ENV NEO4J_URI       = "bolt://neo:7687"
+ENV NEO4J_USER      = "neo4j"
+ENV NEO4J_PASSWORD  = "rrr"
+ENV NEO4J_CURRENTDB = "neo4j"
 
 # -------------------------------------- NODE AND MODULES INSTALLATION
-COPY __ingress $INGRESS
-RUN chmod +x "${INGRESS}/src/update_riboxyz.ts"
+COPY cli $CLI
+# RUN chmod +x "${INGRESS}/src/update_riboxyz.ts"
 
 ENV NODE_VERSION=18.12.1
 RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
@@ -76,8 +76,8 @@ RUN . "$NVM_DIR/nvm.sh" && nvm install ${NODE_VERSION}
 RUN . "$NVM_DIR/nvm.sh" && nvm use v${NODE_VERSION}
 RUN . "$NVM_DIR/nvm.sh" && nvm alias default v${NODE_VERSION}
 ENV PATH="/root/.nvm/versions/node/v${NODE_VERSION}/bin/:${PATH}"
-WORKDIR ${INGRESS}
-ADD __ingress/package.json ${INGRESS}
+WORKDIR ${CLI}
+ADD cli/package.json ${CLI}
 RUN npm install --no-optional && npm cache clean --force
 RUN npm install -g ts-node
 # ----------------------------------------------------------------------

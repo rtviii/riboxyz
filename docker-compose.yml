@@ -13,7 +13,6 @@ services:
 
       # FOR LIVE DEVELOPMENT -----------------------|
       - ./api:/home/backend/api                    #|  <--- DEV ONLY
-      - ./__ingress:/home/backend/ingress          #|  
       # --------------------------------------------|
 
     environment:
