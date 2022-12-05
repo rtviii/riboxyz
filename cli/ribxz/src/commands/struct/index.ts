@@ -3,10 +3,8 @@ import { BaseCommand } from '../..'
 
 export default class Structure extends BaseCommand {
   static description = 'Query structure in the database'
-
   static flags = {
     dryrun: Flags.boolean(),
-    // flag with no value (-f, --force)
     force: Flags.boolean({ char: 'f' }),
   }
 
