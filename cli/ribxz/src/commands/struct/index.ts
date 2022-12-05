@@ -1,4 +1,4 @@
-import {Command, Flags} from '@oclif/core'
+import { Command, Flags } from '@oclif/core'
 import { BaseCommand } from '../..'
 
 export default class Structure extends BaseCommand {
@@ -7,14 +7,15 @@ export default class Structure extends BaseCommand {
   static flags = {
     dryrun: Flags.boolean(),
     // flag with no value (-f, --force)
-    force: Flags.boolean({char: 'f'}),
+    force: Flags.boolean({ char: 'f' }),
   }
 
-  static args = [{name: 'rcsb_id'}]
+  static args = [{ name: 'rcsb_id' }]
 
   public async run(): Promise<void> {
-    const {args, flags} = await this.parse(Structure)
-    const dryrun        = flags.dryrun
+    const { args, flags } = await this.parse(Structure)
+    const dryrun = flags.dryrun
+    super.run()
   }
 
 }
