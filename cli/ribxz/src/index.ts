@@ -1,4 +1,6 @@
 import { Command, Flags } from '@oclif/core'
+import { exec } from 'child_process';
+import { ShellString } from 'shelljs';
 
 
 export { run } from '@oclif/core'
@@ -7,9 +9,19 @@ export { run } from '@oclif/core'
 export abstract class BaseCommand extends Command {
     constructor(argv: string[], config: any) {
         super(argv, config);
-        if (!process.env.NEO4J_URI) {
-
+        const env_vars = [
+            'NEO4J_URI',
+            "NEO4J_USER",
+            "NEO4J_PASSWORD",
+            "NEO4J_CURRENTDB",
+        ];
+        for (var ee of env_vars){
+            this.log(`env: ${ee} = ${process.env[ee]}`);
+            exec(`echo "envv var is  \$${ee}"`).stdout?.on('data', ( r:any ) =>{console.log(r)})
         }
+        // if (!process.env.NEO4J_URI) { 
+        //     this.log("NEO4J_URI not set"); 
+        // }
         console.log("Process nev : ", process.env.NEO4J_URI)
         this.log("Process nev : ", process.env.NEO4J_URI)
     }
