@@ -11,7 +11,6 @@ export abstract class BaseCommand extends Command {
     constructor(argv: string[], config: any) {
         super(argv, config);
     }
-
     static globalFlags = {
         RIBETL_DATA: Flags.string({
             char: 'r',
@@ -49,12 +48,15 @@ export abstract class BaseCommand extends Command {
 
 
     async run() {
-        let { flags } = await this.parse(BaseCommand)
+        let { args, flags } = await this.parse(BaseCommand)
+
+        console.log(`Base args :${args}`, args)
         for (var v of ["NEO4J_URI", "NEO4J_USER", "NEO4J_PASSWORD", "NEO4J_CURRENTDB", "RIBETL_DATA"]) {
             if (Object.keys(flags).includes(v)) {
                 process.env[v] = flags[v]
             }
         }
+
         if (flags.env) {
             const varstring = flags.env
             process.env[varstring.split("=")[0]] = varstring.split("=")[1]
@@ -66,3 +68,4 @@ export abstract class BaseCommand extends Command {
     }
 
 }
+

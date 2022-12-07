@@ -6,15 +6,18 @@ import { flags, flagUsages } from '@oclif/core/lib/parser'
 import { existsSync, readFileSync } from 'fs'
 import { string } from 'yargs'
 import { RibosomeStructure } from '../../RibosomeTypes'
+import { StructureCommand } from '.'
 
 
-export default class Show extends BaseCommand {
+export default class Show extends Command {
 
 
   static description = 'Query structure in the database'
   static flags = {
-    files: Flags.boolean({}),
-    db: Flags.boolean({}),
+    files : Flags.boolean({}),
+    db    : Flags.boolean({}),
+    dryrun: Flags.boolean(),
+    force : Flags.boolean({ char: 'f' }),
   }
 
   static args = [
@@ -24,7 +27,9 @@ export default class Show extends BaseCommand {
   public async run(): Promise<void> {
     const { args, flags } = await this.parse(Show)
     const rcsb_id = args.rcsb_id;
+    const structureFolder = new StructureFolder(rcsb_id)
 
+    // console.log(structureFolder.__structure)
     if (flags.files) {
       queryStructAssets(rcsb_id)
     } else if (flags.db) {
@@ -40,25 +45,48 @@ export default class Show extends BaseCommand {
 
 class StructureFolder {
 
-  cif_filepath            : string
-  cif_modified_filepath   : string
-  json_profile_filepath   : string
-  chains_folder           : string
-  ligand_profile_filepath?: string[]
-  png_thumbnail_filepath  : string
-  rcsb_id                 : string
-  __structure             : RibosomeStructure
+  folder_path           : string
+  cif_filepath          : string
+  cif_modified_filepath : string
+  json_profile_filepath : string
+  chains_folder         : string
+  png_thumbnail_filepath: string
+  rcsb_id               : string
+  __structure           : RibosomeStructure
+  ligands               : string[] = []
+  ligand_like_polymers  : string[] = []
+
   constructor(rcsb_id: string) {
     this.rcsb_id = rcsb_id.toUpperCase()
     if (!process.env["RIBETL_DATA"]) {
       throw Error("RIBETL_DATA environment variable not set. Cannot access assets.")
     }
-    this.cif_filepath           = `${process.env["RIBETL_DATA"]}/${this.rcsb_id}/${this.rcsb_id}.cif`
-    this.cif_modified_filepath  = `${process.env["RIBETL_DATA"]}/${this.rcsb_id}/${this.rcsb_id}_modified.cif`
-    this.json_profile_filepath  = `${process.env["RIBETL_DATA"]}/${this.rcsb_id}/${this.rcsb_id}.json`
-    this.chains_folder          = `${process.env["RIBETL_DATA"]}/${this.rcsb_id}/CHAINS`
-    this.png_thumbnail_filepath = `${process.env["RIBETL_DATA"]}/${this.rcsb_id}/_ray_${this.rcsb_id}.png`
-    this.__structure            = JSON.parse(readFileSync(this.json_profile_filepath, 'utf-8'))
+    this.folder_path = `${process.env["RIBETL_DATA"]}/${this.rcsb_id}`
+
+    this.cif_filepath = `${this.folder_path}/${this.rcsb_id}.cif`
+    this.cif_modified_filepath = `${this.folder_path}/${this.rcsb_id}_modified.cif`
+    this.json_profile_filepath = `${this.folder_path}/${this.rcsb_id}.json`
+    this.chains_folder = `${this.folder_path}/CHAINS`
+    this.png_thumbnail_filepath = `${this.folder_path}/_ray_${this.rcsb_id}.png`
+    this.__structure = JSON.parse(readFileSync(this.json_profile_filepath, 'utf-8'))
+
+    for (var chain of [...this.__structure.proteins, ...(this.__structure.rnas || [])]) {
+      if (chain.ligand_like) {
+        this.ligand_like_polymers = [...this.ligand_like_polymers, chain.auth_asym_id]
+      }
+    }
+
+    if (!this.__structure.ligands) {
+      console.log("No ligands found");
+    } else {
+      for (var lig of this.__structure.ligands) {
+        this.ligands = [...this.ligands, lig.chemicalId]
+      }
+    }
+
+    console.log(this.ligand_like_polymers);
+    console.log(this.ligands);
+
   }
 
 
@@ -90,31 +118,57 @@ class StructureFolder {
   }
   //verify that each chain file exists
   private __verify_chain_files() {
-    const chain_files = [ 
-      ...this.__structure.proteins?.map((c)=>{return c.auth_asym_id}),  
-     ...( this.__structure.rnas || [] ).map((c)=>{return c.auth_asym_id}) 
+    const chain_files = [
+      ...this.__structure.proteins?.map((c) => { return c.auth_asym_id }),
+      ...(this.__structure.rnas || []).map((c) => { return c.auth_asym_id })
     ].forEach(
       (chain_id) => {
-        if (!existsSync(`${this.chains_folder}/${this.rcsb_id}_STRAND_${chain_id}.cif`)){
+        if (!existsSync(`${this.chains_folder}/${this.rcsb_id}_STRAND_${chain_id}.cif`)) {
           console.log(`[${this.rcsb_id}]: NOT FOUND ${this.chains_folder}/${this.rcsb_id}_STRAND_${chain_id}.cif`)
           return false
         }
       }
     )
-    
+
+  }
+
+  private __verify_ligands_and_polymers() {
+    this.ligands && this.ligands.forEach((lig_chem_id) => {
+      if (!existsSync(`${this.folder_path}/LIGAND_${lig_chem_id}.json`)) {
+        console.log(`[${this.rcsb_id}]: NOT FOUND ${this.folder_path}/LIGAND_${lig_chem_id}.json`)
+        return false
+      }
+
+    })
+
+    //verify polymers in a similar way
+    this.ligand_like_polymers && this.ligand_like_polymers.forEach((polymer_id) => {
+      if (!existsSync(`${this.folder_path}/POLYMER_${polymer_id}.json`)) {
+        console.log(`[${this.rcsb_id}]: NOT FOUND ${this.folder_path}/POLYMER_${polymer_id}.json`)
+        return false
+      }
+    })
+
+
   }
 
   assets_verify() {
-    if (!this.__verify_cif          ()) { console.log(`[${this.rcsb_id}]: NOT FOUND ${this.cif_filepath          }`) }
+    if (!this.__verify_cif()) {
+      console.log(`[${this.rcsb_id}]: NOT FOUND ${this.cif_filepath}`)
+    }
+
     if (!this.__verify_cif_modified ()) { console.log(`[${this.rcsb_id}]: NOT FOUND ${this.cif_modified_filepath }`) }
     if (!this.__verify_json_profile ()) { console.log(`[${this.rcsb_id}]: NOT FOUND ${this.json_profile_filepath }`) }
     if (!this.__verify_png_thumbnail()) { console.log(`[${this.rcsb_id}]: NOT FOUND ${this.png_thumbnail_filepath}`) }
-    if (!this.__verify_chains_folder()) { console.log(`[${this.rcsb_id}]: NOT FOUND ${this.chains_folder          }`) }
+    if (!this.__verify_chains_folder()) { console.log(`[${this.rcsb_id}]: NOT FOUND ${this.chains_folder         }`) }
+
     this.__verify_chain_files()
+    this.__verify_ligands_and_polymers()
   }
 
-  db_verify(){
-    
+  db_verify() {
+
+
   }
 }
 
