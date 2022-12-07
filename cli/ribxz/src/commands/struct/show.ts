@@ -2,8 +2,10 @@ import { Command, Flags } from '@oclif/core'
 import { ShellString } from 'shelljs'
 import { exec } from 'child_process'
 import { BaseCommand } from '../..'
-import { flags } from '@oclif/core/lib/parser'
-
+import { flags, flagUsages } from '@oclif/core/lib/parser'
+import { existsSync, readFileSync } from 'fs'
+import { string } from 'yargs'
+import { RibosomeStructure } from '../../RibosomeTypes'
 
 
 export default class Show extends BaseCommand {
@@ -33,6 +35,9 @@ export default class Show extends BaseCommand {
 }
 
 
+
+
+
 class StructureFolder {
 
   cif_filepath            : string
@@ -40,40 +45,93 @@ class StructureFolder {
   json_profile_filepath   : string
   chains_folder           : string
   ligand_profile_filepath?: string[]
-
+  png_thumbnail_filepath  : string
+  rcsb_id                 : string
+  __structure             : RibosomeStructure
   constructor(rcsb_id: string) {
+    this.rcsb_id = rcsb_id.toUpperCase()
     if (!process.env["RIBETL_DATA"]) {
       throw Error("RIBETL_DATA environment variable not set. Cannot access assets.")
     }
-    rcsb_id                    = rcsb_id.toUpperCase()
-    this.cif_filepath          = `${process.env["RIBETL_DATA"]}/${rcsb_id}/${rcsb_id}.cif`
-    this.cif_modified_filepath = `${process.env["RIBETL_DATA"]}/${rcsb_id}/${rcsb_id}_modified.cif`
-    this.json_profile_filepath = `${process.env["RIBETL_DATA"]}/${rcsb_id}/${rcsb_id}.json`
-    this.chains_folder         = `${process.env["RIBETL_DATA"]}/${rcsb_id}/CHAINS`
+    this.cif_filepath           = `${process.env["RIBETL_DATA"]}/${this.rcsb_id}/${this.rcsb_id}.cif`
+    this.cif_modified_filepath  = `${process.env["RIBETL_DATA"]}/${this.rcsb_id}/${this.rcsb_id}_modified.cif`
+    this.json_profile_filepath  = `${process.env["RIBETL_DATA"]}/${this.rcsb_id}/${this.rcsb_id}.json`
+    this.chains_folder          = `${process.env["RIBETL_DATA"]}/${this.rcsb_id}/CHAINS`
+    this.png_thumbnail_filepath = `${process.env["RIBETL_DATA"]}/${this.rcsb_id}/_ray_${this.rcsb_id}.png`
+    this.__structure            = JSON.parse(readFileSync(this.json_profile_filepath, 'utf-8'))
   }
 
 
-  verify_assets() {
 
+  private __verify_cif() {
+    if (existsSync(this.cif_filepath)) {
+      return true
+    } else return false
+  }
+  private __verify_cif_modified() {
+    if (existsSync(this.cif_modified_filepath)) {
+      return true
+    } else return false
+  }
+  private __verify_json_profile() {
+    if (existsSync(this.cif_modified_filepath)) {
+      return true
+    } else return false
+  }
+  private __verify_png_thumbnail() {
+    if (existsSync(this.png_thumbnail_filepath)) {
+      return true
+    } else return false
+  }
+  private __verify_chains_folder() {
+    if (existsSync(this.chains_folder)) {
+      return true
+    } else return false
+  }
+  //verify that each chain file exists
+  private __verify_chain_files() {
+    const chain_files = [ 
+      ...this.__structure.proteins?.map((c)=>{return c.auth_asym_id}),  
+     ...( this.__structure.rnas || [] ).map((c)=>{return c.auth_asym_id}) 
+    ].forEach(
+      (chain_id) => {
+        if (!existsSync(`${this.chains_folder}/${this.rcsb_id}_STRAND_${chain_id}.cif`)){
+          console.log(`[${this.rcsb_id}]: NOT FOUND ${this.chains_folder}/${this.rcsb_id}_STRAND_${chain_id}.cif`)
+          return false
+        }
+      }
+    )
+    
   }
 
+  assets_verify() {
+    if (!this.__verify_cif          ()) { console.log(`[${this.rcsb_id}]: NOT FOUND ${this.cif_filepath          }`) }
+    if (!this.__verify_cif_modified ()) { console.log(`[${this.rcsb_id}]: NOT FOUND ${this.cif_modified_filepath }`) }
+    if (!this.__verify_json_profile ()) { console.log(`[${this.rcsb_id}]: NOT FOUND ${this.json_profile_filepath }`) }
+    if (!this.__verify_png_thumbnail()) { console.log(`[${this.rcsb_id}]: NOT FOUND ${this.png_thumbnail_filepath}`) }
+    if (!this.__verify_chains_folder()) { console.log(`[${this.rcsb_id}]: NOT FOUND ${this.chains_folder          }`) }
+    this.__verify_chain_files()
+  }
 
+  db_verify(){
+    
+  }
 }
-
 
 interface StructureFolder {
 }
-
 
 /**
  * Request and display files associated with the given rcsb_id on disk
  */
 const queryStructAssets = (rcsb_id: string) => {
-  type StructureAsset = 'ChainsFolder' | 'CifModel' | 'CifModel_modified' | 'JsonProfile' | 'LigandProfile' | 'CifModelChain'
-  console.log("hihihc assets call")
+  type StructureAsset = 'ChainsFolder' | 'CifModel' | 'CifModel_modified' | 'JsonProfile' | 'LigandProfile' | 'CifModelChain' | 'PngThumbnail'
   console.log(process.env["RIBETL_DATA"])
   let x = new StructureFolder(rcsb_id);
+  x.assets_verify()
+  // var struct:RibosomeStructure = JSON.parse(readFileSync(x.json_profile_filepath, 'utf-8'))
 
+  // console.log(struct)
 
 
 }
