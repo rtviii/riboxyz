@@ -3,6 +3,7 @@ import axios from "axios";
 import { Command, Flags } from '@oclif/core'
 
 export class StructureCommand  extends Command {
+
     public neo4j_vars = ["NEO4J_URI", "NEO4J_USER", "NEO4J_PASSWORD", "NEO4J_CURRENTDB", "RIBETL_DATA"]
     constructor(argv: string[], config: any) {
         super(argv, config);

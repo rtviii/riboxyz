@@ -37,7 +37,7 @@ export default class Show extends Command {
     const rcsb_id = args.rcsb_id;
     const structureFolder = new StructureFolder(rcsb_id)
 
-    this.log("REPAIR",flags.repair )
+    this.log("REPAIR", flags.repair)
     // console.log(structureFolder.__structure)
     if (flags.files) {
       let x = new StructureFolder(rcsb_id);
@@ -123,24 +123,28 @@ export class StructureFolder {
     } else return false
   }
   //verify that each chain file exists
-  private __verify_chain_files() {
-    const chain_files = [
+  private __verify_chain_files(): boolean {
+    if (!this.__verify_chains_folder()) {
+      return false
+    }
+    const chain_files_all = [
       ...this.__structure.proteins?.map((c) => { return c.auth_asym_id }),
       ...(this.__structure.rnas || []).map((c) => { return c.auth_asym_id })
-    ].forEach(
+    ].map(
       (chain_id) => {
         if (!existsSync(`${this.chains_folder}/${this.rcsb_id}_STRAND_${chain_id}.cif`)) {
           console.log(`[${this.rcsb_id}]: NOT FOUND ${this.chains_folder}/${this.rcsb_id}_STRAND_${chain_id}.cif`)
           return false
-        }
+        } else return true
       }
-    )
+    ).reduce((prev, cur) => { return prev && cur }, true)
+    return chain_files_all
 
   }
 
   private __verify_ligands_and_polymers(try_fix: boolean = false) {
     console.log("ligs polys");
-    
+
     let ligs = this.ligands && this.ligands.map((lig_chem_id) => {
       if (!existsSync(`${this.folder_path}/LIGAND_${lig_chem_id}.json`)) {
         console.log(`[${this.rcsb_id}]: NOT FOUND ${this.folder_path}/LIGAND_${lig_chem_id}.json`)
@@ -155,21 +159,13 @@ export class StructureFolder {
         return false
       } else return true
     })
-
-    console.log((!polys || !ligs));
-    console.log((try_fix));
-    console.log((!polys || !ligs) && try_fix);
-    
-    console.log(`${process.env["PYTHONBIN"]}   \
-         ${process.env["EXTRACT_BSITES_PY"]}       \
-         -s ${this.rcsb_id}                           \
-         --save`)
     if ((!polys || !ligs) && try_fix) {
-      exec(`${process.env["PYTHONBIN"]}   \
-         ${process.env["EXTRACT_BSITES_PY"]}       \
-         -s ${this.rcsb_id}                           \
-         --save`).addListener('exit',()=>{console.log("done");
-         })
+      exec(`${process.env["PYTHONBIN"]} ${process.env["EXTRACT_BSITES_PY"]} -s ${this.rcsb_id} --save`, (err, stdout, stderr) => {
+        console.log(err);
+        console.log(stdout);
+        console.log(stderr);
+      })
+
     }
 
 
@@ -187,7 +183,13 @@ export class StructureFolder {
     if (!this.__verify_cif_modified()) {
       console.log(`[${this.rcsb_id}]: NOT FOUND ${this.cif_modified_filepath}`)
       if (try_fix) {
-        exec(`${process.env["PYTHONBIN"]} ${process.env["SPLIT_RENAME_PY"]} -s ${this.rcsb_id}`)
+        let y = exec(`${process.env["PYTHONBIN"]} ${process.env["SPLIT_RENAME_PY"]} -s ${this.rcsb_id}`,
+          (err, stdout, stderr) => {
+            console.log(err);
+            console.log(stdout);
+            console.log(stderr);
+          })
+        console.log(y.stdout)
       }
     }
 
@@ -198,23 +200,29 @@ export class StructureFolder {
         let filename = await save_struct_profile(ribosome)
         process.stdout.write(`Saved structure profile:\t${filename}`);
       }
-
       console.log(`[${this.rcsb_id}]: NOT FOUND ${this.json_profile_filepath}`)
     }
     if (!this.__verify_png_thumbnail()) {
       console.log(`[${this.rcsb_id}]: NOT FOUND ${this.png_thumbnail_filepath}`)
       if (try_fix) {
-        exec(`${process.env["PYTHONBIN"]} ${process.env["RENDER_THUMBNAIL_PY"]} -s ${this.rcsb_id}`)
-      }
-    }
-    if (!this.__verify_chains_folder()) {
-      console.log(`[${this.rcsb_id}]: NOT FOUND ${this.chains_folder}`)
-      if (try_fix) {
-        exec(`${process.env["PYTHONBIN"]} ${process.env["SPLIT_RENAME_PY"]} -s ${this.rcsb_id}`)
+        let proc = exec(`${process.env["PYTHONBIN"]} ${process.env["RENDER_THUMBNAIL_PY"]} -s ${this.rcsb_id}`,
+          (err, stdout, stderr) => {
+            console.log(err);
+            console.log(stdout);
+            console.log(stderr);
+          })
       }
     }
 
-    this.__verify_chain_files()
+    if (!this.__verify_chain_files()) {
+      if (try_fix) {
+        exec(`${process.env["PYTHONBIN"]} ${process.env["SPLIT_RENAME_PY"]} -s ${this.rcsb_id}`, (err, stdout, stderr) => {
+          console.log(err);
+          console.log(stdout);
+          console.log(stderr);
+        })
+      }
+    }
     this.__verify_ligands_and_polymers(try_fix)
   }
 

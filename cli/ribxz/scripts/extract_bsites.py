@@ -106,6 +106,7 @@ class BindingSiteChain:
       residues        : List[ResidueLite]= field(hash=True, compare=False)
 
 class BindingSite:
+
     def __init__(self, data: Dict[str, BindingSiteChain]) -> None:
         self.data: Dict[str, BindingSiteChain] = data
 
@@ -123,14 +124,12 @@ class BindingSite:
             print(f"\033[91mSaved  {pathtofile} successfuly.\033[0m")
 
     def to_csv(self, pathtofile: str) -> None:
-
         k = [
             "chainname",
             "nomenclature",
             "residue_id",
             "residue_name"
         ]
-
         serialized = dict.fromkeys(k, [])
 
 @dataclass(unsafe_hash=True, order=True)
