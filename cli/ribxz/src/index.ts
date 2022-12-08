@@ -1,8 +1,6 @@
 import { Command, Flags } from '@oclif/core'
 import { exec } from 'child_process';
 import { ShellString } from 'shelljs';
-
-
 export { run } from '@oclif/core'
 
 /**                               Assumptions for updating the db.
@@ -31,12 +29,15 @@ export { run } from '@oclif/core'
 
 export abstract class BaseCommand extends Command {
 
-    // process.env["EXTRACT_BSITES_PY"]   = "/home/backend/ingress/scripts/extract_bsites.py"
-    // process.env["RENDER_THUMBNAIL_PY"] = "/home/backend/ingress/scripts/render_thumbnail.py"
-    // process.env["COMMIT_STRUCTURE_SH"] = "/home/backend/ingress/scripts/commit_structure.sh"
-    // process.env["SPLIT_RENAME_PY"]     = "/home/backend/ingress/scripts/split_rename.py"
+
     public neo4j_vars = ["NEO4J_URI", "NEO4J_USER", "NEO4J_PASSWORD", "NEO4J_CURRENTDB", "RIBETL_DATA"]
     constructor(argv: string[], config: any) {
+        const SCRIPTS_DIR = "/home/rxz/dev/docker_ribxz/cli/scripts"
+        process.env["EXTRACT_BSITES_PY"] = `${SCRIPTS_DIR}/extract_bsites.py`
+        process.env["RENDER_THUMBNAIL_PY"] = `${SCRIPTS_DIR}/render_thumbnail.py`
+        process.env["COMMIT_STRUCTURE_SH"] = `${SCRIPTS_DIR}/commit_structure.sh`
+        process.env["SPLIT_RENAME_PY"] = `${SCRIPTS_DIR}/split_rename.py`
+
         super(argv, config);
     }
     static globalFlags = {
@@ -68,6 +69,26 @@ export abstract class BaseCommand extends Command {
             multiple: false,                             // allow setting this flag multiple times
             env: 'NEO4J_CURRENTDB',                              // default to value of environment variable
         }),
+        PYTHONBIN: Flags.string({
+            multiple: false,                             // allow setting this flag multiple times
+            env: 'PYTHONBIN',                              // default to value of environment variable
+        }),
+        COMMIT_STRUCTURE_SH: Flags.string({
+            multiple: false,                             // allow setting this flag multiple times
+            env: 'COMMIT_STRUCTURE_SH',                              // default to value of environment variable
+        }),
+        EXTRACT_BSITES_PY: Flags.string({
+            multiple: false,                             // allow setting this flag multiple times
+            env: 'EXTRACT_BSITES_PY',                              // default to value of environment variable
+        }),
+        RENDER_THUMBNAIL_PY: Flags.string({
+            multiple: false,                             // allow setting this flag multiple times
+            env: 'RENDER_THUMBNAIL_PY',                              // default to value of environment variable
+        }),
+        SPLIT_RENAME_PY: Flags.string({
+            multiple: false,                             // allow setting this flag multiple times
+            env: 'SPLIT_RENAME_PY',                              // default to value of environment variable
+        }),
         env: Flags.string({
             char: 'e',
             description: 'Environment variable',
@@ -80,6 +101,11 @@ export abstract class BaseCommand extends Command {
 
         console.log(`Base args :${args}`, args)
         for (var v of ["NEO4J_URI", "NEO4J_USER", "NEO4J_PASSWORD", "NEO4J_CURRENTDB", "RIBETL_DATA"]) {
+            if (Object.keys(flags).includes(v)) {
+                process.env[v] = flags[v]
+            }
+        }
+        for (var v of ["PYTHONBIN", "RENDER_THUMBNAIL_PY", "SPLIT_RENAME_PY", "COMMIT_STRUCTURE_SH", "EXTRACT_BSITES_PY"]) {
             if (Object.keys(flags).includes(v)) {
                 process.env[v] = flags[v]
             }

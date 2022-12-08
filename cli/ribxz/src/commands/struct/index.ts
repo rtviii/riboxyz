@@ -1,3 +1,5 @@
+// https://search.rcsb.org/#introduction
+import axios from "axios";
 import { Command, Flags } from '@oclif/core'
 
 export class StructureCommand  extends Command {
@@ -9,7 +11,6 @@ export class StructureCommand  extends Command {
         name: 'rcsb_id',
         required:true
     }]
-
 
     static globalFlags = {
 
@@ -46,7 +47,6 @@ export class StructureCommand  extends Command {
             description: 'Environment variable',
         }),
     };
-
 
     async run() {
         let { args, flags } = await this.parse(StructureCommand)

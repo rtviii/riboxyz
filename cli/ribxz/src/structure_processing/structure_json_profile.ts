@@ -7,18 +7,17 @@ import {
   RibosomeStructure,
   RNAClass,
   RNA,
-} from "../RibosomeTypes";
+} from "./ribosome_types";
 
 // both should be served by django
-import { small_subunit_map } from "../subunit_maps/small-subunit-map";
-import { large_subunit_map } from "../subunit_maps/large-subunit-map";
+import { small_subunit_map } from "./subunit_maps/small-subunit-map";
+import { large_subunit_map } from "./subunit_maps/large-subunit-map";
 
 import {
   Nonpolymer_Entity,
   PDBGQLResponse,
   Polymer_Entity,
-} from "./rcsb.gql.response-shape";
-import _ from "lodash";
+} from "./rcsb_graphql_schema";
 
 
 
@@ -147,7 +146,7 @@ const matchRPNomenclature = (
       });
     });
 
-    return _.uniq(nomenclature)
+    return uniq(nomenclature)
   }
 };
 

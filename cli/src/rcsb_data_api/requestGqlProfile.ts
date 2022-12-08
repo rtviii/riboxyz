@@ -18,8 +18,6 @@ import {
   PDBGQLResponse,
   Polymer_Entity,
 } from "./rcsb.gql.response-shape";
-import _ from "lodash";
-
 
 
 
@@ -147,7 +145,7 @@ const matchRPNomenclature = (
       });
     });
 
-    return _.uniq(nomenclature)
+    return uniq(nomenclature)
   }
 };
 

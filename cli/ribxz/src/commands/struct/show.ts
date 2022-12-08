@@ -3,21 +3,29 @@ import { ShellString } from 'shelljs'
 import { exec } from 'child_process'
 import { BaseCommand } from '../..'
 import { flags, flagUsages } from '@oclif/core/lib/parser'
-import { existsSync, readFileSync } from 'fs'
+import { copyFileSync, existsSync, readFileSync } from 'fs'
 import { string } from 'yargs'
-import { RibosomeStructure } from '../../RibosomeTypes'
+import { RibosomeStructure } from '../../structure_processing/ribosome_types'
 import { StructureCommand } from '.'
-
+// https://search.rcsb.org/#introduction
+import axios from "axios";
+import { gzip, ungzip } from 'node-gzip'
+import { mkdirSync, writeFileSync } from 'fs'
+import yargs from 'yargs'
+import { config } from "shelljs";
+import { processPDBRecord } from "../../structure_processing/structure_json_profile";
+import path = require("path");
 
 export default class Show extends Command {
 
 
   static description = 'Query structure in the database'
   static flags = {
-    files : Flags.boolean({}),
-    db    : Flags.boolean({}),
+    files: Flags.boolean({}),
+    db: Flags.boolean({}),
+    repair: Flags.boolean({ char: 'R' }),
     dryrun: Flags.boolean(),
-    force : Flags.boolean({ char: 'f' }),
+    force: Flags.boolean({ char: 'f' }),
   }
 
   static args = [
@@ -26,12 +34,14 @@ export default class Show extends Command {
 
   public async run(): Promise<void> {
     const { args, flags } = await this.parse(Show)
-    const rcsb_id         = args.rcsb_id;
+    const rcsb_id = args.rcsb_id;
     const structureFolder = new StructureFolder(rcsb_id)
 
+    this.log("REPAIR",flags.repair )
     // console.log(structureFolder.__structure)
     if (flags.files) {
-      queryStructAssets(rcsb_id)
+      let x = new StructureFolder(rcsb_id);
+      x.assets_verify(flags.repair)
     } else if (flags.db) {
       // console.log(await dbquery)
     }
@@ -43,18 +53,18 @@ export default class Show extends Command {
 
 
 
-class StructureFolder {
+export class StructureFolder {
 
-  folder_path           : string
-  cif_filepath          : string
-  cif_modified_filepath : string
-  json_profile_filepath : string
-  chains_folder         : string
+  folder_path: string
+  cif_filepath: string
+  cif_modified_filepath: string
+  json_profile_filepath: string
+  chains_folder: string
   png_thumbnail_filepath: string
-  rcsb_id               : string
-  __structure           : RibosomeStructure
-  ligands               : string[] = []
-  ligand_like_polymers  : string[] = []
+  rcsb_id: string
+  __structure: RibosomeStructure
+  ligands: string[] = []
+  ligand_like_polymers: string[] = []
 
   constructor(rcsb_id: string) {
     this.rcsb_id = rcsb_id.toUpperCase()
@@ -63,12 +73,12 @@ class StructureFolder {
     }
     this.folder_path = `${process.env["RIBETL_DATA"]}/${this.rcsb_id}`
 
-    this.cif_filepath           = `${this.folder_path}/${this.rcsb_id}.cif`
-    this.cif_modified_filepath  = `${this.folder_path}/${this.rcsb_id}_modified.cif`
-    this.json_profile_filepath  = `${this.folder_path}/${this.rcsb_id}.json`
-    this.chains_folder          = `${this.folder_path}/CHAINS`
+    this.cif_filepath = `${this.folder_path}/${this.rcsb_id}.cif`
+    this.cif_modified_filepath = `${this.folder_path}/${this.rcsb_id}_modified.cif`
+    this.json_profile_filepath = `${this.folder_path}/${this.rcsb_id}.json`
+    this.chains_folder = `${this.folder_path}/CHAINS`
     this.png_thumbnail_filepath = `${this.folder_path}/_ray_${this.rcsb_id}.png`
-    this.__structure            = JSON.parse(readFileSync(this.json_profile_filepath, 'utf-8'))
+    this.__structure = JSON.parse(readFileSync(this.json_profile_filepath, 'utf-8'))
 
     for (var chain of [...this.__structure.proteins, ...(this.__structure.rnas || [])]) {
       if (chain.ligand_like) {
@@ -128,38 +138,84 @@ class StructureFolder {
 
   }
 
-  private __verify_ligands_and_polymers() {
-    this.ligands && this.ligands.forEach((lig_chem_id) => {
+  private __verify_ligands_and_polymers(try_fix: boolean = false) {
+    console.log("ligs polys");
+    
+    let ligs = this.ligands && this.ligands.map((lig_chem_id) => {
       if (!existsSync(`${this.folder_path}/LIGAND_${lig_chem_id}.json`)) {
         console.log(`[${this.rcsb_id}]: NOT FOUND ${this.folder_path}/LIGAND_${lig_chem_id}.json`)
         return false
-      }
+      } else return true
 
-    })
+    }).reduce((prev, cur) => { return prev && cur }, true)
 
-    //verify polymers in a similar way
-    this.ligand_like_polymers && this.ligand_like_polymers.forEach((polymer_id) => {
+    let polys = this.ligand_like_polymers && this.ligand_like_polymers.map((polymer_id) => {
       if (!existsSync(`${this.folder_path}/POLYMER_${polymer_id}.json`)) {
         console.log(`[${this.rcsb_id}]: NOT FOUND ${this.folder_path}/POLYMER_${polymer_id}.json`)
         return false
-      }
+      } else return true
     })
+
+    console.log((!polys || !ligs));
+    console.log((try_fix));
+    console.log((!polys || !ligs) && try_fix);
+    
+    console.log(`${process.env["PYTHONBIN"]}   \
+         ${process.env["EXTRACT_BSITES_PY"]}       \
+         -s ${this.rcsb_id}                           \
+         --save`)
+    if ((!polys || !ligs) && try_fix) {
+      exec(`${process.env["PYTHONBIN"]}   \
+         ${process.env["EXTRACT_BSITES_PY"]}       \
+         -s ${this.rcsb_id}                           \
+         --save`).addListener('exit',()=>{console.log("done");
+         })
+    }
 
 
   }
 
-  assets_verify() {
+  async assets_verify(try_fix: boolean = false) {
+
     if (!this.__verify_cif()) {
       console.log(`[${this.rcsb_id}]: NOT FOUND ${this.cif_filepath}`)
+      if (try_fix) {
+        download_unpack_place(this.rcsb_id)
+      }
     }
 
-    if (!this.__verify_cif_modified ()) { console.log(`[${this.rcsb_id}]: NOT FOUND ${this.cif_modified_filepath }`) }
-    if (!this.__verify_json_profile ()) { console.log(`[${this.rcsb_id}]: NOT FOUND ${this.json_profile_filepath }`) }
-    if (!this.__verify_png_thumbnail()) { console.log(`[${this.rcsb_id}]: NOT FOUND ${this.png_thumbnail_filepath}`) }
-    if (!this.__verify_chains_folder()) { console.log(`[${this.rcsb_id}]: NOT FOUND ${this.chains_folder         }`) }
+    if (!this.__verify_cif_modified()) {
+      console.log(`[${this.rcsb_id}]: NOT FOUND ${this.cif_modified_filepath}`)
+      if (try_fix) {
+        exec(`${process.env["PYTHONBIN"]} ${process.env["SPLIT_RENAME_PY"]} -s ${this.rcsb_id}`)
+      }
+    }
+
+    if (!this.__verify_json_profile()) {
+
+      if (try_fix) {
+        let ribosome = await processPDBRecord(this.rcsb_id)
+        let filename = await save_struct_profile(ribosome)
+        process.stdout.write(`Saved structure profile:\t${filename}`);
+      }
+
+      console.log(`[${this.rcsb_id}]: NOT FOUND ${this.json_profile_filepath}`)
+    }
+    if (!this.__verify_png_thumbnail()) {
+      console.log(`[${this.rcsb_id}]: NOT FOUND ${this.png_thumbnail_filepath}`)
+      if (try_fix) {
+        exec(`${process.env["PYTHONBIN"]} ${process.env["RENDER_THUMBNAIL_PY"]} -s ${this.rcsb_id}`)
+      }
+    }
+    if (!this.__verify_chains_folder()) {
+      console.log(`[${this.rcsb_id}]: NOT FOUND ${this.chains_folder}`)
+      if (try_fix) {
+        exec(`${process.env["PYTHONBIN"]} ${process.env["SPLIT_RENAME_PY"]} -s ${this.rcsb_id}`)
+      }
+    }
 
     this.__verify_chain_files()
-    this.__verify_ligands_and_polymers()
+    this.__verify_ligands_and_polymers(try_fix)
   }
 
   db_verify() {
@@ -168,23 +224,6 @@ class StructureFolder {
   }
 }
 
-interface StructureFolder {
-}
-
-/**
- * Request and display files associated with the given rcsb_id on disk
- */
-const queryStructAssets = (rcsb_id: string) => {
-  type StructureAsset = 'ChainsFolder' | 'CifModel' | 'CifModel_modified' | 'JsonProfile' | 'LigandProfile' | 'CifModelChain' | 'PngThumbnail'
-  console.log(process.env["RIBETL_DATA"])
-  let x = new StructureFolder(rcsb_id);
-  x.assets_verify()
-  // var struct:RibosomeStructure = JSON.parse(readFileSync(x.json_profile_filepath, 'utf-8'))
-
-  // console.log(struct)
-
-
-}
 
 
 
@@ -207,3 +246,99 @@ const queryStructDb = (rcsb_id: string) => {
   })
 
 }
+
+
+// Options describing how to process a given structure
+interface IngressOptions {
+  rcsb_id?: string,
+  acquirePDBRecord?: boolean;
+  downloadCifFile?: boolean;
+  splitRenameChains?: boolean;
+  renderStructHero?: boolean;
+  extractBindingSites?: boolean;
+  commitToNeo4j?: boolean;
+}
+
+/**
+ * Download a .cif model of the structure.
+ * @param struct_id 
+ */
+const download_unpack_place = async (struct_id: string) => {
+  const BASE_URL = "http://files.rcsb.org/download/"
+  const FORMAT = ".cif.gz"
+
+  const structid = struct_id.toUpperCase()
+  let url = BASE_URL + structid + FORMAT
+  let compressed: Buffer = await axios.get(url, { responseType: 'arraybuffer' }).then(r => { return r.data })
+    .catch(e => { process.stdout.write(`Structure ${structid} failed: `, e); return []; })
+  let decompressed = await ungzip(compressed);
+
+  // let destination_chains = path.join(
+  //   process.env["RIBETL_DATA"] as string,
+  //   `${structid}`,
+  //   `CHAINS`)
+
+  // if (!existsSync(destination_chains)) {
+  //   mkdirSync(destination_chains)
+  //   process.stdout.write(`Created directory ${destination_chains}.`);
+  // }
+  let structfile = path.join(
+    process.env["RIBETL_DATA"] as string,
+    `${structid}`,
+    `${structid}.cif`)
+  writeFileSync(structfile, decompressed)
+}
+
+export const save_struct_profile = (r: RibosomeStructure): string => {
+  var rcsb_id = r.rcsb_id;
+  var target_filename = path.join(
+    process.env["RIBETL_DATA"] as string,
+    rcsb_id.toUpperCase(),
+    rcsb_id.toUpperCase() + ".json"
+  );
+
+  if (!existsSync(path.dirname(target_filename))) {
+    mkdirSync(path.dirname(target_filename));
+  }
+  writeFileSync(target_filename, JSON.stringify(r, null, 4));
+  return target_filename
+};
+
+// const process_structure = async (opts: IngressOptions) => {
+//   if (!opts.rcsb_id) throw new Error("No structure ID provided.")
+
+//   let struct_id = opts.rcsb_id.toUpperCase()
+
+//   if (opts.acquirePDBRecord) {
+//     let ribosome = await processPDBRecord(struct_id)
+//     let filename = await save_struct_profile(ribosome)
+//     process.stdout.write(`Saved structure profile:\t${filename}`);
+//   }
+
+//   if (opts.downloadCifFile) {
+//     await download_unpack_place(struct_id)
+//     process.stdout.write(`Saved structure cif file ${struct_id}.cif`);
+//   }
+//   if (opts.renderStructHero) {
+//     exec(`${process.env["PYTHONBIN"]} ${process.env["RENDER_THUMBNAIL_PY"]} -s ${struct_id}`)
+//   }
+
+//   if (opts.splitRenameChains) {
+//     exec(`${process.env["PYTHONBIN"]} ${process.env["SPLIT_RENAME_PY"]} -s ${struct_id}`)
+//   }
+
+//   if (opts.extractBindingSites) {
+//     exec(`${process.env["PYTHONBIN"]}   \
+//          ${process.env["EXTRACT_BSITES_PY"]}       \
+//          -s ${struct_id}                           \
+//          --save`)
+//   }
+
+//   if (opts.commitToNeo4j) {
+//     var shellstring = `${process.env["COMMIT_STRUCTURE_SH"]} -s ${opts.rcsb_id.toUpperCase()} \
+//          -d ${process.env.NEO4J_CURRENTDB} \
+//          -a "${process.env.NEO4J_URI}"`;
+//     exec(shellstring)
+//   }
+
+// }
