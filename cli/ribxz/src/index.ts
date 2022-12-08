@@ -5,8 +5,36 @@ import { ShellString } from 'shelljs';
 
 export { run } from '@oclif/core'
 
+/**                               Assumptions for updating the db.
+ * ---------------------------------------------------------------------------------------
+ * The ingress scripts can be ran from anywhere and need not access the database server.
+ * The script has access to
+ * -    the internet
+ * -    locally installed `cypher-shell`
+ * -    the database remote: $NEO4J_URI,$NEO4J_PASSWORD, $NEO4J_USER and $NEO4J_CURRENTDB
+ * -    the (local) filesystem containing the parsed structure-profiles: $RIBETL_DATA
+ * 
+ * ---------------------------------------------------------------------------------------
+ * 
+ * To access the cypher-shell on a the db host (ex.):
+ * 
+ * $ echo "match (n:RibosomeStructure) return n.rcsb_id;" | cypher-shell    /
+ * -a "neo4j://ribosome.xyz:7687"                                           /
+ * -u 'rt'                                                                  /
+ * -p 'rrr'                                                                 /
+ * --database 'riboauth'                                                    /
+ * --format plain 
+ * 
+ * TODO:1. The script begins by verifying that the structure is not already in the database. 
+*/
+
 
 export abstract class BaseCommand extends Command {
+
+    // process.env["EXTRACT_BSITES_PY"]   = "/home/backend/ingress/scripts/extract_bsites.py"
+    // process.env["RENDER_THUMBNAIL_PY"] = "/home/backend/ingress/scripts/render_thumbnail.py"
+    // process.env["COMMIT_STRUCTURE_SH"] = "/home/backend/ingress/scripts/commit_structure.sh"
+    // process.env["SPLIT_RENAME_PY"]     = "/home/backend/ingress/scripts/split_rename.py"
     public neo4j_vars = ["NEO4J_URI", "NEO4J_USER", "NEO4J_PASSWORD", "NEO4J_CURRENTDB", "RIBETL_DATA"]
     constructor(argv: string[], config: any) {
         super(argv, config);
