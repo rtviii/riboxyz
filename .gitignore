@@ -6,3 +6,10 @@ volume/
 **/*.cif
 **/volume
 volume/*
+
+**/node_modules
+node_modules/**
+node_modules
+
+*.env
+**/*.env
