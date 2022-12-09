@@ -143,15 +143,15 @@ export class StructureFolder {
   }
 
   private __verify_ligands_and_polymers(try_fix: boolean = false) {
-    console.log("ligs polys");
-
     let ligs = this.ligands && this.ligands.map((lig_chem_id) => {
       if (!existsSync(`${this.folder_path}/LIGAND_${lig_chem_id}.json`)) {
         console.log(`[${this.rcsb_id}]: NOT FOUND ${this.folder_path}/LIGAND_${lig_chem_id}.json`)
         return false
       } else return true
-
     }).reduce((prev, cur) => { return prev && cur }, true)
+
+
+
 
     let polys = this.ligand_like_polymers && this.ligand_like_polymers.map((polymer_id) => {
       if (!existsSync(`${this.folder_path}/POLYMER_${polymer_id}.json`)) {
@@ -159,6 +159,7 @@ export class StructureFolder {
         return false
       } else return true
     })
+
     if ((!polys || !ligs) && try_fix) {
       exec(`${process.env["PYTHONBIN"]} ${process.env["EXTRACT_BSITES_PY"]} -s ${this.rcsb_id} --save`, (err, stdout, stderr) => {
         console.log(err);
