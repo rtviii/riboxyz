@@ -21,11 +21,11 @@ export default class Show extends Command {
 
   static description = 'Query structure in the database'
   static flags = {
-    files: Flags.boolean({}),
-    db: Flags.boolean({}),
+    files : Flags.boolean({}),
+    db    : Flags.boolean({}),
     repair: Flags.boolean({ char: 'R' }),
     dryrun: Flags.boolean(),
-    force: Flags.boolean({ char: 'f' }),
+    force : Flags.boolean({ char: 'f' }),
   }
 
   static args = [
@@ -34,14 +34,16 @@ export default class Show extends Command {
 
   public async run(): Promise<void> {
     const { args, flags } = await this.parse(Show)
-    const rcsb_id = args.rcsb_id;
+    const rcsb_id         = args.rcsb_id;
     const structureFolder = new StructureFolder(rcsb_id)
 
     this.log("REPAIR", flags.repair)
     // console.log(structureFolder.__structure)
     if (flags.files) {
       let x = new StructureFolder(rcsb_id);
+
       x.assets_verify(flags.repair)
+
     } else if (flags.db) {
       // console.log(await dbquery)
     }
@@ -49,25 +51,22 @@ export default class Show extends Command {
   }
 }
 
-
-
-
-
 export class StructureFolder {
 
-  folder_path: string
-  cif_filepath: string
-  cif_modified_filepath: string
-  json_profile_filepath: string
-  chains_folder: string
-  png_thumbnail_filepath: string
-  rcsb_id: string
-  __structure: RibosomeStructure
-  ligands: string[] = []
-  ligand_like_polymers: string[] = []
+  private folder_path           : string
+  private cif_filepath          : string
+  private cif_modified_filepath : string
+  private json_profile_filepath : string
+  private chains_folder         : string
+  private png_thumbnail_filepath: string
+  private rcsb_id               : string
+  __structure           : RibosomeStructure
+  private ligands               : string[] = []
+  private ligand_like_polymers  : string[] = []
 
   constructor(rcsb_id: string) {
     this.rcsb_id = rcsb_id.toUpperCase()
+
     if (!process.env["RIBETL_DATA"]) {
       throw Error("RIBETL_DATA environment variable not set. Cannot access assets.")
     }
@@ -145,13 +144,10 @@ export class StructureFolder {
   private __verify_ligands_and_polymers(try_fix: boolean = false) {
     let ligs = this.ligands && this.ligands.map((lig_chem_id) => {
       if (!existsSync(`${this.folder_path}/LIGAND_${lig_chem_id}.json`)) {
-        console.log(`[${this.rcsb_id}]: NOT FOUND ${this.folder_path}/LIGAND_${lig_chem_id}.json`)
+        console.log(`[${this.rcsb_id}]: NOT FOUND ${this.folder_path}/LIGAND_${lig_chem_id}.json (Is it an ION? Expected.)`)
         return false
       } else return true
     }).reduce((prev, cur) => { return prev && cur }, true)
-
-
-
 
     let polys = this.ligand_like_polymers && this.ligand_like_polymers.map((polymer_id) => {
       if (!existsSync(`${this.folder_path}/POLYMER_${polymer_id}.json`)) {
@@ -161,6 +157,7 @@ export class StructureFolder {
     })
 
     if ((!polys || !ligs) && try_fix) {
+      console.log("Some ligands are missing. Calling script:", process.env["PYTHONBIN"], process.env["EXTRACT_BSITES_PY"])
       exec(`${process.env["PYTHONBIN"]} ${process.env["EXTRACT_BSITES_PY"]} -s ${this.rcsb_id} --save`, (err, stdout, stderr) => {
         console.log(err);
         console.log(stdout);
@@ -229,6 +226,7 @@ export class StructureFolder {
 
   db_verify() {
 
+    // TODO
 
   }
 }

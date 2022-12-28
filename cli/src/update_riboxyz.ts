@@ -39,13 +39,13 @@ import './cmd_structure'
 
 // Options describing how to process a given structure
 interface IngressOptions {
-    rcsb_id?: string,
-    acquirePDBRecord?: boolean;
-    downloadCifFile?: boolean;
-    splitRenameChains?: boolean;
-    renderStructHero?: boolean;
+    rcsb_id?            : string,
+    acquirePDBRecord?   : boolean;
+    downloadCifFile?    : boolean;
+    splitRenameChains?  : boolean;
+    renderStructHero?   : boolean;
     extractBindingSites?: boolean;
-    commitToNeo4j?: boolean;
+    commitToNeo4j?      : boolean;
 }
 
 const check_env_var = () => {
