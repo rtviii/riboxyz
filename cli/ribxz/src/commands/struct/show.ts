@@ -16,16 +16,17 @@ import { config } from "shelljs";
 import { processPDBRecord } from "../../structure_processing/structure_json_profile";
 import path = require("path");
 
-export default class Show extends Command {
+export default class Show extends BaseCommand {
 
 
   static description = 'Query structure in the database'
   static flags = {
-    files : Flags.boolean({}),
-    db    : Flags.boolean({}),
+    files: Flags.boolean({}),
+    db: Flags.boolean({}),
     repair: Flags.boolean({ char: 'R' }),
+    commit: Flags.boolean({ char: 'C' }),
     dryrun: Flags.boolean(),
-    force : Flags.boolean({ char: 'f' }),
+    force: Flags.boolean({ char: 'f' }),
   }
 
   static args = [
@@ -34,35 +35,43 @@ export default class Show extends Command {
 
   public async run(): Promise<void> {
     const { args, flags } = await this.parse(Show)
-    const rcsb_id         = args.rcsb_id;
+    const rcsb_id = args.rcsb_id;
     const structureFolder = new StructureFolder(rcsb_id)
 
-    this.log("REPAIR", flags.repair)
     // console.log(structureFolder.__structure)
     if (flags.files) {
       let x = new StructureFolder(rcsb_id);
-
       x.assets_verify(flags.repair)
-
     } else if (flags.db) {
-      // console.log(await dbquery)
+      console.log(`The following structs have been found for ${rcsb_id}`, await queryStructDb(rcsb_id))
     }
+    if (flags.commit) {
+
+      const commit_script = process.env["COMMIT_STRUCTURE_SH"]
+      let   current_db    = process.env["NEO4J_CURRENTDB"]
+      let   uri           = process.env["NEO4J_URI"]
+
+      exec(`${commit_script} -s ${rcsb_id} -d ${current_db} -a "${uri}"`)
+
+    }
+
+
 
   }
 }
 
 export class StructureFolder {
 
-  private folder_path           : string
-  private cif_filepath          : string
-  private cif_modified_filepath : string
-  private json_profile_filepath : string
-  private chains_folder         : string
+  private folder_path: string
+  private cif_filepath: string
+  private cif_modified_filepath: string
+  private json_profile_filepath: string
+  private chains_folder: string
   private png_thumbnail_filepath: string
-  private rcsb_id               : string
-  __structure           : RibosomeStructure
-  private ligands               : string[] = []
-  private ligand_like_polymers  : string[] = []
+  private rcsb_id: string
+  __structure: RibosomeStructure
+  private ligands: string[] = []
+  private ligand_like_polymers: string[] = []
 
   constructor(rcsb_id: string) {
     this.rcsb_id = rcsb_id.toUpperCase()
@@ -163,14 +172,10 @@ export class StructureFolder {
         console.log(stdout);
         console.log(stderr);
       })
-
     }
-
-
   }
 
   async assets_verify(try_fix: boolean = false) {
-
     if (!this.__verify_cif()) {
       console.log(`[${this.rcsb_id}]: NOT FOUND ${this.cif_filepath}`)
       if (try_fix) {
@@ -238,18 +243,20 @@ export class StructureFolder {
  * Request and display the state of the given rcsb_id structure in the database instance.
  */
 const queryStructDb = (rcsb_id: string) => {
-  let dbquery = new Promise<string[]>((resolve, reject) => {
-    let y = exec(`echo \"match (struct:RibosomeStructure {rcsb_id:\"${rcsb_id.toUpperCase()}\"}) return struct.rcsb_id\" | cypher-shell -a \"${process.env["NEO4J_URI"]}\" --format plain -u ${process.env["NEO4J_USER"]} -p ${process.env["NEO4J_PASSWORD"]} --database ${process.env["NEO4J_CURRENTDB"]}`,
+  return new Promise<string[]>((resolve, reject) => {
+    let y = exec(`echo \"match (struct:RibosomeStructure {rcsb_id:\\"${rcsb_id.toUpperCase()}\\"}) return struct.rcsb_id\" | cypher-shell -a \"${process.env["NEO4J_URI"]}\" --format plain -u ${process.env["NEO4J_USER"]} -p ${process.env["NEO4J_PASSWORD"]} --database ${process.env["NEO4J_CURRENTDB"]}`,
       { env: process.env },
       (err, stdout, stderr) => {
-        if (err?.code != 0) {
+        if (err && err?.code != 0) {
           process.stdout.write("Got shell error " + stderr + stdout)
+          console.log("Got Error code:", err?.code)
           reject(err)
         }
-        const dbstructs = (stdout as string).replace(/"/g, '').split("\n").filter(r => r.length === 4)
+
+        const dbstructs = stdout != null ? (stdout as string).replace(/"/g, '').split("\n").filter(r => r.length === 4) : []
+        console.log(dbstructs)
         resolve(dbstructs)
       })
-
   })
 
 }

@@ -48,7 +48,6 @@ AMINO_ACIDS = {
     'SEC': 0,
     'PYL': 0
     }
-
 NUCLEOTIDES = ['A', 'T', 'C', 'G', 'U']
 
 def struct_path(pdbid: str, pftype: str)->str:

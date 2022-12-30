@@ -111,10 +111,10 @@ export abstract class BaseCommand extends Command {
             }
         }
 
-        if (flags.env) {
-            const varstring = flags.env
-            process.env[varstring.split("=")[0]] = varstring.split("=")[1]
-        }
+        // if (flags.env) {
+        //     const varstring = flags.env
+        //     process.env[varstring.split("=")[0]] = varstring.split("=")[1]
+        // }
 
         for (var ee of this.neo4j_vars) {
             this.log(`env: ${ee} = ${process.env[ee]}`);

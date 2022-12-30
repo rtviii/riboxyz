@@ -298,8 +298,8 @@ const process_structure = async (opts: IngressOptions) => {
 
     if (opts.extractBindingSites) {
         shell.exec(`${process.env["PYTHONBIN"]}   \
-         ${process.env["EXTRACT_BSITES_PY"]}       \
-         -s ${struct_id}                           \
+         ${process.env["EXTRACT_BSITES_PY"]}      \
+         -s ${struct_id}                          \
          --save`)
     }
 

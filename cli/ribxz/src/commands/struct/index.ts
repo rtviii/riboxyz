@@ -8,9 +8,10 @@ export class StructureCommand  extends Command {
     constructor(argv: string[], config: any) {
         super(argv, config);
     }
+
     static args = [{ 
-        name: 'rcsb_id',
-        required:true
+        name    : 'rcsb_id',
+        required: true
     }]
 
     static globalFlags = {
@@ -48,6 +49,7 @@ export class StructureCommand  extends Command {
             description: 'Environment variable',
         }),
     };
+
 
     async run() {
         let { args, flags } = await this.parse(StructureCommand)
