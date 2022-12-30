@@ -1,22 +1,35 @@
 version: '3.8'
 services:
   django:
-    build: ./rbxz_bend
-    image: rbxz_bend
+    container_name: django
+    restart: always
+    build: .
     ports:
       - 8000:8000
     volumes:
-      - /home/rxz/dev/docker_together/rbxz_bend:/home/backend/django
       - type: bind
         source: ${RIBETL_DATA:?err}
-        target: /home/backend/django/ribetldata
+        target: /home/backend/api/ribetldata
 
-  neo4j:
+      # FOR LIVE DEVELOPMENT -----------------------|
+      - ./api:/home/backend/api                    #|  <--- DEV ONLY
+      # --------------------------------------------|
+
+    environment:
+      - NEO4J_URI=bolt://neo:7687
+    links:
+      - neo
+    depends_on:
+      - neo
+  neo:
     image: neo4j:4.4
-    network_mode: "bridge"
+    container_name: neo
     ports:
       - "7474:7474"
       - "7687:7687"
+
+    hostname: neo
+
     environment:
       - NEO4J_dbms_security_procedures_unrestricted=apoc.*
       - NEO4J_dbms_security_procedures_allowlist=apoc.*
@@ -24,6 +37,17 @@ services:
       - NEO4J_apoc_import_file_enabled=true
       - NEO4J_server_directories_logs=/data
       - NEO4J_apoc_import_file_use__neo4j__config=false
+      - NEO4J_dbms_memory_pagecache_size=4G
+
+
+      - NEO4J_dbms_default__listen__address=0.0.0.0
+      - NEO4J_dbms_default__advertised__address=neo
+      - NEO4J_dbms_connector_https_advertised__address=0.0.0.0:7473
+      - NEO4J_dbms_connector_http_advertised__address=0.0.0.0:7474
+      - NEO4J_dbms_connector_bolt_advertised__address=0.0.0.0:7687
+      # - NEO4J_dbms_ssl_policy_bolt_client__auth=NONE
+      # - NEO4J_dbms_ssl_policy_https_client__auth=NONE
+
 
     volumes:
       - ./volume/plugins:/plugins
@@ -35,4 +59,4 @@ services:
 
 volumes:
   django:
-  neo4j:
+  neo:
