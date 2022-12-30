@@ -1,0 +1,51 @@
+{
+  "name": "riboxyz_ingress",
+  "version": "0.0.1",
+  "description": "Scripts that have to do with the procurement and treatment of ribosome structures for ribosome.xyz",
+  "main": "update_riboxyz.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rtviii/riboxyz_ingress.git"
+  },
+  "keywords": [
+    "ribosome",
+    "api",
+    "rcsb",
+    "pdb",
+    "structural"
+  ],
+  "author": "artie kushner",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rtviii/riboxyz_ingress/issues"
+  },
+  "homepage": "https://github.com/rtviii/riboxyz_ingress#readme",
+  "devDependencies": {
+    "@apollo/client": "^3.4.13",
+    "@types/axios": "^0.14.0",
+    "@types/commander": "^2.12.2",
+    "@types/got": "^9.6.12",
+    "@types/lodash": "^4.14.170",
+    "@types/node": "^15.12.5",
+    "@types/node-gzip": "^1.1.0",
+    "@types/qs": "^6.9.7",
+    "@types/shelljs": "^0.8.8",
+    "@types/yargs": "^17.0.15",
+    "axios": "^0.21.1",
+    "commander": "^8.0.0",
+    "dotenv": "^10.0.0",
+    "got": "^12.1.0",
+    "graphql": "^15.6.0",
+    "gunzip-file": "^0.1.1",
+    "lodash": "^4.17.21",
+    "node-gzip": "^1.1.2",
+    "qs": "^6.11.0",
+    "react": "^17.0.2",
+    "shelljs": "^0.8.4",
+    "ts-node": "^10.9.1",
+    "yargs": "^17.0.1"
+  }
+}
