@@ -1,0 +1,2 @@
+call apoc.load.json("file:///import/riboxyz_seed_data/interpro-base.json") yield value
+with value as v merge (q:InterProFamily{ family_id:KEYS(v)[0],type:v[KEYS(v)[0]].type,description:v[KEYS(v)[0]].name})
