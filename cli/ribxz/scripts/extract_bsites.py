@@ -48,7 +48,6 @@ AMINO_ACIDS = {
     'SEC': 0,
     'PYL': 0
     }
-
 NUCLEOTIDES = ['A', 'T', 'C', 'G', 'U']
 
 def struct_path(pdbid: str, pftype: str)->str:
@@ -277,7 +276,7 @@ if __name__ == "__main__":
 
     parser = argparse. ArgumentParser(description='Split structure into constituent polymers and inject new nomencalture into the .cif file')
     parser.add_argument ('-s'     , '--structure', type=   str   , required=True                                                            )
-    parser.add_argument ('--save' ,                        action          ='store_true'                                                    )
+    parser.add_argument ('--save' ,action          ='store_true'                                                    )
     
     args  = parser.parse_args()
     pdbid = args.structure

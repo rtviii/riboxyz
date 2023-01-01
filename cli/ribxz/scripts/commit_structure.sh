@@ -13,7 +13,7 @@ usage (){
       NEO4J_CURRENTDB=<password>
       NEO4J_URI=<server>
       ______________
-      
+
       $0  /
       [-f] [path to a structure profile(.json)] /
       [-a] [Neo4j remote server i.e. localhost:7678] /

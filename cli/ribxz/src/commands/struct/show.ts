@@ -16,7 +16,7 @@ import { config } from "shelljs";
 import { processPDBRecord } from "../../structure_processing/structure_json_profile";
 import path = require("path");
 
-export default class Show extends Command {
+export default class Show extends BaseCommand {
 
 
   static description = 'Query structure in the database'
@@ -24,6 +24,7 @@ export default class Show extends Command {
     files: Flags.boolean({}),
     db: Flags.boolean({}),
     repair: Flags.boolean({ char: 'R' }),
+    commit: Flags.boolean({ char: 'C' }),
     dryrun: Flags.boolean(),
     force: Flags.boolean({ char: 'f' }),
   }
@@ -37,37 +38,44 @@ export default class Show extends Command {
     const rcsb_id = args.rcsb_id;
     const structureFolder = new StructureFolder(rcsb_id)
 
-    this.log("REPAIR", flags.repair)
     // console.log(structureFolder.__structure)
     if (flags.files) {
       let x = new StructureFolder(rcsb_id);
       x.assets_verify(flags.repair)
     } else if (flags.db) {
-      // console.log(await dbquery)
+      console.log(`The following structs have been found for ${rcsb_id}`, await queryStructDb(rcsb_id))
     }
+    if (flags.commit) {
+
+      const commit_script = process.env["COMMIT_STRUCTURE_SH"]
+      let   current_db    = process.env["NEO4J_CURRENTDB"]
+      let   uri           = process.env["NEO4J_URI"]
+
+      exec(`${commit_script} -s ${rcsb_id} -d ${current_db} -a "${uri}"`)
+
+    }
+
+
 
   }
 }
 
-
-
-
-
 export class StructureFolder {
 
-  folder_path: string
-  cif_filepath: string
-  cif_modified_filepath: string
-  json_profile_filepath: string
-  chains_folder: string
-  png_thumbnail_filepath: string
-  rcsb_id: string
+  private folder_path: string
+  private cif_filepath: string
+  private cif_modified_filepath: string
+  private json_profile_filepath: string
+  private chains_folder: string
+  private png_thumbnail_filepath: string
+  private rcsb_id: string
   __structure: RibosomeStructure
-  ligands: string[] = []
-  ligand_like_polymers: string[] = []
+  private ligands: string[] = []
+  private ligand_like_polymers: string[] = []
 
   constructor(rcsb_id: string) {
     this.rcsb_id = rcsb_id.toUpperCase()
+
     if (!process.env["RIBETL_DATA"]) {
       throw Error("RIBETL_DATA environment variable not set. Cannot access assets.")
     }
@@ -143,14 +151,11 @@ export class StructureFolder {
   }
 
   private __verify_ligands_and_polymers(try_fix: boolean = false) {
-    console.log("ligs polys");
-
     let ligs = this.ligands && this.ligands.map((lig_chem_id) => {
       if (!existsSync(`${this.folder_path}/LIGAND_${lig_chem_id}.json`)) {
-        console.log(`[${this.rcsb_id}]: NOT FOUND ${this.folder_path}/LIGAND_${lig_chem_id}.json`)
+        console.log(`[${this.rcsb_id}]: NOT FOUND ${this.folder_path}/LIGAND_${lig_chem_id}.json (Is it an ION? Expected.)`)
         return false
       } else return true
-
     }).reduce((prev, cur) => { return prev && cur }, true)
 
     let polys = this.ligand_like_polymers && this.ligand_like_polymers.map((polymer_id) => {
@@ -159,20 +164,18 @@ export class StructureFolder {
         return false
       } else return true
     })
+
     if ((!polys || !ligs) && try_fix) {
+      console.log("Some ligands are missing. Calling script:", process.env["PYTHONBIN"], process.env["EXTRACT_BSITES_PY"])
       exec(`${process.env["PYTHONBIN"]} ${process.env["EXTRACT_BSITES_PY"]} -s ${this.rcsb_id} --save`, (err, stdout, stderr) => {
         console.log(err);
         console.log(stdout);
         console.log(stderr);
       })
-
     }
-
-
   }
 
   async assets_verify(try_fix: boolean = false) {
-
     if (!this.__verify_cif()) {
       console.log(`[${this.rcsb_id}]: NOT FOUND ${this.cif_filepath}`)
       if (try_fix) {
@@ -228,6 +231,7 @@ export class StructureFolder {
 
   db_verify() {
 
+    // TODO
 
   }
 }
@@ -239,18 +243,20 @@ export class StructureFolder {
  * Request and display the state of the given rcsb_id structure in the database instance.
  */
 const queryStructDb = (rcsb_id: string) => {
-  let dbquery = new Promise<string[]>((resolve, reject) => {
-    let y = exec(`echo \"match (struct:RibosomeStructure {rcsb_id:\"${rcsb_id.toUpperCase()}\"}) return struct.rcsb_id\" | cypher-shell -a \"${process.env["NEO4J_URI"]}\" --format plain -u ${process.env["NEO4J_USER"]} -p ${process.env["NEO4J_PASSWORD"]} --database ${process.env["NEO4J_CURRENTDB"]}`,
+  return new Promise<string[]>((resolve, reject) => {
+    let y = exec(`echo \"match (struct:RibosomeStructure {rcsb_id:\\"${rcsb_id.toUpperCase()}\\"}) return struct.rcsb_id\" | cypher-shell -a \"${process.env["NEO4J_URI"]}\" --format plain -u ${process.env["NEO4J_USER"]} -p ${process.env["NEO4J_PASSWORD"]} --database ${process.env["NEO4J_CURRENTDB"]}`,
       { env: process.env },
       (err, stdout, stderr) => {
-        if (err?.code != 0) {
+        if (err && err?.code != 0) {
           process.stdout.write("Got shell error " + stderr + stdout)
+          console.log("Got Error code:", err?.code)
           reject(err)
         }
-        const dbstructs = (stdout as string).replace(/"/g, '').split("\n").filter(r => r.length === 4)
+
+        const dbstructs = stdout != null ? (stdout as string).replace(/"/g, '').split("\n").filter(r => r.length === 4) : []
+        console.log(dbstructs)
         resolve(dbstructs)
       })
-
   })
 
 }
