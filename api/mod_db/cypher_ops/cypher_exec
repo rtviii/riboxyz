@@ -1,0 +1,11 @@
+#/bin/bash
+
+# This script accepts a path to a .cypher file and sends it to a ( remote ) cypher-shell specified by the given environment variables
+if [ -z $NEO4J_USER ] || [ -z $NEO4J_PASSWORD ] || [ -z $NEO4J_CURRENTDB ] || [ -z $NEO4J_URI ]
+then
+    echo "Set all of the following environment variables:\nNEO4J_USER,\nNEO4J_PASSWORD,\nNEO4J_CURRENTDB,\nNEO4J_URI"
+else
+    cypher-shell -a $NEO4J_URI  -u $NEO4J_USER -p $NEO4J_PASSWORD --database $NEO4J_CURRENTDB --format plain <<EOF
+    $(cat $1)
+EOF
+fi
