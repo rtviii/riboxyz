@@ -265,7 +265,6 @@ def get_ligand_nbrs(
 
     return BindingSite(nbr_dict)
 
-
 def getLigandResIds(ligchemid: str, struct: Structure) -> List[Residue]:
     ligandResidues: List[Residue] = list(
         filter(lambda x: x.get_resname() == ligchemid, list(struct.get_residues())))

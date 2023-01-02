@@ -10,6 +10,7 @@ set -o pipefail
 # HOWEVER In the case of the case of the neo4j itself, this host dir will be mounted as a docker volume at '/import'. Hence we define this relationship here.
 
 RIBETL_DATA=${RIBETL_DATA:="/import"} # here the default is the docker volume mount point (defined in compose file)
+
 #----------------------------------------
 
 # For remote access:
