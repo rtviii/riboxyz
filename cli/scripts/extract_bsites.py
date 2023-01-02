@@ -48,7 +48,6 @@ AMINO_ACIDS = {
     'SEC': 0,
     'PYL': 0
     }
-
 NUCLEOTIDES = ['A', 'T', 'C', 'G', 'U']
 
 def struct_path(pdbid: str, pftype: str)->str:
@@ -106,6 +105,7 @@ class BindingSiteChain:
       residues        : List[ResidueLite]= field(hash=True, compare=False)
 
 class BindingSite:
+
     def __init__(self, data: Dict[str, BindingSiteChain]) -> None:
         self.data: Dict[str, BindingSiteChain] = data
 
@@ -123,14 +123,12 @@ class BindingSite:
             print(f"\033[91mSaved  {pathtofile} successfuly.\033[0m")
 
     def to_csv(self, pathtofile: str) -> None:
-
         k = [
             "chainname",
             "nomenclature",
             "residue_id",
             "residue_name"
         ]
-
         serialized = dict.fromkeys(k, [])
 
 @dataclass(unsafe_hash=True, order=True)
@@ -267,7 +265,6 @@ def get_ligand_nbrs(
 
     return BindingSite(nbr_dict)
 
-
 def getLigandResIds(ligchemid: str, struct: Structure) -> List[Residue]:
     ligandResidues: List[Residue] = list(
         filter(lambda x: x.get_resname() == ligchemid, list(struct.get_residues())))
@@ -278,7 +275,7 @@ if __name__ == "__main__":
 
     parser = argparse. ArgumentParser(description='Split structure into constituent polymers and inject new nomencalture into the .cif file')
     parser.add_argument ('-s'     , '--structure', type=   str   , required=True                                                            )
-    parser.add_argument ('--save' ,                        action          ='store_true'                                                    )
+    parser.add_argument ('--save' ,action          ='store_true'                                                    )
     
     args  = parser.parse_args()
     pdbid = args.structure
