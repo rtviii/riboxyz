@@ -1,6 +1,6 @@
 import { Command, Flags } from '@oclif/core'
 import { ShellString } from 'shelljs'
-import { exec } from 'child_process'
+import { exec, spawn, spawnSync } from 'child_process'
 import { BaseCommand } from '../..'
 import { flags, flagUsages } from '@oclif/core/lib/parser'
 import { copyFileSync, existsSync, readFileSync } from 'fs'
@@ -35,7 +35,7 @@ export default class Show extends BaseCommand {
 
   public async run(): Promise<void> {
     const { args, flags } = await this.parse(Show)
-    const rcsb_id = args.rcsb_id;
+    const rcsb_id = String(args.rcsb_id).toUpperCase();
     const structureFolder = new StructureFolder(rcsb_id)
 
     // console.log(structureFolder.__structure)
@@ -46,19 +46,32 @@ export default class Show extends BaseCommand {
       console.log(`The following structs have been found for ${rcsb_id}`, await queryStructDb(rcsb_id))
     }
     if (flags.commit) {
+      this.log(`Commiting ${rcsb_id} to the database`)
 
       const commit_script = process.env["COMMIT_STRUCTURE_SH"]
-      let   current_db    = process.env["NEO4J_CURRENTDB"]
-      let   uri           = process.env["NEO4J_URI"]
+      let current_db = process.env["NEO4J_CURRENTDB"]
+      let uri = process.env["NEO4J_URI"]
+      let invocation = `${commit_script} -s ${rcsb_id} -d ${current_db} -a "${uri}"`
+      let cp = exec(invocation)
+      if (cp.stderr !== null) {
+        cp.stderr.on("data",
+          (data) => {
+            console.log(data)
+          }
+        )
+      }
 
-      exec(`${commit_script} -s ${rcsb_id} -d ${current_db} -a "${uri}"`)
 
+      cp.stdout?.on("data", (data) => { console.log(data) })
     }
 
 
 
   }
 }
+
+
+
 
 export class StructureFolder {
 
