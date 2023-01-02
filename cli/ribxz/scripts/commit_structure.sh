@@ -5,13 +5,13 @@ set -o pipefail
 
 
 #----------------------------------------
-# ****
 # $RIBETL_DATA is a general path on the HOST system. (in the case of the docker container -- a mount)
 # where all of the static data is stored like .cif structs, .json files, ligands, thumbnails etc.
 # HOWEVER In the case of the case of the neo4j itself, this host dir will be mounted as a docker volume at '/import'. Hence we define this relationship here.
-RIBETL_DATA=${RIBETL_DATA:="/import"}
-# ****
+
+RIBETL_DATA=${RIBETL_DATA:="/import"} # here the default is the docker volume mount point (defined in compose file)
 #----------------------------------------
+
 # For remote access:
 # echo "match (n) return count(n)" | cypher-shell -a neo4j+s://ribosome.xyz:7687 --format plain -u 'rt' -p 'rrr' --database 'riboauth'
 
