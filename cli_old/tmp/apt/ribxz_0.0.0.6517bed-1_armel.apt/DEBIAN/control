@@ -1,0 +1,7 @@
+Package: ribxz
+Version: 0.0.0.6517bed-1
+Section: main
+Priority: standard
+Architecture: armel
+Maintainer: Artem @rtviii
+Description: Ribosome.xyz cli
