@@ -3,6 +3,15 @@ set -e
 # set -u
 set -o pipefail
 
+
+#----------------------------------------
+# ****
+# $RIBETL_DATA is a general path on the HOST system. (in the case of the docker container -- a mount)
+# where all of the static data is stored like .cif structs, .json files, ligands, thumbnails etc.
+# HOWEVER In the case of the case of the neo4j itself, this host dir will be mounted as a docker volume at '/import'. Hence we define this relationship here.
+RIBETL_DATA=${RIBETL_DATA:="/import"}
+# ****
+#----------------------------------------
 # For remote access:
 # echo "match (n) return count(n)" | cypher-shell -a neo4j+s://ribosome.xyz:7687 --format plain -u 'rt' -p 'rrr' --database 'riboauth'
 
@@ -154,7 +163,7 @@ proteins(){
   fi
 
 
-  echo "Commiting RNA of $RIBETL_DATA/$RCSB_ID/$RCSB_ID.json to $NEO4J_URI."
+  echo "Commiting Proteins of $RIBETL_DATA/$RCSB_ID/$RCSB_ID.json to $NEO4J_URI."
   echo "call apoc.load.json(\"file://$RIBETL_DATA/$RCSB_ID/$RCSB_ID.json\") yield value
   with value, value.rcsb_id as struct
       unwind                              value.proteins as protein
@@ -221,7 +230,7 @@ ligands (){
   fi
 
 
-  echo "Commiting RNA of $RIBETL_DATA/$RCSB_ID/$RCSB_ID.json to $NEO4J_URI."
+  echo "Commiting Ligands of $RIBETL_DATA/$RCSB_ID/$RCSB_ID.json to $NEO4J_URI."
   echo "call apoc.load.json(\"file://$RIBETL_DATA/$RCSB_ID/$RCSB_ID.json\") yield value
   with value.rcsb_id as struct, value
        unwind           value.ligands as lig
@@ -274,13 +283,7 @@ done
 
 
 
-#----------------------------------------
-# ****
-# $RIBETL_DATA is a general path on the HOST system where all of the static data is stored like .cif structs, .json files, ligands, thumbnails etc.
-# HOWEVER In the case of the case of the neo4j itself, this host dir will be mounted as a docker volume at '/import'. Hence we define this relationship here.
-RIBETL_DATA="/import"
-# ****
-#----------------------------------------
+RCSB_ID=${RCSB_ID^^}
 
 if [[ -z $RCSB_ID ]] || [[ -z $NEO4J_CURRENTDB ]] || [[ -z $NEO4J_URI ]] 
 then 
