@@ -1,18 +1,12 @@
-import { Command, Flags } from '@oclif/core'
-import { ShellString } from 'shelljs'
-import { exec, spawn, spawnSync } from 'child_process'
+import { Flags } from '@oclif/core'
+import { exec} from 'child_process'
 import { BaseCommand } from '../..'
-import { flags, flagUsages } from '@oclif/core/lib/parser'
-import { copyFileSync, existsSync, readFileSync } from 'fs'
-import { string } from 'yargs'
+import { existsSync, readFileSync } from 'fs'
 import { RibosomeStructure } from '../../structure_processing/ribosome_types'
-import { StructureCommand } from '.'
 // https://search.rcsb.org/#introduction
 import axios from "axios";
-import { gzip, ungzip } from 'node-gzip'
+import {  ungzip } from 'node-gzip'
 import { mkdirSync, writeFileSync } from 'fs'
-import yargs from 'yargs'
-import { config } from "shelljs";
 import { processPDBRecord } from "../../structure_processing/structure_json_profile";
 import path = require("path");
 
@@ -36,9 +30,6 @@ export default class Show extends BaseCommand {
   public async run(): Promise<void> {
     const { args, flags } = await this.parse(Show)
     const rcsb_id = String(args.rcsb_id).toUpperCase();
-    const structureFolder = new StructureFolder(rcsb_id)
-
-    // console.log(structureFolder.__structure)
     if (flags.files) {
       let x = new StructureFolder(rcsb_id);
       x.assets_verify(flags.repair)
@@ -47,7 +38,6 @@ export default class Show extends BaseCommand {
     }
     if (flags.commit) {
       this.log(`Commiting ${rcsb_id} to the database`)
-
       const commit_script = process.env["COMMIT_STRUCTURE_SH"]
       let current_db = process.env["NEO4J_CURRENTDB"]
       let uri = process.env["NEO4J_URI"]
@@ -60,8 +50,6 @@ export default class Show extends BaseCommand {
           }
         )
       }
-
-
       cp.stdout?.on("data", (data) => { console.log(data) })
     }
 
