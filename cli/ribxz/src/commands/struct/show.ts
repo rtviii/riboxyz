@@ -31,9 +31,12 @@ export default class Show extends BaseCommand {
     const { args, flags } = await this.parse(Show)
     const rcsb_id = String(args.rcsb_id).toUpperCase();
     if (flags.files) {
-      let x = new StructureFolder(rcsb_id);
-      x.assets_verify(flags.repair)
-    } else if (flags.db) {
+      let assets = new StructureFolder(rcsb_id);
+      console.log("\t\tFiles at ", assets.folder_path )
+      assets.assets_verify(flags.repair)
+    } 
+    if (flags.db) {
+      console.log("\t\tDB at ", process.env["NEO4J_URI"])
       console.log(`The following structs have been found for ${rcsb_id}`, await queryStructDb(rcsb_id))
     }
     if (flags.commit) {
@@ -63,7 +66,7 @@ export default class Show extends BaseCommand {
 
 export class StructureFolder {
 
-  private folder_path: string
+  folder_path: string
   private cif_filepath: string
   private cif_modified_filepath: string
   private json_profile_filepath: string
