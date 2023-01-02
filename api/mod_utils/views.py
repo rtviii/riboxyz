@@ -10,7 +10,21 @@ from subprocess import Popen, PIPE, STDOUT, run
 
 @api_view(['GET'])
 def hello(request):
-    return Response("Hi.")
+    return Response("Hi again.")
+
+@api_view(['GET'])
+def struct_assets(request):
+    proc = Popen([ "/home/backend/ingress/src/update_riboxyz.ts",  
+                  "--pythonbin", "/opt/venv/bin/python3",
+                  "--ingress","commit",
+                  "--structure","7UNW"], env=os.environ.copy(), stdout=PIPE)
+
+                     
+
+    print([proc.stdout, proc.stdin, proc.stderr])
+
+    sys.stdout.flush()
+    return Response([proc.stdout, proc.stdin, proc.stderr])
 
 @api_view(['GET'])
 def update_db(request):
@@ -59,8 +73,8 @@ def update_db(request):
     os.environ["RIBETL_DATA"]         = RIBETL_DATA
     os.environ["EXTRACT_BSITES_PY"]   = "/home/backend/ingress/scripts/extract_bsites.py"
     os.environ["RENDER_THUMBNAIL_PY"] = "/home/backend/ingress/scripts/render_thumbnail.py"
-    os.environ["COMMIT_STRUCTURE_SH"]    = "/home/backend/ingress/scripts/commit_structure.sh"
-    os.environ["SPLIT_RENAME_PY"]        = "/home/backend/ingress/scripts/split_rename.py"
+    os.environ["COMMIT_STRUCTURE_SH"] = "/home/backend/ingress/scripts/commit_structure.sh"
+    os.environ["SPLIT_RENAME_PY"]     = "/home/backend/ingress/scripts/split_rename.py"
 
     proc = Popen([ "/home/backend/ingress/src/update_riboxyz.ts",  
                   "--pythonbin", "/opt/venv/bin/python3",
