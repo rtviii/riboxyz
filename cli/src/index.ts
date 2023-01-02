@@ -1,6 +1,4 @@
 import { Command, Flags } from '@oclif/core'
-import { exec } from 'child_process';
-import { ShellString } from 'shelljs';
 export { run } from '@oclif/core'
 
 /**                               Assumptions for updating the db.
@@ -122,4 +120,5 @@ export abstract class BaseCommand extends Command {
     }
 
 }
+
 
