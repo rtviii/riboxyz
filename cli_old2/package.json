@@ -1,10 +1,10 @@
 {
-  "name": "ribxzcli",
-  "version": "0.1.0",
+  "name": "ribxz",
+  "version": "0.0.0",
   "description": "ribosome.xyz cli",
   "author": "Artem @rtviii",
   "bin": {
-    "ribxzcli": "./bin/run"
+    "ribxz": "./bin/run"
   },
   "homepage": "https://github.com/rtviii/hello-world",
   "license": "MIT",
@@ -19,10 +19,9 @@
   "dependencies": {
     "@oclif/core": "^1.23.0",
     "@oclif/plugin-help": "^5",
-    "@types/node-gzip": "^1.1.0",
-    "axios": "^1.2.2",
-    "lodash": "^4.17.21",
-    "node-gzip": "^1.1.2",
+    "@oclif/plugin-plugins": "^2.1.9"
+  },
+  "devDependencies": {
     "@oclif/test": "^2.2.17",
     "@types/chai": "^4",
     "@types/mocha": "^9.0.0",
@@ -39,11 +38,12 @@
     "typescript": "^4.9.4"
   },
   "oclif": {
-    "bin": "ribxzcli",
-    "dirname": "ribxzcli",
+    "bin": "ribxz",
+    "dirname": "ribxz",
     "commands": "./dist/commands",
     "plugins": [
-      "@oclif/plugin-help"
+      "@oclif/plugin-help",
+      "@oclif/plugin-plugins"
     ],
     "topicSeparator": " ",
     "topics": {

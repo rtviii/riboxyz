@@ -6,6 +6,7 @@ FROM ubuntu:22.04
 ENV DJANGO=/home/backend/api
 ENV PYMOL_SOURCE=/home/backend/pymol
 ENV CLI=/home/backend/ingress
+ENV RIBETL_DATA=/home/backend/api/ribetldata
 
 # set work directory
 RUN mkdir -p $DJANGO
@@ -43,7 +44,11 @@ ENV PYTHONPATH="${PYMOL_PATH}/modules"
 RUN mkdir -p $PYMOL_PATH
 WORKDIR $PYMOL_SOURCE
 RUN python3 setup.py build install --home="${PYMOL_PATH}" --install-lib="${PYMOL_PATH}/modules/" --install-scripts="${PYMOL_PATH}"
-# --- NEO4J ---------------------------------------------------------------------------------
+
+# --- CLI INSTALLATION ---------------------------------------------------------------------------------
+RUN npm i -g ribxzcli
+# --- 
+
 
 
 
@@ -60,10 +65,10 @@ RUN pip3 install gunicorn
 # port where the Django app runs
 EXPOSE 8000 8001 8002
 
-ENV NEO4J_URI       = "bolt://neo:7687"
-ENV NEO4J_USER      = "neo4j"
-ENV NEO4J_PASSWORD  = "rrr"
-ENV NEO4J_CURRENTDB = "neo4j"
+ENV NEO4J_URI="bolt://neo:7687"
+ENV NEO4J_USER="neo4j"
+ENV NEO4J_PASSWORD="rrr"
+ENV NEO4J_CURRENTDB="neo4j"
 
 # -------------------------------------- NODE AND MODULES INSTALLATION
 COPY cli $CLI
