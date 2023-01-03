@@ -27,22 +27,22 @@ export { run } from '@oclif/core'
 
 export abstract class BaseCommand extends Command {
 
-
     public neo4j_vars = ["NEO4J_URI", "NEO4J_USER", "NEO4J_PASSWORD", "NEO4J_CURRENTDB", "RIBETL_DATA"]
     constructor(argv: string[], config: any) {
-        const       SCRIPTS_DIR            = "/home/rxz/dev/docker_ribxz/cli/scripts"
+        // const       SCRIPTS_DIR            = "/home/rxz/dev/docker_ribxz/cli/scripts"
+        const       SCRIPTS_DIR            = `${process.env["STRUCT_PROCESS_SCRIPTS"]}`
         process.env["EXTRACT_BSITES_PY"]   = `${SCRIPTS_DIR}/extract_bsites.py`
         process.env["RENDER_THUMBNAIL_PY"] = `${SCRIPTS_DIR}/render_thumbnail.py`
         process.env["COMMIT_STRUCTURE_SH"] = `${SCRIPTS_DIR}/commit_structure.sh`
         process.env["SPLIT_RENAME_PY"]     = `${SCRIPTS_DIR}/split_rename.py`
-
         super(argv, config);
     }
+
     static globalFlags = {
         RIBETL_DATA: Flags.string({
-            char: 'r',
+            char    : 'r',
             multiple: false,           // allow setting this flag multiple times
-            env: 'RIBETL_DATA',   // default to value of environment variable
+            env     : 'RIBETL_DATA',   // default to value of environment variable
         }),
         //add environment variables need to log into neo4j and use environment by default from system
         NEO4J_URI: Flags.string({
