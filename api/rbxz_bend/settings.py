@@ -8,9 +8,6 @@ BASE_DIR     = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RIBETL_DATA  = os.path.join(BASE_DIR, "ribetldata"                           ) # this should be either docker-mounted or populated through the utils module
 CYPHER_EXEC  = os.path.join(BASE_DIR, "mod_db","cypher_ops","cypher_exec")
 
-# INGRESS_EXEC    = os.path.join("/home/backend/ingress","src","update_riboxyz.ts" )
-# INGRESS_SCRIPTS = "/home/backend/ingress/scripts"
-
 neo4j_vars = ["NEO4J_URI", "NEO4J_USER", "NEO4J_PASSWORD", "NEO4J_CURRENTDB"]
 print(" ---------------------------------------------- Reset app. -----------------------------------------------") 
 for var in neo4j_vars:
