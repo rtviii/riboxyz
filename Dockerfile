@@ -45,9 +45,6 @@ RUN mkdir -p $PYMOL_PATH
 WORKDIR $PYMOL_SOURCE
 RUN python3 setup.py build install --home="${PYMOL_PATH}" --install-lib="${PYMOL_PATH}/modules/" --install-scripts="${PYMOL_PATH}"
 
-# --- CLI INSTALLATION ---------------------------------------------------------------------------------
-RUN npm i -g ribxzcli
-# --- 
 
 
 
@@ -65,10 +62,10 @@ RUN pip3 install gunicorn
 # port where the Django app runs
 EXPOSE 8000 8001 8002
 
-ENV NEO4J_URI="bolt://neo:7687"
-ENV NEO4J_USER="neo4j"
-ENV NEO4J_PASSWORD="rrr"
-ENV NEO4J_CURRENTDB="neo4j"
+# ENV NEO4J_URI="bolt://neo:7687"
+# ENV NEO4J_USER="neo4j"
+# ENV NEO4J_PASSWORD="rrr"
+# ENV NEO4J_CURRENTDB="neo4j"
 
 # -------------------------------------- NODE AND MODULES INSTALLATION
 COPY cli $CLI
@@ -85,7 +82,9 @@ WORKDIR ${CLI}
 ADD cli/package.json ${CLI}
 RUN npm install --no-optional && npm cache clean --force
 RUN npm install -g ts-node
-# ----------------------------------------------------------------------
+# --- CLI INSTALLATION ---------------------------------------------------------------------------------
+RUN npm i -g ribxzcli
+# --- 
 
 # Be careful given that both the whole django project and the main module are called `rbxz_bend`. (hence not using the $DJANGO here)
 COPY api /home/backend/api
