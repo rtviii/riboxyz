@@ -3,28 +3,22 @@ import sys
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 import os
-from rbxz_bend.settings import INGRESS_EXEC, INGRESS_SCRIPTS, NEO4J_CURRENTDB, NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER, RIBETL_DATA
+from rbxz_bend.settings import  NEO4J_CURRENTDB, NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER, RIBETL_DATA
+import subprocess
 from subprocess import Popen, PIPE, STDOUT, run
 #-⋯⋯⋅⋱⋰⋆⋅⋅⋄⋅⋅∶⋅⋅⋄▫▪▭┈┅✕⋅⋅⋄⋅⋅✕∶⋅⋅⋄⋱⋰⋯⋯⋯⋯⋅⋱⋰⋆⋅⋅⋄⋅⋅∶⋅⋅⋄▫▪▭┈┅✕⋅⋅⋄⋅⋅✕∶⋅⋅⋄⋱⋰⋯⋯⋯⋅⋱⋰⋆⋅⋅⋄⋅⋅∶⋅⋅⋄▫▪▭┈┅✕⋅⋅⋄⋅⋅✕∶⋅⋅⋄⋱⋰⋯⋯⋯
 
 
 @api_view(['GET'])
 def hello(request):
-    return Response("Hi again.")
+    return Response("Hi again, again.")
 
 @api_view(['GET'])
 def struct_assets(request):
-    proc = Popen([ "/home/backend/ingress/src/update_riboxyz.ts",  
-                  "--pythonbin", "/opt/venv/bin/python3",
-                  "--ingress","commit",
-                  "--structure","7UNW"], env=os.environ.copy(), stdout=PIPE)
-
-                     
-
-    print([proc.stdout, proc.stdin, proc.stderr])
-
-    sys.stdout.flush()
-    return Response([proc.stdout, proc.stdin, proc.stderr])
+    result = subprocess.run([ "ribxzcli", "struct", "show", "7UNW", "--files", "--db"], capture_output=True, text=True)
+    print("\nSTDOUT:",result.stdout)
+    print("\nSTDERR:",result.stderr)
+    return Response(str(result.stderr + result.stdout))
 
 @api_view(['GET'])
 def update_db(request):

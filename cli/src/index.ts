@@ -1,4 +1,5 @@
 import { Command, Flags } from '@oclif/core'
+import { exec } from 'shelljs'
 export { run } from '@oclif/core'
 
 /**                               Assumptions for updating the db.
@@ -24,20 +25,33 @@ export { run } from '@oclif/core'
  * TODO:1. The script begins by verifying that the structure is not already in the database. 
 */
 
+export function queryCypher(cypher_string: string):Promise<string> {
+    return new Promise<string>((resolve, reject) => {
+        exec(`echo "${cypher_string}" | cypher-shell -a \"${process.env["NEO4J_URI"]}\" --format plain -u ${process.env.NEO4J_USER} -p ${process.env.NEO4J_PASSWORD} --database ${process.env.NEO4J_CURRENTDB}`,
+            function (err, stdout, stderr) {
+                if (err != 0) {
+                    console.log(`Got shell error on querying ${process.env["NEO4J_CURRENTDB"]}`, err.toString())
+                    reject(err)
+                }
+                resolve(stdout.toString())
+            })
+    })
+}
+
 
 export abstract class BaseCommand extends Command {
 
-
     public neo4j_vars = ["NEO4J_URI", "NEO4J_USER", "NEO4J_PASSWORD", "NEO4J_CURRENTDB", "RIBETL_DATA"]
     constructor(argv: string[], config: any) {
-        const       SCRIPTS_DIR            = "/home/rxz/dev/docker_ribxz/cli/scripts"
-        process.env["EXTRACT_BSITES_PY"]   = `${SCRIPTS_DIR}/extract_bsites.py`
+        // const       SCRIPTS_DIR            = "/home/rxz/dev/docker_ribxz/cli/scripts"
+        const SCRIPTS_DIR = `${process.env["STRUCT_PROCESS_SCRIPTS"]}`
+        process.env["EXTRACT_BSITES_PY"] = `${SCRIPTS_DIR}/extract_bsites.py`
         process.env["RENDER_THUMBNAIL_PY"] = `${SCRIPTS_DIR}/render_thumbnail.py`
         process.env["COMMIT_STRUCTURE_SH"] = `${SCRIPTS_DIR}/commit_structure.sh`
-        process.env["SPLIT_RENAME_PY"]     = `${SCRIPTS_DIR}/split_rename.py`
-
+        process.env["SPLIT_RENAME_PY"] = `${SCRIPTS_DIR}/split_rename.py`
         super(argv, config);
     }
+
     static globalFlags = {
         RIBETL_DATA: Flags.string({
             char: 'r',
