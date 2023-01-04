@@ -12,7 +12,6 @@ import { StructureFolder } from '../struct/show'
 import { exec, config } from "shelljs";
 
 export default class Status extends BaseCommand {
-
     static description = 'Query structure in the database'
     static flags = {
         // repair: Flags.boolean({ char: 'R' }),
