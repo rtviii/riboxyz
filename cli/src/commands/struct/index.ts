@@ -2,6 +2,9 @@
 import axios from "axios";
 import { Command, Flags } from '@oclif/core'
 
+
+
+
 export class StructureCommand  extends Command {
 
     public neo4j_vars = ["NEO4J_URI", "NEO4J_USER", "NEO4J_PASSWORD", "NEO4J_CURRENTDB", "RIBETL_DATA"]
@@ -15,7 +18,6 @@ export class StructureCommand  extends Command {
     }]
 
     static globalFlags = {
-
         RIBETL_DATA: Flags.string({
             char: 'r',
             multiple: false,           // allow setting this flag multiple times
@@ -50,7 +52,6 @@ export class StructureCommand  extends Command {
         }),
     };
 
-
     async run() {
         let { args, flags } = await this.parse(StructureCommand)
         console.log(`struct args :${args}`, args)
@@ -59,12 +60,10 @@ export class StructureCommand  extends Command {
                 process.env[v] = flags[v]
             }
         }
-
         if (flags.env) {
             const varstring = flags.env
             process.env[varstring.split("=")[0]] = varstring.split("=")[1]
         }
-
         for (var ee of this.neo4j_vars) {
             this.log(`env: ${ee} = ${process.env[ee]}`);
         }

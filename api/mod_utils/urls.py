@@ -8,6 +8,7 @@ from .views import *
 
 urlpatterns = [
     path('hello/' , hello    ),
+    path('struct_assets/' , struct_assets    ),
     path('update/', update_db),
 ]
 app_name = 'mod_utils'

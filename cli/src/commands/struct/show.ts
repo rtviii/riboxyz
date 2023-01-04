@@ -2,7 +2,7 @@ import { Flags } from '@oclif/core'
 import { exec} from 'child_process'
 import { BaseCommand } from '../..'
 import { existsSync, readFileSync } from 'fs'
-import { RibosomeStructure } from '../../structure_processing/ribosome_types'
+import { RibosomeStructure } from '../../structure_processing/structure_types'
 // https://search.rcsb.org/#introduction
 import axios from "axios";
 import {  ungzip } from 'node-gzip'
@@ -11,7 +11,6 @@ import { processPDBRecord } from "../../structure_processing/structure_json_prof
 import path = require("path");
 
 export default class Show extends BaseCommand {
-
 
   static description = 'Query structure in the database'
   static flags = {
@@ -42,10 +41,10 @@ export default class Show extends BaseCommand {
     if (flags.commit) {
       this.log(`Commiting ${rcsb_id} to the database`)
       const commit_script = process.env["COMMIT_STRUCTURE_SH"]
-      let current_db = process.env["NEO4J_CURRENTDB"]
-      let uri = process.env["NEO4J_URI"]
-      let invocation = `${commit_script} -s ${rcsb_id} -d ${current_db} -a "${uri}"`
-      let cp = exec(invocation)
+      let   current_db    = process.env["NEO4J_CURRENTDB"]
+      let   uri           = process.env["NEO4J_URI"]
+      let   invocation    = `${commit_script} -s ${rcsb_id} -d ${current_db} -a "${uri}"`
+      let   cp            = exec(invocation)
       if (cp.stderr !== null) {
         cp.stderr.on("data",
           (data) => {
@@ -55,9 +54,6 @@ export default class Show extends BaseCommand {
       }
       cp.stdout?.on("data", (data) => { console.log(data) })
     }
-
-
-
   }
 }
 

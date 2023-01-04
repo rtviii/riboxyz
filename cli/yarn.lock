@@ -730,6 +730,14 @@
   resolved "https://registry.yarnpkg.com/@types/expect/-/expect-1.20.4.tgz#8288e51737bf7e3ab5d7c77bfa695883745264e5"
   integrity sha512-Q5Vn3yjTDyCMV50TB6VRIbQNxSE4OmZR86VSbGaNpfUolm0iePBB4KdEEHmxoY5sT2+2DIvXW0rvMDP2nHZ4Mg==
 
+"@types/glob@*":
+  version "8.0.0"
+  resolved "https://registry.yarnpkg.com/@types/glob/-/glob-8.0.0.tgz#321607e9cbaec54f687a0792b2d1d370739455d2"
+  integrity sha512-l6NQsDDyQUVeoTynNpC9uRvCUint/gSUXQA2euwmTuWGvPY5LSDUu6tkCtJB2SvGQlJQzLaKqcGZP4//7EDveA==
+  dependencies:
+    "@types/minimatch" "*"
+    "@types/node" "*"
+
 "@types/http-cache-semantics@*":
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/@types/http-cache-semantics/-/http-cache-semantics-4.0.1.tgz#0ea7b61496902b95890dc4c3a116b60cb8dae812"
@@ -751,6 +759,11 @@
   version "4.14.191"
   resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.191.tgz#09511e7f7cba275acd8b419ddac8da9a6a79e2fa"
   integrity sha512-BdZ5BCCvho3EIXw6wUCXHe7rS53AIDPLE+JzwgT+OsJk53oBfbSmZZ7CX4VaRoN78N+TJpFi9QPlfIVNmJYWxQ==
+
+"@types/minimatch@*":
+  version "5.1.2"
+  resolved "https://registry.yarnpkg.com/@types/minimatch/-/minimatch-5.1.2.tgz#07508b45797cb81ec3f273011b054cd0755eddca"
+  integrity sha512-K0VQKziLUWkVKiRVrx4a40iPaxTUefQmjtkQofBkYRcoaaL/8rhwDWww9qWbrgicNOgnpIsMxyNIUM4+n6dUIA==
 
 "@types/minimatch@^3.0.3":
   version "3.0.5"
@@ -794,6 +807,14 @@
   resolved "https://registry.yarnpkg.com/@types/responselike/-/responselike-1.0.0.tgz#251f4fe7d154d2bad125abe1b429b23afd262e29"
   integrity sha512-85Y2BjiufFzaMIlvJDvTTB8Fxl2xfLo4HgmHzVBz08w4wDePCTjYw66PdrolO0kzli3yam/YCgRufyo1DdQVTA==
   dependencies:
+    "@types/node" "*"
+
+"@types/shelljs@^0.8.11":
+  version "0.8.11"
+  resolved "https://registry.yarnpkg.com/@types/shelljs/-/shelljs-0.8.11.tgz#17a5696c825974e96828e96e89585d685646fcb8"
+  integrity sha512-x9yaMvEh5BEaZKeVQC4vp3l+QoFj3BXcd4aYfuKSzIIyihjdVARAadYy3SMNIz0WCCdS2vB9JL/U6GQk5PaxQw==
+  dependencies:
+    "@types/glob" "*"
     "@types/node" "*"
 
 "@types/sinon@*":
@@ -1421,9 +1442,9 @@ chownr@^2.0.0:
   integrity sha512-bIomtDF5KGpdogkLd9VspvFzk9KfpyyGlS8YFVZl7TGPBHL5snIOnxeshwVgPteQ9b4Eydl+pVbIyE1DcvCWgQ==
 
 ci-info@^3.2.0:
-  version "3.7.0"
-  resolved "https://registry.yarnpkg.com/ci-info/-/ci-info-3.7.0.tgz#6d01b3696c59915b6ce057e4aa4adfc2fa25f5ef"
-  integrity sha512-2CpRNYmImPx+RXKLq6jko/L07phmS9I02TyqkcNU20GCF/GgaWvc58hPtjxDX8lPpkdwc9sNh72V9k00S7ezog==
+  version "3.7.1"
+  resolved "https://registry.yarnpkg.com/ci-info/-/ci-info-3.7.1.tgz#708a6cdae38915d597afdf3b145f2f8e1ff55f3f"
+  integrity sha512-4jYS4MOAaCIStSRwiuxc4B8MYhIe676yO1sYGzARnjXkWpmzZMMYxY6zu8WYWDhSuth5zhrQ1rhNSibyyvv4/w==
 
 clean-regexp@^1.0.0:
   version "1.0.0"

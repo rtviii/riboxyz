@@ -236,9 +236,9 @@ const download_unpack_place = async (struct_id: string) => {
     const BASE_URL = "http://files.rcsb.org/download/"
     const FORMAT = ".cif.gz"
 
-    const structid = struct_id.toUpperCase()
-    let url = BASE_URL + structid + FORMAT
-    let compressed: Buffer = await axios.get(url, { responseType: 'arraybuffer' }).then(r => { return r.data })
+    const structid           = struct_id.toUpperCase()
+    let   url                = BASE_URL + structid + FORMAT
+    let   compressed: Buffer = await axios.get(url, { responseType: 'arraybuffer' }).then(r => { return r.data })
         .catch(e => { process.stdout.write(`Structure ${structid} failed: `, e); return []; })
     let decompressed = await ungzip(compressed);
 
