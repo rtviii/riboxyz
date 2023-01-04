@@ -7,7 +7,7 @@ import {
   RibosomeStructure,
   RNAClass,
   RNA,
-} from "./ribosome_types";
+} from "./structure_types";
 
 // both should be served by django
 import { small_subunit_map } from "./subunit_maps/small-subunit-map";

@@ -1,28 +1,37 @@
-import { Command, Flags } from '@oclif/core'
-import { BaseCommand } from '../..'
+import { Flags } from '@oclif/core'
+import { BaseCommand, queryCypher } from '../..'
+import { existsSync, readFileSync } from 'fs'
+import { RibosomeStructure } from '../../structure_processing/structure_types'
 // https://search.rcsb.org/#introduction
 import axios from "axios";
-import {exec, config} from "shelljs";
+import { ungzip } from 'node-gzip'
+import { mkdirSync, writeFileSync } from 'fs'
+import { processPDBRecord } from "../../structure_processing/structure_json_profile";
+import path = require("path");
+import { StructureFolder } from '../struct/show'
+import { exec, config } from "shelljs";
 
-export default class Db extends BaseCommand {
-  static description = 'describe the command here'
-  static flags = {
-  }
+export default class Status extends BaseCommand {
 
-  // static args = [{name: 'file'}]
-
-  public async run(): Promise<void> {
-    const { args, flags } = await this.parse(Db)
-
-    this.log(`hello from /home/rxz/dev/docker_ribxz/__ingress/ribxz/src/commands/db.ts`)
-    if (args.file && flags.force) {
-      this.log(`you input --force and --file: ${args.file}`)
+    static description = 'Query structure in the database'
+    static flags = {
+        // repair: Flags.boolean({ char: 'R' }),
     }
-  }
+
+    static args = [
+        // { name: 'rcsb_id', required: true }
+    ]
+
+    public async run(): Promise<void> {
+        const { args, flags } = await this.parse(Status)
+        // console.log(await queryCypher("match (n:RibosomeStructure) return count(n)"))
+        let out     = await queryCypher("match (n:RibosomeStructure) return count(n)")
+        let missing = await missing_structures()
+    }
 }
 
 
-export const missing_structures = async () => {
+const missing_structures = async () => {
     process.stdout.write("Getting missing structures");
     var rcsb_search_api = "https://search.rcsb.org/rcsbsearch/v2/query"
     const params = {
@@ -50,7 +59,6 @@ export const missing_structures = async () => {
             "results_verbosity": "compact"
         }
     };
-
     let query = rcsb_search_api + "?json=" + encodeURIComponent(JSON.stringify(params))
 
     // let cypherstring = "match (struct:RibosomeStructure) return struct.rcsb_id"
@@ -58,7 +66,6 @@ export const missing_structures = async () => {
     // let ribxz_query = `http://localhost:8000/neo4j/cypher/?cypher=${cypherstring}`
 
     let dbquery = new Promise<string[]>((resolve, reject) => {
-        config.silent = true
         exec(`echo \"match (struct:RibosomeStructure) return struct.rcsb_id\" | cypher-shell -a \"${process.env["NEO4J_URI"]}\" --format plain -u ${process.env.NEO4J_USER} -p ${process.env.NEO4J_PASSWORD} --database ${process.env.NEO4J_CURRENTDB}`,
             function (err, stdout, stderr) {
                 if (err != 0) {
@@ -69,6 +76,7 @@ export const missing_structures = async () => {
                 resolve(dbstructs)
             })
     })
+
 
     return Promise.all([dbquery, axios.get(query)]).then(r => {
         var ribxz_structs: string[] = r[0]

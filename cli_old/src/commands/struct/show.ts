@@ -233,11 +233,11 @@ export class StructureFolder {
     this.__verify_ligands_and_polymers(try_fix)
   }
 
-  db_verify() {
+  // db_verify() {
 
-    // TODO
+  //   // TODO
 
-  }
+  // }
 }
 
 
@@ -321,42 +321,3 @@ export const save_struct_profile = (r: RibosomeStructure): string => {
   writeFileSync(target_filename, JSON.stringify(r, null, 4));
   return target_filename
 };
-
-// const process_structure = async (opts: IngressOptions) => {
-//   if (!opts.rcsb_id) throw new Error("No structure ID provided.")
-
-//   let struct_id = opts.rcsb_id.toUpperCase()
-
-//   if (opts.acquirePDBRecord) {
-//     let ribosome = await processPDBRecord(struct_id)
-//     let filename = await save_struct_profile(ribosome)
-//     process.stdout.write(`Saved structure profile:\t${filename}`);
-//   }
-
-//   if (opts.downloadCifFile) {
-//     await download_unpack_place(struct_id)
-//     process.stdout.write(`Saved structure cif file ${struct_id}.cif`);
-//   }
-//   if (opts.renderStructHero) {
-//     exec(`${process.env["PYTHONBIN"]} ${process.env["RENDER_THUMBNAIL_PY"]} -s ${struct_id}`)
-//   }
-
-//   if (opts.splitRenameChains) {
-//     exec(`${process.env["PYTHONBIN"]} ${process.env["SPLIT_RENAME_PY"]} -s ${struct_id}`)
-//   }
-
-//   if (opts.extractBindingSites) {
-//     exec(`${process.env["PYTHONBIN"]}   \
-//          ${process.env["EXTRACT_BSITES_PY"]}       \
-//          -s ${struct_id}                           \
-//          --save`)
-//   }
-
-//   if (opts.commitToNeo4j) {
-//     var shellstring = `${process.env["COMMIT_STRUCTURE_SH"]} -s ${opts.rcsb_id.toUpperCase()} \
-//          -d ${process.env.NEO4J_CURRENTDB} \
-//          -a "${process.env.NEO4J_URI}"`;
-//     exec(shellstring)
-//   }
-
-// }

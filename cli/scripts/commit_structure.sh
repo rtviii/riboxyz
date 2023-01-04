@@ -85,7 +85,6 @@ structure() {
 
           host_organism_ids           : host_organism_ids                                  ,
           host_organism_names         : host_organism_names
-
           })
 
           on                      create                                  set
