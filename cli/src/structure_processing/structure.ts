@@ -321,10 +321,10 @@ export const save_struct_profile = (r: RibosomeStructure): string => {
 export const commit_struct_to_Db = (rcsb_id: string) => {
     console.log(`Commiting ${rcsb_id} to the database`)
     const commit_script = process.env["COMMIT_STRUCTURE_SH"]
-    let current_db = process.env["NEO4J_CURRENTDB"]
-    let uri = process.env["NEO4J_URI"]
-    let invocation = `${commit_script} -s ${rcsb_id} -d ${current_db} -a "${uri}"`
-    let proc = cp.exec(invocation)
+    let   current_db    = process.env["NEO4J_CURRENTDB"]
+    let   uri           = process.env["NEO4J_URI"]
+    let   invocation    = `${commit_script} -s ${rcsb_id} -d ${current_db} -a "${uri}"`
+    let   proc          = cp.exec(invocation)
     if (proc.stderr !== null) {
         proc.stderr.on("data",
             (data) => {
@@ -333,5 +333,4 @@ export const commit_struct_to_Db = (rcsb_id: string) => {
         )
     }
     proc.stdout?.on("data", (data) => { console.log(data) })
-
 }

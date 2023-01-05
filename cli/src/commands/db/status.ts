@@ -4,6 +4,7 @@ import { existsSync, readFileSync } from 'fs'
 // https://search.rcsb.org/#introduction
 import axios from "axios";
 import { exec, config } from "shelljs";
+import { commit_struct_to_Db } from '../../structure_processing/structure';
 
 export default class Status extends BaseCommand {
 
@@ -22,9 +23,9 @@ export default class Status extends BaseCommand {
         let   missing         = await missing_structures()
         if (flags.updateall){
             for (var struct of missing){
-                this.log("Will get and committ struct " + struct)
-
+                commit_struct_to_Db(struct)
             }
+
         }
     }
 }
