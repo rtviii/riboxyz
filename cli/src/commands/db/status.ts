@@ -15,23 +15,23 @@ export default class Status extends BaseCommand {
     }
 
     static args = [
-        { name: 'rcsb_id', required: true }
+        // { name: 'rcsb_id', required: true }
     ]
 
     public async run(): Promise<void> {
         const { args, flags } = await this.parse(Status)
-        // let   missing         = await missing_structures()
+        let   missing         = await missing_structures()
 
-        // if (flags.updateall) {
-        //     for (var struct of missing) {
-                let x = new StructureFolder(args.rcsb_id)
+        if (flags.updateall) {
+            for (var struct of missing) {
+                let x = new StructureFolder(struct)
                 await x.initialize_assets(true)
                 await x.initialize_ligands(flags.updateall, x.structure as RibosomeStructure)
-                // await commit_struct_to_db_sync(struct)
-                // console.log("EXITING AFTER 1. EXPECTED")
-                // process.exit(1)
-            // }
-        // }
+                await commit_struct_to_db_sync(struct)
+                console.log("EXITING AFTER 1. EXPECTED")
+                process.exit(1)
+            }
+        }
     }
 }
 
