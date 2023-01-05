@@ -56,16 +56,21 @@ export class RibosomeAssets {
 
 
 
-    async __verify_cif(obtain: boolean = false) {
-        if (existsSync(this.cif_filepath())) { return true } else {
+    async __verify_cif(obtain: boolean = false):Promise<boolean> {
+        if (existsSync(this.cif_filepath())) {
+            console.log("Path exists returning true: {}", this.cif_filepath())
+            return true
+        } else {
+
             if (obtain) {
-                download_unpack_place(this.rcsb_id); return true
+                await download_unpack_place(this.rcsb_id); return true
             } else return false
         }
     }
     async __verify_cif_modified(obtain: boolean = false) {
         if (existsSync(this.cif_modified_filepath())) { return true } else {
             if (obtain) {
+                this.__verify_cif(true)
                 let y = exec(`${process.env["PYTHONBIN"]} ${process.env["SPLIT_RENAME_PY"]} -s ${this.rcsb_id}`,
                     (err, stdout, stderr) => {
                         console.log(err);
@@ -77,10 +82,8 @@ export class RibosomeAssets {
         }
     }
     async __verify_json_profile(obtain: boolean = false) {
-        if (existsSync(this.cif_modified_filepath())) { return true } else {
+        if (existsSync(this.json_profile_filepath())) { return true } else {
             if (obtain) {
-                console.log("Trying to call");
-
                 let ribosome = await processPDBRecord(this.rcsb_id)
                 let filename = await save_struct_profile(ribosome)
                 process.stdout.write(`Saved structure profile:\t${filename}`);
@@ -102,6 +105,7 @@ export class RibosomeAssets {
     async __verify_chains_folder(obtain: boolean = false) {
         if (existsSync(this.chains_folder())) { return true } else {
             if (obtain) {
+                this.__verify_cif(true)
                 exec(`${process.env["PYTHONBIN"]} ${process.env["SPLIT_RENAME_PY"]} -s ${this.rcsb_id}`, (err, stdout, stderr) => {
                     console.log(err);
                     console.log(stdout);
@@ -127,7 +131,6 @@ export class RibosomeAssets {
             }
         ).reduce((prev, cur) => { return prev && cur }, true)
         return chain_files_all
-
     }
 
     async __verify_ligands_and_polymers(struct: RibosomeStructure) {
@@ -174,11 +177,6 @@ export class RibosomeAssets {
 
 
     async init_assets(obtain: boolean = false) {
-        await this.__verify_json_profile(obtain)
-        await this.__verify_cif(obtain)
-        await this.__verify_cif_modified(obtain)
-        await this.__verify_png_thumbnail(obtain)
-        await this.__verify_chains_folder(obtain)
     }
 }
 
@@ -189,22 +187,27 @@ export class StructureFolder {
     assets: RibosomeAssets;
     structure?: RibosomeStructure;
 
-    constructor(rcsb_id: string, obtain: boolean = false, ribosome_structure?: RibosomeStructure) {
+    constructor(rcsb_id: string) {
         this.rcsb_id = rcsb_id.toUpperCase()
-        console.log("before assets");
         this.assets = new RibosomeAssets(this.rcsb_id)
-        console.log("after");
     }
 
     async initialize_assets(obtain: boolean) {
-        await this.assets.init_assets(obtain)
+        await this.assets.__verify_json_profile(true)
+        console.log("JSON profile verified");
+        await this.assets.__verify_cif(true)
+
+        console.log("Cif profile verified");
+        await this.assets.__verify_cif_modified(true)
+        await this.assets.__verify_chains_folder(true)
+        await this.assets.__verify_png_thumbnail(true)
+
         if (!this.assets.__verify_json_profile(obtain)) {
             throw Error(`Structure ${this.rcsb_id} assets not found. Cannot initiate resource.`)
         }
-
+        console.log("accessing filepath");
 
         this.structure = JSON.parse(readFileSync(this.assets.json_profile_filepath(), 'utf-8'))
-
     }
 
     async initialize_ligands(obtain: boolean, ribosome: RibosomeStructure) {
@@ -321,10 +324,10 @@ export const save_struct_profile = (r: RibosomeStructure): string => {
 export const commit_struct_to_Db = (rcsb_id: string) => {
     console.log(`Commiting ${rcsb_id} to the database`)
     const commit_script = process.env["COMMIT_STRUCTURE_SH"]
-    let   current_db    = process.env["NEO4J_CURRENTDB"]
-    let   uri           = process.env["NEO4J_URI"]
-    let   invocation    = `${commit_script} -s ${rcsb_id} -d ${current_db} -a "${uri}"`
-    let   proc          = cp.exec(invocation)
+    let current_db = process.env["NEO4J_CURRENTDB"]
+    let uri = process.env["NEO4J_URI"]
+    let invocation = `${commit_script} -s ${rcsb_id} -d ${current_db} -a "${uri}"`
+    let proc = cp.exec(invocation)
     if (proc.stderr !== null) {
         proc.stderr.on("data",
             (data) => {
@@ -332,5 +335,30 @@ export const commit_struct_to_Db = (rcsb_id: string) => {
             }
         )
     }
+
     proc.stdout?.on("data", (data) => { console.log(data) })
+    proc.on("exit", () => { process.exit() })
+}
+export const commit_struct_to_db_sync = (rcsb_id: string): Promise<void> => {
+    console.log(`Commiting ${rcsb_id} to the database`)
+    const commit_script = process.env["COMMIT_STRUCTURE_SH"]
+    let current_db = process.env["NEO4J_CURRENTDB"]
+    let uri = process.env["NEO4J_URI"]
+    let invocation = `${commit_script} -s ${rcsb_id} -d ${current_db} -a "${uri}"`
+    return new Promise<void>((resolve, reject) => {
+        let proc = cp.exec(invocation)
+        if (proc.stderr !== null) {
+            proc.stderr.on("data",
+                (data) => {
+                    console.log(data)
+                }
+            )
+        }
+
+        proc.stdout?.on("data", (data) => { console.log(data) })
+        proc.stderr?.on("data", (data) => { console.log(data); reject(data) })
+        proc.on("exit", () => { process.exit(); resolve() })
+
+    })
+
 }
