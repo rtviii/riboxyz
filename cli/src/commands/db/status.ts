@@ -1,20 +1,15 @@
 import { Flags } from '@oclif/core'
 import { BaseCommand, queryCypher } from '../..'
 import { existsSync, readFileSync } from 'fs'
-import { RibosomeStructure } from '../../structure_processing/structure_types'
 // https://search.rcsb.org/#introduction
 import axios from "axios";
-import { ungzip } from 'node-gzip'
-import { mkdirSync, writeFileSync } from 'fs'
-import { processPDBRecord } from "../../structure_processing/structure_json_profile";
-import path = require("path");
-import { StructureFolder } from '../struct/show'
 import { exec, config } from "shelljs";
 
 export default class Status extends BaseCommand {
+
     static description = 'Query structure in the database'
-    static flags = {
-        // repair: Flags.boolean({ char: 'R' }),
+    static flags       = {
+        updateall: Flags.boolean({ char: 'A' }),
     }
 
     static args = [
@@ -23,9 +18,14 @@ export default class Status extends BaseCommand {
 
     public async run(): Promise<void> {
         const { args, flags } = await this.parse(Status)
-        // console.log(await queryCypher("match (n:RibosomeStructure) return count(n)"))
-        let out     = await queryCypher("match (n:RibosomeStructure) return count(n)")
-        let missing = await missing_structures()
+        let   out             = await queryCypher("match (n:RibosomeStructure) return count(n)")
+        let   missing         = await missing_structures()
+        if (flags.updateall){
+            for (var struct of missing){
+                this.log("Will get and committ struct " + struct)
+
+            }
+        }
     }
 }
 
