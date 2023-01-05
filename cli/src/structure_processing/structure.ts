@@ -7,6 +7,7 @@ import { ungzip } from "node-gzip"
 import axios from "axios"
 import path = require("path")
 import { Polymer_Entity } from "./rcsb_graphql_schema"
+import { resolve } from "path"
 
 
 
@@ -58,7 +59,6 @@ export class RibosomeAssets {
 
     async __verify_cif(obtain: boolean = false):Promise<boolean> {
         if (existsSync(this.cif_filepath())) {
-            console.log("Path exists returning true: {}", this.cif_filepath())
             return true
         } else {
 
@@ -74,8 +74,8 @@ export class RibosomeAssets {
                 let y = exec(`${process.env["PYTHONBIN"]} ${process.env["SPLIT_RENAME_PY"]} -s ${this.rcsb_id}`,
                     (err, stdout, stderr) => {
                         console.log(err);
-                        console.log(stdout);
-                        console.log(stderr);
+                        console.log(stdout.toString());
+                        console.log(stderr.toString());
                     })
                 console.log(y.stdout)
             } else return false
@@ -93,12 +93,15 @@ export class RibosomeAssets {
     async __verify_png_thumbnail(obtain: boolean = false) {
         if (existsSync(this.png_thumbnail_filepath())) { return true } else {
             if (obtain) {
-                let proc = exec(`${process.env["PYTHONBIN"]} ${process.env["RENDER_THUMBNAIL_PY"]} -s ${this.rcsb_id}`,
+               await new Promise<void>((rs,rj)=>{
+               exec(`${process.env["PYTHONBIN"]} ${process.env["RENDER_THUMBNAIL_PY"]} -s ${this.rcsb_id}`,
                     (err, stdout, stderr) => {
-                        console.log(err);
-                        console.log(stdout);
-                        console.log(stderr);
+                        if (err !==0 ){
+                            rj(stderr)
+                        }
+                        else{rs()}
                     })
+               })  
             } else return false
         }
     }
@@ -108,8 +111,8 @@ export class RibosomeAssets {
                 this.__verify_cif(true)
                 exec(`${process.env["PYTHONBIN"]} ${process.env["SPLIT_RENAME_PY"]} -s ${this.rcsb_id}`, (err, stdout, stderr) => {
                     console.log(err);
-                    console.log(stdout);
-                    console.log(stderr);
+                    console.log(stdout.toString());
+                    console.log(stderr.toString());
                 })
             } else return false
         }
@@ -194,10 +197,7 @@ export class StructureFolder {
 
     async initialize_assets(obtain: boolean) {
         await this.assets.__verify_json_profile(true)
-        console.log("JSON profile verified");
         await this.assets.__verify_cif(true)
-
-        console.log("Cif profile verified");
         await this.assets.__verify_cif_modified(true)
         await this.assets.__verify_chains_folder(true)
         await this.assets.__verify_png_thumbnail(true)
