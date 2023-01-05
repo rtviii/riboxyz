@@ -14,7 +14,9 @@ export default class Obtain extends BaseCommand {
     public async run(): Promise<void> {
         const { args, flags } = await this.parse(Obtain)
         const rcsb_id = String(args.rcsb_id).toUpperCase();
-     new StructureFolder(rcsb_id,true) 
+        this.log(`Obtaining structure ${rcsb_id}`)
+        let x = new StructureFolder(rcsb_id, true)
+        await x.initialize_assets(true)
     }
 }
 

@@ -345,16 +345,16 @@ const reshape_PolyEntity_to_RibosomalProtein = (plm: Polymer_Entity): Protein[] 
 export const processPDBRecord = async (
   pdbid: string
 ): Promise<RibosomeStructure> => {
-  return await axios.get(query_template(pdbid))
+  let querystr = query_template(pdbid);
+  return await axios.get(encodeURI( querystr ))
     .then(response => {
 
-
-      var pdbRecord: PDBGQLResponse = response.data.data;
-      var proteins = pdbRecord.entry.polymer_entities.filter(poly => poly.entity_poly.rcsb_entity_polymer_type === "Protein");
-      var rnas = pdbRecord.entry.polymer_entities.filter(poly => poly.entity_poly.rcsb_entity_polymer_type === "RNA");
-      var ligands = pdbRecord.entry.nonpolymer_entities;
+      var pdbRecord: PDBGQLResponse    = response.data.data;
+      var proteins                     = pdbRecord.entry.polymer_entities.filter(poly => poly.entity_poly.rcsb_entity_polymer_type === "Protein");
+      var rnas                         = pdbRecord.entry.polymer_entities.filter(poly => poly.entity_poly.rcsb_entity_polymer_type === "RNA");
+      var ligands                      = pdbRecord.entry.nonpolymer_entities;
       var reshaped_proteins: Protein[] = [];
-      var reshaped_rnas: RNA[] = [];
+      var reshaped_rnas: RNA[]         = [];
 
 
       proteins.map(protein => { reshaped_proteins.push(...reshape_PolyEntity_to_RibosomalProtein(protein)) });
@@ -396,6 +396,7 @@ export const processPDBRecord = async (
       };
 
       return reshaped;
-    });
+    })
+    .catch(error => {console.log("RCSB PDB Error:\n", error); process.exit(1)});
 
 };
