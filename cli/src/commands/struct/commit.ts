@@ -16,7 +16,7 @@ export default class Commit extends BaseCommand {
         const { args, flags } = await this.parse(Commit)
         const rcsb_id = String(args.rcsb_id).toUpperCase();
         this.log(`Comitting structure ${rcsb_id}`)
-        let x = new StructureFolder(rcsb_id, true)
+        let x = new StructureFolder(rcsb_id)
         await x.initialize_assets(true)
         await x.initialize_ligands(true, x.structure as RibosomeStructure )
 

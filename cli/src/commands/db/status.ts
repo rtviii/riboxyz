@@ -4,29 +4,34 @@ import { existsSync, readFileSync } from 'fs'
 // https://search.rcsb.org/#introduction
 import axios from "axios";
 import { exec, config } from "shelljs";
-import { commit_struct_to_Db } from '../../structure_processing/structure';
+import { commit_struct_to_Db, commit_struct_to_db_sync, StructureFolder } from '../../structure_processing/structure';
+import { RibosomeStructure } from '../../structure_processing/structure_types';
 
 export default class Status extends BaseCommand {
 
     static description = 'Query structure in the database'
-    static flags       = {
+    static flags = {
         updateall: Flags.boolean({ char: 'A' }),
     }
 
     static args = [
-        // { name: 'rcsb_id', required: true }
+        { name: 'rcsb_id', required: true }
     ]
 
     public async run(): Promise<void> {
         const { args, flags } = await this.parse(Status)
-        let   out             = await queryCypher("match (n:RibosomeStructure) return count(n)")
-        let   missing         = await missing_structures()
-        if (flags.updateall){
-            for (var struct of missing){
-                commit_struct_to_Db(struct)
-            }
+        // let   missing         = await missing_structures()
 
-        }
+        // if (flags.updateall) {
+        //     for (var struct of missing) {
+                let x = new StructureFolder(args.rcsb_id)
+                await x.initialize_assets(true)
+                await x.initialize_ligands(flags.updateall, x.structure as RibosomeStructure)
+                // await commit_struct_to_db_sync(struct)
+                // console.log("EXITING AFTER 1. EXPECTED")
+                // process.exit(1)
+            // }
+        // }
     }
 }
 
