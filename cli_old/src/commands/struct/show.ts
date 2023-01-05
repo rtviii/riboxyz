@@ -85,12 +85,12 @@ export class StructureFolder {
     }
     this.folder_path = `${process.env["RIBETL_DATA"]}/${this.rcsb_id}`
 
-    this.cif_filepath = `${this.folder_path}/${this.rcsb_id}.cif`
-    this.cif_modified_filepath = `${this.folder_path}/${this.rcsb_id}_modified.cif`
-    this.json_profile_filepath = `${this.folder_path}/${this.rcsb_id}.json`
-    this.chains_folder = `${this.folder_path}/CHAINS`
+    this.cif_filepath           = `${this.folder_path}/${this.rcsb_id}.cif`
+    this.cif_modified_filepath  = `${this.folder_path}/${this.rcsb_id}_modified.cif`
+    this.json_profile_filepath  = `${this.folder_path}/${this.rcsb_id}.json`
+    this.chains_folder          = `${this.folder_path}/CHAINS`
     this.png_thumbnail_filepath = `${this.folder_path}/_ray_${this.rcsb_id}.png`
-    this.__structure = JSON.parse(readFileSync(this.json_profile_filepath, 'utf-8'))
+    this.__structure            = JSON.parse(readFileSync(this.json_profile_filepath, 'utf-8'))
 
     for (var chain of [...this.__structure.proteins, ...(this.__structure.rnas || [])]) {
       if (chain.ligand_like) {

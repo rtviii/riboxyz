@@ -80,9 +80,8 @@ export class RibosomeAssets {
         if (existsSync(this.cif_modified_filepath())) { return true } else {
             if (obtain) {
                 console.log("Trying to call");
-                
+
                 let ribosome = await processPDBRecord(this.rcsb_id)
-                console.log("Trying to call over");
                 let filename = await save_struct_profile(ribosome)
                 process.stdout.write(`Saved structure profile:\t${filename}`);
             } else return false
@@ -173,9 +172,11 @@ export class RibosomeAssets {
         }
     }
 
-    async init_assets(obtain: boolean) {
-        await this.__verify_cif(obtain)
+
+    async init_assets(obtain: boolean = false) {
         await this.__verify_json_profile(obtain)
+        await this.__verify_cif(obtain)
+        await this.__verify_cif_modified(obtain)
         await this.__verify_png_thumbnail(obtain)
         await this.__verify_chains_folder(obtain)
     }
@@ -188,14 +189,11 @@ export class StructureFolder {
     assets: RibosomeAssets;
     structure?: RibosomeStructure;
 
-
     constructor(rcsb_id: string, obtain: boolean = false, ribosome_structure?: RibosomeStructure) {
         this.rcsb_id = rcsb_id.toUpperCase()
         console.log("before assets");
         this.assets = new RibosomeAssets(this.rcsb_id)
         console.log("after");
-
-
     }
 
     async initialize_assets(obtain: boolean) {
@@ -203,8 +201,52 @@ export class StructureFolder {
         if (!this.assets.__verify_json_profile(obtain)) {
             throw Error(`Structure ${this.rcsb_id} assets not found. Cannot initiate resource.`)
         }
+
+
         this.structure = JSON.parse(readFileSync(this.assets.json_profile_filepath(), 'utf-8'))
+
     }
+
+    async initialize_ligands(obtain: boolean, ribosome: RibosomeStructure) {
+        let ligs = ribosome.ligands && ribosome.ligands.map((lig_chem_id) => {
+            if (!existsSync(`${this.assets.folder_path()}/LIGAND_${lig_chem_id}.json`)) {
+                console.log(`[${this.rcsb_id}]: NOT FOUND ${this.assets.folder_path()}/LIGAND_${lig_chem_id}.json (Is it an ION? Expected.)`)
+                return false
+            } else return true
+        }).reduce((prev, cur) => { return prev && cur }, true)
+
+
+        let ligandlike: string[] = []
+        for (var chain of [...ribosome.proteins, ...(ribosome.rnas || [])]) {
+            if (chain.ligand_like) {
+                ligandlike = [...ligandlike, chain.auth_asym_id]
+            }
+        }
+
+
+
+        let polys = ligandlike && ligandlike.map((polymer_id) => {
+            if (!existsSync(`${this.assets.folder_path()}/POLYMER_${polymer_id}.json`)) {
+                console.log(`[${this.rcsb_id}]: NOT FOUND ${this.assets.folder_path()}/POLYMER_${polymer_id}.json`)
+                return false
+            } else return true
+        })
+
+        if ((!polys || !ligs) && obtain) {
+            console.log("Some ligands are missing. Calling script:", process.env["PYTHONBIN"], process.env["EXTRACT_BSITES_PY"])
+            exec(`${process.env["PYTHONBIN"]} ${process.env["EXTRACT_BSITES_PY"]} -s ${this.rcsb_id} --save`, (err, stdout, stderr) => {
+                console.log(err);
+                console.log(stdout);
+                console.log(stderr);
+            })
+        }
+
+    }
+
+
+
+
+
 
 }
 
@@ -260,7 +302,6 @@ export const download_unpack_place = async (struct_id: string) => {
     writeFileSync(structfile, decompressed)
 }
 
-
 export const save_struct_profile = (r: RibosomeStructure): string => {
     var rcsb_id = r.rcsb_id;
     var target_filename = path.join(
@@ -274,4 +315,23 @@ export const save_struct_profile = (r: RibosomeStructure): string => {
     }
     writeFileSync(target_filename, JSON.stringify(r, null, 4));
     return target_filename
+}
+
+
+export const commit_struct_to_Db = (rcsb_id: string) => {
+    console.log(`Commiting ${rcsb_id} to the database`)
+    const commit_script = process.env["COMMIT_STRUCTURE_SH"]
+    let current_db = process.env["NEO4J_CURRENTDB"]
+    let uri = process.env["NEO4J_URI"]
+    let invocation = `${commit_script} -s ${rcsb_id} -d ${current_db} -a "${uri}"`
+    let proc = cp.exec(invocation)
+    if (proc.stderr !== null) {
+        proc.stderr.on("data",
+            (data) => {
+                console.log(data)
+            }
+        )
+    }
+    proc.stdout?.on("data", (data) => { console.log(data) })
+
 }
