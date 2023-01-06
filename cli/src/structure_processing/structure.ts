@@ -9,8 +9,6 @@ import path = require("path")
 import { Polymer_Entity } from "./rcsb_graphql_schema"
 import { resolve } from "path"
 
-
-
 export class RibosomeAssets {
     rcsb_id: string
 
@@ -183,16 +181,15 @@ export class RibosomeAssets {
     }
 }
 
-
 export class StructureFolder {
 
-    rcsb_id: string;
-    assets: RibosomeAssets;
+    rcsb_id   : string;
+    assets    : RibosomeAssets;
     structure?: RibosomeStructure;
 
     constructor(rcsb_id: string) {
         this.rcsb_id = rcsb_id.toUpperCase()
-        this.assets = new RibosomeAssets(this.rcsb_id)
+        this.assets  = new RibosomeAssets(this.rcsb_id)
     }
 
     async initialize_assets(obtain: boolean) {
@@ -218,15 +215,12 @@ export class StructureFolder {
             } else return true
         }).reduce((prev, cur) => { return prev && cur }, true)
 
-
         let ligandlike: string[] = []
         for (var chain of [...ribosome.proteins, ...(ribosome.rnas || [])]) {
             if (chain.ligand_like) {
                 ligandlike = [...ligandlike, chain.auth_asym_id]
             }
         }
-
-
 
         let polys = ligandlike && ligandlike.map((polymer_id) => {
             if (!existsSync(`${this.assets.folder_path()}/POLYMER_${polymer_id}.json`)) {
@@ -245,14 +239,7 @@ export class StructureFolder {
         }
 
     }
-
-
-
-
-
-
 }
-
 
 /**
  * Request and display the state of the given rcsb_id structure in the database instance.
@@ -319,7 +306,6 @@ export const save_struct_profile = (r: RibosomeStructure): string => {
     writeFileSync(target_filename, JSON.stringify(r, null, 4));
     return target_filename
 }
-
 
 export const commit_struct_to_Db = (rcsb_id: string) => {
     console.log(`Commiting ${rcsb_id} to the database`)
