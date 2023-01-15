@@ -11,6 +11,7 @@
 # Distribute freely.
 import os
 from pprint import pprint
+from typing import List, Tuple
 from fuzzywuzzy import process
 import re
 from extract_bsites import open_structure
@@ -90,10 +91,15 @@ def util__backwards_match(alntgt: str, resid: int):
         else:
             counter_proper += 1
 
-def util__forwards_match(alnsrc: str, resid: int):
+def util__forwards_match(string: str, resid: int):
     """Returns the index of a source-sequence residue in the (aligned) source sequence."""
+
     count_proper = 0
-    for alignment_indx, char in enumerate(alnsrc):
+    for alignment_indx, char in enumerate(string):
+        if resid >= len(string):
+            print("Requested residue index exceeds aligned(likely already gaps-extended) sequence. Something went wrong.")
+            exit(-1)
+
         if count_proper == resid:
             return alignment_indx
         if char == '-':
@@ -229,7 +235,7 @@ def process_target(rcsb_id: str, result_as: str, custom_path=None):
 
 
 
-def process_via_ribovision(rcsb_id: str, result_as: str, custom_path=None):
+def process_via_ribovision(rcsb_id: str, result_as: str, custom_path=None)->Tuple[str,str]:
     default_path = f"{rcsb_id.upper()}_modified.cif" if custom_path == None else custom_path
     target = gemmi.cif.read_file(default_path)
     block  = target.sole_block()
@@ -269,13 +275,14 @@ class RibovisionAlignment:
     'name', 'reverse_complement', 'seq', 'translate', 'upper'
     """
     def __init__(self) -> None:
-        self.fasta_seqs = SeqIO.parse(open('ribovision-3j7z.fas'),'fasta')
+        self.fasta_seqs:List[SeqIO.SeqRecord] = SeqIO.parse(open('ribovision-3j7z.fas'),'fasta')
         pass
-    def find_aln_by_species(self, species_name: str):
-        top_score = 0
-        seq   = None
 
-        for fasta in self.fasta_seqs:
+    def find_aln_by_species(self, species_name: str)->SeqIO.SeqRecord:
+        top_score = 0
+        seq       = None
+
+        for fasta in self.fasta_seqs: 
             rat =  process.fuzz.ratio(species_name, fasta.description)
             if rat > top_score:
                 top_score = rat
@@ -286,24 +293,25 @@ class RibovisionAlignment:
 if args.ribovision:
     print("\t\tMODE: Ribovision")
 
-    rcsb_id = argdict["targets"]
-    struct_profile = open_structure(rcsb_id, 'json')
-    # print(struct_profile["src_organism_ids"])
-    strandseq       = process_via_ribovision(rcsb_id, "residue", custom_path=os.path.join(RIBETL_DATA, rcsb_id.upper(), f"{rcsb_id.upper()}_modified.cif"))
+    rcsb_id         = argdict["targets"]
 
+    struct_profile    = open_structure(rcsb_id, 'json')
+    [chain_ida,strand_target]     = process_via_ribovision(rcsb_id, "residue", custom_path=os.path.join(RIBETL_DATA, rcsb_id.upper(), f"{rcsb_id.upper()}_modified.cif"))
+    fasta_sequences   = SeqIO.parse(open('ribovision-3j7z.fas'),'fasta')
+    aln               = RibovisionAlignment()
+    strand_ribovision:str = aln.find_aln_by_species("Escherichia").seq
 
+    # + Verify whether it is better to post-ribovision align to a sequence with gaps, or delete the gaps from ribovision aln first.
+    # + Or perhaps it is better to align the target rna to the whole bacterial[or euk] ribovision array 
 
-    fasta_sequences = SeqIO.parse(open('ribovision-3j7z.fas'),'fasta')
-    aln             = RibovisionAlignment()
-    fasta           = aln.find_aln_by_species("Escherichia")
-    print(fasta.seq)
+     
 
-    # Verify whether it is better to post-ribovision align to a sequence with gaps, or delete the gaps from ribovision aln first.
-    # Or perhaps it is better to align the target rna to the whole bacterial[or euk] ribovision array 
+    print(len(strand_target), len(strand_ribovision))
+    strand_target.replace('\\n',''    )
+    strand_ribovision.replace('\\n',''    )
+    print(len(strand_target), len(strand_ribovision))
 
-    print(len(strandseq[1]), len(fasta.seq.replace('-','')))
-
-    alignment = pairwise2.align.globalxx(RNA_3J7Z_23S, SEQ, one_alignment_only=True)
+    alignment = pairwise2.align.globalxx(strand_target,strand_ribovision)
 
     src_aln = alignment[0].seqA
     tgt_aln = alignment[0].seqB
@@ -316,19 +324,21 @@ if args.ribovision:
 
     aln_ids = list(filter(lambda x: x != None, aln_ids))
 
-    for aln_resid in aln_ids:
-        if tgt_aln[aln_resid] == '-':
-            continue
-        tgt_ids.append(util__backwards_match(tgt_aln, aln_resid))
+    # for aln_resid in aln_ids:
+    #     if tgt_aln[aln_resid] == '-':
+    #         continue
+    #     tgt_ids.append(util__backwards_match(tgt_aln, aln_resid))
 
-    if result_as == "residue":
-        return [model[STRAND][ix] for ix in tgt_ids]
-    elif result_as == "position":
-        print(
-            "The alpha-carbon of each residue is taken to be its position for simplicity.")
-        return [list(model[STRAND][ix][0].pos) for ix in tgt_ids]
+    # if result_as == "residue":
+    #     return [model[STRAND][ix] for ix in tgt_ids]
+
+    # elif result_as == "position":
+    #     print(
+    #         "The alpha-carbon of each residue is taken to be its position for simplicity.")
+    #     return [list(model[STRAND][ix][0].pos) for ix in tgt_ids]
 
 
+    # ※ RIBOVISION PART END ※
     exit(0)
 
 if args.generate:
