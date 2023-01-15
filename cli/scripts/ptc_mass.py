@@ -9,9 +9,10 @@
 # And additionally "requests" to download missing structures: https://pypi.org/project/requests/
 
 # Distribute freely.
-from genericpath import exists
 import os
+from pprint import pprint
 import re
+from extract_bsites import open_structure
 import pandas
 try:
     from Bio import pairwise2
@@ -57,22 +58,21 @@ RNA_3J7Z_23S = "GGUUAAGCGACUAAGCGUACACGGUGGAUGCCCUGGCAGUCAGAGGCGAUGAAGGACGUGCUAA
 
 parser = argparse.ArgumentParser(
     description='CLI for locating PTC residues of 23SrRNA in a given prokaryotic PDB file')
-parser.add_argument("-t", "--targets", type=str, required=True)
+parser.add_argument("-t", "--targets", type=str, required=False)
 parser.add_argument("-m", "--mode", type=str,  choices=['position', 'residue'], nargs='?', default='position',
                     help="Display the position of the PTC residue, or the residue itself. Default: position")
 parser.add_argument("--display_all",   action='store_true')
 parser.add_argument("--generate",   action='store_true')
+parser.add_argument("--ribovision",   action='store_true')
 parser.add_argument("--batch",   type=int, required=False)
 
 args    = parser .parse_args()
 argdict = vars(parser.parse_args())
 
-if "targets" in argdict.keys():
-    argdict["targets"] = [s.strip().upper()
-                          for s in argdict["targets"].split(",")]
-    if len(argdict) > 50:
-        print("Please don't overload our servers. Paid out of pocket!:) \nInstead, get in touch for collaboration: rtkushner@gmail.com!")
-        exit(1)
+bact_registry_file = open('rcsb_pdb_ids_20230106032038.txt', 'r')
+line = bact_registry_file.readline()
+bact_registry_file.close()
+bacteria_structs = line.split(',')
 
 
 def backwards_match(alntgt: str, resid: int):
@@ -88,7 +88,6 @@ def backwards_match(alntgt: str, resid: int):
             continue
         else:
             counter_proper += 1
-
 
 def forwards_match(alnsrc: str, resid: int):
     """Returns the index of a source-sequence residue in the (aligned) source sequence."""
@@ -227,6 +226,19 @@ def process_target(rcsb_id: str, result_as: str, custom_path=None):
         return [list(model[STRAND][ix][0].pos) for ix in tgt_ids]
 
 
+
+
+
+if args.ribovision:
+    print("mode ribovision")
+    fasta_sequences = SeqIO.parse(open('ribovision-3j7z.fas'),'fasta')
+    pprint(list(fasta_sequences))
+    print(bacteria_structs)
+
+    print(open_structure('3j7z', 'json'))
+
+    exit(0)
+
 if args.generate:
     f = open('rcsb_pdb_ids_20230106032038.txt', 'r')
     line = f.readline()
@@ -285,16 +297,21 @@ if args.generate:
     exit(1)
 
 
-
-for target in argdict["targets"]:
-    if not args.display_all:
-        target_ptc = process_target(target, args.mode)
-        print("[\033[94m{}\033[0m] Approximate PTC position(1 of {} residues): \033[91m{}\033[0m".format(
-            target, len(target_ptc), target_ptc[0]))
-    else:
-        print("[\033[94m{}\033[0m] PTC atom positions: ".format(target))
-        for residue in process_target(target, args.mode):
-            print(f"\t\033[91m{residue}\033[0m")
+if "targets" in argdict.keys():
+    argdict["targets"] = [s.strip().upper()
+                          for s in argdict["targets"].split(",")]
+    if len(argdict) > 50:
+        print("Please don't overload our servers. Paid out of pocket!:) \nInstead, get in touch for collaboration: rtkushner@gmail.com!")
+        exit(1)
+    for target in argdict["targets"]:
+        if not args.display_all:
+            target_ptc = process_target(target, args.mode)
+            print("[\033[94m{}\033[0m] Approximate PTC position(1 of {} residues): \033[91m{}\033[0m".format(
+                target, len(target_ptc), target_ptc[0]))
+        else:
+            print("[\033[94m{}\033[0m] PTC atom positions: ".format(target))
+            for residue in process_target(target, args.mode):
+                print(f"\t\033[91m{residue}\033[0m")
 
 if not args.display_all:
     print("\nTo display more residues per target structure, use additional --display_all flag.")
