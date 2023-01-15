@@ -11,6 +11,7 @@
 # Distribute freely.
 import os
 from pprint import pprint
+from fuzzywuzzy import process
 import re
 from extract_bsites import open_structure
 import pandas
@@ -210,13 +211,14 @@ def process_target(rcsb_id: str, result_as: str, custom_path=None):
     tgt_ids = []
 
     for src_resid in PTC_SEQ_IDS:
-        aln_ids.append(forwards_match(src_aln, src_resid))
+        aln_ids.append(util__forwards_match(src_aln, src_resid))
+
     aln_ids = list(filter(lambda x: x != None, aln_ids))
 
     for aln_resid in aln_ids:
         if tgt_aln[aln_resid] == '-':
             continue
-        tgt_ids.append(backwards_match(tgt_aln, aln_resid))
+        tgt_ids.append(util__backwards_match(tgt_aln, aln_resid))
 
     if result_as == "residue":
         return [model[STRAND][ix] for ix in tgt_ids]
@@ -228,7 +230,7 @@ def process_target(rcsb_id: str, result_as: str, custom_path=None):
 
 
 def process_via_ribovision(rcsb_id: str, result_as: str, custom_path=None):
-    default_path = f"{rcsb_id.upper()}.cif" if custom_path == None else custom_path
+    default_path = f"{rcsb_id.upper()}_modified.cif" if custom_path == None else custom_path
     target = gemmi.cif.read_file(default_path)
     block  = target.sole_block()
     model  = gemmi.read_structure(default_path)[0]
@@ -260,40 +262,72 @@ def process_via_ribovision(rcsb_id: str, result_as: str, custom_path=None):
     print("Located 23SrRNA sequence in {} CIF file. (Chain {})".format(rcsb_id, STRAND))
     return (STRAND, SEQ)
 
-    # alignment = pairwise2.align.globalxx(RNA_3J7Z_23S, SEQ, one_alignment_only=True)
 
-    # src_aln = alignment[0].seqA
-    # tgt_aln = alignment[0].seqB
+class RibovisionAlignment:
+    """defiened on the memeber of fsatas :
+    'annotations', 'dbxrefs', 'description', 'features', 'format', 'id', 'letter_annotations', 'lower', 
+    'name', 'reverse_complement', 'seq', 'translate', 'upper'
+    """
+    def __init__(self) -> None:
+        self.fasta_seqs = SeqIO.parse(open('ribovision-3j7z.fas'),'fasta')
+        pass
+    def find_aln_by_species(self, species_name: str):
+        top_score = 0
+        seq   = None
 
-    # aln_ids = []
-    # tgt_ids = []
-
-    # for src_resid in PTC_SEQ_IDS:
-    #     aln_ids.append(forwards_match(src_aln, src_resid))
-    # aln_ids = list(filter(lambda x: x != None, aln_ids))
-
-    # for aln_resid in aln_ids:
-    #     if tgt_aln[aln_resid] == '-':
-    #         continue
-    #     tgt_ids.append(backwards_match(tgt_aln, aln_resid))
-
-    # if result_as == "residue":
-    #     return [model[STRAND][ix] for ix in tgt_ids]
-    # elif result_as == "position":
-
-# get struct organism(source)
-# search among ribovision's alnments 
-    # if not found -- align over top 
-# backtrack to original residue
+        for fasta in self.fasta_seqs:
+            rat =  process.fuzz.ratio(species_name, fasta.description)
+            if rat > top_score:
+                top_score = rat
+                seq       = fasta
+        return seq
 
 
 if args.ribovision:
     print("\t\tMODE: Ribovision")
-    fasta_sequences = SeqIO.parse(open('ribovision-3j7z.fas'),'fasta')
-    pprint(list(fasta_sequences))
-    print(bacteria_structs)
 
-    open_structure('3j7z', 'json')
+    rcsb_id = argdict["targets"]
+    struct_profile = open_structure(rcsb_id, 'json')
+    # print(struct_profile["src_organism_ids"])
+    strandseq       = process_via_ribovision(rcsb_id, "residue", custom_path=os.path.join(RIBETL_DATA, rcsb_id.upper(), f"{rcsb_id.upper()}_modified.cif"))
+
+
+
+    fasta_sequences = SeqIO.parse(open('ribovision-3j7z.fas'),'fasta')
+    aln             = RibovisionAlignment()
+    fasta           = aln.find_aln_by_species("Escherichia")
+    print(fasta.seq)
+
+    # Verify whether it is better to post-ribovision align to a sequence with gaps, or delete the gaps from ribovision aln first.
+    # Or perhaps it is better to align the target rna to the whole bacterial[or euk] ribovision array 
+
+    print(len(strandseq[1]), len(fasta.seq.replace('-','')))
+
+    alignment = pairwise2.align.globalxx(RNA_3J7Z_23S, SEQ, one_alignment_only=True)
+
+    src_aln = alignment[0].seqA
+    tgt_aln = alignment[0].seqB
+
+    aln_ids = []
+    tgt_ids = []
+
+    for src_resid in PTC_SEQ_IDS:
+        aln_ids.append(util__forwards_match(src_aln, src_resid))
+
+    aln_ids = list(filter(lambda x: x != None, aln_ids))
+
+    for aln_resid in aln_ids:
+        if tgt_aln[aln_resid] == '-':
+            continue
+        tgt_ids.append(util__backwards_match(tgt_aln, aln_resid))
+
+    if result_as == "residue":
+        return [model[STRAND][ix] for ix in tgt_ids]
+    elif result_as == "position":
+        print(
+            "The alpha-carbon of each residue is taken to be its position for simplicity.")
+        return [list(model[STRAND][ix][0].pos) for ix in tgt_ids]
+
 
     exit(0)
 
