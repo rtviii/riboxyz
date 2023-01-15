@@ -75,7 +75,7 @@ bact_registry_file.close()
 bacteria_structs = line.split(',')
 
 
-def backwards_match(alntgt: str, resid: int):
+def util__backwards_match(alntgt: str, resid: int):
     """Returns the target-sequence index of a residue in the (aligned) target sequence"""
     if resid > len(alntgt):
         exit(IndexError(
@@ -89,7 +89,7 @@ def backwards_match(alntgt: str, resid: int):
         else:
             counter_proper += 1
 
-def forwards_match(alnsrc: str, resid: int):
+def util__forwards_match(alnsrc: str, resid: int):
     """Returns the index of a source-sequence residue in the (aligned) source sequence."""
     count_proper = 0
     for alignment_indx, char in enumerate(alnsrc):
@@ -174,11 +174,11 @@ def process_target(rcsb_id: str, result_as: str, custom_path=None):
     #             f'https://api.ribosome.xyz/static_files/download_structure?struct_id={rcsb_id}').content)
 
     target = gemmi.cif.read_file(default_path)
-    block = target.sole_block()
-    model = gemmi.read_structure(default_path)[0]
+    block  = target.sole_block()
+    model  = gemmi.read_structure(default_path)[0]
 
     STRAND = None
-    SEQ = None
+    SEQ    = None
 
     # Locate the chain of 23SrRNA class
     for (strand, nomclass) in zip(
@@ -227,15 +227,73 @@ def process_target(rcsb_id: str, result_as: str, custom_path=None):
 
 
 
+def process_via_ribovision(rcsb_id: str, result_as: str, custom_path=None):
+    default_path = f"{rcsb_id.upper()}.cif" if custom_path == None else custom_path
+    target = gemmi.cif.read_file(default_path)
+    block  = target.sole_block()
+    model  = gemmi.read_structure(default_path)[0]
+
+    STRAND = None
+    SEQ    = None
+
+    # Locate the chain of 23SrRNA class
+    for (strand, nomclass) in zip(
+        block.find_loop('_ribosome_nomenclature.entity_poly.pdbx_strand_id'),
+        block.find_loop('_ribosome_nomenclature.polymer_class')
+    ):
+        if nomclass == '23SrRNA':
+            STRAND = strand
+            break
+
+    # Now find sequence of this 23SrRNA
+    for (chain_id, one_letter_code) in zip(
+        block.find_loop('_entity_poly.pdbx_strand_id'),
+        block.find_loop('_entity_poly.pdbx_seq_one_letter_code')
+    ):
+        # X-RAY structures have 'dual' chains. Split on comma to check both.
+        if STRAND in chain_id.split(','):
+            SEQ = str(one_letter_code).strip(";").strip("\n")
+
+    if SEQ == None:
+        print("Could not locate 23SrRNA sequence in {} CIF file".format(rcsb_id))
+
+    print("Located 23SrRNA sequence in {} CIF file. (Chain {})".format(rcsb_id, STRAND))
+    return (STRAND, SEQ)
+
+    # alignment = pairwise2.align.globalxx(RNA_3J7Z_23S, SEQ, one_alignment_only=True)
+
+    # src_aln = alignment[0].seqA
+    # tgt_aln = alignment[0].seqB
+
+    # aln_ids = []
+    # tgt_ids = []
+
+    # for src_resid in PTC_SEQ_IDS:
+    #     aln_ids.append(forwards_match(src_aln, src_resid))
+    # aln_ids = list(filter(lambda x: x != None, aln_ids))
+
+    # for aln_resid in aln_ids:
+    #     if tgt_aln[aln_resid] == '-':
+    #         continue
+    #     tgt_ids.append(backwards_match(tgt_aln, aln_resid))
+
+    # if result_as == "residue":
+    #     return [model[STRAND][ix] for ix in tgt_ids]
+    # elif result_as == "position":
+
+# get struct organism(source)
+# search among ribovision's alnments 
+    # if not found -- align over top 
+# backtrack to original residue
 
 
 if args.ribovision:
-    print("mode ribovision")
+    print("\t\tMODE: Ribovision")
     fasta_sequences = SeqIO.parse(open('ribovision-3j7z.fas'),'fasta')
     pprint(list(fasta_sequences))
     print(bacteria_structs)
 
-    print(open_structure('3j7z', 'json'))
+    open_structure('3j7z', 'json')
 
     exit(0)
 
