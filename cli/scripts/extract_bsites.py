@@ -53,7 +53,6 @@ NUCLEOTIDES = ['A', 'T', 'C', 'G', 'U']
 def struct_path(pdbid: str, pftype: str)->str:
     if pftype == 'cif':
         return os.path.join(RIBETL_DATA, pdbid.upper(), f"{pdbid.upper()}.cif")
-
     if pftype == 'json':
         return os.path.join(RIBETL_DATA, pdbid.upper(), f"{pdbid.upper()}.json")
 
