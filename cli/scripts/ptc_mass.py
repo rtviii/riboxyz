@@ -168,6 +168,7 @@ class RibovisionAlignment:
 if args.ribovision:
 
     # choose a structurn
+    # TODO: fit given sequence against the ribovision alignment via mafft and triangulate between sites 6,8,9 
     # obtain its [PDBID].23S sequence (from modified cif) 
     # | 
     # .- - - - -[ obtain ribovision alignment (how best to do this?
