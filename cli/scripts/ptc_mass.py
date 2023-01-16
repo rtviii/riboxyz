@@ -104,137 +104,13 @@ def util__forwards_match(string: str, resid: int):
         else:
             count_proper += 1
 
-def process_target_to_tuple(rcsb_id: str, result_as: str, custom_path=None):
-    default_path = f"{rcsb_id.upper()}.cif" if custom_path == None else custom_path
-    if not pathlib.Path(default_path).is_file():
-        print("Could not find the fiel!!!! exti ")
-        exit(1)
-        # print(
-        #     f"Could not locate file {default_path} in the current directory. Downloading via {f'https://api.ribosome.xyz/static_files/download_structure?struct_id={rcsb_id}'}.")
-        # import requests
-        # with open(default_path, 'wb') as outfile:
-            # outfile.write(requests.get(
-            #     f'https://api.ribosome.xyz/static_files/download_structure?struct_id={rcsb_id}').content)
 
-    target = gemmi.cif.read_file(default_path)
-    block = target.sole_block()
-    model = gemmi.read_structure(default_path)[0]
+# ※ ---------------------------- 23SrRNA PTC residue locations ---------------------------- ※
 
-    STRAND = None
-    SEQ = None
+def get_23SrRNA_strandseq(rcsb_id:str, custom_path=None)->Tuple[str,str]:
+    return get_strandseq_by_nomclass(rcsb_id, "23SrRNA", custom_path)
 
-    # Locate the chain of 23SrRNA class
-    for (strand, nomclass) in zip(
-        block.find_loop('_ribosome_nomenclature.entity_poly.pdbx_strand_id'),
-        block.find_loop('_ribosome_nomenclature.polymer_class')
-    ):
-        if nomclass == '23SrRNA':
-            STRAND = strand
-            break
-
-    # Now find sequence of this 23SrRNA
-    for (chain_id, one_letter_code) in zip(
-        block.find_loop('_entity_poly.pdbx_strand_id'),
-        block.find_loop('_entity_poly.pdbx_seq_one_letter_code')
-    ):
-        # X-RAY structures have 'dual' chains. Split on comma to check both.
-        if STRAND in chain_id.split(','):
-            SEQ = str(one_letter_code).strip(";").strip("\n")
-
-    if SEQ == None:
-        print("Could not locate 23SrRNA sequence in {} CIF file".format(rcsb_id))
-
-    alignment = pairwise2.align.globalxx(
-        RNA_3J7Z_23S, SEQ, one_alignment_only=True)
-    src_aln = alignment[0].seqA
-    tgt_aln = alignment[0].seqB
-
-    aln_ids = []
-    tgt_ids = []
-
-    for src_resid in PTC_SEQ_IDS:
-        aln_ids.append(forwards_match(src_aln, src_resid))
-    aln_ids = list(filter(lambda x: x != None, aln_ids))
-
-    for aln_resid in aln_ids:
-        if tgt_aln[aln_resid] == '-':
-            continue
-        tgt_ids.append(backwards_match(tgt_aln, aln_resid))
-
-    guesses_residues     = [model[STRAND][ix] for ix in tgt_ids]
-    guesses_alphaC_posns = [list(model[STRAND][ix][0].pos) for ix in tgt_ids]
-
-    print(guesses_residues)
-    print(guesses_alphaC_posns)
-    return (guesses_residues[0], guesses_alphaC_posns[0], STRAND)
-
-def process_target(rcsb_id: str, result_as: str, custom_path=None):
-    default_path = f"{rcsb_id.upper()}.cif" if custom_path == None else custom_path
-    # if not pathlib.Path(default_path).is_file():
-    #     print(
-    #         f"Could not locate file {default_path} in the current directory. Downloading via {f'https://api.ribosome.xyz/static_files/download_structure?struct_id={rcsb_id}'}.")
-    #     import requests
-    #     with open(default_path, 'wb') as outfile:
-    #         outfile.write(requests.get(
-    #             f'https://api.ribosome.xyz/static_files/download_structure?struct_id={rcsb_id}').content)
-
-    target = gemmi.cif.read_file(default_path)
-    block  = target.sole_block()
-    model  = gemmi.read_structure(default_path)[0]
-
-    STRAND = None
-    SEQ    = None
-
-    # Locate the chain of 23SrRNA class
-    for (strand, nomclass) in zip(
-        block.find_loop('_ribosome_nomenclature.entity_poly.pdbx_strand_id'),
-        block.find_loop('_ribosome_nomenclature.polymer_class')
-    ):
-        if nomclass == '23SrRNA':
-            STRAND = strand
-            break
-
-    # Now find sequence of this 23SrRNA
-    for (chain_id, one_letter_code) in zip(
-        block.find_loop('_entity_poly.pdbx_strand_id'),
-        block.find_loop('_entity_poly.pdbx_seq_one_letter_code')
-    ):
-        # X-RAY structures have 'dual' chains. Split on comma to check both.
-        if STRAND in chain_id.split(','):
-            SEQ = str(one_letter_code).strip(";").strip("\n")
-
-    if SEQ == None:
-        print("Could not locate 23SrRNA sequence in {} CIF file".format(rcsb_id))
-
-    alignment = pairwise2.align.globalxx(RNA_3J7Z_23S, SEQ, one_alignment_only=True)
-
-    src_aln = alignment[0].seqA
-    tgt_aln = alignment[0].seqB
-
-    aln_ids = []
-    tgt_ids = []
-
-    for src_resid in PTC_SEQ_IDS:
-        aln_ids.append(util__forwards_match(src_aln, src_resid))
-
-    aln_ids = list(filter(lambda x: x != None, aln_ids))
-
-    for aln_resid in aln_ids:
-        if tgt_aln[aln_resid] == '-':
-            continue
-        tgt_ids.append(util__backwards_match(tgt_aln, aln_resid))
-
-    if result_as == "residue":
-        return [model[STRAND][ix] for ix in tgt_ids]
-    elif result_as == "position":
-        print(
-            "The alpha-carbon of each residue is taken to be its position for simplicity.")
-        return [list(model[STRAND][ix][0].pos) for ix in tgt_ids]
-
-def get_23SrRNA(rcsb_id:str, custom_path=None)->Tuple[str,str]:
-    return get_strand_by_nomclass(rcsb_id, "23SrRNA", custom_path)
-
-def get_strand_by_nomclass(rcsb_id: str,nomenclature_class:str, custom_path=None)->Tuple[str,str]:
+def get_strandseq_by_nomclass(rcsb_id: str,nomenclature_class:str, custom_path=None)->Tuple[str,str]:
     default_path = f"{rcsb_id.upper()}_modified.cif" if custom_path == None else custom_path
     target       = gemmi.cif.read_file(default_path)
     block        = target.sole_block()
@@ -290,11 +166,10 @@ class RibovisionAlignment:
 
 if args.ribovision:
 
-    print("\t\tMODE: Ribovision")
 
     rcsb_id                       = argdict["targets"]
     struct_profile                = open_structure(rcsb_id, 'json')
-    [chain_ida,strand_target]     = process_via_ribovision(
+    [chain_ida,strand_target]     = get_23SrRNA(
                rcsb_id,
                "residue",
                custom_path = os.path.join(RIBETL_DATA, rcsb_id.upper(), f"{rcsb_id.upper()}_modified.cif")
