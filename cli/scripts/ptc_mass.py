@@ -44,7 +44,6 @@ DORIS_ET_AL = {
         "site_6": [2400, 2401, 2402, 2403, 2404, 2405,2406,2407],
         "site_8": [2811, 2812, 2813, 2814, 2815, 2816, 2817, 2818],
         "site_9": [2941, 2942, 2943, 2944, 2945, 2946, 2947, 2948, 2949,2950,2951,2952,2953]
-
     },
     'bact':{
         "site_6": [2059, 2060,2061,2062,2063,2064,2065,2066],
@@ -63,10 +62,10 @@ parser = argparse.ArgumentParser(
 parser.add_argument("-t", "--targets", type=str, required=False)
 parser.add_argument("-m", "--mode", type=str,  choices=['position', 'residue'], nargs='?', default='position',
                     help="Display the position of the PTC residue, or the residue itself. Default: position")
-parser.add_argument("--display_all",   action='store_true')
-parser.add_argument("--generate",   action='store_true')
-parser.add_argument("--ribovision",   action='store_true')
-parser.add_argument("--batch",   type=int, required=False)
+parser.add_argument("--display_all", action='store_true')
+parser.add_argument("--generate"   , action='store_true')
+parser.add_argument("--ribovision" , action='store_true')
+parser.add_argument("--batch"      , type  =int, required=False       )
 
 args    = parser .parse_args()
 argdict = vars(parser.parse_args())
@@ -80,8 +79,8 @@ bacteria_structs = line.split(',')
 def util__backwards_match(alntgt: str, resid: int):
     """Returns the target-sequence index of a residue in the (aligned) target sequence"""
     if resid > len(alntgt):
-        exit(IndexError(
-            f"Passed residue with invalid index ({resid}) to back-match to target.Seqlen:{len(alntgt)}"))
+        raise IndexError(f"Passed residue with invalid index ({resid}) to back-match to target.Seqlen:{len(alntgt)}")
+
     counter_proper = 0
     for i, char in enumerate(alntgt):
         if i == resid:
@@ -93,13 +92,11 @@ def util__backwards_match(alntgt: str, resid: int):
 
 def util__forwards_match(string: str, resid: int):
     """Returns the index of a source-sequence residue in the (aligned) source sequence."""
+    if resid >= len(string):
+        raise IndexError("Requested residue index({resid}) exceeds aligned(likely already gaps-extended) sequence. Something went wrong.")
 
     count_proper = 0
     for alignment_indx, char in enumerate(string):
-        if resid >= len(string):
-            print("Requested residue index exceeds aligned(likely already gaps-extended) sequence. Something went wrong.")
-            exit(-1)
-
         if count_proper == resid:
             return alignment_indx
         if char == '-':
@@ -166,6 +163,7 @@ def process_target_to_tuple(rcsb_id: str, result_as: str, custom_path=None):
 
     guesses_residues     = [model[STRAND][ix] for ix in tgt_ids]
     guesses_alphaC_posns = [list(model[STRAND][ix][0].pos) for ix in tgt_ids]
+
     print(guesses_residues)
     print(guesses_alphaC_posns)
     return (guesses_residues[0], guesses_alphaC_posns[0], STRAND)
@@ -233,27 +231,28 @@ def process_target(rcsb_id: str, result_as: str, custom_path=None):
             "The alpha-carbon of each residue is taken to be its position for simplicity.")
         return [list(model[STRAND][ix][0].pos) for ix in tgt_ids]
 
+def get_23SrRNA(rcsb_id:str, custom_path=None)->Tuple[str,str]:
+    return get_strand_by_nomclass(rcsb_id, "23SrRNA", custom_path)
 
-
-def process_via_ribovision(rcsb_id: str, result_as: str, custom_path=None)->Tuple[str,str]:
+def get_strand_by_nomclass(rcsb_id: str,nomenclature_class:str, custom_path=None)->Tuple[str,str]:
     default_path = f"{rcsb_id.upper()}_modified.cif" if custom_path == None else custom_path
-    target = gemmi.cif.read_file(default_path)
-    block  = target.sole_block()
-    model  = gemmi.read_structure(default_path)[0]
+    target       = gemmi.cif.read_file(default_path)
+    block        = target.sole_block()
+    model        = gemmi.read_structure(default_path)[0]
 
-    STRAND = None
-    SEQ    = None
+    STRAND       = None
+    SEQ          = None
 
-    # Locate the chain of 23SrRNA class
+    # Locate the chain of given nom. class
     for (strand, nomclass) in zip(
         block.find_loop('_ribosome_nomenclature.entity_poly.pdbx_strand_id'),
         block.find_loop('_ribosome_nomenclature.polymer_class')
     ):
-        if nomclass == '23SrRNA':
+        if nomclass == nomenclature_class:
             STRAND = strand
             break
 
-    # Now find sequence of this 23SrRNA
+    # Now find sequence of this class
     for (chain_id, one_letter_code) in zip(
         block.find_loop('_entity_poly.pdbx_strand_id'),
         block.find_loop('_entity_poly.pdbx_seq_one_letter_code')
@@ -263,9 +262,9 @@ def process_via_ribovision(rcsb_id: str, result_as: str, custom_path=None)->Tupl
             SEQ = str(one_letter_code).strip(";").strip("\n")
 
     if SEQ == None:
-        print("Could not locate 23SrRNA sequence in {} CIF file".format(rcsb_id))
+        print("Could not locate {} sequence in {} CIF file".format(nomenclature_class,rcsb_id))
 
-    print("Located 23SrRNA sequence in {} CIF file. (Chain {})".format(rcsb_id, STRAND))
+    print("Located {} sequence in {} CIF file. (Chain {})".format(nomenclature_class,rcsb_id, STRAND))
     return (STRAND, SEQ)
 
 
@@ -274,6 +273,7 @@ class RibovisionAlignment:
     'annotations', 'dbxrefs', 'description', 'features', 'format', 'id', 'letter_annotations', 'lower', 
     'name', 'reverse_complement', 'seq', 'translate', 'upper'
     """
+
     def __init__(self) -> None:
         self.fasta_seqs:List[SeqIO.SeqRecord] = SeqIO.parse(open('ribovision-3j7z.fas'),'fasta')
         pass
@@ -281,7 +281,6 @@ class RibovisionAlignment:
     def find_aln_by_species(self, species_name: str)->SeqIO.SeqRecord:
         top_score = 0
         seq       = None
-
         for fasta in self.fasta_seqs: 
             rat =  process.fuzz.ratio(species_name, fasta.description)
             if rat > top_score:
@@ -289,27 +288,23 @@ class RibovisionAlignment:
                 seq       = fasta
         return seq
 
-
 if args.ribovision:
+
     print("\t\tMODE: Ribovision")
 
-    rcsb_id         = argdict["targets"]
-
-    struct_profile    = open_structure(rcsb_id, 'json')
-    [chain_ida,strand_target]     = process_via_ribovision(rcsb_id, "residue", custom_path=os.path.join(RIBETL_DATA, rcsb_id.upper(), f"{rcsb_id.upper()}_modified.cif"))
-    fasta_sequences   = SeqIO.parse(open('ribovision-3j7z.fas'),'fasta')
-    aln               = RibovisionAlignment()
-    strand_ribovision:str = aln.find_aln_by_species("Escherichia").seq
+    rcsb_id                       = argdict["targets"]
+    struct_profile                = open_structure(rcsb_id, 'json')
+    [chain_ida,strand_target]     = process_via_ribovision(
+               rcsb_id,
+               "residue",
+               custom_path = os.path.join(RIBETL_DATA, rcsb_id.upper(), f"{rcsb_id.upper()}_modified.cif")
+           )
+    fasta_sequences               = SeqIO.parse(open('ribovision-5afi.fas'),'fasta')
+    aln                           = RibovisionAlignment()
+    strand_ribovision:str         = aln.find_aln_by_species("Escherichia").seq
 
     # + Verify whether it is better to post-ribovision align to a sequence with gaps, or delete the gaps from ribovision aln first.
     # + Or perhaps it is better to align the target rna to the whole bacterial[or euk] ribovision array 
-
-     
-
-    print(len(strand_target), len(strand_ribovision))
-    strand_target.replace('\\n',''    )
-    strand_ribovision.replace('\\n',''    )
-    print(len(strand_target), len(strand_ribovision))
 
     alignment = pairwise2.align.globalxx(strand_target,strand_ribovision)
 
@@ -319,26 +314,25 @@ if args.ribovision:
     aln_ids = []
     tgt_ids = []
 
-    for src_resid in PTC_SEQ_IDS:
+    for src_resid in DORIS_ET_AL['bact']['site_6']:
         aln_ids.append(util__forwards_match(src_aln, src_resid))
 
     aln_ids = list(filter(lambda x: x != None, aln_ids))
 
-    # for aln_resid in aln_ids:
-    #     if tgt_aln[aln_resid] == '-':
-    #         continue
-    #     tgt_ids.append(util__backwards_match(tgt_aln, aln_resid))
+    for aln_resid in aln_ids:
+        if tgt_aln[aln_resid] == '-': 
+            continue
+        tgt_ids.append(util__backwards_match(tgt_aln, aln_resid))
+    
+    print(tgt_ids)
 
     # if result_as == "residue":
     #     return [model[STRAND][ix] for ix in tgt_ids]
 
     # elif result_as == "position":
-    #     print(
-    #         "The alpha-carbon of each residue is taken to be its position for simplicity.")
+    #     print("The alpha-carbon of each residue is taken to be its position for simplicity.")
     #     return [list(model[STRAND][ix][0].pos) for ix in tgt_ids]
 
-
-    # ※ RIBOVISION PART END ※
     exit(0)
 
 if args.generate:
@@ -400,16 +394,19 @@ if args.generate:
 
 
 if "targets" in argdict.keys():
-    argdict["targets"] = [s.strip().upper()
-                          for s in argdict["targets"].split(",")]
+    argdict["targets"] = [s.strip().upper() for s in argdict["targets"].split(",")]
+
     if len(argdict) > 50:
         print("Please don't overload our servers. Paid out of pocket!:) \nInstead, get in touch for collaboration: rtkushner@gmail.com!")
         exit(1)
+
     for target in argdict["targets"]:
+
         if not args.display_all:
             target_ptc = process_target(target, args.mode)
             print("[\033[94m{}\033[0m] Approximate PTC position(1 of {} residues): \033[91m{}\033[0m".format(
                 target, len(target_ptc), target_ptc[0]))
+
         else:
             print("[\033[94m{}\033[0m] PTC atom positions: ".format(target))
             for residue in process_target(target, args.mode):
