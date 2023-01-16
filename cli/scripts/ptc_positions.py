@@ -55,16 +55,14 @@ DORIS_ET_AL = {
 RNA_3J7Z_23S = "GGUUAAGCGACUAAGCGUACACGGUGGAUGCCCUGGCAGUCAGAGGCGAUGAAGGACGUGCUAAUCUGCGAUAAGCGUCGGUAAGGUGAUAUGAACCGUUAUAACCGGCGAUUUCCGAAUGGGGAAACCCAGUGUGUUUCGACACACUAUCAUUAACUGAAUCCAUAGGUUAAUGAGGCGAACCGGGGGAACUGAAACAUCUAAGUACCCCGAGGAAAAGAAAUCAACCGAGAUUCCCCCAGUAGCGGCGAGCGAACGGGGAGCAGCCCAGAGCCUGAAUCAGUGUGUGUGUUAGUGGAAGCGUCUGGAAAGGCGCGCGAUACAGGGUGACAGCCCCGUACACAAAAAUGCACAUGCUGUGAGCUCGAUGAGUAGGGCGGGACACGUGGUAUCCUGUCUGAAUAUGGGGGGACCAUCCUCCAAGGCUAAAUACUCCUGACUGACCGAUAGUGAACCAGUACCGUGAGGGAAAGGCGAAAAGAACCCCGGCGAGGGGAGUGAAAAAGAACCUGAAACCGUGUACGUACAAGCAGUGGGAGCACGCUUAGGCGUGUGACUGCGUACCUUUUGUAUAAUGGGUCAGCGACUUAUAUUCUGUAGCAAGGUUAACCGAAUAGGGGAGCCGAAGGGAAACCGAGUCUUAACUGGGCGUUAAGUUGCAGGGUAUAGACCCGAAACCCGGUGAUCUAGCCAUGGGCAGGUUGAAGGUUGGGUAACACUAACUGGAGGACCGAACCGACUAAUGUUGAAAAAUUAGCGGAUGACUUGUGGCUGGGGGUGAAAGGCCAAUCAAACCGGGAGAUAGCUGGUUCUCCCCGAAAGCUAUUUAGGUAGCGCCUCGUGAAUUCAUCUCCGGGGGUAGAGCACUGUUUCGGCAAGGGGGUCAUCCCGACUUACCAACCCGAUGCAAACUGCGAAUACCGGAGAAUGUUAUCACGGGAGACACACGGCGGGUGCUAACGUCCGUCGUGAAGAGGGAAACAACCCAGACCGCCAGCUAAGGUCCCAAAGUCAUGGUUAAGUGGGAAACGAUGUGGGAAGGCCCAGACAGCCAGGAUGUUGGCUUAGAAGCAGCCAUCAUUUAAAGAAAGCGUAAUAGCUCACUGGUCGAGUCGGCCUGCGCGGAAGAUGUAACGGGGCUAAACCAUGCACCGAAGCUGCGGCAGCGACGCUUAUGCGUUGUUGGGUAGGGGAGCGUUCUGUAAGCCUGCGAAGGUGUGCUGUGAGGCAUGCUGGAGGUAUCAGAAGUGCGAAUGCUGACAUAAGUAACGAUAAAGCGGGUGAAAAGCCCGCUCGCCGGAAGACCAAGGGUUCCUGUCCAACGUUAAUCGGGGCAGGGUGAGUCGACCCCUAAGGCGAGGCCGAAAGGCGUAGUCGAUGGGAAACAGGUUAAUAUUCCUGUACUUGGUGUUACUGCGAAGGGGGGACGGAGAAGGCUAUGUUGGCCGGGCGACGGUUGUCCCGGUUUAAGCGUGUAGGCUGGUUUUCCAGGCAAAUCCGGAAAAUCAAGGCUGAGGCGUGAUGACGAGGCACUACGGUGCUGAAGCAACAAAUGCCCUGCUUCCAGGAAAAGCCUCUAAGCAUCAGGUAACAUCAAAUCGUACCCCAAACCGACACAGGUGGUCAGGUAGAGAAUACCAAGGCGCUUGAGAGAACUCGGGUGAAGGAACUAGGCAAAAUGGUGCCGUAACUUCGGGAGAAGGCACGCUGAUAUGUAGGUGAGGUCCCUCGCGGAUGGAGCUGAAAUCAGUCGAAGAUACCAGCUGGCUGCAACUGUUUAUUAAAAACACAGCACUGUGCAAACACGAAAGUGGACGUAUACGGUGUGACGCCUGCCCGGUGCCGGAAGGUUAAUUGAUGGGGUUAGCGCAAGCGAAGCUCUUGAUCGAAGCCCCGGUAAACGGCGGCCGUAACUAUAACGGUCCUAAGGUAGCGAAAUUCCUUGUCGGGUAAGUUCCGACCUGCACGAAUGGCGUAAUGAUGGCCAGGCUGUCUCCACCCGAGACUCAGUGAAAUUGAACUCGCUGUGAAGAUGCAGUGUACCCGCGGCAAGACGGAAAGACCCCGUGAACCUUUACUAUAGCUUGACACUGAACAUUGAGCCUUGAUGUGUAGGAUAGGUGGGAGGCUUUGAAGUGUGGACGCCAGUCUGCAUGGAGCCGACCUUGAAAUACCACCCUUUAAUGUUUGAUGUUCUAACGUUGACCCGUAAUCCGGGUUGCGGACAGUGUCUGGUGGGUAGUUUGACUGGGGCGGUCUCCUCCUAAAGAGUAACGGAGGAGCACGAAGGUUGGCUAAUCCUGGUCGGACAUCAGGAGGUUAGUGCAAUGGCAUAAGCCAGCUUGACUGCGAGCGUGACGGCGCGAGCAGGUGCGAAAGCAGGUCAUAGUGAUCCGGUGGUUCUGAAUGGAAGGGCCAUCGCUCAACGGAUAAAAGGUACUCCGGGGAUAACAGGCUGAUACCGCCCAAGAGUUCAUAUCGACGGCGGUGUUUGGCACCUCGAUGUCGGCUCAUCACAUCCUGGGGCUGAAGUAGGUCCCAAGGGUAUGGCUGUUCGCCAUUUAAAGUGGUACGCGAGCUGGGUUUAGAACGUCGUGAGACAGUUCGGUCCCUAUCUGCCGUGGGCGCUGGAGAACUGAGGGGGGCUGCUCCUAGUACGAGAGGACCGGAGUGGACGCAUCACUGGUGUUCGGGUUGUCAUGCCAAUGGCACUGCCCGGUAGCUAAAUGCGGAAGAGAUAAGUGCUGAAAGCAUCUAAGCACGAAACUUGCCCCGAGAUGAGUUCUCCCUGACCCUUUAAGGGUCCUGAAGGAACGUUGAAGACGACGACGUUGAUAGGCCGGGUGUGUAAGCGCAGCGAUGCGUUGAGCUAACCGGUACUAAUGAACCGUGAGGCUUAACCU"
 # -------------------------------------------------------------------------------------------|
 
-parser = argparse.ArgumentParser(
-    description='CLI for locating PTC residues of 23SrRNA in a given prokaryotic PDB file')
-parser.add_argument("-t", "--targets", type=str, required=True)
-parser.add_argument("-m", "--mode", type=str,  choices=['position', 'residue'], nargs='?', default='position',
-                    help="Display the position of the PTC residue, or the residue itself. Default: position")
-parser.add_argument("--display_all",   action='store_true')
-parser.add_argument("--generate",   action='store_true')
-parser.add_argument("--batch",   type=int, required=False)
+parser = argparse.ArgumentParser(description='CLI for locating PTC residues of 23SrRNA in a given prokaryotic PDB file')
+parser.add_argument("-t","--targets", type=str, required=True)
+parser.add_argument("-m","--mode",type=str,  choices=['position', 'residue'], nargs='?', default='position',help="Display the position of the PTC residue, or the residue itself. Default: position")
+parser.add_argument("--display_all",action='store_true')
+parser.add_argument("--generate",action='store_true')
+parser.add_argument("--batch",type=int, required=False)
 
-args    = parser .parse_args()
+args    = parser.parse_args()
 argdict = vars(parser.parse_args())
 
 if "targets" in argdict.keys():
@@ -73,7 +71,6 @@ if "targets" in argdict.keys():
     if len(argdict) > 50:
         print("Please don't overload our servers. Paid out of pocket!:) \nInstead, get in touch for collaboration: rtkushner@gmail.com!")
         exit(1)
-
 
 def backwards_match(alntgt: str, resid: int):
     """Returns the target-sequence index of a residue in the (aligned) target sequence"""
@@ -88,7 +85,6 @@ def backwards_match(alntgt: str, resid: int):
             continue
         else:
             counter_proper += 1
-
 
 def forwards_match(alnsrc: str, resid: int):
     """Returns the index of a source-sequence residue in the (aligned) source sequence."""
@@ -226,21 +222,20 @@ def process_target(rcsb_id: str, result_as: str, custom_path=None):
             "The alpha-carbon of each residue is taken to be its position for simplicity.")
         return [list(model[STRAND][ix][0].pos) for ix in tgt_ids]
 
-
 if args.generate:
-    f = open('rcsb_pdb_ids_20230106032038.txt', 'r')
+    f    = open('rcsb_pdb_ids_20230106032038.txt', 'r')
     line = f.readline()
     f.close()
     bacteria_structs = line.split(',')
+    struct_ids       = []
+    parent_chain     = []
+    residue_name     = []
+    residue_seqid    = []
+    residue_x        = []
+    residue_y        = []
+    residue_z        = []
+    i                = 0
 
-    struct_ids    = []
-    parent_chain  = []
-    residue_name  = []
-    residue_seqid = []
-    residue_x     = []
-    residue_y     = []
-    residue_z     = []
-    i = 0
     for struct in bacteria_structs[args.batch:args.batch+100]:
         struct = str.upper(struct)
         # get the ptc guess
@@ -283,8 +278,6 @@ if args.generate:
     # save the dataframe to a csv
     df.to_csv(f"ptc_100xbatch={args.batch}.csv")
     exit(1)
-
-
 
 for target in argdict["targets"]:
     if not args.display_all:

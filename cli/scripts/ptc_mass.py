@@ -111,7 +111,8 @@ def get_23SrRNA_strandseq(rcsb_id:str, custom_path=None)->Tuple[str,str]:
     return get_strandseq_by_nomclass(rcsb_id, "23SrRNA", custom_path)
 
 def get_strandseq_by_nomclass(rcsb_id: str,nomenclature_class:str, custom_path=None)->Tuple[str,str]:
-    default_path = f"{rcsb_id.upper()}_modified.cif" if custom_path == None else custom_path
+
+    default_path = f"{rcsb_id.upper()}_modified.cif" if custom_path = = None else custom_path
     target       = gemmi.cif.read_file(default_path)
     block        = target.sole_block()
     model        = gemmi.read_structure(default_path)[0]
@@ -166,17 +167,33 @@ class RibovisionAlignment:
 
 if args.ribovision:
 
+    # choose a structurn
+    # obtain its [PDBID].23S sequence (from modified cif) 
+    # | 
+    # .- - - - -[ obtain ribovision alignment (how best to do this?
+    # |                                             - what model to use for reference? ( Doris et al don't provide a pdb id )
+    # |                                             - if using a hand-picked one -- how to choose?(considerations: stages of assembly)
+    # |                                             - align the given sequence on top of all bacterial MSA (best guess i have now)
+    # | 
+    # |                                             
+    # |          
+    # |
+    # .- - - - -[ extract the residues ( 
+    # |                                             - the ones specified in DORIS (※ multiple sites) from the alignment naively?(unlikely) ]
+    # |                                             - extract 3 sites (6,8,9) separately and triangulate between them in Euc. space, take center as PTC?
+    # |
+
 
     rcsb_id                       = argdict["targets"]
     struct_profile                = open_structure(rcsb_id, 'json')
-    [chain_ida,strand_target]     = get_23SrRNA(
+    [chain_ida,strand_target]     = get_23SrRNA_strandseq(
                rcsb_id,
-               "residue",
                custom_path = os.path.join(RIBETL_DATA, rcsb_id.upper(), f"{rcsb_id.upper()}_modified.cif")
            )
     fasta_sequences               = SeqIO.parse(open('ribovision-5afi.fas'),'fasta')
     aln                           = RibovisionAlignment()
     strand_ribovision:str         = aln.find_aln_by_species("Escherichia").seq
+
 
     # + Verify whether it is better to post-ribovision align to a sequence with gaps, or delete the gaps from ribovision aln first.
     # + Or perhaps it is better to align the target rna to the whole bacterial[or euk] ribovision array 
