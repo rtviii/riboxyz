@@ -10,7 +10,11 @@
 
 # Distribute freely.
 import os
+from Bio import AlignIO
+from Bio import Alphabet
+from Bio import SeqRecord
 from pprint import pprint
+import subprocess
 from typing import List, Tuple
 from fuzzywuzzy import process
 import re
@@ -108,11 +112,11 @@ def util__forwards_match(string: str, resid: int):
 # ※ ---------------------------- 23SrRNA PTC residue locations ---------------------------- ※
 
 def get_23SrRNA_strandseq(rcsb_id:str, custom_path=None)->Tuple[str,str]:
-    return get_strandseq_by_nomclass(rcsb_id, "23SrRNA", custom_path)
+    return get_one_letter_code_can_by_nomclass(rcsb_id, "23SrRNA", custom_path)
 
-def get_strandseq_by_nomclass(rcsb_id: str,nomenclature_class:str, custom_path=None)->Tuple[str,str]:
+def get_one_letter_code_can_by_nomclass(rcsb_id: str,nomenclature_class:str, custom_path=None)->Tuple[str,str]:
 
-    default_path = f"{rcsb_id.upper()}_modified.cif" if custom_path = = None else custom_path
+    default_path = f"{rcsb_id.upper()}_modified.cif" if custom_path == None else custom_path
     target       = gemmi.cif.read_file(default_path)
     block        = target.sole_block()
     model        = gemmi.read_structure(default_path)[0]
@@ -132,7 +136,7 @@ def get_strandseq_by_nomclass(rcsb_id: str,nomenclature_class:str, custom_path=N
     # Now find sequence of this class
     for (chain_id, one_letter_code) in zip(
         block.find_loop('_entity_poly.pdbx_strand_id'),
-        block.find_loop('_entity_poly.pdbx_seq_one_letter_code')
+        block.find_loop('_entity_poly.pdbx_seq_one_letter_code_can')
     ):
         # X-RAY structures have 'dual' chains. Split on comma to check both.
         if STRAND in chain_id.split(','):
@@ -165,7 +169,26 @@ class RibovisionAlignment:
                 seq       = fasta
         return seq
 
+
+
+
+
+
+def seq_to_fasta(_seq:str, outfile:str):
+    SeqIO.write(SeqRecord.SeqRecord(_seq),outfile,'fasta')
+    
+
+
+
+def muscle_combine_profile(msa_path1:str , msa_path2:str, out_filepath:str):
+    """Combine two MSA-profiles into a single one. Used here to "append" a target sequence two the ribovision alignment. """
+    cmd     = ['muscle3.8',  '-profile', '-in1', msa_path2, '-in2', msa_path2, '-out', out_filepath]
+    aligner = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                              
+
+
 if args.ribovision:
+
 
     # choose a structurn
     # TODO: fit given sequence against the ribovision alignment via mafft and triangulate between sites 6,8,9 
@@ -284,6 +307,8 @@ if args.generate:
     # save the dataframe to a csv
     df.to_csv(f"ptc_100xbatch={args.batch}.csv")
     exit(1)
+
+
 
 
 if "targets" in argdict.keys():
