@@ -10,8 +10,7 @@
 
 # Distribute freely.
 import os
-from Bio import AlignIO
-from Bio import Alphabet
+import sys
 from Bio import SeqRecord
 from pprint import pprint
 import subprocess
@@ -20,18 +19,9 @@ from fuzzywuzzy import process
 import re
 from extract_bsites import open_structure
 import pandas
-try:
-    from Bio import pairwise2
-    from Bio import SeqIO
-except ImportError:
-    print("Please install Biopython to use this script: pip install biopython")
-    exit(1)
-try:
-    import gemmi
-except:
-    print("Please install gemmi to use this script: pip install gemmi")
-    exit(1)
-import pathlib
+from Bio import pairwise2
+from Bio import SeqIO
+import gemmi
 import argparse
 
 RIBETL_DATA = os.environ.get('RIBETL_DATA')
@@ -40,38 +30,35 @@ RIBETL_DATA = os.environ.get('RIBETL_DATA')
 #                                                                                           |
 # List of conserved nucleotide sequences on 23s-28s can be found here: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4574749/pdf/1719.pdf
 # Some of the PTC residues in bacterial 23SrRNA                                             |
-PTC_SEQ_IDS = [2445, 2446, 2447, 2448, 2449, 2450, 2451, 2452]  # |
 
 # https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4574749/pdf/1719.pdf
 DORIS_ET_AL = {
-    "euk":{
-        "site_6": [2400, 2401, 2402, 2403, 2404, 2405,2406,2407],
+    "euk": {
+        "site_6": [2400, 2401, 2402, 2403, 2404, 2405, 2406, 2407],
         "site_8": [2811, 2812, 2813, 2814, 2815, 2816, 2817, 2818],
-        "site_9": [2941, 2942, 2943, 2944, 2945, 2946, 2947, 2948, 2949,2950,2951,2952,2953]
+        "site_9": [2941, 2942, 2943, 2944, 2945, 2946, 2947, 2948, 2949, 2950, 2951, 2952, 2953]
     },
-    'bact':{
-        "site_6": [2059, 2060,2061,2062,2063,2064,2065,2066],
-        "site_8": [2446,2447,2448,2449,2450,2451,2452,2453],
-        "site_9": [2576,2577,2578,2579,2580,2581,2582,2583,2584,2585,2586,2587,2588]
+    'bact': {
+        "site_6": [2059, 2060, 2061, 2062, 2063, 2064, 2065, 2066],
+        "site_8": [2446, 2447, 2448, 2449, 2450, 2451, 2452, 2453],
+        "site_9": [2576, 2577, 2578, 2579, 2580, 2581, 2582, 2583, 2584, 2585, 2586, 2587, 2588]
     }
 }
 
-# As per PDB 3J7Z ( https://www.rcsb.org/structure/3j7z )                                   |
-# ECOLI23SRRNA = "GGUUAAGCGACUAAGCGUACACGGUGGAUGCCCUGGCAGUCAGAGGCGAUGAAGGACGUGCUAAUCUGCGAUAAGCGUCGGUAAGGUGAUAUGAACCGUUAUAACCGGCGAUUUCCGAAUGGGGAAACCCAGUGUGUUUCGACACACUAUCAUUAACUGAAUCCAUAGGUUAAUGAGGCGAACCGGGGGAACUGAAACAUCUAAGUACCCCGAGGAAAAGAAAUCAACCGAGAUUCCCCCAGUAGCGGCGAGCGAACGGGGAGCAGCCCAGAGCCUGAAUCAGUGUGUGUGUUAGUGGAAGCGUCUGGAAAGGCGCGCGAUACAGGGUGACAGCCCCGUACACAAAAAUGCACAUGCUGUGAGCUCGAUGAGUAGGGCGGGACACGUGGUAUCCUGUCUGAAUAUGGGGGGACCAUCCUCCAAGGCUAAAUACUCCUGACUGACCGAUAGUGAACCAGUACCGUGAGGGAAAGGCGAAAAGAACCCCGGCGAGGGGAGUGAAAAAGAACCUGAAACCGUGUACGUACAAGCAGUGGGAGCACGCUUAGGCGUGUGACUGCGUACCUUUUGUAUAAUGGGUCAGCGACUUAUAUUCUGUAGCAAGGUUAACCGAAUAGGGGAGCCGAAGGGAAACCGAGUCUUAACUGGGCGUUAAGUUGCAGGGUAUAGACCCGAAACCCGGUGAUCUAGCCAUGGGCAGGUUGAAGGUUGGGUAACACUAACUGGAGGACCGAACCGACUAAUGUUGAAAAAUUAGCGGAUGACUUGUGGCUGGGGGUGAAAGGCCAAUCAAACCGGGAGAUAGCUGGUUCUCCCCGAAAGCUAUUUAGGUAGCGCCUCGUGAAUUCAUCUCCGGGGGUAGAGCACUGUUUCGGCAAGGGGGUCAUCCCGACUUACCAACCCGAUGCAAACUGCGAAUACCGGAGAAUGUUAUCACGGGAGACACACGGCGGGUGCUAACGUCCGUCGUGAAGAGGGAAACAACCCAGACCGCCAGCUAAGGUCCCAAAGUCAUGGUUAAGUGGGAAACGAUGUGGGAAGGCCCAGACAGCCAGGAUGUUGGCUUAGAAGCAGCCAUCAUUUAAAGAAAGCGUAAUAGCUCACUGGUCGAGUCGGCCUGCGCGGAAGAUGUAACGGGGCUAAACCAUGCACCGAAGCUGCGGCAGCGACGCUUAUGCGUUGUUGGGUAGGGGAGCGUUCUGUAAGCCUGCGAAGGUGUGCUGUGAGGCAUGCUGGAGGUAUCAGAAGUGCGAAUGCUGACAUAAGUAACGAUAAAGCGGGUGAAAAGCCCGCUCGCCGGAAGACCAAGGGUUCCUGUCCAACGUUAAUCGGGGCAGGGUGAGUCGACCCCUAAGGCGAGGCCGAAAGGCGUAGUCGAUGGGAAACAGGUUAAUAUUCCUGUACUUGGUGUUACUGCGAAGGGGGGACGGAGAAGGCUAUGUUGGCCGGGCGACGGUUGUCCCGGUUUAAGCGUGUAGGCUGGUUUUCCAGGCAAAUCCGGAAAAUCAAGGCUGAGGCGUGAUGACGAGGCACUACGGUGCUGAAGCAACAAAUGCCCUGCUUCCAGGAAAAGCCUCUAAGCAUCAGGUAACAUCAAAUCGUACCCCAAACCGACACAGGUGGUCAGGUAGAGAAUACCAAGGCGCUUGAGAGAACUCGGGUGAAGGAACUAGGCAAAAUGGUGCCGUAACUUCGGGAGAAGGCACGCUGAUAUGUAGGUGAGGUCCCUCGCGGAUGGAGCUGAAAUCAGUCGAAGAUACCAGCUGGCUGCAACUGUUUAUUAAAAACACAGCACUGUGCAAACACGAAAGUGGACGUAUACGGUGUGACGCCUGCCCGGUGCCGGAAGGUUAAUUGAUGGGGUUAGCGCAAGCGAAGCUCUUGAUCGAAGCCCCGGUAAACGGCGGCCGUAACUAUAACGGUCCUAAGGUAGCGAAAUUCCUUGUCGGGUAAGUUCCGACCUGCACGAAUGGCGUAAUGAUGGCCAGGCUGUCUCCACCCGAGACUCAGUGAAAUUGAACUCGCUGUGAAGAUGCAGUGUACCCGCGGCAAGACGGAAAGACCCCGUGAACCUUUACUAUAGCUUGACACUGAACAUUGAGCCUUGAUGUGUAGGAUAGGUGGGAGGCUUUGAAGUGUGGACGCCAGUCUGCAUGGAGCCGACCUUGAAAUACCACCCUUUAAUGUUUGAUGUUCUAACGUUGACCCGUAAUCCGGGUUGCGGACAGUGUCUGGUGGGUAGUUUGACUGGGGCGGUCUCCUCCUAAAGAGUAACGGAGGAGCACGAAGGUUGGCUAAUCCUGGUCGGACAUCAGGAGGUUAGUGCAAUGGCAUAAGCCAGCUUGACUGCGAGCGUGACGGCGCGAGCAGGUGCGAAAGCAGGUCAUAGUGAUCCGGUGGUUCUGAAUGGAAGGGCCAUCGCUCAACGGAUAAAAGGUACUCCGGGGAUAACAGGCUGAUACCGCCCAAGAGUUCAUAUCGACGGCGGUGUUUGGCACCUCGAUGUCGGCUCAUCACAUCCUGGGGCUGAAGUAGGUCCCAAGGGUAUGGCUGUUCGCCAUUUAAAGUGGUACGCGAGCUGGGUUUAGAACGUCGUGAGACAGUUCGGUCCCUAUCUGCCGUGGGCGCUGGAGAACUGAGGGGGGCUGCUCCUAGUACGAGAGGACCGGAGUGGACGCAUCACUGGUGUUCGGGUUGUCAUGCCAAUGGCACUGCCCGGUAGCUAAAUGCGGAAGAGAUAAGUGCUGAAAGCAUCUAAGCACGAAACUUGCCCCGAGAUGAGUUCUCCCUGACCCUUUAAGGGUCCUGAAGGAACGUUGAAGACGACGACGUUGAUAGGCCGGGUGUGUAAGCGCAGCGAUGCGUUGAGCUAACCGGUACUAAUGAACCGUGAGGCUUAACCU"
-RNA_3J7Z_23S = "GGUUAAGCGACUAAGCGUACACGGUGGAUGCCCUGGCAGUCAGAGGCGAUGAAGGACGUGCUAAUCUGCGAUAAGCGUCGGUAAGGUGAUAUGAACCGUUAUAACCGGCGAUUUCCGAAUGGGGAAACCCAGUGUGUUUCGACACACUAUCAUUAACUGAAUCCAUAGGUUAAUGAGGCGAACCGGGGGAACUGAAACAUCUAAGUACCCCGAGGAAAAGAAAUCAACCGAGAUUCCCCCAGUAGCGGCGAGCGAACGGGGAGCAGCCCAGAGCCUGAAUCAGUGUGUGUGUUAGUGGAAGCGUCUGGAAAGGCGCGCGAUACAGGGUGACAGCCCCGUACACAAAAAUGCACAUGCUGUGAGCUCGAUGAGUAGGGCGGGACACGUGGUAUCCUGUCUGAAUAUGGGGGGACCAUCCUCCAAGGCUAAAUACUCCUGACUGACCGAUAGUGAACCAGUACCGUGAGGGAAAGGCGAAAAGAACCCCGGCGAGGGGAGUGAAAAAGAACCUGAAACCGUGUACGUACAAGCAGUGGGAGCACGCUUAGGCGUGUGACUGCGUACCUUUUGUAUAAUGGGUCAGCGACUUAUAUUCUGUAGCAAGGUUAACCGAAUAGGGGAGCCGAAGGGAAACCGAGUCUUAACUGGGCGUUAAGUUGCAGGGUAUAGACCCGAAACCCGGUGAUCUAGCCAUGGGCAGGUUGAAGGUUGGGUAACACUAACUGGAGGACCGAACCGACUAAUGUUGAAAAAUUAGCGGAUGACUUGUGGCUGGGGGUGAAAGGCCAAUCAAACCGGGAGAUAGCUGGUUCUCCCCGAAAGCUAUUUAGGUAGCGCCUCGUGAAUUCAUCUCCGGGGGUAGAGCACUGUUUCGGCAAGGGGGUCAUCCCGACUUACCAACCCGAUGCAAACUGCGAAUACCGGAGAAUGUUAUCACGGGAGACACACGGCGGGUGCUAACGUCCGUCGUGAAGAGGGAAACAACCCAGACCGCCAGCUAAGGUCCCAAAGUCAUGGUUAAGUGGGAAACGAUGUGGGAAGGCCCAGACAGCCAGGAUGUUGGCUUAGAAGCAGCCAUCAUUUAAAGAAAGCGUAAUAGCUCACUGGUCGAGUCGGCCUGCGCGGAAGAUGUAACGGGGCUAAACCAUGCACCGAAGCUGCGGCAGCGACGCUUAUGCGUUGUUGGGUAGGGGAGCGUUCUGUAAGCCUGCGAAGGUGUGCUGUGAGGCAUGCUGGAGGUAUCAGAAGUGCGAAUGCUGACAUAAGUAACGAUAAAGCGGGUGAAAAGCCCGCUCGCCGGAAGACCAAGGGUUCCUGUCCAACGUUAAUCGGGGCAGGGUGAGUCGACCCCUAAGGCGAGGCCGAAAGGCGUAGUCGAUGGGAAACAGGUUAAUAUUCCUGUACUUGGUGUUACUGCGAAGGGGGGACGGAGAAGGCUAUGUUGGCCGGGCGACGGUUGUCCCGGUUUAAGCGUGUAGGCUGGUUUUCCAGGCAAAUCCGGAAAAUCAAGGCUGAGGCGUGAUGACGAGGCACUACGGUGCUGAAGCAACAAAUGCCCUGCUUCCAGGAAAAGCCUCUAAGCAUCAGGUAACAUCAAAUCGUACCCCAAACCGACACAGGUGGUCAGGUAGAGAAUACCAAGGCGCUUGAGAGAACUCGGGUGAAGGAACUAGGCAAAAUGGUGCCGUAACUUCGGGAGAAGGCACGCUGAUAUGUAGGUGAGGUCCCUCGCGGAUGGAGCUGAAAUCAGUCGAAGAUACCAGCUGGCUGCAACUGUUUAUUAAAAACACAGCACUGUGCAAACACGAAAGUGGACGUAUACGGUGUGACGCCUGCCCGGUGCCGGAAGGUUAAUUGAUGGGGUUAGCGCAAGCGAAGCUCUUGAUCGAAGCCCCGGUAAACGGCGGCCGUAACUAUAACGGUCCUAAGGUAGCGAAAUUCCUUGUCGGGUAAGUUCCGACCUGCACGAAUGGCGUAAUGAUGGCCAGGCUGUCUCCACCCGAGACUCAGUGAAAUUGAACUCGCUGUGAAGAUGCAGUGUACCCGCGGCAAGACGGAAAGACCCCGUGAACCUUUACUAUAGCUUGACACUGAACAUUGAGCCUUGAUGUGUAGGAUAGGUGGGAGGCUUUGAAGUGUGGACGCCAGUCUGCAUGGAGCCGACCUUGAAAUACCACCCUUUAAUGUUUGAUGUUCUAACGUUGACCCGUAAUCCGGGUUGCGGACAGUGUCUGGUGGGUAGUUUGACUGGGGCGGUCUCCUCCUAAAGAGUAACGGAGGAGCACGAAGGUUGGCUAAUCCUGGUCGGACAUCAGGAGGUUAGUGCAAUGGCAUAAGCCAGCUUGACUGCGAGCGUGACGGCGCGAGCAGGUGCGAAAGCAGGUCAUAGUGAUCCGGUGGUUCUGAAUGGAAGGGCCAUCGCUCAACGGAUAAAAGGUACUCCGGGGAUAACAGGCUGAUACCGCCCAAGAGUUCAUAUCGACGGCGGUGUUUGGCACCUCGAUGUCGGCUCAUCACAUCCUGGGGCUGAAGUAGGUCCCAAGGGUAUGGCUGUUCGCCAUUUAAAGUGGUACGCGAGCUGGGUUUAGAACGUCGUGAGACAGUUCGGUCCCUAUCUGCCGUGGGCGCUGGAGAACUGAGGGGGGCUGCUCCUAGUACGAGAGGACCGGAGUGGACGCAUCACUGGUGUUCGGGUUGUCAUGCCAAUGGCACUGCCCGGUAGCUAAAUGCGGAAGAGAUAAGUGCUGAAAGCAUCUAAGCACGAAACUUGCCCCGAGAUGAGUUCUCCCUGACCCUUUAAGGGUCCUGAAGGAACGUUGAAGACGACGACGUUGAUAGGCCGGGUGUGUAAGCGCAGCGAUGCGUUGAGCUAACCGGUACUAAUGAACCGUGAGGCUUAACCU"
 # -------------------------------------------------------------------------------------------|
 
 parser = argparse.ArgumentParser(
     description='CLI for locating PTC residues of 23SrRNA in a given prokaryotic PDB file')
-parser.add_argument("-t", "--targets", type=str, required=False)
-parser.add_argument("-m", "--mode", type=str,  choices=['position', 'residue'], nargs='?', default='position',
-                    help="Display the position of the PTC residue, or the residue itself. Default: position")
-parser.add_argument("--display_all", action='store_true')
-parser.add_argument("--generate"   , action='store_true')
-parser.add_argument("--ribovision" , action='store_true')
-parser.add_argument("--batch"      , type  =int, required=False       )
 
-args    = parser .parse_args()
+parser.add_argument("-t", "--target", type=str, required=False)
+parser.add_argument("-m", "--mode",
+                    type=str,  choices=['position', 'residue'], nargs='?', default='position', help="Display the position of the PTC residue, or the residue itself. Default: position")
+parser.add_argument("--display_all", action='store_true')
+parser.add_argument("--generate", action='store_true')
+parser.add_argument("--ribovision", action='store_true')
+parser.add_argument("--batch", type=int, required=False)
+
+args = parser .parse_args()
 argdict = vars(parser.parse_args())
 
 bact_registry_file = open('rcsb_pdb_ids_20230106032038.txt', 'r')
@@ -83,7 +70,8 @@ bacteria_structs = line.split(',')
 def util__backwards_match(alntgt: str, resid: int):
     """Returns the target-sequence index of a residue in the (aligned) target sequence"""
     if resid > len(alntgt):
-        raise IndexError(f"Passed residue with invalid index ({resid}) to back-match to target.Seqlen:{len(alntgt)}")
+        raise IndexError(
+            f"Passed residue with invalid index ({resid}) to back-match to target.Seqlen:{len(alntgt)}")
 
     counter_proper = 0
     for i, char in enumerate(alntgt):
@@ -94,10 +82,12 @@ def util__backwards_match(alntgt: str, resid: int):
         else:
             counter_proper += 1
 
+
 def util__forwards_match(string: str, resid: int):
     """Returns the index of a source-sequence residue in the (aligned) source sequence."""
     if resid >= len(string):
-        raise IndexError("Requested residue index({resid}) exceeds aligned(likely already gaps-extended) sequence. Something went wrong.")
+        raise IndexError(
+            "Requested residue index({resid}) exceeds aligned(likely already gaps-extended) sequence. Something went wrong.")
 
     count_proper = 0
     for alignment_indx, char in enumerate(string):
@@ -108,21 +98,22 @@ def util__forwards_match(string: str, resid: int):
         else:
             count_proper += 1
 
-
 # ※ ---------------------------- 23SrRNA PTC residue locations ---------------------------- ※
 
-def get_23SrRNA_strandseq(rcsb_id:str, custom_path=None)->Tuple[str,str]:
+
+def get_23SrRNA_strandseq(rcsb_id: str, custom_path=None) -> Tuple[str, str]:
     return get_one_letter_code_can_by_nomclass(rcsb_id, "23SrRNA", custom_path)
 
-def get_one_letter_code_can_by_nomclass(rcsb_id: str,nomenclature_class:str, custom_path=None)->Tuple[str,str]:
+
+def get_one_letter_code_can_by_nomclass(rcsb_id: str, nomenclature_class: str, custom_path=None) -> Tuple[str, str]:
 
     default_path = f"{rcsb_id.upper()}_modified.cif" if custom_path == None else custom_path
-    target       = gemmi.cif.read_file(default_path)
-    block        = target.sole_block()
-    model        = gemmi.read_structure(default_path)[0]
+    target = gemmi.cif.read_file(default_path)
+    block = target.sole_block()
+    model = gemmi.read_structure(default_path)[0]
 
-    STRAND       = None
-    SEQ          = None
+    STRAND = None
+    SEQ = None
 
     # Locate the chain of given nom. class
     for (strand, nomclass) in zip(
@@ -143,9 +134,11 @@ def get_one_letter_code_can_by_nomclass(rcsb_id: str,nomenclature_class:str, cus
             SEQ = str(one_letter_code).strip(";").strip("\n")
 
     if SEQ == None:
-        print("Could not locate {} sequence in {} CIF file".format(nomenclature_class,rcsb_id))
+        print("Could not locate {} sequence in {} CIF file".format(
+            nomenclature_class, rcsb_id))
 
-    print("Located {} sequence in {} CIF file. (Chain {})".format(nomenclature_class,rcsb_id, STRAND))
+    print("Located {} sequence in {} CIF file. (Chain {})".format(
+        nomenclature_class, rcsb_id, STRAND))
     return (STRAND, SEQ)
 
 
@@ -156,100 +149,88 @@ class RibovisionAlignment:
     """
 
     def __init__(self) -> None:
-        self.fasta_seqs:List[SeqIO.SeqRecord] = SeqIO.parse(open('ribovision-3j7z.fas'),'fasta')
+        self.fasta_seqs: List[SeqIO.SeqRecord] = SeqIO.parse(
+            open('ribovision-3j7z.fas'), 'fasta')
         pass
 
-    def find_aln_by_species(self, species_name: str)->SeqIO.SeqRecord:
+    def find_aln_by_species(self, species_name: str) -> SeqIO.SeqRecord:
         top_score = 0
-        seq       = None
-        for fasta in self.fasta_seqs: 
-            rat =  process.fuzz.ratio(species_name, fasta.description)
+        seq = None
+        for fasta in self.fasta_seqs:
+            rat = process.fuzz.ratio(species_name, fasta.description)
             if rat > top_score:
                 top_score = rat
-                seq       = fasta
+                seq = fasta
         return seq
 
 
+def add_target_to_domain_alignment(rcsb_id: str, domain: str):
+    """
+    @param rcsb_id: PDB ID of target structure
+    @param domain:  Domain of target structure (euk or bac)
+    """
+
+    rcsb_id = argdict["target"]
+    struct_profile = open_structure(rcsb_id, 'json')
+    [chain_id, strand_target] = get_23SrRNA_strandseq(
+        rcsb_id,
+        custom_path=os.path.join(
+            RIBETL_DATA, rcsb_id.upper(), f"{rcsb_id.upper()}_modified.cif")
+    )
+
+    fpath_23s = f'{rcsb_id.upper()}_{chain_id}_23SrRNA.fasta'
+    domain_alignment: str = ''
+    if domain == 'bacteria':
+        domain_alignment = 'ribovision.bacteria.fasta'
+    elif domain == 'eukarya':
+        domain_alignment = 'ribovision.eukaryota.fasta'
+    else:
+        raise FileNotFoundError(
+            "Domain misspecified. Must be either 'bacteria' or 'eukarya'.")
+
+    seq_to_fasta(rcsb_id, strand_target, fpath_23s)
+    muscle_combine_profile(domain_alignment, fpath_23s,
+                           f'combined_{rcsb_id.upper()}_ribovision_{domain}.fasta')
 
 
+def seq_to_fasta(rcsb_id: str, _seq: str, outfile: str):
+    from Bio.Seq import Seq
+    _seq = _seq.replace("\n","")
+    seq_record = SeqRecord.SeqRecord(Seq(_seq).upper())
+    seq_record.id = seq_record.description = rcsb_id
+    SeqIO.write(seq_record, outfile, 'fasta',)
 
 
-def seq_to_fasta(_seq:str, outfile:str):
-    SeqIO.write(SeqRecord.SeqRecord(_seq),outfile,'fasta')
-    
-
-
-
-def muscle_combine_profile(msa_path1:str , msa_path2:str, out_filepath:str):
+def muscle_combine_profile(msa_path1: str, msa_path2: str, out_filepath: str):
     """Combine two MSA-profiles into a single one. Used here to "append" a target sequence two the ribovision alignment. """
-    cmd     = ['muscle3.8',  '-profile', '-in1', msa_path2, '-in2', msa_path2, '-out', out_filepath]
-    aligner = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                              
+    cmd = ['/home/rxz/dev/docker_ribxz/cli/scripts/muscle3.8',  '-profile', '-in1', msa_path1,'-in2', msa_path2, '-out', out_filepath]
+    proc= subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=os.environ.copy()).wait()
+    sys.stdout.flush()
+    print("finished")
 
 
 if args.ribovision:
+    domain = 'bacteria'
 
+    rcsb_id = argdict["target"]
+    struct_profile = open_structure(rcsb_id, 'json')
+    [chain_id, strand_target] = get_23SrRNA_strandseq(
+        rcsb_id,
+        custom_path=os.path.join(RIBETL_DATA, rcsb_id.upper(), f"{rcsb_id.upper()}_modified.cif"))
 
-    # choose a structurn
-    # TODO: fit given sequence against the ribovision alignment via mafft and triangulate between sites 6,8,9 
-    # obtain its [PDBID].23S sequence (from modified cif) 
-    # | 
-    # .- - - - -[ obtain ribovision alignment (how best to do this?
-    # |                                             - what model to use for reference? ( Doris et al don't provide a pdb id )
-    # |                                             - if using a hand-picked one -- how to choose?(considerations: stages of assembly)
-    # |                                             - align the given sequence on top of all bacterial MSA (best guess i have now)
-    # | 
-    # |                                             
-    # |          
-    # |
-    # .- - - - -[ extract the residues ( 
-    # |                                             - the ones specified in DORIS (※ multiple sites) from the alignment naively?(unlikely) ]
-    # |                                             - extract 3 sites (6,8,9) separately and triangulate between them in Euc. space, take center as PTC?
-    # |
+    fpath_23s = f'{rcsb_id.upper()}_{chain_id}_23SrRNA.fasta'
+    domain_alignment: str = ''
+    if domain == 'bacteria':
+        domain_alignment = 'ribovision.bacteria.fasta'
+    elif domain == 'eukarya':
+        domain_alignment = 'ribovision.eukaryota.fasta'
+    else:
+        raise FileNotFoundError("Domain misspecified. Must be either 'bacteria' or 'eukarya'.")
 
+    seq_to_fasta(rcsb_id,strand_target,fpath_23s)
+    muscle_combine_profile(domain_alignment, fpath_23s,'here.combined.fasta')
 
-    rcsb_id                       = argdict["targets"]
-    struct_profile                = open_structure(rcsb_id, 'json')
-    [chain_ida,strand_target]     = get_23SrRNA_strandseq(
-               rcsb_id,
-               custom_path = os.path.join(RIBETL_DATA, rcsb_id.upper(), f"{rcsb_id.upper()}_modified.cif")
-           )
-    fasta_sequences               = SeqIO.parse(open('ribovision-5afi.fas'),'fasta')
-    aln                           = RibovisionAlignment()
-    strand_ribovision:str         = aln.find_aln_by_species("Escherichia").seq
-
-
-    # + Verify whether it is better to post-ribovision align to a sequence with gaps, or delete the gaps from ribovision aln first.
-    # + Or perhaps it is better to align the target rna to the whole bacterial[or euk] ribovision array 
-
-    alignment = pairwise2.align.globalxx(strand_target,strand_ribovision)
-
-    src_aln = alignment[0].seqA
-    tgt_aln = alignment[0].seqB
-
-    aln_ids = []
-    tgt_ids = []
-
-    for src_resid in DORIS_ET_AL['bact']['site_6']:
-        aln_ids.append(util__forwards_match(src_aln, src_resid))
-
-    aln_ids = list(filter(lambda x: x != None, aln_ids))
-
-    for aln_resid in aln_ids:
-        if tgt_aln[aln_resid] == '-': 
-            continue
-        tgt_ids.append(util__backwards_match(tgt_aln, aln_resid))
-    
-    print(tgt_ids)
-
-    # if result_as == "residue":
-    #     return [model[STRAND][ix] for ix in tgt_ids]
-
-    # elif result_as == "position":
-    #     print("The alpha-carbon of each residue is taken to be its position for simplicity.")
-    #     return [list(model[STRAND][ix][0].pos) for ix in tgt_ids]
-
-    exit(0)
+    exit(1)
 
 if args.generate:
     f = open('rcsb_pdb_ids_20230106032038.txt', 'r')
@@ -257,27 +238,28 @@ if args.generate:
     f.close()
     bacteria_structs = line.split(',')
 
-    struct_ids    = []
-    parent_chain  = []
-    residue_name  = []
+    struct_ids = []
+    parent_chain = []
+    residue_name = []
     residue_seqid = []
-    residue_x     = []
-    residue_y     = []
-    residue_z     = []
+    residue_x = []
+    residue_y = []
+    residue_z = []
     i = 0
     for struct in bacteria_structs[args.batch:args.batch+100]:
         struct = str.upper(struct)
         # get the ptc guess
-        structpath = os.path.join(RIBETL_DATA,  struct, f"{struct}_modified.cif")
+        structpath = os.path.join(
+            RIBETL_DATA,  struct, f"{struct}_modified.cif")
 
         # check whether structpath file exists
-        
-        if not os.path.isfile(structpath): 
+
+        if not os.path.isfile(structpath):
             print(f"Could not find {structpath} in RIBETL_DATA")
             continue
         try:
             ptc_guess = process_target_to_tuple(struct, args.mode, structpath)
-            (res, posn, strand)=ptc_guess
+            (res, posn, strand) = ptc_guess
             struct_ids.append(struct)
             residue_seqid.append(res.seqid)
             parent_chain.append(strand)
@@ -285,34 +267,32 @@ if args.generate:
             residue_x.append(posn[0])
             residue_y.append(posn[1])
             residue_z.append(posn[2])
-            i=i+1
+            i = i+1
             print(f"Processed structs  : {i}")
         except:
-            i=i+1
+            i = i+1
             print("err")
             print(f"Processed structs  : {i}")
             continue
 
     # add this to the dataframe
     df = pandas.DataFrame.from_dict({
-        'struct_ids'   : struct_ids   ,
-        'parent_chain' : parent_chain ,
-        'residue_name' : residue_name ,
+        'struct_ids': struct_ids,
+        'parent_chain': parent_chain,
+        'residue_name': residue_name,
         'residue_seqid': residue_seqid,
-        'residue_x'    : residue_x    ,
-        'residue_y'    : residue_y    ,
-        'residue_z'    : residue_z
+        'residue_x': residue_x,
+        'residue_y': residue_y,
+        'residue_z': residue_z
     })
 
     # save the dataframe to a csv
     df.to_csv(f"ptc_100xbatch={args.batch}.csv")
     exit(1)
 
-
-
-
 if "targets" in argdict.keys():
-    argdict["targets"] = [s.strip().upper() for s in argdict["targets"].split(",")]
+    argdict["targets"] = [s.strip().upper()
+                          for s in argdict["targets"].split(",")]
 
     if len(argdict) > 50:
         print("Please don't overload our servers. Paid out of pocket!:) \nInstead, get in touch for collaboration: rtkushner@gmail.com!")
