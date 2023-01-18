@@ -70,7 +70,9 @@ bacteria_structs = line.split(',')
 
 
 def util__backwards_match(alntgt: str, aln_resid: int, verbose:bool=False)->Tuple[int, str]:
-    """Returns the target-sequence index of a residue in the (aligned) target sequence"""
+    """
+    returns (projected i.e. "ungapped" residue id, the residue itself residue)
+    """
     if aln_resid > len(alntgt):
         raise IndexError(
             f"Passed residue with invalid index ({aln_resid}) to back-match to target. Seqlen:{len(alntgt)}")
@@ -78,13 +80,13 @@ def util__backwards_match(alntgt: str, aln_resid: int, verbose:bool=False)->Tupl
     counter_proper = 0
     for i, char in enumerate(alntgt):
         if i == aln_resid:
-            if verbose: print("Residue {} is at index [aligned: {} | orgiginal: {} ] in the target sequence".format(aln_resid, counter_proper, i))
+            if verbose: 
+                print("[ {} ] <-----> id.[aligned: {} | orgiginal: {} ]".format(alntgt[aln_resid],i, counter_proper))
             return ( counter_proper,  alntgt[i] )
         if char == '-':
             continue
         else:
             counter_proper += 1
-            return (-1,'')
 
     raise LookupError()
 
@@ -113,9 +115,10 @@ def get_23SrRNA_strandseq(rcsb_id: str, custom_path=None) -> Tuple[str, str]:
 def get_one_letter_code_can_by_nomclass(rcsb_id: str, nomenclature_class: str, custom_path=None) -> Tuple[str, str]:
 
     default_path = f"{rcsb_id.upper()}_modified.cif" if custom_path == None else custom_path
+
     target = gemmi.cif.read_file(default_path)
-    block = target.sole_block()
-    model = gemmi.read_structure(default_path)[0]
+    block  = target.sole_block()
+    model  = gemmi.read_structure(default_path)[0]
 
     STRAND = None
     SEQ = None
@@ -225,15 +228,10 @@ if args.ptc:
     domain  = 'b'
     rcsb_id = args.target.upper()
     tgt_seq = get_seq_from_profiles(rcsb_id, domain)
-    print(tgt_seq.seq[2446:2456])
+    # print(tgt_seq.seq[2446:2456])
 
-
-
-    tgt_seq.seq.ungap('-')
-    util__backwards_match()
-
-    # print("---------------")
-    # print("TArget seq", tgt_seq)
+    for i in range(2576,2586):
+        [ resid,res_projected ] = util__backwards_match(tgt_seq.seq, i, True)
     exit(1)
 
 if args.fasta_profile:
