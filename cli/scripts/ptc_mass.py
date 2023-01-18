@@ -51,14 +51,15 @@ parser = argparse.ArgumentParser(
     description='CLI for locating PTC residues of 23SrRNA in a given prokaryotic PDB file')
 
 parser.add_argument("-t", "--target", type=str, required=False)
+parser.add_argument("-d", "--domain", type=str, required=False, choices=['e', 'b'])
 parser.add_argument("-m", "--mode",
                     type=str,  choices=['position', 'residue'], nargs='?', default='position', help="Display the position of the PTC residue, or the residue itself. Default: position")
-parser.add_argument("--display_all", action='store_true')
-parser.add_argument("--generate", action='store_true')
-parser.add_argument("--ribovision", action='store_true')
-parser.add_argument("--batch", type=int, required=False)
+parser.add_argument("--display_all"  ,      action          ='store_true')
+parser.add_argument("--generate"     ,      action          ='store_true')
+parser.add_argument("--fasta_profile",      action          ='store_true')
+parser.add_argument("--batch"        ,    type=int,        required=False)
 
-args = parser .parse_args()
+args    = parser .parse_args()
 argdict = vars(parser.parse_args())
 
 bact_registry_file = open('rcsb_pdb_ids_20230106032038.txt', 'r')
@@ -143,24 +144,21 @@ def get_one_letter_code_can_by_nomclass(rcsb_id: str, nomenclature_class: str, c
 
 
 class RibovisionAlignment:
-    """defiened on the memeber of fsatas :
-    'annotations', 'dbxrefs', 'description', 'features', 'format', 'id', 'letter_annotations', 'lower', 
-    'name', 'reverse_complement', 'seq', 'translate', 'upper'
-    """
 
-    def __init__(self) -> None:
-        self.fasta_seqs: List[SeqIO.SeqRecord] = SeqIO.parse(
-            open('ribovision-3j7z.fas'), 'fasta')
+    def __init__(self, mass_alignment_path:str) -> None:
+        self.fasta_seqs: List[SeqIO.SeqRecord] = SeqIO.parse(open(mass_alignment_path), 'fasta')
         pass
 
-    def find_aln_by_species(self, species_name: str) -> SeqIO.SeqRecord:
+    def find_aln_by_id(self, rcsb_id: str) -> SeqIO.SeqRecord:
         top_score = 0
-        seq = None
+        seq       = None
         for fasta in self.fasta_seqs:
-            rat = process.fuzz.ratio(species_name, fasta.description)
+            print("Description ", fasta.description)
+            print("Description ", fasta.id)
+            rat = max([process.fuzz.ratio(rcsb_id, fasta.description), process.fuzz.ratio(rcsb_id, fasta.id) ])
             if rat > top_score:
                 top_score = rat
-                seq = fasta
+                seq       = fasta
         return seq
 
 
@@ -204,31 +202,45 @@ def seq_to_fasta(rcsb_id: str, _seq: str, outfile: str):
 def muscle_combine_profile(msa_path1: str, msa_path2: str, out_filepath: str):
     """Combine two MSA-profiles into a single one. Used here to "append" a target sequence two the ribovision alignment. """
     cmd = ['/home/rxz/dev/docker_ribxz/cli/scripts/muscle3.8',  '-profile', '-in1', msa_path1,'-in2', msa_path2, '-out', out_filepath]
-    proc= subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=os.environ.copy()).wait()
+    subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=os.environ.copy()).wait()
     sys.stdout.flush()
-    print("finished")
+
+def get_aligned_from_profiles(rcsb_id:str, domain:str):
+    if domain == 'bacteria':
+        domain_alignment_path = 'ribovision.bacteria.fasta'
+    elif domain == 'eukarya':
+        domain_alignment_path = 'ribovision.eukaryota.fasta'
+    else:
+        raise FileNotFoundError("Domain misspecified. Must be either 'bacteria' or 'eukarya'.")
+
+    ribovision        = RibovisionAlignment(domain_alignment_path)
+    target_seq_record = ribovision.find_aln_by_id(rcsb_id)
+    print(target_seq_record)
+
+    return target_seq_record
 
 
-if args.ribovision:
+if args.fasta_profile:
     domain = 'bacteria'
 
     rcsb_id = argdict["target"]
     struct_profile = open_structure(rcsb_id, 'json')
-    [chain_id, strand_target] = get_23SrRNA_strandseq(
-        rcsb_id,
-        custom_path=os.path.join(RIBETL_DATA, rcsb_id.upper(), f"{rcsb_id.upper()}_modified.cif"))
+    [chain_id, strand_target] = get_23SrRNA_strandseq(rcsb_id,custom_path=os.path.join(RIBETL_DATA, rcsb_id.upper(), f"{rcsb_id.upper()}_modified.cif"))
 
-    fpath_23s = f'{rcsb_id.upper()}_{chain_id}_23SrRNA.fasta'
+    fpath_23s             = f'{rcsb_id.upper()}_{chain_id}_23SrRNA.fasta'
     domain_alignment: str = ''
+
     if domain == 'bacteria':
         domain_alignment = 'ribovision.bacteria.fasta'
+
     elif domain == 'eukarya':
         domain_alignment = 'ribovision.eukaryota.fasta'
+
     else:
         raise FileNotFoundError("Domain misspecified. Must be either 'bacteria' or 'eukarya'.")
 
     seq_to_fasta(rcsb_id,strand_target,fpath_23s)
-    muscle_combine_profile(domain_alignment, fpath_23s,'here.combined.fasta')
+    muscle_combine_profile(domain_alignment, fpath_23s,'ribovision.bacteria.fasta')
 
     exit(1)
 
