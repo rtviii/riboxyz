@@ -107,10 +107,8 @@ def util__forwards_match(string: str, resid: int):
 
 # ※ ---------------------------- 23SrRNA PTC residue locations ---------------------------- ※
 
-
 def get_23SrRNA_strandseq(rcsb_id: str, custom_path=None) -> Tuple[str, str]:
     return get_one_letter_code_can_by_nomclass(rcsb_id, "23SrRNA", custom_path)
-
 
 def get_one_letter_code_can_by_nomclass(rcsb_id: str, nomenclature_class: str, custom_path=None) -> Tuple[str, str]:
 
@@ -149,7 +147,6 @@ def get_one_letter_code_can_by_nomclass(rcsb_id: str, nomenclature_class: str, c
         nomenclature_class, rcsb_id, STRAND))
     return (STRAND, SEQ)
 
-
 class RibovisionAlignment:
 
     def __init__(self, mass_alignment_path:str) -> None:
@@ -165,7 +162,6 @@ class RibovisionAlignment:
                 top_score = rat
                 seq       = fasta
         return seq
-
 
 def add_target_to_domain_alignment(rcsb_id: str, domain: str):
     """
@@ -195,14 +191,12 @@ def add_target_to_domain_alignment(rcsb_id: str, domain: str):
     muscle_combine_profile(domain_alignment, fpath_23s,
                            f'combined_{rcsb_id.upper()}_ribovision_{domain}.fasta')
 
-
 def seq_to_fasta(rcsb_id: str, _seq: str, outfile: str):
     from Bio.Seq import Seq
     _seq = _seq.replace("\n","")
     seq_record = SeqRecord.SeqRecord(Seq(_seq).upper())
     seq_record.id = seq_record.description = rcsb_id
     SeqIO.write(seq_record, outfile, 'fasta',)
-
 
 def muscle_combine_profile(msa_path1: str, msa_path2: str, out_filepath: str):
     """Combine two MSA-profiles into a single one. Used here to "append" a target sequence two the ribovision alignment. """
@@ -222,7 +216,6 @@ def get_seq_from_profiles(rcsb_id:str, domain:str):
     target_seq_record = ribovision.find_aln_by_id(rcsb_id)
 
     return target_seq_record
-
 
 if args.ptc:
     domain  = 'b'
@@ -336,3 +329,11 @@ if "targets" in argdict.keys():
 
 if not args.display_all:
     print("\nTo display more residues per target structure, use additional --display_all flag.")
+
+
+# the task for today is to establish a robust pipeline for saving the visualized regions 
+# n regions of the 23S rRNA are conserved.
+# - datasheet with the conserved regions: 6,8,9
+# - robust way to visualize it with pymol
+
+
