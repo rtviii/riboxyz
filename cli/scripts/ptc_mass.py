@@ -57,32 +57,36 @@ parser.add_argument("-m", "--mode",
 parser.add_argument("--display_all"  ,      action          ='store_true')
 parser.add_argument("--generate"     ,      action          ='store_true')
 parser.add_argument("--fasta_profile",      action          ='store_true')
+parser.add_argument("--ptc"        ,    action='store_true')
 parser.add_argument("--batch"        ,    type=int,        required=False)
 
-args    = parser .parse_args()
-argdict = vars(parser.parse_args())
+args               = parser .parse_args()
+argdict            = vars(parser.parse_args())
 
 bact_registry_file = open('rcsb_pdb_ids_20230106032038.txt', 'r')
-line = bact_registry_file.readline()
+line               = bact_registry_file.readline()
 bact_registry_file.close()
 bacteria_structs = line.split(',')
 
 
-def util__backwards_match(alntgt: str, resid: int):
+def util__backwards_match(alntgt: str, aln_resid: int, verbose:bool=False)->Tuple[int, str]:
     """Returns the target-sequence index of a residue in the (aligned) target sequence"""
-    if resid > len(alntgt):
+    if aln_resid > len(alntgt):
         raise IndexError(
-            f"Passed residue with invalid index ({resid}) to back-match to target.Seqlen:{len(alntgt)}")
+            f"Passed residue with invalid index ({aln_resid}) to back-match to target. Seqlen:{len(alntgt)}")
 
     counter_proper = 0
     for i, char in enumerate(alntgt):
-        if i == resid:
-            return counter_proper
+        if i == aln_resid:
+            if verbose: print("Residue {} is at index [aligned: {} | orgiginal: {} ] in the target sequence".format(aln_resid, counter_proper, i))
+            return ( counter_proper,  alntgt[i] )
         if char == '-':
             continue
         else:
             counter_proper += 1
+            return (-1,'')
 
+    raise LookupError()
 
 def util__forwards_match(string: str, resid: int):
     """Returns the index of a source-sequence residue in the (aligned) source sequence."""
@@ -153,8 +157,6 @@ class RibovisionAlignment:
         top_score = 0
         seq       = None
         for fasta in self.fasta_seqs:
-            print("Description ", fasta.description)
-            print("Description ", fasta.id)
             rat = max([process.fuzz.ratio(rcsb_id, fasta.description), process.fuzz.ratio(rcsb_id, fasta.id) ])
             if rat > top_score:
                 top_score = rat
@@ -205,20 +207,34 @@ def muscle_combine_profile(msa_path1: str, msa_path2: str, out_filepath: str):
     subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=os.environ.copy()).wait()
     sys.stdout.flush()
 
-def get_aligned_from_profiles(rcsb_id:str, domain:str):
-    if domain == 'bacteria':
+def get_seq_from_profiles(rcsb_id:str, domain:str):
+    if domain == 'b':
         domain_alignment_path = 'ribovision.bacteria.fasta'
-    elif domain == 'eukarya':
+    elif domain == 'e':
         domain_alignment_path = 'ribovision.eukaryota.fasta'
     else:
         raise FileNotFoundError("Domain misspecified. Must be either 'bacteria' or 'eukarya'.")
 
     ribovision        = RibovisionAlignment(domain_alignment_path)
     target_seq_record = ribovision.find_aln_by_id(rcsb_id)
-    print(target_seq_record)
 
     return target_seq_record
 
+
+if args.ptc:
+    domain  = 'b'
+    rcsb_id = args.target.upper()
+    tgt_seq = get_seq_from_profiles(rcsb_id, domain)
+    print(tgt_seq.seq[2446:2456])
+
+
+
+    tgt_seq.seq.ungap('-')
+    util__backwards_match()
+
+    # print("---------------")
+    # print("TArget seq", tgt_seq)
+    exit(1)
 
 if args.fasta_profile:
     domain = 'bacteria'
@@ -238,10 +254,8 @@ if args.fasta_profile:
 
     else:
         raise FileNotFoundError("Domain misspecified. Must be either 'bacteria' or 'eukarya'.")
-
     seq_to_fasta(rcsb_id,strand_target,fpath_23s)
     muscle_combine_profile(domain_alignment, fpath_23s,'ribovision.bacteria.fasta')
-
     exit(1)
 
 if args.generate:
