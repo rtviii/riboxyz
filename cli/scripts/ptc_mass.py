@@ -33,12 +33,12 @@ RIBETL_DATA = os.environ.get('RIBETL_DATA')
 
 # https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4574749/pdf/1719.pdf
 DORIS_ET_AL = {
-    "euk": {
+    "e": {
         "site_6": [2400, 2401, 2402, 2403, 2404, 2405, 2406, 2407],
         "site_8": [2811, 2812, 2813, 2814, 2815, 2816, 2817, 2818],
         "site_9": [2941, 2942, 2943, 2944, 2945, 2946, 2947, 2948, 2949, 2950, 2951, 2952, 2953]
     },
-    'bact': {
+    'b': {
         "site_6": [2059, 2060, 2061, 2062, 2063, 2064, 2065, 2066],
         "site_8": [2446, 2447, 2448, 2449, 2450, 2451, 2452, 2453],
         "site_9": [2576, 2577, 2578, 2579, 2580, 2581, 2582, 2583, 2584, 2585, 2586, 2587, 2588]
@@ -204,7 +204,7 @@ def muscle_combine_profile(msa_path1: str, msa_path2: str, out_filepath: str):
     subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=os.environ.copy()).wait()
     sys.stdout.flush()
 
-def get_seq_from_profiles(rcsb_id:str, domain:str):
+def retrieve_aligned(rcsb_id:str, domain:str):
     if domain == 'b':
         domain_alignment_path = 'ribovision.bacteria.fasta'
     elif domain == 'e':
@@ -218,13 +218,27 @@ def get_seq_from_profiles(rcsb_id:str, domain:str):
     return target_seq_record
 
 if args.ptc:
+
     domain  = 'b'
     rcsb_id = args.target.upper()
-    tgt_seq = get_seq_from_profiles(rcsb_id, domain)
-    # print(tgt_seq.seq[2446:2456])
+    tgt_seq = retrieve_aligned(rcsb_id, domain)
 
-    for i in range(2576,2586):
-        [ resid,res_projected ] = util__backwards_match(tgt_seq.seq, i, True)
+    ptc_projected = {
+        "site_6": [],
+        "site_8": [],
+        "site_9": []
+    }
+
+
+    
+    for ( site, resids ) in DORIS_ET_AL[domain].items():
+       for resid in resids:
+            print("->",resid)
+            ptc_projected[site].append(util__backwards_match(tgt_seq.seq,resid, True))
+       
+   
+    pprint(ptc_projected)
+
     exit(1)
 
 if args.fasta_profile:
