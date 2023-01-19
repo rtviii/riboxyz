@@ -1,15 +1,17 @@
 import csv
+import json
+from pprint import pprint
 import requests
 from datetime import datetime
 
 ROR_API_ENDPOINT = "https://api.ror.org/organizations"
-INPUT_DIR        = ""
-OUTPUT_DIR       = ""
+INPUT_DIR = ""
+OUTPUT_DIR = ""
 
-input_file  = "affiliation_names.csv"
-now         = datetime.now()
+input_file = "affiliation_names.csv"
+now = datetime.now()
 output_file = OUTPUT_DIR + now.strftime("%Y-%m-%d") + "_matched_ror_ids.csv"
-fields      = ['input_id', 'ror_id']
+fields = ['input_id', 'ror_id']
 
 with open(input_file) as csv_file:
     reader = csv.reader(csv_file, delimiter=',')
@@ -19,21 +21,21 @@ with open(input_file) as csv_file:
         writer.writerow(fields)
         for row in reader:
             input_id = row[0]
-            print("Finding ROR for: " + input_id)
-            search_term = '"' + input_id + '"'
-            params      = {'query': search_term}
-            ror_id      = ''
+            print("---------------------->",row)
+            # print("Finding ROR for: " + input_id)
+            search_term =input_id
+            params = {'query': search_term}
+            ror_id = ''
             try:
-                _resp = requests.get(ROR_API_ENDPOINT,params=[ ('query', search_term) ] )
+                _resp    = requests.get(ROR_API_ENDPOINT, params=[('query', search_term)])
                 response = _resp.json()
-                if response['number_of_results'] == 0:
-                    ror_id = ''
-                elif response['number_of_results'] == 1:
-                    ror_id = response['items'][0]['id']
-                else:
-                    ror_id = ''
-                    for items in response:
-                        ror_id = ror_id + ", " + response['items'][0]['id']
+
+                # with open(f'{search_term}.json', 'w') as outfile:
+                #     json.dump(response, outfile)
+                print(f"Found {len(response['items'])} items for query \"{search_term}\"")
+                item_ids = [*map(lambda item: item['id'], response['items'])]
+                        
+                ror_id = item_ids
             except ValueError:
                 ror_id = 'Error'
                 pass
