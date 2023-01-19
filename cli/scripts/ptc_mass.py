@@ -82,7 +82,7 @@ def util__backwards_match(alntgt: str, aln_resid: int, verbose:bool=False)->Tupl
         if i == aln_resid:
             if verbose: 
                 print("[ {} ] <-----> id.[aligned: {} | orgiginal: {} ]".format(alntgt[aln_resid],i, counter_proper))
-            return ( counter_proper,  alntgt[i] )
+            return ( counter_proper,  alntgt[i] , aln_resid)
         if char == '-':
             continue
         else:
@@ -242,10 +242,9 @@ if args.ptc:
     exit(1)
 
 if args.fasta_profile:
-    domain = 'bacteria'
-
-    rcsb_id = argdict["target"]
-    struct_profile = open_structure(rcsb_id, 'json')
+    domain                    = 'bacteria'
+    rcsb_id                   = argdict["target"]
+    struct_profile            = open_structure(rcsb_id, 'json')
     [chain_id, strand_target] = get_23SrRNA_strandseq(rcsb_id,custom_path=os.path.join(RIBETL_DATA, rcsb_id.upper(), f"{rcsb_id.upper()}_modified.cif"))
 
     fpath_23s             = f'{rcsb_id.upper()}_{chain_id}_23SrRNA.fasta'
@@ -320,26 +319,6 @@ if args.generate:
     # save the dataframe to a csv
     df.to_csv(f"ptc_100xbatch={args.batch}.csv")
     exit(1)
-
-if "targets" in argdict.keys():
-    argdict["targets"] = [s.strip().upper()
-                          for s in argdict["targets"].split(",")]
-
-    if len(argdict) > 50:
-        print("Please don't overload our servers. Paid out of pocket!:) \nInstead, get in touch for collaboration: rtkushner@gmail.com!")
-        exit(1)
-
-    for target in argdict["targets"]:
-
-        if not args.display_all:
-            target_ptc = process_target(target, args.mode)
-            print("[\033[94m{}\033[0m] Approximate PTC position(1 of {} residues): \033[91m{}\033[0m".format(
-                target, len(target_ptc), target_ptc[0]))
-
-        else:
-            print("[\033[94m{}\033[0m] PTC atom positions: ".format(target))
-            for residue in process_target(target, args.mode):
-                print(f"\t\033[91m{residue}\033[0m")
 
 if not args.display_all:
     print("\nTo display more residues per target structure, use additional --display_all flag.")
