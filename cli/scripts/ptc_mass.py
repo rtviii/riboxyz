@@ -9,6 +9,7 @@
 # And additionally "requests" to download missing structures: https://pypi.org/project/requests/
 
 # Distribute freely.
+import json
 import os
 import sys
 from Bio import SeqRecord
@@ -51,25 +52,26 @@ parser = argparse.ArgumentParser(
     description='CLI for locating PTC residues of 23SrRNA in a given prokaryotic PDB file')
 
 parser.add_argument("-t", "--target", type=str, required=False)
-parser.add_argument("-d", "--domain", type=str, required=False, choices=['e', 'b'])
+parser.add_argument("-d", "--domain", type=str,
+                    required=False, choices=['e', 'b'])
 parser.add_argument("-m", "--mode",
                     type=str,  choices=['position', 'residue'], nargs='?', default='position', help="Display the position of the PTC residue, or the residue itself. Default: position")
-parser.add_argument("--display_all"  ,      action          ='store_true')
-parser.add_argument("--generate"     ,      action          ='store_true')
-parser.add_argument("--fasta_profile",      action          ='store_true')
-parser.add_argument("--ptc"        ,    action='store_true')
-parser.add_argument("--batch"        ,    type=int,        required=False)
+parser.add_argument("--display_all",      action='store_true')
+parser.add_argument("--generate",      action='store_true')
+parser.add_argument("--fasta_profile",      action='store_true')
+parser.add_argument("--ptc",    action='store_true')
+parser.add_argument("--batch",    type=int,        required=False)
 
-args               = parser .parse_args()
-argdict            = vars(parser.parse_args())
+args = parser .parse_args()
+argdict = vars(parser.parse_args())
 
 bact_registry_file = open('rcsb_pdb_ids_20230106032038.txt', 'r')
-line               = bact_registry_file.readline()
+line = bact_registry_file.readline()
 bact_registry_file.close()
 bacteria_structs = line.split(',')
 
 
-def util__backwards_match(alntgt: str, aln_resid: int, verbose:bool=False)->Tuple[int, str]:
+def util__backwards_match(alntgt: str, aln_resid: int, verbose: bool = False) -> Tuple[int, str, int]:
     """
     returns (projected i.e. "ungapped" residue id, the residue itself residue)
     """
@@ -80,15 +82,17 @@ def util__backwards_match(alntgt: str, aln_resid: int, verbose:bool=False)->Tupl
     counter_proper = 0
     for i, char in enumerate(alntgt):
         if i == aln_resid:
-            if verbose: 
-                print("[ {} ] <-----> id.[aligned: {} | orgiginal: {} ]".format(alntgt[aln_resid],i, counter_proper))
-            return ( counter_proper,  alntgt[i] , aln_resid)
+            if verbose:
+                print("[ {} ] <-----> id.[aligned: {} | orgiginal: {} ]".format(
+                    alntgt[aln_resid], i, counter_proper))
+            return (counter_proper,  alntgt[i], aln_resid)
         if char == '-':
             continue
         else:
             counter_proper += 1
 
     raise LookupError()
+
 
 def util__forwards_match(string: str, resid: int):
     """Returns the index of a source-sequence residue in the (aligned) source sequence."""
@@ -107,16 +111,18 @@ def util__forwards_match(string: str, resid: int):
 
 # ※ ---------------------------- 23SrRNA PTC residue locations ---------------------------- ※
 
+
 def get_23SrRNA_strandseq(rcsb_id: str, custom_path=None) -> Tuple[str, str]:
     return get_one_letter_code_can_by_nomclass(rcsb_id, "23SrRNA", custom_path)
+
 
 def get_one_letter_code_can_by_nomclass(rcsb_id: str, nomenclature_class: str, custom_path=None) -> Tuple[str, str]:
 
     default_path = f"{rcsb_id.upper()}_modified.cif" if custom_path == None else custom_path
 
     target = gemmi.cif.read_file(default_path)
-    block  = target.sole_block()
-    model  = gemmi.read_structure(default_path)[0]
+    block = target.sole_block()
+    model = gemmi.read_structure(default_path)[0]
 
     STRAND = None
     SEQ = None
@@ -147,21 +153,25 @@ def get_one_letter_code_can_by_nomclass(rcsb_id: str, nomenclature_class: str, c
         nomenclature_class, rcsb_id, STRAND))
     return (STRAND, SEQ)
 
+
 class RibovisionAlignment:
 
-    def __init__(self, mass_alignment_path:str) -> None:
-        self.fasta_seqs: List[SeqIO.SeqRecord] = SeqIO.parse(open(mass_alignment_path), 'fasta')
+    def __init__(self, mass_alignment_path: str) -> None:
+        self.fasta_seqs: List[SeqIO.SeqRecord] = SeqIO.parse(
+            open(mass_alignment_path), 'fasta')
         pass
 
     def find_aln_by_id(self, rcsb_id: str) -> SeqIO.SeqRecord:
         top_score = 0
-        seq       = None
+        seq = None
         for fasta in self.fasta_seqs:
-            rat = max([process.fuzz.ratio(rcsb_id, fasta.description), process.fuzz.ratio(rcsb_id, fasta.id) ])
+            rat = max([process.fuzz.ratio(rcsb_id, fasta.description),
+                      process.fuzz.ratio(rcsb_id, fasta.id)])
             if rat > top_score:
                 top_score = rat
-                seq       = fasta
+                seq = fasta
         return seq
+
 
 def add_target_to_domain_alignment(rcsb_id: str, domain: str):
     """
@@ -191,37 +201,51 @@ def add_target_to_domain_alignment(rcsb_id: str, domain: str):
     muscle_combine_profile(domain_alignment, fpath_23s,
                            f'combined_{rcsb_id.upper()}_ribovision_{domain}.fasta')
 
+
 def seq_to_fasta(rcsb_id: str, _seq: str, outfile: str):
     from Bio.Seq import Seq
-    _seq = _seq.replace("\n","")
+    _seq = _seq.replace("\n", "")
     seq_record = SeqRecord.SeqRecord(Seq(_seq).upper())
     seq_record.id = seq_record.description = rcsb_id
     SeqIO.write(seq_record, outfile, 'fasta',)
 
+
 def muscle_combine_profile(msa_path1: str, msa_path2: str, out_filepath: str):
     """Combine two MSA-profiles into a single one. Used here to "append" a target sequence two the ribovision alignment. """
-    cmd = ['/home/rxz/dev/docker_ribxz/cli/scripts/muscle3.8',  '-profile', '-in1', msa_path1,'-in2', msa_path2, '-out', out_filepath]
-    subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=os.environ.copy()).wait()
+    cmd = ['/home/rxz/dev/docker_ribxz/cli/scripts/muscle3.8',  '-profile',
+           '-in1', msa_path1, '-in2', msa_path2, '-out', out_filepath]
+    subprocess.Popen(cmd, stdout=subprocess.PIPE,
+                     stderr=subprocess.PIPE, env=os.environ.copy()).wait()
     sys.stdout.flush()
 
-def retrieve_aligned(rcsb_id:str, domain:str):
+
+def retrieve_aligned_23s(rcsb_id: str, domain: str):
     if domain == 'b':
         domain_alignment_path = 'ribovision.bacteria.fasta'
     elif domain == 'e':
         domain_alignment_path = 'ribovision.eukaryota.fasta'
     else:
-        raise FileNotFoundError("Domain misspecified. Must be either 'bacteria' or 'eukarya'.")
+        raise FileNotFoundError(
+            "Domain misspecified. Must be either 'bacteria' or 'eukarya'.")
 
-    ribovision        = RibovisionAlignment(domain_alignment_path)
+    ribovision = RibovisionAlignment(domain_alignment_path)
     target_seq_record = ribovision.find_aln_by_id(rcsb_id)
 
     return target_seq_record
 
+
 if args.ptc:
 
-    domain  = 'b'
+    domain = 'b'
     rcsb_id = args.target.upper()
-    tgt_seq = retrieve_aligned(rcsb_id, domain)
+
+    [chain_id, strand_target] = get_23SrRNA_strandseq(
+        rcsb_id,
+        custom_path=os.path.join(
+            RIBETL_DATA, rcsb_id.upper(), f"{rcsb_id.upper()}_modified.cif")
+    )
+
+    tgt_seq = retrieve_aligned_23s(rcsb_id, domain)
 
     ptc_projected = {
         "site_6": [],
@@ -230,24 +254,33 @@ if args.ptc:
     }
 
 
-    
-    for ( site, resids ) in DORIS_ET_AL[domain].items():
-       for resid in resids:
-            print("->",resid)
-            ptc_projected[site].append(util__backwards_match(tgt_seq.seq,resid, True))
-       
-   
-    pprint(ptc_projected)
+
+    report = {
+        chain_id: {
+            "site_6": [],
+            "site_8": [],
+            "site_9": []
+        }
+    }
+    for (site, resids) in DORIS_ET_AL[domain].items():
+        for resid in resids:
+            report[chain_id][site].append(
+                util__backwards_match(tgt_seq.seq, resid, True))
+
+    pprint(report)
+    with open(f'/home/rxz/dev/docker_ribxz/cli/scripts/PTC_COORDINATES/{rcsb_id.upper()}_PTC.json', 'w') as f:
+        json.dump(report, f, indent=4)
 
     exit(1)
 
 if args.fasta_profile:
-    domain                    = 'bacteria'
-    rcsb_id                   = argdict["target"]
-    struct_profile            = open_structure(rcsb_id, 'json')
-    [chain_id, strand_target] = get_23SrRNA_strandseq(rcsb_id,custom_path=os.path.join(RIBETL_DATA, rcsb_id.upper(), f"{rcsb_id.upper()}_modified.cif"))
+    domain = 'bacteria'
+    rcsb_id = argdict["target"]
+    struct_profile = open_structure(rcsb_id, 'json')
+    [chain_id, strand_target] = get_23SrRNA_strandseq(rcsb_id, custom_path=os.path.join(
+        RIBETL_DATA, rcsb_id.upper(), f"{rcsb_id.upper()}_modified.cif"))
 
-    fpath_23s             = f'{rcsb_id.upper()}_{chain_id}_23SrRNA.fasta'
+    fpath_23s = f'{rcsb_id.upper()}_{chain_id}_23SrRNA.fasta'
     domain_alignment: str = ''
 
     if domain == 'bacteria':
@@ -257,9 +290,11 @@ if args.fasta_profile:
         domain_alignment = 'ribovision.eukaryota.fasta'
 
     else:
-        raise FileNotFoundError("Domain misspecified. Must be either 'bacteria' or 'eukarya'.")
-    seq_to_fasta(rcsb_id,strand_target,fpath_23s)
-    muscle_combine_profile(domain_alignment, fpath_23s,'ribovision.bacteria.fasta')
+        raise FileNotFoundError(
+            "Domain misspecified. Must be either 'bacteria' or 'eukarya'.")
+    seq_to_fasta(rcsb_id, strand_target, fpath_23s)
+    muscle_combine_profile(domain_alignment, fpath_23s,
+                           'ribovision.bacteria.fasta')
     exit(1)
 
 if args.generate:
@@ -324,9 +359,7 @@ if not args.display_all:
     print("\nTo display more residues per target structure, use additional --display_all flag.")
 
 
-# the task for today is to establish a robust pipeline for saving the visualized regions 
+# the task for today is to establish a robust pipeline for saving the visualized regions
 # n regions of the 23S rRNA are conserved.
 # - datasheet with the conserved regions: 6,8,9
 # - robust way to visualize it with pymol
-
-
