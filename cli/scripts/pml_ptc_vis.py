@@ -49,6 +49,10 @@ def highlight_ptc(structure:str):
         cmd.set("cartoon_transparency", 0.75)
         cmd.reset()
 
+def list_bacteria():
+    pprint(os.listdir("/home/rxz/dev/docker_ribxz/cli/scripts/PTC_COORDINATES"))
+
+
 def ptc(struct:str):
     cmd.delete("all")
     struct      = struct.upper()
@@ -59,3 +63,4 @@ def ptc(struct:str):
     highlight_ptc(struct)
 
 cmd.extend("ptc",ptc)
+cmd.extend("list_bacteria",list_bacteria)
