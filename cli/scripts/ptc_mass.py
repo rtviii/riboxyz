@@ -253,8 +253,6 @@ if args.ptc:
         "site_9": []
     }
 
-
-
     report = {
         chain_id: {
             "site_6": [],
