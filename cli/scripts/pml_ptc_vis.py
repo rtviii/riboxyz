@@ -12,7 +12,6 @@ def build_selection_string(site_name: str, chain_name: str, res_ids: List[int]):
     return selection_name, selection_string
 
 def highlight_ptc(structure:str):
-    # structure      = '7SSW'
     structure = structure.upper()
     ptc_coord_path = os.path.join(
                 "/home/rxz/dev/docker_ribxz/cli/scripts/PTC_COORDINATES", 
@@ -43,14 +42,12 @@ def highlight_ptc(structure:str):
         cmd.create(name8, selection8)
         cmd.create(name9, selection9)
 
-        cmd.color("gray60", "7ssw")
+        cmd.color("gray60", structure)
         cmd.show("surface", name6)
         cmd.show("surface", name8)
         cmd.show("surface", name9)
         cmd.set("cartoon_transparency", 0.75)
         cmd.reset()
-
-
 
 def ptc(struct:str):
     cmd.delete("all")
