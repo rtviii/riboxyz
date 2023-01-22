@@ -13,10 +13,11 @@ from subprocess import Popen, PIPE, STDOUT, run
 #-⋯⋯⋅⋱⋰⋆⋅⋅⋄⋅⋅∶⋅⋅⋄▫▪▭┈┅✕⋅⋅⋄⋅⋅✕∶⋅⋅⋄⋱⋰⋯⋯⋯⋯⋅⋱⋰⋆⋅⋅⋄⋅⋅∶⋅⋅⋄▫▪▭┈┅✕⋅⋅⋄⋅⋅✕∶⋅⋅⋄⋱⋰⋯⋯⋯⋅⋱⋰⋆⋅⋅⋄⋅⋅∶⋅⋅⋄▫▪▭┈┅✕⋅⋅⋄⋅⋅✕∶⋅⋅⋄⋱⋰⋯⋯⋯
 @api_view(['GET'])
 def hello(request):
-    return Response("Hello from comp")
+    return Response("Hello from comp january")
 
 @api_view(['GET'])
 def edit_chain(request):
+
     params     = dict(request.GET)
     structid   = str.upper(params['structid'][0])
     filehandle = os.path.join(RIBETL_DATA, structid + ".cif")
