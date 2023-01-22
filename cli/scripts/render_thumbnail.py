@@ -14,6 +14,7 @@ thumbnail_path=os.path.join(RIBETL_DATA,pdbid, f"_ray_{pdbid}.png")
 if os.path.exists(thumbnail_path):
     print(f"Thumbnail already exists: {thumbnail_path}")
     sys.exit(0)
+
 else:
     cmd.load(os.path.join(RIBETL_DATA, pdbid, f"{pdbid}.cif"))
     cmd.reset()
