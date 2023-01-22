@@ -198,9 +198,9 @@ def add_target_to_domain_alignment(rcsb_id: str, domain: str):
     fpath_23s = f'{rcsb_id.upper()}_{chain_id}_23SrRNA.fasta'
     domain_alignment: str = ''
     if domain == 'bacteria':
-        domain_alignment = 'ribovision.bacteria.fasta'
+        domain_alignment = 'data/ribovision.bacteria.fasta'
     elif domain == 'eukarya':
-        domain_alignment = 'ribovision.eukaryota.fasta'
+        domain_alignment = 'data/ribovision.eukaryota.fasta'
     else:
         raise FileNotFoundError(
             "Domain misspecified. Must be either 'bacteria' or 'eukarya'.")
@@ -229,9 +229,9 @@ def muscle_combine_profile(msa_path1: str, msa_path2: str, out_filepath: str):
 
 def retrieve_aligned_23s(rcsb_id: str, domain: str):
     if domain == 'b':
-        domain_alignment_path = 'ribovision.bacteria.fasta'
+        domain_alignment_path = 'data/ribovision.bacteria.fasta'
     elif domain == 'e':
-        domain_alignment_path = 'ribovision.eukaryota.fasta'
+        domain_alignment_path = 'data/ribovision.eukaryota.fasta'
     else:
         raise FileNotFoundError(
             "Domain misspecified. Must be either 'bacteria' or 'eukarya'.")
@@ -296,10 +296,10 @@ if args.fasta_profile:
     domain_alignment: str = ''
 
     if domain == 'bacteria':
-        domain_alignment = 'ribovision.bacteria.fasta'
+        domain_alignment = 'data/ribovision.bacteria.fasta'
 
     elif domain == 'eukarya':
-        domain_alignment = 'ribovision.eukaryota.fasta'
+        domain_alignment = 'data/ribovision.eukaryota.fasta'
 
     else:
         raise FileNotFoundError(
