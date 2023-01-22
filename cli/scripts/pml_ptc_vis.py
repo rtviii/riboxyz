@@ -62,9 +62,7 @@ def list_bacteria():
 def ptc(struct:str):
     cmd.delete("all")
     struct      = struct.upper()
-    struct_path = os.path.join(
-                "/home/rxz/dev/static/{}/{}.cif".format(struct,struct)
-            )
+    struct_path = os.path.join("/home/rxz/dev/static/{}/{}.cif".format(struct,struct))
     cmd.load(struct_path)
     highlight_ptc(struct)
 
