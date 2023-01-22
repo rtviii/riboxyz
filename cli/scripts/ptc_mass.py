@@ -40,9 +40,17 @@ DORIS_ET_AL = {
         "site_9": [2941, 2942, 2943, 2944, 2945, 2946, 2947, 2948, 2949, 2950, 2951, 2952, 2953]
     },
     'b': {
-        "site_6": [2059, 2060, 2061, 2062, 2063, 2064, 2065, 2066],
-        "site_8": [2446, 2447, 2448, 2449, 2450, 2451, 2452, 2453],
-        "site_9": [2576, 2577, 2578, 2579, 2580, 2581, 2582, 2583, 2584, 2585, 2586, 2587, 2588]
+
+        "site_6": [2059, 2060, 2061,
+                   2062, 2063, 2064,
+                   2065],
+
+        "site_8": [2446, 2447, 2448,
+                   2449, 2450, 2451, 2452],
+
+        "site_9": [2576, 2577, 2578, 2579,
+                   2580, 2581, 2582, 2583,
+                   2584, 2585, 2586, 2587]
     }
 }
 
@@ -204,8 +212,8 @@ def add_target_to_domain_alignment(rcsb_id: str, domain: str):
 
 def seq_to_fasta(rcsb_id: str, _seq: str, outfile: str):
     from Bio.Seq import Seq
-    _seq = _seq.replace("\n", "")
-    seq_record = SeqRecord.SeqRecord(Seq(_seq).upper())
+    _seq          = _seq.replace("\n", "")
+    seq_record    = SeqRecord.SeqRecord(Seq(_seq).upper())
     seq_record.id = seq_record.description = rcsb_id
     SeqIO.write(seq_record, outfile, 'fasta',)
 
@@ -263,9 +271,15 @@ if args.ptc:
     for (site, resids) in DORIS_ET_AL[domain].items():
         for resid in resids:
             report[chain_id][site].append(
-                util__backwards_match(tgt_seq.seq, resid, True))
+                util__backwards_match(tgt_seq.seq, resid))
+
 
     pprint(report)
+
+    pprint("Site 6:" + "".join([* map(lambda x: x[1], report[chain_id]["site_6"])]))
+    pprint("Site 8:" + "".join([* map(lambda x: x[1], report[chain_id]["site_8"])]))
+    pprint("Site 9:" + "".join([* map(lambda x: x[1], report[chain_id]["site_9"])]))
+
     with open(f'/home/rxz/dev/docker_ribxz/cli/scripts/PTC_COORDINATES/{rcsb_id.upper()}_PTC.json', 'w') as f:
         json.dump(report, f, indent=4)
 

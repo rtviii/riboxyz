@@ -43,10 +43,16 @@ def highlight_ptc(structure:str):
         cmd.create(name9, selection9)
 
         cmd.color("gray60", structure)
+
+        cmd.color("forest", name6)
+        cmd.color("tv_orange", name8)
+        cmd.color("blue", name9)
+
         cmd.show("surface", name6)
         cmd.show("surface", name8)
         cmd.show("surface", name9)
-        cmd.set("cartoon_transparency", 0.75)
+        cmd.set("cartoon_transparency", 0.5)
+        cmd.bg_color("white")
         cmd.reset()
 
 def list_bacteria():
