@@ -35,7 +35,6 @@ def util__forwards_match(string: str, resid: int):
         else:
             count_proper += 1
 
-
 # ? Case Same-id-to-same (unperturbed seqs)
 SEQ1_1    = "AAABrfBCCC"
 SEQ1_2    = "AAABrfBCCC"
