@@ -34,6 +34,9 @@ RIBETL_DATA = os.environ.get('RIBETL_DATA')
 
 # https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4574749/pdf/1719.pdf
 DORIS_ET_AL = {
+    "subseq_6": "AAGACCC",
+    "subseq_8": "GGAUAAC",
+    "subseq_9": "GAGCUGGGUUUA",
     "e": {
         "site_6": [2400, 2401, 2402, 2403, 2404, 2405, 2406, 2407],
         "site_8": [2811, 2812, 2813, 2814, 2815, 2816, 2817, 2818],
@@ -50,7 +53,7 @@ DORIS_ET_AL = {
 
         "site_9": [2576, 2577, 2578, 2579,
                    2580, 2581, 2582, 2583,
-                   2584, 2585, 2586, 2587]
+                   2584, 2585, 2586, 2587],
     }
 }
 
@@ -212,8 +215,8 @@ def add_target_to_domain_alignment(rcsb_id: str, domain: str):
 
 def seq_to_fasta(rcsb_id: str, _seq: str, outfile: str):
     from Bio.Seq import Seq
-    _seq          = _seq.replace("\n", "")
-    seq_record    = SeqRecord.SeqRecord(Seq(_seq).upper())
+    _seq = _seq.replace("\n", "")
+    seq_record = SeqRecord.SeqRecord(Seq(_seq).upper())
     seq_record.id = seq_record.description = rcsb_id
     SeqIO.write(seq_record, outfile, 'fasta',)
 
@@ -273,12 +276,14 @@ if args.ptc:
             report[chain_id][site].append(
                 util__backwards_match(tgt_seq.seq, resid))
 
-
     pprint(report)
 
-    pprint("Site 6:" + "".join([* map(lambda x: x[1], report[chain_id]["site_6"])]))
-    pprint("Site 8:" + "".join([* map(lambda x: x[1], report[chain_id]["site_8"])]))
-    pprint("Site 9:" + "".join([* map(lambda x: x[1], report[chain_id]["site_9"])]))
+    pprint("Site 6:" +
+           "".join([* map(lambda x: x[1], report[chain_id]["site_6"])]))
+    pprint("Site 8:" +
+           "".join([* map(lambda x: x[1], report[chain_id]["site_8"])]))
+    pprint("Site 9:" +
+           "".join([* map(lambda x: x[1], report[chain_id]["site_9"])]))
 
     with open(f'/home/rxz/dev/docker_ribxz/cli/scripts/PTC_COORDINATES/{rcsb_id.upper()}_PTC.json', 'w') as f:
         json.dump(report, f, indent=4)
