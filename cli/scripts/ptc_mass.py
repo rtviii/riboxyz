@@ -17,6 +17,7 @@ from pprint import pprint
 import subprocess
 from typing import List, Tuple
 from fuzzywuzzy import process
+from fuzzysearch import find_near_matches
 import re
 from extract_bsites import open_structure
 import pandas
@@ -65,13 +66,14 @@ parser = argparse.ArgumentParser(
 parser.add_argument("-t", "--target", type=str, required=False)
 parser.add_argument("-d", "--domain", type=str,
                     required=False, choices=['e', 'b'])
-parser.add_argument("-m", "--mode",
-                    type=str,  choices=['position', 'residue'], nargs='?', default='position', help="Display the position of the PTC residue, or the residue itself. Default: position")
-parser.add_argument("--display_all",      action='store_true')
-parser.add_argument("--generate",      action='store_true')
-parser.add_argument("--fasta_profile",      action='store_true')
-parser.add_argument("--ptc",    action='store_true')
-parser.add_argument("--batch",    type=int,        required=False)
+parser.add_argument("-m", "--mode", type=str,  choices=['position', 'residue'], nargs='?', default='position',
+                    help="Display the position of the PTC residue, or the residue itself. Default: position")
+parser.add_argument("--display_all", action='store_true')
+parser.add_argument("--generate", action='store_true')
+parser.add_argument("--fuzzy", action='store_true')
+parser.add_argument("--fasta_profile", action='store_true')
+parser.add_argument("--ptc", action='store_true')
+parser.add_argument("--batch", type=int, required=False)
 
 args = parser .parse_args()
 argdict = vars(parser.parse_args())
@@ -165,6 +167,16 @@ def get_one_letter_code_can_by_nomclass(rcsb_id: str, nomenclature_class: str, c
     return (STRAND, SEQ)
 
 
+class rRNA23S(SeqIO.SeqRecord):
+
+    def __init__(self, seq):
+        super().__init__(seq)
+
+    def fuzzy_search_subseq(self, subseq: str):
+        print("Fuzz seq", self._seq)
+        print("Fuzz seq")
+
+
 class RibovisionAlignment:
 
     def __init__(self, mass_alignment_path: str) -> None:
@@ -243,6 +255,72 @@ def retrieve_aligned_23s(rcsb_id: str, domain: str):
     target_seq_record = ribovision.find_aln_by_id(rcsb_id)
 
     return target_seq_record
+
+
+if args.fuzzy:
+
+    domain = 'b'
+    rcsb_id = args.target.upper()
+
+    [chain_id, strand_target] = get_23SrRNA_strandseq(
+        rcsb_id,
+        custom_path=os.path.join(
+            RIBETL_DATA, rcsb_id.upper(), f"{rcsb_id.upper()}_modified.cif")
+    )
+
+    ptc_projected = {
+        "site_6": [],
+        "site_8": [],
+        "site_9": []
+    }
+
+    def pick_match(ms, rna_length: int):
+        """Pick the match that is closest to the 3' end of the rRNA."""
+        best = None
+        farthest_dist = 0
+
+        if len(ms) > 1:
+            for m in ms:
+                if rna_length - ((m.start + m.end) / 2) < farthest_dist:
+                    best = m
+            return best
+        else:
+            return ms[0]
+
+    # tgt_seq = retrieve_aligned_23s(rcsb_id, domain)
+    rna23s = SeqIO.SeqRecord(strand_target)
+    found6 = find_near_matches(
+        DORIS_ET_AL["subseq_6"], strand_target, max_l_dist=0)
+    found8 = find_near_matches(
+        DORIS_ET_AL["subseq_8"], strand_target, max_l_dist=0)
+    found9 = find_near_matches(
+        DORIS_ET_AL["subseq_9"], strand_target, max_l_dist=0)
+
+    best_match6 = pick_match(found6, len(rna23s))
+    best_match8 = pick_match(found8, len(rna23s))
+    best_match9 = pick_match(found9, len(rna23s))
+
+    # print(">>Returned matches ", )
+    # pprint(best_match6)
+    # print(best_match8)
+    # print(best_match9)
+
+    ptc_projected["site_6"] = [*range(best_match6.start, best_match6.end)]
+    ptc_projected["site_8"] = [*range(best_match8.start, best_match8.end)]
+    ptc_projected["site_9"] = [*range(best_match9.start, best_match9.end)]
+
+    ptcs_dir       = os.path.join(RIBETL_DATA, "PTC_COORDINATES")
+    ptc_fuzzy_path = os.path.join(ptcs_dir, f"{rcsb_id.upper()}_FUZZY_PTC.json")
+    with open(ptc_fuzzy_path, 'w') as f:
+        json.dump({
+            chain_id:{
+                "site_6": ptc_projected["site_6"],
+                "site_8": ptc_projected["site_8"],
+                "site_9": ptc_projected["site_9"]
+            }
+        }, f, indent=4)
+    print("[Saved {} successfully.]".format(ptc_fuzzy_path))
+    
 
 
 if args.ptc:
@@ -372,8 +450,8 @@ if args.generate:
     df.to_csv(f"ptc_100xbatch={args.batch}.csv")
     exit(1)
 
-if not args.display_all:
-    print("\nTo display more residues per target structure, use additional --display_all flag.")
+# if not args.display_all:
+    # print("\nTo display more residues per target structure, use additional --display_all flag.")
 
 
 # the task for today is to establish a robust pipeline for saving the visualized regions
