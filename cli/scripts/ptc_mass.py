@@ -44,11 +44,9 @@ DORIS_ET_AL = {
         "site_9": [2941, 2942, 2943, 2944, 2945, 2946, 2947, 2948, 2949, 2950, 2951, 2952, 2953]
     },
     'b': {
-
         "site_6": [2059, 2060, 2061,
                    2062, 2063, 2064,
                    2065],
-
         "site_8": [2446, 2447, 2448,
                    2449, 2450, 2451, 2452],
 
@@ -79,7 +77,7 @@ args = parser .parse_args()
 argdict = vars(parser.parse_args())
 
 bact_registry_file = open('rcsb_pdb_ids_20230106032038.txt', 'r')
-line = bact_registry_file.readline()
+line               = bact_registry_file.readline()
 bact_registry_file.close()
 bacteria_structs = line.split(',')
 
@@ -105,7 +103,6 @@ def util__backwards_match(alntgt: str, aln_resid: int, verbose: bool = False) ->
             counter_proper += 1
 
     raise LookupError()
-
 
 def util__forwards_match(string: str, resid: int):
     """Returns the index of a source-sequence residue in the (aligned) source sequence."""
@@ -300,15 +297,15 @@ if args.fuzzy:
     best_match8 = pick_match(found8, len(rna23s))
     best_match9 = pick_match(found9, len(rna23s))
 
-    # print(">>Returned matches ", )
-    # pprint(best_match6)
-    # print(best_match8)
-    # print(best_match9)
+    print("\tReturned matches ", )
+    print(best_match6)
+    print(best_match8)
+    print(best_match9)
 
     ptc_projected["site_6"] = [*range(best_match6.start, best_match6.end)]
     ptc_projected["site_8"] = [*range(best_match8.start, best_match8.end)]
     ptc_projected["site_9"] = [*range(best_match9.start, best_match9.end)]
-
+    pprint(ptc_projected)
     ptcs_dir       = os.path.join(RIBETL_DATA, "PTC_COORDINATES")
     ptc_fuzzy_path = os.path.join(ptcs_dir, f"{rcsb_id.upper()}_FUZZY_PTC.json")
     with open(ptc_fuzzy_path, 'w') as f:
@@ -458,3 +455,8 @@ if args.generate:
 # n regions of the 23S rRNA are conserved.
 # - datasheet with the conserved regions: 6,8,9
 # - robust way to visualize it with pymol
+
+
+
+# 5afi | A| resi 2610-2611 |~ C3
+# 3j7z | sele c. A and resi 2609 and name C4 | O4 | n4

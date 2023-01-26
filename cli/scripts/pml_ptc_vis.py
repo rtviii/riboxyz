@@ -8,11 +8,10 @@ from pymol import cmd
 RIBETL_DATA = "/home/rxz/dev/static"
 def build_selection_string(site_name: str, chain_name: str, res_ids: List[int]):
     """pymol command being issued"""
-    selection_name = '23S_{}_{}'.format(chain_name, site_name)
-    selection_string = f"c. {chain_name} and "
+    selection_name    = '23S_{}_{}'.format(chain_name, site_name)
+    selection_string  = f"c. {chain_name} and "
     selection_string += " OR ".join([*map(lambda x: f"resi {x}", res_ids)])
     return selection_name, selection_string
-
 
 def highlight_ptc(structure: str):
     structure = structure.upper()
@@ -58,7 +57,6 @@ def highlight_ptc(structure: str):
         cmd.bg_color("white")
         cmd.reset()
 
-
 def highlight_ptc_fuzzy(structure: str):
     structure = structure.upper()
     print("GOT HERE")
@@ -97,12 +95,11 @@ def highlight_ptc_fuzzy(structure: str):
         cmd.show("surface", name9)
         cmd.set("cartoon_transparency", 0.5)
         cmd.bg_color("white")
+        cmd.set("transparency", 0.5)
         cmd.reset()
-
 
 def list_bacteria():
     pprint(os.listdir(f"{RIBETL_DATA}/PTC_COORDINATES"))
-
 
 def ptc(struct: str):
     cmd.delete("all")
@@ -112,15 +109,13 @@ def ptc(struct: str):
     cmd.load(struct_path)
     highlight_ptc(struct)
 
-
-def ptc_fuzzy(struct: str):
+def ptc_fuzzy(struct: str): 
     cmd.delete("all")
     struct = struct.upper()
     struct_path = os.path.join(
         "/home/rxz/dev/static/{}/{}.cif".format(struct, struct))
     cmd.load(struct_path)
     highlight_ptc_fuzzy(struct)
-
 
 # cmd.extend("ptc",ptc)
 cmd.extend("ptc", ptc_fuzzy)
