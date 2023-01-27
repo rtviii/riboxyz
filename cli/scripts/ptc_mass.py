@@ -49,7 +49,6 @@ DORIS_ET_AL = {
                    2065],
         "site_8": [2446, 2447, 2448,
                    2449, 2450, 2451, 2452],
-
         "site_9": [2576, 2577, 2578, 2579,
                    2580, 2581, 2582, 2583,
                    2584, 2585, 2586, 2587],
@@ -163,7 +162,6 @@ def get_one_letter_code_can_by_nomclass(rcsb_id: str, nomenclature_class: str, c
         nomenclature_class, rcsb_id, STRAND))
     return (STRAND, SEQ)
 
-
 class rRNA23S(SeqIO.SeqRecord):
 
     def __init__(self, seq):
@@ -266,8 +264,8 @@ if args.fuzzy:
     )
 
     ptc_projected = {
-        "site_6": [],
-        "site_8": [],
+        # "site_6": [],
+        # "site_8": [],
         "site_9": []
     }
 
@@ -286,36 +284,50 @@ if args.fuzzy:
 
     # tgt_seq = retrieve_aligned_23s(rcsb_id, domain)
     rna23s = SeqIO.SeqRecord(strand_target)
-    found6 = find_near_matches(
-        DORIS_ET_AL["subseq_6"], strand_target, max_l_dist=0)
-    found8 = find_near_matches(
-        DORIS_ET_AL["subseq_8"], strand_target, max_l_dist=0)
+    # found6 = find_near_matches(
+    #     DORIS_ET_AL["subseq_6"], strand_target, max_l_dist=0)
+    # found8 = find_near_matches(
+    #     DORIS_ET_AL["subseq_8"], strand_target, max_l_dist=0)
     found9 = find_near_matches(
         DORIS_ET_AL["subseq_9"], strand_target, max_l_dist=0)
 
-    best_match6 = pick_match(found6, len(rna23s))
-    best_match8 = pick_match(found8, len(rna23s))
+    # best_match6 = pick_match(found6, len(rna23s))
+    # best_match8 = pick_match(found8, len(rna23s))
     best_match9 = pick_match(found9, len(rna23s))
 
     print("\tReturned matches ", )
-    print(best_match6)
-    print(best_match8)
+    # print(best_match6)
+    # print(best_match8)
     print(best_match9)
 
-    ptc_projected["site_6"] = [*range(best_match6.start, best_match6.end)]
-    ptc_projected["site_8"] = [*range(best_match8.start, best_match8.end)]
+    # ptc_projected["site_6"] = [*range(best_match6.start, best_match6.end)]
+    # ptc_projected["site_8"] = [*range(best_match8.start, best_match8.end)]
     ptc_projected["site_9"] = [*range(best_match9.start, best_match9.end)]
-    pprint(ptc_projected)
-    ptcs_dir       = os.path.join(RIBETL_DATA, "PTC_COORDINATES")
-    ptc_fuzzy_path = os.path.join(ptcs_dir, f"{rcsb_id.upper()}_FUZZY_PTC.json")
-    with open(ptc_fuzzy_path, 'w') as f:
-        json.dump({
+
+
+    report = {
             chain_id:{
-                "site_6": ptc_projected["site_6"],
-                "site_8": ptc_projected["site_8"],
+                # "site_6": ptc_projected["site_6"],
+                # "site_8": ptc_projected["site_8"],
                 "site_9": ptc_projected["site_9"]
             }
-        }, f, indent=4)
+        }
+    pprint(ptc_projected)
+
+
+    # pprint("Site 6:" +
+    #        "".join([* map(lambda x: strand_target[x], report[chain_id]["site_6"])]))
+    # pprint("Site 8:" +
+    #        "".join([* map(lambda x: strand_target[x], report[chain_id]["site_8"])]))
+    for res in [* map(lambda x: strand_target[x], report[chain_id]["site_9"])]:
+        print("Res", res)
+
+
+    ptcs_dir       = os.path.join(RIBETL_DATA, "PTC_COORDINATES")
+    ptc_fuzzy_path = os.path.join(ptcs_dir, f"{rcsb_id.upper()}_FUZZY_PTC.json")
+
+    with open(ptc_fuzzy_path, 'w') as f:
+        json.dump(report, f, indent=4)
     print("[Saved {} successfully.]".format(ptc_fuzzy_path))
     
 
