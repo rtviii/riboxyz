@@ -19,6 +19,11 @@ from typing import List, Tuple
 from fuzzywuzzy import process
 from fuzzysearch import find_near_matches
 import re
+from Bio.PDB.Structure import Structure
+from Bio.PDB.Model import Model
+from Bio.PDB.Chain import Chain
+from Bio.PDB.Atom import Atom
+from Bio.PDB.Residue import Residue
 from extract_bsites import open_structure
 import pandas
 from Bio import pairwise2
@@ -68,6 +73,7 @@ parser.add_argument("-m", "--mode", type=str,  choices=['position', 'residue'], 
 parser.add_argument("--display_all", action='store_true')
 parser.add_argument("--generate", action='store_true')
 parser.add_argument("--fuzzy", action='store_true')
+parser.add_argument("--markers", action='store_true')
 parser.add_argument("--fasta_profile", action='store_true')
 parser.add_argument("--ptc", action='store_true')
 parser.add_argument("--batch", type=int, required=False)
@@ -330,6 +336,18 @@ if args.fuzzy:
         json.dump(report, f, indent=4)
     print("[Saved {} successfully.]".format(ptc_fuzzy_path))
     
+if args.markers:
+    domain                    = 'bacteria'
+    rcsb_id                   = argdict["target"].upper()
+    struct_profile:Structure            = open_structure(rcsb_id, 'cif')
+    print(struct_profile.child_dict[0])
+    model:Model =struct_profile.child_dict[0]
+    rna23s:Chain = model.child_dict['A']
+    x:Residue;
+    print(rna23s.child_list[2611])
+    print(rna23s.child_list[2611].id)
+    # [*map(lambda x: print(x.id)  ,rna23s.child_list)]
+    
 
 
 if args.ptc:
@@ -378,9 +396,9 @@ if args.ptc:
     exit(1)
 
 if args.fasta_profile:
-    domain = 'bacteria'
-    rcsb_id = argdict["target"]
-    struct_profile = open_structure(rcsb_id, 'json')
+    domain                    = 'bacteria'
+    rcsb_id                   = argdict["target"]
+    struct_profile            = open_structure(rcsb_id, 'json')
     [chain_id, strand_target] = get_23SrRNA_strandseq(rcsb_id, custom_path=os.path.join(
         RIBETL_DATA, rcsb_id.upper(), f"{rcsb_id.upper()}_modified.cif"))
 
