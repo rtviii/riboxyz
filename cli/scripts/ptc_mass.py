@@ -131,6 +131,8 @@ DORIS_ET_AL = {
 def get_23SrRNA_strandseq(rcsb_id: str, custom_path=None) -> Tuple[str, str]:
     return get_one_letter_code_can_by_nomclass(rcsb_id, "23SrRNA", custom_path)
 
+def get_25SrRNA_strandseq(rcsb_id: str, custom_path=None) -> Tuple[str, str]:
+    return get_one_letter_code_can_by_nomclass(rcsb_id, "25SrRNA", custom_path)
 
 def get_one_letter_code_can_by_nomclass(rcsb_id: str, nomenclature_class: str, custom_path=None) -> Tuple[str, str]:
 
@@ -168,16 +170,6 @@ def get_one_letter_code_can_by_nomclass(rcsb_id: str, nomenclature_class: str, c
     print("Located {} sequence in {} CIF file. (Chain {})".format(
         nomenclature_class, rcsb_id, STRAND))
     return (STRAND, SEQ)
-
-class rRNA23S(SeqIO.SeqRecord):
-
-    def __init__(self, seq):
-        super().__init__(seq)
-
-    def fuzzy_search_subseq(self, subseq: str):
-        print("Fuzz seq", self._seq)
-        print("Fuzz seq")
-
 
 class RibovisionAlignment:
 
@@ -349,14 +341,31 @@ if args.markers:
         custom_path=os.path.join(
             RIBETL_DATA, rcsb_id.upper(), f"{rcsb_id.upper()}_modified.cif")
     )
-    print(struct_profile.child_dict[0])
-    model : Model =struct_profile.child_dict[0]
-    rna23s: Chain = model.child_dict[chain_id]
+
+    if chain_id == None or strand_target == None:
+        [chain_id, strand_target] = get_25SrRNA_strandseq(
+            rcsb_id,
+            custom_path=os.path.join(
+                RIBETL_DATA, rcsb_id.upper(), f"{rcsb_id.upper()}_modified.cif")
+        )
+        print("25S wflow")
+    else:
+        print("23S wflow")
+
+    if chain_id == None or strand_target == None:
+        print("Failed to locate either 23S or 25S rRNA in {}".format(rcsb_id))
+        exit(1)
+
+    if chain_id in struct_profile.child_dict[0].child_dict:
+        rnas: Chain = struct_profile.child_dict[0].child_dict[chain_id]
+    else:
+        rnas: Chain = struct_profile.child_dict[1].child_dict[chain_id]
+
     x     : Residue;
     LANDMARK_IDS = [2610,2611,2612]
     SITE_DICT    = {}
 
-    for res in rna23s.child_list:
+    for res in rnas.child_list:
         res:Residue
         seq_id_raw = res.id[1]
         if seq_id_raw in LANDMARK_IDS:
