@@ -106,39 +106,67 @@ def util__forwards_match(string: str, resid: int):
             count_proper += 1
 
 
-def get_23SrRNA_strandseq(rcsb_id: str, custom_path=None) -> Tuple[str, str]:
-    return get_one_letter_code_can_by_nomclass(rcsb_id, "23SrRNA", custom_path)
-
-def get_25SrRNA_strandseq(rcsb_id: str, custom_path=None) -> Tuple[str, str]:
-    return get_one_letter_code_can_by_nomclass(rcsb_id, "25SrRNA", custom_path)
-
-def get_28SrRNA_strandseq(rcsb_id: str, custom_path=None) -> Tuple[str, str]:
-    return get_one_letter_code_can_by_nomclass(rcsb_id, "28SrRNA", custom_path)
 
 
-def retrieve_LSU_rRNA(rcsb_id):
+def get_sequence_by_nomclass(rcsb_id: str, nomenclature_class: str, canonical:bool=True,path:str=None) -> Tuple[str, str]:
+
+    target       = gemmi.cif.read_file(path)
+    block        = target.sole_block()
+    model        = gemmi.read_structure(path)[0]
+
+    STRAND = None
+    SEQ    = None
+
+    # Locate the chain of given nom. class
+    for (strand, nomclass) in zip(
+        block.find_loop('_ribosome_nomenclature.entity_poly.pdbx_strand_id'),
+        block.find_loop('_ribosome_nomenclature.polymer_class')
+    ):
+        if nomclass == nomenclature_class:
+            STRAND = strand
+            break
+
+    # Now find sequence of this class
+    for (chain_id, one_letter_code) in zip(
+        block.find_loop('_entity_poly.pdbx_strand_id'),
+        block.find_loop('_entity_poly.pdbx_seq_one_letter_code_can') if canonical else block.find_loop('_entity_poly.pdbx_seq_one_letter_code')
+    ):
+        # X-RAY structures have 'dual' chains. Split on comma to check both.
+        if STRAND in chain_id.split(','):
+            SEQ = str(one_letter_code).strip(";").strip("\n")
+
+    if SEQ == None:
+        print("Could not locate {} sequence in {} CIF file".format(
+            nomenclature_class, rcsb_id))
+    return (STRAND, SEQ)
+
+def retrieve_LSU_rRNA(rcsb_id, canonical:bool=True):
+    annotated_cifpath = os.path.join(RIBETL_DATA, rcsb_id.upper(), f"{rcsb_id.upper()}_modified.cif")
     rna_type = ""
-    [chain_id, strand_target] = get_23SrRNA_strandseq(
+    [chain_id, strand_target] = get_sequence_by_nomclass(
         rcsb_id,
-        custom_path=os.path.join(
+        "23SrRNA",
+        canonical,
+        path=os.path.join(
             RIBETL_DATA, rcsb_id.upper(), f"{rcsb_id.upper()}_modified.cif")
     )
     rna_type = "23SrRNA"
 
     if chain_id == None or strand_target == None:
-        [chain_id, strand_target] = get_25SrRNA_strandseq(
+        [chain_id, strand_target] = get_sequence_by_nomclass(
             rcsb_id,
-            custom_path=os.path.join(
-                RIBETL_DATA, rcsb_id.upper(), f"{rcsb_id.upper()}_modified.cif")
+            "25SrRNA",
+            canonical,
+            path=annotated_cifpath
         )
         rna_type = "25SrRNA"
 
     if chain_id == None or strand_target == None:
-        [chain_id, strand_target] = get_28SrRNA_strandseq(
+        [chain_id, strand_target] = get_sequence_by_nomclass(
             rcsb_id,
-            custom_path=os.path.join(
-                RIBETL_DATA, rcsb_id.upper(), f"{rcsb_id.upper()}_modified.cif")
-        )
+            "28SrRNA",
+            canonical,
+            path=annotated_cifpath)
         rna_type = "28SrRNA"
 
     if chain_id == None or strand_target == None:
@@ -147,13 +175,7 @@ def retrieve_LSU_rRNA(rcsb_id):
 
     return [chain_id, strand_target, rna_type]
 
-
-
-
-
 # ※ ---------------------------- 23/25/28SrRNA PTC residue locations ---------------------------- ※
-
-
 # https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4574749/pdf/1719.pdf
 DORIS_ET_AL = {
     "subseq_6": "AAGACCC",
@@ -176,40 +198,6 @@ DORIS_ET_AL = {
     }
 }
 
-
-def get_one_letter_code_can_by_nomclass(rcsb_id: str, nomenclature_class: str, custom_path=None) -> Tuple[str, str]:
-
-    default_path = f"{rcsb_id.upper()}_modified.cif" if custom_path == None else custom_path
-
-    target = gemmi.cif.read_file(default_path)
-    block = target.sole_block()
-    model = gemmi.read_structure(default_path)[0]
-
-    STRAND = None
-    SEQ = None
-
-    # Locate the chain of given nom. class
-    for (strand, nomclass) in zip(
-        block.find_loop('_ribosome_nomenclature.entity_poly.pdbx_strand_id'),
-        block.find_loop('_ribosome_nomenclature.polymer_class')
-    ):
-        if nomclass == nomenclature_class:
-            STRAND = strand
-            break
-
-    # Now find sequence of this class
-    for (chain_id, one_letter_code) in zip(
-        block.find_loop('_entity_poly.pdbx_strand_id'),
-        block.find_loop('_entity_poly.pdbx_seq_one_letter_code_can')
-    ):
-        # X-RAY structures have 'dual' chains. Split on comma to check both.
-        if STRAND in chain_id.split(','):
-            SEQ = str(one_letter_code).strip(";").strip("\n")
-
-    if SEQ == None:
-        print("Could not locate {} sequence in {} CIF file".format(
-            nomenclature_class, rcsb_id))
-    return (STRAND, SEQ)
 
 
 class RibovisionAlignment:
