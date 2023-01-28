@@ -128,6 +128,22 @@ def ptc(struct: str):
     highlight_ptc(struct)
 
 
+
+
+def get_markerpath (struct: str):
+    struct = struct.upper()
+    _path = os.path.join(RIBETL_DATA, "PTC_MARKERS", f"{struct}_PTC_MARKERS.json")
+    return _path
+
+def create_markerks(fpath:str):
+    with open(fpath, 'r') as infile:
+        POSNS = json.load(infile)
+    resid_id = "2610"
+    atom_name = "N4"
+    atom_coords:List[float] = POSNS[resid_id][atom_name]
+    cmd.pseudoatom("N4", pos=atom_coords, vdw=1.5, color="red")
+
+
 def ptc_fuzzy(struct: str):
     cmd.delete("all")
     struct = struct.upper()
@@ -135,8 +151,18 @@ def ptc_fuzzy(struct: str):
         "/home/rxz/dev/static/{}/{}.cif".format(struct, struct))
     cmd.load(struct_path)
     highlight_ptc_fuzzy(struct)
+    create_markerks(get_markerpath(struct))
 
 
-# cmd.extend("ptc",ptc)
-cmd.extend("ptc", ptc_fuzzy)
+def ptc_fuzzy_w_markerks(struct: str):
+    cmd.delete("all")
+    struct = struct.upper()
+    struct_path = os.path.join(
+        "/home/rxz/dev/static/{}/{}.cif".format(struct, struct))
+    cmd.load(struct_path)
+    highlight_ptc_fuzzy(struct)
+
+cmd.extend("ptc", ptc_fuzzy_w_markerks)
 cmd.extend("list_bacteria", list_bacteria)
+
+
