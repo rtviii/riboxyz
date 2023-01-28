@@ -304,10 +304,10 @@ if args.fuzzy:
             return ms[0]
 
     rnaS = SeqIO.SeqRecord(strand_target)
-    found9 = find_near_matches(
+    matches_site9 = find_near_matches(
         DORIS_ET_AL["subseq_9"], strand_target, max_l_dist=1)
-    best_match9 = pick_match(found9, len(rnaS))
-    print("\tReturned matches ", )
+    print("Got {} matches for {}".format(len(matches_site9), rna_type))
+    best_match9 = pick_match(matches_site9, len(rnaS))
     print(best_match9)
 
     ptc_projected["site_9"] = [*range(best_match9.start, best_match9.end)]
