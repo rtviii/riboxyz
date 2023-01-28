@@ -9,6 +9,7 @@
 # And additionally "requests" to download missing structures: https://pypi.org/project/requests/
 
 # Distribute freely.
+from functools import reduce
 import json
 import os
 import sys
@@ -142,7 +143,8 @@ def get_sequence_by_nomclass(rcsb_id: str, nomenclature_class: str, canonical:bo
 
 def retrieve_LSU_rRNA(rcsb_id, canonical:bool=True):
     annotated_cifpath = os.path.join(RIBETL_DATA, rcsb_id.upper(), f"{rcsb_id.upper()}_modified.cif")
-    rna_type = ""
+    rna_type          = ""
+    #--------------
     [chain_id, strand_target] = get_sequence_by_nomclass(
         rcsb_id,
         "23SrRNA",
@@ -247,21 +249,18 @@ def add_target_to_domain_alignment(rcsb_id: str, domain: str):
     muscle_combine_profile(domain_alignment, fpath_23s,
                            f'combined_{rcsb_id.upper()}_ribovision_{domain}.fasta')
 
-
 def seq_to_fasta(rcsb_id: str, _seq: str, outfile: str):
     from Bio.Seq import Seq
-    _seq = _seq.replace("\n", "")
-    seq_record = SeqRecord.SeqRecord(Seq(_seq).upper())
+    _seq          = _seq.replace("\n", "")
+    seq_record    = SeqRecord.SeqRecord(Seq(_seq).upper())
     seq_record.id = seq_record.description = rcsb_id
     SeqIO.write(seq_record, outfile, 'fasta',)
-
 
 def muscle_combine_profile(msa_path1: str, msa_path2: str, out_filepath: str):
     """Combine two MSA-profiles into a single one. Used here to "append" a target sequence two the ribovision alignment. """
     cmd = ['/home/rxz/dev/docker_ribxz/cli/scripts/muscle3.8', '-profile','-in1', msa_path1, '-in2', msa_path2, '-out', out_filepath]
     subprocess.Popen(cmd, stdout=subprocess.PIPE,stderr=subprocess.PIPE, env=os.environ.copy()).wait()
     sys.stdout.flush()
-
 
 def retrieve_aligned_23s(rcsb_id: str, domain: str):
     if domain == 'b':
@@ -277,6 +276,21 @@ def retrieve_aligned_23s(rcsb_id: str, domain: str):
 
     return target_seq_record
 
+def pick_match(ms, rna_length: int):
+    if len(ms) == 0:
+        print("No matches found!!")
+        exit(1)
+    """Pick the match that is closest to the 3' end of the rRNA."""
+    best = None
+    farthest_dist = 0
+
+    if len(ms) > 1:
+        for m in ms:
+            if rna_length - ((m.start + m.end) / 2) < farthest_dist:
+                best = m
+        return best
+    else:
+        return ms[0]
 
 if args.fuzzy:
 
@@ -288,21 +302,6 @@ if args.fuzzy:
     print("Target rRNA: {}".format(chain_id))
     ptc_projected = {"site_9": []}
 
-    def pick_match(ms, rna_length: int):
-        if len(ms) == 0:
-            print("No matches found!!")
-            exit(1)
-        """Pick the match that is closest to the 3' end of the rRNA."""
-        best = None
-        farthest_dist = 0
-
-        if len(ms) > 1:
-            for m in ms:
-                if rna_length - ((m.start + m.end) / 2) < farthest_dist:
-                    best = m
-            return best
-        else:
-            return ms[0]
 
     rnaS = SeqIO.SeqRecord(strand_target)
     matches_site9 = find_near_matches(
@@ -332,12 +331,34 @@ if args.canon:
     domain = 'bacteria'
     rcsb_id = argdict["target"].upper()
     struct_profile: Structure = open_structure(rcsb_id, 'cif')
-    [chain_id, strand_target, rna_type] = retrieve_LSU_rRNA(rcsb_id)
+    [chain_id, strand_target, rna_type] = retrieve_LSU_rRNA(rcsb_id, False)
+    print(chain_id, strand_target)
 
     if chain_id in struct_profile.child_dict[0].child_dict:
-        rnas: Chain = struct_profile.child_dict[0].child_dict[chain_id]
+        chain3d: Chain = struct_profile.child_dict[0].child_dict[chain_id]
     else:
-        rnas: Chain = struct_profile.child_dict[1].child_dict[chain_id]
+        chain3d: Chain = struct_profile.child_dict[1].child_dict[chain_id]
+
+    ress:List[Residue] = chain3d.child_list
+    print("Before filter", len(ress))
+    _r:Residue
+
+    ress_sanitized: List[Residue] = [*filter(lambda r: r.get_resname() in ["A", "C", "G", "U", "PSU"], ress)]
+
+    for _r in ress_sanitized:
+        if _r.get_resname() == "PSU":
+            _r.resname = "U"
+
+
+    raw_seq         = reduce(lambda x,y: x + y.resname, ress_sanitized,'')
+    matches         = find_near_matches(DORIS_ET_AL["subseq_9"], raw_seq, max_l_dist=1)
+    m0              = pick_match(matches, len(raw_seq))
+    sought_residues = [ ress_sanitized[i] for i in list(range(m0.start, m0.end))]
+
+    # uni = set()
+    # for i in ress_sanitized: 
+    #     uni.add(i.get_resname())
+    # pprint(uni)
 
 
 if args.markers:
@@ -361,7 +382,6 @@ if args.markers:
 
             if seq_id_raw not in SITE_DICT:
                 SITE_DICT[seq_id_raw] = {}
-
             for atom in res.child_dict.items():
                 atom_name = atom[0]
                 atom_coords = atom[1].get_coord()
@@ -370,17 +390,16 @@ if args.markers:
 
     pprint(SITE_DICT)
     markers_dir = os.path.join(RIBETL_DATA, "PTC_MARKERS")
-    outfile = os.path.join(markers_dir, f"{rcsb_id.upper()}_PTC_MARKERS.json")
+    outfile     = os.path.join(markers_dir, f"{rcsb_id.upper()}_PTC_MARKERS.json")
+
     with open(outfile, 'w') as outf:
         json.dump(SITE_DICT, outf, indent=4)
-
         print("Saved {} successfully.".format(outfile))
 
 if args.ptc:
 
-    domain = 'b'
-    rcsb_id = args.target.upper()
-
+    domain                    = 'b'
+    rcsb_id                   = args.target.upper()
     [chain_id, strand_target] = get_23SrRNA_strandseq(
         rcsb_id,
         custom_path=os.path.join(
