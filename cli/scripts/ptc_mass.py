@@ -38,7 +38,6 @@ RIBETL_DATA = os.environ.get('RIBETL_DATA')
 # List of conserved nucleotide sequences on 23s-28s can be found here: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4574749/pdf/1719.pdf
 # Some of the PTC residues in bacterial 23SrRNA                                             |
 
-# https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4574749/pdf/1719.pdf
 
 # -------------------------------------------------------------------------------------------|
 
@@ -54,6 +53,7 @@ parser.add_argument("--display_all", action='store_true')
 parser.add_argument("--generate", action='store_true')
 parser.add_argument("--fuzzy", action='store_true')
 parser.add_argument("--markers", action='store_true')
+parser.add_argument("--canon", action='store_true')
 parser.add_argument("--fasta_profile", action='store_true')
 parser.add_argument("--ptc", action='store_true')
 parser.add_argument("--batch", type=int, required=False)
@@ -105,9 +105,56 @@ def util__forwards_match(string: str, resid: int):
         else:
             count_proper += 1
 
-# ※ ---------------------------- 23SrRNA PTC residue locations ---------------------------- ※
+
+def get_23SrRNA_strandseq(rcsb_id: str, custom_path=None) -> Tuple[str, str]:
+    return get_one_letter_code_can_by_nomclass(rcsb_id, "23SrRNA", custom_path)
+
+def get_25SrRNA_strandseq(rcsb_id: str, custom_path=None) -> Tuple[str, str]:
+    return get_one_letter_code_can_by_nomclass(rcsb_id, "25SrRNA", custom_path)
+
+def get_28SrRNA_strandseq(rcsb_id: str, custom_path=None) -> Tuple[str, str]:
+    return get_one_letter_code_can_by_nomclass(rcsb_id, "28SrRNA", custom_path)
 
 
+def retrieve_LSU_rRNA(rcsb_id):
+    rna_type = ""
+    [chain_id, strand_target] = get_23SrRNA_strandseq(
+        rcsb_id,
+        custom_path=os.path.join(
+            RIBETL_DATA, rcsb_id.upper(), f"{rcsb_id.upper()}_modified.cif")
+    )
+    rna_type = "23SrRNA"
+
+    if chain_id == None or strand_target == None:
+        [chain_id, strand_target] = get_25SrRNA_strandseq(
+            rcsb_id,
+            custom_path=os.path.join(
+                RIBETL_DATA, rcsb_id.upper(), f"{rcsb_id.upper()}_modified.cif")
+        )
+        rna_type = "25SrRNA"
+
+    if chain_id == None or strand_target == None:
+        [chain_id, strand_target] = get_28SrRNA_strandseq(
+            rcsb_id,
+            custom_path=os.path.join(
+                RIBETL_DATA, rcsb_id.upper(), f"{rcsb_id.upper()}_modified.cif")
+        )
+        rna_type = "28SrRNA"
+
+    if chain_id == None or strand_target == None:
+        print("Failed to locate either 23S or 25S or 28 rRNA in {}".format(rcsb_id))
+        exit(1)
+
+    return [chain_id, strand_target, rna_type]
+
+
+
+
+
+# ※ ---------------------------- 23/25/28SrRNA PTC residue locations ---------------------------- ※
+
+
+# https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4574749/pdf/1719.pdf
 DORIS_ET_AL = {
     "subseq_6": "AAGACCC",
     "subseq_8": "GGAUAAC",
@@ -128,14 +175,6 @@ DORIS_ET_AL = {
                    2584, 2585, 2586, 2587],
     }
 }
-
-
-def get_23SrRNA_strandseq(rcsb_id: str, custom_path=None) -> Tuple[str, str]:
-    return get_one_letter_code_can_by_nomclass(rcsb_id, "23SrRNA", custom_path)
-
-
-def get_25SrRNA_strandseq(rcsb_id: str, custom_path=None) -> Tuple[str, str]:
-    return get_one_letter_code_can_by_nomclass(rcsb_id, "25SrRNA", custom_path)
 
 
 def get_one_letter_code_can_by_nomclass(rcsb_id: str, nomenclature_class: str, custom_path=None) -> Tuple[str, str]:
@@ -231,10 +270,8 @@ def seq_to_fasta(rcsb_id: str, _seq: str, outfile: str):
 
 def muscle_combine_profile(msa_path1: str, msa_path2: str, out_filepath: str):
     """Combine two MSA-profiles into a single one. Used here to "append" a target sequence two the ribovision alignment. """
-    cmd = ['/home/rxz/dev/docker_ribxz/cli/scripts/muscle3.8',  '-profile',
-           '-in1', msa_path1, '-in2', msa_path2, '-out', out_filepath]
-    subprocess.Popen(cmd, stdout=subprocess.PIPE,
-                     stderr=subprocess.PIPE, env=os.environ.copy()).wait()
+    cmd = ['/home/rxz/dev/docker_ribxz/cli/scripts/muscle3.8', '-profile','-in1', msa_path1, '-in2', msa_path2, '-out', out_filepath]
+    subprocess.Popen(cmd, stdout=subprocess.PIPE,stderr=subprocess.PIPE, env=os.environ.copy()).wait()
     sys.stdout.flush()
 
 
@@ -251,30 +288,6 @@ def retrieve_aligned_23s(rcsb_id: str, domain: str):
     target_seq_record = ribovision.find_aln_by_id(rcsb_id)
 
     return target_seq_record
-
-
-def retrieve_LSU_rRNA(rcsb_id):
-    rna_type = ""
-    [chain_id, strand_target] = get_23SrRNA_strandseq(
-        rcsb_id,
-        custom_path=os.path.join(
-            RIBETL_DATA, rcsb_id.upper(), f"{rcsb_id.upper()}_modified.cif")
-    )
-    rna_type = "23SrRNA"
-
-    if chain_id == None or strand_target == None:
-        [chain_id, strand_target] = get_25SrRNA_strandseq(
-            rcsb_id,
-            custom_path=os.path.join(
-                RIBETL_DATA, rcsb_id.upper(), f"{rcsb_id.upper()}_modified.cif")
-        )
-        rna_type = "25SrRNA"
-
-    if chain_id == None or strand_target == None:
-        print("Failed to locate either 23S or 25S rRNA in {}".format(rcsb_id))
-        exit(1)
-
-    return [chain_id, strand_target, rna_type]
 
 
 if args.fuzzy:
@@ -308,10 +321,7 @@ if args.fuzzy:
         DORIS_ET_AL["subseq_9"], strand_target, max_l_dist=1)
     print("Got {} matches for {}".format(len(matches_site9), rna_type))
     best_match9 = pick_match(matches_site9, len(rnaS))
-    print(best_match9)
-
     ptc_projected["site_9"] = [*range(best_match9.start, best_match9.end)]
-
     report = {
         chain_id: {
             "site_9": ptc_projected["site_9"]
@@ -330,6 +340,17 @@ if args.fuzzy:
         print("[Saved {} successfully.]".format(ptc_fuzzy_path))
         exit(1)
 
+if args.canon:
+    domain = 'bacteria'
+    rcsb_id = argdict["target"].upper()
+    struct_profile: Structure = open_structure(rcsb_id, 'cif')
+    [chain_id, strand_target, rna_type] = retrieve_LSU_rRNA(rcsb_id)
+
+    if chain_id in struct_profile.child_dict[0].child_dict:
+        rnas: Chain = struct_profile.child_dict[0].child_dict[chain_id]
+    else:
+        rnas: Chain = struct_profile.child_dict[1].child_dict[chain_id]
+
 
 if args.markers:
     domain = 'bacteria'
@@ -343,8 +364,7 @@ if args.markers:
         rnas: Chain = struct_profile.child_dict[1].child_dict[chain_id]
 
     x: Residue
-    LANDMARK_IDS = [2610, 2611, 2612]
-    SITE_DICT = {}
+    SITE_DICT    = {}
 
     for res in rnas.child_list:
         res: Residue
@@ -367,7 +387,6 @@ if args.markers:
         json.dump(SITE_DICT, outf, indent=4)
 
         print("Saved {} successfully.".format(outfile))
-
 
 if args.ptc:
 
