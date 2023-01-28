@@ -62,7 +62,7 @@ args = parser .parse_args()
 argdict = vars(parser.parse_args())
 
 bact_registry_file = open('rcsb_pdb_ids_20230106032038.txt', 'r')
-line               = bact_registry_file.readline()
+line = bact_registry_file.readline()
 bact_registry_file.close()
 bacteria_structs = line.split(',')
 
@@ -88,6 +88,7 @@ def util__backwards_match(alntgt: str, aln_resid: int, verbose: bool = False) ->
             counter_proper += 1
 
     raise LookupError()
+
 
 def util__forwards_match(string: str, resid: int):
     """Returns the index of a source-sequence residue in the (aligned) source sequence."""
@@ -128,11 +129,14 @@ DORIS_ET_AL = {
     }
 }
 
+
 def get_23SrRNA_strandseq(rcsb_id: str, custom_path=None) -> Tuple[str, str]:
     return get_one_letter_code_can_by_nomclass(rcsb_id, "23SrRNA", custom_path)
 
+
 def get_25SrRNA_strandseq(rcsb_id: str, custom_path=None) -> Tuple[str, str]:
     return get_one_letter_code_can_by_nomclass(rcsb_id, "25SrRNA", custom_path)
+
 
 def get_one_letter_code_can_by_nomclass(rcsb_id: str, nomenclature_class: str, custom_path=None) -> Tuple[str, str]:
 
@@ -166,10 +170,8 @@ def get_one_letter_code_can_by_nomclass(rcsb_id: str, nomenclature_class: str, c
     if SEQ == None:
         print("Could not locate {} sequence in {} CIF file".format(
             nomenclature_class, rcsb_id))
-
-    print("Located {} sequence in {} CIF file. (Chain {})".format(
-        nomenclature_class, rcsb_id, STRAND))
     return (STRAND, SEQ)
+
 
 class RibovisionAlignment:
 
@@ -251,7 +253,28 @@ def retrieve_aligned_23s(rcsb_id: str, domain: str):
     return target_seq_record
 
 
+def retrieve_LSU_rRNA(rcsb_id):
+    rna_type = ""
+    [chain_id, strand_target] = get_23SrRNA_strandseq(
+        rcsb_id,
+        custom_path=os.path.join(
+            RIBETL_DATA, rcsb_id.upper(), f"{rcsb_id.upper()}_modified.cif")
+    )
+    rna_type = "23SrRNA"
 
+    if chain_id == None or strand_target == None:
+        [chain_id, strand_target] = get_25SrRNA_strandseq(
+            rcsb_id,
+            custom_path=os.path.join(
+                RIBETL_DATA, rcsb_id.upper(), f"{rcsb_id.upper()}_modified.cif")
+        )
+        rna_type = "25SrRNA"
+
+    if chain_id == None or strand_target == None:
+        print("Failed to locate either 23S or 25S rRNA in {}".format(rcsb_id))
+        exit(1)
+
+    return [chain_id, strand_target, rna_type]
 
 
 if args.fuzzy:
@@ -259,19 +282,15 @@ if args.fuzzy:
     domain = 'b'
     rcsb_id = args.target.upper()
 
-    [chain_id, strand_target] = get_23SrRNA_strandseq(
-        rcsb_id,
-        custom_path=os.path.join(
-            RIBETL_DATA, rcsb_id.upper(), f"{rcsb_id.upper()}_modified.cif")
-    )
+    [chain_id, strand_target, rna_type] = retrieve_LSU_rRNA(rcsb_id)
 
-    ptc_projected = {
-        # "site_6": [],
-        # "site_8": [],
-        "site_9": []
-    }
+    print("Target rRNA: {}".format(chain_id))
+    ptc_projected = {"site_9": []}
 
     def pick_match(ms, rna_length: int):
+        if len(ms) == 0:
+            print("No matches found!!")
+            exit(1)
         """Pick the match that is closest to the 3' end of the rRNA."""
         best = None
         farthest_dist = 0
@@ -284,112 +303,70 @@ if args.fuzzy:
         else:
             return ms[0]
 
-    # tgt_seq = retrieve_aligned_23s(rcsb_id, domain)
-    rna23s = SeqIO.SeqRecord(strand_target)
-    # found6 = find_near_matches(
-    #     DORIS_ET_AL["subseq_6"], strand_target, max_l_dist=0)
-    # found8 = find_near_matches(
-    #     DORIS_ET_AL["subseq_8"], strand_target, max_l_dist=0)
+    rnaS = SeqIO.SeqRecord(strand_target)
     found9 = find_near_matches(
-        DORIS_ET_AL["subseq_9"], strand_target, max_l_dist=0)
-
-    # best_match6 = pick_match(found6, len(rna23s))
-    # best_match8 = pick_match(found8, len(rna23s))
-    best_match9 = pick_match(found9, len(rna23s))
-
+        DORIS_ET_AL["subseq_9"], strand_target, max_l_dist=1)
+    best_match9 = pick_match(found9, len(rnaS))
     print("\tReturned matches ", )
-    # print(best_match6)
-    # print(best_match8)
     print(best_match9)
 
-    # ptc_projected["site_6"] = [*range(best_match6.start, best_match6.end)]
-    # ptc_projected["site_8"] = [*range(best_match8.start, best_match8.end)]
     ptc_projected["site_9"] = [*range(best_match9.start, best_match9.end)]
 
-
     report = {
-            chain_id:{
-                # "site_6": ptc_projected["site_6"],
-                # "site_8": ptc_projected["site_8"],
-                "site_9": ptc_projected["site_9"]
-            }
+        chain_id: {
+            "site_9": ptc_projected["site_9"]
         }
-    pprint(ptc_projected)
+    }
 
-
-    # pprint("Site 6:" +
-    #        "".join([* map(lambda x: strand_target[x], report[chain_id]["site_6"])]))
-    # pprint("Site 8:" +
-    #        "".join([* map(lambda x: strand_target[x], report[chain_id]["site_8"])]))
     for res in [* map(lambda x: strand_target[x], report[chain_id]["site_9"])]:
         print("Res", res)
 
-
-    ptcs_dir       = os.path.join(RIBETL_DATA, "PTC_COORDINATES")
-    ptc_fuzzy_path = os.path.join(ptcs_dir, f"{rcsb_id.upper()}_FUZZY_PTC.json")
+    ptcs_dir = os.path.join(RIBETL_DATA, "PTC_COORDINATES")
+    ptc_fuzzy_path = os.path.join(
+        ptcs_dir, f"{rcsb_id.upper()}_FUZZY_PTC.json")
 
     with open(ptc_fuzzy_path, 'w') as f:
         json.dump(report, f, indent=4)
-    print("[Saved {} successfully.]".format(ptc_fuzzy_path))
-    
-if args.markers:
-    domain                    = 'bacteria'
-    rcsb_id                   = argdict["target"].upper()
-    struct_profile:Structure            = open_structure(rcsb_id, 'cif')
-    [chain_id, strand_target] = get_23SrRNA_strandseq(
-        rcsb_id,
-        custom_path=os.path.join(
-            RIBETL_DATA, rcsb_id.upper(), f"{rcsb_id.upper()}_modified.cif")
-    )
-
-    if chain_id == None or strand_target == None:
-        [chain_id, strand_target] = get_25SrRNA_strandseq(
-            rcsb_id,
-            custom_path=os.path.join(
-                RIBETL_DATA, rcsb_id.upper(), f"{rcsb_id.upper()}_modified.cif")
-        )
-        print("25S wflow")
-    else:
-        print("23S wflow")
-
-    if chain_id == None or strand_target == None:
-        print("Failed to locate either 23S or 25S rRNA in {}".format(rcsb_id))
+        print("[Saved {} successfully.]".format(ptc_fuzzy_path))
         exit(1)
+
+
+if args.markers:
+    domain = 'bacteria'
+    rcsb_id = argdict["target"].upper()
+    struct_profile: Structure = open_structure(rcsb_id, 'cif')
+    [chain_id, strand_target, rna_type] = retrieve_LSU_rRNA(rcsb_id)
 
     if chain_id in struct_profile.child_dict[0].child_dict:
         rnas: Chain = struct_profile.child_dict[0].child_dict[chain_id]
     else:
         rnas: Chain = struct_profile.child_dict[1].child_dict[chain_id]
 
-    x     : Residue;
-    LANDMARK_IDS = [2610,2611,2612]
-    SITE_DICT    = {}
+    x: Residue
+    LANDMARK_IDS = [2610, 2611, 2612]
+    SITE_DICT = {}
 
     for res in rnas.child_list:
-        res:Residue
+        res: Residue
         seq_id_raw = res.id[1]
         if seq_id_raw in LANDMARK_IDS:
 
-            if seq_id_raw not in SITE_DICT: 
+            if seq_id_raw not in SITE_DICT:
                 SITE_DICT[seq_id_raw] = {}
 
             for atom in res.child_dict.items():
-                atom_name   = atom[0]
-                atom_coords = atom[1].get_coord();
-                SITE_DICT[seq_id_raw][atom_name] = list(map(lambda x : float(x),list(atom_coords)))
+                atom_name = atom[0]
+                atom_coords = atom[1].get_coord()
+                SITE_DICT[seq_id_raw][atom_name] = list(
+                    map(lambda x: float(x), list(atom_coords)))
 
     pprint(SITE_DICT)
     markers_dir = os.path.join(RIBETL_DATA, "PTC_MARKERS")
-    outfile     = os.path.join(markers_dir, f"{rcsb_id.upper()}_PTC_MARKERS.json")
+    outfile = os.path.join(markers_dir, f"{rcsb_id.upper()}_PTC_MARKERS.json")
     with open(outfile, 'w') as outf:
         json.dump(SITE_DICT, outf, indent=4)
 
         print("Saved {} successfully.".format(outfile))
-
-    
-
-
-    
 
 
 if args.ptc:
@@ -438,9 +415,9 @@ if args.ptc:
     exit(1)
 
 if args.fasta_profile:
-    domain                    = 'bacteria'
-    rcsb_id                   = argdict["target"]
-    struct_profile            = open_structure(rcsb_id, 'json')
+    domain = 'bacteria'
+    rcsb_id = argdict["target"]
+    struct_profile = open_structure(rcsb_id, 'json')
     [chain_id, strand_target] = get_23SrRNA_strandseq(rcsb_id, custom_path=os.path.join(
         RIBETL_DATA, rcsb_id.upper(), f"{rcsb_id.upper()}_modified.cif"))
 
@@ -527,7 +504,6 @@ if args.generate:
 # n regions of the 23S rRNA are conserved.
 # - datasheet with the conserved regions: 6,8,9
 # - robust way to visualize it with pymol
-
 
 
 # 5afi | A| resi 2610-2611 |~ C3
