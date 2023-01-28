@@ -344,10 +344,15 @@ if args.markers:
     domain                    = 'bacteria'
     rcsb_id                   = argdict["target"].upper()
     struct_profile:Structure            = open_structure(rcsb_id, 'cif')
+    [chain_id, strand_target] = get_23SrRNA_strandseq(
+        rcsb_id,
+        custom_path=os.path.join(
+            RIBETL_DATA, rcsb_id.upper(), f"{rcsb_id.upper()}_modified.cif")
+    )
     print(struct_profile.child_dict[0])
-    model:Model =struct_profile.child_dict[0]
-    rna23s:Chain = model.child_dict['A']
-    x:Residue;
+    model : Model =struct_profile.child_dict[0]
+    rna23s: Chain = model.child_dict[chain_id]
+    x     : Residue;
     LANDMARK_IDS = [2610,2611,2612]
     SITE_DICT    = {}
 
