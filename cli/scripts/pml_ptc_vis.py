@@ -103,12 +103,11 @@ def highlight_ptc_fuzzy(structure: str):
         # SITE_9_OBJ ="site9"
         # cmd.create(SITE_9_OBJ, name9)
 
-        # cmd.hide("everything")
         cmd.show("licorice", name9)
         cmd.color("blue", name9)
-        cmd.label(name9, "name")
+        # cmd.label(name9, "resi")
         cmd.set("label_color", "pink")
-        cmd.set("label_size", 20)
+        cmd.set("label_size", 5)
 
 
         cmd.zoom(name9)
@@ -133,14 +132,15 @@ def get_markerpath (struct: str):
     _path = os.path.join(RIBETL_DATA, "PTC_MARKERS", f"{struct}_PTC_MARKERS.json")
     return _path
 
-def create_markerks(fpath:str):
+def create_N4_markers_on_2610_2611_2612(fpath:str):
     with open(fpath, 'r') as infile:
         POSNS = json.load(infile)
-    resid_id = "2610"
-    atom_name = "N4"
-    atom_coords:List[float] = POSNS[resid_id][atom_name]
-    cmd.pseudoatom("N4", pos=atom_coords, vdw=1, color="red")
-    cmd.show("spheres", "N4")
+
+    for resid in ["2610", "2611","2612"]:
+        selection_name = f"{resid}_N4"
+        atom_coords:List[float] = POSNS[resid]["N4"]
+        cmd.pseudoatom(selection_name, pos=atom_coords, vdw=1, color="red")
+        cmd.show("spheres", selection_name)
 
 def ptc_fuzzy(struct: str):
     cmd.delete("all")
@@ -158,7 +158,7 @@ def ptc_fuzzy_w_markerks(struct: str):
         "/home/rxz/dev/static/{}/{}.cif".format(struct, struct))
     cmd.load(struct_path)
     highlight_ptc_fuzzy(struct)
-    create_markerks(get_markerpath(struct))
+    create_N4_markers_on_2610_2611_2612(get_markerpath(struct))
 
 cmd.extend("ptc", ptc_fuzzy_w_markerks)
 cmd.extend("list_bacteria", list_bacteria)
