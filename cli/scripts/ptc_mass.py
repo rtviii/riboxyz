@@ -39,26 +39,6 @@ RIBETL_DATA = os.environ.get('RIBETL_DATA')
 # Some of the PTC residues in bacterial 23SrRNA                                             |
 
 # https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4574749/pdf/1719.pdf
-DORIS_ET_AL = {
-    "subseq_6": "AAGACCC",
-    "subseq_8": "GGAUAAC",
-    "subseq_9": "GAGCUGGGUUUA",
-    "e": {
-        "site_6": [2400, 2401, 2402, 2403, 2404, 2405, 2406, 2407],
-        "site_8": [2811, 2812, 2813, 2814, 2815, 2816, 2817, 2818],
-        "site_9": [2941, 2942, 2943, 2944, 2945, 2946, 2947, 2948, 2949, 2950, 2951, 2952, 2953]
-    },
-    'b': {
-        "site_6": [2059, 2060, 2061,
-                   2062, 2063, 2064,
-                   2065],
-        "site_8": [2446, 2447, 2448,
-                   2449, 2450, 2451, 2452],
-        "site_9": [2576, 2577, 2578, 2579,
-                   2580, 2581, 2582, 2583,
-                   2584, 2585, 2586, 2587],
-    }
-}
 
 # -------------------------------------------------------------------------------------------|
 
@@ -126,6 +106,27 @@ def util__forwards_match(string: str, resid: int):
 
 # ※ ---------------------------- 23SrRNA PTC residue locations ---------------------------- ※
 
+
+DORIS_ET_AL = {
+    "subseq_6": "AAGACCC",
+    "subseq_8": "GGAUAAC",
+    "subseq_9": "GAGCUGGGUUUA",
+    "e": {
+        "site_6": [2400, 2401, 2402, 2403, 2404, 2405, 2406, 2407],
+        "site_8": [2811, 2812, 2813, 2814, 2815, 2816, 2817, 2818],
+        "site_9": [2941, 2942, 2943, 2944, 2945, 2946, 2947, 2948, 2949, 2950, 2951, 2952, 2953]
+    },
+    'b': {
+        "site_6": [2059, 2060, 2061,
+                   2062, 2063, 2064,
+                   2065],
+        "site_8": [2446, 2447, 2448,
+                   2449, 2450, 2451, 2452],
+        "site_9": [2576, 2577, 2578, 2579,
+                   2580, 2581, 2582, 2583,
+                   2584, 2585, 2586, 2587],
+    }
+}
 
 def get_23SrRNA_strandseq(rcsb_id: str, custom_path=None) -> Tuple[str, str]:
     return get_one_letter_code_can_by_nomclass(rcsb_id, "23SrRNA", custom_path)
@@ -258,6 +259,9 @@ def retrieve_aligned_23s(rcsb_id: str, domain: str):
     return target_seq_record
 
 
+
+
+
 if args.fuzzy:
 
     domain = 'b'
@@ -344,9 +348,33 @@ if args.markers:
     model:Model =struct_profile.child_dict[0]
     rna23s:Chain = model.child_dict['A']
     x:Residue;
-    print(rna23s.child_list[2611])
-    print(rna23s.child_list[2611].id)
-    # [*map(lambda x: print(x.id)  ,rna23s.child_list)]
+    LANDMARK_IDS = [2610,2611,2612]
+    SITE_DICT    = {}
+
+    for res in rna23s.child_list:
+        res:Residue
+        seq_id_raw = res.id[1]
+        if seq_id_raw in LANDMARK_IDS:
+
+            if seq_id_raw not in SITE_DICT: 
+                SITE_DICT[seq_id_raw] = {}
+
+            for atom in res.child_dict.items():
+                atom_name   = atom[0]
+                atom_coords = atom[1].get_coord();
+                SITE_DICT[seq_id_raw][atom_name] = list(map(lambda x : float(x),list(atom_coords)))
+
+    pprint(SITE_DICT)
+    markers_dir = os.path.join(RIBETL_DATA, "PTC_MARKERS")
+    outfile     = os.path.join(markers_dir, f"{rcsb_id.upper()}_PTC_MARKERS.json")
+    with open(outfile, 'w') as outf:
+        json.dump(SITE_DICT, outf, indent=4)
+
+        print("Saved {} successfully.".format(outfile))
+
+    
+
+
     
 
 
