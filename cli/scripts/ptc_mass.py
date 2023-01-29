@@ -332,7 +332,6 @@ if args.canon:
     rcsb_id = argdict["target"].upper()
     struct_profile: Structure = open_structure(rcsb_id, 'cif')
     [chain_id, strand_target, rna_type] = retrieve_LSU_rRNA(rcsb_id, False)
-    print(chain_id, strand_target)
 
     if chain_id in struct_profile.child_dict[0].child_dict:
         chain3d: Chain = struct_profile.child_dict[0].child_dict[chain_id]
@@ -340,7 +339,6 @@ if args.canon:
         chain3d: Chain = struct_profile.child_dict[1].child_dict[chain_id]
 
     ress:List[Residue] = chain3d.child_list
-    print("Before filter", len(ress))
     _r:Residue
 
     ress_sanitized: List[Residue] = [*filter(lambda r: r.get_resname() in ["A", "C", "G", "U", "PSU"], ress)]
@@ -355,10 +353,23 @@ if args.canon:
     m0              = pick_match(matches, len(raw_seq))
     sought_residues = [ ress_sanitized[i] for i in list(range(m0.start, m0.end))]
 
-    # uni = set()
-    # for i in ress_sanitized: 
-    #     uni.add(i.get_resname())
-    # pprint(uni)
+    PTC_MARKERKS_RAW = {}
+    for res in sought_residues:
+        if res.id[1] not in PTC_MARKERKS_RAW:
+            PTC_MARKERKS_RAW[res.id[1]] = {}
+        atom:Atom
+        for atom in res.child_list:
+            atom_name = atom.name
+            atom_coords = atom.get_coord()
+            PTC_MARKERKS_RAW[res.id[1]][atom_name] = list(map(lambda x: float(x), list(atom_coords)))
+
+    markers_dir = os.path.join(RIBETL_DATA, "PTC_MARKERS_RAW")
+    outfile     = os.path.join(markers_dir, f"{rcsb_id.upper()}_PTC_MARKERS_RAW.json")
+
+    with open(outfile, 'w') as outf:
+        json.dump(PTC_MARKERKS_RAW, outf, indent=4)
+        print("Saved {} successfully.".format(outfile))
+
 
 
 if args.markers:
@@ -385,8 +396,7 @@ if args.markers:
             for atom in res.child_dict.items():
                 atom_name = atom[0]
                 atom_coords = atom[1].get_coord()
-                SITE_DICT[seq_id_raw][atom_name] = list(
-                    map(lambda x: float(x), list(atom_coords)))
+                SITE_DICT[seq_id_raw][atom_name] = list(map(lambda x: float(x), list(atom_coords)))
 
     pprint(SITE_DICT)
     markers_dir = os.path.join(RIBETL_DATA, "PTC_MARKERS")
