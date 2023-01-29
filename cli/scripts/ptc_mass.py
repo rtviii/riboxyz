@@ -363,6 +363,10 @@ if args.canon:
             atom_coords = atom.get_coord()
             PTC_MARKERKS_RAW[res.id[1]][atom_name] = list(map(lambda x: float(x), list(atom_coords)))
 
+    PTC_MARKERKS_RAW = {
+        chain_id: PTC_MARKERKS_RAW
+    }
+
     markers_dir = os.path.join(RIBETL_DATA, "PTC_MARKERS_RAW")
     outfile     = os.path.join(markers_dir, f"{rcsb_id.upper()}_PTC_MARKERS_RAW.json")
 

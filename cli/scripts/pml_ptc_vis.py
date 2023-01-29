@@ -114,12 +114,12 @@ def highlight_ptc_fuzzy(structure: str):
         cmd.zoom(name9)
         cmd.reset()
 
-def highlight_ptc_fuzzy(structure: str):
-    structure = structure.upper()
+def highlight_ptc_raw(structure: str):
+    structure            = structure.upper()
     ptc_fuzzy_coord_path = os.path.join(
         RIBETL_DATA,
-        "PTC_COORDINATES",
-        f'{structure}_FUZZY_PTC.json'
+        "PTC_MARKERS_RAW",
+        f'{structure}_PTC_MARKERS_RAW.json'
     )
     print(ptc_fuzzy_coord_path)
     with open(ptc_fuzzy_coord_path, 'r') as f:
