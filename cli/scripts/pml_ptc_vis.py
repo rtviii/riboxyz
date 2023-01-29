@@ -133,7 +133,7 @@ def highlight_ptc_raw(structure: str):
         cmd.create(name9, selection9)
         cmd.color("gray60", structure)
 
-        cmd.set("cartoon_transparency", 0.5)
+        # cmd.set("cartoon_transparency", 0.5)
         cmd.bg_color("white")
         cmd.set("transparency", 0.5)
 
@@ -165,11 +165,9 @@ def get_markerspath(struct: str):
     return _path
 
 
-def create_marker_at_atom(selection_name:str, posn:List[float], color_:str="red"):
-    print("selection_name:::", selection_name)
-    print("selection_name:::", posn)
-    cmd.pseudoatom(selection_name, pos=posn, vdw=1, color=color_)
-    cmd.show("spheres", selection_name)
+def create_marker_at_atom(selection_name:str, posn:List[float], color_:str="red", repr="spheres", label=''):
+    cmd.pseudoatom(selection_name, pos=posn, vdw=1, color=color_,  label=label)
+    cmd.show(repr, selection_name)
 
 def ptc_raw_w_markerks(struct: str):
     cmd.delete("all")
@@ -186,11 +184,20 @@ def ptc_raw_w_markerks(struct: str):
     if chain == None:
         exit("Could not identify chain")
 
-    for residue in POSNS[chain].keys():
-        try:
-            create_marker_at_atom(residue,POSNS[chain][residue]["N4"], color_="red")
-        except:
-            ...
+    U_end_pos   = [ *POSNS[chain].values() ][len(POSNS[chain]) - 2]["O4'"] # pre  last residue of the comb
+    U_start_pos = [ *POSNS[chain].values() ][0]["O4'"] # firs      residue of the comb
+
+    midpoint = [
+        ( U_end_pos[0] + U_start_pos[0] ) / 2,
+        ( U_end_pos[1] + U_start_pos[1] ) / 2,
+        ( U_end_pos[2] + U_start_pos[2] ) / 2,
+    ]
+    # print( "PRESENT::",[ *POSNS[chain].values() ][0].keys())
+    create_marker_at_atom("uridine_comb_start",U_start_pos, color_="green")
+    create_marker_at_atom("uridine_comb_end",U_end_pos, color_="green")
+    cmd.distance(None, "uridine_comb_start", "uridine_comb_end", mode=0)
+
+    create_marker_at_atom("centroid",midpoint, color_="red")
 
 
 cmd.extend("ptc", ptc_raw_w_markerks)
