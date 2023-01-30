@@ -52,12 +52,12 @@ parser.add_argument("-m", "--mode", type=str,  choices=['position', 'residue'], 
                     help="Display the position of the PTC residue, or the residue itself. Default: position")
 parser.add_argument("--display_all", action='store_true')
 parser.add_argument("--generate", action='store_true')
+parser.add_argument("--generate_from_raw", action='store_true')
 parser.add_argument("--fuzzy", action='store_true')
 parser.add_argument("--markers", action='store_true')
 parser.add_argument("--canon", action='store_true')
 parser.add_argument("--fasta_profile", action='store_true')
 parser.add_argument("--ptc", action='store_true')
-parser.add_argument("--batch", type=int, required=False)
 
 args = parser .parse_args()
 argdict = vars(parser.parse_args())
@@ -375,7 +375,6 @@ if args.canon:
         print("Saved {} successfully.".format(outfile))
 
 
-
 if args.markers:
     domain = 'bacteria'
     rcsb_id = argdict["target"].upper()
@@ -479,40 +478,62 @@ if args.fasta_profile:
     exit(1)
 
 if args.generate:
-    f = open('rcsb_pdb_ids_20230106032038.txt', 'r')
-    line = f.readline()
+    f    = open('rcsb_pdb_ids_20230106032038.txt', 'r')
+    lines = f.readlines()
     f.close()
-    bacteria_structs = line.split(',')
+    bacteria_structs =[*map(lambda _: _.strip("\n"),lines)]
 
-    struct_ids = []
-    parent_chain = []
-    residue_name = []
+    struct_ids    = []
+    parent_chain  = []
+    residue_name  = []
     residue_seqid = []
-    residue_x = []
-    residue_y = []
-    residue_z = []
-    i = 0
-    for struct in bacteria_structs[args.batch:args.batch+100]:
-        struct = str.upper(struct)
-        # get the ptc guess
-        structpath = os.path.join(
-            RIBETL_DATA,  struct, f"{struct}_modified.cif")
 
-        # check whether structpath file exists
+    coord_x       = []
+    coord_y       = []
+    coord_z       = []
 
-        if not os.path.isfile(structpath):
-            print(f"Could not find {structpath} in RIBETL_DATA")
+    i             = 0
+    for struct in bacteria_structs:
+        struct     = str.upper(struct).strip("\n")
+        markerfile = os.path.join(RIBETL_DATA,"PTC_MARKERS_RAW", f"{struct}_PTC_MARKERS_RAW.json")
+
+        if not os.path.isfile(markerfile):
+            print(f"Could not find {markerfile} in RIBETL_DATA")
             continue
         try:
-            ptc_guess = process_target_to_tuple(struct, args.mode, structpath)
-            (res, posn, strand) = ptc_guess
+            with open(markerfile, 'r') as f:
+                POSNS = json.load(f)
+
+            chain = [*POSNS.keys()][0]
+            if chain == None:
+                exit("Could not identify chain")
+
+            if "O4'" in [ *POSNS[chain].values() ][len(POSNS[chain]) - 2]:
+                U_end_pos   = [ *POSNS[chain].values() ][len(POSNS[chain]) - 2]["O4'"] # pre  last residue of the comb
+            else:
+                U_end_pos   = [ *POSNS[chain].values() ][len(POSNS[chain]) - 2]["C4"] # pre  last residue of the comb
+
+            if "O4'" in  [ *POSNS[chain].values() ][0]:
+                U_start_pos = [ *POSNS[chain].values() ][0]["O4'"]                     # first residue of the comb
+            else:
+                U_start_pos = [ *POSNS[chain].values() ][0]["C4"]                     # first residue of the comb
+
+
+            midpoint = [
+                ( U_end_pos[0] + U_start_pos[0] ) / 2,
+                ( U_end_pos[1] + U_start_pos[1] ) / 2,
+                ( U_end_pos[2] + U_start_pos[2] ) / 2,
+            ]
+
+
             struct_ids.append(struct)
-            residue_seqid.append(res.seqid)
-            parent_chain.append(strand)
-            residue_name.append(res.name)
-            residue_x.append(posn[0])
-            residue_y.append(posn[1])
-            residue_z.append(posn[2])
+            parent_chain.append(chain)
+            coord_x.append(midpoint[0])
+            coord_y.append(midpoint[1])
+            coord_z.append(midpoint[2])
+
+
+
             i = i+1
             print(f"Processed structs  : {i}")
         except:
@@ -523,27 +544,20 @@ if args.generate:
 
     # add this to the dataframe
     df = pandas.DataFrame.from_dict({
-        'struct_ids': struct_ids,
+        'struct_ids'  : struct_ids,
         'parent_chain': parent_chain,
-        'residue_name': residue_name,
-        'residue_seqid': residue_seqid,
-        'residue_x': residue_x,
-        'residue_y': residue_y,
-        'residue_z': residue_z
+        'coord_x'     : coord_x,
+        'coord_y'     : coord_y,
+        'coord_z'     : coord_z
     })
 
     # save the dataframe to a csv
-    df.to_csv(f"ptc_100xbatch={args.batch}.csv")
+    df.to_csv(f"ptc_centroids.csv")
     exit(1)
 
 # if not args.display_all:
     # print("\nTo display more residues per target structure, use additional --display_all flag.")
 
-
-# the task for today is to establish a robust pipeline for saving the visualized regions
-# n regions of the 23S rRNA are conserved.
-# - datasheet with the conserved regions: 6,8,9
-# - robust way to visualize it with pymol
 
 
 # 5afi | A| resi 2610-2611 |~ C3
