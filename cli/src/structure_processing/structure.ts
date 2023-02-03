@@ -208,9 +208,10 @@ export class StructureFolder {
     }
 
     async initialize_ligands(obtain: boolean, ribosome: RibosomeStructure) {
-        let ligs = ribosome.ligands && ribosome.ligands.map((lig_chem_id) => {
-            if (!existsSync(`${this.assets.folder_path()}/LIGAND_${lig_chem_id}.json`)) {
-                console.log(`[${this.rcsb_id}]: NOT FOUND ${this.assets.folder_path()}/LIGAND_${lig_chem_id}.json (Is it an ION? Expected.)`)
+        let ligs = ribosome.ligands && ribosome.ligands.map((lig) => {
+            console.log("Looking through chemids" , lig) 
+            if (!existsSync(`${this.assets.folder_path()}/LIGAND_${lig.chemicalId}.json`)) {
+                console.log(`[${this.rcsb_id}]: NOT FOUND ${this.assets.folder_path()}/LIGAND_${lig.chemicalId}.json (Is it an ION? Expected.)`)
                 return false
             } else return true
         }).reduce((prev, cur) => { return prev && cur }, true)
