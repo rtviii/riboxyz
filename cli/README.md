@@ -20,7 +20,7 @@ $ npm install -g ribxzcli
 $ ribxzcli COMMAND
 running command...
 $ ribxzcli (--version)
-ribxzcli/0.3.0 linux-x64 node-v18.14.0
+ribxzcli/0.4.1 linux-x64 node-v18.14.0
 $ ribxzcli --help [COMMAND]
 USAGE
   $ ribxzcli COMMAND
@@ -51,7 +51,7 @@ FLAGS
   -u, --NEO4J_USER=<value>
 ```
 
-_See code: [dist/commands/db/index.js](https://github.com/rtviii/hello-world/blob/v0.3.0/dist/commands/db/index.js)_
+_See code: [dist/commands/db/index.js](https://github.com/rtviii/hello-world/blob/v0.4.1/dist/commands/db/index.js)_
 
 ## `ribxzcli db status`
 
@@ -116,7 +116,7 @@ FLAGS
   -u, --NEO4J_USER=<value>
 ```
 
-_See code: [dist/commands/struct/index.js](https://github.com/rtviii/hello-world/blob/v0.3.0/dist/commands/struct/index.js)_
+_See code: [dist/commands/struct/index.js](https://github.com/rtviii/hello-world/blob/v0.4.1/dist/commands/struct/index.js)_
 
 ## `ribxzcli struct obtain RCSB_ID`
 

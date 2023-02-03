@@ -193,11 +193,15 @@ export class StructureFolder {
     }
 
     async initialize_assets(obtain: boolean) {
+        console.log("Initializing assets");
+        
         await this.assets.__verify_json_profile(true)
         await this.assets.__verify_cif(true)
         await this.assets.__verify_cif_modified(true)
         await this.assets.__verify_chains_folder(true)
         await this.assets.__verify_png_thumbnail(true)
+
+        console.log("verifying json profile");
         if (!this.assets.__verify_json_profile(obtain)) {
             throw Error(`Structure ${this.rcsb_id} assets not found. Cannot initiate resource.`)
         }
@@ -206,10 +210,13 @@ export class StructureFolder {
         this.structure = JSON.parse(readFileSync(this.assets.json_profile_filepath(), 'utf-8'))
     }
 
+
     async initialize_ligands(obtain: boolean, ribosome: RibosomeStructure) {
+        console.log("Initializing ligands");
+        
         let ligs = ribosome.ligands && ribosome.ligands.map((lig) => {
             console.log("Looking through chemids" , lig) 
-            if (!existsSync(`${this.assets.folder_path()}/LIGAND_${lig.chemicalId}.json`)) {
+            if (!existsSync(`${this.assets.folder_path()}/LIGAND_${lig}.json`)) {
                 console.log(`[${this.rcsb_id}]: NOT FOUND ${this.assets.folder_path()}/LIGAND_${lig.chemicalId}.json (Is it an ION? Expected.)`)
                 return false
             } else return true
@@ -230,7 +237,7 @@ export class StructureFolder {
         })
 
         if ((!polys || !ligs) && obtain) {
-            console.log("Some ligands are missing. Calling script:", process.env["PYTHONBIN"], process.env["EXTRACT_BSITES_PY"])
+            console.log("Some ligands are missing. Calling script:", `${process.env["PYTHONBIN"]} ${process.env["EXTRACT_BSITES_PY"]} -s ${this.rcsb_id} --save`)
             exec(`${process.env["PYTHONBIN"]} ${process.env["EXTRACT_BSITES_PY"]} -s ${this.rcsb_id} --save`, (err, stdout, stderr) => {
                 console.log(err);
                 console.log(stdout);
@@ -310,10 +317,12 @@ export const save_struct_profile = (r: RibosomeStructure): string => {
 export const commit_struct_to_Db = (rcsb_id: string) => {
     console.log(`Commiting ${rcsb_id} to the database`)
     const commit_script = process.env["COMMIT_STRUCTURE_SH"]
-    let current_db = process.env["NEO4J_CURRENTDB"]
-    let uri = process.env["NEO4J_URI"]
-    let invocation = `${commit_script} -s ${rcsb_id} -d ${current_db} -a "${uri}"`
-    let proc = cp.exec(invocation)
+    let   current_db    = process.env["NEO4J_CURRENTDB"]
+    let   uri           = process.env["NEO4J_URI"]
+    let   invocation    = `${commit_script} -s ${rcsb_id} -d ${current_db} -a "${uri}"`
+    console.log("Invoking:", invocation);
+    let   proc          = cp.exec(invocation)
+
     if (proc.stderr !== null) {
         proc.stderr.on("data",
             (data) => {

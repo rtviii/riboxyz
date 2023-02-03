@@ -23,6 +23,7 @@ export default class Obtain extends BaseCommand {
 
         this.log("----------11-------------------------------")
         await x.initialize_assets(flags.repair)
+        this.log("---------12------------------------")
         await x.initialize_ligands(flags.repair, x.structure as RibosomeStructure)
         if (flags.commit) {
             commit_struct_to_Db(rcsb_id)
