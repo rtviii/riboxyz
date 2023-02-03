@@ -198,7 +198,6 @@ export class StructureFolder {
         await this.assets.__verify_cif_modified(true)
         await this.assets.__verify_chains_folder(true)
         await this.assets.__verify_png_thumbnail(true)
-
         if (!this.assets.__verify_json_profile(obtain)) {
             throw Error(`Structure ${this.rcsb_id} assets not found. Cannot initiate resource.`)
         }
