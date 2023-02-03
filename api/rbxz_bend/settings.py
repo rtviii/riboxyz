@@ -9,7 +9,7 @@ RIBETL_DATA  = os.path.join(BASE_DIR, "ribetldata"                           ) #
 CYPHER_EXEC  = os.path.join(BASE_DIR, "mod_db","cypher_ops","cypher_exec")
 
 neo4j_vars = ["NEO4J_URI", "NEO4J_USER", "NEO4J_PASSWORD", "NEO4J_CURRENTDB"]
-print(" ---------------------------------------------- Reset app. -----------------------------------------------") 
+print(" ---------------------------------------------- App has been reset. -----------------------------------------------") 
 for var in neo4j_vars:
     # print("Environment variable {}:\t{}".format( var, os.getenv(var) ))
     if var not in os.environ:
