@@ -212,8 +212,6 @@ export class StructureFolder {
 
 
     async initialize_ligands(obtain: boolean, ribosome: RibosomeStructure) {
-        console.log("Initializing ligands");
-        
         let ligs = ribosome.ligands && ribosome.ligands.map((lig) => {
             console.log("Looking through chemids" , lig) 
             if (!existsSync(`${this.assets.folder_path()}/LIGAND_${lig}.json`)) {
