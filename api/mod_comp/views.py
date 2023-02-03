@@ -22,8 +22,7 @@ def edit_chain(request):
     structid   = str.upper(params['structid'][0])
     filehandle = os.path.join(RIBETL_DATA, structid + ".cif")
 
-    #Clip chains with pymol, create snippet objects, align those and save.
-    cmd.load(filehandle)
+
     cmd.select("resi 1-3")
     cmd.create("{}_test".format(structid), "sele")
     tosave=os.path.join(RIBETL_DATA, f"tempchain{structid}.cif")

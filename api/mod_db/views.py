@@ -6,7 +6,6 @@ from rest_framework.response import Response
 from neo4j import Result, GraphDatabase
 from rbxz_bend.settings import CYPHER_EXEC
 import os
-# -⋯⋯⋅⋱⋰⋆⋅⋅⋄⋅⋅∶⋅⋅⋄▫▪▭┈┅✕⋅⋅⋄⋅⋅✕∶⋅⋅⋄⋱⋰⋯⋯⋯⋯⋅⋱⋰⋆⋅⋅⋄⋅⋅∶⋅⋅⋄▫▪▭┈┅✕⋅⋅⋄⋅⋅✕∶⋅⋅⋄⋱⋰⋯⋯⋯⋅⋱⋰⋆⋅⋅⋄⋅⋅∶⋅⋅⋄▫▪▭┈┅✕⋅⋅⋄⋅⋅✕∶⋅⋅⋄⋱⋰⋯⋯⋯
 
 
 def neoget(cypher_string: str):
@@ -24,10 +23,10 @@ def neoget(cypher_string: str):
         return session.read_transaction(parametrized_query)
 
 
+
 @api_view(['GET'])
 def hello(request):
     return Response("Hello from db")
-
 
 @api_view(['GET'])
 def get_struct(request):

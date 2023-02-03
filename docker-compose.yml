@@ -17,7 +17,7 @@ services:
 
     environment:
       - NEO4J_URI=bolt://neo:7687
-      - STRUCT_PROCESS_SCRIPTS=/home/backend/ingress/scripts
+      - STRUCT_PROCESS_SCRIPTS=/home/backend/cli/scripts
       # You could possibly move these out of the dockerfile to here (at least the auths)
       #(if not the dockerfile will be rebuilt every time you change them)
       # ENV DJANGO=/home/backend/api
@@ -30,6 +30,13 @@ services:
       - NEO4J_USER=neo4j
       - NEO4J_PASSWORD=rrr
       - NEO4J_CURRENTDB=neo4j
+      # ------ CLi ENV VARS ------------------------
+      - COMMIT_STRUCTURE_SH=$CLI/scripts/commit_structure.sh 
+      - EXTRACT_BSITES_PY=$CLI/scripts/extract_bsites.py 
+      - RENDER_THUMBNAIL_PY=$CLI/scripts/render_thumbnail.py 
+      - SPLIT_RENAME_PY=$CLI/scripts/split_rename.py 
+      - PYTHONBIN=/opt/venv/bin/python3 
+
 
     links:
       - neo

@@ -9,6 +9,6 @@ from .views import *
 urlpatterns = [
     path('hello/' , hello    ),
     path('struct_assets/' , struct_assets    ),
-    path('update/', update_db),
+    path('pull_struct_pdb/', pull_struct_pdb),
 ]
 app_name = 'mod_utils'
