@@ -205,8 +205,8 @@ export class StructureFolder {
         if (!this.assets.__verify_json_profile(obtain)) {
             throw Error(`Structure ${this.rcsb_id} assets not found. Cannot initiate resource.`)
         }
-        console.log("accessing filepath");
 
+        console.log("accessing filepath");
         this.structure = JSON.parse(readFileSync(this.assets.json_profile_filepath(), 'utf-8'))
     }
 
@@ -236,7 +236,7 @@ export class StructureFolder {
             } else return true
         })
 
-        if ((!polys || !ligs) && obtain) {
+        if (obtain) {
             console.log("Some ligands are missing. Calling script:", `${process.env["PYTHONBIN"]} ${process.env["EXTRACT_BSITES_PY"]} -s ${this.rcsb_id} --save`)
             exec(`${process.env["PYTHONBIN"]} ${process.env["EXTRACT_BSITES_PY"]} -s ${this.rcsb_id} --save`, (err, stdout, stderr) => {
                 console.log(err);
