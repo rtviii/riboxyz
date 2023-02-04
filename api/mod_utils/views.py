@@ -1,6 +1,6 @@
 # Create your views here.
 import sys
-from api.rbxz_bend.neoget import _neoget
+from rbxz_bend.neoget import _neoget
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 import os
@@ -42,5 +42,5 @@ def struct_commit_new_PDB(request):
 
 @api_view(['GET'])
 def structs_get_ids(request):
-    ids = _neoget("match (r:RibosomeStructure) return collect(r.rcsb_id);")
+    ids = _neoget("match (r:RibosomeStructure) return r.rcsb_id;")
     return Response(ids)

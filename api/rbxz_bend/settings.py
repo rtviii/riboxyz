@@ -1,5 +1,4 @@
 import os
-# from ribxz_bend.neoget import _neoget
 
 
 # SECURITY WARNING: keep the secret key used in production secret!
