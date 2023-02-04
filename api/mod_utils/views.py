@@ -1,10 +1,10 @@
 # Create your views here.
 import sys
+from api.rbxz_bend.neoget import _neoget
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 import os
-from rbxz_bend.settings import  NEO4J_CURRENTDB, NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER, RIBETL_DATA
-import subprocess
+from rbxz_bend.settings import  NEO4J_CURRENTDB, NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER, RIBETL_DATA, CYPHER_EXEC
 from subprocess import Popen, PIPE, STDOUT, run
 #-⋯⋯⋅⋱⋰⋆⋅⋅⋄⋅⋅∶⋅⋅⋄▫▪▭┈┅✕⋅⋅⋄⋅⋅✕∶⋅⋅⋄⋱⋰⋯⋯⋯⋯⋅⋱⋰⋆⋅⋅⋄⋅⋅∶⋅⋅⋄▫▪▭┈┅✕⋅⋅⋄⋅⋅✕∶⋅⋅⋄⋱⋰⋯⋯⋯⋅⋱⋰⋆⋅⋅⋄⋅⋅∶⋅⋅⋄▫▪▭┈┅✕⋅⋅⋄⋅⋅✕∶⋅⋅⋄⋱⋰⋯⋯⋯
 
@@ -13,36 +13,6 @@ from subprocess import Popen, PIPE, STDOUT, run
 def hello(request):
     return Response("Hi again, again.")
 
-@api_view(['GET'])
-def struct_assets(request):
-    result = subprocess.run([ "ribxzcli", "struct", "show", "7UNW", "--files", "--db"], capture_output=True, text=True)
-    print("\nSTDOUT:",result.stdout)
-    print("\nSTDERR:",result.stderr)
-    return Response(str(result.stderr + result.stdout))
-
-@api_view(['GET'])
-def pull_struct_pdb(request):
-    params   = dict(request.GET)
-    structid = str.upper(params['rcsb_id'][0])
-    print("Attempting to acquire PDB for ", structid)
-
-    os.environ["RIBETL_DATA"]         = RIBETL_DATA
-    os.environ["EXTRACT_BSITES_PY"]   = "/home/backend/ingress/scripts/extract_bsites.py"
-    os.environ["RENDER_THUMBNAIL_PY"] = "/home/backend/ingress/scripts/render_thumbnail.py"
-    os.environ["COMMIT_STRUCTURE_SH"] = "/home/backend/ingress/scripts/commit_structure.sh"
-    os.environ["SPLIT_RENAME_PY"]     = "/home/backend/ingress/scripts/split_rename.py"
-
-    proc = Popen([ "/home/backend/ingress/src/update_riboxyz.ts",  
-                  "--pythonbin", "/opt/venv/bin/python3",
-                  "--ingress","commit",
-                  "--structure",f"{structid}"], env=os.environ.copy(), stdout=PIPE)
-
-                     
-
-    print([proc.stdout, proc.stdin, proc.stderr])
-
-    sys.stdout.flush()
-    return Response([proc.stdout, proc.stdin, proc.stderr])
 
 @api_view(['GET'])
 def last_update(request):
@@ -55,3 +25,22 @@ def last_update(request):
     return Response()
 
 
+
+#-------------------- SRUCT SINGLE
+
+
+@api_view(['GET'])
+def struct_commit_new_PDB(request):
+    params  = dict(request.GET)
+    rcsb_id = str.upper(params['rcsb_id'][0])
+    proc    = Popen([ "ribxzcli",  "struct", "obtain", f"{rcsb_id}", "--commit"], env=os.environ.copy(), stdout=PIPE)
+    print([proc.stdout, proc.stdin, proc.stderr])
+    sys.stdout.flush()
+    return Response([proc.stdout, proc.stdin, proc.stderr])
+
+#-------------------- SRUCTS PLURAL
+
+@api_view(['GET'])
+def structs_get_ids(request):
+    ids = _neoget("match (r:RibosomeStructure) return collect(r.rcsb_id);")
+    return Response(ids)
