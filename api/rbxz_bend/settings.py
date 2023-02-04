@@ -1,4 +1,5 @@
 import os
+# from ribxz_bend.neoget import _neoget
 
 
 # SECURITY WARNING: keep the secret key used in production secret!
@@ -6,7 +7,7 @@ SECRET_KEY = 'ju=n4om3z00jd1+y2(ufn)g^@w-dj*&-45&4yd1_aiun50b6by'
 
 BASE_DIR     = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RIBETL_DATA  = os.path.join(BASE_DIR, "ribetldata"                           ) # this should be either docker-mounted or populated through the utils module
-CYPHER_EXEC  = os.path.join(BASE_DIR, "mod_db","cypher_ops","cypher_exec")
+CYPHER_EXEC  = os.path.join(BASE_DIR, "mod_db","cypher_ops","cypher_exec")     # this should be either docker-mounted or populated through the utils module
 
 neo4j_vars = ["NEO4J_URI", "NEO4J_USER", "NEO4J_PASSWORD", "NEO4J_CURRENTDB"]
 print(" ---------------------------------------------- App has been reset. -----------------------------------------------") 
