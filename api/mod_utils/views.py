@@ -5,6 +5,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 import os
 from rbxz_bend.settings import  NEO4J_CURRENTDB, NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER, RIBETL_DATA, CYPHER_EXEC
+from neo4j import GraphDatabase,Driver,Session, Transaction, Result, ResultSummary
 from subprocess import Popen, PIPE, STDOUT, run
 #-⋯⋯⋅⋱⋰⋆⋅⋅⋄⋅⋅∶⋅⋅⋄▫▪▭┈┅✕⋅⋅⋄⋅⋅✕∶⋅⋅⋄⋱⋰⋯⋯⋯⋯⋅⋱⋰⋆⋅⋅⋄⋅⋅∶⋅⋅⋄▫▪▭┈┅✕⋅⋅⋄⋅⋅✕∶⋅⋅⋄⋱⋰⋯⋯⋯⋅⋱⋰⋆⋅⋅⋄⋅⋅∶⋅⋅⋄▫▪▭┈┅✕⋅⋅⋄⋅⋅✕∶⋅⋅⋄⋱⋰⋯⋯⋯
 
@@ -25,10 +26,7 @@ def last_update(request):
     return Response()
 
 
-
 #-------------------- SRUCT SINGLE
-
-
 @api_view(['GET'])
 def struct_commit_new_PDB(request):
     params  = dict(request.GET)
@@ -36,11 +34,15 @@ def struct_commit_new_PDB(request):
     proc    = Popen([ "ribxzcli",  "struct", "obtain", f"{rcsb_id}", "--commit"], env=os.environ.copy(), stdout=PIPE)
     print([proc.stdout, proc.stdin, proc.stderr])
     sys.stdout.flush()
-    return Response([proc.stdout, proc.stdin, proc.stderr])
+    return Response([proc.stdout, proc.stdin, pro.stderr])
 
 #-------------------- SRUCTS PLURAL
-
 @api_view(['GET'])
 def structs_get_ids(request):
-    ids = _neoget("match (r:RibosomeStructure) return r.rcsb_id;")
-    return Response(ids)
+    with GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD)) as driver:
+        def transaction_fn(tx:Transaction):
+             r = tx.run("match (r:RibosomeStructure) return r.rcsb_id;")
+             return r.values()
+        with driver.session() as session:
+            values = session.read_transaction(transaction_fn)
+            return Response([v[0] for v in values])
