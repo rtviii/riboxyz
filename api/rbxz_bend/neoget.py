@@ -1,4 +1,4 @@
-from neo4j import GraphDatabase, Result, Transaction
+from neo4j import GraphDatabase, Result
 import os
 
 def _neoget(CYPHER_STRING:str):
@@ -12,15 +12,12 @@ def _neoget(CYPHER_STRING:str):
     database=os.environ.get("NEO4J_CURRENTDB")
     )
 
-    def parametrized_query(tx:Transaction, **kwargs):
+    def parametrized_query(tx, **kwargs):
         result:Result = tx.run(CYPHER_STRING, **kwargs)
-        data = result.data()
-        print("Result data:", data)
         return result.values()
 
     with driver.session() as session:
         session.close()
-        session.run("MATCH (n) DETACH DELETE n")
         return session.read_transaction(parametrized_query)
 
 def get_nom_cmap(rcsb_id:str)->dict:
