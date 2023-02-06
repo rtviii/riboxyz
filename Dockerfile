@@ -5,7 +5,7 @@ FROM ubuntu:22.04
 # vars inside the container
 ENV DJANGO=/home/backend/api
 ENV PYMOL_SOURCE=/home/backend/pymol
-ENV CLI=/home/backend/ingress
+ENV CLI=/home/backend/cli
 ENV RIBETL_DATA=/home/backend/api/ribetldata
 
 # set work directory
@@ -48,9 +48,7 @@ RUN python3 setup.py build install --home="${PYMOL_PATH}" --install-lib="${PYMOL
 
 
 
-
-
-# WORKDIR $DJANGO
+# ------- WORKDIR $DJANGO ---------------
 ADD api/reqs.txt $DJANGO
 RUN python3 -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
@@ -62,15 +60,6 @@ RUN pip3 install gunicorn
 # port where the Django app runs
 EXPOSE 8000 8001 8002
 
-# ENV NEO4J_URI="bolt://neo:7687"
-# ENV NEO4J_USER="neo4j"
-# ENV NEO4J_PASSWORD="rrr"
-# ENV NEO4J_CURRENTDB="neo4j"
-
-# -------------------------------------- NODE AND MODULES INSTALLATION
-COPY cli $CLI
-# RUN chmod +x "${INGRESS}/src/update_riboxyz.ts"
-
 ENV NODE_VERSION=18.12.1
 RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
 ENV NVM_DIR=/root/.nvm
@@ -78,12 +67,15 @@ RUN . "$NVM_DIR/nvm.sh" && nvm install ${NODE_VERSION}
 RUN . "$NVM_DIR/nvm.sh" && nvm use v${NODE_VERSION}
 RUN . "$NVM_DIR/nvm.sh" && nvm alias default v${NODE_VERSION}
 ENV PATH="/root/.nvm/versions/node/v${NODE_VERSION}/bin/:${PATH}"
-WORKDIR ${CLI}
+
+# -------------------------------------- NODE AND MODULES INSTALLATION
+COPY cli $CLI
+WORKDIR $CLI
 ADD cli/package.json ${CLI}
 RUN npm install --no-optional && npm cache clean --force
 RUN npm install -g ts-node
-# --- CLI INSTALLATION ---------------------------------------------------------------------------------
 RUN npm i -g ribxzcli
+# --- CLI INSTALLATION ---------------------------------------------------------------------------------
 # --- 
 
 # Be careful given that both the whole django project and the main module are called `rbxz_bend`. (hence not using the $DJANGO here)
@@ -91,4 +83,4 @@ COPY api /home/backend/api
 
 # start server
 WORKDIR ${DJANGO}
-CMD ["gunicorn", "--bind", ":8000", "--workers", "3", "rbxz_bend.wsgi:application","--reload"]
+ENTRYPOINT ["gunicorn", "--bind", ":8000", "--workers", "3", "rbxz_bend.wsgi:application","--reload"]

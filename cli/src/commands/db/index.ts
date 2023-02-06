@@ -4,7 +4,6 @@ import { Command, Flags } from '@oclif/core'
 
 
 
-
 export class DbCommand  extends Command {
 
     public neo4j_vars = ["NEO4J_URI", "NEO4J_USER", "NEO4J_PASSWORD", "NEO4J_CURRENTDB", "RIBETL_DATA"]
