@@ -6,7 +6,7 @@ from rest_framework.response import Response
 import os
 from rbxz_bend.settings import  NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER, RIBETL_DATA, CYPHER_EXEC
 from neo4j import GraphDatabase, Driver, Session, Transaction, Result, ResultSummary
-from subprocess import Popen, PIPE, run
+from subprocess import STDOUT, Popen, PIPE, run
 from urllib import parse
 import logging
 # -⋯⋯⋅⋱⋰⋆⋅⋅⋄⋅⋅∶⋅⋅⋄▫▪▭┈┅✕⋅⋅⋄⋅⋅✕∶⋅⋅⋄⋱⋰⋯⋯⋯⋯⋅⋱⋰⋆⋅⋅⋄⋅⋅∶⋅⋅⋄▫▪▭┈┅✕⋅⋅⋄⋅⋅✕∶⋅⋅⋄⋱⋰⋯⋯⋯⋅⋱⋰⋆⋅⋅⋄⋅⋅∶⋅⋅⋄▫▪▭┈┅✕⋅⋅⋄⋅⋅✕∶⋅⋅⋄⋱⋰⋯⋯⋯
@@ -30,7 +30,7 @@ def last_update(request):
 
 # -------------------- SRUCT SINGLE
 @api_view(['GET'])
-def struct_commit_new_PDB(request):
+def struct_commit_new(request):
     params  = dict(request.GET)
     rcsb_id = str.upper(params['rcsb_id'][0])
     return Response(neo4j_commit_structure(rcsb_id))
@@ -40,9 +40,25 @@ def struct_commit_new_PDB(request):
 
 def neo4j_commit_structure(rcsb_id: str):
     rcsb_id = str.upper(rcsb_id)
-    proc = Popen(["ribxzcli",  "struct", "obtain", f"{rcsb_id}", "--commit"], env=os.environ.copy(), stdout=PIPE)
+    proc = Popen(["ribxzcli",  "struct", "obtain", f"{rcsb_id}", "--commit"], env=os.environ.copy(), stdout=PIPE,stderr=PIPE)
     proc.wait()
-    return [proc.stdout, proc.stdin, proc.stderr]
+    out, err = proc.communicate()
+
+
+    logging.basicConfig(filename=f'{RIBETL_DATA}/logs/structs.update.log', filemode='a')
+    logger = logging.getLogger(__name__)
+    syslog = logging.StreamHandler()
+    formatter = logging.Formatter('%(asctime)s %(app_name)s : %(message)s')
+    syslog.setFormatter(formatter)
+    logger.setLevel(logging.INFO)
+    logger.addHandler(syslog)
+    logger = logging.LoggerAdapter(logger, {'app_name': 'ribosome.xyz'})
+    logger.info(out)
+
+    update_log = logging.Logger("structs.update")
+    update_log.log(logging.INFO,"updated with rcsb_id: " + rcsb_id)
+    # logging.error(err)
+    return [out,err]
 
 def neo4j_get_all_struct_ids():
     with GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD)) as driver:
@@ -118,10 +134,7 @@ def structs_sync_with_pdb(request):
     structs = neo4j_diff_w_pdb()['diff']
     results = {}
     for rcsb_id in structs:
-        proc    = Popen(["ribxzcli",  "struct", "obtain",f"{rcsb_id}", "--commit"], env=os.environ.copy(), stdout=PIPE)
-        proc.wait()
-        results['rcsb_id'] = ["stderr", proc.stderr]
-        sys.stdout.flush()
+        neo4j_commit_structure(rcsb_id)
     print(results)
     return Response(["Done", structs])
 
