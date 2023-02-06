@@ -20,7 +20,7 @@ $ npm install -g ribxzcli
 $ ribxzcli COMMAND
 running command...
 $ ribxzcli (--version)
-ribxzcli/0.1.0 linux-x64 node-v18.12.1
+ribxzcli/0.4.4 linux-x64 node-v18.14.0
 $ ribxzcli --help [COMMAND]
 USAGE
   $ ribxzcli COMMAND
@@ -29,9 +29,57 @@ USAGE
 <!-- usagestop -->
 # Commands
 <!-- commands -->
+* [`ribxzcli db`](#ribxzcli-db)
+* [`ribxzcli db status`](#ribxzcli-db-status)
 * [`ribxzcli help [COMMAND]`](#ribxzcli-help-command)
 * [`ribxzcli struct RCSB_ID`](#ribxzcli-struct-rcsb_id)
+* [`ribxzcli struct obtain RCSB_ID`](#ribxzcli-struct-obtain-rcsb_id)
 * [`ribxzcli struct show RCSB_ID`](#ribxzcli-struct-show-rcsb_id)
+
+## `ribxzcli db`
+
+```
+USAGE
+  $ ribxzcli db [-r <value>] [-a <value>] [-p <value>] [-u <value>] [-d <value>] [-e <value>]
+
+FLAGS
+  -a, --NEO4J_URI=<value>
+  -d, --NEO4J_CURRENTDB=<value>
+  -e, --env=<value>              Environment variable
+  -p, --NEO4J_PASSWORD=<value>
+  -r, --RIBETL_DATA=<value>
+  -u, --NEO4J_USER=<value>
+```
+
+_See code: [dist/commands/db/index.js](https://github.com/rtviii/hello-world/blob/v0.4.4/dist/commands/db/index.js)_
+
+## `ribxzcli db status`
+
+Query structure in the database
+
+```
+USAGE
+  $ ribxzcli db status [-r <value>] [-a <value>] [-p <value>] [-u <value>] [-d <value>] [--PYTHONBIN <value>]
+    [--COMMIT_STRUCTURE_SH <value>] [--EXTRACT_BSITES_PY <value>] [--RENDER_THUMBNAIL_PY <value>] [--SPLIT_RENAME_PY
+    <value>] [-e <value>] [-A]
+
+FLAGS
+  -A, --updateall
+  -a, --NEO4J_URI=<value>
+  -d, --NEO4J_CURRENTDB=<value>
+  -e, --env=<value>              Environment variable
+  -p, --NEO4J_PASSWORD=<value>
+  -r, --RIBETL_DATA=<value>
+  -u, --NEO4J_USER=<value>
+  --COMMIT_STRUCTURE_SH=<value>
+  --EXTRACT_BSITES_PY=<value>
+  --PYTHONBIN=<value>
+  --RENDER_THUMBNAIL_PY=<value>
+  --SPLIT_RENAME_PY=<value>
+
+DESCRIPTION
+  Query structure in the database
+```
 
 ## `ribxzcli help [COMMAND]`
 
@@ -68,7 +116,36 @@ FLAGS
   -u, --NEO4J_USER=<value>
 ```
 
-_See code: [dist/commands/struct/index.js](https://github.com/rtviii/hello-world/blob/v0.1.0/dist/commands/struct/index.js)_
+_See code: [dist/commands/struct/index.js](https://github.com/rtviii/hello-world/blob/v0.4.4/dist/commands/struct/index.js)_
+
+## `ribxzcli struct obtain RCSB_ID`
+
+Query structure in the database
+
+```
+USAGE
+  $ ribxzcli struct obtain [RCSB_ID] [-r <value>] [-a <value>] [-p <value>] [-u <value>] [-d <value>] [--PYTHONBIN
+    <value>] [--COMMIT_STRUCTURE_SH <value>] [--EXTRACT_BSITES_PY <value>] [--RENDER_THUMBNAIL_PY <value>]
+    [--SPLIT_RENAME_PY <value>] [-e <value>] [-R] [-C]
+
+FLAGS
+  -C, --commit
+  -R, --repair
+  -a, --NEO4J_URI=<value>
+  -d, --NEO4J_CURRENTDB=<value>
+  -e, --env=<value>              Environment variable
+  -p, --NEO4J_PASSWORD=<value>
+  -r, --RIBETL_DATA=<value>
+  -u, --NEO4J_USER=<value>
+  --COMMIT_STRUCTURE_SH=<value>
+  --EXTRACT_BSITES_PY=<value>
+  --PYTHONBIN=<value>
+  --RENDER_THUMBNAIL_PY=<value>
+  --SPLIT_RENAME_PY=<value>
+
+DESCRIPTION
+  Query structure in the database
+```
 
 ## `ribxzcli struct show RCSB_ID`
 
@@ -78,11 +155,9 @@ Query structure in the database
 USAGE
   $ ribxzcli struct show [RCSB_ID] [-r <value>] [-a <value>] [-p <value>] [-u <value>] [-d <value>] [--PYTHONBIN
     <value>] [--COMMIT_STRUCTURE_SH <value>] [--EXTRACT_BSITES_PY <value>] [--RENDER_THUMBNAIL_PY <value>]
-    [--SPLIT_RENAME_PY <value>] [-e <value>] [--files] [--db] [-R] [-C] [--dryrun] [-f]
+    [--SPLIT_RENAME_PY <value>] [-e <value>] [--files] [--db] [--dryrun] [-f]
 
 FLAGS
-  -C, --commit
-  -R, --repair
   -a, --NEO4J_URI=<value>
   -d, --NEO4J_CURRENTDB=<value>
   -e, --env=<value>              Environment variable

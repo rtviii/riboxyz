@@ -7,8 +7,10 @@ from .views import *
 # - "last updated" endpoint for fend serving : date, some new structure ids.
 
 urlpatterns = [
-    path('hello/' , hello    ),
-    path('struct_assets/' , struct_assets    ),
-    path('update/', update_db),
+    path('hello/' , hello),
+    path('struct_commit_new_PDB/',struct_commit_new_PDB ),
+    path('structs_all_ids', structs_all_ids),
+    path('structs_diff_pdb', structs_diff_pdb),
 ]
+
 app_name = 'mod_utils'
