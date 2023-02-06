@@ -43,8 +43,7 @@ def struct_commit_new_PDB(request):
 
 
 @api_view(['GET'])
-def structs_get_all_ids(request):
-
+def structs_all_ids(request):
     with GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD)) as driver:
         def transaction_fn(tx: Transaction):
             r = tx.run("match (r:RibosomeStructure) return r.rcsb_id;")
