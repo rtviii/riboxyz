@@ -42,48 +42,73 @@ def struct_commit_new_PDB(request):
 # -------------------- SRUCTS PLURAL
 
 
-@api_view(['GET'])
-def structs_all_ids(request):
+def neo4j_get_all_struct_ids():
     with GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD)) as driver:
         def transaction_fn(tx: Transaction):
             r = tx.run("match (r:RibosomeStructure) return r.rcsb_id;")
             return r.values()
         with driver.session() as session:
             values = session.read_transaction(transaction_fn)
-            return Response([v[0] for v in values])
+            return [v[0] for v in values]
+
+# ?----------------->>> CACHEABLE
+@api_view(['GET'])
+def structs_all_ids(request):
+    return Response(neo4j_get_all_struct_ids())
 
 
 @api_view(['GET'])
 def structs_diff_pdb(request):
-
-    rcsb_search_api = "https://search.rcsb.org/rcsbsearch/v2/query"
-    params = {
-        "query": {
-            "type": "group",
-            "logical_operator": "and",
-            "nodes": [
-                {
-                    "type": "group",
-                    "logical_operator": "and",
-                    "nodes": [
-                        {"type": "group", "logical_operator": "and", "nodes": [{"type": "terminal", "service": "text", "parameters": {
-                            "operator": "contains_phrase", "negation": False, "value": "RIBOSOME", "attribute": "struct_keywords.pdbx_keywords"}}]},
-                        {"type": "group", "logical_operator": "and", "nodes": [{"type": "terminal", "service": "text", "parameters": {
-                            "operator": "greater", "negation": False, "value": 25, "attribute": "rcsb_entry_info.polymer_entity_count_protein"}}]},
-                    ],
-                    "label": "text"
-                }
-            ],
-            "label": "query-builder"
-        },
-        "return_type": "entry",
-        "request_options": {
-            "return_all_hits": True,
-            "results_verbosity": "compact"
-        }
+    import requests
+    from urllib import parse
+    rcsb_search_api = "https://search.rcsb.org/rcsbsearch/v2/query?json="
+    params          = '''
+    {
+      "query": {
+        "type": "group",
+        "logical_operator": "and",
+        "nodes": [
+          {
+            "type": "terminal",
+            "service": "text",
+            "parameters": {
+              "operator": "contains_phrase",
+              "negation": false,
+              "value": "RIBOSOME",
+              "attribute": "struct_keywords.pdbx_keywords"
+            },
+            "node_id": 0
+          },
+          {
+            "type": "terminal",
+            "service": "text",
+            "parameters": {
+              "operator": "greater",
+              "negation": false,
+              "value": 25,
+              "attribute": "rcsb_entry_info.polymer_entity_count_protein"
+            },
+            "node_id": 1
+          }
+        ],
+        "label": "text"
+      },
+      "return_type": "entry",
+      "request_options": {
+        "return_all_hits": true
+      }
     }
-    query_response = requests.get(
-        rcsb_search_api, params=parse.urlencode(params))
-    query_response = query_response.json()
-    print(query_response)
-    return Response(query_response)
+    '''
+
+
+    
+
+    query          = requests.get(rcsb_search_api + parse.quote_plus(params))
+    query_response = query.json()
+    structs        = list(map(lambda x: x['identifier'], query_response['result_set']))
+
+    diff = {
+        "rcsb":structs,
+        "riboxyz":neo4j_get_all_struct_ids()
+    }
+    return Response(structs)
