@@ -100,15 +100,13 @@ def structs_diff_pdb(request):
     }
     '''
 
-
-    
-
     query          = requests.get(rcsb_search_api + parse.quote_plus(params))
     query_response = query.json()
     structs        = list(map(lambda x: x['identifier'], query_response['result_set']))
 
     diff = {
-        "rcsb":structs,
-        "riboxyz":neo4j_get_all_struct_ids()
+        "rcsb"   : structs,
+        "riboxyz": neo4j_get_all_struct_ids(),
+        "diff"   : list(set(structs) - set(neo4j_get_all_struct_ids()))
     }
-    return Response(structs)
+    return Response(diff)
