@@ -4,11 +4,11 @@ from rbxz_bend.neoget import _neoget
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 import os
-from rbxz_bend.settings import NEO4J_CURRENTDB, NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER, RIBETL_DATA, CYPHER_EXEC
+from rbxz_bend.settings import  NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER, RIBETL_DATA, CYPHER_EXEC
 from neo4j import GraphDatabase, Driver, Session, Transaction, Result, ResultSummary
-from subprocess import Popen, PIPE, STDOUT, run
-import requests
+from subprocess import Popen, PIPE, run
 from urllib import parse
+import logging
 # -⋯⋯⋅⋱⋰⋆⋅⋅⋄⋅⋅∶⋅⋅⋄▫▪▭┈┅✕⋅⋅⋄⋅⋅✕∶⋅⋅⋄⋱⋰⋯⋯⋯⋯⋅⋱⋰⋆⋅⋅⋄⋅⋅∶⋅⋅⋄▫▪▭┈┅✕⋅⋅⋄⋅⋅✕∶⋅⋅⋄⋱⋰⋯⋯⋯⋅⋱⋰⋆⋅⋅⋄⋅⋅∶⋅⋅⋄▫▪▭┈┅✕⋅⋅⋄⋅⋅✕∶⋅⋅⋄⋱⋰⋯⋯⋯
 
 
@@ -31,16 +31,18 @@ def last_update(request):
 # -------------------- SRUCT SINGLE
 @api_view(['GET'])
 def struct_commit_new_PDB(request):
-    params = dict(request.GET)
+    params  = dict(request.GET)
     rcsb_id = str.upper(params['rcsb_id'][0])
-    proc = Popen(["ribxzcli",  "struct", "obtain",
-                 f"{rcsb_id}", "--commit"], env=os.environ.copy(), stdout=PIPE)
-    print([proc.stdout, proc.stdin, proc.stderr])
-    sys.stdout.flush()
-    return Response([proc.stdout, proc.stdin, proc.stderr])
+    return Response(neo4j_commit_structure(rcsb_id))
 
 # -------------------- SRUCTS PLURAL
 
+
+def neo4j_commit_structure(rcsb_id: str):
+    rcsb_id = str.upper(rcsb_id)
+    proc = Popen(["ribxzcli",  "struct", "obtain", f"{rcsb_id}", "--commit"], env=os.environ.copy(), stdout=PIPE)
+    proc.wait()
+    return [proc.stdout, proc.stdin, proc.stderr]
 
 def neo4j_get_all_struct_ids():
     with GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD)) as driver:
@@ -51,14 +53,7 @@ def neo4j_get_all_struct_ids():
             values = session.read_transaction(transaction_fn)
             return [v[0] for v in values]
 
-# ?----------------->>> CACHEABLE
-@api_view(['GET'])
-def structs_all_ids(request):
-    return Response(neo4j_get_all_struct_ids())
-
-
-@api_view(['GET'])
-def structs_diff_pdb(request):
+def neo4j_diff_w_pdb():
     import requests
     from urllib import parse
     rcsb_search_api = "https://search.rcsb.org/rcsbsearch/v2/query?json="
@@ -99,7 +94,6 @@ def structs_diff_pdb(request):
       }
     }
     '''
-
     query          = requests.get(rcsb_search_api + parse.quote_plus(params))
     query_response = query.json()
     structs        = list(map(lambda x: x['identifier'], query_response['result_set']))
@@ -109,4 +103,28 @@ def structs_diff_pdb(request):
         "riboxyz": neo4j_get_all_struct_ids(),
         "diff"   : list(set(structs) - set(neo4j_get_all_struct_ids()))
     }
-    return Response(diff)
+    return diff
+
+
+
+# ?----------------->>> CACHEABLE
+
+@api_view(['GET'])
+def structs_all_ids(request):
+    return Response(neo4j_get_all_struct_ids())
+
+@api_view(['GET'])
+def structs_sync_with_pdb(request):
+    structs = neo4j_diff_w_pdb()['diff']
+    results = {}
+    for rcsb_id in structs:
+        proc    = Popen(["ribxzcli",  "struct", "obtain",f"{rcsb_id}", "--commit"], env=os.environ.copy(), stdout=PIPE)
+        proc.wait()
+        results['rcsb_id'] = ["stderr", proc.stderr]
+        sys.stdout.flush()
+    print(results)
+    return Response(["Done", structs])
+
+@api_view(['GET'])
+def structs_diff_pdb(request):
+    return Response(neo4j_diff_w_pdb())
