@@ -9,7 +9,8 @@ from .views import *
 urlpatterns = [
     path('hello/' , hello),
     path('struct_commit_new_PDB/',struct_commit_new_PDB ),
-    path('structs_get_ids', structs_get_ids),
+    path('structs_all_ids', structs_all_ids),
+    path('structs_diff_pdb', structs_diff_pdb),
 ]
 
 app_name = 'mod_utils'
