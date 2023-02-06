@@ -1,10 +1,12 @@
 # Create your views here.
 import sys
+from typing import List
+from django.http import HttpResponse
 from rbxz_bend.neoget import _neoget
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 import os
-from rbxz_bend.settings import  NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER, RIBETL_DATA, CYPHER_EXEC
+from rbxz_bend.settings import NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER, RIBETL_DATA, CYPHER_EXEC
 from neo4j import GraphDatabase, Driver, Session, Transaction, Result, ResultSummary
 from subprocess import STDOUT, Popen, PIPE, run
 from urllib import parse
@@ -12,53 +14,84 @@ import logging
 # -⋯⋯⋅⋱⋰⋆⋅⋅⋄⋅⋅∶⋅⋅⋄▫▪▭┈┅✕⋅⋅⋄⋅⋅✕∶⋅⋅⋄⋱⋰⋯⋯⋯⋯⋅⋱⋰⋆⋅⋅⋄⋅⋅∶⋅⋅⋄▫▪▭┈┅✕⋅⋅⋄⋅⋅✕∶⋅⋅⋄⋱⋰⋯⋯⋯⋅⋱⋰⋆⋅⋅⋄⋅⋅∶⋅⋅⋄▫▪▭┈┅✕⋅⋅⋄⋅⋅✕∶⋅⋅⋄⋱⋰⋯⋯⋯
 
 
+# class Neo4jEntity:
+	# def commit(*args, **kwargs):
+
+
+class DatabaseUpdateLog:
+	def __init__(self, date, new_structs):
+		self.date = date
+		self.new_structs = new_structs
+
+	def commit(self):
+		print("commiting")
+		return f"commiting {self.date} {self.new_structs}"
+
+connection = DatabaseUpdateLog("2020-12-12", ["first", "second"])
+
+
 @api_view(['GET'])
 def hello(request):
-    return Response("Hi again, again.")
+	global connection
+	return HttpResponse(connection.commit())
 
 
-@api_view(['GET'])
-def last_update(request):
-    "match (n:Update) return n order by n.date desc  limit 1"
-    """MATCH (n:Update)
-        WITH n
-        ORDER BY n.date DESC
-        LIMIT 1
-        merge (new:Update {date:date("2023-12-12"), new_structs:['firs','sra']})-[:previous_update]->(n)"""
-    return Response()
+# @api_view(['GET'])
+# def last_update(request):
+#     "match (n:Update) return n order by n.date desc  limit 1"
+#     """MATCH (n:Update)
+#         WITH n
+#         ORDER BY n.date DESC
+#         LIMIT 1
+#         merge (new:Update {date:date("2023-12-12"), new_structs:['firs','sra']})-[:previous_update]->(n)"""
+#     return Response()
 
 
 # -------------------- SRUCT SINGLE
 @api_view(['GET'])
 def struct_commit_new(request):
-    params  = dict(request.GET)
+    params = dict(request.GET)
     rcsb_id = str.upper(params['rcsb_id'][0])
     return Response(neo4j_commit_structure(rcsb_id))
 
 # -------------------- SRUCTS PLURAL
 
 
+def neo4j_create_update(structures_added: List[str]):
+    with GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD)) as driver:
+        def transaction_fn(tx: Transaction):
+            r = tx.run(
+                "match (n:Update) return n order by n.date desc  limit 1")
+            return r.values()
+        with driver.session() as session:
+            values = session.read_transaction(transaction_fn)
+            return [v[0] for v in values]
+
+
 def neo4j_commit_structure(rcsb_id: str):
     rcsb_id = str.upper(rcsb_id)
-    proc = Popen(["ribxzcli",  "struct", "obtain", f"{rcsb_id}", "--commit"], env=os.environ.copy(), stdout=PIPE,stderr=PIPE)
+    proc = Popen(["ribxzcli",  "struct", "obtain",
+                 f"{rcsb_id}", "--commit"], env=os.environ.copy(), stdout=PIPE, stderr=PIPE)
+
     proc.wait()
     out, err = proc.communicate()
 
-
-    logging.basicConfig(filename=f'{RIBETL_DATA}/logs/structs.update.log', filemode='a')
+    logging.basicConfig(
+        filename=f'{RIBETL_DATA}/logs/structs.update.log', filemode='a')
     logger = logging.getLogger(__name__)
     syslog = logging.StreamHandler()
     formatter = logging.Formatter('%(asctime)s %(app_name)s : %(message)s')
+
     syslog.setFormatter(formatter)
     logger.setLevel(logging.INFO)
     logger.addHandler(syslog)
-    logger = logging.LoggerAdapter(logger, {'app_name': 'ribosome.xyz'})
-    logger.info(out)
 
+    logger = logging.LoggerAdapter(logger, {'app_name': 'ribosome.xyz'})
     update_log = logging.Logger("structs.update")
-    update_log.log(logging.INFO,"updated with rcsb_id: " + rcsb_id)
-    # logging.error(err)
-    return [out,err]
+    update_log.log(logging.INFO, "updated with rcsb_id: " + rcsb_id)
+
+    return [out, err]
+
 
 def neo4j_get_all_struct_ids():
     with GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD)) as driver:
@@ -69,11 +102,12 @@ def neo4j_get_all_struct_ids():
             values = session.read_transaction(transaction_fn)
             return [v[0] for v in values]
 
+
 def neo4j_diff_w_pdb():
     import requests
     from urllib import parse
     rcsb_search_api = "https://search.rcsb.org/rcsbsearch/v2/query?json="
-    params          = '''
+    params = '''
     {
       "query": {
         "type": "group",
@@ -110,17 +144,17 @@ def neo4j_diff_w_pdb():
       }
     }
     '''
-    query          = requests.get(rcsb_search_api + parse.quote_plus(params))
+    query = requests.get(rcsb_search_api + parse.quote_plus(params))
     query_response = query.json()
-    structs        = list(map(lambda x: x['identifier'], query_response['result_set']))
+    structs = list(map(lambda x: x['identifier'],
+                   query_response['result_set']))
 
     diff = {
-        "rcsb"   : structs,
+        "rcsb": structs,
         "riboxyz": neo4j_get_all_struct_ids(),
-        "diff"   : list(set(structs) - set(neo4j_get_all_struct_ids()))
+        "diff": list(set(structs) - set(neo4j_get_all_struct_ids()))
     }
     return diff
-
 
 
 # ?----------------->>> CACHEABLE
@@ -128,6 +162,7 @@ def neo4j_diff_w_pdb():
 @api_view(['GET'])
 def structs_all_ids(request):
     return Response(neo4j_get_all_struct_ids())
+
 
 @api_view(['GET'])
 def structs_sync_with_pdb(request):
@@ -137,6 +172,7 @@ def structs_sync_with_pdb(request):
         neo4j_commit_structure(rcsb_id)
     print(results)
     return Response(["Done", structs])
+
 
 @api_view(['GET'])
 def structs_diff_pdb(request):
