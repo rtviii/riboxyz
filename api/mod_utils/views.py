@@ -7,33 +7,58 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 import os
 from rbxz_bend.settings import NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER, RIBETL_DATA, CYPHER_EXEC
+from rbxz_bend.settings import Neo4jConnection
 from neo4j import GraphDatabase, Driver, Session, Transaction, Result, ResultSummary
 from subprocess import STDOUT, Popen, PIPE, run
+from neo4j.graph import Graph, Node, Relationship, Path
 from urllib import parse
 import logging
 # -⋯⋯⋅⋱⋰⋆⋅⋅⋄⋅⋅∶⋅⋅⋄▫▪▭┈┅✕⋅⋅⋄⋅⋅✕∶⋅⋅⋄⋱⋰⋯⋯⋯⋯⋅⋱⋰⋆⋅⋅⋄⋅⋅∶⋅⋅⋄▫▪▭┈┅✕⋅⋅⋄⋅⋅✕∶⋅⋅⋄⋱⋰⋯⋯⋯⋅⋱⋰⋆⋅⋅⋄⋅⋅∶⋅⋅⋄▫▪▭┈┅✕⋅⋅⋄⋅⋅✕∶⋅⋅⋄⋱⋰⋯⋯⋯
 
 
 # class Neo4jEntity:
-	# def commit(*args, **kwargs):
+# def commit(*args, **kwargs):
 
 
 class DatabaseUpdateLog:
-	def __init__(self, date, new_structs):
-		self.date = date
-		self.new_structs = new_structs
+    def __init__(self, date, new_structs):
+        self.date = date
+        self.new_structs = new_structs
 
-	def commit(self):
-		print("commiting")
-		return f"commiting {self.date} {self.new_structs}"
+    def commit(self):
+        print("commiting")
+        return f"commiting {self.date} {self.new_structs}"
+
 
 connection = DatabaseUpdateLog("2020-12-12", ["first", "second"])
 
 
 @api_view(['GET'])
 def hello(request):
-	global connection
-	return HttpResponse(connection.commit())
+    global connection
+    commit_last_db_init()
+    commit_last_update(['3j7z'])
+    return HttpResponse(connection.commit())
+
+
+def commit_last_db_init():
+    cypher = """merge (new:LastUpdated {date:localdatetime()})"""
+    with Neo4jConnection.driver.session() as session:
+        session.write_transaction(lambda tx: tx.run(
+            cypher))
+
+
+def commit_last_update(new_structs: List[str]):
+    cypher = """
+	     MATCH (n:LastUpdated)
+         WITH n
+         ORDER BY n.date DESC
+         LIMIT 1
+         merge (new:LastUpdated {date:localdatetime(), new_structs: $new_structs})-[:previous_update]->(n)
+	"""
+    with Neo4jConnection.driver.session() as session:
+        node_id = session.write_transaction(lambda tx: tx.run(
+            cypher, new_structs=new_structs))
 
 
 # @api_view(['GET'])
