@@ -1,4 +1,5 @@
 import os
+from .neo4j.db import Neo4jConnection
 
 
 # SECURITY WARNING: keep the secret key used in production secret!
