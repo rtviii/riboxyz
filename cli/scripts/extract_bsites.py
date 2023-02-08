@@ -24,7 +24,7 @@ flatten = itertools.chain.from_iterable
 def get_dict(path:str,)->dict:
 	return MMCIF2Dict.MMCIF2Dict(path)
 
-AMINO_ACIDS = {
+MINO_ACIDS = {
     "ALA": 0,
     'ARG': 1,
     'ASN': 0,
