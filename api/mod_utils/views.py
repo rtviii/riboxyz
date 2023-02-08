@@ -158,17 +158,17 @@ def structs_all_ids(request):
 
 @api_view(['GET'])
 def structs_sync_with_pdb(request):
+    import subprocess
+    import shlex
     structs = neo4j_diff_w_pdb()['diff']
-	
-    updateloop= "for rcsb_id in {}; do ribxzcli struct obtain $rcsb_id --commit >> {}; done".format(" ".join(structs), f'{RIBETL_DATA}/logs/structs.update.log')
-    # os.system(updateloop)
-
-    # for rcsb_id in structs:
-    #     neo4j_commit_structure(rcsb_id)
-
+    updateloop = "for rcsb_id in {}; do ribxzcli struct obtain \\$rcsb_id --commit >> {}; done".format(
+        " ".join(structs),
+        f'{RIBETL_DATA}/logs/structs.update.log')
+    update_split = shlex.split(updateloop)
+    
+    subprocess.run(update_split, start_new_session=True)
     neo4j_commit_last_update(structs)
-    return HttpResponse(f"{updateloop}")
-    return HttpResponse("Added " + str(len(structs)) + " structures to database." + str(structs))
+    return HttpResponse(f"{update_split}")
 
 
 @api_view(['GET'])
