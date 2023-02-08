@@ -161,14 +161,17 @@ def structs_sync_with_pdb(request):
     import subprocess
     import shlex
     structs = neo4j_diff_w_pdb()['diff']
-    updateloop = "for rcsb_id in {}; do ribxzcli struct obtain \\$rcsb_id --commit >> {}; done".format(
+
+    updateloop = """for rcsb_id in {}; do ribxzcli struct obtain $rcsb_id --commit >> {}; done""".format(
         " ".join(structs),
         f'{RIBETL_DATA}/logs/structs.update.log')
-    update_split = shlex.split(updateloop)
-    
-    subprocess.run(update_split, start_new_session=True)
+    with open(f'./update_all.sh', 'w') as f:
+        f.write(f"{updateloop}")
+
+    subprocess.Popen([ "/usr/bin/sh", "./update_all.sh" ], start_new_session=True)
+
     neo4j_commit_last_update(structs)
-    return HttpResponse(f"{update_split}")
+    return HttpResponse(f"{updateloop}")
 
 
 @api_view(['GET'])
