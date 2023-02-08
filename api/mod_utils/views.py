@@ -7,44 +7,43 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 import os
 from rbxz_bend.settings import NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER, RIBETL_DATA, CYPHER_EXEC
+from rbxz_bend.settings import Neo4jConnection
 from neo4j import GraphDatabase, Driver, Session, Transaction, Result, ResultSummary
 from subprocess import STDOUT, Popen, PIPE, run
+from neo4j.graph import Graph, Node, Relationship, Path
 from urllib import parse
 import logging
 # -⋯⋯⋅⋱⋰⋆⋅⋅⋄⋅⋅∶⋅⋅⋄▫▪▭┈┅✕⋅⋅⋄⋅⋅✕∶⋅⋅⋄⋱⋰⋯⋯⋯⋯⋅⋱⋰⋆⋅⋅⋄⋅⋅∶⋅⋅⋄▫▪▭┈┅✕⋅⋅⋄⋅⋅✕∶⋅⋅⋄⋱⋰⋯⋯⋯⋅⋱⋰⋆⋅⋅⋄⋅⋅∶⋅⋅⋄▫▪▭┈┅✕⋅⋅⋄⋅⋅✕∶⋅⋅⋄⋱⋰⋯⋯⋯
 
 
 # class Neo4jEntity:
-	# def commit(*args, **kwargs):
-
-
-class DatabaseUpdateLog:
-	def __init__(self, date, new_structs):
-		self.date = date
-		self.new_structs = new_structs
-
-	def commit(self):
-		print("commiting")
-		return f"commiting {self.date} {self.new_structs}"
-
-connection = DatabaseUpdateLog("2020-12-12", ["first", "second"])
+# def commit(*args, **kwargs):
 
 
 @api_view(['GET'])
 def hello(request):
-	global connection
-	return HttpResponse(connection.commit())
+    global connection
+    return HttpResponse('hi')
 
 
-# @api_view(['GET'])
-# def last_update(request):
-#     "match (n:Update) return n order by n.date desc  limit 1"
-#     """MATCH (n:Update)
-#         WITH n
-#         ORDER BY n.date DESC
-#         LIMIT 1
-#         merge (new:Update {date:date("2023-12-12"), new_structs:['firs','sra']})-[:previous_update]->(n)"""
-#     return Response()
+def neo4j_commit_last_db_init():
+    cypher = """merge (new:LastUpdated {date:localdatetime()})"""
+    with Neo4jConnection.driver.session() as session:
+        session.write_transaction(lambda tx: tx.run(
+            cypher))
+
+
+def neo4j_commit_last_update(new_structs: List[str]):
+    cypher = """
+	     MATCH (n:LastUpdated)
+         WITH n
+         ORDER BY n.date DESC
+         LIMIT 1
+         merge (new:LastUpdated {date:localdatetime(), new_structs: $new_structs})-[:previous_update]->(n)
+	"""
+    with Neo4jConnection.driver.session() as session:
+        node_id = session.write_transaction(lambda tx: tx.run(
+            cypher, new_structs=new_structs))
 
 
 # -------------------- SRUCT SINGLE
@@ -52,28 +51,17 @@ def hello(request):
 def struct_commit_new(request):
     params = dict(request.GET)
     rcsb_id = str.upper(params['rcsb_id'][0])
-    return Response(neo4j_commit_structure(rcsb_id))
+    return HttpResponse(neo4j_commit_structure(rcsb_id))
 
 # -------------------- SRUCTS PLURAL
-
-
-def neo4j_create_update(structures_added: List[str]):
-    with GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD)) as driver:
-        def transaction_fn(tx: Transaction):
-            r = tx.run(
-                "match (n:Update) return n order by n.date desc  limit 1")
-            return r.values()
-        with driver.session() as session:
-            values = session.read_transaction(transaction_fn)
-            return [v[0] for v in values]
 
 
 def neo4j_commit_structure(rcsb_id: str):
     rcsb_id = str.upper(rcsb_id)
     proc = Popen(["ribxzcli",  "struct", "obtain",
                  f"{rcsb_id}", "--commit"], env=os.environ.copy(), stdout=PIPE, stderr=PIPE)
-
     proc.wait()
+
     out, err = proc.communicate()
 
     logging.basicConfig(
@@ -89,6 +77,8 @@ def neo4j_commit_structure(rcsb_id: str):
     logger = logging.LoggerAdapter(logger, {'app_name': 'ribosome.xyz'})
     update_log = logging.Logger("structs.update")
     update_log.log(logging.INFO, "updated with rcsb_id: " + rcsb_id)
+
+    print(out, err)
 
     return [out, err]
 
@@ -164,14 +154,24 @@ def structs_all_ids(request):
     return Response(neo4j_get_all_struct_ids())
 
 
+# TODO: Centralize logging
+
 @api_view(['GET'])
 def structs_sync_with_pdb(request):
+    import subprocess
+    import shlex
     structs = neo4j_diff_w_pdb()['diff']
-    results = {}
-    for rcsb_id in structs:
-        neo4j_commit_structure(rcsb_id)
-    print(results)
-    return Response(["Done", structs])
+
+    updateloop = """for rcsb_id in {}; do ribxzcli struct obtain $rcsb_id --commit >> {}; done""".format(
+        " ".join(structs),
+        f'{RIBETL_DATA}/logs/structs.update.log')
+    with open(f'./update_all.sh', 'w') as f:
+        f.write(f"{updateloop}")
+
+    subprocess.Popen([ "/usr/bin/sh", "./update_all.sh" ], start_new_session=True)
+
+    neo4j_commit_last_update(structs)
+    return HttpResponse(f"{updateloop}")
 
 
 @api_view(['GET'])
