@@ -16,3 +16,9 @@
 - automatic update per struct -- cron job every 24 weeks
 - rewrite cli entirely in python
 
+
+
+rewrite struct init scripts in python
+rewrtie cli in python
+monitoring
+graph.ribosome.xyz
