@@ -374,7 +374,6 @@ if args.canon:
         json.dump(PTC_MARKERKS_RAW, outf, indent=4)
         print("Saved {} successfully.".format(outfile))
 
-
 if args.markers:
     domain = 'bacteria'
     rcsb_id = argdict["target"].upper()
@@ -473,8 +472,7 @@ if args.fasta_profile:
         raise FileNotFoundError(
             "Domain misspecified. Must be either 'bacteria' or 'eukarya'.")
     seq_to_fasta(rcsb_id, strand_target, fpath_23s)
-    muscle_combine_profile(domain_alignment, fpath_23s,
-                           'ribovision.bacteria.fasta')
+    muscle_combine_profile(domain_alignment, fpath_23s,'ribovision.bacteria.fasta')
     exit(1)
 
 if args.generate:
