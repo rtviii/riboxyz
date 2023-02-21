@@ -51,7 +51,23 @@ for control in suspects:
     control_path = (lambda _: "5afi_unclassified_{}.fasta".format(_))(control)
     muscle_combine_profiles('PV_uL2.fasta', control_path, 'PV_uL2_with_{}.fasta'.format(control))
 
+# silence prody
+
+prd.confProDy(verbosity='none')
 
 def compare_entropies(msa_path1: str, msa_path2: str):
-    msa_file = prd.parseMSA('PV_uL2.fasta')
-    msa_file_ctl = prd.parseMSA('PV_uL2.fasta')
+    msa_file     = prd.parseMSA(msa_path1)
+    msa_file_ctl = prd.parseMSA(msa_path2)
+    H            = sum(calcShannonEntropy(msa_file, omitgaps=False))
+    H_w_ctl      = sum(calcShannonEntropy(msa_file_ctl, omitgaps=False))
+
+    return  H, H_w_ctl
+    
+  
+
+for control in suspects:
+    print("---------")
+    print(f"Comparing 'PV_uL2.fasta' against 'PV_uL2_with_{control}.fasta'") 
+    h, hwctl = compare_entropies('PV_uL2.fasta', f'PV_uL2_with_{control}.fasta')
+    print("Unpetrurbed entropy: {}".format(h))
+    print("Perturbed entropy: {}".format(hwctl))
