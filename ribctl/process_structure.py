@@ -162,3 +162,19 @@ def reshape_to_ligand(nonpoly):
         "chemicalName       ": nonpoly['pdbx_entity_nonpoly']['name'],
         "number_of_instances": nonpoly['rcsb_nonpolymer_entity']['pdbx_number_of_molecules']
     }
+
+
+def is_ligand_like(polymer, nomenclature:list[str]) :
+    if 'tRNA' in nomenclature or 'mRNA' in nomenclature:
+        return True
+    #   // ? Look for enzymes, factors and antibiotics
+    reg     = r"/(\w*(?<!(cha|pro|dom|stra|pl\w*))in\b)|(\b\w*zyme\b)|(factor)/gi";
+    matches = re.search(reg, polymer['rcsb_polymer_entity']['pdbx_description'])
+
+    if matches != None  \
+    and not True in [ 'protein' not in _.lower() for _ in matches]  \
+    and not ('protein' in polymer['rcsb_polymer_entity']['pdbx_description'].lower()) \
+    and not ('rna' in polymer['rcsb_polymer_entity']['pdbx_description'].lower()):
+        return True
+    else:
+      return False
