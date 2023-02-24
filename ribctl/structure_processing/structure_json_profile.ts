@@ -22,93 +22,6 @@ import {
 
 
 
-// Renamed, added so far:  host organisms, host ids, srcids srcnames
-const query_template = (pdbid: string) => {
-  const GQL_QUERY_SHAPE = `{
-  entry(entry_id: "${pdbid.toUpperCase()}") {
-    rcsb_id
-    struct_keywords {
-      pdbx_keywords
-      text
-    }
-    rcsb_entry_info {
-      resolution_combined
-    }
-    rcsb_external_references {
-      link
-      type
-      id
-    }
-    exptl {
-      method
-    }
-    citation {
-      rcsb_authors
-      year
-      title
-      pdbx_database_id_DOI
-    }
-    struct_keywords {
-      pdbx_keywords
-      text
-    }
-    polymer_entities {
-      entry{
-        rcsb_id
-      }
-      rcsb_polymer_entity_container_identifiers {
-        asym_ids
-        auth_asym_ids
-        entry_id
-        entity_id
-      }
-      pfams {
-        rcsb_pfam_accession
-        rcsb_pfam_comment
-        rcsb_pfam_description
-      }
-      rcsb_entity_source_organism {
-        ncbi_taxonomy_id
-        scientific_name
-      }
-
-      rcsb_entity_host_organism {
-        ncbi_taxonomy_id
-        scientific_name
-      }
-
-      uniprots {
-        rcsb_id
-      }
-      rcsb_polymer_entity {
-        pdbx_description
-      }
-      entity_poly {
-        pdbx_seq_one_letter_code
-        pdbx_seq_one_letter_code_can
-        pdbx_strand_id
-        rcsb_entity_polymer_type
-        rcsb_sample_sequence_length
-        type
-      }
-    }
-    nonpolymer_entities {
-      pdbx_entity_nonpoly {
-        comp_id
-        name
-        entity_id
-      }
-      rcsb_nonpolymer_entity {
-        formula_weight
-        pdbx_description
-        pdbx_number_of_molecules
-      }
-    }
-  }
-}`
-  return `https://data.rcsb.org/graphql?query=${GQL_QUERY_SHAPE}`;
-};
-
 const matchRPNomenclature = (
   polymer: Polymer_Entity
 ): ProteinClass[] => {
@@ -167,6 +80,7 @@ const matchRNANomenclature = (polymer: Polymer_Entity): RNAClass[] => {
   }
 
   var rnatypes = Object.keys(rna_reg) as RNAClass[]
+
   for (var c of rnatypes) {
     var matches = rna_reg[c].exec(polymer.rcsb_polymer_entity.pdbx_description)
     if (matches) {
@@ -177,10 +91,14 @@ const matchRNANomenclature = (polymer: Polymer_Entity): RNAClass[] => {
 
 }
 
+
+
+
+
 interface Organisms {
-  src_organism_ids: number[]
-  src_organism_names: string[]
-  host_organism_ids: number[]
+  src_organism_ids   : number[]
+  src_organism_names : string[]
+  host_organism_ids  : number[]
   host_organism_names: string[]
 
 }
