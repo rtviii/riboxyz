@@ -132,3 +132,24 @@ def inferOrganismsFromPolymers(polymers: list[Protein | RNA]):
         "src_organism_names ": list(set(src_organism_names)),
         "host_organism_ids  ": list(set(host_organism_ids)),
         "host_organism_names": list(set(host_organism_names))}
+
+
+
+def extractRefs(external_refs):
+    """
+    external_refs: list[{ link: string; type: string; id: string }]
+    """
+
+    externalRefIds: list[str] = [];
+    externalRefTypes: list[str] = [];
+    externalRefLinks: list[str] = [];
+
+    if external_refs == None:
+       ...
+    else:
+        for ref in external_refs:
+            externalRefIds.append(ref['id']);
+            externalRefTypes.append(ref['type']);
+            externalRefLinks.append(ref['link']);
+
+    return [externalRefIds, externalRefTypes, externalRefLinks];
