@@ -74,7 +74,7 @@ def get_protein_nomenclature(protein):
     else:
         pfamids = [pfam['rcsb_pfam_accession'] for pfam in protein['pfams']]
 
-        nomenclature: list[Protein] = []
+        nomenclature = []
         for pfam_id in pfamids:
             [nomenclature.append(kv[0]) if pfam_id in kv[1]
              ['pfamDomainAccession'] else ... for kv in LSU_map.items()]
@@ -84,7 +84,7 @@ def get_protein_nomenclature(protein):
     return list(set(nomenclature))
 
 
-def get_rna_nomenclature(polymer):
+def get_rna_nomenclature(polymer) -> list:
     rna_reg = {
         "5SrRNA": r"/\b(5s)/gi",
         "5.8SrRNA": r"/\b(5\.8s)/gi",
@@ -105,9 +105,7 @@ def get_rna_nomenclature(polymer):
         matches = re.search(i[1], polymer.rcsb_polymer_entity.pdbx_description)
         if (matches):
             return [i[0]]
-
-        else:
-            return []
+    return []
 
 
 def inferOrganismsFromPolymers(polymers: list[Protein | RNA]):
@@ -164,17 +162,101 @@ def reshape_to_ligand(nonpoly):
     }
 
 
-def is_ligand_like(polymer, nomenclature:list[str]) :
+def is_ligand_like(polymer, nomenclature: list[str]):
     if 'tRNA' in nomenclature or 'mRNA' in nomenclature:
         return True
     #   // ? Look for enzymes, factors and antibiotics
-    reg     = r"/(\w*(?<!(cha|pro|dom|stra|pl\w*))in\b)|(\b\w*zyme\b)|(factor)/gi";
-    matches = re.search(reg, polymer['rcsb_polymer_entity']['pdbx_description'])
+    reg = r"/(\w*(?<!(cha|pro|dom|stra|pl\w*))in\b)|(\b\w*zyme\b)|(factor)/gi"
+    matches = re.search(
+        reg, polymer['rcsb_polymer_entity']['pdbx_description'])
 
     if matches != None  \
-    and not True in [ 'protein' not in _.lower() for _ in matches]  \
-    and not ('protein' in polymer['rcsb_polymer_entity']['pdbx_description'].lower()) \
-    and not ('rna' in polymer['rcsb_polymer_entity']['pdbx_description'].lower()):
+            and not True in ['protein' not in _.lower() for _ in matches]  \
+            and not ('protein' in polymer['rcsb_polymer_entity']['pdbx_description'].lower()) \
+            and not ('rna' in polymer['rcsb_polymer_entity']['pdbx_description'].lower()):
         return True
     else:
-      return False
+        return False
+
+
+def reshape_PolyEntity_to_rRNA(plm) -> list:
+
+    src_organism_ids    = list(set([org['ncbi_taxonomy_id'] for org in plm['rcsb_entity_source_organism']])) if plm['rcsb_entity_source_organism'] != None else []
+    host_organism_ids   = list(set([org['ncbi_taxonomy_id'] for org in plm['rcsb_entity_host_organism']])) if plm['rcsb_entity_host_organism']     != None else []
+    src_organism_names  = list(set([org['ncbi_taxonomy_id'] for org in plm['rcsb_entity_source_organism']])) if plm['rcsb_entity_source_organism'] != None else []
+    host_organism_names = list(set([org['ncbi_taxonomy_id'] for org in plm['rcsb_entity_host_organism']])) if plm['rcsb_entity_host_organism']     != None else []
+
+    nomenclature = get_rna_nomenclature(plm)
+
+    return [
+        {
+        "nomenclature": nomenclature,
+        "ligand_like": is_ligand_like(plm, nomenclature),
+
+        "asym_ids": plm['rcsb_polymer_entity_container_identifiers']['asym_ids'],
+        "auth_asym_id": auth_asym_id,
+        "parent_rcsb_id": plm['entry']['rcsb_id'],
+
+        "host_organism_ids"  : host_organism_ids,
+        "host_organism_names": host_organism_names,
+        "src_organism_ids"   : src_organism_ids,
+        "src_organism_names" : src_organism_names,
+
+        "rcsb_pdbx_description": "" if plm['rcsb_polymer_entity']['pdbx_description'] == None else plm['rcsb_polymer_entity']['pdbx_description'],
+
+        "entity_poly_strand_id"              : plm['entity_poly']['pdbx_strand_id'],
+        "entity_poly_seq_one_letter_code"    : plm['entity_poly']['pdbx_seq_one_letter_code'],
+        "entity_poly_seq_one_letter_code_can": plm['entity_poly']['pdbx_seq_one_letter_code_can'],
+        "entity_poly_seq_length"             : plm['entity_poly']['rcsb_sample_sequence_length'],
+        "entity_poly_entity_type"            : plm['entity_poly']['type'],
+        "entity_poly_polymer_type"           : plm['entity_poly']['rcsb_entity_polymer_type']
+        } 
+
+    for auth_asym_id in plm['rcsb_polymer_entity_container_identifiers']['auth_asym_ids']]
+
+
+def reshape_poly_to_protein(plm):
+    if plm['pfams'] != None and len(plm['pfams']) > 0:
+
+        pfam_comments     = list(set([pfam['rcsb_pfam_comment']for pfam in plm['pfams']]))
+        pfam_descriptions = list(set([pfam['rcsb_pfam_description'] for pfam in plm['pfams']]))
+        pfam_accessions   = list(set([pfam['rcsb_pfam_accession'] for pfam in plm['pfams']]))
+
+    else: 
+        pfam_comments     = []
+        pfam_descriptions = []
+        pfam_accessions   = []
+
+    src_organism_ids    = list(set([org['ncbi_taxonomy_id'] for org in plm['rcsb_entity_source_organism']]))  if plm['rcsb_entity_host_organism'] != None  else []
+    src_organism_names  = list(set([org['scientific_name'] for org in plm['rcsb_entity_source_organism']]))  if plm['rcsb_entity_host_organism']   != None  else []
+    host_organism_ids   = list(set([org['ncbi_taxnonomy_id'] for org in plm['rcsb_entity_host_organism']])) if plm['rcsb_entity_host_organism'] != None  else []
+    host_organism_names = list(set([org['scientific_name'] for org in plm['rcsb_entity_host_organism']]))   if plm['rcsb_entity_host_organism']   != None  else []
+
+    nomenclature = get_protein_nomenclature(plm)
+
+    return [
+        {
+            "nomenclature"                       : nomenclature,
+            "asym_ids"                           : plm['rcsb_polymer_entity_container_identifiers']['asym_ids'],
+            "parent_rcsb_id"                     : plm['entry.rcsb_id'],
+            "auth_asym_id"                       : auth_asym_id,
+            "pfam_accessions"                    : pfam_accessions,
+            "pfam_comments"                      : pfam_comments,
+            "pfam_descriptions"                  : pfam_descriptions,
+            "ligand_like"                        : is_ligand_like(plm, nomenclature),
+            "host_organism_ids"                  : host_organism_ids,
+            "host_organism_names"                : host_organism_names,
+            "src_organism_ids"                   : src_organism_ids,
+            "src_organism_names"                 : src_organism_names,
+            "uniprot_accession"                  : [entry['rcsb_id'] for entry in plm['uniprots']] if plm['uniprots'] != None and len(plm['uniprots']) > 0 else [],
+            "rcsb_pdbx_description"              : plm['rcsb_polymer_entity']['pdbx_description'],
+            "entity_poly_strand_id"              : plm['entity_poly']['pdbx_strand_id'],
+            "entity_poly_seq_one_letter_code"    : plm['entity_poly']['pdbx_seq_one_letter_code'],
+            "entity_poly_seq_one_letter_code_can": plm['entity_poly']['pdbx_seq_one_letter_code_can'],
+            "entity_poly_seq_length"             : plm['entity_poly']['rcsb_sample_sequence_length'],
+            "entity_poly_entity_type"            : plm['entity_poly']['type'],
+            "entity_poly_polymer_type"           : plm['entity_poly']['rcsb_entity_polymer_type']
+        }
+
+
+        for auth_asym_id in plm['rcsb_polymer_entity_container_identifiers']['auth_asym_ids']]
