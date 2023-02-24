@@ -93,10 +93,10 @@ export interface Protein {
 }
 
 export interface Ligand {
-  chemicalId: string;
-  chemicalName: string;
-  formula_weight: number;
-  pdbx_description: string;
+  chemicalId         : string;
+  chemicalName       : string;
+  formula_weight     : number;
+  pdbx_description   : string;
   number_of_instances: number;
 }
 
