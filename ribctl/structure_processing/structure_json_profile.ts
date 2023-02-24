@@ -147,10 +147,10 @@ const extractRefs = (
 
 const reshape_ToLigand = (nonpoly: Nonpolymer_Entity): Ligand => {
   return {
-    pdbx_description: nonpoly.rcsb_nonpolymer_entity.pdbx_description,
-    formula_weight: nonpoly.rcsb_nonpolymer_entity.formula_weight,
-    chemicalId: nonpoly.pdbx_entity_nonpoly.comp_id,
-    chemicalName: nonpoly.pdbx_entity_nonpoly.name,
+    pdbx_description   : nonpoly.rcsb_nonpolymer_entity.pdbx_description,
+    formula_weight     : nonpoly.rcsb_nonpolymer_entity.formula_weight,
+    chemicalId         : nonpoly.pdbx_entity_nonpoly.comp_id,
+    chemicalName       : nonpoly.pdbx_entity_nonpoly.name,
     number_of_instances: nonpoly.rcsb_nonpolymer_entity.pdbx_number_of_molecules
   };
 };

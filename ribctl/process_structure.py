@@ -134,22 +134,31 @@ def inferOrganismsFromPolymers(polymers: list[Protein | RNA]):
         "host_organism_names": list(set(host_organism_names))}
 
 
-
-def extractRefs(external_refs):
+def extract_external_refs(external_refs):
     """
     external_refs: list[{ link: string; type: string; id: string }]
     """
 
-    externalRefIds: list[str] = [];
-    externalRefTypes: list[str] = [];
-    externalRefLinks: list[str] = [];
+    externalRefIds: list[str] = []
+    externalRefTypes: list[str] = []
+    externalRefLinks: list[str] = []
 
     if external_refs == None:
-       ...
+        ...
     else:
         for ref in external_refs:
-            externalRefIds.append(ref['id']);
-            externalRefTypes.append(ref['type']);
-            externalRefLinks.append(ref['link']);
+            externalRefIds.append(ref['id'])
+            externalRefTypes.append(ref['type'])
+            externalRefLinks.append(ref['link'])
 
-    return [externalRefIds, externalRefTypes, externalRefLinks];
+    return [externalRefIds, externalRefTypes, externalRefLinks]
+
+
+def reshape_to_ligand(nonpoly):
+    return {
+        "pdbx_description   ": nonpoly['rcsb_nonpolymer_entity']['pdbx_description'],
+        "formula_weight     ": nonpoly['rcsb_nonpolymer_entity']['formula_weight'],
+        "chemicalId         ": nonpoly['pdbx_entity_nonpoly']['comp_id'],
+        "chemicalName       ": nonpoly['pdbx_entity_nonpoly']['name'],
+        "number_of_instances": nonpoly['rcsb_nonpolymer_entity']['pdbx_number_of_molecules']
+    }
