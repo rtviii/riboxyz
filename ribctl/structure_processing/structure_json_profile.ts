@@ -142,6 +142,9 @@ const extractRefs = (
   return [externalRefIds, externalRefTypes, externalRefLinks];
 };
 
+
+
+
 const reshape_ToLigand = (nonpoly: Nonpolymer_Entity): Ligand => {
   return {
     pdbx_description: nonpoly.rcsb_nonpolymer_entity.pdbx_description,
