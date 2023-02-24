@@ -50,26 +50,26 @@ def get_protein_nomenclature(protein):
     return list(set(nomenclature))
 
 
-def get_rna_nomenclature(polymer) -> list:
+def get_rna_nomenclature(polymer):  
+
     rna_reg = {
-        "5SrRNA": r"/\b(5s)/gi",
-        "5.8SrRNA": r"/\b(5\.8s)/gi",
-        "12SrRNA": r"/\b(12s)/gi",
-        "16SrRNA": r"/\b(16s)/gi",
-        "21SrRNA": r"/\b(21s)/gi",
-        "23SrRNA": r"/\b(23s)/gi",
-        "25SrRNA": r"/\b(25s)/gi",
-        "28SrRNA": r"/\b(28s)/gi",
-        "35SrRNA": r"/\b(35s)/gi",
-        "mRNA": r"/(mrna)|\b(messenger)\b/gi",
-        "tRNA": r"/(trna)|\b(transfer)\b/gi",
+        "5SrRNA"  : r"\b(5s)",
+        "5.8SrRNA": r"\b(5\.8s)",
+        "12SrRNA" : r"\b(12s)",
+        "16SrRNA" : r"\b(16s)",
+        "21SrRNA" : r"\b(21s)",
+        "23SrRNA" : r"\b(23s)",
+        "25SrRNA" : r"\b(25s)",
+        "28SrRNA" : r"\b(28s)",
+        "35SrRNA" : r"\b(35s)",
+        "mRNA"    : r"(mrna)|\b(messenger)\b",
+        "tRNA"    : r"(trna)|\b(transfer)\b",
     }
 
     rnatypes = rna_reg.items()
-
     for i in rnatypes:
-        matches = re.search(i[1], polymer['rcsb_polymer_entity'][ 'pdbx_description' ])
-        if (matches):
+        matches = re.search(i[1], polymer['rcsb_polymer_entity'][ 'pdbx_description' ], flags=re.IGNORECASE | re.MULTILINE)
+        if matches!=None:
             return [i[0]]
     return []
 
