@@ -16,45 +16,14 @@ SSU_map = {k.upper(): v for k, v in json.load(
     open('subunit_map_SSU.json', 'r')).items()}
 
 
-def gql_monolith(rcsb_id): return monolithic.replace(
-    "$RCSB_ID", rcsb_id.upper())
+def gql_monolith(rcsb_id): return monolithic.replace("$RCSB_ID", rcsb_id.upper())
 # gql_structs             = lambda rcsb_id: structure_string.replace("$RCSB_ID", rcsb_id.upper())
 # gql_polymer_entities    = lambda rcsb_id: polymer_entities_string.replace("$RCSB_ID", rcsb_id.upper())
 # gql_nonpolymer_entities = lambda rcsb_id: nonpolymer_entities_string.replace("$RCSB_ID", rcsb_id.upper())
 
 
-def query_rcsb_api(gql_string: str):
-    reqstring = "https://data.rcsb.org/graphql?query={}".format(gql_string)
-    try:
-        resp = requests.get(reqstring)
-        return resp.json()['data']
-    except Exception as e:
-        print("Could not land request to RCSB API. {}".format(e))
 
 
-RCSB_ID = "4ug0"
-# structs  = query_rcsb_api(gql_structs(RCSB_ID))
-# nonpolys = query_rcsb_api(gql_nonpolymer_entities(RCSB_ID))
-# polys    = query_rcsb_api(gql_polymer_entities(RCSB_ID))
-mono = query_rcsb_api(gql_monolith(RCSB_ID))
-
-
-polys = mono['entry']['polymer_entities']
-nonpolys = mono['entry']['nonpolymer_entities']
-
-proteins = polys
-# pprint(polys)
-
-
-def is_protein(
-    poly): return poly['entity_poly']['rcsb_entity_polymer_type'] == 'Protein'
-
-
-proteins, rnas = [], []
-for poly in polys:
-    proteins.append(poly) if is_protein(poly) else rnas.append(poly)
-
-P = proteins[5]
 
 
 def get_protein_nomenclature(protein):
@@ -82,7 +51,6 @@ def get_protein_nomenclature(protein):
              ['pfamDomainAccession'] else ... for kv in SSU_map.items()]
 
     return list(set(nomenclature))
-
 
 def get_rna_nomenclature(polymer) -> list:
     rna_reg = {
@@ -181,39 +149,35 @@ def is_ligand_like(polymer, nomenclature: list[str]):
 
 def reshape_poly_to_rna(plm) -> list:
 
-    src_organism_ids = list(set([org['ncbi_taxonomy_id'] for org in plm['rcsb_entity_source_organism']])
-                            ) if plm['rcsb_entity_source_organism'] != None else []
-    host_organism_ids = list(set([org['ncbi_taxonomy_id'] for org in plm['rcsb_entity_host_organism']])
-                             ) if plm['rcsb_entity_host_organism'] != None else []
-    src_organism_names = list(set([org['ncbi_taxonomy_id'] for org in plm['rcsb_entity_source_organism']])
-                              ) if plm['rcsb_entity_source_organism'] != None else []
-    host_organism_names = list(set([org['ncbi_taxonomy_id'] for org in plm['rcsb_entity_host_organism']])
-                               ) if plm['rcsb_entity_host_organism'] != None else []
+    src_organism_ids    = list(set([org['ncbi_taxonomy_id'] for org in plm['rcsb_entity_source_organism']])) if plm['rcsb_entity_source_organism'] != None else []
+    host_organism_ids   = list(set([org['ncbi_taxonomy_id'] for org in plm['rcsb_entity_host_organism'  ]])) if plm['rcsb_entity_host_organism'  ] != None else []
+    src_organism_names  = list(set([org['ncbi_taxonomy_id'] for org in plm['rcsb_entity_source_organism']])) if plm['rcsb_entity_source_organism'] != None else []
+    host_organism_names = list(set([org['ncbi_taxonomy_id'] for org in plm['rcsb_entity_host_organism'  ]])) if plm['rcsb_entity_host_organism'  ] != None else []
 
-    nomenclature = get_rna_nomenclature(plm)
+    nomenclature        = get_rna_nomenclature(plm)
 
     return [
         {
             "nomenclature": nomenclature,
-            "ligand_like": is_ligand_like(plm, nomenclature),
+            "ligand_like" : is_ligand_like(plm, nomenclature),
 
-            "asym_ids": plm['rcsb_polymer_entity_container_identifiers']['asym_ids'],
-            "auth_asym_id": auth_asym_id,
+            "asym_ids"      : plm['rcsb_polymer_entity_container_identifiers']['asym_ids'],
+            "auth_asym_id"  : auth_asym_id,
             "parent_rcsb_id": plm['entry']['rcsb_id'],
 
-            "host_organism_ids": host_organism_ids,
+            "host_organism_ids"  : host_organism_ids,
             "host_organism_names": host_organism_names,
-            "src_organism_ids": src_organism_ids,
-            "src_organism_names": src_organism_names,
+            "src_organism_ids"   : src_organism_ids,
+            "src_organism_names" : src_organism_names,
 
             "rcsb_pdbx_description": "" if plm['rcsb_polymer_entity']['pdbx_description'] == None else plm['rcsb_polymer_entity']['pdbx_description'],
 
-            "entity_poly_strand_id": plm['entity_poly']['pdbx_strand_id'],
-            "entity_poly_seq_one_letter_code": plm['entity_poly']['pdbx_seq_one_letter_code'],
+            "entity_poly_strand_id"              : plm['entity_poly']['pdbx_strand_id'],
+            "entity_poly_seq_one_letter_code"    : plm['entity_poly']['pdbx_seq_one_letter_code'],
             "entity_poly_seq_one_letter_code_can": plm['entity_poly']['pdbx_seq_one_letter_code_can'],
-            "entity_poly_seq_length": plm['entity_poly']['rcsb_sample_sequence_length'],
-            "entity_poly_entity_type": plm['entity_poly']['type'],
-            "entity_poly_polymer_type": plm['entity_poly']['rcsb_entity_polymer_type']
+            "entity_poly_seq_length"             : plm['entity_poly']['rcsb_sample_sequence_length'],
+            "entity_poly_entity_type"            : plm['entity_poly']['type'],
+            "entity_poly_polymer_type"           : plm['entity_poly']['rcsb_entity_polymer_type']
         }
 
         for auth_asym_id in plm['rcsb_polymer_entity_container_identifiers']['auth_asym_ids']]
@@ -277,12 +241,18 @@ def process_pdb_record(pdb_api_response):
     """at the level of @entry, so response['data']['entry'] is the pdb record"""
 
     response = pdb_api_response
+    polys    = response['polymer_entities']
+    ligands  = response['nonpolymer_entities']
 
-    proteins = XXXXXXXX
-    rnas = XXXXXXX
-    ligands = XXXXX
+    proteins = polys
+    def is_protein(poly): return poly['entity_poly']['rcsb_entity_polymer_type'] == 'Protein'
+
+    proteins, rnas = [], []
+    for poly in polys: 
+        proteins.append(poly) if is_protein(poly) else rnas.append(poly)
+
     reshaped_proteins = []
-    reshaped_rnas = []
+    reshaped_rnas     = []
 
     [reshaped_proteins.append(*reshape_poly_to_protein(poly))
      for poly in proteins]
@@ -290,30 +260,47 @@ def process_pdb_record(pdb_api_response):
 
     reshaped_nonpoly = [reshape_to_ligand(
         nonpoly) for nonpoly in ligands] if ligands != None and len(ligands) > 0 else []
-    organisms = inferOrganismsFromPolymers(reshaped_proteins)
+    organisms    = inferOrganismsFromPolymers(reshaped_proteins)
     externalRefs = extract_external_refs(response['rcsb_external_references'])
-    pub = response['citation'][0]
+    pub          = response['citation'][0]
 
-    kwords_text = response['struct_keywords']['text'] if response['struct_keywords'] != None else None
-    kwords = response['struct_keywords']['dbx_keywords'] if response['struct_keywords'] != None else None
+    kwords_text = response['struct_keywords']['text'] if response['struct_keywords']         != None else None
+    kwords      = response['struct_keywords']['dbx_keywords'] if response['struct_keywords'] != None else None
 
     reshaped = {
-        "rcsb_id": response['entry']['rcsb_id'],
-        "expMethod": response['entry']['exptl'][0]['method'],
-        "resolution": response['entry']['rcsb_entry_info']['resolution_combined'][0],
-        "rcsb_external_ref_id": externalRefs[0],
+        "rcsb_id"               : response['entry']['rcsb_id'],
+        "expMethod"             : response['entry']['exptl'][0]['method'],
+        "resolution"            : response['entry']['rcsb_entry_info']['resolution_combined'][0],
+        "rcsb_external_ref_id"  : externalRefs[0],
         "rcsb_external_ref_type": externalRefs[1],
         "rcsb_external_ref_link": externalRefs[2],
-        "citation_year": pub['year'],
-        "citation_rcsb_authors": pub['rcsb_authors'],
-        "citation_title": pub['title'],
-        "citation_pdbx_doi": pub['pdbx_database_id_DOI'],
-        "pdbx_keywords_text": kwords_text,
-        "pdbx_keywords": kwords,
-        "proteins": reshaped_proteins,
-        "rnas": reshaped_rnas,
-        "ligands": reshaped_nonpoly,
+        "citation_year"         : pub['year'],
+        "citation_rcsb_authors" : pub['rcsb_authors'],
+        "citation_title"        : pub['title'],
+        "citation_pdbx_doi"     : pub['pdbx_database_id_DOI'],
+        "pdbx_keywords_text"    : kwords_text,
+        "pdbx_keywords"         : kwords,
+        "proteins"              : reshaped_proteins,
+        "rnas"                  : reshaped_rnas,
+        "ligands"               : reshaped_nonpoly,
         **organisms,
     }
 
     return reshaped
+
+
+
+def query_rcsb_api(gql_string: str):
+    reqstring = "https://data.rcsb.org/graphql?query={}".format(gql_string)
+
+    try:
+        resp = requests.get(reqstring)
+        return resp.json()['data']['entry']
+
+    except Exception as e:
+        print("Could not land request to RCSB API. {}".format(e))
+
+
+RCSB_ID = "4ug0"
+mono    = query_rcsb_api(gql_monolith(RCSB_ID))
+process_pdb_record(mono)
