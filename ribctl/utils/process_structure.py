@@ -221,8 +221,11 @@ def __reshape_poly_to_protein(plm):
         for auth_asym_id in plm['rcsb_polymer_entity_container_identifiers']['auth_asym_ids']]
 
 
-def process_pdb_record(rcsb_id:str):
-    """at the level of @entry, so response['data']['entry'] is the pdb record"""
+def process_pdb_record(rcsb_id:str)->dict:
+    """
+    returns dict of the shape types_RibosomeStructure 
+    """
+
     response = query_rcsb_api(gql_monolith(rcsb_id.upper()))
     polys = response['polymer_entities']
     ligands = response['nonpolymer_entities']
@@ -271,7 +274,6 @@ def process_pdb_record(rcsb_id:str):
     }
 
     return reshaped
-
 
 def query_rcsb_api(gql_string: str)->dict:
     reqstring = "https://data.rcsb.org/graphql?query={}".format(gql_string)

@@ -1,9 +1,12 @@
+import json
 import os
-from pydantic import BaseModel
+from pydantic import BaseModel, parse_obj_as
 import gzip
 import os
 import requests
 from render_thumbnail import render_thumbnail
+from ribctl.types_ribosome import RibosomeStructure
+from ribctl.utils.process_structure import process_pdb_record
 from split_rename import split_rename
 
 
@@ -69,6 +72,11 @@ class RibosomeAssets(BaseModel):
     def png_thumbnail_filepath(self):
         self.envcheck()
         return f"{self.dir_path()}/_ray_{self.rcsb_id}.png"
+      
+    @staticmethod
+    def save_json_profile(filepath:str, profile:dict):
+        with open(filepath, "w") as f:
+            json.dump(profile, f)
 
     def __verify_cif(self, obtain: bool = False) -> bool:
         if os.path.exists(self.cif_filepath()):
@@ -95,9 +103,12 @@ class RibosomeAssets(BaseModel):
             return True
         else:
             if obtain:
-                ribosome = processPDBRecord(self.rcsb_id)
-                filename = save_struct_profile(ribosome)
-                print(f"Saved structure profile:\t{filename}")
+                ribosome = process_pdb_record(self.rcsb_id)
+                if not parse_obj_as(RibosomeStructure, ribosome):
+                    raise Exception("Invalid ribosome structure profile.")
+                  
+                self.save_json_profile(self.json_profile_filepath(), ribosome)
+                print(f"Saved structure profile:\t{self.json_profile_filepath()}")
                 return True
             else:
                 return False
