@@ -293,7 +293,6 @@ struct_json = process_pdb_record(mono)
 x           = json.dumps(struct_json, indent=4)
 
 struct  = parse_obj_as(RibosomeStructure, struct_json)
-RibosomeStructure.
 print(struct)
 
 
@@ -310,8 +309,8 @@ print(struct)
 
         # if (flags.commit) {
         #     commit_struct_to_Db(rcsb_id)
-export class RibosomeAssets {
-    rcsb_id: string
+# export class RibosomeAssets {
+#     rcsb_id: string
 
 #     constructor(
         rcsb_id: string
