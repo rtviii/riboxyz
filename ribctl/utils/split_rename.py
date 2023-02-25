@@ -123,8 +123,8 @@ if __name__ == '__main__':
     pdbid = args.structure
 
     if not pdbid:
-        print("Provide structure ID with -s arg")
-        exit(0)
+        raise ValueError("Provide structure ID with -s arg")
+
     else:
         __inject_dict(pdbid.upper())
         __process_chains(pdbid.upper())

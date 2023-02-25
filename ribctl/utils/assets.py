@@ -3,6 +3,8 @@ from pydantic import BaseModel
 import gzip
 import os
 import requests
+from render_thumbnail import render_thumbnail
+from split_rename import split_rename
 
 
 def download_unpack_place(struct_id: str) -> None:
@@ -32,6 +34,7 @@ def download_unpack_place(struct_id: str) -> None:
     with open(structfile, "wb") as f:
         f.write(decompressed)
 
+
 class RibosomeAssets(BaseModel):
     rcsb_id: str
 
@@ -40,7 +43,8 @@ class RibosomeAssets(BaseModel):
 
     def envcheck(self):
         if not os.environ.get("RIBETL_DATA"):
-            raise Exception("RIBETL_DATA environment variable not set. Cannot access assets.")
+            raise Exception(
+                "RIBETL_DATA environment variable not set. Cannot access assets.")
 
     def dir_path(self):
         self.envcheck()
@@ -81,7 +85,7 @@ class RibosomeAssets(BaseModel):
             return True
         else:
             if obtain:
-                splt_rename(self.rcsb_id)
+                split_rename(self.rcsb_id)
                 return True
             else:
                 return False
@@ -98,8 +102,17 @@ class RibosomeAssets(BaseModel):
             else:
                 return False
 
-    def __verify_png_thumbnail(self, obtain: bool = False
+    def __verify_png_thumbnail(self, obtain: bool = False) -> bool:
+        if os.path.exists(self.png_thumbnail_filepath()):
+            return True
+        else:
+            if obtain:
+                print("Obtaning thumbnail...")
+                render_thumbnail(self.rcsb_id)
 
+                return True
+            else:
+                return False
 
 
 # export class RibosomeAssets {
@@ -147,7 +160,6 @@ class RibosomeAssets(BaseModel):
 #     }
 
 
-
 #     async __verify_cif(obtain: boolean = false):Promise<boolean> {
 #         if (existsSync(this.cif_filepath())) {
 #             return true
@@ -192,7 +204,7 @@ class RibosomeAssets(BaseModel):
 #                         }
 #                         else{rs()}
 #                     })
-#                })  
+#                })
 #             } else return false
 #         }
 #     }
