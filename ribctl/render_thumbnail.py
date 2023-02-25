@@ -1,12 +1,12 @@
 import argparse
 import os,sys
-sys.path.append(os.environ.get("PYMOL_PATH")) 
 RIBETL_DATA = str(os.environ.get('RIBETL_DATA'))
-from pymol import cmd, util
 
 
 
 def render_thumbnail(pdbid:str):
+    sys.path.append(os.environ.get("PYMOL_PATH")) 
+    from pymol import cmd, util
     pdbid = pdbid.upper()
 
     thumbnail_path = os.path.join(RIBETL_DATA,pdbid, f"_ray_{pdbid}.png")
