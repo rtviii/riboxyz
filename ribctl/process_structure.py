@@ -3,7 +3,7 @@ import typing
 from pydantic.tools import parse_obj_as
 import requests
 from urllib.parse import urlencode
-from ribctl.utils.gql_querystrings import monolithic
+from gql_querystrings import monolithic
 from types_ribosome import Protein, RNA, Ligand, RibosomeStructure
 import re
 import json

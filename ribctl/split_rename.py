@@ -1,52 +1,28 @@
 import argparse
 import json
 import os
-import typing
 from Bio.PDB.Structure import Structure
 import itertools
 import itertools
 import numpy as np
 from Bio.PDB import MMCIF2Dict, MMCIFIO, FastMMCIFParser
 import gemmi
+
+from utils import open_structure
 flatten = itertools.chain.from_iterable
 n1 = np.array
+import typing
 RIBETL_DATA = str(os.environ.get('RIBETL_DATA'))
 
 
 def __get_dict(path: str,) -> dict:
     return MMCIF2Dict.MMCIF2Dict(path)
 
-
-def make_nom_dict(profile):
+def __make_nom_dict(profile):
     nomdict = {}
     for i in [*profile['rnas'], *profile['proteins']]:
         nomdict[i['auth_asym_id']] = i['nomenclature']
     return nomdict
-
-
-def struct_path(pdbid: str, pftype: typing.Literal["cif", "json", "modified"]):
-    if pftype == 'cif':
-        return os.path.join(RIBETL_DATA, pdbid.upper(), f"{pdbid.upper()}.cif")
-    elif pftype == 'json':
-        return os.path.join(RIBETL_DATA, pdbid.upper(), f"{pdbid.upper()}.json")
-    elif pftype == 'modified':
-        return os.path.join(RIBETL_DATA, pdbid.upper(), f"{pdbid.upper()}_modified.cif")
-    else:
-        raise ValueError("Invalid path type. Must be 'cif', 'json', or 'modified' ")
-
-
-def open_structure(pdbid: str, path_type: typing.Literal[ "cif", "json", "modified"])->Structure|typing.Any:
-    pdbid = pdbid.upper()
-    if path_type == 'cif':
-        cifpath = struct_path(pdbid, 'cif')
-        try:
-            return FastMMCIFParser(QUIET=True).get_structure(pdbid, cifpath)
-        except Exception as e:
-            return f"\033[93m Parser Error in structure {pdbid} \033[0m : {e}"
-
-    if path_type == 'json':
-        with open(struct_path(pdbid, 'json'), 'rb') as _:
-            return json.load(_)
 
 
 def __inject_dict(pdbid: str):
@@ -63,8 +39,8 @@ def __inject_dict(pdbid: str):
     loop = block.init_loop('_ribosome_nomenclature.', [
                            'entity_poly.pdbx_strand_id', 'polymer_class'])
 
-    nomd = make_nom_dict(structprofile)
-    for i in make_nom_dict(structprofile).items():
+    nomd = __make_nom_dict(structprofile)
+    for i in __make_nom_dict(structprofile).items():
         loop.add_row([i[0], gemmi.cif.quote(
             "unclassified" if len(i[1]) == 0 else i[1][0])])
 
@@ -82,7 +58,7 @@ def __process_chains(pdbid: str):
 
     model = gemmi.read_structure(os.path.join(
         RIBETL_DATA, pdbid, f'{pdbid}.cif'))[0]
-    nomd = make_nom_dict(structprofile)
+    nomd = __make_nom_dict(structprofile)
 
     for chain in struct_cif[0].child_list:
         destination = os.path.join(
