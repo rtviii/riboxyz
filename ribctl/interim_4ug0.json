@@ -25,7 +25,7 @@
     "proteins": [
         {
             "nomenclature": [
-                "UL2"
+                "uL2"
             ],
             "asym_ids": [
                 "D"
@@ -40,8 +40,8 @@
                 "NULL"
             ],
             "pfam_descriptions": [
-                "Ribosomal Proteins L2, C-terminal domain",
-                "Ribosomal Proteins L2, RNA binding domain"
+                "Ribosomal Proteins L2, RNA binding domain",
+                "Ribosomal Proteins L2, C-terminal domain"
             ],
             "ligand_like": false,
             "host_organism_ids": [],
@@ -65,7 +65,7 @@
         },
         {
             "nomenclature": [
-                "UL3"
+                "uL3"
             ],
             "asym_ids": [
                 "E"
@@ -103,7 +103,7 @@
         },
         {
             "nomenclature": [
-                "UL4"
+                "uL4"
             ],
             "asym_ids": [
                 "F"
@@ -111,8 +111,8 @@
             "parent_rcsb_id": "4UG0",
             "auth_asym_id": "LC",
             "pfam_accessions": [
-                "PF00573",
-                "PF14374"
+                "PF14374",
+                "PF00573"
             ],
             "pfam_comments": [
                 "This family is found at the very C-terminal of 60 ribosomal L4 proteins.",
@@ -144,7 +144,7 @@
         },
         {
             "nomenclature": [
-                "UL18"
+                "uL18"
             ],
             "asym_ids": [
                 "G"
@@ -156,12 +156,12 @@
                 "PF14204"
             ],
             "pfam_comments": [
-                "This domain is the C-terminal end of ribosomal L18/L5 proteins.",
-                "This family contains the large 60S ribosomal L5 proteins from Eukaryota and the 50S L18 proteins from Archaea. It has been shown that the amino terminal 93 amino acids of Swiss:P09895 are necessary and sufficient to bind 5S rRNA in vitro [1], suggesting that the entire family has a function in rRNA binding [2,3,4,5]."
+                "This family contains the large 60S ribosomal L5 proteins from Eukaryota and the 50S L18 proteins from Archaea. It has been shown that the amino terminal 93 amino acids of Swiss:P09895 are necessary and sufficient to bind 5S rRNA in vitro [1], suggesting that the entire family has a function in rRNA binding [2,3,4,5].",
+                "This domain is the C-terminal end of ribosomal L18/L5 proteins."
             ],
             "pfam_descriptions": [
-                "Ribosomal L18 C-terminal region",
-                "Ribosomal large subunit proteins 60S L5, and 50S L18"
+                "Ribosomal large subunit proteins 60S L5, and 50S L18",
+                "Ribosomal L18 C-terminal region"
             ],
             "ligand_like": false,
             "host_organism_ids": [],
@@ -185,7 +185,7 @@
         },
         {
             "nomenclature": [
-                "EL6"
+                "eL6"
             ],
             "asym_ids": [
                 "H"
@@ -225,7 +225,7 @@
         },
         {
             "nomenclature": [
-                "UL30"
+                "uL30"
             ],
             "asym_ids": [
                 "I"
@@ -233,12 +233,12 @@
             "parent_rcsb_id": "4UG0",
             "auth_asym_id": "LF",
             "pfam_accessions": [
-                "PF08079",
-                "PF00327"
+                "PF00327",
+                "PF08079"
             ],
             "pfam_comments": [
-                "This family includes prokaryotic L30 and eukaryotic L7.",
-                "This presumed domain is found at the N-terminus of Ribosomal L30 proteins and has been termed RL30NT or NUC018 [1]."
+                "This presumed domain is found at the N-terminus of Ribosomal L30 proteins and has been termed RL30NT or NUC018 [1].",
+                "This family includes prokaryotic L30 and eukaryotic L7."
             ],
             "pfam_descriptions": [
                 "Ribosomal protein L30p/L7e",
@@ -266,9 +266,9 @@
         },
         {
             "nomenclature": [
-                "EL30",
-                "ES12",
-                "EL8"
+                "eL30",
+                "eS12",
+                "eL8"
             ],
             "asym_ids": [
                 "J"
@@ -306,7 +306,7 @@
         },
         {
             "nomenclature": [
-                "UL6"
+                "uL6"
             ],
             "asym_ids": [
                 "K"
@@ -344,7 +344,7 @@
         },
         {
             "nomenclature": [
-                "UL16"
+                "uL16"
             ],
             "asym_ids": [
                 "L"
@@ -382,7 +382,7 @@
         },
         {
             "nomenclature": [
-                "UL5"
+                "uL5"
             ],
             "asym_ids": [
                 "M"
@@ -390,16 +390,16 @@
             "parent_rcsb_id": "4UG0",
             "auth_asym_id": "LJ",
             "pfam_accessions": [
-                "PF00281",
-                "PF00673"
+                "PF00673",
+                "PF00281"
             ],
             "pfam_comments": [
-                "NULL",
-                "This region is found associated with Pfam:PF00281."
+                "This region is found associated with Pfam:PF00281.",
+                "NULL"
             ],
             "pfam_descriptions": [
-                "ribosomal L5P family C-terminus",
-                "Ribosomal protein L5"
+                "Ribosomal protein L5",
+                "ribosomal L5P family C-terminus"
             ],
             "ligand_like": false,
             "host_organism_ids": [],
@@ -423,7 +423,45 @@
         },
         {
             "nomenclature": [
-                "EL14"
+                "eL13"
+            ],
+            "asym_ids": [
+                "N"
+            ],
+            "parent_rcsb_id": "4UG0",
+            "auth_asym_id": "LL",
+            "pfam_accessions": [
+                "PF01294"
+            ],
+            "pfam_comments": [
+                "NULL"
+            ],
+            "pfam_descriptions": [
+                "Ribosomal protein L13e"
+            ],
+            "ligand_like": false,
+            "host_organism_ids": [],
+            "host_organism_names": [],
+            "src_organism_ids": [
+                9606
+            ],
+            "src_organism_names": [
+                "HOMO SAPIENS"
+            ],
+            "uniprot_accession": [
+                "P26373"
+            ],
+            "rcsb_pdbx_description": "60S RIBOSOMAL PROTEIN L13",
+            "entity_poly_strand_id": "LL",
+            "entity_poly_seq_one_letter_code": "MAPSRNGMVLKPHFHKDWQRRVATWFNQPARKIRRRKARQAKARRIAPRPASGPIRPIVRCPTVRYHTKVRAGRGFSLEELRVAGIHKKVARTIGISVDPRRRNKSTESLQANVQRLKEYRSKLILFPRKPSAPKKGDSSAEELKLATQLTGPVMPVRNVYKKEKARVITEEEKNFKAFASLRMARANARLFGIRAKRAKEAAEQDVEKKK",
+            "entity_poly_seq_one_letter_code_can": "MAPSRNGMVLKPHFHKDWQRRVATWFNQPARKIRRRKARQAKARRIAPRPASGPIRPIVRCPTVRYHTKVRAGRGFSLEELRVAGIHKKVARTIGISVDPRRRNKSTESLQANVQRLKEYRSKLILFPRKPSAPKKGDSSAEELKLATQLTGPVMPVRNVYKKEKARVITEEEKNFKAFASLRMARANARLFGIRAKRAKEAAEQDVEKKK",
+            "entity_poly_seq_length": 211,
+            "entity_poly_entity_type": "polypeptide(L)",
+            "entity_poly_polymer_type": "Protein"
+        },
+        {
+            "nomenclature": [
+                "eL14"
             ],
             "asym_ids": [
                 "O"
@@ -461,7 +499,7 @@
         },
         {
             "nomenclature": [
-                "EL15"
+                "eL15"
             ],
             "asym_ids": [
                 "P"
@@ -499,7 +537,7 @@
         },
         {
             "nomenclature": [
-                "UL13"
+                "uL13"
             ],
             "asym_ids": [
                 "Q"
@@ -537,7 +575,7 @@
         },
         {
             "nomenclature": [
-                "UL22"
+                "uL22"
             ],
             "asym_ids": [
                 "R"
@@ -575,7 +613,7 @@
         },
         {
             "nomenclature": [
-                "EL18"
+                "eL18"
             ],
             "asym_ids": [
                 "S"
@@ -613,7 +651,7 @@
         },
         {
             "nomenclature": [
-                "EL19"
+                "eL19"
             ],
             "asym_ids": [
                 "T"
@@ -651,7 +689,7 @@
         },
         {
             "nomenclature": [
-                "EL20"
+                "eL20"
             ],
             "asym_ids": [
                 "U"
@@ -689,7 +727,7 @@
         },
         {
             "nomenclature": [
-                "EL21"
+                "eL21"
             ],
             "asym_ids": [
                 "V"
@@ -727,7 +765,45 @@
         },
         {
             "nomenclature": [
-                "UL14"
+                "eL22"
+            ],
+            "asym_ids": [
+                "W"
+            ],
+            "parent_rcsb_id": "4UG0",
+            "auth_asym_id": "LU",
+            "pfam_accessions": [
+                "PF01776"
+            ],
+            "pfam_comments": [
+                "NULL"
+            ],
+            "pfam_descriptions": [
+                "Ribosomal L22e protein family"
+            ],
+            "ligand_like": false,
+            "host_organism_ids": [],
+            "host_organism_names": [],
+            "src_organism_ids": [
+                9606
+            ],
+            "src_organism_names": [
+                "HOMO SAPIENS"
+            ],
+            "uniprot_accession": [
+                "P35268"
+            ],
+            "rcsb_pdbx_description": "60S RIBOSOMAL PROTEIN L22",
+            "entity_poly_strand_id": "LU",
+            "entity_poly_seq_one_letter_code": "MAPVKKLVVKGGKKKKQVLKFTLDCTHPVEDGIMDAANFEQFLQERIKVNGKAGNLGGGVVTIERSKSKITVTSEVPFSKRYLKYLTKKYLKKNNLRDWLRVVANSKESYELRYFQINQDEEEEEDED",
+            "entity_poly_seq_one_letter_code_can": "MAPVKKLVVKGGKKKKQVLKFTLDCTHPVEDGIMDAANFEQFLQERIKVNGKAGNLGGGVVTIERSKSKITVTSEVPFSKRYLKYLTKKYLKKNNLRDWLRVVANSKESYELRYFQINQDEEEEEDED",
+            "entity_poly_seq_length": 128,
+            "entity_poly_entity_type": "polypeptide(L)",
+            "entity_poly_polymer_type": "Protein"
+        },
+        {
+            "nomenclature": [
+                "uL14"
             ],
             "asym_ids": [
                 "X"
@@ -765,7 +841,7 @@
         },
         {
             "nomenclature": [
-                "EL24"
+                "eL24"
             ],
             "asym_ids": [
                 "Y"
@@ -803,7 +879,7 @@
         },
         {
             "nomenclature": [
-                "UL23"
+                "uL23"
             ],
             "asym_ids": [
                 "Z"
@@ -811,16 +887,16 @@
             "parent_rcsb_id": "4UG0",
             "auth_asym_id": "LX",
             "pfam_accessions": [
-                "PF00276",
-                "PF03939"
+                "PF03939",
+                "PF00276"
             ],
             "pfam_comments": [
-                "NULL",
-                "The N-terminal domain appears to be specific to the  eukaryotic ribosomal proteins L25, L23, and L23a."
+                "The N-terminal domain appears to be specific to the  eukaryotic ribosomal proteins L25, L23, and L23a.",
+                "NULL"
             ],
             "pfam_descriptions": [
-                "Ribosomal protein L23",
-                "Ribosomal protein L23, N-terminal domain"
+                "Ribosomal protein L23, N-terminal domain",
+                "Ribosomal protein L23"
             ],
             "ligand_like": false,
             "host_organism_ids": [],
@@ -844,8 +920,8 @@
         },
         {
             "nomenclature": [
-                "UL24",
-                "ES4"
+                "uL24",
+                "eS4"
             ],
             "asym_ids": [
                 "AA"
@@ -857,8 +933,8 @@
                 "PF00467"
             ],
             "pfam_comments": [
-                "This family has been extended to coincide with ref [1]. The KOW (Kyprides, Ouzounis, Woese) motif is found in a variety of ribosomal proteins and NusG.",
-                "Ribosomal_L26 is a family of the 50S and the 60S ribosomal proteins from eukaryotes - L26 - and archaea - L25."
+                "Ribosomal_L26 is a family of the 50S and the 60S ribosomal proteins from eukaryotes - L26 - and archaea - L25.",
+                "This family has been extended to coincide with ref [1]. The KOW (Kyprides, Ouzounis, Woese) motif is found in a variety of ribosomal proteins and NusG."
             ],
             "pfam_descriptions": [
                 "Ribosomal proteins L26 eukaryotic, L24P archaeal",
@@ -886,9 +962,9 @@
         },
         {
             "nomenclature": [
-                "EL27",
-                "ES4",
-                "UL24"
+                "uL24",
+                "eS4",
+                "eL27"
             ],
             "asym_ids": [
                 "BA"
@@ -929,7 +1005,7 @@
         },
         {
             "nomenclature": [
-                "UL15"
+                "uL15"
             ],
             "asym_ids": [
                 "CA"
@@ -967,7 +1043,7 @@
         },
         {
             "nomenclature": [
-                "EL29"
+                "eL29"
             ],
             "asym_ids": [
                 "DA"
@@ -1005,9 +1081,9 @@
         },
         {
             "nomenclature": [
-                "EL30",
-                "ES12",
-                "EL8"
+                "eL30",
+                "eS12",
+                "eL8"
             ],
             "asym_ids": [
                 "EA"
@@ -1045,7 +1121,7 @@
         },
         {
             "nomenclature": [
-                "EL31"
+                "eL31"
             ],
             "asym_ids": [
                 "FA"
@@ -1083,7 +1159,7 @@
         },
         {
             "nomenclature": [
-                "EL32"
+                "eL32"
             ],
             "asym_ids": [
                 "GA"
@@ -1121,7 +1197,7 @@
         },
         {
             "nomenclature": [
-                "EL33"
+                "eL33"
             ],
             "asym_ids": [
                 "HA"
@@ -1159,7 +1235,45 @@
         },
         {
             "nomenclature": [
-                "UL29"
+                "eL34"
+            ],
+            "asym_ids": [
+                "IA"
+            ],
+            "parent_rcsb_id": "4UG0",
+            "auth_asym_id": "Lg",
+            "pfam_accessions": [
+                "PF01199"
+            ],
+            "pfam_comments": [
+                "NULL"
+            ],
+            "pfam_descriptions": [
+                "Ribosomal protein L34e"
+            ],
+            "ligand_like": false,
+            "host_organism_ids": [],
+            "host_organism_names": [],
+            "src_organism_ids": [
+                9606
+            ],
+            "src_organism_names": [
+                "HOMO SAPIENS"
+            ],
+            "uniprot_accession": [
+                "P49207"
+            ],
+            "rcsb_pdbx_description": "60S RIBOSOMAL PROTEIN L34",
+            "entity_poly_strand_id": "Lg",
+            "entity_poly_seq_one_letter_code": "MVQRLTYRRRLSYNTASNKTRLSRTPGNRIVYLYTKKVGKAPKSACGVCPGRLRGVRAVRPKVLMRLSKTKKHVSRAYGGSMCAKCVRDRIKRAFLIEEQKIVVKVLKAQAQSQKAK",
+            "entity_poly_seq_one_letter_code_can": "MVQRLTYRRRLSYNTASNKTRLSRTPGNRIVYLYTKKVGKAPKSACGVCPGRLRGVRAVRPKVLMRLSKTKKHVSRAYGGSMCAKCVRDRIKRAFLIEEQKIVVKVLKAQAQSQKAK",
+            "entity_poly_seq_length": 117,
+            "entity_poly_entity_type": "polypeptide(L)",
+            "entity_poly_polymer_type": "Protein"
+        },
+        {
+            "nomenclature": [
+                "uL29"
             ],
             "asym_ids": [
                 "JA"
@@ -1197,7 +1311,7 @@
         },
         {
             "nomenclature": [
-                "EL36"
+                "eL36"
             ],
             "asym_ids": [
                 "KA"
@@ -1235,7 +1349,7 @@
         },
         {
             "nomenclature": [
-                "EL37"
+                "eL37"
             ],
             "asym_ids": [
                 "LA"
@@ -1273,7 +1387,7 @@
         },
         {
             "nomenclature": [
-                "EL38"
+                "eL38"
             ],
             "asym_ids": [
                 "MA"
@@ -1311,7 +1425,7 @@
         },
         {
             "nomenclature": [
-                "EL39"
+                "eL39"
             ],
             "asym_ids": [
                 "NA"
@@ -1349,7 +1463,7 @@
         },
         {
             "nomenclature": [
-                "EL40"
+                "eL40"
             ],
             "asym_ids": [
                 "OA"
@@ -1387,7 +1501,7 @@
         },
         {
             "nomenclature": [
-                "EL41"
+                "eL41"
             ],
             "asym_ids": [
                 "PA"
@@ -1425,7 +1539,7 @@
         },
         {
             "nomenclature": [
-                "EL42"
+                "eL42"
             ],
             "asym_ids": [
                 "QA"
@@ -1463,7 +1577,7 @@
         },
         {
             "nomenclature": [
-                "EL43"
+                "eL43"
             ],
             "asym_ids": [
                 "RA"
@@ -1501,7 +1615,7 @@
         },
         {
             "nomenclature": [
-                "EL28"
+                "eL28"
             ],
             "asym_ids": [
                 "SA"
@@ -1539,7 +1653,7 @@
         },
         {
             "nomenclature": [
-                "UL1"
+                "uL1"
             ],
             "asym_ids": [
                 "TA"
@@ -1577,7 +1691,7 @@
         },
         {
             "nomenclature": [
-                "US2"
+                "uS2"
             ],
             "asym_ids": [
                 "WA"
@@ -1585,8 +1699,8 @@
             "parent_rcsb_id": "4UG0",
             "auth_asym_id": "SA",
             "pfam_accessions": [
-                "PF00318",
-                "PF16122"
+                "PF16122",
+                "PF00318"
             ],
             "pfam_comments": [
                 "NULL",
@@ -1618,7 +1732,7 @@
         },
         {
             "nomenclature": [
-                "ES1"
+                "eS1"
             ],
             "asym_ids": [
                 "XA"
@@ -1656,7 +1770,7 @@
         },
         {
             "nomenclature": [
-                "US3"
+                "uS3"
             ],
             "asym_ids": [
                 "YA"
@@ -1668,8 +1782,8 @@
                 "PF07650"
             ],
             "pfam_comments": [
-                "NULL",
-                "This family contains a central domain Pfam:PF00013, hence the amino and carboxyl terminal domains are stored separately. This is a minimal carboxyl-terminal domain.      Some are much longer."
+                "This family contains a central domain Pfam:PF00013, hence the amino and carboxyl terminal domains are stored separately. This is a minimal carboxyl-terminal domain.      Some are much longer.",
+                "NULL"
             ],
             "pfam_descriptions": [
                 "Ribosomal protein S3, C-terminal domain",
@@ -1697,9 +1811,9 @@
         },
         {
             "nomenclature": [
-                "UL24",
-                "ES4",
-                "US4"
+                "eS4",
+                "uL24",
+                "uS4"
             ],
             "asym_ids": [
                 "ZA"
@@ -1707,25 +1821,25 @@
             "parent_rcsb_id": "4UG0",
             "auth_asym_id": "SE",
             "pfam_accessions": [
-                "PF00467",
                 "PF01479",
-                "PF00900",
                 "PF16121",
-                "PF08071"
+                "PF00900",
+                "PF08071",
+                "PF00467"
             ],
             "pfam_comments": [
-                "This family has been extended to coincide with ref [1]. The KOW (Kyprides, Ouzounis, Woese) motif is found in a variety of ribosomal proteins and NusG.",
-                "NULL",
                 "The S4 domain is a small domain consisting of 60-65 amino acid residues that was detected in the bacterial ribosomal protein S4, eukaryotic ribosomal S9, two families of pseudouridine synthases, a novel family of predicted RNA methylases, a yeast protein containing a pseudouridine synthetase and a deaminase domain, bacterial tyrosyl-tRNA synthetases, and a number of uncharacterized, small proteins that may be involved in translation regulation [1]. The S4 domain probably mediates binding to RNA.",
                 "This is the N-terminal domain of Ribosomal S4 / S4e proteins. This domain is associated with S4 and KOW domains [1].",
+                "NULL",
+                "This family has been extended to coincide with ref [1]. The KOW (Kyprides, Ouzounis, Woese) motif is found in a variety of ribosomal proteins and NusG.",
                 "This domain is found at the C-terminus of 40S ribosomal protein S4."
             ],
             "pfam_descriptions": [
                 "Ribosomal family S4e",
                 "40S ribosomal protein S4 C-terminus",
+                "KOW motif",
                 "RS4NT (NUC023) domain",
-                "S4 domain",
-                "KOW motif"
+                "S4 domain"
             ],
             "ligand_like": false,
             "host_organism_ids": [],
@@ -1749,7 +1863,7 @@
         },
         {
             "nomenclature": [
-                "US7"
+                "uS7"
             ],
             "asym_ids": [
                 "AB"
@@ -1787,7 +1901,7 @@
         },
         {
             "nomenclature": [
-                "ES7"
+                "eS7"
             ],
             "asym_ids": [
                 "BB"
@@ -1825,7 +1939,7 @@
         },
         {
             "nomenclature": [
-                "ES8"
+                "eS8"
             ],
             "asym_ids": [
                 "CB"
@@ -1863,7 +1977,7 @@
         },
         {
             "nomenclature": [
-                "ES10"
+                "eS10"
             ],
             "asym_ids": [
                 "DB"
@@ -1901,8 +2015,8 @@
         },
         {
             "nomenclature": [
-                "US17",
-                "ES17"
+                "eS17",
+                "uS17"
             ],
             "asym_ids": [
                 "EB"
@@ -1910,12 +2024,12 @@
             "parent_rcsb_id": "4UG0",
             "auth_asym_id": "SL",
             "pfam_accessions": [
-                "PF00366",
-                "PF16205"
+                "PF16205",
+                "PF00366"
             ],
             "pfam_comments": [
-                "NULL",
-                "This short N-terminal region is found in a number of higher eukaryotic ribosomal subunit 17 proteins."
+                "This short N-terminal region is found in a number of higher eukaryotic ribosomal subunit 17 proteins.",
+                "NULL"
             ],
             "pfam_descriptions": [
                 "Ribosomal protein S17",
@@ -1943,7 +2057,7 @@
         },
         {
             "nomenclature": [
-                "US19"
+                "uS19"
             ],
             "asym_ids": [
                 "FB"
@@ -1981,7 +2095,7 @@
         },
         {
             "nomenclature": [
-                "US9"
+                "uS9"
             ],
             "asym_ids": [
                 "GB"
@@ -2055,7 +2169,7 @@
         },
         {
             "nomenclature": [
-                "US13"
+                "uS13"
             ],
             "asym_ids": [
                 "IB"
@@ -2093,7 +2207,7 @@
         },
         {
             "nomenclature": [
-                "ES19"
+                "eS19"
             ],
             "asym_ids": [
                 "JB"
@@ -2131,7 +2245,7 @@
         },
         {
             "nomenclature": [
-                "US10"
+                "uS10"
             ],
             "asym_ids": [
                 "KB"
@@ -2169,7 +2283,7 @@
         },
         {
             "nomenclature": [
-                "ES21"
+                "eS21"
             ],
             "asym_ids": [
                 "LB"
@@ -2207,7 +2321,7 @@
         },
         {
             "nomenclature": [
-                "US12"
+                "uS12"
             ],
             "asym_ids": [
                 "MB"
@@ -2245,7 +2359,7 @@
         },
         {
             "nomenclature": [
-                "ES26"
+                "eS26"
             ],
             "asym_ids": [
                 "NB"
@@ -2283,7 +2397,7 @@
         },
         {
             "nomenclature": [
-                "ES28"
+                "eS28"
             ],
             "asym_ids": [
                 "OB"
@@ -2321,7 +2435,7 @@
         },
         {
             "nomenclature": [
-                "US14"
+                "uS14"
             ],
             "asym_ids": [
                 "PB"
@@ -2359,7 +2473,7 @@
         },
         {
             "nomenclature": [
-                "ES31"
+                "eS31"
             ],
             "asym_ids": [
                 "QB"
@@ -2435,7 +2549,7 @@
         },
         {
             "nomenclature": [
-                "US5"
+                "uS5"
             ],
             "asym_ids": [
                 "SB"
@@ -2443,8 +2557,8 @@
             "parent_rcsb_id": "4UG0",
             "auth_asym_id": "SC",
             "pfam_accessions": [
-                "PF03719",
-                "PF00333"
+                "PF00333",
+                "PF03719"
             ],
             "pfam_comments": [
                 "NULL"
@@ -2475,7 +2589,7 @@
         },
         {
             "nomenclature": [
-                "ES6"
+                "eS6"
             ],
             "asym_ids": [
                 "TB"
@@ -2513,7 +2627,7 @@
         },
         {
             "nomenclature": [
-                "US4"
+                "uS4"
             ],
             "asym_ids": [
                 "UB"
@@ -2521,16 +2635,16 @@
             "parent_rcsb_id": "4UG0",
             "auth_asym_id": "SJ",
             "pfam_accessions": [
-                "PF00163",
-                "PF01479"
+                "PF01479",
+                "PF00163"
             ],
             "pfam_comments": [
                 "The S4 domain is a small domain consisting of 60-65 amino acid residues that was detected in the bacterial ribosomal protein S4, eukaryotic ribosomal S9, two families of pseudouridine synthases, a novel family of predicted RNA methylases, a yeast protein containing a pseudouridine synthetase and a deaminase domain, bacterial tyrosyl-tRNA synthetases, and a number of uncharacterized, small proteins that may be involved in translation regulation [1]. The S4 domain probably mediates binding to RNA.",
                 "This family includes small ribosomal subunit S9 from prokaryotes and S16 from metazoans.  This domain is predicted to bind to ribosomal RNA [1].  This domain is composed of four helices in the known structure.  However the domain is discontinuous in sequence and the alignment for this family contains only the first three helices."
             ],
             "pfam_descriptions": [
-                "Ribosomal protein S4/S9 N-terminal domain",
-                "S4 domain"
+                "S4 domain",
+                "Ribosomal protein S4/S9 N-terminal domain"
             ],
             "ligand_like": false,
             "host_organism_ids": [],
@@ -2582,7 +2696,7 @@
         },
         {
             "nomenclature": [
-                "US15"
+                "uS15"
             ],
             "asym_ids": [
                 "WB"
@@ -2590,16 +2704,16 @@
             "parent_rcsb_id": "4UG0",
             "auth_asym_id": "SN",
             "pfam_accessions": [
-                "PF08069",
-                "PF00312"
+                "PF00312",
+                "PF08069"
             ],
             "pfam_comments": [
-                "NULL",
-                "This domain is found at the N-terminus of ribosomal S13 and S15 proteins.                      This domain is also identified as NUC021 [1]."
+                "This domain is found at the N-terminus of ribosomal S13 and S15 proteins.                      This domain is also identified as NUC021 [1].",
+                "NULL"
             ],
             "pfam_descriptions": [
-                "Ribosomal protein S15",
-                "Ribosomal S13/S15 N-terminal domain"
+                "Ribosomal S13/S15 N-terminal domain",
+                "Ribosomal protein S15"
             ],
             "ligand_like": false,
             "host_organism_ids": [],
@@ -2623,7 +2737,7 @@
         },
         {
             "nomenclature": [
-                "US11"
+                "uS11"
             ],
             "asym_ids": [
                 "XB"
@@ -2661,7 +2775,7 @@
         },
         {
             "nomenclature": [
-                "US8"
+                "uS8"
             ],
             "asym_ids": [
                 "YB"
@@ -2699,7 +2813,7 @@
         },
         {
             "nomenclature": [
-                "ES24"
+                "es24"
             ],
             "asym_ids": [
                 "ZB"
@@ -2737,159 +2851,7 @@
         },
         {
             "nomenclature": [
-                "ES30"
-            ],
-            "asym_ids": [
-                "CC"
-            ],
-            "parent_rcsb_id": "4UG0",
-            "auth_asym_id": "Se",
-            "pfam_accessions": [
-                "PF04758"
-            ],
-            "pfam_comments": [
-                "NULL"
-            ],
-            "pfam_descriptions": [
-                "Ribosomal protein S30"
-            ],
-            "ligand_like": false,
-            "host_organism_ids": [],
-            "host_organism_names": [],
-            "src_organism_ids": [
-                9606
-            ],
-            "src_organism_names": [
-                "HOMO SAPIENS"
-            ],
-            "uniprot_accession": [
-                "P62861"
-            ],
-            "rcsb_pdbx_description": "40S RIBOSOMAL PROTEIN S30",
-            "entity_poly_strand_id": "Se",
-            "entity_poly_seq_one_letter_code": "KVHGSLARAGKVRGQTPKVAKQEKKKKKTGRAKRRMQYNRRFVNVVPTFGKKKGPNANS",
-            "entity_poly_seq_one_letter_code_can": "KVHGSLARAGKVRGQTPKVAKQEKKKKKTGRAKRRMQYNRRFVNVVPTFGKKKGPNANS",
-            "entity_poly_seq_length": 59,
-            "entity_poly_entity_type": "polypeptide(L)",
-            "entity_poly_polymer_type": "Protein"
-        },
-        {
-            "nomenclature": [
-                "EL13"
-            ],
-            "asym_ids": [
-                "N"
-            ],
-            "parent_rcsb_id": "4UG0",
-            "auth_asym_id": "LL",
-            "pfam_accessions": [
-                "PF01294"
-            ],
-            "pfam_comments": [
-                "NULL"
-            ],
-            "pfam_descriptions": [
-                "Ribosomal protein L13e"
-            ],
-            "ligand_like": false,
-            "host_organism_ids": [],
-            "host_organism_names": [],
-            "src_organism_ids": [
-                9606
-            ],
-            "src_organism_names": [
-                "HOMO SAPIENS"
-            ],
-            "uniprot_accession": [
-                "P26373"
-            ],
-            "rcsb_pdbx_description": "60S RIBOSOMAL PROTEIN L13",
-            "entity_poly_strand_id": "LL",
-            "entity_poly_seq_one_letter_code": "MAPSRNGMVLKPHFHKDWQRRVATWFNQPARKIRRRKARQAKARRIAPRPASGPIRPIVRCPTVRYHTKVRAGRGFSLEELRVAGIHKKVARTIGISVDPRRRNKSTESLQANVQRLKEYRSKLILFPRKPSAPKKGDSSAEELKLATQLTGPVMPVRNVYKKEKARVITEEEKNFKAFASLRMARANARLFGIRAKRAKEAAEQDVEKKK",
-            "entity_poly_seq_one_letter_code_can": "MAPSRNGMVLKPHFHKDWQRRVATWFNQPARKIRRRKARQAKARRIAPRPASGPIRPIVRCPTVRYHTKVRAGRGFSLEELRVAGIHKKVARTIGISVDPRRRNKSTESLQANVQRLKEYRSKLILFPRKPSAPKKGDSSAEELKLATQLTGPVMPVRNVYKKEKARVITEEEKNFKAFASLRMARANARLFGIRAKRAKEAAEQDVEKKK",
-            "entity_poly_seq_length": 211,
-            "entity_poly_entity_type": "polypeptide(L)",
-            "entity_poly_polymer_type": "Protein"
-        },
-        {
-            "nomenclature": [
-                "EL22"
-            ],
-            "asym_ids": [
-                "W"
-            ],
-            "parent_rcsb_id": "4UG0",
-            "auth_asym_id": "LU",
-            "pfam_accessions": [
-                "PF01776"
-            ],
-            "pfam_comments": [
-                "NULL"
-            ],
-            "pfam_descriptions": [
-                "Ribosomal L22e protein family"
-            ],
-            "ligand_like": false,
-            "host_organism_ids": [],
-            "host_organism_names": [],
-            "src_organism_ids": [
-                9606
-            ],
-            "src_organism_names": [
-                "HOMO SAPIENS"
-            ],
-            "uniprot_accession": [
-                "P35268"
-            ],
-            "rcsb_pdbx_description": "60S RIBOSOMAL PROTEIN L22",
-            "entity_poly_strand_id": "LU",
-            "entity_poly_seq_one_letter_code": "MAPVKKLVVKGGKKKKQVLKFTLDCTHPVEDGIMDAANFEQFLQERIKVNGKAGNLGGGVVTIERSKSKITVTSEVPFSKRYLKYLTKKYLKKNNLRDWLRVVANSKESYELRYFQINQDEEEEEDED",
-            "entity_poly_seq_one_letter_code_can": "MAPVKKLVVKGGKKKKQVLKFTLDCTHPVEDGIMDAANFEQFLQERIKVNGKAGNLGGGVVTIERSKSKITVTSEVPFSKRYLKYLTKKYLKKNNLRDWLRVVANSKESYELRYFQINQDEEEEEDED",
-            "entity_poly_seq_length": 128,
-            "entity_poly_entity_type": "polypeptide(L)",
-            "entity_poly_polymer_type": "Protein"
-        },
-        {
-            "nomenclature": [
-                "EL34"
-            ],
-            "asym_ids": [
-                "IA"
-            ],
-            "parent_rcsb_id": "4UG0",
-            "auth_asym_id": "Lg",
-            "pfam_accessions": [
-                "PF01199"
-            ],
-            "pfam_comments": [
-                "NULL"
-            ],
-            "pfam_descriptions": [
-                "Ribosomal protein L34e"
-            ],
-            "ligand_like": false,
-            "host_organism_ids": [],
-            "host_organism_names": [],
-            "src_organism_ids": [
-                9606
-            ],
-            "src_organism_names": [
-                "HOMO SAPIENS"
-            ],
-            "uniprot_accession": [
-                "P49207"
-            ],
-            "rcsb_pdbx_description": "60S RIBOSOMAL PROTEIN L34",
-            "entity_poly_strand_id": "Lg",
-            "entity_poly_seq_one_letter_code": "MVQRLTYRRRLSYNTASNKTRLSRTPGNRIVYLYTKKVGKAPKSACGVCPGRLRGVRAVRPKVLMRLSKTKKHVSRAYGGSMCAKCVRDRIKRAFLIEEQKIVVKVLKAQAQSQKAK",
-            "entity_poly_seq_one_letter_code_can": "MVQRLTYRRRLSYNTASNKTRLSRTPGNRIVYLYTKKVGKAPKSACGVCPGRLRGVRAVRPKVLMRLSKTKKHVSRAYGGSMCAKCVRDRIKRAFLIEEQKIVVKVLKAQAQSQKAK",
-            "entity_poly_seq_length": 117,
-            "entity_poly_entity_type": "polypeptide(L)",
-            "entity_poly_polymer_type": "Protein"
-        },
-        {
-            "nomenclature": [
-                "ES25"
+                "eS25"
             ],
             "asym_ids": [
                 "AC"
@@ -2927,7 +2889,7 @@
         },
         {
             "nomenclature": [
-                "ES27"
+                "eS27"
             ],
             "asym_ids": [
                 "BC"
@@ -2960,6 +2922,44 @@
             "entity_poly_seq_one_letter_code": "MPLAKDLLHPSPEEEKRKHKKKRLVQSPNSYFMDVKCPGCYKITTVFSHAQTVVLCVGCSTVLCQPTGGKARLTEGCSFRRKQH",
             "entity_poly_seq_one_letter_code_can": "MPLAKDLLHPSPEEEKRKHKKKRLVQSPNSYFMDVKCPGCYKITTVFSHAQTVVLCVGCSTVLCQPTGGKARLTEGCSFRRKQH",
             "entity_poly_seq_length": 84,
+            "entity_poly_entity_type": "polypeptide(L)",
+            "entity_poly_polymer_type": "Protein"
+        },
+        {
+            "nomenclature": [
+                "eS30"
+            ],
+            "asym_ids": [
+                "CC"
+            ],
+            "parent_rcsb_id": "4UG0",
+            "auth_asym_id": "Se",
+            "pfam_accessions": [
+                "PF04758"
+            ],
+            "pfam_comments": [
+                "NULL"
+            ],
+            "pfam_descriptions": [
+                "Ribosomal protein S30"
+            ],
+            "ligand_like": false,
+            "host_organism_ids": [],
+            "host_organism_names": [],
+            "src_organism_ids": [
+                9606
+            ],
+            "src_organism_names": [
+                "HOMO SAPIENS"
+            ],
+            "uniprot_accession": [
+                "P62861"
+            ],
+            "rcsb_pdbx_description": "40S RIBOSOMAL PROTEIN S30",
+            "entity_poly_strand_id": "Se",
+            "entity_poly_seq_one_letter_code": "KVHGSLARAGKVRGQTPKVAKQEKKKKKTGRAKRRMQYNRRFVNVVPTFGKKKGPNANS",
+            "entity_poly_seq_one_letter_code_can": "KVHGSLARAGKVRGQTPKVAKQEKKKKKTGRAKRRMQYNRRFVNVVPTFGKKKGPNANS",
+            "entity_poly_seq_length": 59,
             "entity_poly_entity_type": "polypeptide(L)",
             "entity_poly_polymer_type": "Protein"
         }
@@ -3113,7 +3113,7 @@
     "src_organism_ids": [
         9606
     ],
-    "src_organism_names ": [
+    "src_organism_names": [
         "HOMO SAPIENS"
     ],
     "host_organism_ids": [],

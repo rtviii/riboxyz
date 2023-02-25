@@ -10,9 +10,9 @@ import json
 
 # open both subunit maps:
 
-LSU_map = {k.upper(): v for k, v in json.load(
+LSU_map = {k: v for k, v in json.load(
     open('subunit_map_LSU.json', 'r')).items()}
-SSU_map = {k.upper(): v for k, v in json.load(
+SSU_map = {k: v for k, v in json.load(
     open('subunit_map_SSU.json', 'r')).items()}
 
 
@@ -30,23 +30,22 @@ def get_protein_nomenclature(protein):
         banregex, protein['rcsb_polymer_entity']['pdbx_description'])
 
     if (finds != None):
-        firstcap: str = finds[0]
-        clasname = firstcap[0].lower() + firstcap[1].upper() + firstcap[2:]
-        return [clasname]
+        firstcap:str = finds[0]
+        classname:str = firstcap[0].lower() + firstcap[1].upper() + firstcap[2:]
+        print("0 returning nomenclature: ", [classname])
+        return [classname]
 
     elif protein['pfams'] == None or protein['pfams'] == []:
+        print("1 returning nomenclature: ", [])
         return []
     else:
-        pfamids = [pfam['rcsb_pfam_accession'] for pfam in protein['pfams']]
-
+        pfamids      = [pfam['rcsb_pfam_accession'] for pfam in protein['pfams']]
         nomenclature = []
         for pfam_id in pfamids:
-            [nomenclature.append(kv[0]) if pfam_id in kv[1]
-             ['pfamDomainAccession'] else ... for kv in LSU_map.items()]
-            [nomenclature.append(kv[0]) if pfam_id in kv[1]
-             ['pfamDomainAccession'] else ... for kv in SSU_map.items()]
-
-    return list(set(nomenclature))
+            [nomenclature.append(kv[0]) if pfam_id in kv[1] ['pfamDomainAccession'] else ... for kv in LSU_map.items()]
+            [nomenclature.append(kv[0]) if pfam_id in kv[1] ['pfamDomainAccession'] else ... for kv in SSU_map.items()]
+        print("2 returning nomenclature: ", nomenclature)
+        return list(set(nomenclature))
 
 
 def get_rna_nomenclature(polymer):  
