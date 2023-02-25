@@ -5,7 +5,7 @@ from pydantic.tools import parse_obj_as
 import requests
 from urllib.parse import urlencode
 from gql_querystrings import monolithic
-from ribctl.types_ribosome import Protein, RNA, Ligand, RibosomeStructure
+from types_ribosome import Protein, RNA, Ligand, RibosomeStructure
 import re
 import json
 
@@ -295,6 +295,7 @@ x           = json.dumps(struct_json, indent=4)
 
 
 struct  = parse_obj_as(RibosomeStructure, struct_json)
+pprint(struct)
 
 
 
