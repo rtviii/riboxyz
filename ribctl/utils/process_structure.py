@@ -16,8 +16,7 @@ SSU_map = {k: v for k, v in json.load(
     open('subunit_map_SSU.json', 'r')).items()}
 
 
-def gql_monolith(rcsb_id): return monolithic.replace(
-    "$RCSB_ID", rcsb_id.upper())
+def gql_monolith(rcsb_id): return monolithic.replace("$RCSB_ID", rcsb_id.upper())
 # gql_structs             = lambda rcsb_id: structure_string.replace("$RCSB_ID", rcsb_id.upper())
 # gql_polymer_entities    = lambda rcsb_id: polymer_entities_string.replace("$RCSB_ID", rcsb_id.upper())
 # gql_nonpolymer_entities = lambda rcsb_id: nonpolymer_entities_string.replace("$RCSB_ID", rcsb_id.upper())
@@ -239,7 +238,7 @@ def process_pdb_record(rcsb_id:str):
     reshaped_proteins = []
     reshaped_rnas     = []
 
-    [reshaped_proteins.append(*reshape_poly_to_protein(poly))
+    [reshaped_proteins.append(*__reshape_poly_to_protein(poly))
      for poly in proteins]
     [reshaped_rnas.append(*__reshape_poly_to_rna(poly)) for poly in rnas]
 
@@ -274,11 +273,13 @@ def process_pdb_record(rcsb_id:str):
     return reshaped
 
 
-def query_rcsb_api(gql_string: str)->typing.dict:
+def query_rcsb_api(gql_string: str)->dict:
     reqstring = "https://data.rcsb.org/graphql?query={}".format(gql_string)
-    resp = requests.get(reqstring)
-    if ['data'] in resp.json():
-        return resp.json()['data']['entry']
+    _resp     = requests.get(reqstring)
+    resp      = _resp.json()
+
+    if ['data'] in resp and ['entry'] in resp['data']:
+        return resp()['data']['entry']
     else:
         raise Exception("No data found for query: {}".format(gql_string))
 
