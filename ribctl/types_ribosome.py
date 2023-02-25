@@ -106,7 +106,6 @@ class RibosomeAssets():
         return os.path.join(self.dir_path(), f"_ray_{self.rcsb_id}.png")
 
 
-
 class RibosomeStructure(BaseModel):
     rcsb_id: str
     expMethod: str
@@ -144,7 +143,6 @@ class RibosomeStructure(BaseModel):
         ...
     def _ingres_commit_structure():
         ...
-
 
 
 # ※--------------------------------------------------------

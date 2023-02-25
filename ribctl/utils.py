@@ -9,7 +9,6 @@ import requests
 
 RIBETL_DATA = str(os.environ.get('RIBETL_DATA'))
 
-
 def download_unpack_place(struct_id: str) -> None:
 
     BASE_URL = "http://files.rcsb.org/download/"
@@ -36,8 +35,6 @@ def download_unpack_place(struct_id: str) -> None:
 
     with open(structfile, "wb") as f:
         f.write(decompressed)
-
-
 
 def struct_path(pdbid: str, pftype: typing.Literal["cif", "json", "modified"]):
     if pftype == 'cif':
