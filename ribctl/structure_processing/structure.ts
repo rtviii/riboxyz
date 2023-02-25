@@ -1,12 +1,12 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs"
 import { exec } from "shelljs"
-import { processPDBRecord } from "./structure_json_profile"
-import { RibosomeStructure } from "./structure_types"
+import { processPDBRecord } from "./xx____structure_json_profile"
+import { RibosomeStructure } from "./xx____structure_types"
 import * as cp from 'child_process'
 import { ungzip } from "node-gzip"
 import axios from "axios"
 import path = require("path")
-import { Polymer_Entity } from "./rcsb_graphql_schema"
+import { Polymer_Entity } from "./xx____rcsb_graphql_schema"
 import { resolve } from "path"
 
 export class RibosomeAssets {
