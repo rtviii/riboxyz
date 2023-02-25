@@ -295,7 +295,6 @@ def query_rcsb_api(gql_string: str):
         print("Could not land request to RCSB API. {}".format(e))
 
 
-RCSB_ID = "4ug0"
-mono    = query_rcsb_api(gql_monolith(RCSB_ID))
-
-pprint(process_pdb_record(mono))
+RCSB_ID     = "4ug0"
+mono        = query_rcsb_api(gql_monolith(RCSB_ID))
+struct_json = process_pdb_record(mono)
