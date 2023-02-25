@@ -279,9 +279,10 @@ def query_rcsb_api(gql_string: str)->dict:
     reqstring = "https://data.rcsb.org/graphql?query={}".format(gql_string)
     _resp     = requests.get(reqstring)
     resp      = _resp.json()
+    print("Resp is ", resp.keys())
 
-    if ['data'] in resp and ['entry'] in resp['data']:
-        return resp()['data']['entry']
+    if 'data' in resp and 'entry' in resp['data']:
+        return resp['data']['entry']
     else:
         raise Exception("No data found for query: {}".format(gql_string))
 

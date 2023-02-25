@@ -124,9 +124,9 @@ class RibosomeAssets():
         pprint(ligandlike_polymers)
 
 
-new = RibosomeAssets("3J9M")
-new._verify_ligads_and_ligandlike_polys()
-
+new = RibosomeAssets("3J7Z")
+new._verify_cif(True)
+new._verify_json_profile(True)
 
       
         
