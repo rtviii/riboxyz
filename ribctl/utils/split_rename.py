@@ -49,7 +49,7 @@ def open_structure(pdbid: str, path_type: typing.Literal[ "cif", "json", "modifi
             return json.load(_)
 
 
-def inject_dict(pdbid: str):
+def __inject_dict(pdbid: str):
 
     cifpath = os.path.join(RIBETL_DATA, pdbid, pdbid+".cif")
     cifmodified = os.path.join(RIBETL_DATA, pdbid, pdbid+"_modified.cif")
@@ -72,7 +72,7 @@ def inject_dict(pdbid: str):
     print("\033[91mWrote {} \033[0m".format(cifmodified))
 
 
-def process_chains(pdbid: str):
+def __process_chains(pdbid: str):
     io = MMCIFIO()
     if not os.path.exists(os.path.join(RIBETL_DATA, pdbid, 'CHAINS')):
         os.mkdir(os.path.join(RIBETL_DATA, pdbid, 'CHAINS'))
@@ -109,8 +109,8 @@ def process_chains(pdbid: str):
 
 def split_rename(pdbid: str):
     pdbid = pdbid.upper()
-    inject_dict(pdbid)
-    process_chains(pdbid)
+    __inject_dict(pdbid)
+    __process_chains(pdbid)
 
 
 if __name__ == '__main__':
@@ -126,5 +126,5 @@ if __name__ == '__main__':
         print("Provide structure ID with -s arg")
         exit(0)
     else:
-        inject_dict(pdbid.upper())
-        process_chains(pdbid.upper())
+        __inject_dict(pdbid.upper())
+        __process_chains(pdbid.upper())

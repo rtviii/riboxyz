@@ -81,16 +81,7 @@ class RibosomeAssets(BaseModel):
             return True
         else:
             if obtain:
-                self.__verify_cif(True)
-                subprocess.run(
-                    [
-                        os.environ.get("PYTHONBIN"),
-                        os.environ.get("SPLIT_RENAME_PY"),
-                        "-s",
-                        self.rcsb_id,
-                    ],
-                    capture_output=True,
-                )
+                splt_rename(self.rcsb_id)
                 return True
             else:
                 return False
