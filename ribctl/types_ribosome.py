@@ -105,8 +105,19 @@ class RibosomeStructure(BaseModel):
     host_organism_names: list[str]
 
     proteins: list[Protein]
-    rnas: list[RNA] | None
-    ligands: list[Ligand] | None
+    rnas    : list[RNA] | None
+    ligands : list[Ligand] | None
+
+    def _ingres_split_rename():
+        ...
+    def _ingres_extract_bsites():
+        ...
+    def _ingres_render_thumbnail():
+        ...
+    def _ingres_commit_structure():
+        ...
+
+
 
 # ※--------------------------------------------------------
 
