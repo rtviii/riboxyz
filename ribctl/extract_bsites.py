@@ -1,6 +1,7 @@
 import dataclasses
 import json
 import os,sys
+from pprint import pprint
 sys.path.append(os.environ.get("PYMOL_PATH")) 
 RIBETL_DATA = str(os.environ.get('RIBETL_DATA'))
 from typing import Dict, List
@@ -120,30 +121,6 @@ def __get_polymer_residues(auth_asym_id: str, struct: Structure) -> List[Residue
     c: Chain = struct[0][auth_asym_id]
     return [*c.get_residues()]
 
-def __get_liglike_polymers(struct_profile:dict) -> List[__PolymerRef]:
-    """Given an rcsb id, open the profile for the corresponding structure
-    and return references to all polymers marked ligand-like"""
-
-    liglike = []
-    for i in [*struct_profile['rnas'], *struct_profile['proteins']]:
-        if i['ligand_like'] == True:
-            liglike =  [*liglike,
-                       __PolymerRef(
-                           i['parent_rcsb_id'],
-                           i['auth_asym_id'],
-                           i['rcsb_pdbx_description'],
-                           i['entity_poly_seq_length'],
-                           i['entity_poly_polymer_type'],
-                       )]
-    return liglike
-
-def __get_lig_ids(pdbid: str, profile:dict) -> List[tuple]:
-    pdbid = pdbid.upper()
-    if not profile['ligands']: return []
-
-    _ = [* map(lambda x: (x['chemicalId'], x['chemicalName']),profile['ligands'])] 
-    return [ ] if len(_) < 1 else [* filter(lambda k: "ion" not in k[1].lower(), _)] 
-
 def __get_poly_nbrs(
       residues      : List[Residue],
       struct        : Structure,
@@ -246,6 +223,60 @@ def __getLigandResIds(ligchemid: str, struct: Structure) -> List[Residue]:
         filter(lambda x: x.get_resname() == ligchemid, list(struct.get_residues())))
     return ligandResidues
 
+
+def get_liglike_polymers(struct_profile:dict) -> List[__PolymerRef]:
+    """Given an rcsb id, open the profile for the corresponding structure
+    and return references to all polymers marked ligand-like"""
+
+    liglike = []
+    for i in [*struct_profile['rnas'], *struct_profile['proteins']]:
+        if i['ligand_like'] == True:
+            liglike =  [*liglike,
+                       __PolymerRef(
+                           i['parent_rcsb_id'],
+                           i['auth_asym_id'],
+                           i['rcsb_pdbx_description'],
+                           i['entity_poly_seq_length'],
+                           i['entity_poly_polymer_type'],
+                       )]
+    return liglike
+
+def get_lig_ids(pdbid: str, profile:dict) -> List[tuple]:
+    pdbid = pdbid.upper()
+    if not profile['ligands']: return []
+
+    _ = [* map(lambda x: (x['chemicalId'], x['chemicalName']),profile['ligands'])] 
+    return [ ] if len(_) < 1 else [* filter(lambda k: "ion" not in k[1].lower(), _)] 
+
+
+
+def render_liglike_polymer(rcsb_id:str, auth_asym_id:str, structure:Structure, save:bool=False)->__BindingSite:
+    residues: list[Residue] = __get_polymer_residues(auth_asym_id, structure)
+    binding_site_polymer: __BindingSite = __get_poly_nbrs(residues, structure, auth_asym_id)
+
+    if args.save:
+        outfile_json = os.path.join(RIBETL_DATA, rcsb_id.upper(), f'POLYMER_{auth_asym_id}.json')
+        if (os.path.isfile(outfile_json)):
+            print("Exists already: ", outfile_json)
+        else:
+            binding_site_polymer.to_json(outfile_json)
+
+    return binding_site_polymer
+
+
+def render_ligand(rcsb_id:str,chemicalId:str, structure:Structure, save:bool=False)->__BindingSite:
+    chemicalId = chemicalId.upper()
+    residues: list[Residue] = __getLigandResIds(chemicalId, structure)
+    binding_site_ligand: __BindingSite   = __get_ligand_nbrs(residues, structure, chemicalId)
+
+    if args.save:
+        outfile_json = os.path.join(RIBETL_DATA, rcsb_id.upper(), f'LIGAND_{chemicalId}.json')
+        if (os.path.isfile(outfile_json)):
+            print("Exists already: ", outfile_json)
+        else:
+            binding_site_ligand.to_json(outfile_json)
+    return binding_site_ligand
+
 if __name__ == "__main__":
 
 
@@ -260,23 +291,15 @@ if __name__ == "__main__":
     _structure_cif_handle :Structure = open_structure(PDBID,'cif')  # type: ignore
     struct_profile_handle:dict       = open_structure(PDBID,'json')  # type: ignore
 
-    liglike_polys = __get_liglike_polymers(struct_profile_handle)
-    ligands       = __get_lig_ids(PDBID, struct_profile_handle)
+    liglike_polys = get_liglike_polymers(struct_profile_handle)
+    ligands       = get_lig_ids(PDBID, struct_profile_handle)
 
 
-    print(ligands)
-    print(liglike_polys)
+    pprint(ligands)
+    pprint(liglike_polys)
 
     for polyref in liglike_polys:
-        print(f"Polymer {polyref.auth_asym_id}")
-        outfile_json = os.path.join(RIBETL_DATA, polyref.parent_rcsb_id.upper(), f'POLYMER_{polyref.auth_asym_id}.json')
-        if (os.path.isfile(outfile_json)):
-            print("Exists already: ", outfile_json)
-
-        residues: List[Residue] = __get_polymer_residues(polyref.auth_asym_id, _structure_cif_handle)
-        bsp: __BindingSite = __get_poly_nbrs(residues, _structure_cif_handle, polyref.auth_asym_id)
-        if args.save:
-            bsp.to_json(outfile_json)
+        render_liglike_polymer(polyref.parent_rcsb_id, polyref.auth_asym_id, _structure_cif_handle, args.save)
 
     for l in ligands:
         print(f"Ligand {l[0]}")
