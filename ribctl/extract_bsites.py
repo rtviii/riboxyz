@@ -18,7 +18,7 @@ import itertools
 from utils import  open_structure, struct_path
 flatten = itertools.chain.from_iterable
 
-def get_dict(path:str,)->dict:
+def __get_dict(path:str,)->dict:
 	return MMCIF2Dict.MMCIF2Dict(path)
 
 AMINO_ACIDS = {
@@ -223,13 +223,14 @@ def __getLigandResIds(ligchemid: str, struct: Structure) -> List[Residue]:
         filter(lambda x: x.get_resname() == ligchemid, list(struct.get_residues())))
     return ligandResidues
 
+#※----------------------------------------------------------------------------
 
 def get_liglike_polymers(struct_profile:dict) -> List[__PolymerRef]:
     """Given an rcsb id, open the profile for the corresponding structure
     and return references to all polymers marked ligand-like"""
-
     liglike = []
     for i in [*struct_profile['rnas'], *struct_profile['proteins']]:
+        if 'ligand_like' not in i.keys(): raise KeyError("ligand_like key not found in struct json_profile. Perhaps the semantics have changed.")
         if i['ligand_like'] == True:
             liglike =  [*liglike,
                        __PolymerRef(
@@ -241,14 +242,12 @@ def get_liglike_polymers(struct_profile:dict) -> List[__PolymerRef]:
                        )]
     return liglike
 
-def get_lig_ids(pdbid: str, profile:dict) -> List[tuple]:
+def get_ligands(pdbid: str, profile:dict) -> List[tuple]:
     pdbid = pdbid.upper()
     if not profile['ligands']: return []
 
     _ = [* map(lambda x: (x['chemicalId'], x['chemicalName']),profile['ligands'])] 
     return [ ] if len(_) < 1 else [* filter(lambda k: "ion" not in k[1].lower(), _)] 
-
-
 
 def render_liglike_polymer(rcsb_id:str, auth_asym_id:str, structure:Structure, save:bool=False)->__BindingSite:
     residues: list[Residue] = __get_polymer_residues(auth_asym_id, structure)
@@ -262,7 +261,6 @@ def render_liglike_polymer(rcsb_id:str, auth_asym_id:str, structure:Structure, s
             binding_site_polymer.to_json(outfile_json)
 
     return binding_site_polymer
-
 
 def render_ligand(rcsb_id:str,chemicalId:str, structure:Structure, save:bool=False)->__BindingSite:
     chemicalId = chemicalId.upper()
@@ -292,7 +290,7 @@ if __name__ == "__main__":
     struct_profile_handle:dict       = open_structure(PDBID,'json')  # type: ignore
 
     liglike_polys = get_liglike_polymers(struct_profile_handle)
-    ligands       = get_lig_ids(PDBID, struct_profile_handle)
+    ligands       = get_ligands(PDBID, struct_profile_handle)
 
 
     pprint(ligands)
