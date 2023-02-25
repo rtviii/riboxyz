@@ -1,5 +1,6 @@
 import json
 import os
+from pprint import pprint
 from pydantic import BaseModel, parse_obj_as
 import gzip
 import os
@@ -16,53 +17,51 @@ import typing
 
 RIBETL_DATA = str(os.environ.get('RIBETL_DATA'))
 
-class RibosomeAssets(BaseModel):
+class RibosomeAssets():
     rcsb_id: str
+    def __init__(self, rcsb_id:str) -> None:
+        self.rcsb_id= rcsb_id
 
-    def __init__(self, rcsb_id: str):
-        self.rcsb_id = rcsb_id
-
-    def __envcheck(self):
+    def _envcheck(self):
         if not os.environ.get("RIBETL_DATA"):
             raise Exception(
                 "RIBETL_DATA environment variable not set. Cannot access assets.")
 
-    def dir_path(self):
-        self.__envcheck()
+    def _dir_path(self):
+        self._envcheck()
         return f"{os.environ.get('RIBETL_DATA')}/{self.rcsb_id}"
 
-    def __cif_filepath(self):
-        self.__envcheck()
-        return f"{self.dir_path()}/{self.rcsb_id}.cif"
+    def _cif_filepath(self):
+        self._envcheck()
+        return f"{self._dir_path()}/{self.rcsb_id}.cif"
 
-    def __cif_modified_filepath(self):
-        self.__envcheck()
-        return f"{self.dir_path()}/{self.rcsb_id}_modified.cif"
+    def _cif_modified_filepath(self):
+        self._envcheck()
+        return f"{self._dir_path()}/{self.rcsb_id}_modified.cif"
 
-    def __json_profile_filepath(self):
-        self.__envcheck()
-        return f"{self.dir_path()}/{self.rcsb_id}.json"
+    def _json_profile_filepath(self):
+        self._envcheck()
+        return f"{self._dir_path()}/{self.rcsb_id}.json"
 
     def json_profile(self):
-        with open(self.__json_profile_filepath(), "r") as f:
+        with open(self._json_profile_filepath(), "r") as f:
             return json.load(f)
 
 
     def chains_folder(self):
-        self.__envcheck()
-        return f"{self.dir_path()}/CHAINS"
+        self._envcheck()
+        return f"{self._dir_path()}/CHAINS"
 
-    def __png_thumbnail_filepath(self):
-        self.__envcheck()
-        return f"{self.dir_path()}/_ray_{self.rcsb_id}.png"
+    def _png_thumbnail_filepath(self):
+        self._envcheck()
+        return f"{self._dir_path()}/_ray_{self.rcsb_id}.png"
       
-    @staticmethod
-    def save_json_profile(filepath:str, profile:dict):
+    def save_json_profile(self,filepath:str, profile:dict):
         with open(filepath, "w") as f:
             json.dump(profile, f)
 
-    def __verify_cif(self, obtain: bool = False) -> bool:
-        if os.path.exists(self.__cif_filepath()):
+    def _verify_cif(self, obtain: bool = False) -> bool:
+        if os.path.exists(self._cif_filepath()):
             return True
         else:
             if obtain:
@@ -71,8 +70,8 @@ class RibosomeAssets(BaseModel):
             else:
                 return False
 
-    def __verify_cif_modified(self, obtain: bool = False) -> bool:
-        if os.path.exists(self.__cif_modified_filepath()):
+    def _verify_cif_modified(self, obtain: bool = False) -> bool:
+        if os.path.exists(self._cif_modified_filepath()):
             return True
         else:
             if obtain:
@@ -81,8 +80,8 @@ class RibosomeAssets(BaseModel):
             else:
                 return False
 
-    def __verify_json_profile(self, obtain: bool = False) -> bool:
-        if os.path.exists(self.__json_profile_filepath()):
+    def _verify_json_profile(self, obtain: bool = False) -> bool:
+        if os.path.exists(self._json_profile_filepath()):
             return True
         else:
             if obtain:
@@ -90,14 +89,14 @@ class RibosomeAssets(BaseModel):
                 if not parse_obj_as(RibosomeStructure, ribosome):
                     raise Exception("Invalid ribosome structure profile.")
                   
-                self.save_json_profile(self.__json_profile_filepath(), ribosome)
-                print(f"Saved structure profile:\t{self.__json_profile_filepath()}")
+                self.save_json_profile(self._json_profile_filepath(), ribosome)
+                print(f"Saved structure profile:\t{self._json_profile_filepath()}")
                 return True
             else:
                 return False
 
-    def __verify_png_thumbnail(self, obtain: bool = False) -> bool:
-        if os.path.exists(self.__png_thumbnail_filepath()):
+    def _verify_png_thumbnail(self, obtain: bool = False) -> bool:
+        if os.path.exists(self._png_thumbnail_filepath()):
             return True
         else:
             if obtain:
@@ -108,19 +107,25 @@ class RibosomeAssets(BaseModel):
             else:
                 return False
     
-    def __verify_chains_folder(self, obtain: bool = False) -> bool:
+    def _verify_chains_folder(self, obtain: bool = False) -> bool:
         if os.path.exists(self.chains_folder()):
             return True
         else:
             if obtain:
-                self.__verify_cif_modified(True)
+                self._verify_cif_modified(True)
                 return True
             else:
                 return False
 
-    def verify_ligads_and_ligandlike_polys(self):
-        ligands = get_ligands(self.rcsb_id, self.json_profile())
-        ligands = get_liglike_polymers(self.rcsb_id)
+    def _verify_ligads_and_ligandlike_polys(self):
+        ligands             = get_ligands(self.rcsb_id, self.json_profile())
+        ligandlike_polymers = get_liglike_polymers(self.json_profile())
+        pprint(ligands)
+        pprint(ligandlike_polymers)
+
+
+new = RibosomeAssets("3J9M")
+new._verify_ligads_and_ligandlike_polys()
 
 
       

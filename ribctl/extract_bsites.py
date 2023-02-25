@@ -109,6 +109,7 @@ class __BindingSite:
         ]
         serialized = dict.fromkeys(k, [])
 
+#TODO: Replace this with an actual polymer class.
 @dataclass(unsafe_hash=True, order=True)
 class __PolymerRef: 
       parent_rcsb_id          : str = field(hash=True, compare=False)
@@ -230,7 +231,9 @@ def get_liglike_polymers(struct_profile:dict) -> List[__PolymerRef]:
     and return references to all polymers marked ligand-like"""
     liglike = []
     for i in [*struct_profile['rnas'], *struct_profile['proteins']]:
-        if 'ligand_like' not in i.keys(): raise KeyError("ligand_like key not found in struct json_profile. Perhaps the semantics have changed.")
+        if 'ligand_like' not in i.keys(): 
+            raise KeyError("ligand_like key not found in struct json_profile. Perhaps the semantics have changed.")
+
         if i['ligand_like'] == True:
             liglike =  [*liglike,
                        __PolymerRef(
