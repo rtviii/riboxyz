@@ -249,109 +249,110 @@ export class StructureFolder {
 /**
  * Request and display the state of the given rcsb_id structure in the database instance.
  */
-export const queryStructDb = (rcsb_id: string) => {
-    return new Promise<string[]>((resolve, reject) => {
-        let y = cp.exec(`echo \"match (struct:RibosomeStructure {rcsb_id:\\"${rcsb_id.toUpperCase()}\\"}) return struct.rcsb_id\" | cypher-shell -a \"${process.env["NEO4J_URI"]}\" --format plain -u ${process.env["NEO4J_USER"]} -p ${process.env["NEO4J_PASSWORD"]} --database ${process.env["NEO4J_CURRENTDB"]}`,
-            { env: process.env },
-            (err, stdout, stderr) => {
-                if (err && err?.code != 0) {
-                    process.stdout.write("Got shell error " + stderr + stdout)
-                    console.log("Got Error code:", err?.code)
-                    reject(err)
-                }
+// export const queryStructDb = (rcsb_id: string) => {
+//     return new Promise<string[]>((resolve, reject) => {
+//         let y = cp.exec(`echo \"match (struct:RibosomeStructure {rcsb_id:\\"${rcsb_id.toUpperCase()}\\"}) return struct.rcsb_id\" | cypher-shell -a \"${process.env["NEO4J_URI"]}\" --format plain -u ${process.env["NEO4J_USER"]} -p ${process.env["NEO4J_PASSWORD"]} --database ${process.env["NEO4J_CURRENTDB"]}`,
+//             { env: process.env },
+//             (err, stdout, stderr) => {
+//                 if (err && err?.code != 0) {
+//                     process.stdout.write("Got shell error " + stderr + stdout)
+//                     console.log("Got Error code:", err?.code)
+//                     reject(err)
+//                 }
 
-                const dbstructs = stdout != null ? (stdout as string).replace(/"/g, '').split("\n").filter(r => r.length === 4) : []
-                console.log(dbstructs)
-                resolve(dbstructs)
-            })
-    })
+//                 const dbstructs = stdout != null ? (stdout as string).replace(/"/g, '').split("\n").filter(r => r.length === 4) : []
+//                 console.log(dbstructs)
+//                 resolve(dbstructs)
+//             })
+//     })
 
-}
+// }
+
 /**
  * Download a .cif model of the structure.
  * @param struct_id 
  */
-export const download_unpack_place = async (struct_id: string) => {
-    const BASE_URL = "http://files.rcsb.org/download/"
-    const FORMAT = ".cif.gz"
+// export const download_unpack_place = async (struct_id: string) => {
+//     const BASE_URL = "http://files.rcsb.org/download/"
+//     const FORMAT = ".cif.gz"
 
-    const structid = struct_id.toUpperCase()
-    let url = BASE_URL + structid + FORMAT
-    let compressed: Buffer = await axios.get(url, { responseType: 'arraybuffer' }).then(r => { return r.data })
-        .catch(e => { process.stdout.write(`Structure ${structid} failed: `, e); return []; })
-    let decompressed = await ungzip(compressed);
+//     const structid = struct_id.toUpperCase()
+//     let url = BASE_URL + structid + FORMAT
+//     let compressed: Buffer = await axios.get(url, { responseType: 'arraybuffer' }).then(r => { return r.data })
+//         .catch(e => { process.stdout.write(`Structure ${structid} failed: `, e); return []; })
+//     let decompressed = await ungzip(compressed);
 
-    // let destination_chains = path.join(
-    //   process.env["RIBETL_DATA"] as string,
-    //   `${structid}`,
-    //   `CHAINS`)
+//     // let destination_chains = path.join(
+//     //   process.env["RIBETL_DATA"] as string,
+//     //   `${structid}`,
+//     //   `CHAINS`)
 
-    // if (!existsSync(destination_chains)) {
-    //   mkdirSync(destination_chains)
-    //   process.stdout.write(`Created directory ${destination_chains}.`);
-    // }
-    let structfile = path.join(
-        process.env["RIBETL_DATA"] as string,
-        `${structid}`,
-        `${structid}.cif`)
-    writeFileSync(structfile, decompressed)
-}
+//     // if (!existsSync(destination_chains)) {
+//     //   mkdirSync(destination_chains)
+//     //   process.stdout.write(`Created directory ${destination_chains}.`);
+//     // }
+//     let structfile = path.join(
+//         process.env["RIBETL_DATA"] as string,
+//         `${structid}`,
+//         `${structid}.cif`)
+//     writeFileSync(structfile, decompressed)
+// }
 
-export const save_struct_profile = (r: RibosomeStructure): string => {
-    var rcsb_id = r.rcsb_id;
-    var target_filename = path.join(
-        process.env["RIBETL_DATA"] as string,
-        rcsb_id.toUpperCase(),
-        rcsb_id.toUpperCase() + ".json"
-    );
+// export const save_struct_profile = (r: RibosomeStructure): string => {
+//     var rcsb_id = r.rcsb_id;
+//     var target_filename = path.join(
+//         process.env["RIBETL_DATA"] as string,
+//         rcsb_id.toUpperCase(),
+//         rcsb_id.toUpperCase() + ".json"
+//     );
 
-    if (!existsSync(path.dirname(target_filename))) {
-        mkdirSync(path.dirname(target_filename));
-    }
-    writeFileSync(target_filename, JSON.stringify(r, null, 4));
-    return target_filename
-}
+//     if (!existsSync(path.dirname(target_filename))) {
+//         mkdirSync(path.dirname(target_filename));
+//     }
+//     writeFileSync(target_filename, JSON.stringify(r, null, 4));
+//     return target_filename
+// }
 
-export const commit_struct_to_Db = (rcsb_id: string) => {
-    console.log(`Commiting ${rcsb_id} to the database`)
-    const commit_script = process.env["COMMIT_STRUCTURE_SH"]
-    let   current_db    = process.env["NEO4J_CURRENTDB"]
-    let   uri           = process.env["NEO4J_URI"]
-    let   invocation    = `${commit_script} -s ${rcsb_id} -d ${current_db} -a "${uri}"`
-    console.log("Invoking:", invocation);
-    let   proc          = cp.exec(invocation)
+// export const commit_struct_to_Db = (rcsb_id: string) => {
+//     console.log(`Commiting ${rcsb_id} to the database`)
+//     const commit_script = process.env["COMMIT_STRUCTURE_SH"]
+//     let   current_db    = process.env["NEO4J_CURRENTDB"]
+//     let   uri           = process.env["NEO4J_URI"]
+//     let   invocation    = `${commit_script} -s ${rcsb_id} -d ${current_db} -a "${uri}"`
+//     console.log("Invoking:", invocation);
+//     let   proc          = cp.exec(invocation)
 
-    if (proc.stderr !== null) {
-        proc.stderr.on("data",
-            (data) => {
-                console.log(data)
-            }
-        )
-    }
+//     if (proc.stderr !== null) {
+//         proc.stderr.on("data",
+//             (data) => {
+//                 console.log(data)
+//             }
+//         )
+//     }
 
-    proc.stdout?.on("data", (data) => { console.log(data) })
-    proc.on("exit", () => { process.exit() })
-}
-export const commit_struct_to_db_sync = (rcsb_id: string): Promise<void> => {
-    console.log(`Commiting ${rcsb_id} to the database`)
-    const commit_script = process.env["COMMIT_STRUCTURE_SH"]
-    let current_db = process.env["NEO4J_CURRENTDB"]
-    let uri = process.env["NEO4J_URI"]
-    let invocation = `${commit_script} -s ${rcsb_id} -d ${current_db} -a "${uri}"`
-    return new Promise<void>((resolve, reject) => {
-        let proc = cp.exec(invocation)
-        if (proc.stderr !== null) {
-            proc.stderr.on("data",
-                (data) => {
-                    console.log(data)
-                }
-            )
-        }
+//     proc.stdout?.on("data", (data) => { console.log(data) })
+//     proc.on("exit", () => { process.exit() })
+// }
+// export const commit_struct_to_db_sync = (rcsb_id: string): Promise<void> => {
+//     console.log(`Commiting ${rcsb_id} to the database`)
+//     const commit_script = process.env["COMMIT_STRUCTURE_SH"]
+//     let   current_db    = process.env["NEO4J_CURRENTDB"]
+//     let   uri           = process.env["NEO4J_URI"]
+//     let   invocation    = `${commit_script} -s ${rcsb_id} -d ${current_db} -a "${uri}"`
+//     return new Promise<void>((resolve, reject) => {
+//         let proc = cp.exec(invocation)
+//         if (proc.stderr !== null) {
+//             proc.stderr.on("data",
+//                 (data) => {
+//                     console.log(data)
+//                 }
+//             )
+//         }
 
-        proc.stdout?.on("data", (data) => { console.log(data) })
-        proc.stderr?.on("data", (data) => { console.log(data); reject(data) })
-        proc.on("exit", () => { process.exit(); resolve() })
+//         proc.stdout?.on("data", (data) => { console.log(data) })
+//         proc.stderr?.on("data", (data) => { console.log(data); reject(data) })
+//         proc.on("exit", () => { process.exit(); resolve() })
 
-    })
+//     })
 
-}
+// }

@@ -1,3 +1,4 @@
+import os
 import typing
 from pydantic import BaseModel
 from pydantic.dataclasses import dataclass
@@ -77,6 +78,33 @@ class Ligand(BaseModel):
     formula_weight: float
     pdbx_description: str
     number_of_instances: int
+
+
+
+class RibosomeAssets():
+    rcsb_id: str
+
+    def __init__(self, rcsb_id:str) -> None:
+        self.rcsb_id = rcsb_id.upper()
+
+    def dir_path(self):
+        return os.path.join(os.environ["RIBETL_DATA"], self.rcsb_id)
+
+    def cif_filepath(self):
+        return os.path.join(self.dir_path(), f"{self.rcsb_id}.cif")
+
+    def cif_modified_filepath(self):
+        return os.path.join(self.dir_path(), f"{self.rcsb_id}_modified.cif")
+
+    def json_profile_filepath(self):
+        return os.path.join(self.dir_path(), f"{self.rcsb_id}.json")
+
+    def chains_folder(self):
+        return os.path.join(self.dir_path(), "CHAINS")
+
+    def png_thumbnail_filepath(self):
+        return os.path.join(self.dir_path(), f"_ray_{self.rcsb_id}.png")
+
 
 
 class RibosomeStructure(BaseModel):
