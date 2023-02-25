@@ -1,6 +1,5 @@
-import functools
-import itertools
 from pprint import pprint
+import typing
 from pydantic.tools import parse_obj_as
 import requests
 from urllib.parse import urlencode
@@ -24,7 +23,7 @@ def gql_monolith(rcsb_id): return monolithic.replace(
 # gql_nonpolymer_entities = lambda rcsb_id: nonpolymer_entities_string.replace("$RCSB_ID", rcsb_id.upper())
 
 
-def get_protein_nomenclature(protein):
+def __get_protein_nomenclature(protein):
     banregex = r"/\b([ueb][ls]\d{1,2})\b/gi"
     #     check authors's annotations. if classes are present --> use that.
     finds = re.search(
@@ -46,7 +45,7 @@ def get_protein_nomenclature(protein):
         return list(set(nomenclature))
 
 
-def get_rna_nomenclature(polymer):  
+def __get_rna_nomenclature(polymer):  
 
     rna_reg = {
         "5SrRNA"  : r"\b(5s)",
@@ -70,7 +69,7 @@ def get_rna_nomenclature(polymer):
     return []
 
 
-def inferOrganismsFromPolymers(polymers: list):
+def __infer_organisms_from_polymers(polymers: list):
 
     host_organism_names: list[str] = []
     src_organism_names : list[str] = []
@@ -90,7 +89,7 @@ def inferOrganismsFromPolymers(polymers: list):
         "host_organism_names": list(set(host_organism_names))}
 
 
-def extract_external_refs(external_refs):
+def __extract_external_refs(external_refs):
     """
     external_refs: list[{ link: string; type: string; id: string }]
     """
@@ -110,7 +109,7 @@ def extract_external_refs(external_refs):
     return [externalRefIds, externalRefTypes, externalRefLinks]
 
 
-def reshape_to_ligand(nonpoly):
+def __reshape_to_ligand(nonpoly):
     return {
         "pdbx_description"   : nonpoly['rcsb_nonpolymer_entity']['pdbx_description'],
         "formula_weight"     : nonpoly['rcsb_nonpolymer_entity']['formula_weight'],
@@ -120,7 +119,7 @@ def reshape_to_ligand(nonpoly):
     }
 
 
-def is_ligand_like(polymer, nomenclature: list[str]):
+def __is_ligand_like(polymer, nomenclature: list[str]):
     if 'tRNA' in nomenclature or 'mRNA' in nomenclature:
         return True
     #   // ? Look for enzymes, factors and antibiotics
@@ -137,19 +136,19 @@ def is_ligand_like(polymer, nomenclature: list[str]):
         return False
 
 
-def reshape_poly_to_rna(plm) -> list:
+def __reshape_poly_to_rna(plm) -> list:
 
     src_organism_ids    = list(set([org['ncbi_taxonomy_id'] for org in plm['rcsb_entity_source_organism']])) if plm['rcsb_entity_source_organism'] != None else []
     host_organism_ids   = list(set([org['ncbi_taxonomy_id'] for org in plm['rcsb_entity_host_organism'  ]])) if plm['rcsb_entity_host_organism'  ] != None else []
     src_organism_names  = list(set([org['ncbi_taxonomy_id'] for org in plm['rcsb_entity_source_organism']])) if plm['rcsb_entity_source_organism'] != None else []
     host_organism_names = list(set([org['ncbi_taxonomy_id'] for org in plm['rcsb_entity_host_organism'  ]])) if plm['rcsb_entity_host_organism'  ] != None else []
 
-    nomenclature = get_rna_nomenclature(plm)
+    nomenclature = __get_rna_nomenclature(plm)
 
     return [
         {
             "nomenclature": nomenclature,
-            "ligand_like" : is_ligand_like(plm, nomenclature),
+            "ligand_like" : __is_ligand_like(plm, nomenclature),
 
             "asym_ids"      : plm['rcsb_polymer_entity_container_identifiers']['asym_ids'],
             "auth_asym_id"  : auth_asym_id,
@@ -173,7 +172,7 @@ def reshape_poly_to_rna(plm) -> list:
         for auth_asym_id in plm['rcsb_polymer_entity_container_identifiers']['auth_asym_ids']]
 
 
-def reshape_poly_to_protein(plm):
+def __reshape_poly_to_protein(plm):
     if plm['pfams'] != None and len(plm['pfams']) > 0:
 
         pfam_comments = list(set([pfam['rcsb_pfam_comment']
@@ -193,7 +192,7 @@ def reshape_poly_to_protein(plm):
     host_organism_ids   = list(set([org['ncbi_taxnonomy_id'] for org in plm['rcsb_entity_host_organism'  ]])) if plm['rcsb_entity_host_organism'] != None else []
     host_organism_names = list(set([org['scientific_name'  ] for org in plm['rcsb_entity_host_organism'  ]])) if plm['rcsb_entity_host_organism'] != None else []
 
-    nomenclature = get_protein_nomenclature(plm)
+    nomenclature = __get_protein_nomenclature(plm)
 
     return [
         {
@@ -204,7 +203,7 @@ def reshape_poly_to_protein(plm):
             "pfam_accessions": pfam_accessions,
             "pfam_comments": pfam_comments,
             "pfam_descriptions": pfam_descriptions,
-            "ligand_like": is_ligand_like(plm, nomenclature),
+            "ligand_like": __is_ligand_like(plm, nomenclature),
             "host_organism_ids": host_organism_ids,
             "host_organism_names": host_organism_names,
             "src_organism_ids": src_organism_ids,
@@ -223,10 +222,9 @@ def reshape_poly_to_protein(plm):
         for auth_asym_id in plm['rcsb_polymer_entity_container_identifiers']['auth_asym_ids']]
 
 
-def process_pdb_record(pdb_api_response):
+def process_pdb_record(rcsb_id:str):
     """at the level of @entry, so response['data']['entry'] is the pdb record"""
-
-    response = pdb_api_response
+    response = query_rcsb_api(gql_monolith(rcsb_id.upper()))
     polys = response['polymer_entities']
     ligands = response['nonpolymer_entities']
 
@@ -243,11 +241,11 @@ def process_pdb_record(pdb_api_response):
 
     [reshaped_proteins.append(*reshape_poly_to_protein(poly))
      for poly in proteins]
-    [reshaped_rnas.append(*reshape_poly_to_rna(poly)) for poly in rnas]
+    [reshaped_rnas.append(*__reshape_poly_to_rna(poly)) for poly in rnas]
 
-    reshaped_nonpoly = [reshape_to_ligand(nonpoly) for nonpoly in ligands] if ligands != None and len(ligands) > 0 else []
-    organisms        = inferOrganismsFromPolymers(reshaped_proteins)
-    externalRefs     = extract_external_refs(response['rcsb_external_references'])
+    reshaped_nonpoly = [__reshape_to_ligand(nonpoly) for nonpoly in ligands] if ligands != None and len(ligands) > 0 else []
+    organisms        = __infer_organisms_from_polymers(reshaped_proteins)
+    externalRefs     = __extract_external_refs(response['rcsb_external_references'])
 
     pub              = response['citation'][0]
 
@@ -276,43 +274,21 @@ def process_pdb_record(pdb_api_response):
     return reshaped
 
 
-def query_rcsb_api(gql_string: str):
+def query_rcsb_api(gql_string: str)->typing.dict:
     reqstring = "https://data.rcsb.org/graphql?query={}".format(gql_string)
-
-    try:
-        resp = requests.get(reqstring)
+    resp = requests.get(reqstring)
+    if ['data'] in resp.json():
         return resp.json()['data']['entry']
+    else:
+        raise Exception("No data found for query: {}".format(gql_string))
 
-    except Exception as e:
-        print("Could not land request to RCSB API. {}".format(e))
 
 
-RCSB_ID     = "4ug0"
-mono        = query_rcsb_api(gql_monolith(RCSB_ID))
-struct_json = process_pdb_record(mono)
-x           = json.dumps(struct_json, indent=4)
-
-struct      = parse_obj_as(RibosomeStructure, struct_json)
-print(struct)
+# struct      = parse_obj_as(RibosomeStructure, struct_json)
 
 
 
 
-
-# export const save_struct_profile = (r: RibosomeStructure): string => {
-#     var rcsb_id = r.rcsb_id;
-#     var target_filename = path.join(
-#         process.env["RIBETL_DATA"] as string,
-#         rcsb_id.toUpperCase(),
-#         rcsb_id.toUpperCase() + ".json"
-#     );
-
-#     if (!existsSync(path.dirname(target_filename))) {
-#         mkdirSync(path.dirname(target_filename));
-#     }
-#     writeFileSync(target_filename, JSON.stringify(r, null, 4));
-#     return target_filename
-# }
 
 
 ### Functionality to migrate from older cli:
