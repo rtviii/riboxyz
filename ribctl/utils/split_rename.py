@@ -13,7 +13,7 @@ n1 = np.array
 RIBETL_DATA = str(os.environ.get('RIBETL_DATA'))
 
 
-def get_dict(path: str,) -> dict:
+def __get_dict(path: str,) -> dict:
     return MMCIF2Dict.MMCIF2Dict(path)
 
 
@@ -90,7 +90,7 @@ def __process_chains(pdbid: str):
         if not os.path.exists(destination):
             io.set_structure(chain)
             io.save(destination)
-            cdict = get_dict(destination)
+            cdict = __get_dict(destination)
 
             try:
                 if len(nomd[chain.get_id()]) < 1:

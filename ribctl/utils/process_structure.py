@@ -287,7 +287,6 @@ def query_rcsb_api(gql_string: str)->dict:
 
 
 
-# struct      = parse_obj_as(RibosomeStructure, struct_json)
 
 
 

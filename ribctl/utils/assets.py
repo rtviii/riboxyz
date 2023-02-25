@@ -8,6 +8,10 @@ from render_thumbnail import render_thumbnail
 from ribctl.types_ribosome import RibosomeStructure
 from ribctl.utils.process_structure import process_pdb_record
 from split_rename import split_rename
+from Bio.PDB.Structure import Structure
+from Bio.PDB import FastMMCIFParser
+import typing
+RIBETL_DATA = str(os.environ.get('RIBETL_DATA'))
 
 
 def download_unpack_place(struct_id: str) -> None:
@@ -36,6 +40,33 @@ def download_unpack_place(struct_id: str) -> None:
 
     with open(structfile, "wb") as f:
         f.write(decompressed)
+
+
+
+
+def struct_path(pdbid: str, pftype: typing.Literal["cif", "json", "modified"]):
+    if pftype == 'cif':
+        return os.path.join(RIBETL_DATA, pdbid.upper(), f"{pdbid.upper()}.cif")
+    elif pftype == 'json':
+        return os.path.join(RIBETL_DATA, pdbid.upper(), f"{pdbid.upper()}.json")
+    elif pftype == 'modified':
+        return os.path.join(RIBETL_DATA, pdbid.upper(), f"{pdbid.upper()}_modified.cif")
+    else:
+        raise ValueError("Invalid path type. Must be 'cif', 'json', or 'modified' ")
+
+
+def open_structure(pdbid: str, path_type: typing.Literal[ "cif", "json", "modified"])->Structure|typing.Any:
+    pdbid = pdbid.upper()
+    if path_type == 'cif':
+        cifpath = struct_path(pdbid, 'cif')
+        try:
+            return FastMMCIFParser(QUIET=True).get_structure(pdbid, cifpath)
+        except Exception as e:
+            return f"\033[93m Parser Error in structure {pdbid} \033[0m : {e}"
+
+    if path_type == 'json':
+        with open(struct_path(pdbid, 'json'), 'rb') as _:
+            return json.load(_)
 
 
 class RibosomeAssets(BaseModel):
@@ -124,175 +155,19 @@ class RibosomeAssets(BaseModel):
                 return True
             else:
                 return False
+    
+    def __verify_chains_folder(self, obtain: bool = False) -> bool:
+        if os.path.exists(self.chains_folder()):
+            return True
+        else:
+            if obtain:
+                self.__verify_cif_modified(True)
+                return True
+            else:
+                return False
 
+    def verify_ligads_and_ligandlike_polys(self):
 
-# export class RibosomeAssets {
-#     rcsb_id: string
-
-#     constructor(
-#         rcsb_id: string
-#     ) {
-#         this.rcsb_id = rcsb_id
-#     }
-#     envcheck = () => {
-#         if (!process.env["RIBETL_DATA"]) {
-#             throw Error("RIBETL_DATA environment variable not set. Cannot access assets.")
-#         }
-#     }
-
-#     folder_path = () => {
-#         this.envcheck()
-#         return `${process.env["RIBETL_DATA"]}/${this.rcsb_id}`
-#     }
-
-#     cif_filepath = () => {
-#         this.envcheck()
-#         return `${this.folder_path()}/${this.rcsb_id}.cif`
-#     }
-
-#     cif_modified_filepath = () => {
-#         this.envcheck()
-#         return `${this.folder_path()}/${this.rcsb_id}_modified.cif`
-#     }
-
-#     json_profile_filepath = () => {
-#         this.envcheck()
-#         return `${this.folder_path()}/${this.rcsb_id}.json`
-#     }
-
-#     chains_folder = () => {
-#         this.envcheck()
-#         return `${this.folder_path()}/CHAINS`
-#     }
-
-#     png_thumbnail_filepath = () => {
-#         this.envcheck()
-#         return `${this.folder_path()}/_ray_${this.rcsb_id}.png`
-#     }
-
-
-#     async __verify_cif(obtain: boolean = false):Promise<boolean> {
-#         if (existsSync(this.cif_filepath())) {
-#             return true
-#         } else {
-
-#             if (obtain) {
-#                 await download_unpack_place(this.rcsb_id); return true
-#             } else return false
-#         }
-#     }
-#     async __verify_cif_modified(obtain: boolean = false) {
-#         if (existsSync(this.cif_modified_filepath())) { return true } else {
-#             if (obtain) {
-#                 this.__verify_cif(true)
-#                 let y = exec(`${process.env["PYTHONBIN"]} ${process.env["SPLIT_RENAME_PY"]} -s ${this.rcsb_id}`,
-#                     (err, stdout, stderr) => {
-#                         console.log(err);
-#                         console.log(stdout.toString());
-#                         console.log(stderr.toString());
-#                     })
-#                 console.log(y.stdout)
-#             } else return false
-#         }
-#     }
-#     async __verify_json_profile(obtain: boolean = false) {
-#         if (existsSync(this.json_profile_filepath())) { return true } else {
-#             if (obtain) {
-#                 let ribosome = await processPDBRecord(this.rcsb_id)
-#                 let filename = await save_struct_profile(ribosome)
-#                 process.stdout.write(`Saved structure profile:\t${filename}`);
-#             } else return false
-#         }
-#     }
-#     async __verify_png_thumbnail(obtain: boolean = false) {
-#         if (existsSync(this.png_thumbnail_filepath())) { return true } else {
-#             if (obtain) {
-#                await new Promise<void>((rs,rj)=>{
-#                exec(`${process.env["PYTHONBIN"]} ${process.env["RENDER_THUMBNAIL_PY"]} -s ${this.rcsb_id}`,
-#                     (err, stdout, stderr) => {
-#                         if (err !==0 ){
-#                             rj(stderr)
-#                         }
-#                         else{rs()}
-#                     })
-#                })
-#             } else return false
-#         }
-#     }
-#     async __verify_chains_folder(obtain: boolean = false) {
-#         if (existsSync(this.chains_folder())) { return true } else {
-#             if (obtain) {
-#                 this.__verify_cif(true)
-#                 exec(`${process.env["PYTHONBIN"]} ${process.env["SPLIT_RENAME_PY"]} -s ${this.rcsb_id}`, (err, stdout, stderr) => {
-#                     console.log(err);
-#                     console.log(stdout.toString());
-#                     console.log(stderr.toString());
-#                 })
-#             } else return false
-#         }
-#     }
-#     //verify that each chain file exists
-#     async __verify_chain_files(parent_structure: RibosomeStructure): Promise<boolean> {
-#         if (!this.__verify_chains_folder()) {
-#             return false
-#         }
-#         const chain_files_all = [
-#             parent_structure.proteins?.map((c) => { return c.auth_asym_id }),
-#             (parent_structure.rnas || []).map((c) => { return c.auth_asym_id })
-#         ].map(
-#             (chain_id) => {
-#                 if (!existsSync(`${this.chains_folder()}/${this.rcsb_id}_STRAND_${chain_id}.cif`)) {
-#                     console.log(`[${this.rcsb_id}]: NOT FOUND ${this.chains_folder()}/${this.rcsb_id}_STRAND_${chain_id}.cif`)
-#                     return false
-#                 } else return true
-#             }
-#         ).reduce((prev, cur) => { return prev && cur }, true)
-#         return chain_files_all
-#     }
-
-#     async __verify_ligands_and_polymers(struct: RibosomeStructure) {
-#         let ligs = struct.ligands && struct.ligands.map((lig_chem_id) => {
-#             if (!existsSync(`${this.folder_path()}/LIGAND_${lig_chem_id}.json`)) {
-#                 console.log(`[${this.rcsb_id}]: NOT FOUND ${this.folder_path()}/LIGAND_${lig_chem_id}.json (Is it an ION? Expected.)`)
-#                 return false
-#             } else return true
-#         }).reduce((prev, cur) => { return prev && cur }, true)
-
-
-#         let ligandlike: string[] = []
-#         let ligands: string[] = []
-
-#         for (var chain of [...struct.proteins, ...(struct.rnas || [])]) {
-#             if (chain.ligand_like) {
-#                 ligandlike = [...ligandlike, chain.auth_asym_id]
-#             }
-#         }
-#         if (!struct.ligands) {
-#         } else {
-#             for (var lig of struct.ligands) {
-#                 ligands = [...ligands, lig.chemicalId]
-#             }
-#         }
-
-
-#         let polys = ligandlike.map((polymer_id) => {
-#             if (!existsSync(`${this.folder_path()}/POLYMER_${polymer_id}.json`)) {
-#                 console.log(`[${this.rcsb_id}]: NOT FOUND ${this.folder_path()}/POLYMER_${polymer_id}.json`)
-#                 return false
-#             } else return true
-#         })
-
-#         if ((!polys || !ligs)) {
-#             console.log("Some ligands are missing. Calling script:", process.env["PYTHONBIN"], process.env["EXTRACT_BSITES_PY"])
-#             exec(`${process.env["PYTHONBIN"]} ${process.env["EXTRACT_BSITES_PY"]} -s ${this.rcsb_id} --save`, (err, stdout, stderr) => {
-#                 console.log(err);
-#                 console.log(stdout);
-#                 console.log(stderr);
-#             })
-#         }
-#     }
-
-
-#     async init_assets(obtain: boolean = false) {
-#     }
-# }
+        ...
+      
+        
