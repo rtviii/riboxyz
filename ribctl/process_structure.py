@@ -292,10 +292,9 @@ mono        = query_rcsb_api(gql_monolith(RCSB_ID))
 struct_json = process_pdb_record(mono)
 x           = json.dumps(struct_json, indent=4)
 
-
-
 struct  = parse_obj_as(RibosomeStructure, struct_json)
-pprint(struct)
+RibosomeStructure.
+print(struct)
 
 
 
@@ -311,44 +310,44 @@ pprint(struct)
 
         # if (flags.commit) {
         #     commit_struct_to_Db(rcsb_id)
-# export class RibosomeAssets {
-#     rcsb_id: string
+export class RibosomeAssets {
+    rcsb_id: string
 
-# #     constructor(
-#         rcsb_id: string
-#     ) {
-#         this.rcsb_id = rcsb_id
-#     }
-#     envcheck = () => {
-#         if (!process.env["RIBETL_DATA"]) {
-#             throw Error("RIBETL_DATA environment variable not set. Cannot access assets.")
-#         }
-#     }
+#     constructor(
+        rcsb_id: string
+    ) {
+        this.rcsb_id = rcsb_id
+    }
+    envcheck = () => {
+        if (!process.env["RIBETL_DATA"]) {
+            throw Error("RIBETL_DATA environment variable not set. Cannot access assets.")
+        }
+    }
 
-#     folder_path = () => {
-#         this.envcheck()
-#         return `${process.env["RIBETL_DATA"]}/${this.rcsb_id}`
-#     }
+    folder_path = () => {
+        this.envcheck()
+        return `${process.env["RIBETL_DATA"]}/${this.rcsb_id}`
+    }
 
-#     cif_filepath = () => {
-#         this.envcheck()
-#         return `${this.folder_path()}/${this.rcsb_id}.cif`
-#     }
+    cif_filepath = () => {
+        this.envcheck()
+        return `${this.folder_path()}/${this.rcsb_id}.cif`
+    }
 
-#     cif_modified_filepath = () => {
-#         this.envcheck()
-#         return `${this.folder_path()}/${this.rcsb_id}_modified.cif`
-#     }
+    cif_modified_filepath = () => {
+        this.envcheck()
+        return `${this.folder_path()}/${this.rcsb_id}_modified.cif`
+    }
 
-#     json_profile_filepath = () => {
-#         this.envcheck()
-#         return `${this.folder_path()}/${this.rcsb_id}.json`
-#     }
+    json_profile_filepath = () => {
+        this.envcheck()
+        return `${this.folder_path()}/${this.rcsb_id}.json`
+    }
 
-#     chains_folder = () => {
-#         this.envcheck()
-#         return `${this.folder_path()}/CHAINS`
-#     }
+    chains_folder = () => {
+        this.envcheck()
+        return `${this.folder_path()}/CHAINS`
+    }
 
 #     png_thumbnail_filepath = () => {
 #         this.envcheck()
@@ -418,47 +417,48 @@ pprint(struct)
 #         }
 #     }
 #     //verify that each chain file exists
-#     async __verify_chain_files(parent_structure: RibosomeStructure): Promise<boolean> {
-#         if (!this.__verify_chains_folder()) {
-#             return false
-#         }
-#         const chain_files_all = [
-#             parent_structure.proteins?.map((c) => { return c.auth_asym_id }),
-#             (parent_structure.rnas || []).map((c) => { return c.auth_asym_id })
-#         ].map(
-#             (chain_id) => {
-#                 if (!existsSync(`${this.chains_folder()}/${this.rcsb_id}_STRAND_${chain_id}.cif`)) {
-#                     console.log(`[${this.rcsb_id}]: NOT FOUND ${this.chains_folder()}/${this.rcsb_id}_STRAND_${chain_id}.cif`)
-#                     return false
-#                 } else return true
-#             }
-#         ).reduce((prev, cur) => { return prev && cur }, true)
-#         return chain_files_all
-#     }
+    async __verify_chain_files(parent_structure: RibosomeStructure): Promise<boolean> {
+        if (!this.__verify_chains_folder()) {
+            return false
+        }
+        const chain_files_all = [
+            parent_structure.proteins?.map((c) => { return c.auth_asym_id }),
 
-#     async __verify_ligands_and_polymers(struct: RibosomeStructure) {
-#         let ligs = struct.ligands && struct.ligands.map((lig_chem_id) => {
-#             if (!existsSync(`${this.folder_path()}/LIGAND_${lig_chem_id}.json`)) {
-#                 console.log(`[${this.rcsb_id}]: NOT FOUND ${this.folder_path()}/LIGAND_${lig_chem_id}.json (Is it an ION? Expected.)`)
-#                 return false
-#             } else return true
-#         }).reduce((prev, cur) => { return prev && cur }, true)
+            (parent_structure.rnas || []).map((c) => { return c.auth_asym_id })
+        ].map(
+            (chain_id) => {
+                if (!existsSync(`${this.chains_folder()}/${this.rcsb_id}_STRAND_${chain_id}.cif`)) {
+                    console.log(`[${this.rcsb_id}]: NOT FOUND ${this.chains_folder()}/${this.rcsb_id}_STRAND_${chain_id}.cif`)
+                    return false
+                } else return true
+            }
+        ).reduce((prev, cur) => { return prev && cur }, true)
+        return chain_files_all
+    }
+
+    async __verify_ligands_and_polymers(struct: RibosomeStructure) {
+        let ligs = struct.ligands && struct.ligands.map((lig_chem_id) => {
+            if (!existsSync(`${this.folder_path()}/LIGAND_${lig_chem_id}.json`)) {
+                console.log(`[${this.rcsb_id}]: NOT FOUND ${this.folder_path()}/LIGAND_${lig_chem_id}.json (Is it an ION? Expected.)`)
+                return false
+            } else return true
+        }).reduce((prev, cur) => { return prev && cur }, true)
 
 
-#         let ligandlike: string[] = []
-#         let ligands: string[] = []
+        let ligandlike: string[] = []
+        let ligands: string[] = []
 
-#         for (var chain of [...struct.proteins, ...(struct.rnas || [])]) {
-#             if (chain.ligand_like) {
-#                 ligandlike = [...ligandlike, chain.auth_asym_id]
-#             }
-#         }
-#         if (!struct.ligands) {
-#         } else {
-#             for (var lig of struct.ligands) {
-#                 ligands = [...ligands, lig.chemicalId]
-#             }
-#         }
+        for (var chain of [...struct.proteins, ...(struct.rnas || [])]) {
+            if (chain.ligand_like) {
+                ligandlike = [...ligandlike, chain.auth_asym_id]
+            }
+        }
+        if (!struct.ligands) {
+        } else {
+            for (var lig of struct.ligands) {
+                ligands = [...ligands, lig.chemicalId]
+            }
+        }
 
 
 #         let polys = ligandlike.map((polymer_id) => {
