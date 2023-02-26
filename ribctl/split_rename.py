@@ -54,7 +54,7 @@ def __process_chains(pdbid: str):
         os.mkdir(os.path.join(RIBETL_DATA, pdbid, 'CHAINS'))
 
     structprofile = open_structure(pdbid, 'json')
-    struct_cif: Structure = open_structure(pdbid, 'cif')
+    struct_cif: Structure    = open_structure(pdbid, 'cif')
 
     model = gemmi.read_structure(os.path.join(
         RIBETL_DATA, pdbid, f'{pdbid}.cif'))[0]
@@ -73,14 +73,13 @@ def __process_chains(pdbid: str):
                     cdict['data_'] = f'{pdbid}_{chain.get_id()}'
                 else:
                     cdict['data_'] = f'{pdbid}_{chain.get_id()}_{nomd[chain.get_id()][0]}'
-
                 io.set_dict(cdict)
-                print("Saved ", destination)
+                print("Saved: ", destination)
             except:
                 ...
             io.save(destination)
         else:
-            print("Skipping chain. Exists: \t", destination)
+            print("Exists: ", destination)
 
 
 def split_rename(pdbid: str):

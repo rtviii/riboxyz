@@ -98,7 +98,7 @@ class __BindingSite:
             for x in self.data.items():
                 serialized.update({x[0]: dataclasses.asdict(x[1])})
             json.dump(serialized, outf)
-            print(f"\033[91mSaved  {pathtofile} successfuly.\033[0m")
+            print(f"Saved  \033[91m{pathtofile}\033[0m.")
 
     def to_csv(self, pathtofile: str) -> None:
         k = [
@@ -256,7 +256,7 @@ def render_liglike_polymer(rcsb_id:str, auth_asym_id:str, structure:Structure, s
     residues: list[Residue] = __get_polymer_residues(auth_asym_id, structure)
     binding_site_polymer: __BindingSite = __get_poly_nbrs(residues, structure, auth_asym_id)
 
-    if args.save:
+    if save:
         outfile_json = os.path.join(RIBETL_DATA, rcsb_id.upper(), f'POLYMER_{auth_asym_id}.json')
         if (os.path.isfile(outfile_json)):
             print("Exists already: ", outfile_json)
@@ -270,16 +270,16 @@ def render_ligand(rcsb_id:str,chemicalId:str, structure:Structure, save:bool=Fal
     residues: list[Residue] = __getLigandResIds(chemicalId, structure)
     binding_site_ligand: __BindingSite   = __get_ligand_nbrs(residues, structure, chemicalId)
 
-    if args.save:
+    if save:
         outfile_json = os.path.join(RIBETL_DATA, rcsb_id.upper(), f'LIGAND_{chemicalId}.json')
         if (os.path.isfile(outfile_json)):
             print("Exists already: ", outfile_json)
         else:
             binding_site_ligand.to_json(outfile_json)
+
     return binding_site_ligand
 
 if __name__ == "__main__":
-
 
     parser = argparse. ArgumentParser(description='Split structure into constituent polymers and inject new nomencalture into the .cif file')
     parser.add_argument ('-s'     , '--structure', type=   str   , required=True                                                            )
@@ -288,13 +288,11 @@ if __name__ == "__main__":
     args  = parser.parse_args()
     PDBID = args.structure.upper()
 
-
     _structure_cif_handle :Structure = open_structure(PDBID,'cif')  # type: ignore
     struct_profile_handle:dict       = open_structure(PDBID,'json')  # type: ignore
 
     liglike_polys = get_liglike_polymers(struct_profile_handle)
     ligands       = get_ligands(PDBID, struct_profile_handle)
-
 
     pprint(ligands)
     pprint(liglike_polys)
@@ -303,12 +301,4 @@ if __name__ == "__main__":
         render_liglike_polymer(polyref.parent_rcsb_id, polyref.auth_asym_id, _structure_cif_handle, args.save)
 
     for l in ligands:
-        print(f"Ligand {l[0]}")
-        outfile_json = os.path.join(RIBETL_DATA, PDBID.upper(), f'LIGAND_{l[0].upper()}.json')
-        if (os.path.isfile(outfile_json)):
-            print("Exists already: ", outfile_json)
-        residues: List[Residue] = __getLigandResIds(l[0].upper(), _structure_cif_handle)
-        bsl      : __BindingSite   = __get_ligand_nbrs(residues, _structure_cif_handle, l[0].upper())
-        if args.save:
-            bsl.to_json(outfile_json)
-
+        render_ligand(PDBID, l[0], _structure_cif_handle, args.save)
