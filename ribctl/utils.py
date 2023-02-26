@@ -58,3 +58,12 @@ def open_structure(pdbid: str, path_type: typing.Literal[ "cif", "json", "modifi
     if path_type == 'json':
         with open(struct_path(pdbid, 'json'), 'rb') as _:
             return json.load(_)
+
+    elif path_type == 'modified':
+        with open(struct_path(pdbid, 'modified'), 'rb') as _:
+
+            try:
+                return FastMMCIFParser(QUIET=True).get_structure(pdbid, _)
+
+            except Exception as e:
+                return f"\033[93m Parser Error in structure {pdbid} \033[0m : {e}"
