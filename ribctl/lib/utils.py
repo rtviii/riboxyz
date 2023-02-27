@@ -3,10 +3,12 @@ import json
 import os
 import typing
 import requests
+
 from Bio.PDB.Structure import Structure
 from Bio.PDB import FastMMCIFParser
 
-RIBETL_DATA = str(os.environ.get('RIBETL_DATA'))
+from ribctl.lib import RIBETL_DATA
+
 
 def download_unpack_place(struct_id: str) -> None:
 
