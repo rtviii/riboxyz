@@ -64,8 +64,8 @@ with driver.session() as s:
 _rib = RibosomeAssets("4UG0").json_profile()
 
 rib = RibosomeStructure(**_rib)
-print(json.dumps(rib.dict()))
-# print(json.dumps(RibosomeAssets("4UG0").json_profile()))
+# print(json.dumps(rib.dict()))
+print(json.dumps(RibosomeAssets("4UG0").json_profile()))
 # pprint(R)
 # def create_structure_node(tx:Transaction,_rib:RibosomeStructure):
 #     R = _rib.dict()
