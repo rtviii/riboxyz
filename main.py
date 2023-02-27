@@ -1,7 +1,8 @@
 import json
 from pprint import pprint
-from typing import Callable
+from typing import Any, Callable
 from neo4j import GraphDatabase, Driver, ManagedTransaction, Record, Result, Transaction
+from neo4j.graph import Node, Relationship
 from ribctl.lib.types.types_ribosome import RNA, Protein, RibosomeAssets, RibosomeStructure
 
 
@@ -68,47 +69,69 @@ with driver.session() as s:
 rib = RibosomeStructure.from_json_profile("4UG0")
 
 
-# def create_polymer(_poly:Protein):
 
-def create_node_rna(_rna: RNA) -> Callable[[Transaction | ManagedTransaction], Result | None]:
+def link__rna_to_struct(): 
+    ... 
+
+def link__rna_to_nomclass(rna:Node)->Callable[[Transaction | ManagedTransaction], list[list[Node|Relationship]]]: 
+
+    def _(tx: Transaction | ManagedTransaction):
+        return tx.run("""//
+MATCH (r:RNA) WHERE ID(r)=$ELEM and r.nomenclature[0] IS NOT NULL with r as rna
+MATCH (rna_class:RNAClass {class_id:rna.nomenclature[0]}) 
+with rna, rna_class 
+merge (rna)-[b:belongs_to]-(rna_class)
+return rna, b, rna_class
+""", { "ELEM":int(rna.element_id) }).values('rna','b','rna_class')
+
+    return _
+
+
+
+
+#   with newrna, value
+#   match(s:RibosomeStructure {rcsb_id: value.rcsb_id})
+#   create (newrna)-[:rna_of]->(s);
+
+
+
+
+
+def node__rna(_rna: RNA) -> Callable[[Transaction | ManagedTransaction], Node]:
     RNA_dict = _rna.dict()
 
     def _(tx: Transaction | ManagedTransaction):
         return tx.run("""//
 merge (rna:RNA {
+      asym_ids:     $asym_ids,
+      auth_asym_id: $auth_asym_id,
 
-      asym_ids: rna.asym_ids,
-      auth_asym_id: rna.auth_asym_id,
+      parent_rcsb_id: $parent_rcsb_id,
+      nomenclature  : $nomenclature,
+      ligand_like   : $ligand_like,
 
-      parent_rcsb_id: rna.parent_rcsb_id,
-      nomenclature  : rna.nomenclature,
-      ligand_like   : rna.ligand_like,
-
-      src_organism_ids   : rna.src_organism_ids,
-      src_organism_names : rna.src_organism_names,
-      host_organism_ids  : rna.host_organism_ids,
-      host_organism_names: rna.host_organism_names,
+      src_organism_ids   : $src_organism_ids,
+      src_organism_names : $src_organism_names,
+      host_organism_ids  : $host_organism_ids,
+      host_organism_names: $host_organism_names,
 
 
-      entity_poly_strand_id               :  rna.entity_poly_strand_id,
-      entity_poly_seq_one_letter_code     :  rna.entity_poly_seq_one_letter_code,
-      entity_poly_seq_one_letter_code_can :  rna.entity_poly_seq_one_letter_code_can,
-      entity_poly_seq_length              :  rna.entity_poly_seq_length,
-      entity_poly_polymer_type            :  rna.entity_poly_polymer_type,
-      entity_poly_entity_type             :  rna.entity_poly_entity_type
-  }) on create set newrna.rcsb_pdbx_description = CASE WHEN rna.rcsb_pdbx_description = null then \"null\" else rna.rcsb_pdbx_description END
+      entity_poly_strand_id               :  $entity_poly_strand_id,
+      entity_poly_seq_one_letter_code     :  $entity_poly_seq_one_letter_code,
+      entity_poly_seq_one_letter_code_can :  $entity_poly_seq_one_letter_code_can,
+      entity_poly_seq_length              :  $entity_poly_seq_length,
+      entity_poly_polymer_type            :  $entity_poly_polymer_type,
+      entity_poly_entity_type             :  $entity_poly_entity_type
+  }) on create set rna.rcsb_pdbx_description = CASE WHEN $rcsb_pdbx_description = null then \"null\" else $rcsb_pdbx_description END
 
-  with newrna, value
-  match(s:RibosomeStructure {rcsb_id: value.rcsb_id})
-  create (newrna)-[:rna_of]->(s);
+  return rna
+""", **RNA_dict).single(strict=True)['rna']
 
-  match (n:RNA) where n.nomenclature[0] is not null
-  merge (nc:RNAClass{class_id:n.nomenclature[0]})
-  merge (n)-[:belongs_to]-(nc)""")
     return _
 
 
-def create_node_structure(_rib: RibosomeStructure) -> Callable[[Transaction | ManagedTransaction], Record | None]:
+
+def node__structure(_rib: RibosomeStructure) -> Callable[[Transaction | ManagedTransaction], Record | None]:
 
     R = _rib.dict()
 
@@ -143,9 +166,16 @@ def create_node_structure(_rib: RibosomeStructure) -> Callable[[Transaction | Ma
         """, **R).single()
     return _
 
-# rib = RibosomeStructure.from_json_profile("4UG0")
-# r   = rib.dict()
+rib = RibosomeStructure.from_json_profile("4UG0")
+rna = rib.rnas[0]
 
-# with driver.session() as s:
-#     result = s.execute_write(create_structure_node(rib))
-#     pprint(result)
+
+with driver.session() as s:
+    record = s.execute_write(node__rna(rna))
+    print(record.element_id)
+
+with driver.session() as s:
+    node = s.execute_write(node__rna(rna))
+    s= s.execute_write(link__rna_to_nomclass(node))
+    print(s)
+    # pprint(record.get("node_id"))
