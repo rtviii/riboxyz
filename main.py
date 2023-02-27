@@ -1,6 +1,7 @@
 import json
 from pprint import pprint
-from neo4j import GraphDatabase, Driver, Result, Transaction
+from typing import Callable
+from neo4j import GraphDatabase, Driver, ManagedTransaction, Result, Transaction
 
 from ribctl.lib.types.types_ribosome import RibosomeAssets, RibosomeStructure
 
@@ -61,20 +62,53 @@ with driver.session() as s:
 #※ ----------------[ 2. Neo4j Data Types ]
 
 # _rib = RibosomeStructure(rcsb_id="4UG0")
-_rib = RibosomeAssets("4UG0").json_profile()
+# _rib = RibosomeAssets("4UG0").json_profile()
+rib  = RibosomeStructure.from_json_profile("4UG0")
+r= rib.dict()
+# print(json.dumps(RibosomeAssets("4UG0").json_profile()))
 
-rib = RibosomeStructure(**_rib)
-# print(json.dumps(rib.dict()))
-print(json.dumps(RibosomeAssets("4UG0").json_profile()))
 # pprint(R)
-# def create_structure_node(tx:Transaction,_rib:RibosomeStructure):
-#     R = _rib.dict()
-#     pprint(R)
-    # return  tx.run("""""",**)
+def create_structure_node(_rib:RibosomeStructure)->Callable[[Transaction|ManagedTransaction], Result]:
+    R = _rib.dict()
+    def create_parametrized_node(tx:Transaction|ManagedTransaction):
+        return  tx.run("""//
+    merge ( struct:RibosomeStructure{
+              rcsb_id               : $rcsb_id,
+              expMethod             : $expMethod,
+              resolution            : $resolution,
+              citation_rcsb_authors : $citation_rcsb_authors,
+              citation_title        : $citation_title,
+
+              pdbx_keywords     : $pdbx_keywords     ,
+              pdbx_keywords_text: $pdbx_keywords_text,
+
+              src_organism_ids           : $src_organism_ids,
+              src_organism_names         : $src_organism_names,
+
+              host_organism_ids           : $host_organism_ids,
+              host_organism_names         : $host_organism_names
+
+              })
+
+              on create set
+              struct.rcsb_external_ref_id   = CASE WHEN $rcsb_external_ref_id = null then \"null\" else $rcsb_external_ref_id   END,
+              struct.rcsb_external_ref_type = CASE WHEN $rcsb_external_ref_type = null then \"null\" else $rcsb_external_ref_type END,
+              struct.rcsb_external_ref_link = CASE WHEN $rcsb_external_ref_link = null then \"null\" else $rcsb_external_ref_link END,
+              struct.citation_pdbx_doi      = CASE WHEN $citation_pdbx_doi = null then \"null\" else $citation_pdbx_doi END,
+              struct.citation_year          = CASE WHEN $citation_year = null then \"null\" else $citation_year END"
+        """,**R)
+    return create_parametrized_node
     
 
 
+                                                            # value.citation_year as cit_year,
+                                                            # value.citation_rcsb_authors as cit_authors,
+                                                            # value.citation_title as cit_title,
+                                                            # value.citation_pdbx_doi as cit_doi,
+
+rib = RibosomeStructure.from_json_profile("4UG0")
+r   = rib.dict()
 
 
-# with driver.session() as s:
-#     s.execute_write()
+with driver.session() as s:
+    s.execute_write(create_structure_node(rib))
