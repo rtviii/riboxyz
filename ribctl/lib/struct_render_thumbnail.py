@@ -5,7 +5,6 @@ RIBETL_DATA = str(os.environ.get('RIBETL_DATA'))
 
 
 def render_thumbnail(pdbid:str):
-    sys.path.append(os.environ.get("PYMOL_PATH")) 
     from pymol import cmd, util
     pdbid = pdbid.upper()
 
@@ -25,6 +24,7 @@ def render_thumbnail(pdbid:str):
 
 
 if __name__ == "__main__":
+    from pymol import cmd, util
 
     parser = argparse.ArgumentParser(description='Generate a ribosome thumbnail image.')
     parser.add_argument ("-s", "--structure", type= str ,required=True, help="RCSB ID of structure to process")

@@ -6,11 +6,11 @@ import numpy as np
 import gemmi
 from Bio.PDB import MMCIF2Dict, MMCIFIO
 from Bio.PDB.Structure import Structure
+from ribctl.lib import RIBETL_DATA
 from ribctl.lib.utils import open_structure
 
 flatten     = itertools.chain.from_iterable
 n1          = np.array
-RIBETL_DATA = str(os.environ.get('RIBETL_DATA'))
 
 def __get_dict(path: str,) -> dict:
     return MMCIF2Dict.MMCIF2Dict(path)
@@ -85,15 +85,14 @@ def split_rename(pdbid: str):
 if __name__ == '__main__':
     parser = argparse. ArgumentParser(
         description='Split structure into constituent polymers and inject new nomencalture into the .cif file')
-    parser. add_argument("-s", "--structure", type=str,
+    parser.add_argument("-s", "--structure", type=str,
                          help="RCSB ID of structure to process")
 
-    args = parser.parse_args()
+    args  = parser.parse_args()
     pdbid = args.structure
 
     if not pdbid:
         raise ValueError("Provide structure ID with -s arg")
-
     else:
         __inject_dict(pdbid.upper())
         __process_chains(pdbid.upper())
