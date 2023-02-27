@@ -70,11 +70,13 @@ def __infer_organisms_from_polymers(polymers: list):
         src_organism_names = [*src_organism_names, *polymer[ 'host_organism_names' ]] if polymer[ 'host_organism_names' ] != None else src_organism_names
         src_organism_ids   = [*src_organism_ids  , *polymer[ 'host_organism_ids' ]] if polymer[ 'host_organism_ids' ]     != None else src_organism_ids
 
+
     return {
-        "src_organism_ids": list(set(src_organism_ids)),
-        "src_organism_names": list(set(src_organism_names)),
-        "host_organism_ids": list(set(host_organism_ids)),
-        "host_organism_names": list(set(host_organism_names))}
+        "src_organism_ids"   : list(map(int,set(src_organism_ids))),
+        "src_organism_names" : list(map(str,set(src_organism_names))),
+        "host_organism_ids"  : list(map(int,set(host_organism_ids))),
+        "host_organism_names": list(map(str,set(host_organism_names)))
+        }
 
 
 def __extract_external_refs(external_refs):
