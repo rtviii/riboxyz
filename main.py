@@ -20,60 +20,16 @@ def init_driver(uri, username, password):
 driver = init_driver("neo4j://localhost:7687", "neo4j", "neo4j")
 
 
-# ※ -------------------------------= [ 1. Create a Node ]
-
-# # Unit of work
-# def get_structures(tx, rcsb_id): # (1)
-#     result:Result= tx.run("MATCH (ribosome:RibosomeStructure {rcsb_id: $rcsb_id})-[]-(protein:Protein) RETURN ribosome,protein", rcsb_id=rcsb_id)
-#     pprint(result.values('ribosome','protein'))
-#     return result
-
-# # Open a Session
-# with driver.session() as session:
-#     # Run the unit of work within a Read Transaction
-#     session.execute_read(get_structures, rcsb_id="5AFI")
-#     session.close()
-
-# ※ ----------------[ 2. Neo4j Data Types ]
-# Exploring Records
-
-# When accessing a record, either within a loop, list comprehension or within a single record, you can use the [] bracket syntax.
-
-# The following example extracts the p value fro
 
 
-with driver.session() as s:
-    res = s.run(
-        "MATCH (lig:Ligand)-[rel]-(rib:RibosomeStructure) RETURN lig,rib,rel limit 5")
-    # for record in res.values():
-    #     print("\033[91m ------------------------ \033[0m")
-    #     pprint(p)
-
-    for record in res:
-        # print("\033[91m ------------------------ \033[0m")
-        node_lig, node_rib, rel_rel = record["lig"], record["rib"], record['rel']
-        # pprint(node_lig.id)
-        # pprint(rel_rel.type)
-        # pprint(rel_rel.items())
-        # pprint(rel_rel.start_node)
-        # pprint(rel_rel.end_node)
-        # pprint(node_lig.labels)
-        # pprint(node_lig.items())
-
-
-# ※ ----------------[ 2. Neo4j Data Types ]
-
-# _rib = RibosomeStructure(rcsb_id="4UG0")
-# _rib = RibosomeAssets("4UG0").json_profile()
-rib = RibosomeStructure.from_json_profile("4UG0")
-
+# ※ ----------------[ 1.RNA Nodes] 
 
 def link__rna_to_struct(rna: Node, parent_rcsb_id: str) -> Callable[[Transaction | ManagedTransaction], list[list[Node | Relationship]]]:
 
     def _(tx: Transaction | ManagedTransaction):
         return tx.run("""//
-match (rna:RNA) where ID(rna)=$ELEM 
-match (struct:RibosomeStructure {rcsb_id:"4UG0"})
+match (rna:RNA) where ID(rna)=$ELEM_ID
+match (struct:RibosomeStructure {rcsb_id:$PARENT})
 merge (rna)-[rnaof:rna_of]-(struct)
 return rna, rnaof, struct""",
                       {"ELEM": int(rna.element_id),
@@ -83,22 +39,15 @@ return rna, rnaof, struct""",
 
 
 def link__rna_to_nomclass(rna: Node) -> Callable[[Transaction | ManagedTransaction], list[list[Node | Relationship]]]:
-
     def _(tx: Transaction | ManagedTransaction):
         return tx.run("""//
-MATCH (r:RNA) WHERE ID(r)=$ELEM and r.nomenclature[0] IS NOT NULL with r as rna
+MATCH (r:RNA) WHERE ID(r)=$ELEM_ID and r.nomenclature[0] IS NOT NULL with r as rna
 MATCH (rna_class:RNAClass {class_id:rna.nomenclature[0]}) 
 with rna, rna_class 
 merge (rna)-[b:belongs_to]-(rna_class)
 return rna, b, rna_class""",
                       {"ELEM": int(rna.element_id)}).values('rna', 'b', 'rna_class')
-
     return _
-
-
-#   with newrna, value
-#   match(s:RibosomeStructure {rcsb_id: value.rcsb_id})
-#   create (newrna)-[:rna_of]->(s);
 
 
 def node__rna(_rna: RNA) -> Callable[[Transaction | ManagedTransaction], Node]:
@@ -133,6 +82,10 @@ merge (rna:RNA {
 
     return _
 
+
+
+
+# ※ ----------------[ 1.Structure Nodes] 
 
 def node__structure(_rib: RibosomeStructure) -> Callable[[Transaction | ManagedTransaction], Record | None]:
 
@@ -170,24 +123,122 @@ def node__structure(_rib: RibosomeStructure) -> Callable[[Transaction | ManagedT
     return _
 
 
-rib = RibosomeStructure.from_json_profile("4UG0")
-rna = rib.rnas[0]
+# ※ ----------------[ 1.Protein Nodes] 
+
+def node__protein(_prot:Protein)->Callable[[Transaction | ManagedTransaction], Record | None]:
+    P = _prot.dict()
+    def _(tx: Transaction | ManagedTransaction):
+        return tx.run("""//
+        merge (rp:Protein {
+      asym_ids    : $asym_ids,
+      auth_asym_id: $auth_asym_id,
+          
+      parent_rcsb_id                      : $parent_rcsb_id,
+      pfam_comments                       : $pfam_comments,
+      pfam_descriptions                   : $pfam_descriptions,
+      pfam_accessions                     : $pfam_accessions,
+
+      src_organism_ids   : $src_organism_ids,
+      src_organism_names : $src_organism_names,
+      host_organism_ids  : $host_organism_ids,
+      host_organism_names: $host_organism_names,
+      
+      ligand_like          : $ligand_like,
+      uniprot_accession    : $uniprot_accession,
+      rcsb_pdbx_description: $rcsb_pdbx_description,
+
+      entity_poly_strand_id              : $entity_poly_strand_id,
+      entity_poly_seq_one_letter_code    : $entity_poly_seq_one_letter_code,
+      entity_poly_seq_one_letter_code_can: $entity_poly_seq_one_letter_code_can,
+      entity_poly_seq_length             : $entity_poly_seq_length,
+      entity_poly_polymer_type           : $entity_poly_polymer_type,
+      entity_poly_entity_type            : $entity_poly_entity_type,
+      nomenclature                       : $nomenclature
+  })
+  on create set
+  rp.rcsb_pdbx_description = CASE WHEN $rcsb_pdbx_description = null then \"null\" else $rcsb_pdbx_description END
+  return rp
+        """, **P).single(strict=True)['rp']
+    return _
 
 
-with driver.session() as s:
-    record = s.execute_write(node__rna(rna))
-    print(record.element_id)
 
 
-def rna_init(RNA:RNA):
+
+def link__prot_to_struct(prot: Node, parent_rcsb_id: str) -> Callable[[Transaction | ManagedTransaction], list[list[Node | Relationship]]]:
+
+    def _(tx: Transaction | ManagedTransaction):
+        return tx.run("""//
+match (prot:Protein) where ID(rna)=$ELEM_ID
+match (struct:RibosomeStructure {rcsb_id:"4UG0"})
+merge (rna)-[rnaof:rna_of]-(struct)
+return rna, rnaof, struct
+""",
+                      {"ELEM_ID": int(prot.element_id),
+                       "PARENT": parent_rcsb_id}).values('rna', 'rnaof', 'struct')
+
+    return _
+
+
+def link__prot_to_nomclass(prot: Node) -> Callable[[Transaction | ManagedTransaction], list[list[Node | Relationship]]]:
+    def _(tx: Transaction | ManagedTransaction):
+        return tx.run("""//
+MATCH (r:RNA) WHERE ID(r)=$ELEM_ID and r.nomenclature[0] IS NOT NULL with r as rna
+MATCH (rna_class:RNAClass {class_id:rna.nomenclature[0]}) 
+with rna, rna_class 
+merge (rna)-[b:belongs_to]-(rna_class)
+return rna, b, rna_class
+""",
+                      {"ELEM_ID": int(prot.element_id)}).values('rna', 'b', 'rna_class')
+    return _
+
+
+#   match(s:RibosomeStructure {rcsb_id: value.rcsb_id})
+#   create (rp)-[:protein_of]->(s)
+
+
+#   with rp,struct,value
+#       unwind  rp    .   pfam_accessions as pfamils
+#       match  (pf    :   PFAMFamily      {family_id:pfamils})
+#   with rp,struct,value,pf
+#       merge  (rp    )-[:belongs_to     ]->(pf);
+
+#   match (n:Protein) where n.nomenclature[0] is not null
+#   merge (nc:ProteinClass {class_id:n.nomenclature[0]})
+#   merge (n)-[:member_of]->(nc)
+
+
+
+
+
+
+
+
+
+
+#########################################################################################################################################
+rib  = RibosomeStructure.from_json_profile("4UG0")
+rna  = rib.rnas[0]
+prot = rib.proteins[0]
+print(prot)
+
+
+
+
+def rna_init(rna:RNA):
     with driver.session() as s:
         node = s.execute_write(node__rna(RNA))
         s.execute_write(link__rna_to_nomclass(node))
         s.execute_write(link__rna_to_struct(node, RNA.parent_rcsb_id))
 
-def protein_init(RNA:RNA):
+def protein_init(prot:Protein):
     with driver.session() as s:
-        node = s.execute_write(node__rna(RNA))
-        s.execute_write(link__rna_to_nomclass(node))
-        s.execute_write(link__rna_to_struct(node, RNA.parent_rcsb_id))
+        node = s.execute_write(node__protein(prot))
+        print(node)
+        # s.execute_write(link__rna_to_nomclass(node))
+        # s.execute_write(link__rna_to_struct(node, RNA.parent_rcsb_id))
     # pprint(record.get("node_id"))
+
+
+
+protein_init(prot)
