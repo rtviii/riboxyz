@@ -248,11 +248,15 @@ class RibosomeStructure(BaseModel):
     rnas: list[RNA] | None
     ligands: list[Ligand] | None
 
-    def from_json_profile(self, rcsb_id: str) -> typing.Self:
 
-        RibosomeAssets(rcsb_id).json_profile()
 
-        return self
+    @staticmethod
+    def from_json_profile(rcsb_id: str):
+
+        _rib = RibosomeAssets(rcsb_id.upper()).json_profile()
+        rib  = RibosomeStructure(**_rib)
+
+        return rib
 
     # def _ingres_split_rename():
     #     ...
