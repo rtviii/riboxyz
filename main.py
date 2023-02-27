@@ -1,7 +1,7 @@
 import json
 from pprint import pprint
 from typing import Callable
-from neo4j import GraphDatabase, Driver, ManagedTransaction, Result, Transaction
+from neo4j import GraphDatabase, Driver, ManagedTransaction, Record, Result, Transaction
 
 from ribctl.lib.types.types_ribosome import RibosomeAssets, RibosomeStructure
 
@@ -68,7 +68,7 @@ r= rib.dict()
 # print(json.dumps(RibosomeAssets("4UG0").json_profile()))
 
 # pprint(R)
-def create_structure_node(_rib:RibosomeStructure)->Callable[[Transaction|ManagedTransaction], Result]:
+def create_structure_node(_rib:RibosomeStructure, **kwargs)->Callable[[Transaction|ManagedTransaction], Record | None]:
     R = _rib.dict()
     def create_parametrized_node(tx:Transaction|ManagedTransaction):
         return  tx.run("""//
@@ -97,7 +97,8 @@ def create_structure_node(_rib:RibosomeStructure)->Callable[[Transaction|Managed
               struct.citation_pdbx_doi      = CASE WHEN $citation_pdbx_doi = null then \"null\" else $citation_pdbx_doi END,
               struct.citation_year          = CASE WHEN $citation_year = null then \"null\" else $citation_year END
               
-        """,**R)
+              return struct
+        """,**R).single()
     return create_parametrized_node
     
 
@@ -111,6 +112,5 @@ rib = RibosomeStructure.from_json_profile("4UG0")
 r   = rib.dict()
 
 with driver.session() as s:
-    s.execute_write(create_structure_node(rib))
-    # for record in r:
-    #     pprint(record)
+    result = s.execute_write(create_structure_node(rib))
+    pprint(result)
