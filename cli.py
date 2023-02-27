@@ -1,7 +1,7 @@
-from ribctl.lib.struct_assets import RibosomeAssets
+from ribctl.lib.types.types_ribosome import RibosomeAssets
 
 
-new = RibosomeAssets("3J7Z")
+new = RibosomeAssets("4ug0")
 
 new._verify_cif(True)
 new._verify_json_profile(True)

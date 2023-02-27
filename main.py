@@ -1,5 +1,8 @@
 from pprint import pprint
-from neo4j import GraphDatabase, Driver, Result
+from neo4j import GraphDatabase, Driver, Result, Transaction
+
+
+from ribctl.types.types_ribosome import Ligand, RibosomeAssets, RibosomeStructure
 
 
 def init_driver(uri, username, password):
@@ -54,3 +57,21 @@ with driver.session() as s:
         
 
 #※ ----------------[ 2. Neo4j Data Types ]
+
+# _rib = RibosomeStructure(rcsb_id="4UG0")
+_rib = RibosomeAssets("4UG0").json_profile()
+
+RibosomeStructure(**_rib)
+pprint(_rib)
+# pprint(R)
+# def create_structure_node(tx:Transaction,_rib:RibosomeStructure):
+#     R = _rib.dict()
+#     pprint(R)
+    # return  tx.run("""""",**)
+    
+
+
+
+
+# with driver.session() as s:
+#     s.execute_write()
