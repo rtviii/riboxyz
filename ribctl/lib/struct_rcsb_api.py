@@ -1,13 +1,7 @@
-from pprint import pprint
-import typing
-from pydantic.tools import parse_obj_as
 import requests
-from urllib.parse import urlencode
 from ribctl.lib import LSU_map, SSU_map
 from ribctl.lib.gql_querystrings import monolithic
-from ribctl.lib.types_ribosome import Protein, RNA, Ligand, RibosomeStructure
 import re
-import json
 
 
 
