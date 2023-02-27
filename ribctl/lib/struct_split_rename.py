@@ -1,19 +1,16 @@
 import argparse
-import json
 import os
-from Bio.PDB.Structure import Structure
 import itertools
 import itertools
 import numpy as np
-from Bio.PDB import MMCIF2Dict, MMCIFIO, FastMMCIFParser
 import gemmi
+from Bio.PDB import MMCIF2Dict, MMCIFIO
+from Bio.PDB.Structure import Structure
+from ribctl.lib.utils import open_structure
 
-from utils import open_structure
-flatten = itertools.chain.from_iterable
-n1 = np.array
-import typing
+flatten     = itertools.chain.from_iterable
+n1          = np.array
 RIBETL_DATA = str(os.environ.get('RIBETL_DATA'))
-
 
 def __get_dict(path: str,) -> dict:
     return MMCIF2Dict.MMCIF2Dict(path)
@@ -23,7 +20,6 @@ def __make_nom_dict(profile):
     for i in [*profile['rnas'], *profile['proteins']]:
         nomdict[i['auth_asym_id']] = i['nomenclature']
     return nomdict
-
 
 def __inject_dict(pdbid: str):
 
@@ -46,7 +42,6 @@ def __inject_dict(pdbid: str):
 
     doc.write_file(cifmodified)
     print("\033[91mWrote {} \033[0m".format(cifmodified))
-
 
 def __process_chains(pdbid: str):
     io = MMCIFIO()
@@ -80,7 +75,6 @@ def __process_chains(pdbid: str):
             io.save(destination)
         else:
             print("Exists: ", destination)
-
 
 def split_rename(pdbid: str):
     pdbid = pdbid.upper()

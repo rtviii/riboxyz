@@ -1,19 +1,12 @@
 import json
 import os
-from pprint import pprint
-from pydantic import BaseModel, parse_obj_as
-import gzip
-import os
-import requests
-from utils import download_unpack_place, open_structure
-from types_ribosome import RibosomeStructure
-from process_structure import process_pdb_record
-from render_thumbnail import render_thumbnail
-from split_rename import split_rename
-from extract_bsites import get_ligands, get_liglike_polymers, render_ligand, render_liglike_polymer
-from Bio.PDB.Structure import Structure
-from Bio.PDB import FastMMCIFParser
-import typing
+from pydantic import parse_obj_as
+from ribctl.lib.utils import download_unpack_place, open_structure
+from ribctl.lib.types_ribosome import RibosomeStructure
+from ribctl.lib.struct_render_thumbnail import render_thumbnail
+from ribctl.lib.struct_rcsb_api import process_pdb_record
+from ribctl.lib.struct_split_rename import split_rename
+from ribctl.lib.struct_extract_bsites import get_ligands, get_liglike_polymers, render_ligand, render_liglike_polymer
 
 RIBETL_DATA = str(os.environ.get('RIBETL_DATA'))
 
@@ -109,7 +102,7 @@ class RibosomeAssets():
             else:
                 return False
     
-    def _verify_chains_dir(self, obtain: bool = False):
+    def _verify_chains_dir(self):
         split_rename(self.rcsb_id)
         
     def _verify_ligads_and_ligandlike_polys(self, obtain:bool=False):
@@ -133,14 +126,3 @@ class RibosomeAssets():
                 render_liglike_polymer(self.rcsb_id, ligandlike_poly.auth_asym_id,self.biopython_sturcture(), obtain)
 
         return _flag
-
-new = RibosomeAssets("3J7Z")
-
-new._verify_cif(True)
-new._verify_json_profile(True)
-new._verify_cif_modified(True)
-new._verify_ligads_and_ligandlike_polys(True)
-new._verify_chains_dir(True)
-
-      
-        

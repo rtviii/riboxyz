@@ -1,37 +1,38 @@
 import gzip
 import json
 import os
+import typing
+import requests
 from Bio.PDB.Structure import Structure
 from Bio.PDB import FastMMCIFParser
-import typing
-
-import requests
 
 RIBETL_DATA = str(os.environ.get('RIBETL_DATA'))
 
 def download_unpack_place(struct_id: str) -> None:
 
     BASE_URL = "http://files.rcsb.org/download/"
-    FORMAT = ".cif.gz"
+    FORMAT   = ".cif.gz"
 
-    structid = struct_id.upper()
-    url = BASE_URL + structid + FORMAT
-    compressed = requests.get(url).content
-    decompressed = gzip.decompress(compressed)
+    structid           = struct_id.upper()
+    url                = BASE_URL + structid + FORMAT
+    compressed         = requests.get(url).content
+    decompressed       = gzip.decompress(compressed)
 
     destination_chains = os.path.join(
-        os.environ["RIBETL_DATA"],
-        structid,
-        "CHAINS")
+            os.environ["RIBETL_DATA"],
+            structid,
+            "CHAINS"
+        )
 
     if not os.path.exists(destination_chains):
         os.mkdir(destination_chains)
         print(f"Created directory {destination_chains}.")
 
     structfile = os.path.join(
-        os.environ["RIBETL_DATA"],
-        structid,
-        structid + ".cif")
+            os.environ["RIBETL_DATA"],
+            structid,
+            structid + ".cif"
+        )
 
     with open(structfile, "wb") as f:
         f.write(decompressed)

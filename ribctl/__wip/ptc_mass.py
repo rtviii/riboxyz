@@ -25,7 +25,7 @@ from Bio.PDB.Model import Model
 from Bio.PDB.Chain import Chain
 from Bio.PDB.Atom import Atom
 from Bio.PDB.Residue import Residue
-from extract_bsites import open_structure
+from ribctl.struct_extract_bsites import open_structure
 import pandas
 from Bio import pairwise2
 from Bio import SeqIO

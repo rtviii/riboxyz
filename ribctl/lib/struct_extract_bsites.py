@@ -15,7 +15,7 @@ import argparse
 import itertools
 from dataclasses import dataclass, field
 import itertools
-from utils import  open_structure, struct_path
+from ribctl.lib.utils import  open_structure, struct_path
 flatten = itertools.chain.from_iterable
 
 def __get_dict(path:str,)->dict:

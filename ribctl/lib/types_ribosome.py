@@ -1,16 +1,24 @@
 import os
 import typing
 from pydantic import BaseModel
-from pydantic.dataclasses import dataclass
-import dataclasses
-import json
-from types_proteins import LSU_Proteins, SSU_Proteins
+from ribctl.lib.types_proteins import LSU_Proteins, SSU_Proteins
 
 
-ProteinClass = LSU_Proteins | SSU_Proteins
-RNAClass = typing.Literal["5SrRNA", "5.8SrRNA", "12SrRNA", "16SrRNA",
-                          "21SrRNA", "23SrRNA", "25SrRNA", "28SrRNA", "35SrRNA", "mRNA", "tRNA"]
+ProteinClass        = LSU_Proteins | SSU_Proteins
 ProteinClassesArray = typing.get_args(ProteinClass)
+RNAClass            = typing.Literal[
+                          "5SrRNA",
+                          "5.8SrRNA",
+                          "12SrRNA",
+                          "16SrRNA",
+                          "21SrRNA",
+                          "23SrRNA",
+                          "25SrRNA",
+                          "28SrRNA",
+                          "35SrRNA",
+                          "mRNA",
+                          "tRNA"
+                          ]
 
 
 class LastUpdate(BaseModel):
@@ -80,11 +88,10 @@ class Ligand(BaseModel):
     number_of_instances: int
 
 
-
 class RibosomeAssets():
     rcsb_id: str
 
-    def __init__(self, rcsb_id:str) -> None:
+    def __init__(self, rcsb_id: str) -> None:
         self.rcsb_id = rcsb_id.upper()
 
     def dir_path(self):
@@ -107,28 +114,27 @@ class RibosomeAssets():
 
 
 class RibosomeStructure(BaseModel):
-    rcsb_id: str
-    expMethod: str
+
+    rcsb_id:    str
+    expMethod:  str
     resolution: float
 
-    pdbx_keywords: str | None
+    pdbx_keywords:      str | None
     pdbx_keywords_text: str | None
 
-    rcsb_external_ref_id: list[str]
+    rcsb_external_ref_id  : list[str]
     rcsb_external_ref_type: list[str]
     rcsb_external_ref_link: list[str]
 
-    # citation
-    citation_year: int
+    citation_year        : int
     citation_rcsb_authors: list[str]
-    citation_title: str
-    citation_pdbx_doi: str
-    # keywords
-    # custom
-    src_organism_ids: list[int]
+    citation_title       : str
+    citation_pdbx_doi    : str
+
+    src_organism_ids  : list[int]
     src_organism_names: list[str]
 
-    host_organism_ids: list[int]
+    host_organism_ids  : list[int]
     host_organism_names: list[str]
 
     proteins: list[Protein]
@@ -137,13 +143,15 @@ class RibosomeStructure(BaseModel):
 
     def _ingres_split_rename():
         ...
+
     def _ingres_extract_bsites():
         ...
+
     def _ingres_render_thumbnail():
         ...
+
     def _ingres_commit_structure():
         ...
-
 
 # ※--------------------------------------------------------
 
