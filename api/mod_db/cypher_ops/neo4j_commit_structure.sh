@@ -33,7 +33,7 @@ structure() {
 
   echo "Commiting structure $RCSB_ID.json core to $NEO4J_URI."
   echo "call apoc.load.json(\"file://$RIBETL_DATA/$RCSB_ID/$RCSB_ID.json\") yield value
-  with                                                       value.rcsb_id as pdbid,
+  with                                                      value.rcsb_id as pdbid,
                                                             value.expMethod as exp,
                                                             value.resolution as reso,
 
