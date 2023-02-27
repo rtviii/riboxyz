@@ -1,0 +1,5 @@
+{
+    "python.analysis.extraPaths": [
+        "./pymol_source/modules"
+    ]
+}
