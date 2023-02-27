@@ -88,6 +88,7 @@ class RNA(BaseModel):
     ligand_like: bool
 
 
+
 class Ligand(BaseModel):
     chemicalId: str
     chemicalName: str
