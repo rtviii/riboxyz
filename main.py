@@ -22,7 +22,7 @@ driver = init_driver("neo4j://localhost:7687", "neo4j", "neo4j")
 
 
 
-# ※ ----------------[ 1.RNA Nodes] 
+# ※ ----------------[ 0.RNA Nodes] 
 
 def link__rna_to_struct(rna: Node, parent_rcsb_id: str) -> Callable[[Transaction | ManagedTransaction], list[list[Node | Relationship]]]:
 
@@ -123,9 +123,9 @@ def node__structure(_rib: RibosomeStructure) -> Callable[[Transaction | ManagedT
     return _
 
 
-# ※ ----------------[ 1.Protein Nodes] 
+# ※ ----------------[ 2.Protein Nodes] 
 
-def node__protein(_prot:Protein)->Callable[[Transaction | ManagedTransaction], Record | None]:
+def node__protein(_prot:Protein)->Callable[[Transaction | ManagedTransaction], Node ]:
     P = _prot.dict()
     def _(tx: Transaction | ManagedTransaction):
         return tx.run("""//
@@ -169,43 +169,29 @@ def link__prot_to_struct(prot: Node, parent_rcsb_id: str) -> Callable[[Transacti
 
     def _(tx: Transaction | ManagedTransaction):
         return tx.run("""//
-match (prot:Protein) where ID(rna)=$ELEM_ID
-match (struct:RibosomeStructure {rcsb_id:"4UG0"})
-merge (rna)-[rnaof:rna_of]-(struct)
-return rna, rnaof, struct
+match (prot:Protein) where ID(prot)=$ELEM_ID
+match (struct:RibosomeStructure {rcsb_id:$PARENT})
+merge (prot)-[protof:protein_of]-(struct)
+return prot, protof, struct
 """,
                       {"ELEM_ID": int(prot.element_id),
-                       "PARENT": parent_rcsb_id}).values('rna', 'rnaof', 'struct')
-
+                       "PARENT": parent_rcsb_id}).values('prot', 'protof', 'struct')
     return _
 
 
 def link__prot_to_nomclass(prot: Node) -> Callable[[Transaction | ManagedTransaction], list[list[Node | Relationship]]]:
     def _(tx: Transaction | ManagedTransaction):
         return tx.run("""//
-MATCH (r:RNA) WHERE ID(r)=$ELEM_ID and r.nomenclature[0] IS NOT NULL with r as rna
-MATCH (rna_class:RNAClass {class_id:rna.nomenclature[0]}) 
-with rna, rna_class 
-merge (rna)-[b:belongs_to]-(rna_class)
-return rna, b, rna_class
+   match (prot:Protein) WHERE ID(prot)=$ELEM_ID and prot.nomenclature[0] IS NOT NULL
+   merge (prot_class:ProteinClass {class_id:prot.nomenclature[0]})
+   merge (prot)-[member:member_of]->(prot_class)
+   return prot, member,prot_class
 """,
-                      {"ELEM_ID": int(prot.element_id)}).values('rna', 'b', 'rna_class')
+                      {"ELEM_ID": int(prot.element_id)}).values('prot', 'member', 'prot_class')
     return _
 
 
-#   match(s:RibosomeStructure {rcsb_id: value.rcsb_id})
-#   create (rp)-[:protein_of]->(s)
 
-
-#   with rp,struct,value
-#       unwind  rp    .   pfam_accessions as pfamils
-#       match  (pf    :   PFAMFamily      {family_id:pfamils})
-#   with rp,struct,value,pf
-#       merge  (rp    )-[:belongs_to     ]->(pf);
-
-#   match (n:Protein) where n.nomenclature[0] is not null
-#   merge (nc:ProteinClass {class_id:n.nomenclature[0]})
-#   merge (n)-[:member_of]->(nc)
 
 
 
@@ -227,17 +213,16 @@ print(prot)
 
 def rna_init(rna:RNA):
     with driver.session() as s:
-        node = s.execute_write(node__rna(RNA))
+        node = s.execute_write(node__rna(rna))
         s.execute_write(link__rna_to_nomclass(node))
         s.execute_write(link__rna_to_struct(node, RNA.parent_rcsb_id))
 
 def protein_init(prot:Protein):
     with driver.session() as s:
         node = s.execute_write(node__protein(prot))
-        print(node)
-        # s.execute_write(link__rna_to_nomclass(node))
-        # s.execute_write(link__rna_to_struct(node, RNA.parent_rcsb_id))
-    # pprint(record.get("node_id"))
+        s.execute_write(link__prot_to_struct(node, prot.parent_rcsb_id))
+        x = s.execute_write(link__prot_to_nomclass(node))
+        pprint(x)
 
 
 
