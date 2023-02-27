@@ -6,7 +6,6 @@ from neo4j.graph import Node, Relationship
 from ribctl.lib.types.types_ribosome import RNA, Protein, RibosomeAssets, RibosomeStructure
 
 
-
 """Functions of the form create_node_xxxx return a closure over their target [xxxx] because the neo4j expects a 'unit-of-work'
 function that takes a transaction as its argument."""
 
@@ -69,11 +68,21 @@ with driver.session() as s:
 rib = RibosomeStructure.from_json_profile("4UG0")
 
 
+def link__rna_to_struct(rna: Node, parent_rcsb_id: str) -> Callable[[Transaction | ManagedTransaction], list[list[Node | Relationship]]]:
 
-def link__rna_to_struct(): 
-    ... 
+    def _(tx: Transaction | ManagedTransaction):
+        return tx.run("""//
+match (rna:RNA) where ID(rna)=$ELEM 
+match (struct:RibosomeStructure {rcsb_id:"4UG0"})
+merge (rna)-[rnaof:rna_of]-(struct)
+return rna, rnaof, struct""",
+                      {"ELEM": int(rna.element_id),
+                       "PARENT": parent_rcsb_id}).values('rna', 'rnaof', 'struct')
 
-def link__rna_to_nomclass(rna:Node)->Callable[[Transaction | ManagedTransaction], list[list[Node|Relationship]]]: 
+    return _
+
+
+def link__rna_to_nomclass(rna: Node) -> Callable[[Transaction | ManagedTransaction], list[list[Node | Relationship]]]:
 
     def _(tx: Transaction | ManagedTransaction):
         return tx.run("""//
@@ -81,20 +90,15 @@ MATCH (r:RNA) WHERE ID(r)=$ELEM and r.nomenclature[0] IS NOT NULL with r as rna
 MATCH (rna_class:RNAClass {class_id:rna.nomenclature[0]}) 
 with rna, rna_class 
 merge (rna)-[b:belongs_to]-(rna_class)
-return rna, b, rna_class
-""", { "ELEM":int(rna.element_id) }).values('rna','b','rna_class')
+return rna, b, rna_class""",
+                      {"ELEM": int(rna.element_id)}).values('rna', 'b', 'rna_class')
 
     return _
-
-
 
 
 #   with newrna, value
 #   match(s:RibosomeStructure {rcsb_id: value.rcsb_id})
 #   create (newrna)-[:rna_of]->(s);
-
-
-
 
 
 def node__rna(_rna: RNA) -> Callable[[Transaction | ManagedTransaction], Node]:
@@ -128,7 +132,6 @@ merge (rna:RNA {
 """, **RNA_dict).single(strict=True)['rna']
 
     return _
-
 
 
 def node__structure(_rib: RibosomeStructure) -> Callable[[Transaction | ManagedTransaction], Record | None]:
@@ -166,6 +169,7 @@ def node__structure(_rib: RibosomeStructure) -> Callable[[Transaction | ManagedT
         """, **R).single()
     return _
 
+
 rib = RibosomeStructure.from_json_profile("4UG0")
 rna = rib.rnas[0]
 
@@ -174,8 +178,16 @@ with driver.session() as s:
     record = s.execute_write(node__rna(rna))
     print(record.element_id)
 
-with driver.session() as s:
-    node = s.execute_write(node__rna(rna))
-    s= s.execute_write(link__rna_to_nomclass(node))
-    print(s)
+
+def rna_init(RNA:RNA):
+    with driver.session() as s:
+        node = s.execute_write(node__rna(RNA))
+        s.execute_write(link__rna_to_nomclass(node))
+        s.execute_write(link__rna_to_struct(node, RNA.parent_rcsb_id))
+
+def protein_init(RNA:RNA):
+    with driver.session() as s:
+        node = s.execute_write(node__rna(RNA))
+        s.execute_write(link__rna_to_nomclass(node))
+        s.execute_write(link__rna_to_struct(node, RNA.parent_rcsb_id))
     # pprint(record.get("node_id"))
