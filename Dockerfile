@@ -60,23 +60,6 @@ RUN pip3 install gunicorn
 # port where the Django app runs
 EXPOSE 8000 8001 8002
 
-ENV NODE_VERSION=18.12.1
-RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
-ENV NVM_DIR=/root/.nvm
-RUN . "$NVM_DIR/nvm.sh" && nvm install ${NODE_VERSION}
-RUN . "$NVM_DIR/nvm.sh" && nvm use v${NODE_VERSION}
-RUN . "$NVM_DIR/nvm.sh" && nvm alias default v${NODE_VERSION}
-ENV PATH="/root/.nvm/versions/node/v${NODE_VERSION}/bin/:${PATH}"
-
-# -------------------------------------- NODE AND MODULES INSTALLATION
-COPY cli $CLI
-WORKDIR $CLI
-ADD cli/package.json ${CLI}
-RUN npm install --no-optional && npm cache clean --force
-RUN npm install -g ts-node
-RUN npm i -g ribxzcli
-# --- CLI INSTALLATION ---------------------------------------------------------------------------------
-# --- 
 
 # Be careful given that both the whole django project and the main module are called `rbxz_bend`. (hence not using the $DJANGO here)
 COPY api /home/backend/api
