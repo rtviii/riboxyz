@@ -177,10 +177,10 @@ def __reshape_poly_to_protein(plm):
         pfam_descriptions = []
         pfam_accessions = []
 
-    src_organism_ids    = list(set([org['ncbi_taxonomy_id' ] for org in plm['rcsb_entity_source_organism']])) if plm['rcsb_entity_source_organism'] != None else []
-    src_organism_names  = list(set([org['scientific_name'  ] for org in plm['rcsb_entity_source_organism']])) if plm['rcsb_entity_source_organism'] != None else []
-    host_organism_ids   = list(set([org['ncbi_taxnonomy_id'] for org in plm['rcsb_entity_host_organism'  ]])) if plm['rcsb_entity_host_organism'] != None else []
-    host_organism_names = list(set([org['scientific_name'  ] for org in plm['rcsb_entity_host_organism'  ]])) if plm['rcsb_entity_host_organism'] != None else []
+    src_organism_ids    = list(map(int,set([org['ncbi_taxonomy_id' ] for org in plm['rcsb_entity_source_organism']]))) if plm['rcsb_entity_source_organism'] != None else []
+    host_organism_ids   = list(map(int,set([org['ncbi_taxnonomy_id'] for org in plm['rcsb_entity_host_organism'  ]]))) if plm['rcsb_entity_host_organism'] != None else []
+    src_organism_names  = list(map(str,set([org['scientific_name'  ] for org in plm['rcsb_entity_source_organism']]))) if plm['rcsb_entity_source_organism'] != None else []
+    host_organism_names = list(map(str,set([org['scientific_name'  ] for org in plm['rcsb_entity_host_organism'  ]]))) if plm['rcsb_entity_host_organism'] != None else []
 
     nomenclature = __get_protein_nomenclature(plm)
 
