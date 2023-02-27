@@ -1,14 +1,14 @@
 import json
 import os
 from pydantic import parse_obj_as
+from ribctl.lib import RIBETL_DATA
 from ribctl.lib.utils import download_unpack_place, open_structure
-from ribctl.lib.types_ribosome import RibosomeStructure
+from ribctl.types.types_ribosome import RibosomeStructure
 from ribctl.lib.struct_render_thumbnail import render_thumbnail
 from ribctl.lib.struct_rcsb_api import process_pdb_record
 from ribctl.lib.struct_split_rename import split_rename
 from ribctl.lib.struct_extract_bsites import get_ligands, get_liglike_polymers, render_ligand, render_liglike_polymer
 
-RIBETL_DATA = str(os.environ.get('RIBETL_DATA'))
 
 class RibosomeAssets():
     rcsb_id: str
@@ -16,13 +16,13 @@ class RibosomeAssets():
         self.rcsb_id= rcsb_id
 
     def _envcheck(self):
-        if not os.environ.get("RIBETL_DATA"):
+        if not RIBETL_DATA:
             raise Exception(
                 "RIBETL_DATA environment variable not set. Cannot access assets.")
 
     def _dir_path(self):
         self._envcheck()
-        return f"{os.environ.get('RIBETL_DATA')}/{self.rcsb_id}"
+        return f"{RIBETL_DATA}/{self.rcsb_id}"
 
     def _cif_filepath(self):
         self._envcheck()

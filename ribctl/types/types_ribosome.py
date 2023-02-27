@@ -1,7 +1,7 @@
 import os
 import typing
 from pydantic import BaseModel
-from ribctl.lib.types_proteins import LSU_Proteins, SSU_Proteins
+from ribctl.types.types_proteins import LSU_Proteins, SSU_Proteins
 
 
 ProteinClass        = LSU_Proteins | SSU_Proteins

@@ -9,7 +9,6 @@ from Bio.PDB import FastMMCIFParser
 
 from ribctl.lib import RIBETL_DATA
 
-
 def download_unpack_place(struct_id: str) -> None:
 
     BASE_URL = "http://files.rcsb.org/download/"

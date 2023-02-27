@@ -2,8 +2,6 @@ import dataclasses
 import json
 import os,sys
 from pprint import pprint
-sys.path.append(os.environ.get("PYMOL_PATH")) 
-RIBETL_DATA = str(os.environ.get('RIBETL_DATA'))
 from typing import Dict, List
 import operator
 from Bio.PDB import MMCIF2Dict
@@ -15,6 +13,7 @@ import argparse
 import itertools
 from dataclasses import dataclass, field
 import itertools
+from ribctl.lib import RIBETL_DATA
 from ribctl.lib.utils import  open_structure, struct_path
 flatten = itertools.chain.from_iterable
 
