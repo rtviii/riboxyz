@@ -19,11 +19,25 @@
 - [ ] graph.ribosome.xyz
 - monitoring
 
+
+
+## Additions to the db possibly:
+
+- [ ] Add species and subspecies as nodes
+
+
 # LIGANDS
 
 - ligands/ligandlike should have a common category in the db. filter the ions too. some ligands are not redndered at all (ex. 5AFI.FME)
 
-- gene ontology + bird + CCD
 
-## Branching out to other resources
+
+- gene ontology 
+- bird + CCD
+
+
+## BRANCHING OUT TO OTHER RESOURCES
 - interpro
+
+
+
