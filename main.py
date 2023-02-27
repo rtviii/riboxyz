@@ -1,8 +1,10 @@
+import json
 from pprint import pprint
 from neo4j import GraphDatabase, Driver, Result, Transaction
 
+from ribctl.lib.types.types_ribosome import RibosomeAssets, RibosomeStructure
 
-from ribctl.types.types_ribosome import Ligand, RibosomeAssets, RibosomeStructure
+
 
 
 def init_driver(uri, username, password):
@@ -45,13 +47,13 @@ with driver.session() as s:
     #     pprint(p)
 
     for record in res:
-        print("\033[91m ------------------------ \033[0m")
+        # print("\033[91m ------------------------ \033[0m")
         node_lig, node_rib, rel_rel = record["lig"], record["rib"], record['rel']
         # pprint(node_lig.id)
-        pprint(rel_rel.type)
-        pprint(rel_rel.items())
-        pprint(rel_rel.start_node)
-        pprint(rel_rel.end_node)
+        # pprint(rel_rel.type)
+        # pprint(rel_rel.items())
+        # pprint(rel_rel.start_node)
+        # pprint(rel_rel.end_node)
         # pprint(node_lig.labels)
         # pprint(node_lig.items())
         
@@ -61,8 +63,9 @@ with driver.session() as s:
 # _rib = RibosomeStructure(rcsb_id="4UG0")
 _rib = RibosomeAssets("4UG0").json_profile()
 
-RibosomeStructure(**_rib)
-pprint(_rib)
+rib = RibosomeStructure(**_rib)
+# print(json.dumps(rib.dict()))
+print(json.dumps(RibosomeAssets("4UG0").json_profile()))
 # pprint(R)
 # def create_structure_node(tx:Transaction,_rib:RibosomeStructure):
 #     R = _rib.dict()
