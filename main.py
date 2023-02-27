@@ -3,7 +3,7 @@ from pprint import pprint
 from typing import Any, Callable
 from neo4j import GraphDatabase, Driver, ManagedTransaction, Record, Result, Transaction
 from neo4j.graph import Node, Relationship
-from ribctl.lib.types.types_ribosome import RNA, Protein, RibosomeAssets, RibosomeStructure
+from ribctl.lib.types.types_ribosome import RNA, Ligand, Protein, RibosomeAssets, RibosomeStructure
 
 
 """Functions of the form create_node_xxxx return a closure over their target [xxxx] because the neo4j expects a 'unit-of-work'
@@ -162,9 +162,6 @@ def node__protein(_prot:Protein)->Callable[[Transaction | ManagedTransaction], N
     return _
 
 
-
-
-
 def link__prot_to_struct(prot: Node, parent_rcsb_id: str) -> Callable[[Transaction | ManagedTransaction], list[list[Node | Relationship]]]:
 
     def _(tx: Transaction | ManagedTransaction):
@@ -191,24 +188,40 @@ def link__prot_to_nomclass(prot: Node) -> Callable[[Transaction | ManagedTransac
     return _
 
 
+# ※ ----------------[ 3.Ligand Nodes] 
+
+def node__ligand(_ligand:Ligand)->Callable[[Transaction | ManagedTransaction], Node ]:
+    L = _ligand.dict()
+    def _(tx: Transaction | ManagedTransaction):
+        return tx.run("""//
+ merge (ligand:Ligand {
+ 	chemicalId          : $chemicalId         ,
+ 	chemicalName        : $chemicalName       ,
+ 	formula_weight      : $formula_weight     ,
+ 	pdbx_description    : $pdbx_description   ,
+ 	number_of_instances : $number_of_instances
+        })
+       return ligand
+        """, **L).single(strict=True)['ligand']
+    return _
 
 
-
-
-
-
-
-
+def link__ligand_to_struct(prot: Node, parent_rcsb_id: str) -> Callable[[Transaction | ManagedTransaction], list[list[Node | Relationship]]]:
+    parent_rcsb_id = parent_rcsb_id.upper()
+    def _(tx: Transaction | ManagedTransaction):
+        return tx.run("""//
+  match (ligand:Ligand) where ID(ligand)=$ELEM_ID
+  match (struct:RibosomeStructure {rcsb_id: $PARENT})
+  merge (ligand)<-[contains:contains]-(struct)
+  return struct, ligand, contains
+""",
+                      {"ELEM_ID": int(prot.element_id),
+                       "PARENT": parent_rcsb_id}).values('struct', 'ligand', 'contains')
+    return _
 
 
 
 #########################################################################################################################################
-rib  = RibosomeStructure.from_json_profile("4UG0")
-rna  = rib.rnas[0]
-prot = rib.proteins[0]
-print(prot)
-
-
 
 
 def rna_init(rna:RNA):
@@ -225,5 +238,19 @@ def protein_init(prot:Protein):
         pprint(x)
 
 
+def ligand_init(lig:Ligand):
+    with driver.session() as s:
+        node = s.execute_write(node__ligand(lig))
+        s.execute_write(link__ligand_to_struct(node, RCSB_ID))
 
-protein_init(prot)
+
+RCSB_ID = "5afi"
+
+rib     = RibosomeStructure.from_json_profile(RCSB_ID)
+rna     = rib.rnas[0]
+prot    = rib.proteins[0]
+lig     = rib.ligands[4]
+
+ligand_init(lig)
+
+# protein_init(prot)

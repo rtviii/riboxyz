@@ -6,7 +6,6 @@
 
 # DevOps:
 
-- bubble all env vars to one place
 - one-click docker deployment 
 - how can we benefit from github actions?
 
@@ -14,11 +13,17 @@
 
 - "last updated" section
 - automatic update per struct -- cron job every 24 weeks
-- rewrite cli entirely in python
 
+- [x] rewrite struct init scripts in python
+- [x] rewrtie cli in python
+- [ ] graph.ribosome.xyz
+- monitoring
 
+# LIGANDS
 
-rewrite struct init scripts in python
-rewrtie cli in python
-monitoring
-graph.ribosome.xyz
+- ligands/ligandlike should have a common category in the db. filter the ions too. some ligands are not redndered at all (ex. 5AFI.FME)
+
+- gene ontology + bird + CCD
+
+## Branching out to other resources
+- interpro
