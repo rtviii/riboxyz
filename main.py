@@ -95,7 +95,8 @@ def create_structure_node(_rib:RibosomeStructure)->Callable[[Transaction|Managed
               struct.rcsb_external_ref_type = CASE WHEN $rcsb_external_ref_type = null then \"null\" else $rcsb_external_ref_type END,
               struct.rcsb_external_ref_link = CASE WHEN $rcsb_external_ref_link = null then \"null\" else $rcsb_external_ref_link END,
               struct.citation_pdbx_doi      = CASE WHEN $citation_pdbx_doi = null then \"null\" else $citation_pdbx_doi END,
-              struct.citation_year          = CASE WHEN $citation_year = null then \"null\" else $citation_year END"
+              struct.citation_year          = CASE WHEN $citation_year = null then \"null\" else $citation_year END
+              
         """,**R)
     return create_parametrized_node
     
@@ -109,6 +110,7 @@ def create_structure_node(_rib:RibosomeStructure)->Callable[[Transaction|Managed
 rib = RibosomeStructure.from_json_profile("4UG0")
 r   = rib.dict()
 
-
 with driver.session() as s:
     s.execute_write(create_structure_node(rib))
+    # for record in r:
+    #     pprint(record)
