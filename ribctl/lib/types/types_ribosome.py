@@ -1,7 +1,7 @@
 import os
 import typing
 from pydantic import BaseModel
-from ribctl.lib.types.types_proteins import LSU_Proteins, SSU_Proteins
+from ribctl.lib.types.types_polymer import LSU_Proteins, RNAClass, SSU_Proteins
 import json
 from pydantic import parse_obj_as
 from ribctl.lib import RIBETL_DATA
@@ -12,21 +12,7 @@ from ribctl.lib.struct_split_rename import split_rename
 from ribctl.lib.struct_extract_bsites import get_ligands, get_liglike_polymers, render_ligand, render_liglike_polymer
 
 
-ProteinClass = LSU_Proteins | SSU_Proteins
-ProteinClassesArray = typing.get_args(ProteinClass)
-RNAClass = typing.Literal[
-    "5SrRNA",
-    "5.8SrRNA",
-    "12SrRNA",
-    "16SrRNA",
-    "21SrRNA",
-    "23SrRNA",
-    "25SrRNA",
-    "28SrRNA",
-    "35SrRNA",
-    "mRNA",
-    "tRNA"
-]
+ProteinClass        = LSU_Proteins | SSU_Proteins
 
 
 class LastUpdate(BaseModel):

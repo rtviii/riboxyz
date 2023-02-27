@@ -1,9 +1,11 @@
 import json
 from pprint import pprint
 from typing import Any, Callable
+import typing
 from neo4j import GraphDatabase, Driver, ManagedTransaction, Record, Result, Transaction
 from neo4j.graph import Node, Relationship
-from ribctl.lib.types.types_ribosome import RNA, Ligand, Protein, RibosomeAssets, RibosomeStructure
+from ribctl.lib.types.types_ribosome import RNA, Ligand, Protein, ProteinClass, RibosomeAssets, RibosomeStructure
+from ribctl.lib.types.types_polymer import list_LSU_Proteins, list_SSU_Proteins, list_RNAClass
 
 
 """Functions of the form create_node_xxxx return a closure over their target [xxxx] because the neo4j expects a 'unit-of-work'
@@ -19,8 +21,44 @@ def init_driver(uri, username, password):
 
 driver = init_driver("neo4j://localhost:7687", "neo4j", "neo4j")
 
+### DATABASE INITIALIZATION
 
+def node__protein_class(protein_class:str):
+    def _(tx:Transaction | ManagedTransaction):
+        return tx.run("""//
+            merge (protein_class:NomenclatureClass {class_id:$CLASS_ID})
+            return protein_class
+        """, {"CLASS_ID":protein_class}).single(strict=True)['protein_class']
+    return _
 
+def node__rna_class(rna_class:str):
+    def _(tx:Transaction | ManagedTransaction):
+        return tx.run("""//
+            merge (rna_class:RNAClass {class_id:$CLASS_ID})
+            return rna_class
+        """, {"CLASS_ID":rna_class}).single(strict=True)['rna_class']
+    return _
+
+def init_protein_classes():
+    with driver.session() as s:
+        for protein_class in [*list_LSU_Proteins,*  list_SSU_Proteins]:
+            s.execute_write(node__protein_class(protein_class))
+
+def init_rna_classes():
+    with driver.session() as s:
+        for rna_class in list_RNAClass:
+            s.execute_write(node__rna_class(rna_class))
+
+def create_constraints(tx: Transaction | ManagedTransaction):
+    tx.run("""//
+    CREATE CONSTRAINT IF NOT EXISTS ON (ipro:InterProFamily) ASSERT ipro.family_id  IS UNIQUE;
+    CREATE CONSTRAINT IF NOT EXISTS ON (go:GOClass) ASSERT go.class_id IS UNIQUE;
+    CREATE CONSTRAINT IF NOT EXISTS ON (q:RibosomeStructure) Assert q.rcsb_id IS UNIQUE;
+    CREATE CONSTRAINT IF NOT EXISTS ON (pf:PFAMFamily) assert pf.family_id  is unique;
+    CREATE CONSTRAINT IF NOT EXISTS ON (lig:Ligand) assert lig.chemicalId is unique;
+    CREATE CONSTRAINT IF NOT EXISTS ON (nc:NomenclatureClass) assert nc.class_id is unique;
+    CREATE CONSTRAINT IF NOT EXISTS ON (nc:NomenclatureClass) assert nc.class_id is unique;
+    """)
 
 # ※ ----------------[ 0.RNA Nodes] 
 
@@ -37,7 +75,6 @@ return rna, rnaof, struct""",
 
     return _
 
-
 def link__rna_to_nomclass(rna: Node) -> Callable[[Transaction | ManagedTransaction], list[list[Node | Relationship]]]:
     def _(tx: Transaction | ManagedTransaction):
         return tx.run("""//
@@ -48,7 +85,6 @@ merge (rna)-[b:belongs_to]-(rna_class)
 return rna, b, rna_class""",
                       {"ELEM": int(rna.element_id)}).values('rna', 'b', 'rna_class')
     return _
-
 
 def node__rna(_rna: RNA) -> Callable[[Transaction | ManagedTransaction], Node]:
     RNA_dict = _rna.dict()
@@ -81,7 +117,6 @@ merge (rna:RNA {
 """, **RNA_dict).single(strict=True)['rna']
 
     return _
-
 
 
 
@@ -224,33 +259,24 @@ def link__ligand_to_struct(prot: Node, parent_rcsb_id: str) -> Callable[[Transac
 #########################################################################################################################################
 
 
-def rna_init(rna:RNA):
+# ※ ----------------[ 4. Ingress]
+def commit_init(rna:RNA):
     with driver.session() as s:
         node = s.execute_write(node__rna(rna))
         s.execute_write(link__rna_to_nomclass(node))
         s.execute_write(link__rna_to_struct(node, RNA.parent_rcsb_id))
 
-def protein_init(prot:Protein):
+def commit_protein(prot:Protein):
     with driver.session() as s:
         node = s.execute_write(node__protein(prot))
         s.execute_write(link__prot_to_struct(node, prot.parent_rcsb_id))
         x = s.execute_write(link__prot_to_nomclass(node))
         pprint(x)
 
-
-def ligand_init(lig:Ligand):
+def commit_ligand(lig:Ligand):
     with driver.session() as s:
         node = s.execute_write(node__ligand(lig))
         s.execute_write(link__ligand_to_struct(node, RCSB_ID))
 
 
-RCSB_ID = "5afi"
 
-rib     = RibosomeStructure.from_json_profile(RCSB_ID)
-rna     = rib.rnas[0]
-prot    = rib.proteins[0]
-lig     = rib.ligands[4]
-
-ligand_init(lig)
-
-# protein_init(prot)
