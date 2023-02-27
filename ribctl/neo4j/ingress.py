@@ -1,6 +1,4 @@
-import json
 from typing import Any, Callable
-import typing
 from neo4j import GraphDatabase, Driver, ManagedTransaction, Record, Result, Transaction
 from neo4j.graph import Node, Relationship
 from ribctl.lib.types.types_ribosome import RNA, Ligand, Protein, ProteinClass, RibosomeAssets, RibosomeStructure
@@ -259,9 +257,7 @@ def link__ligand_to_struct(prot: Node, parent_rcsb_id: str) -> Callable[[Transac
     return _
 
 
-
 #########################################################################################################################################
-
 
 # ※ ----------------[ 4. Ingress]
 def commit_init(rna:RNA, driver:Driver=init_driver()):
