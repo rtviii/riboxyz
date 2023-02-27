@@ -2,24 +2,25 @@ import json
 from pprint import pprint
 from typing import Callable
 from neo4j import GraphDatabase, Driver, ManagedTransaction, Record, Result, Transaction
+from ribctl.lib.types.types_ribosome import RNA, Protein, RibosomeAssets, RibosomeStructure
 
-from ribctl.lib.types.types_ribosome import RibosomeAssets, RibosomeStructure
 
 
+"""Functions of the form create_node_xxxx return a closure over their target [xxxx] because the neo4j expects a 'unit-of-work'
+function that takes a transaction as its argument."""
 
 
 def init_driver(uri, username, password):
     # TODO: Create an instance of the driver here
-    api = GraphDatabase.driver("neo4j://localhost:7687",auth=(username, password))
+    api = GraphDatabase.driver(
+        "neo4j://localhost:7687", auth=(username, password))
     return api
-
-
 
 
 driver = init_driver("neo4j://localhost:7687", "neo4j", "neo4j")
 
 
-#※ -------------------------------= [ 1. Create a Node ]
+# ※ -------------------------------= [ 1. Create a Node ]
 
 # # Unit of work
 # def get_structures(tx, rcsb_id): # (1)
@@ -30,11 +31,11 @@ driver = init_driver("neo4j://localhost:7687", "neo4j", "neo4j")
 # # Open a Session
 # with driver.session() as session:
 #     # Run the unit of work within a Read Transaction
-#     session.execute_read(get_structures, rcsb_id="5AFI") 
+#     session.execute_read(get_structures, rcsb_id="5AFI")
 #     session.close()
 
-#※ ----------------[ 2. Neo4j Data Types ]
-#### Exploring Records
+# ※ ----------------[ 2. Neo4j Data Types ]
+# Exploring Records
 
 # When accessing a record, either within a loop, list comprehension or within a single record, you can use the [] bracket syntax.
 
@@ -42,7 +43,8 @@ driver = init_driver("neo4j://localhost:7687", "neo4j", "neo4j")
 
 
 with driver.session() as s:
-    res = s.run("MATCH (lig:Ligand)-[rel]-(rib:RibosomeStructure) RETURN lig,rib,rel limit 5")
+    res = s.run(
+        "MATCH (lig:Ligand)-[rel]-(rib:RibosomeStructure) RETURN lig,rib,rel limit 5")
     # for record in res.values():
     #     print("\033[91m ------------------------ \033[0m")
     #     pprint(p)
@@ -57,21 +59,61 @@ with driver.session() as s:
         # pprint(rel_rel.end_node)
         # pprint(node_lig.labels)
         # pprint(node_lig.items())
-        
 
-#※ ----------------[ 2. Neo4j Data Types ]
+
+# ※ ----------------[ 2. Neo4j Data Types ]
 
 # _rib = RibosomeStructure(rcsb_id="4UG0")
 # _rib = RibosomeAssets("4UG0").json_profile()
-rib  = RibosomeStructure.from_json_profile("4UG0")
-r= rib.dict()
-# print(json.dumps(RibosomeAssets("4UG0").json_profile()))
+rib = RibosomeStructure.from_json_profile("4UG0")
 
-# pprint(R)
-def create_structure_node(_rib:RibosomeStructure, **kwargs)->Callable[[Transaction|ManagedTransaction], Record | None]:
+
+# def create_polymer(_poly:Protein):
+
+def create_node_rna(_rna: RNA) -> Callable[[Transaction | ManagedTransaction], Result | None]:
+    RNA_dict = _rna.dict()
+
+    def _(tx: Transaction | ManagedTransaction):
+        return tx.run("""//
+merge (rna:RNA {
+
+      asym_ids: rna.asym_ids,
+      auth_asym_id: rna.auth_asym_id,
+
+      parent_rcsb_id: rna.parent_rcsb_id,
+      nomenclature  : rna.nomenclature,
+      ligand_like   : rna.ligand_like,
+
+      src_organism_ids   : rna.src_organism_ids,
+      src_organism_names : rna.src_organism_names,
+      host_organism_ids  : rna.host_organism_ids,
+      host_organism_names: rna.host_organism_names,
+
+
+      entity_poly_strand_id               :  rna.entity_poly_strand_id,
+      entity_poly_seq_one_letter_code     :  rna.entity_poly_seq_one_letter_code,
+      entity_poly_seq_one_letter_code_can :  rna.entity_poly_seq_one_letter_code_can,
+      entity_poly_seq_length              :  rna.entity_poly_seq_length,
+      entity_poly_polymer_type            :  rna.entity_poly_polymer_type,
+      entity_poly_entity_type             :  rna.entity_poly_entity_type
+  }) on create set newrna.rcsb_pdbx_description = CASE WHEN rna.rcsb_pdbx_description = null then \"null\" else rna.rcsb_pdbx_description END
+
+  with newrna, value
+  match(s:RibosomeStructure {rcsb_id: value.rcsb_id})
+  create (newrna)-[:rna_of]->(s);
+
+  match (n:RNA) where n.nomenclature[0] is not null
+  merge (nc:RNAClass{class_id:n.nomenclature[0]})
+  merge (n)-[:belongs_to]-(nc)""")
+    return _
+
+
+def create_node_structure(_rib: RibosomeStructure) -> Callable[[Transaction | ManagedTransaction], Record | None]:
+
     R = _rib.dict()
-    def create_parametrized_node(tx:Transaction|ManagedTransaction):
-        return  tx.run("""//
+
+    def _(tx: Transaction | ManagedTransaction):
+        return tx.run("""//
     merge ( struct:RibosomeStructure{
               rcsb_id               : $rcsb_id,
               expMethod             : $expMethod,
@@ -86,7 +128,7 @@ def create_structure_node(_rib:RibosomeStructure, **kwargs)->Callable[[Transacti
               src_organism_names         : $src_organism_names,
 
               host_organism_ids           : $host_organism_ids,
-              host_organism_names         : $host_organism_names
+             host_organism_names         : $host_organism_names
 
               })
 
@@ -98,19 +140,12 @@ def create_structure_node(_rib:RibosomeStructure, **kwargs)->Callable[[Transacti
               struct.citation_year          = CASE WHEN $citation_year = null then \"null\" else $citation_year END
               
               return struct
-        """,**R).single()
-    return create_parametrized_node
-    
+        """, **R).single()
+    return _
 
+# rib = RibosomeStructure.from_json_profile("4UG0")
+# r   = rib.dict()
 
-                                                            # value.citation_year as cit_year,
-                                                            # value.citation_rcsb_authors as cit_authors,
-                                                            # value.citation_title as cit_title,
-                                                            # value.citation_pdbx_doi as cit_doi,
-
-rib = RibosomeStructure.from_json_profile("4UG0")
-r   = rib.dict()
-
-with driver.session() as s:
-    result = s.execute_write(create_structure_node(rib))
-    pprint(result)
+# with driver.session() as s:
+#     result = s.execute_write(create_structure_node(rib))
+#     pprint(result)
