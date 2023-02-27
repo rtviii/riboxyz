@@ -7,17 +7,25 @@ from ribctl.lib.types.types_ribosome import RNA, Ligand, Protein, ProteinClass, 
 from ribctl.lib.types.types_polymer import list_LSU_Proteins, list_SSU_Proteins, list_RNAClass
 
 
+
+
+def init_driver(NEO4J_URI:str="neo4j://localhost:7687", NEO4J_USERNAME:str="neo4j", NEO4J_PASSWORD:str="neo4j"):
+    return GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USERNAME, NEO4J_PASSWORD))
+
+
+# TODO: write this into a cli, encrypted WHEN/IF people actually need access. Keep auth disabled for now
+# def change_default_password(new_password:str):
+#     with driver.session(database="system") as s:
+#         print(s.run("show default database").single())
+
+#     s.run("ALTER CURRENT USER SET PASSWORD FROM $CURRENT_PASSWORD TO $NEW_PASSWORD", {
+#         "CURRENT_PASSWORD": "neo4j",
+#         "NEW_PASSWORD": "55288",
+#     } ).single()
+    
+
 """Functions of the form create_node_xxxx return a closure over their target [xxxx] because the neo4j expects a 'unit-of-work'
 function that takes a transaction as its argument."""
-
-
-def init_driver(NEO4J_URI:str="neo4j://localhost:7687", NEO4J_USERNAME:str="neo4j", NEO4J_PASSWORD:str="neo4k"):
-    # TODO: Create an instance of the driver here
-    return GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USERNAME, NEO4J_PASSWORD))
-     
-
-driver = init_driver("neo4j://localhost:7687", "neo4j", "neo4j")
-
 ### DATABASE INITIALIZATION
 def node__protein_class(protein_class:str):
     def _(tx:Transaction | ManagedTransaction):
@@ -35,12 +43,12 @@ def node__rna_class(rna_class:str):
         """, {"CLASS_ID":rna_class}).single(strict=True)['rna_class']
     return _
 
-def init_protein_classes():
+def init_protein_classes(driver:Driver=init_driver()):
     with driver.session() as s:
         for protein_class in [*list_LSU_Proteins,*  list_SSU_Proteins]:
             s.execute_write(node__protein_class(protein_class))
 
-def init_rna_classes():
+def init_rna_classes(driver:Driver=init_driver()):
     with driver.session() as s:
         for rna_class in list_RNAClass:
             s.execute_write(node__rna_class(rna_class))
@@ -256,20 +264,20 @@ def link__ligand_to_struct(prot: Node, parent_rcsb_id: str) -> Callable[[Transac
 
 
 # ※ ----------------[ 4. Ingress]
-def commit_init(rna:RNA):
+def commit_init(rna:RNA, driver:Driver=init_driver()):
     with driver.session() as s:
         node = s.execute_write(node__rna(rna))
         s.execute_write(link__rna_to_nomclass(node))
         s.execute_write(link__rna_to_struct(node, RNA.parent_rcsb_id))
 
-def commit_protein(prot:Protein):
+def commit_protein(prot:Protein, driver:Driver=init_driver()):
     with driver.session() as s:
         node = s.execute_write(node__protein(prot))
         s.execute_write(link__prot_to_struct(node, prot.parent_rcsb_id))
         x = s.execute_write(link__prot_to_nomclass(node))
         pprint(x)
 
-def commit_ligand(lig:Ligand):
+def commit_ligand(lig:Ligand, driver:Driver=init_driver()):
     with driver.session() as s:
         node = s.execute_write(node__ligand(lig))
         s.execute_write(link__ligand_to_struct(node, RCSB_ID))
