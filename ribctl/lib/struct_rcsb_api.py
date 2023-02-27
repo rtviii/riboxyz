@@ -3,20 +3,15 @@ import typing
 from pydantic.tools import parse_obj_as
 import requests
 from urllib.parse import urlencode
-from gql_querystrings import monolithic
-from types_ribosome import Protein, RNA, Ligand, RibosomeStructure
+from ribctl.lib.gql_querystrings import monolithic
+from ribctl.lib.types_ribosome import Protein, RNA, Ligand, RibosomeStructure
 import re
 import json
 
-# open both subunit maps:
-
-LSU_map = {k: v for k, v in json.load(
-    open('subunit_map_LSU.json', 'r')).items()}
-SSU_map = {k: v for k, v in json.load(
-    open('subunit_map_SSU.json', 'r')).items()}
 
 
 def gql_monolith(rcsb_id): return monolithic.replace("$RCSB_ID", rcsb_id.upper())
+
 # gql_structs             = lambda rcsb_id: structure_string.replace("$RCSB_ID", rcsb_id.upper())
 # gql_polymer_entities    = lambda rcsb_id: polymer_entities_string.replace("$RCSB_ID", rcsb_id.upper())
 # gql_nonpolymer_entities = lambda rcsb_id: nonpolymer_entities_string.replace("$RCSB_ID", rcsb_id.upper())
@@ -42,7 +37,6 @@ def __get_protein_nomenclature(protein):
             [nomenclature.append(kv[0]) if pfam_id in kv[1] ['pfamDomainAccession'] else ... for kv in LSU_map.items()]
             [nomenclature.append(kv[0]) if pfam_id in kv[1] ['pfamDomainAccession'] else ... for kv in SSU_map.items()]
         return list(set(nomenclature))
-
 
 def __get_rna_nomenclature(polymer):  
 
