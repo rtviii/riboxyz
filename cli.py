@@ -7,9 +7,7 @@ driver = init_driver()
 pprint(driver)
 
 
-
 with driver.session(database="system") as s:
-    print(s.run("show default database").single())
     print(s.run("show default database").single())
 
 
