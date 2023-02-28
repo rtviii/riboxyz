@@ -1,16 +1,4 @@
 
-# docs
-
-les i
-just serve templates manually...
-drf-yasg https://drf-yasg.readthedocs.io/en/stable/
-https://github.com/axnsan12/drf-yasg/
-https://www.django-rest-framework.org/topics/documenting-your-api/
-
-
-# Msa-based nomenclature
-
-
 # Features to stability:
 
 - api
@@ -31,25 +19,11 @@ https://www.django-rest-framework.org/topics/documenting-your-api/
 - [ ] graph.ribosome.xyz
 - monitoring
 
-
-
-## Additions to the db possibly:
-
-- [ ] Add species and subspecies as nodes
-
-
 # LIGANDS
 
 - ligands/ligandlike should have a common category in the db. filter the ions too. some ligands are not redndered at all (ex. 5AFI.FME)
 
+- gene ontology + bird + CCD
 
-
-- gene ontology 
-- bird + CCD
-
-
-## BRANCHING OUT TO OTHER RESOURCES
+## Branching out to other resources
 - interpro
-
-
-
