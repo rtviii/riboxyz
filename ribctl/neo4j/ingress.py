@@ -269,12 +269,8 @@ def commit_protein(prot:Protein, driver:Driver=init_driver()):
         node = s.execute_write(node__protein(prot))
         s.execute_write(link__prot_to_struct(node, prot.parent_rcsb_id))
         x = s.execute_write(link__prot_to_nomclass(node))
-        pprint(x)
 
-def commit_ligand(lig:Ligand, driver:Driver=init_driver()):
+def commit_ligand(lig:Ligand,parent_rcsb_id:str, driver:Driver=init_driver()):
     with driver.session() as s:
         node = s.execute_write(node__ligand(lig))
-        s.execute_write(link__ligand_to_struct(node, RCSB_ID))
-
-
-
+        s.execute_write(link__ligand_to_struct(node, parent_rcsb_id))
