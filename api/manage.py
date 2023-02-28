@@ -1,9 +1,8 @@
-#!/usr/bin/env python3.11
+#!/usr/bin/env python
 import os
 import sys
 
 if __name__ == "__main__":
-    sys.path.append(os.environ["PYMOL_PATH"])
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "rbxz_bend.settings")
     try:
         from django.core.management import execute_from_command_line

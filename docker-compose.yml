@@ -31,6 +31,11 @@ services:
       - NEO4J_PASSWORD=rrr
       - NEO4J_CURRENTDB=neo4j
       # ------ CLi ENV VARS ------------------------
+      - CLI=/home/backend/cli
+      - COMMIT_STRUCTURE_SH=/home/backend/cli/scripts/commit_structure.sh 
+      - EXTRACT_BSITES_PY=/home/backend/cli/scripts/extract_bsites.py 
+      - RENDER_THUMBNAIL_PY=/home/backend/cli/scripts/render_thumbnail.py 
+      - SPLIT_RENAME_PY=/home/backend/cli/scripts/split_rename.py 
       - PYTHONBIN=/opt/venv/bin/python3 
 
 
