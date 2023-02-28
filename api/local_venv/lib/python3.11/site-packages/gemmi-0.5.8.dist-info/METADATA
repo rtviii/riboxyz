@@ -1,0 +1,31 @@
+Metadata-Version: 2.1
+Name: gemmi
+Version: 0.5.8
+Summary: library for structural biology
+Home-page: https://project-gemmi.github.io/
+Author: Marcin Wojdyr
+Author-email: wojdyr@gmail.com
+License: MPL-2.0
+Keywords: structural bioinformatics,structural biology,crystallography,CIF,mmCIF,PDB,CCP4,MTZ
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: Topic :: Scientific/Engineering :: Bio-Informatics
+Classifier: Topic :: Scientific/Engineering :: Chemistry
+Classifier: Programming Language :: C++
+Classifier: Programming Language :: Python
+Description-Content-Type: text/plain
+License-File: LICENSE.txt
+
+    Library for macromolecular crystallography and structural bioinformatics.
+    For working with coordinate files (mmCIF, PDB, mmJSON),
+    refinement restraints (monomer library), electron density maps (CCP4),
+    and crystallographic reflection data (MTZ, SF-mmCIF). It understands
+    crystallographic symmetries, it knows how to switch between the real
+    and reciprocal space and it can do a few other things.
+
+    The setup.py script builds only Python extension.
+    Use cmake to build also a command-line program.
+    
