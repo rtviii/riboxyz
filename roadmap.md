@@ -1,4 +1,16 @@
 
+# docs
+
+les i
+just serve templates manually...
+drf-yasg https://drf-yasg.readthedocs.io/en/stable/
+https://github.com/axnsan12/drf-yasg/
+https://www.django-rest-framework.org/topics/documenting-your-api/
+
+
+# Msa-based nomenclature
+
+
 # Features to stability:
 
 - api
