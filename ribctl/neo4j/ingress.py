@@ -12,10 +12,8 @@ def init_driver(NEO4J_URI:str="neo4j://localhost:7687", NEO4J_USERNAME:str="neo4
 
 
 # TODO: write this into a cli, encrypted WHEN/IF people actually need access. Keep auth disabled for now
-# def change_default_password(new_password:str):
-#     with driver.session(database="system") as s:
+# def change_default_password(new_password:str): #     with driver.session(database="system") as s:
 #         print(s.run("show default database").single())
-
 #     s.run("ALTER CURRENT USER SET PASSWORD FROM $CURRENT_PASSWORD TO $NEW_PASSWORD", {
 #         "CURRENT_PASSWORD": "neo4j",
 #         "NEW_PASSWORD": "55288",
