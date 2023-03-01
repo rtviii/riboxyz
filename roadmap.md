@@ -27,3 +27,6 @@
 
 ## Branching out to other resources
 - interpro
+
+## Static Files Server
+- https://docs.djangoproject.com/en/4.1/howto/static-files/deployment/
