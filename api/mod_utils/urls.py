@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.urls import path
 from .views import * 
 
@@ -12,6 +13,7 @@ urlpatterns = [
     path('structs_all_ids/'       , structs_all_ids       ),
     path('structs_diff_pdb/'      , structs_diff_pdb      ),
     path('structs_sync_with_pdb/' , structs_sync_with_pdb ),
+    path('index/' , index, name='my_template')
 ]
 
 app_name = 'mod_utils'
