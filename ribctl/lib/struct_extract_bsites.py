@@ -81,7 +81,7 @@ class BindingSiteChain:
       auth_asym_id    : str= field(hash=True, compare=False)
       residues: list[ ResidueLite ]         = field(hash=True, compare=False)
 
-class __BindingSite:
+class BindingSite:
 
     def __init__(self, data: Dict[str, BindingSiteChain]) -> None:
         self.data: Dict[str, BindingSiteChain] = data
@@ -125,7 +125,7 @@ def __get_poly_nbrs(
       residues      : List[Residue],
       struct        : Structure,
       auth_asym_id  : str
-    ) -> __BindingSite: 
+    ) -> BindingSite: 
 
     """KDTree search the neighbors of a given list of residues(which constitue a ligand)
     and return unique having tagged them with a ban identifier proteins within 5 angstrom of these residues. """
@@ -164,13 +164,13 @@ def __get_poly_nbrs(
             sorted([residue for residue in nbr_residues if residue.parent_auth_asym_id == c], key=operator.attrgetter('residue_id')))
 
 
-    return __BindingSite(nbr_dict)
+    return BindingSite(nbr_dict)
 
 def __get_ligand_nbrs(
       ligand_residues: List[Residue],
       struct         : Structure,
       chemicalId: str
-    ) -> __BindingSite : 
+    ) -> BindingSite : 
     """KDTree search the neighbors of a given list of residues(which constitue a ligand) 
     and return unique having tagged them with a ban identifier proteins within 5 angstrom of these residues. """
 
@@ -216,7 +216,7 @@ def __get_ligand_nbrs(
             sorted([residue for residue in nbr_residues if residue.parent_auth_asym_id == c], key=operator.attrgetter('residue_id')))
 
 
-    return __BindingSite(nbr_dict)
+    return BindingSite(nbr_dict)
 
 def __getLigandResIds(ligchemid: str, struct: Structure) -> List[Residue]:
     ligandResidues: List[Residue] = list(
@@ -251,9 +251,9 @@ def get_ligands(pdbid: str, profile:dict) -> List[tuple]:
     _ = [* map(lambda x: (x['chemicalId'], x['chemicalName']),profile['ligands'])] 
     return [ ] if len(_) < 1 else [* filter(lambda k: "ion" not in k[1].lower(), _)] 
 
-def render_liglike_polymer(rcsb_id:str, auth_asym_id:str, structure:Structure, save:bool=False)->__BindingSite:
+def render_liglike_polymer(rcsb_id:str, auth_asym_id:str, structure:Structure, save:bool=False)->BindingSite:
     residues: list[Residue] = __get_polymer_residues(auth_asym_id, structure)
-    binding_site_polymer: __BindingSite = __get_poly_nbrs(residues, structure, auth_asym_id)
+    binding_site_polymer: BindingSite = __get_poly_nbrs(residues, structure, auth_asym_id)
 
     if save:
         outfile_json = os.path.join(RIBETL_DATA, rcsb_id.upper(), f'POLYMER_{auth_asym_id}.json')
@@ -264,10 +264,10 @@ def render_liglike_polymer(rcsb_id:str, auth_asym_id:str, structure:Structure, s
 
     return binding_site_polymer
 
-def render_ligand(rcsb_id:str,chemicalId:str, structure:Structure, save:bool=False)->__BindingSite:
+def render_ligand(rcsb_id:str,chemicalId:str, structure:Structure, save:bool=False)->BindingSite:
     chemicalId = chemicalId.upper()
     residues: list[Residue] = __getLigandResIds(chemicalId, structure)
-    binding_site_ligand: __BindingSite   = __get_ligand_nbrs(residues, structure, chemicalId)
+    binding_site_ligand: BindingSite   = __get_ligand_nbrs(residues, structure, chemicalId)
 
     if save:
         outfile_json = os.path.join(RIBETL_DATA, rcsb_id.upper(), f'LIGAND_{chemicalId}.json')
