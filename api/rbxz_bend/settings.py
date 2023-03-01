@@ -6,6 +6,7 @@ from .neo4j.db import Neo4jConnection
 SECRET_KEY = 'ju=n4om3z00jd1+y2(ufn)g^@w-dj*&-45&4yd1_aiun50b6by'
 
 BASE_DIR     = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+print("BASE_DIR: ", BASE_DIR)
 RIBETL_DATA  = os.path.join(BASE_DIR, "ribetldata"                           ) # this should be either docker-mounted or populated through the utils module
 CYPHER_EXEC  = os.path.join(BASE_DIR, "mod_db","cypher_ops","cypher_exec")     # this should be either docker-mounted or populated through the utils module
 
@@ -96,6 +97,5 @@ USE_I18N         = True
 USE_L10N         = True
 USE_TZ           = True
 STATIC_URL       = '/static/'
-# STATIC_ROOT      = '/static/'
 STATIC_ROOT      = os.path.join(BASE_DIR, 'static')
 
