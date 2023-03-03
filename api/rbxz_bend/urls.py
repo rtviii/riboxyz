@@ -15,4 +15,4 @@ urlpatterns = [
     path('utils/' , include('mod_utils.urls', 'mod_utils')),
     ]
 
-urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+# urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

@@ -1,18 +1,18 @@
 import os
 from .neo4j.db import Neo4jConnection
 
-
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'ju=n4om3z00jd1+y2(ufn)g^@w-dj*&-45&4yd1_aiun50b6by'
-
 BASE_DIR     = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-print("BASE_DIR: ", BASE_DIR)
-RIBETL_DATA  = os.path.join(BASE_DIR, "ribetldata"                           ) # this should be either docker-mounted or populated through the utils module
-CYPHER_EXEC  = os.path.join(BASE_DIR, "mod_db","cypher_ops","cypher_exec")     # this should be either docker-mounted or populated through the utils module
+# this should be either docker-mounted or populated through the utils module
+RIBETL_DATA  = os.environ["RIBETL_DATA"] if os.environ["RIBETL_DATA"] else os.path.join(BASE_DIR, "ribetldata") 
 
-neo4j_vars = ["NEO4J_URI", "NEO4J_USER", "NEO4J_PASSWORD", "NEO4J_CURRENTDB"]
+# ※ Dont' forget to export pymol path ( we want to ship a built pymol, but python needs to be aware of it)
+# export PYMOL_PATH=/home/rxz/dev/pymol3.11 && export PYTHONPATH="$PYTHONPATH:$PYMOL_PATH/modules/:"
+
+vars = ["NEO4J_URI", "NEO4J_USER", "NEO4J_PASSWORD", "NEO4J_CURRENTDB", "RIBETL_DATA"]
 print(" ---------------------------------------------- App has been reset. -----------------------------------------------") 
-for var in neo4j_vars:
+for var in vars:
     # print("Environment variable {}:\t{}".format( var, os.getenv(var) ))
     if var not in os.environ:
         print("Environment variable {} not set".format(var))
