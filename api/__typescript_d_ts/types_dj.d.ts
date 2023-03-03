@@ -138,3 +138,4 @@ export interface RibosomeResponse {
   name: string;
   proteins: Protein[];
 }
+export interface Schema {}
