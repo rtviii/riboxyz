@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from ninja import Router
-from ribctl.lib.types.types_ribosome import RibosomeResponse
+from rbxz_bend.types import RibosomeResponse
 
 router = Router()
 
