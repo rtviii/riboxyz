@@ -74,7 +74,8 @@ WORKDIR $CLI
 ADD cli/package.json ${CLI}
 RUN npm install --no-optional && npm cache clean --force
 RUN npm install -g ts-node
-RUN npm i -g ribxzcli
+RUN npm i -g json-schema-to-typescript
+# RUN npm i -g ribxzcli
 # --- CLI INSTALLATION ---------------------------------------------------------------------------------
 # --- 
 
