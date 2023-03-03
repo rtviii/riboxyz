@@ -1,17 +1,16 @@
 import os
-import typing
 from pydantic import BaseModel
-from ribctl.lib.types.types_polymer import LSU_Proteins, RNAClass, SSU_Proteins
 import json
 from pydantic import parse_obj_as
 from ribctl.lib import RIBETL_DATA
+from ribctl.lib.types.types_polymer import LSU_Proteins, RNAClass, SSU_Proteins
 from ribctl.lib.utils import download_unpack_place, open_structure
 from ribctl.lib.struct_render_thumbnail import render_thumbnail
 from ribctl.lib.struct_rcsb_api import process_pdb_record
 from ribctl.lib.struct_split_rename import split_rename
 from ribctl.lib.struct_extract_bsites import get_ligands, get_liglike_polymers, render_ligand, render_liglike_polymer
-from ninja import Schema
 
+from ninja import Schema
 ProteinClass = LSU_Proteins | SSU_Proteins
 
 
