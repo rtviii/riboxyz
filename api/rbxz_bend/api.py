@@ -20,7 +20,7 @@ router = Router()
 #         return {'detail': 'The specific user cannot be found.'}
 
 
-@router.get('/resp/{resp_id}', response=list[int])
+@router.get('/resp/{resp_id}')
 def get_article(request, resp_id: int):
     article = [ 1,2,3 ]
     return article
