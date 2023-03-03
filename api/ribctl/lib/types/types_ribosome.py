@@ -1,8 +1,7 @@
 from pydantic import BaseModel
 from pydantic import parse_obj_as
-from .types_polymer import LSU_Proteins, RNAClass, SSU_Proteins
-# 
 from ninja import Schema 
+from .types_polymer import LSU_Proteins, RNAClass, SSU_Proteins
 
 ProteinClass = LSU_Proteins | SSU_Proteins
 
@@ -40,12 +39,6 @@ class Protein(BaseModel):
     entity_poly_entity_type            : str
 
     nomenclature:  list[ProteinClass]
-
-# ※ TESTING NINJA
-class RibosomeResponse(__Schema):
-    id: int
-    name: str
-    proteins: list[Protein]
 
 class RNA(BaseModel):
 
