@@ -1,7 +1,8 @@
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
+
 from ninja import Router
-from schema.types_django import RibosomeResponse
+
 
 router = Router()
 
@@ -11,7 +12,6 @@ def get_article(request, resp_id: int):
     return article
 
 
-@router.get('/resps', response=list[RibosomeResponse])
+@router.get('/resps', response=list)
 def get_articles(request):
-    # articles = Article.objects.all()
     return ["a", "b", "c"]
