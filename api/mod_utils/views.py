@@ -2,7 +2,6 @@
 import sys
 from typing import List
 from django.http import HttpResponse
-from rbxz_bend.neoget import _neoget
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 import os
@@ -174,9 +173,7 @@ def neo4j_diff_w_pdb():
 def structs_all_ids(request):
     return Response(neo4j_get_all_struct_ids())
 
-
 # TODO: Centralize logging
-
 @api_view(['GET'])
 def structs_sync_with_pdb(request):
     import subprocess
