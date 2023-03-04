@@ -69,10 +69,10 @@ RUN . "$NVM_DIR/nvm.sh" && nvm alias default v${NODE_VERSION}
 ENV PATH="/root/.nvm/versions/node/v${NODE_VERSION}/bin/:${PATH}"
 
 # -------------------------------------- NODE AND MODULES INSTALLATION
-COPY cli $CLI
-WORKDIR $CLI
-ADD cli/package.json ${CLI}
-RUN npm install --no-optional && npm cache clean --force
+# COPY cli $CLI
+# WORKDIR $CLI
+# ADD cli/package.json ${CLI}
+# RUN npm install --no-optional && npm cache clean --force
 RUN npm install -g ts-node
 RUN npm i -g json-schema-to-typescript
 # RUN npm i -g ribxzcli
