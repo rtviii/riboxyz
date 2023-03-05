@@ -6,6 +6,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 import os
 from rbxz_bend.settings import NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER, RIBETL_DATA
+from rbxz_bend.settings import Neo4jConnection
 from neo4j import GraphDatabase, Driver, Session, Transaction, Result, ResultSummary
 from subprocess import STDOUT, Popen, PIPE, run
 from neo4j.graph import Graph, Node, Relationship, Path
