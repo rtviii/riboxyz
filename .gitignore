@@ -14,9 +14,10 @@ node_modules
 *.env
 **/*.env
 
-__pycache__
+__pycache__/
 __pycache__/**
 **/__pycache__/
+**/__pycache__/**
 
 
 **/local_venv
