@@ -13,6 +13,7 @@ arg.add_argument('-v', '--version', action='version', version='%(prog)s 0.1.0')
 arg.add_argument('-ts','--ts_typegen', type=str,nargs='+', help='Generate TypeScript types for the API. Point at "types" directory and specify the out directory')
 arg.add_argument('-s','--structure', type=str)
 arg.add_argument('-db','--database', action='store_true')
+
 args = arg.parse_args()
 
 
@@ -22,8 +23,11 @@ if args.structure:
 if args.database:
     D = Neo4jDB()
 
-
+    # D.see_constraints()
+    # D.init_constraints()
     D.see_constraints()
-    D.init_constraints()
-    pprint(D.see_constraints())
+    D.init_protein_classes()
+    D.init_rna_classes()
+    print(D.return_any())
+
 

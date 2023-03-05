@@ -2,7 +2,7 @@ from typing import Callable
 from neo4j import GraphDatabase, Driver, ManagedTransaction, Record, Result, Transaction
 from neo4j.graph import Node, Relationship
 from neo4j import ManagedTransaction, Transaction
-from api.ribctl.lib.types.types_ribosome import RNA, Ligand, Protein, RibosomeStructure
+from ribctl.lib.types.types_ribosome import RNA, Ligand, Protein, RibosomeStructure
 from ribctl.lib.types.types_polymer import list_LSU_Proteins, list_SSU_Proteins, list_RNAClass
 def node__structure(_rib: RibosomeStructure) -> Callable[[Transaction | ManagedTransaction], Record | None]:
     R = _rib.dict()
@@ -46,8 +46,7 @@ def node__ligand(_ligand:Ligand)->Callable[[Transaction | ManagedTransaction], N
  	chemicalName        : $chemicalName       ,
  	formula_weight      : $formula_weight     ,
  	pdbx_description    : $pdbx_description   ,
- 	number_of_instances : $number_of_instances
-        })
+ 	number_of_instances : $number_of_instances})
        return ligand
         """, **L).single(strict=True)['ligand']
     return _
@@ -64,6 +63,7 @@ def link__ligand_to_struct(prot: Node, parent_rcsb_id: str) -> Callable[[Transac
                       {"ELEM_ID": int(prot.element_id),
                        "PARENT": parent_rcsb_id}).values('struct', 'ligand', 'contains')
     return _
+
 def commit_ligand(lig:Ligand, parent_rcsb_id:str, driver:Driver):
     with driver.session() as s:
         node = s.execute_write(node__ligand(lig))
