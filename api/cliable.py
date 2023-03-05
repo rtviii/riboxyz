@@ -1,9 +1,10 @@
 #TODO: ( Bring up ) Lift all the useful top-level functions from the package to this level.
 
 import argparse
+from pprint import pprint
 from pydantic2ts import generate_typescript_defs
-from api.ribctl.db.driver import init_driver
-from api.ribctl.db import constraints, structure, rna, proteins, ligands, nomenclature
+from api.ribctl.db.driver import Neo4jDB, init_driver
+from api.ribctl.db import constraints, structure, rna, proteins
 from ribctl.lib.types.types_ribosome_assets import RibosomeAssets
 
 arg = argparse.ArgumentParser(description='RibCtl - A simple tool to control the ribosome')
@@ -19,8 +20,10 @@ if args.structure:
     RibosomeAssets(args.structure)
 
 if args.database:
-    D = init_driver()
+    D = Neo4jDB()
 
 
+    D.see_constraints()
+    D.init_constraints()
+    pprint(D.see_constraints())
 
-    print(D)
