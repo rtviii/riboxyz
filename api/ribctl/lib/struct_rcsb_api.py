@@ -277,10 +277,10 @@ def process_pdb_record(rcsb_id: str) -> RibosomeStructure:
         pub         = response['citation'][0]
     else:
         pub = {
-            "year": None,
-            "rcsb_authors": None,
-            "title": None,
-            "pdbx_database_id_DOI": None,
+            "year"                   : None,
+            "rcsb_authors"           : None,
+            "title"                  : None,
+            "pdbx_database_id_DOI"   : None,
             "pdbx_database_id_PubMed": None
         }
     
@@ -352,8 +352,6 @@ def query_rcsb_api(gql_string: str) -> dict:
         return resp['data']['entry']
     else:
         raise Exception("No data found for query: {}".format(gql_string))
-
-
 
 
 
