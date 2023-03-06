@@ -100,8 +100,8 @@ class RibosomeStructure(BaseModel):
     host_organism_names: list[str]
 
     proteins: list[Protein]
-    rnas: list[RNA] | None
-    ligands: list[Ligand] | None
+    rnas    : list[RNA] | None
+    ligands : list[Ligand] | None
 
 
 
