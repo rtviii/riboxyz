@@ -53,8 +53,13 @@ class Neo4jDB():
             CALL db.constraints;
                   """)
             return r.data()
+    def get_all_structs(self) :
+        with self.driver.session() as s:
+            return s.read_transaction(lambda tx: tx.run("""//
+            match (n:RibosomeStructure) return n.rcsb_id;
+            """).values('n.rcsb_id'))
 
-    def return_any(self) -> list[dict[str, Any]]:
+    def get_any(self) -> list[dict[str, Any]]:
         with self.driver.session() as s:
             return s.read_transaction(lambda tx: tx.run("""//
             match (n) return n limit 10;

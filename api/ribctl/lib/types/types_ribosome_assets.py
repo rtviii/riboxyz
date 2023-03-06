@@ -56,49 +56,49 @@ class RibosomeAssets():
             json.dump(profile, f)
 
     def _verify_cif(self, obtain: bool = False) -> bool:
-        if os.path.exists(self._cif_filepath()):
+        if obtain:
+            download_unpack_place(self.rcsb_id)
             return True
         else:
-            if obtain:
-                download_unpack_place(self.rcsb_id)
+            if os.path.exists(self._cif_filepath()):
                 return True
             else:
                 return False
 
     def _verify_cif_modified(self, obtain: bool = False) -> bool:
-        if os.path.exists(self._cif_modified_filepath()):
+        if obtain:
+            split_rename(self.rcsb_id)
             return True
         else:
-            if obtain:
-                split_rename(self.rcsb_id)
+            if os.path.exists(self._cif_modified_filepath()):
                 return True
             else:
                 return False
 
     def _verify_json_profile(self, obtain: bool = False) -> bool:
-        if os.path.exists(self._json_profile_filepath()):
+        if obtain:
+            ribosome = process_pdb_record(self.rcsb_id)
+            if not parse_obj_as(RibosomeStructure, ribosome):
+                raise Exception("Invalid ribosome structure profile.")
+
+            self.save_json_profile(self._json_profile_filepath(), ribosome)
+            print(
+                f"Saved structure profile:\t{self._json_profile_filepath()}")
             return True
         else:
-            if obtain:
-                ribosome = process_pdb_record(self.rcsb_id)
-                if not parse_obj_as(RibosomeStructure, ribosome):
-                    raise Exception("Invalid ribosome structure profile.")
-
-                self.save_json_profile(self._json_profile_filepath(), ribosome)
-                print(
-                    f"Saved structure profile:\t{self._json_profile_filepath()}")
+            if os.path.exists(self._json_profile_filepath()):
                 return True
-            else:
-                return False
+            return False
+
 
     def _verify_png_thumbnail(self, obtain: bool = False) -> bool:
-        if os.path.exists(self._png_thumbnail_filepath()):
+        if obtain:
+            print("Obtaning thumbnail...")
+            render_thumbnail(self.rcsb_id)
+
             return True
         else:
-            if obtain:
-                print("Obtaning thumbnail...")
-                render_thumbnail(self.rcsb_id)
-
+            if os.path.exists(self._png_thumbnail_filepath()):
                 return True
             else:
                 return False
@@ -108,12 +108,10 @@ class RibosomeAssets():
 
     def _verify_ligads_and_ligandlike_polys(self, obtain: bool = False):
 
-        def ligand_path(chem_id): return os.path.join(
-            self._dir_path(), f"LIGAND_{chem_id.upper()}.json")
-        def liglike_poly_path(auth_asym_id): return os.path.join(
-            self._dir_path(), f"POLYMER_{auth_asym_id.upper()}.json")
+        def ligand_path(chem_id):            return os.path.join(self._dir_path(), f"LIGAND_{chem_id.upper()}.json")
+        def liglike_poly_path(auth_asym_id): return os.path.join(self._dir_path(), f"POLYMER_{auth_asym_id.upper()}.json")
 
-        ligands = get_ligands(self.rcsb_id, self.json_profile())
+        ligands             = get_ligands(self.rcsb_id, self.json_profile())
         ligandlike_polymers = get_liglike_polymers(self.json_profile())
 
         _flag = True

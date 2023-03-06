@@ -24,8 +24,11 @@ args = arg.parse_args()
 
 
 if args.sync_rcsb:
-    rcsb_structs = rcsb_structs()
-    neo4j_structs = 
+    D = Neo4jDB()
+
+    rcsb_structs  = current_rcsb_structs()
+    neo4j_structs = D.get_all_structs()
+    print(neo4j_structs)
 
 
 
@@ -41,7 +44,7 @@ if args.obtain:
     print(rcsb_id)
 
 if args.structure:
-
+   
     r  = RibosomeAssets(args.structure)
     d  = r.json_profile()
     rs = RibosomeStructure(**d)
@@ -51,18 +54,9 @@ if args.structure:
 if args.database:
     D = Neo4jDB()
 
-    # D.see_constraints()
-    # D.init_constraints()
-    D.see_constraints()
-    print(D.add_structure(RibosomeAssets('3J7Z')))
-
-if args.database:
-    D = Neo4jDB()
-
-    # D.see_constraints()
-    # D.init_constraints()
-    D.see_constraints()
-    print(D.add_structure(RibosomeAssets('3J7Z')))
-
-
-
+    for i in ["4UG0","3J9M","5AFI","7K00"]:
+        ra = RibosomeAssets(i)
+        ra._verify_json_profile(True)
+        jp = ra.json_profile()
+        pprint(jp)
+        # print(D.add_structure(ra))
