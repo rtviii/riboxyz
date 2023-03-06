@@ -4,9 +4,9 @@ import argparse
 from pprint import pprint
 from pydantic2ts import generate_typescript_defs
 from api.ribctl.db.driver import Neo4jDB, init_driver
-from api.ribctl.db import structure, rna, proteins
 from api.ribctl.lib.types.types_ribosome import RibosomeStructure
 from ribctl.lib.types.types_ribosome_assets import RibosomeAssets
+from ribctl.lib.struct_rcsb_api import current_rcsb_structs
 
 arg = argparse.ArgumentParser(description='RibCtl - A simple tool to control the ribosome')
 
@@ -24,6 +24,11 @@ args = arg.parse_args()
 
 
 if args.sync_rcsb:
+    rcsb_structs = rcsb_structs()
+    neo4j_structs = 
+
+
+
     
 
 
