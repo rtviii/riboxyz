@@ -125,8 +125,6 @@ def __is_ligand_like(polymer, nomenclature: list[str]):
     #   // ? Look for enzymes, factors and antibiotics
     reg = r"/(\w*(?<!(cha|pro|dom|str))in\b)|(\b\w*zyme\b)|(factor)/gi"
     match = re.search(reg, polymer['rcsb_polymer_entity']['pdbx_description'])
-
-    print("Matches : ", match)
     if match != None  \
             and not 'protein' not in match.string.lower()  \
             and not ('protein' in polymer['rcsb_polymer_entity']['pdbx_description'].lower()) \

@@ -95,13 +95,14 @@ class Neo4jDB():
 
         for protein in R.proteins:
             add_protein(self.driver, protein)
+
         if R.rnas is not None:
             for rna in R.rnas:
-
                 add_rna(self.driver, rna)
 
         if R.ligands is not None:
             for ligand in R.ligands:
                 add_ligand(self.driver, ligand, R.rcsb_id)
+
         return struct_node_result.data()
 
