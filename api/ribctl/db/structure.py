@@ -1,3 +1,4 @@
+from pprint import pprint
 from typing import Callable
 from neo4j import GraphDatabase, Driver, ManagedTransaction, Record, Result, Transaction
 from neo4j.graph import Node, Relationship
@@ -40,14 +41,14 @@ def node__structure(_rib: RibosomeStructure) -> Callable[[Transaction | ManagedT
 def node__ligand(_ligand:Ligand)->Callable[[Transaction | ManagedTransaction], Node ]:
     L = _ligand.dict()
     def _(tx: Transaction | ManagedTransaction):
-        return tx.run("""//
- merge (ligand:Ligand {
- 	chemicalId          : $chemicalId         ,
- 	chemicalName        : $chemicalName       ,
- 	formula_weight      : $formula_weight     ,
- 	pdbx_description    : $pdbx_description   ,
- 	number_of_instances : $number_of_instances})
-       return ligand
+     return tx.run("""//
+MERGE (ligand:Ligand {chemicalId: 
+                $chemicalId })
+   ON CREATE SET	ligand.chemicalName        = $chemicalName      ,
+ 	                ligand.formula_weight      = $formula_weight    ,
+ 	                ligand.pdbx_description    = $pdbx_description  ,
+ 	                ligand.number_of_instances = $number_of_instances
+       RETURN ligand       
         """, **L).single(strict=True)['ligand']
     return _
 
@@ -65,6 +66,8 @@ def link__ligand_to_struct(prot: Node, parent_rcsb_id: str) -> Callable[[Transac
     return _
 
 def add_ligand(driver:Driver,lig:Ligand, parent_rcsb_id:str):
+    print("Attemptign to add ligand:")
+    pprint(lig.dict())
     with driver.session() as s:
         node = s.execute_write(node__ligand(lig))
         s.execute_write(link__ligand_to_struct(node, parent_rcsb_id))

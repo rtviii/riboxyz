@@ -54,10 +54,9 @@ if args.structure:
 if args.database:
     D = Neo4jDB()
 
-    for i in ["4UG0","3J9M","5AFI","7K00"]:
+    for i in ["7K00"]:
         print("PROCESSING: ※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※",i)
         ra = RibosomeAssets(i)
         ra._verify_json_profile(True)
         jp = ra.json_profile()
-        pprint(jp)
-        # print(D.add_structure(ra))
+        print(D.add_structure(ra))
