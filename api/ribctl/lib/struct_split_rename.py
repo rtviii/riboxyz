@@ -74,7 +74,8 @@ def __process_chains(pdbid: str):
                 ...
             io.save(destination)
         else:
-            print("Exists: ", destination)
+            ...
+            # print("Exists: ", destination)
 
 def split_rename(pdbid: str):
     pdbid = pdbid.upper()

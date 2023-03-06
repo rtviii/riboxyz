@@ -8,6 +8,8 @@ from api.ribctl.lib.types.types_ribosome import RibosomeStructure
 from ribctl.lib.types.types_ribosome_assets import RibosomeAssets
 from ribctl.lib.struct_rcsb_api import current_rcsb_structs
 
+import logging
+
 arg = argparse.ArgumentParser(description='RibCtl - A simple tool to control the ribosome')
 
 arg.add_argument('-v', '--version', action='version', version='%(prog)s 0.1.0')
@@ -19,8 +21,8 @@ arg.add_argument('-pdbsync','--sync_rcsb', action='store_true')
 
 args = arg.parse_args()
 
-
-
+logging.basicConfig(level=logging.ERROR, filemode='w', filename='injest_log.txt', format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 
 if args.sync_rcsb:
@@ -53,13 +55,19 @@ if args.database:
     unsynced = current_rcsb_structs()
 
 
-    for i in set(unsynced) - set(synced):
-        print("PROCESSING: ※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※",i)
-        assets = RibosomeAssets(i)
+    for rcsb_id in set(unsynced) - set(synced):
 
-        assets._verify_dir_exists()
-        assets._verify_json_profile(True) # <-- overwrite old stuff
-        assets._verify_cif(True)
-        assets._verify_cif_modified(True)
-        assets._verify_ligads_and_ligandlike_polys(True)
-        D.add_structure(assets)
+
+        try :
+            assets = RibosomeAssets(rcsb_id)
+            assets._verify_dir_exists()
+            assets._verify_json_profile(True) # <-- overwrite old stuff
+            assets._verify_cif(True)
+            assets._verify_cif_modified(True)
+            assets._verify_ligads_and_ligandlike_polys(True)
+            D.add_structure(assets)
+        except Exception as e:
+            print(e)
+            logger.error("Exception occurred:", exc_info=True)
+
+

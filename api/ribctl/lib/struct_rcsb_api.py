@@ -40,21 +40,20 @@ def __get_protein_nomenclature(protein):
              ['pfamDomainAccession'] else ... for kv in SSU_map.items()]
         return list(set(nomenclature))
 
-
 def __get_rna_nomenclature(polymer):
 
     rna_reg = {
-        "5SrRNA": r"\b(5s)",
+        "5SrRNA"  : r"\b(5s)",
         "5.8SrRNA": r"\b(5\.8s)",
-        "12SrRNA": r"\b(12s)",
-        "16SrRNA": r"\b(16s)",
-        "21SrRNA": r"\b(21s)",
-        "23SrRNA": r"\b(23s)",
-        "25SrRNA": r"\b(25s)",
-        "28SrRNA": r"\b(28s)",
-        "35SrRNA": r"\b(35s)",
-        "mRNA": r"(mrna)|\b(messenger)\b",
-        "tRNA": r"(trna)|\b(transfer)\b",
+        "12SrRNA" : r"\b(12s)",
+        "16SrRNA" : r"\b(16s)",
+        "21SrRNA" : r"\b(21s)",
+        "23SrRNA" : r"\b(23s)",
+        "25SrRNA" : r"\b(25s)",
+        "28SrRNA" : r"\b(28s)",
+        "35SrRNA" : r"\b(35s)",
+        "mRNA"    : r"(mrna)|\b(messenger)\b",
+        "tRNA"    : r"(trna)|\b(transfer)\b",
     }
 
     rnatypes = rna_reg.items()
@@ -64,7 +63,6 @@ def __get_rna_nomenclature(polymer):
         if matches != None:
             return [i[0]]
     return []
-
 
 def __infer_organisms_from_polymers(polymers: list[RNA|Protein]):
 
@@ -90,7 +88,6 @@ def __infer_organisms_from_polymers(polymers: list[RNA|Protein]):
         "host_organism_names": list(map(str, set(host_organism_names)))
     }
 
-
 def __extract_external_refs(external_refs):
     """
     external_refs: list[{ link: string; type: string; id: string }]
@@ -110,7 +107,6 @@ def __extract_external_refs(external_refs):
 
     return [externalRefIds, externalRefTypes, externalRefLinks]
 
-
 def __reshape_to_ligand(nonpoly)->Ligand:
     return Ligand(**{
         "pdbx_description": nonpoly['rcsb_nonpolymer_entity']['pdbx_description'],
@@ -119,7 +115,6 @@ def __reshape_to_ligand(nonpoly)->Ligand:
         "chemicalName": nonpoly['pdbx_entity_nonpoly']['name'],
         "number_of_instances": nonpoly['rcsb_nonpolymer_entity']['pdbx_number_of_molecules']
     })
-
 
 def __is_ligand_like(polymer, nomenclature: list[str]):
     if 'tRNA' in nomenclature or 'mRNA' in nomenclature:
@@ -134,7 +129,6 @@ def __is_ligand_like(polymer, nomenclature: list[str]):
         return True
     else:
         return False
-
 
 def __reshape_poly_to_rna(plm) -> list[RNA]:
     """this returns a list because certain polymers accounts for multiple RNA molecules"""
@@ -207,7 +201,6 @@ def __reshape_poly_to_rna(plm) -> list[RNA]:
 
         for auth_asym_id in plm['rcsb_polymer_entity_container_identifiers']['auth_asym_ids']]
 
-
 def __reshape_poly_to_protein(plm)->list[Protein]:
     if plm['pfams'] != None and len(plm['pfams']) > 0:
 
@@ -255,7 +248,6 @@ def __reshape_poly_to_protein(plm)->list[Protein]:
         }) for auth_asym_id in plm['rcsb_polymer_entity_container_identifiers']['auth_asym_ids']
     ]
 
-
 def process_pdb_record(rcsb_id: str) -> RibosomeStructure:
     """
     returns dict of the shape types_RibosomeStructure 
@@ -286,12 +278,6 @@ def process_pdb_record(rcsb_id: str) -> RibosomeStructure:
     kwords      = response['struct_keywords']['pdbx_keywords'] if response['struct_keywords'] != None else None
 
 
-    entryinfo = response['rcsb_entry_info']
-
-    print("entry info", entryinfo.keys())
-    reso_combined = entryinfo['resolution_combined']
-    print("reso combiend::: ", reso_combined)
-
     reshaped = RibosomeStructure(**{
         "rcsb_id"               : response['rcsb_id'],
         "expMethod"             : response['exptl'][0]['method'],
@@ -312,7 +298,6 @@ def process_pdb_record(rcsb_id: str) -> RibosomeStructure:
     })
 
     return reshaped
-
 
 def current_rcsb_structs() -> list[str]:
     """Return all structures in the rcsb that contain the phrase RIBOSOME and have more than 25 protein entities"""
@@ -348,7 +333,6 @@ def current_rcsb_structs() -> list[str]:
     query = rcsb_search_api + "?json=" + json.dumps(params)
     return requests.get(query).json()['result_set']
 
-
 def query_rcsb_api(gql_string: str) -> dict:
 
     reqstring = "https://data.rcsb.org/graphql?query={}".format(gql_string)
@@ -359,6 +343,9 @@ def query_rcsb_api(gql_string: str) -> dict:
         return resp['data']['entry']
     else:
         raise Exception("No data found for query: {}".format(gql_string))
+
+
+
 
 
 # Functionality to migrate from older cli:
