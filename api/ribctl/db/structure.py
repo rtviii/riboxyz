@@ -1,9 +1,11 @@
+from pprint import pprint
 from typing import Callable
 from neo4j import GraphDatabase, Driver, ManagedTransaction, Record, Result, Transaction
 from neo4j.graph import Node, Relationship
 from neo4j import ManagedTransaction, Transaction
-from api.ribctl.lib.types.types_ribosome import RNA, Ligand, Protein, RibosomeStructure
+from ribctl.lib.types.types_ribosome import RNA, Ligand, Protein, RibosomeStructure
 from ribctl.lib.types.types_polymer import list_LSU_Proteins, list_SSU_Proteins, list_RNAClass
+
 def node__structure(_rib: RibosomeStructure) -> Callable[[Transaction | ManagedTransaction], Record | None]:
     R = _rib.dict()
     def _(tx: Transaction | ManagedTransaction):
@@ -22,7 +24,7 @@ def node__structure(_rib: RibosomeStructure) -> Callable[[Transaction | ManagedT
               src_organism_names         : $src_organism_names,
 
               host_organism_ids           : $host_organism_ids,
-             host_organism_names         : $host_organism_names
+             host_organism_names          : $host_organism_names
 
               })
 
@@ -32,7 +34,6 @@ def node__structure(_rib: RibosomeStructure) -> Callable[[Transaction | ManagedT
               struct.rcsb_external_ref_link = CASE WHEN $rcsb_external_ref_link = null then \"null\" else $rcsb_external_ref_link END,
               struct.citation_pdbx_doi      = CASE WHEN $citation_pdbx_doi = null then \"null\" else $citation_pdbx_doi END,
               struct.citation_year          = CASE WHEN $citation_year = null then \"null\" else $citation_year END
-              
               return struct
         """, **R).single()
     return _
@@ -40,15 +41,14 @@ def node__structure(_rib: RibosomeStructure) -> Callable[[Transaction | ManagedT
 def node__ligand(_ligand:Ligand)->Callable[[Transaction | ManagedTransaction], Node ]:
     L = _ligand.dict()
     def _(tx: Transaction | ManagedTransaction):
-        return tx.run("""//
- merge (ligand:Ligand {
- 	chemicalId          : $chemicalId         ,
- 	chemicalName        : $chemicalName       ,
- 	formula_weight      : $formula_weight     ,
- 	pdbx_description    : $pdbx_description   ,
- 	number_of_instances : $number_of_instances
-        })
-       return ligand
+     return tx.run("""//
+MERGE (ligand:Ligand {chemicalId: 
+                $chemicalId })
+   ON CREATE SET	ligand.chemicalName        = $chemicalName      ,
+ 	                ligand.formula_weight      = $formula_weight    ,
+ 	                ligand.pdbx_description    = $pdbx_description  ,
+ 	                ligand.number_of_instances = $number_of_instances
+       RETURN ligand       
         """, **L).single(strict=True)['ligand']
     return _
 
@@ -64,7 +64,8 @@ def link__ligand_to_struct(prot: Node, parent_rcsb_id: str) -> Callable[[Transac
                       {"ELEM_ID": int(prot.element_id),
                        "PARENT": parent_rcsb_id}).values('struct', 'ligand', 'contains')
     return _
-def commit_ligand(lig:Ligand, parent_rcsb_id:str, driver:Driver):
+
+def add_ligand(driver:Driver,lig:Ligand, parent_rcsb_id:str):
     with driver.session() as s:
         node = s.execute_write(node__ligand(lig))
         s.execute_write(link__ligand_to_struct(node, parent_rcsb_id))

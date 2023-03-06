@@ -156,12 +156,12 @@ def __get_poly_nbrs(
                     auth_asym_id = poly_entity['auth_asym_id']
                     seq          = poly_entity['entity_poly_seq_one_letter_code']
 
-        nbr_dict[c] = BindingSiteChain(
-            seq,
-            nomenclature,
-            asym_id,
-            auth_asym_id,
-            sorted([residue for residue in nbr_residues if residue.parent_auth_asym_id == c], key=operator.attrgetter('residue_id')))
+                    nbr_dict[c] = BindingSiteChain(
+                        seq,
+                        nomenclature,
+                        asym_id,
+                        auth_asym_id,
+                        sorted([residue for residue in nbr_residues if residue.parent_auth_asym_id == c], key=operator.attrgetter('residue_id')))
 
 
     return BindingSite(nbr_dict)
@@ -197,23 +197,20 @@ def __get_ligand_nbrs(
     nbr_dict     = {}
     chain_names  = list(set(map(lambda _:  _.parent_auth_asym_id, nbr_residues)))
 
-
-
     for c in chain_names:
         for poly_entity in poly_entities:
             if c == poly_entity['auth_asym_id']:
-
                     nomenclature = poly_entity['nomenclature']
                     asym_ids     = poly_entity['asym_ids']
                     auth_asym_id = poly_entity['auth_asym_id']
                     seq          = poly_entity['entity_poly_seq_one_letter_code']
 
-        nbr_dict[c] = BindingSiteChain(
-            seq,
-            nomenclature,
-            asym_ids,
-            auth_asym_id,
-            sorted([residue for residue in nbr_residues if residue.parent_auth_asym_id == c], key=operator.attrgetter('residue_id')))
+                    nbr_dict[c] = BindingSiteChain(
+                        seq,
+                        nomenclature,
+                        asym_ids,
+                        auth_asym_id,
+                        sorted([residue for residue in nbr_residues if residue.parent_auth_asym_id == c], key=operator.attrgetter('residue_id')))
 
 
     return BindingSite(nbr_dict)
