@@ -67,6 +67,7 @@ def link__prot_to_nomclass(prot: Node) -> Callable[[Transaction | ManagedTransac
 """,
                       {"ELEM_ID": int(prot.element_id)}).values('prot', 'member', 'prot_class')
     return _
+
 def node__protein_class(protein_class:str):
     def _(tx:Transaction | ManagedTransaction):
         return tx.run("""//
@@ -75,9 +76,8 @@ def node__protein_class(protein_class:str):
         """, {"CLASS_ID":protein_class}).single(strict=True)['protein_class']
     return _
 
-def commit_protein(prot:Protein):
+def add_protein(driver:Driver,prot:Protein):
     with driver.session() as s:
         node = s.execute_write(node__protein(prot))
         s.execute_write(link__prot_to_struct(node, prot.parent_rcsb_id))
-        x = s.execute_write(link__prot_to_nomclass(node))
-        pprint(x)
+        s.execute_write(link__prot_to_nomclass(node))
