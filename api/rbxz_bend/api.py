@@ -1,7 +1,8 @@
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from ninja import Router
-from schema.types_django import RibosomeResponse
+from schema import data_requests as reqs
+from schema import data_responses as resps
 
 router = Router()
 

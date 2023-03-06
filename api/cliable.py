@@ -2,10 +2,9 @@
 
 import argparse
 from pprint import pprint
-from pydantic2ts import generate_typescript_defs
-from api.ribctl.db.driver import Neo4jDB, init_driver
+from api.ribctl.db.driver import Neo4jDB
 from api.ribctl.lib.types.types_ribosome import RibosomeStructure
-from ribctl.lib.types.types_ribosome_assets import RibosomeAssets
+from ribctl.lib.types.types_ribosome_assets import  RibosomeAssets
 from ribctl.lib.struct_rcsb_api import current_rcsb_structs
 
 import logging
@@ -26,19 +25,11 @@ logger = logging.getLogger(__name__)
 
 
 if args.sync_rcsb:
-    D = Neo4jDB()
 
+    D             = Neo4jDB()
     rcsb_structs  = current_rcsb_structs()
     neo4j_structs = D.get_all_structs()
     print(neo4j_structs)
-
-
-
-    
-
-
-
-
 
 if args.obtain:
     rcsb_id = args.obtain
@@ -48,25 +39,20 @@ if args.structure:
     d  = r.json_profile()
     rs = RibosomeStructure(**d)
 
-if args.database:
-    D = Neo4jDB()
 
-    synced = D.get_all_structs()
+
+
+if args.database:
+    D        = Neo4jDB()
+
+    synced   = D.get_all_structs()
     unsynced = sorted(current_rcsb_structs())
 
-
-    # for rcsb_id in set(unsynced) - set(synced):
-
-    # for rcsb_id in set(unsynced):
     for rcsb_id in unsynced:
+        assets = RibosomeAssets(rcsb_id)
 
-        try :
-            assets = RibosomeAssets(rcsb_id)
-            assets._verify_dir_exists()
-            assets._verify_json_profile(True) # <-- overwrite old stuff
-            assets._verify_cif(True)
-            assets._verify_cif_modified(True)
-            assets._verify_ligads_and_ligandlike_polys(True)
+        try:
+            assets._verify_json_profile(True)
             D.add_structure(assets)
         except Exception as e:
             print(e)

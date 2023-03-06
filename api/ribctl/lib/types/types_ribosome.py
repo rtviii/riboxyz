@@ -66,12 +66,13 @@ class RNA(BaseModel):
 
 
 
-class Ligand(BaseModel):
-    chemicalId: str
-    chemicalName: str
-    formula_weight: float
-    pdbx_description: str
-    number_of_instances: int
+class Ligand(BaseModel)  : 
+
+      chemicalId         : str
+      chemicalName       : str
+      formula_weight     : None | float
+      pdbx_description   : str
+      number_of_instances: int
 
 
 
@@ -88,10 +89,10 @@ class RibosomeStructure(BaseModel):
     rcsb_external_ref_type: list[str]
     rcsb_external_ref_link: list[str]
 
-    citation_year: int
-    citation_rcsb_authors: list[str]
-    citation_title: str
-    citation_pdbx_doi: str
+    citation_year        : None | int
+    citation_rcsb_authors: None | list[str]
+    citation_title       : None | str
+    citation_pdbx_doi    : None | str
 
     src_organism_ids: list[int]
     src_organism_names: list[str]
