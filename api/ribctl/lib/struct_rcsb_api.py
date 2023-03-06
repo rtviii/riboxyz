@@ -1,11 +1,15 @@
+import json
+from pprint import pprint
+from typing import Any
 import requests
+from api.ribctl.lib.types.types_ribosome import RNA, Ligand, Protein, RibosomeStructure
 from ribctl.lib import LSU_map, SSU_map
 from ribctl.lib.gql_querystrings import monolithic
 import re
 
 
-
-def gql_monolith(rcsb_id): return monolithic.replace("$RCSB_ID", rcsb_id.upper())
+def gql_monolith(rcsb_id): return monolithic.replace(
+    "$RCSB_ID", rcsb_id.upper())
 
 # gql_structs             = lambda rcsb_id: structure_string.replace("$RCSB_ID", rcsb_id.upper())
 # gql_polymer_entities    = lambda rcsb_id: polymer_entities_string.replace("$RCSB_ID", rcsb_id.upper())
@@ -19,21 +23,24 @@ def __get_protein_nomenclature(protein):
         banregex, protein['rcsb_polymer_entity']['pdbx_description'])
 
     if (finds != None):
-        firstcap:str = finds[0]
-        classname:str = firstcap[0].lower() + firstcap[1].upper() + firstcap[2:]
+        firstcap: str = finds[0]
+        classname: str = firstcap[0].lower(
+        ) + firstcap[1].upper() + firstcap[2:]
         return [classname]
 
     elif protein['pfams'] == None or protein['pfams'] == []:
         return []
     else:
-        pfamids      = [pfam['rcsb_pfam_accession'] for pfam in protein['pfams']]
+        pfamids = [pfam['rcsb_pfam_accession'] for pfam in protein['pfams']]
         nomenclature = []
         for pfam_id in pfamids:
-            [nomenclature.append(kv[0]) if pfam_id in kv[1] ['pfamDomainAccession'] else ... for kv in LSU_map.items()]
-            [nomenclature.append(kv[0]) if pfam_id in kv[1] ['pfamDomainAccession'] else ... for kv in SSU_map.items()]
+            [nomenclature.append(kv[0]) if pfam_id in kv[1]
+             ['pfamDomainAccession'] else ... for kv in LSU_map.items()]
+            [nomenclature.append(kv[0]) if pfam_id in kv[1]
+             ['pfamDomainAccession'] else ... for kv in SSU_map.items()]
         return list(set(nomenclature))
 
-def __get_rna_nomenclature(polymer):  
+def __get_rna_nomenclature(polymer):
 
     rna_reg = {
         "5SrRNA"  : r"\b(5s)",
@@ -51,13 +58,13 @@ def __get_rna_nomenclature(polymer):
 
     rnatypes = rna_reg.items()
     for i in rnatypes:
-        matches = re.search(i[1], polymer['rcsb_polymer_entity'][ 'pdbx_description' ], flags=re.IGNORECASE | re.MULTILINE)
-        if matches!=None:
+        matches = re.search(i[1], polymer['rcsb_polymer_entity']
+                            ['pdbx_description'], flags=re.IGNORECASE | re.MULTILINE)
+        if matches != None:
             return [i[0]]
     return []
 
-
-def __infer_organisms_from_polymers(polymers: list):
+def __infer_organisms_from_polymers(polymers: list[RNA|Protein]):
 
     host_organism_names: list[str] = []
     src_organism_names : list[str] = []
@@ -65,19 +72,21 @@ def __infer_organisms_from_polymers(polymers: list):
     src_organism_ids   : list[int] = []
 
     for polymer in polymers:
-        src_organism_names = [*src_organism_names, *polymer['src_organism_names']] if polymer[ 'src_organism_names' ]     != None else src_organism_names
-        src_organism_ids   = [*src_organism_ids  , *polymer['src_organism_ids']] if polymer['src_organism_ids']           != None else src_organism_ids
-        src_organism_names = [*src_organism_names, *polymer[ 'host_organism_names' ]] if polymer[ 'host_organism_names' ] != None else src_organism_names
-        src_organism_ids   = [*src_organism_ids  , *polymer[ 'host_organism_ids' ]] if polymer[ 'host_organism_ids' ]     != None else src_organism_ids
-
+        src_organism_names = [*src_organism_names, *polymer.src_organism_names
+                              ] if polymer.src_organism_names != None else src_organism_names
+        src_organism_ids = [*src_organism_ids, *polymer.src_organism_ids
+                            ] if polymer.src_organism_ids != None else src_organism_ids
+        src_organism_names = [*src_organism_names, *polymer.host_organism_names
+                              ] if polymer.host_organism_names != None else src_organism_names
+        src_organism_ids = [*src_organism_ids, *polymer.host_organism_ids
+                            ] if polymer.host_organism_ids != None else src_organism_ids
 
     return {
-        "src_organism_ids"   : list(map(int,set(src_organism_ids))),
-        "src_organism_names" : list(map(str,set(src_organism_names))),
-        "host_organism_ids"  : list(map(int,set(host_organism_ids))),
-        "host_organism_names": list(map(str,set(host_organism_names)))
-        }
-
+        "src_organism_ids": list(map(int, set(src_organism_ids))),
+        "src_organism_names": list(map(str, set(src_organism_names))),
+        "host_organism_ids": list(map(int, set(host_organism_ids))),
+        "host_organism_names": list(map(str, set(host_organism_names)))
+    }
 
 def __extract_external_refs(external_refs):
     """
@@ -98,50 +107,81 @@ def __extract_external_refs(external_refs):
 
     return [externalRefIds, externalRefTypes, externalRefLinks]
 
-
-def __reshape_to_ligand(nonpoly):
-    return {
-        "pdbx_description"   : nonpoly['rcsb_nonpolymer_entity']['pdbx_description'],
-        "formula_weight"     : nonpoly['rcsb_nonpolymer_entity']['formula_weight'],
-        "chemicalId"         : nonpoly['pdbx_entity_nonpoly']['comp_id'],
-        "chemicalName"       : nonpoly['pdbx_entity_nonpoly']['name'],
+def __reshape_to_ligand(nonpoly)->Ligand:
+    return Ligand(**{
+        "pdbx_description": nonpoly['rcsb_nonpolymer_entity']['pdbx_description'],
+        "formula_weight": nonpoly['rcsb_nonpolymer_entity']['formula_weight'],
+        "chemicalId": nonpoly['pdbx_entity_nonpoly']['comp_id'],
+        "chemicalName": nonpoly['pdbx_entity_nonpoly']['name'],
         "number_of_instances": nonpoly['rcsb_nonpolymer_entity']['pdbx_number_of_molecules']
-    }
-
+    })
 
 def __is_ligand_like(polymer, nomenclature: list[str]):
     if 'tRNA' in nomenclature or 'mRNA' in nomenclature:
         return True
     #   // ? Look for enzymes, factors and antibiotics
     reg = r"/(\w*(?<!(cha|pro|dom|str))in\b)|(\b\w*zyme\b)|(factor)/gi"
-    matches = re.search(
-        reg, polymer['rcsb_polymer_entity']['pdbx_description'])
-
-    if matches != None  \
-            and not True in ['protein' not in _.lower() for _ in matches]  \
+    match = re.search(reg, polymer['rcsb_polymer_entity']['pdbx_description'])
+    if match != None  \
+            and not 'protein' not in match.string.lower()  \
             and not ('protein' in polymer['rcsb_polymer_entity']['pdbx_description'].lower()) \
             and not ('rna' in polymer['rcsb_polymer_entity']['pdbx_description'].lower()):
         return True
     else:
         return False
 
+def __reshape_poly_to_rna(plm) -> list[RNA]:
+    """this returns a list because certain polymers accounts for multiple RNA molecules"""
 
-def __reshape_poly_to_rna(plm) -> list:
+    # class RCSBOrganism:
+    #     ncbi_taxonomy_id:int | None
+    #     scientific_name :str | None
 
-    src_organism_ids    = list(map(int,set([org['ncbi_taxonomy_id'] for org in plm['rcsb_entity_source_organism']]))) if plm['rcsb_entity_source_organism'] != None else []
-    host_organism_ids   = list(map(int,set([org['ncbi_taxonomy_id'] for org in plm['rcsb_entity_host_organism'  ]]))) if plm['rcsb_entity_host_organism'  ] != None else []
-    src_organism_names  = list(map(str,set([org['ncbi_taxonomy_id'] for org in plm['rcsb_entity_source_organism']]))) if plm['rcsb_entity_source_organism'] != None else []
-    host_organism_names = list(map(str,set([org['ncbi_taxonomy_id'] for org in plm['rcsb_entity_host_organism'  ]]))) if plm['rcsb_entity_host_organism'  ] != None else []
+
+    host_organisms  :list[Any] | None = plm['rcsb_entity_host_organism']
+    source_organisms:list[Any] | None = plm['rcsb_entity_source_organism']
+
+    host_organism_ids   = []
+    host_organism_names = []
+    src_organism_ids   = []
+    src_organism_names = []
+
+
+    if host_organisms != None:
+        for ho in host_organisms:
+            if ho['ncbi_taxonomy_id'] != None:
+                host_organism_ids.append(ho['ncbi_taxonomy_id'])
+            if ho['scientific_name'] != None:
+                host_organism_names.append(ho['scientific_name'])
+
+    if source_organisms != None:
+        for so in source_organisms:
+            if so[ 'ncbi_taxonomy_id' ] != None:
+                src_organism_ids.append(so['ncbi_taxonomy_id'])
+            if so['scientific_name'] != None:
+                src_organism_names.append(so['scientific_name'])
+
+    host_organism_ids   = list(map(int, set(host_organism_ids)))
+    host_organism_names = list(map(str, set(host_organism_names)))
+    src_organism_ids    = list(map(int, set(src_organism_ids)))
+    src_organism_names  = list(map(str, set(src_organism_names)))
+
+    # # ------------
+    # host_organism_ids   = list(map(int, set([org['ncbi_taxonomy_id'] for org in plm['rcsb_entity_host_organism'  ]]))) if plm['rcsb_entity_host_organism'  ] != None else []
+    # host_organism_names = list(map(str, set([org['scientific_name'] for org in plm['rcsb_entity_host_organism'  ]]))) if plm['rcsb_entity_host_organism'  ] != None else []
+
+    # src_organism_ids   = list(map(int, set([org['ncbi_taxonomy_id'] for org in plm['rcsb_entity_source_organism']]))) if plm['rcsb_entity_source_organism'] != None else []
+    # src_organism_names = list(map(str, set([org['scientific_name'] for org in plm['rcsb_entity_source_organism']]))) if plm['rcsb_entity_source_organism']  != None else []
 
     nomenclature = __get_rna_nomenclature(plm)
 
     return [
-        {
+        RNA(**{
             "nomenclature": nomenclature,
-            "ligand_like" : __is_ligand_like(plm, nomenclature),
+            "ligand_like": __is_ligand_like(plm, nomenclature),
 
-            "asym_ids"      : plm['rcsb_polymer_entity_container_identifiers']['asym_ids'],
-            "auth_asym_id"  : auth_asym_id,
+            "asym_ids": plm['rcsb_polymer_entity_container_identifiers']['asym_ids'],
+            "auth_asym_id": auth_asym_id,
             "parent_rcsb_id": plm['entry']['rcsb_id'],
 
             "host_organism_ids"  : host_organism_ids,
@@ -151,18 +191,17 @@ def __reshape_poly_to_rna(plm) -> list:
 
             "rcsb_pdbx_description": "" if plm['rcsb_polymer_entity']['pdbx_description'] == None else plm['rcsb_polymer_entity']['pdbx_description'],
 
-            "entity_poly_strand_id"              : plm['entity_poly']['pdbx_strand_id'],
-            "entity_poly_seq_one_letter_code"    : plm['entity_poly']['pdbx_seq_one_letter_code'],
+            "entity_poly_strand_id": plm['entity_poly']['pdbx_strand_id'],
+            "entity_poly_seq_one_letter_code": plm['entity_poly']['pdbx_seq_one_letter_code'],
             "entity_poly_seq_one_letter_code_can": plm['entity_poly']['pdbx_seq_one_letter_code_can'],
-            "entity_poly_seq_length"             : plm['entity_poly']['rcsb_sample_sequence_length'],
-            "entity_poly_entity_type"            : plm['entity_poly']['type'],
-            "entity_poly_polymer_type"           : plm['entity_poly']['rcsb_entity_polymer_type']
-        }
+            "entity_poly_seq_length": plm['entity_poly']['rcsb_sample_sequence_length'],
+            "entity_poly_entity_type": plm['entity_poly']['type'],
+            "entity_poly_polymer_type": plm['entity_poly']['rcsb_entity_polymer_type']
+        })
 
         for auth_asym_id in plm['rcsb_polymer_entity_container_identifiers']['auth_asym_ids']]
 
-
-def __reshape_poly_to_protein(plm):
+def __reshape_poly_to_protein(plm)->list[Protein]:
     if plm['pfams'] != None and len(plm['pfams']) > 0:
 
         pfam_comments = list(set([pfam['rcsb_pfam_comment']
@@ -173,19 +212,19 @@ def __reshape_poly_to_protein(plm):
             set([pfam['rcsb_pfam_accession'] for pfam in plm['pfams']]))
 
     else:
-        pfam_comments = []
+        pfam_comments     = []
         pfam_descriptions = []
-        pfam_accessions = []
+        pfam_accessions   = []
 
-    src_organism_ids    = list(map(int,set([org['ncbi_taxonomy_id' ] for org in plm['rcsb_entity_source_organism']]))) if plm['rcsb_entity_source_organism'] != None else []
-    host_organism_ids   = list(map(int,set([org['ncbi_taxnonomy_id'] for org in plm['rcsb_entity_host_organism'  ]]))) if plm['rcsb_entity_host_organism'] != None else []
-    src_organism_names  = list(map(str,set([org['scientific_name'  ] for org in plm['rcsb_entity_source_organism']]))) if plm['rcsb_entity_source_organism'] != None else []
-    host_organism_names = list(map(str,set([org['scientific_name'  ] for org in plm['rcsb_entity_host_organism'  ]]))) if plm['rcsb_entity_host_organism'] != None else []
+    src_organism_ids    = list(map(int, set([org['ncbi_taxonomy_id'] for org in plm['rcsb_entity_source_organism']]))) if plm['rcsb_entity_source_organism'] != None else []
+    host_organism_ids   = list(map(int, set([org['ncbi_taxnonomy_id'] for org in plm['rcsb_entity_host_organism']]))) if plm['rcsb_entity_host_organism']    != None else []
+    src_organism_names  = list(map(str, set([org['scientific_name'] for org in plm['rcsb_entity_source_organism']]))) if plm['rcsb_entity_source_organism']  != None else []
+    host_organism_names = list(map(str, set([org['scientific_name'] for org in plm['rcsb_entity_host_organism']]))) if plm['rcsb_entity_host_organism']      != None else []
 
     nomenclature = __get_protein_nomenclature(plm)
 
     return [
-        {
+        Protein(**{
             "nomenclature": nomenclature,
             "asym_ids": plm['rcsb_polymer_entity_container_identifiers']['asym_ids'],
             "parent_rcsb_id": plm['entry']['rcsb_id'],
@@ -206,46 +245,49 @@ def __reshape_poly_to_protein(plm):
             "entity_poly_seq_length": plm['entity_poly']['rcsb_sample_sequence_length'],
             "entity_poly_entity_type": plm['entity_poly']['type'],
             "entity_poly_polymer_type": plm['entity_poly']['rcsb_entity_polymer_type']
-        }
+        }) for auth_asym_id in plm['rcsb_polymer_entity_container_identifiers']['auth_asym_ids']
+    ]
 
-
-        for auth_asym_id in plm['rcsb_polymer_entity_container_identifiers']['auth_asym_ids']]
-
-
-def process_pdb_record(rcsb_id:str)->dict:
+def process_pdb_record(rcsb_id: str) -> RibosomeStructure:
     """
     returns dict of the shape types_RibosomeStructure 
     """
 
     response = query_rcsb_api(gql_monolith(rcsb_id.upper()))
-    polys = response['polymer_entities']
-    ligands = response['nonpolymer_entities']
+    proteins    = response['polymer_entities']
+    ligands  = response['nonpolymer_entities']
 
-    proteins = polys
-    def is_protein(
-        poly): return poly['entity_poly']['rcsb_entity_polymer_type'] == 'Protein'
+    def is_protein(poly): return poly['entity_poly']['rcsb_entity_polymer_type'] == 'Protein'
 
     proteins, rnas = [], []
-    for poly in polys:
+    for poly in proteins:
         proteins.append(poly) if is_protein(poly) else rnas.append(poly)
 
-    reshaped_proteins = []
-    reshaped_rnas     = []
+    reshaped_proteins:list[Protein] = []
+    reshaped_rnas    :list[RNA]     = []
 
-    [reshaped_proteins.append(*__reshape_poly_to_protein(poly))
-     for poly in proteins]
-    [reshaped_rnas.append(*__reshape_poly_to_rna(poly)) for poly in rnas]
+    [reshaped_proteins.extend(__reshape_poly_to_protein(poly)) for poly in proteins]
+    [reshaped_rnas.extend(__reshape_poly_to_rna(poly)) for poly in rnas]
 
-    reshaped_nonpoly = [__reshape_to_ligand(nonpoly) for nonpoly in ligands] if ligands != None and len(ligands) > 0 else []
-    organisms        = __infer_organisms_from_polymers(reshaped_proteins)
+    reshaped_nonpoly:list[Ligand] = [__reshape_to_ligand(nonpoly) for nonpoly in ligands] if ligands != None and len(ligands) > 0 else []
+    organisms        = __infer_organisms_from_polymers(reshaped_proteins)  # type: ignore (only accessing commong fields)
     externalRefs     = __extract_external_refs(response['rcsb_external_references'])
 
-    pub              = response['citation'][0]
+    if response['citation'] != None and len(response['citation']) > 0:
+        pub         = response['citation'][0]
+    else:
+        pub = {
+            "year"                   : None,
+            "rcsb_authors"           : None,
+            "title"                  : None,
+            "pdbx_database_id_DOI"   : None,
+            "pdbx_database_id_PubMed": None
+        }
+    
+    kwords_text = response['struct_keywords']['text'] if response['struct_keywords']          != None else None
+    kwords      = response['struct_keywords']['pdbx_keywords'] if response['struct_keywords'] != None else None
 
-    kwords_text = response['struct_keywords']['text'] if response['struct_keywords'] != None else None
-    kwords = response['struct_keywords']['pdbx_keywords'] if response['struct_keywords'] != None else None
-
-    reshaped = {
+    reshaped = RibosomeStructure(**{
         "rcsb_id"               : response['rcsb_id'],
         "expMethod"             : response['exptl'][0]['method'],
         "resolution"            : response['rcsb_entry_info']['resolution_combined'][0],
@@ -262,15 +304,49 @@ def process_pdb_record(rcsb_id:str)->dict:
         "rnas"                  : reshaped_rnas,
         "ligands"               : reshaped_nonpoly,
         **organisms,
-    }
+    })
 
     return reshaped
 
-def query_rcsb_api(gql_string: str)->dict:
+def current_rcsb_structs() -> list[str]:
+    """Return all structures in the rcsb that contain the phrase RIBOSOME and have more than 25 protein entities"""
+
+    rcsb_search_api = "https://search.rcsb.org/rcsbsearch/v2/query"
+    params = {
+        "query":
+        {
+            "type": "group",
+            "logical_operator": "and",
+            "nodes": [
+                {
+                    "type": "group",
+                    "logical_operator": "and",
+                    "nodes": [
+                        {"type": "group", "logical_operator": "and", "nodes": [{"type": "terminal", "service": "text", "parameters": {
+                            "operator": "contains_phrase", "negation": False, "value": "RIBOSOME", "attribute": "struct_keywords.pdbx_keywords"}}]},
+                        {"type": "group", "logical_operator": "and", "nodes": [{"type": "terminal", "service": "text", "parameters": {
+                            "operator": "greater", "negation": False, "value": 25, "attribute": "rcsb_entry_info.polymer_entity_count_protein"}}]},
+                    ],
+                    "label": "text"
+                }
+            ],
+            "label": "query-builder"
+        },
+        "return_type": "entry",
+        "request_options": {
+            "return_all_hits": True,
+            "results_verbosity": "compact"
+        }
+    }
+
+    query = rcsb_search_api + "?json=" + json.dumps(params)
+    return requests.get(query).json()['result_set']
+
+def query_rcsb_api(gql_string: str) -> dict:
+
     reqstring = "https://data.rcsb.org/graphql?query={}".format(gql_string)
-    _resp     = requests.get(reqstring)
-    resp      = _resp.json()
-    print("Resp is ", resp.keys())
+    _resp = requests.get(reqstring)
+    resp = _resp.json()
 
     if 'data' in resp and 'entry' in resp['data']:
         return resp['data']['entry']
@@ -279,16 +355,10 @@ def query_rcsb_api(gql_string: str)->dict:
 
 
 
+# Functionality to migrate from older cli:
 
-
-
-
-
-
-### Functionality to migrate from older cli:
-
-### 4 Scripts
-### Assets verification
+# 4 Scripts
+# Assets verification
 
         # await x.initialize_assets(flags.commit || flags.repair)
         # await x.initialize_ligands(flags.commit || flags.repair, x.structure as RibosomeStructure)
@@ -340,7 +410,6 @@ def query_rcsb_api(gql_string: str)->dict:
     # }
 
 
-
 #     async __verify_cif(obtain: boolean = false):Promise<boolean> {
 #         if (existsSync(this.cif_filepath())) {
 #             return true
@@ -385,7 +454,7 @@ def query_rcsb_api(gql_string: str)->dict:
 #                         }
 #                         else{rs()}
 #                     })
-#                })  
+#                })
 #             } else return false
 #         }
 #     }
@@ -481,7 +550,7 @@ def query_rcsb_api(gql_string: str)->dict:
 
 #     async initialize_assets(obtain: boolean) {
 #         console.log("Initializing assets");
-        
+
 #         await this.assets.__verify_json_profile(true)
 #         await this.assets.__verify_cif(true)
 #         await this.assets.__verify_cif_modified(true)
@@ -500,7 +569,7 @@ def query_rcsb_api(gql_string: str)->dict:
 
 #     async initialize_ligands(obtain: boolean, ribosome: RibosomeStructure) {
 #         let ligs = ribosome.ligands && ribosome.ligands.map((lig) => {
-#             console.log("Looking through chemids" , lig) 
+#             console.log("Looking through chemids" , lig)
 #             if (!existsSync(`${this.assets.folder_path()}/LIGAND_${lig}.json`)) {
 #                 console.log(`[${this.rcsb_id}]: NOT FOUND ${this.assets.folder_path()}/LIGAND_${lig.chemicalId}.json (Is it an ION? Expected.)`)
 #                 return false
@@ -556,7 +625,7 @@ def query_rcsb_api(gql_string: str)->dict:
 # }
 # /**
 #  * Download a .cif model of the structure.
-#  * @param struct_id 
+#  * @param struct_id
 #  */
 # export const download_unpack_place = async (struct_id: string) => {
 #     const BASE_URL = "http://files.rcsb.org/download/"

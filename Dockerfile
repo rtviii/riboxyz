@@ -5,7 +5,7 @@ FROM ubuntu:22.04
 # vars inside the container
 ENV DJANGO=/home/backend/api
 ENV PYMOL_SOURCE=/home/backend/pymol
-ENV CLI=/home/backend/cli
+# ENV CLI=/home/backend/cli
 ENV RIBETL_DATA=/home/backend/api/ribetldata
 
 # set work directory
