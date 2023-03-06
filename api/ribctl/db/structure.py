@@ -66,8 +66,6 @@ def link__ligand_to_struct(prot: Node, parent_rcsb_id: str) -> Callable[[Transac
     return _
 
 def add_ligand(driver:Driver,lig:Ligand, parent_rcsb_id:str):
-    print("Attemptign to add ligand:")
-    pprint(lig.dict())
     with driver.session() as s:
         node = s.execute_write(node__ligand(lig))
         s.execute_write(link__ligand_to_struct(node, parent_rcsb_id))
