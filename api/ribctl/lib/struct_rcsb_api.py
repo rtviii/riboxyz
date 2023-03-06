@@ -56,7 +56,6 @@ def __get_rna_nomenclature(polymer):
             return [i[0]]
     return []
 
-
 def __infer_organisms_from_polymers(polymers: list):
 
     host_organism_names: list[str] = []
@@ -78,7 +77,6 @@ def __infer_organisms_from_polymers(polymers: list):
         "host_organism_names": list(map(str,set(host_organism_names)))
         }
 
-
 def __extract_external_refs(external_refs):
     """
     external_refs: list[{ link: string; type: string; id: string }]
@@ -98,7 +96,6 @@ def __extract_external_refs(external_refs):
 
     return [externalRefIds, externalRefTypes, externalRefLinks]
 
-
 def __reshape_to_ligand(nonpoly):
     return {
         "pdbx_description"   : nonpoly['rcsb_nonpolymer_entity']['pdbx_description'],
@@ -107,7 +104,6 @@ def __reshape_to_ligand(nonpoly):
         "chemicalName"       : nonpoly['pdbx_entity_nonpoly']['name'],
         "number_of_instances": nonpoly['rcsb_nonpolymer_entity']['pdbx_number_of_molecules']
     }
-
 
 def __is_ligand_like(polymer, nomenclature: list[str]):
     if 'tRNA' in nomenclature or 'mRNA' in nomenclature:
@@ -124,7 +120,6 @@ def __is_ligand_like(polymer, nomenclature: list[str]):
         return True
     else:
         return False
-
 
 def __reshape_poly_to_rna(plm) -> list:
 
@@ -160,7 +155,6 @@ def __reshape_poly_to_rna(plm) -> list:
         }
 
         for auth_asym_id in plm['rcsb_polymer_entity_container_identifiers']['auth_asym_ids']]
-
 
 def __reshape_poly_to_protein(plm):
     if plm['pfams'] != None and len(plm['pfams']) > 0:
@@ -210,7 +204,6 @@ def __reshape_poly_to_protein(plm):
 
 
         for auth_asym_id in plm['rcsb_polymer_entity_container_identifiers']['auth_asym_ids']]
-
 
 def process_pdb_record(rcsb_id:str)->dict:
     """
@@ -266,11 +259,44 @@ def process_pdb_record(rcsb_id:str)->dict:
 
     return reshaped
 
+
+def rcsb_structs():
+        var rcsb_search_api = "https://search.rcsb.org/rcsbsearch/v2/query"
+    const params = {
+        "query":
+        {
+            "type": "group",
+            "logical_operator": "and",
+            "nodes": [
+                {
+                    "type": "group",
+                    "logical_operator": "and",
+                    "nodes": [
+                        { "type": "group", "logical_operator": "and", "nodes": [{ "type": "terminal", "service": "text", "parameters": { "operator": "contains_phrase", "negation": false, "value": "RIBOSOME", "attribute": "struct_keywords.pdbx_keywords" } }] },
+                        { "type": "group", "logical_operator": "and", "nodes": [{ "type": "terminal", "service": "text", "parameters": { "operator": "greater", "negation": false, "value": 25, "attribute": "rcsb_entry_info.polymer_entity_count_protein" } }] },
+                        // { "type": "group", "logical_operator": "and", "nodes": [{ "type": "terminal", "service": "text", "parameters": { "operator": "less"           , "negation": false, "value": 20         , "attribute": "rcsb_entry_info.resolution_combined"          } }] }
+                    ],
+                    "label": "text"
+                }
+            ],
+            "label": "query-builder"
+        },
+        "return_type": "entry",
+        "request_options": {
+            "return_all_hits": true,
+            "results_verbosity": "compact"
+        }
+    };
+
+    let query = rcsb_search_api + "?json=" + encodeURIComponent(JSON.stringify(params))
+
+
+
 def query_rcsb_api(gql_string: str)->dict:
+
     reqstring = "https://data.rcsb.org/graphql?query={}".format(gql_string)
     _resp     = requests.get(reqstring)
     resp      = _resp.json()
-    print("Resp is ", resp.keys())
 
     if 'data' in resp and 'entry' in resp['data']:
         return resp['data']['entry']
