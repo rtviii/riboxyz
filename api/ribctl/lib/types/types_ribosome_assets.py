@@ -59,7 +59,8 @@ class RibosomeAssets():
 
     def _verify_dir_exists(self):
         if not os.path.exists(self._dir_path()):
-            os.mkdir(self._dir_path(), mode=777)
+            os.umask(0)
+            os.makedirs(self._dir_path(), 0o777)
 
     def _verify_cif(self, overwrite: bool = False) -> bool:
         if overwrite:

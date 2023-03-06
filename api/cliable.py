@@ -21,7 +21,7 @@ arg.add_argument('-pdbsync','--sync_rcsb', action='store_true')
 
 args = arg.parse_args()
 
-logging.basicConfig(level=logging.ERROR, filemode='w', filename='injest_log.txt', format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.ERROR, filemode='w', format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 
@@ -52,11 +52,13 @@ if args.database:
     D = Neo4jDB()
 
     synced = D.get_all_structs()
-    unsynced = current_rcsb_structs()
+    unsynced = sorted(current_rcsb_structs())
 
 
-    for rcsb_id in set(unsynced) - set(synced):
+    # for rcsb_id in set(unsynced) - set(synced):
 
+    # for rcsb_id in set(unsynced):
+    for rcsb_id in unsynced:
 
         try :
             assets = RibosomeAssets(rcsb_id)

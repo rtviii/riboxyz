@@ -273,10 +273,19 @@ def process_pdb_record(rcsb_id: str) -> RibosomeStructure:
     organisms        = __infer_organisms_from_polymers(reshaped_proteins)  # type: ignore (only accessing commong fields)
     externalRefs     = __extract_external_refs(response['rcsb_external_references'])
 
-    pub         = response['citation'][0]
+    if response['citation'] != None and len(response['citation']) > 0:
+        pub         = response['citation'][0]
+    else:
+        pub = {
+            "year": None,
+            "rcsb_authors": None,
+            "title": None,
+            "pdbx_database_id_DOI": None,
+            "pdbx_database_id_PubMed": None
+        }
+    
     kwords_text = response['struct_keywords']['text'] if response['struct_keywords']          != None else None
     kwords      = response['struct_keywords']['pdbx_keywords'] if response['struct_keywords'] != None else None
-
 
     reshaped = RibosomeStructure(**{
         "rcsb_id"               : response['rcsb_id'],
