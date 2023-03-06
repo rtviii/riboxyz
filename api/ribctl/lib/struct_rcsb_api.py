@@ -1,3 +1,4 @@
+import json
 import requests
 from ribctl.lib import LSU_map, SSU_map
 from ribctl.lib.gql_querystrings import monolithic
@@ -260,9 +261,11 @@ def process_pdb_record(rcsb_id:str)->dict:
     return reshaped
 
 
-def rcsb_structs():
-        var rcsb_search_api = "https://search.rcsb.org/rcsbsearch/v2/query"
-    const params = {
+def current_rcsb_structs()->list[str]:
+    """Return all structures in the rcsb that contain the phrase RIBOSOME and have more than 25 protein entities"""
+
+    rcsb_search_api = "https://search.rcsb.org/rcsbsearch/v2/query"
+    params = {
         "query":
         {
             "type": "group",
@@ -272,9 +275,8 @@ def rcsb_structs():
                     "type": "group",
                     "logical_operator": "and",
                     "nodes": [
-                        { "type": "group", "logical_operator": "and", "nodes": [{ "type": "terminal", "service": "text", "parameters": { "operator": "contains_phrase", "negation": false, "value": "RIBOSOME", "attribute": "struct_keywords.pdbx_keywords" } }] },
-                        { "type": "group", "logical_operator": "and", "nodes": [{ "type": "terminal", "service": "text", "parameters": { "operator": "greater", "negation": false, "value": 25, "attribute": "rcsb_entry_info.polymer_entity_count_protein" } }] },
-                        // { "type": "group", "logical_operator": "and", "nodes": [{ "type": "terminal", "service": "text", "parameters": { "operator": "less"           , "negation": false, "value": 20         , "attribute": "rcsb_entry_info.resolution_combined"          } }] }
+                        { "type": "group", "logical_operator": "and", "nodes": [{ "type": "terminal", "service": "text", "parameters": { "operator": "contains_phrase", "negation": False, "value": "RIBOSOME", "attribute": "struct_keywords.pdbx_keywords" } }] },
+                        { "type": "group", "logical_operator": "and", "nodes": [{ "type": "terminal", "service": "text", "parameters": { "operator": "greater", "negation": False, "value": 25, "attribute": "rcsb_entry_info.polymer_entity_count_protein" } }] },
                     ],
                     "label": "text"
                 }
@@ -283,12 +285,13 @@ def rcsb_structs():
         },
         "return_type": "entry",
         "request_options": {
-            "return_all_hits": true,
+            "return_all_hits": True,
             "results_verbosity": "compact"
         }
     };
 
-    let query = rcsb_search_api + "?json=" + encodeURIComponent(JSON.stringify(params))
+    query = rcsb_search_api + "?json=" + json.dumps(params)
+    return requests.get(query).json()['result_set']
 
 
 
