@@ -36,7 +36,6 @@ class RibosomeAssets():
         self._envcheck()
         return f"{self._dir_path()}/{self.rcsb_id}.json"
 
-    
     def json_profile(self):
         with open(self._json_profile_filepath(), "r") as f:
             return json.load(f)
@@ -56,12 +55,11 @@ class RibosomeAssets():
         with open(filepath, "w") as f:
             json.dump(profile, f)
 
-
     # ※ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
     def _verify_dir_exists(self):
         if not os.path.exists(self._dir_path()):
-            os.mkdir(self._dir_path())
+            os.mkdir(self._dir_path(), mode=777)
 
     def _verify_cif(self, overwrite: bool = False) -> bool:
         if overwrite:
