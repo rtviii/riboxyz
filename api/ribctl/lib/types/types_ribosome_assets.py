@@ -55,8 +55,12 @@ class RibosomeAssets():
         with open(filepath, "w") as f:
             json.dump(profile, f)
 
-    def _verify_cif(self, obtain: bool = False) -> bool:
-        if obtain:
+
+    # ※ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+
+    def _verify_cif(self, overwrite: bool = False) -> bool:
+        if overwrite:
             download_unpack_place(self.rcsb_id)
             return True
         else:
@@ -65,8 +69,8 @@ class RibosomeAssets():
             else:
                 return False
 
-    def _verify_cif_modified(self, obtain: bool = False) -> bool:
-        if obtain:
+    def _verify_cif_modified(self, overwrite: bool = False) -> bool:
+        if overwrite:
             split_rename(self.rcsb_id)
             return True
         else:
@@ -75,13 +79,13 @@ class RibosomeAssets():
             else:
                 return False
 
-    def _verify_json_profile(self, obtain: bool = False) -> bool:
-        if obtain:
+    def _verify_json_profile(self, overwrite: bool = False) -> bool:
+        if overwrite:
             ribosome = process_pdb_record(self.rcsb_id)
             if not parse_obj_as(RibosomeStructure, ribosome):
                 raise Exception("Invalid ribosome structure profile.")
 
-            self.save_json_profile(self._json_profile_filepath(), ribosome)
+            self.save_json_profile(self._json_profile_filepath(), ribosome.dict())
             print(
                 f"Saved structure profile:\t{self._json_profile_filepath()}")
             return True
@@ -90,9 +94,8 @@ class RibosomeAssets():
                 return True
             return False
 
-
-    def _verify_png_thumbnail(self, obtain: bool = False) -> bool:
-        if obtain:
+    def _verify_png_thumbnail(self, overwrite: bool = False) -> bool:
+        if overwrite:
             print("Obtaning thumbnail...")
             render_thumbnail(self.rcsb_id)
 
@@ -106,7 +109,7 @@ class RibosomeAssets():
     def _verify_chains_dir(self):
         split_rename(self.rcsb_id)
 
-    def _verify_ligads_and_ligandlike_polys(self, obtain: bool = False):
+    def _verify_ligads_and_ligandlike_polys(self, overwrite: bool = False):
 
         def ligand_path(chem_id):            return os.path.join(self._dir_path(), f"LIGAND_{chem_id.upper()}.json")
         def liglike_poly_path(auth_asym_id): return os.path.join(self._dir_path(), f"POLYMER_{auth_asym_id.upper()}.json")
@@ -120,12 +123,12 @@ class RibosomeAssets():
             if not os.path.exists(ligand_path(ligand[0])):
                 _flag = False
                 render_ligand(
-                    self.rcsb_id, ligand[0], self.biopython_sturcture(), obtain)
+                    self.rcsb_id, ligand[0], self.biopython_sturcture(), overwrite)
 
         for ligandlike_poly in ligandlike_polymers:
             if not os.path.exists(liglike_poly_path(ligandlike_poly.auth_asym_id)):
                 _flag = False
                 render_liglike_polymer(
-                    self.rcsb_id, ligandlike_poly.auth_asym_id, self.biopython_sturcture(), obtain)
+                    self.rcsb_id, ligandlike_poly.auth_asym_id, self.biopython_sturcture(), overwrite)
 
         return _flag
