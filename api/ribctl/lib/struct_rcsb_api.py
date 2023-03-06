@@ -285,10 +285,11 @@ def process_pdb_record(rcsb_id: str) -> RibosomeStructure:
     kwords_text = response['struct_keywords']['text'] if response['struct_keywords']          != None else None
     kwords      = response['struct_keywords']['pdbx_keywords'] if response['struct_keywords'] != None else None
 
-    entry_info = response
-    pprint(response)
 
-    reso_combined = response['resolution_combined']
+    entryinfo = response['rcsb_entry_info']
+
+    print("entry info", entryinfo.keys())
+    reso_combined = entryinfo['resolution_combined']
     print("reso combiend::: ", reso_combined)
 
     reshaped = RibosomeStructure(**{
