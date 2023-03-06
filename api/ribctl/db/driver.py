@@ -24,7 +24,6 @@ NODE_CONSTRAINTS: list[LiteralString] = [
 ]
 
 # ※ ----------------[ 1.Structure Nodes]
-
 # ※ ----------------[ 2.RNA Nodes]
 # ※ ----------------[ 3.Protein Nodes]
 # ※ ----------------[ 4.Ligand Nodes]
@@ -55,9 +54,11 @@ class Neo4jDB():
             return r.data()
     def get_all_structs(self) :
         with self.driver.session() as s:
-            return s.read_transaction(lambda tx: tx.run("""//
+            struct_ids = []
+            [struct_ids.extend(struct) for struct in  s.read_transaction(lambda tx: tx.run("""//
             match (n:RibosomeStructure) return n.rcsb_id;
-            """).values('n.rcsb_id'))
+            """).values('n.rcsb_id'))]
+            return struct_ids
 
     def get_any(self) -> list[dict[str, Any]]:
         with self.driver.session() as s:
@@ -86,6 +87,7 @@ class Neo4jDB():
                 s.execute_write(node__rna_class(rna_class))
 
     def add_structure(self, struct_assets: RibosomeAssets):
+
         R = RibosomeStructure(**struct_assets.json_profile())
 
         global struct_node_result;

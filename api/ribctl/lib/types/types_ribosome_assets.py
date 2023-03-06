@@ -36,6 +36,7 @@ class RibosomeAssets():
         self._envcheck()
         return f"{self._dir_path()}/{self.rcsb_id}.json"
 
+    
     def json_profile(self):
         with open(self._json_profile_filepath(), "r") as f:
             return json.load(f)
@@ -58,6 +59,9 @@ class RibosomeAssets():
 
     # ※ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
+    def _verify_dir_exists(self):
+        if not os.path.exists(self._dir_path()):
+            os.mkdir(self._dir_path())
 
     def _verify_cif(self, overwrite: bool = False) -> bool:
         if overwrite:
@@ -74,10 +78,7 @@ class RibosomeAssets():
             split_rename(self.rcsb_id)
             return True
         else:
-            if os.path.exists(self._cif_modified_filepath()):
-                return True
-            else:
-                return False
+            return os.path.exists(self._cif_modified_filepath())
 
     def _verify_json_profile(self, overwrite: bool = False) -> bool:
         if overwrite:
@@ -98,7 +99,6 @@ class RibosomeAssets():
         if overwrite:
             print("Obtaning thumbnail...")
             render_thumbnail(self.rcsb_id)
-
             return True
         else:
             if os.path.exists(self._png_thumbnail_filepath()):

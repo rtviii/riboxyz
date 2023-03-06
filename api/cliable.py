@@ -40,23 +40,26 @@ if args.sync_rcsb:
 
 if args.obtain:
     rcsb_id = args.obtain
-    print(rcsb_id)
-    print(rcsb_id)
 
 if args.structure:
-   
     r  = RibosomeAssets(args.structure)
     d  = r.json_profile()
     rs = RibosomeStructure(**d)
 
-    pprint(rs)
-
 if args.database:
     D = Neo4jDB()
 
-    for i in ["7K00"]:
+    synced = D.get_all_structs()
+    unsynced = current_rcsb_structs()
+
+
+    for i in set(unsynced) - set(synced):
         print("PROCESSING: ※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※",i)
-        ra = RibosomeAssets(i)
-        ra._verify_json_profile(True)
-        jp = ra.json_profile()
-        print(D.add_structure(ra))
+        assets = RibosomeAssets(i)
+
+        assets._verify_dir_exists()
+        assets._verify_json_profile(True) # <-- overwrite old stuff
+        assets._verify_cif(True)
+        assets._verify_cif_modified(True)
+        assets._verify_ligads_and_ligandlike_polys(True)
+        D.add_structure(assets)
