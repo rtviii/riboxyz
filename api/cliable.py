@@ -7,6 +7,7 @@ from neo4j import ManagedTransaction, Transaction
 from api.ribctl.db.data import QueryOps
 from api.ribctl.db.inits.driver import Neo4jDB
 from api.ribctl.lib.types.types_ribosome import RibosomeStructure
+from api.schema.v0 import NeoStruct
 from ribctl.lib.types.types_ribosome_assets import  RibosomeAssets
 from ribctl.lib.struct_rcsb_api import current_rcsb_structs
 
@@ -48,7 +49,19 @@ if args.structure:
 if args.query:
 
     qo = QueryOps()
-    print(qo.get_all_structures())
+    q  = qo.get_all_structures()
+    for qq in q:
+        
+        NeoStruct.validate(qq)
+        print("VAlidated 1")
+
+    print(len(q))
+        # try:
+        #     # NeoStruct.validate(q)
+
+        # except Exception as e:
+        #     print("Failed to validate NeoStruct:", q.struct.rcsb_id)
+
     # print(qo.driver)
     
     # D        = Neo4jDB()

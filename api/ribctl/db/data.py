@@ -17,34 +17,29 @@ class QueryOps(Neo4jDB):
         with self.driver.session() as session:
 
             def _(tx: Transaction | ManagedTransaction):
-                return tx.run("""//
-match (ribs:RibosomeStructure) 
-        unwind ribs as rb
+                return   tx.run("""//
+                        match (ribs:RibosomeStructure) 
+                                unwind ribs as struct
 
-        optional match (l:Ligand)-[]-(rb)
-        with collect(l.chemicalId) as ligs, rb
+                                optional match (l:Ligand)-[]-(struct)
+                                with collect(l.chemicalId) as ligands, struct
 
-        optional match (rps:Protein)-[]-(rb)
-        with ligs, rb, collect({
-            auth_asym_id                   : rps.auth_asym_id,
-            nomenclature                   : rps.nomenclature,
-            entity_poly_seq_one_letter_code: rps.entity_poly_seq_one_letter_code
-            }) as rps
+                                optional match (rps:Protein)-[]-(struct)
+                                with ligands, struct, collect({
+                                    auth_asym_id                   : rps.auth_asym_id,
+                                    nomenclature                   : rps.nomenclature,
+                                    entity_poly_seq_one_letter_code: rps.entity_poly_seq_one_letter_code
+                                    }) as rps
 
-        optional match (rnas:RNA)-[]-(rb)
-        with ligs, rb, rps, collect({
-            auth_asym_id                   : rnas.auth_asym_id,
-            nomenclature                   : rnas.nomenclature,
-            entity_poly_seq_one_letter_code: rnas.entity_poly_seq_one_letter_code
-            }) as struct_rnas
+                                optional match (struct_rnas:RNA)-[]-(struct)
+                                with ligands, struct, rps, collect({
+                                    auth_asym_id                   : struct_rnas.auth_asym_id,
+                                    nomenclature                   : struct_rnas.nomenclature,
+                                    entity_poly_seq_one_letter_code: struct_rnas.entity_poly_seq_one_letter_code
+                                    }) as rnas
 
-        return {
-            struct : rb         ,
-            ligands: ligs       ,
-            rps    : rps        ,
-            rnas   : struct_rnas
-            }
-                """).values()
+                                return struct, ligands,rps,rnas limit 3
+                                        """).data()
 
             return session.read_transaction(_)
 
