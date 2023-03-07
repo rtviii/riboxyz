@@ -37,7 +37,7 @@ class QueryOps(Neo4jDB):
                                     nomenclature                   : struct_rnas.nomenclature,
                                     entity_poly_seq_one_letter_code: struct_rnas.entity_poly_seq_one_letter_code
                                     }) as rnas
-
+                                with ligands, rps, rnas, keys(struct) as keys, struct 
                                 return struct, ligands,rps,rnas limit 3
                                         """).data()
 
