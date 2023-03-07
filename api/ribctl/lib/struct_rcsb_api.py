@@ -1,5 +1,4 @@
 import json
-from pprint import pprint
 from typing import Any
 import requests
 from api.ribctl.lib.types.types_ribosome import RNA, Ligand, Protein, RibosomeStructure
@@ -221,8 +220,9 @@ def __reshape_poly_to_protein(plm)->list[Protein]:
 
     host_organism_ids   = []
     host_organism_names = []
-    src_organism_ids   = []
-    src_organism_names = []
+
+    src_organism_ids    = []
+    src_organism_names  = []
 
 
     if host_organisms != None:
@@ -246,7 +246,7 @@ def __reshape_poly_to_protein(plm)->list[Protein]:
 
     nomenclature = __get_protein_nomenclature(plm)
 
-    prots =  [
+    return  [
         Protein(**{
             "nomenclature": nomenclature,
             "asym_ids": plm['rcsb_polymer_entity_container_identifiers']['asym_ids'],
@@ -270,8 +270,6 @@ def __reshape_poly_to_protein(plm)->list[Protein]:
             "entity_poly_polymer_type": plm['entity_poly']['rcsb_entity_polymer_type']
         }) for auth_asym_id in plm['rcsb_polymer_entity_container_identifiers']['auth_asym_ids']
     ]
-    print( "returning reshaped:",  len(prots) )
-    return prots
 
 def process_pdb_record(rcsb_id: str) -> RibosomeStructure:
     """
@@ -286,22 +284,15 @@ def process_pdb_record(rcsb_id: str) -> RibosomeStructure:
 
     proteins, rnas = [], []
     for poly in poly_entities:
-        print("Processing poly:", poly['entry']['rcsb_id'])
         proteins.append(poly) if is_protein(poly) else rnas.append(poly)
 
     reshaped_proteins:list[Protein] = []
     reshaped_rnas    :list[RNA]     = []
 
     [reshaped_rnas.extend(__reshape_poly_to_rna(poly)) for poly in rnas]
+    [reshaped_proteins.extend(__reshape_poly_to_protein(poly)) for poly in proteins]
 
-    print("Proteins is :", proteins)
-    for poly in proteins:
-        print("invoking reshe")
-        protein  = __reshape_poly_to_protein(poly)
-        print("GOt least with proteins:", protein)
-        reshaped_proteins.extend(__reshape_poly_to_protein(poly)) 
 
-    print("Reshaped proteins:", reshaped_proteins)
     reshaped_nonpoly:list[Ligand] = [__reshape_to_ligand(nonpoly) for nonpoly in nonpoly_entities] if nonpoly_entities != None and len(nonpoly_entities) > 0 else []
     organisms        = __infer_organisms_from_polymers(reshaped_proteins)  # type: ignore (only accessing commong fields)
     externalRefs     = __extract_external_refs(response['rcsb_external_references'])
@@ -338,9 +329,6 @@ def process_pdb_record(rcsb_id: str) -> RibosomeStructure:
         "ligands"               : reshaped_nonpoly,
         **organisms,
     })
-
-    print("returning 6s0k", reshaped.dict())
-    print("reshp rptoeins", reshaped_proteins)
 
     return reshaped
 

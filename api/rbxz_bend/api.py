@@ -2,8 +2,8 @@ from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from ninja import Router
 from ninja import Query, Schema
+from ribctl.db.data import QueryOps
 from schema.v0 import NeoStruct
-from ribctl.db.structure
 
 router = Router()
 
@@ -11,6 +11,8 @@ router = Router()
 
 @router.get('/v0/get_all_structures', response=list[NeoStruct])
 def get_all_structures(request):
+    qo = QueryOps()
+    return qo.get_all_structures()
 
     
 
