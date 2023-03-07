@@ -1,18 +1,32 @@
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from ninja import Router
-from schema import data_requests as reqs
-from schema import data_responses as resps
+from ninja import Query, Schema
+from schema.v0 import NeoStruct
+from ribctl.db.structure
 
 router = Router()
 
-@router.get('/resp/{resp_id}')
-def get_article(request, resp_id: int):
-    article = [ 1,2,3 ]
-    return article
 
 
-@router.get('/resps', response=list[RibosomeResponse])
-def get_articles(request):
-    # articles = Article.objects.all()
-    return ["a", "b", "c"]
+@router.get('/v0/get_all_structures', response=list[NeoStruct])
+def get_all_structures(request):
+
+    
+
+
+    
+
+
+
+
+# @router.get('/resp/{resp_id}')
+# def get_article(request, resp_id: int):
+#     article = [ 1,2,3 ]
+#     return article
+
+
+# @router.get('/resps', response=list[RibosomeResponse])
+# def get_articles(request):
+#     # articles = Article.objects.all()
+#     return ["a", "b", "c"]
