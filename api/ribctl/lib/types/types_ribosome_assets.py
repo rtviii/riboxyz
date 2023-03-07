@@ -91,8 +91,7 @@ class RibosomeAssets():
                 raise Exception("Invalid ribosome structure profile.")
 
             self.save_json_profile(self._json_profile_filepath(), ribosome.dict())
-            print(
-                f"Saved structure profile:\t{self._json_profile_filepath()}")
+            print(f"Saved structure profile:\t{self._json_profile_filepath()}")
             return True
         else:
             if os.path.exists(self._json_profile_filepath()):

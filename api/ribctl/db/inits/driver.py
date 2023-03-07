@@ -106,5 +106,6 @@ class Neo4jDB():
             for ligand in R.ligands:
                 add_ligand(self.driver, ligand, R.rcsb_id)
 
+        print("Added structure: ", R.rcsb_id)
         return struct_node_result.data()
 

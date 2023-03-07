@@ -2,6 +2,8 @@
 
 import argparse
 from pprint import pprint
+
+from neo4j import ManagedTransaction, Transaction
 from api.ribctl.db.data import QueryOps
 from api.ribctl.db.inits.driver import Neo4jDB
 from api.ribctl.lib.types.types_ribosome import RibosomeStructure
@@ -47,6 +49,15 @@ if args.query:
 
     qo = QueryOps()
     print(qo.get_all_structures())
+    # print(qo.driver)
+    
+    # D        = Neo4jDB()
+    # with qo.driver.session() as session:
+    #     def _(tx: Transaction | ManagedTransaction):
+    #         return tx.run("""//
+    #         match (n:RibosomeStructure) return n.rcsb_id
+    #         """).values()
+    #     print(session.read_transaction(_))
 
 
 if args.database:
@@ -56,7 +67,7 @@ if args.database:
     synced   = D.get_all_structs()
     unsynced = sorted(current_rcsb_structs())
 
-    for rcsb_id in ["6S0K"]:
+    for rcsb_id in unsynced:
         assets = RibosomeAssets(rcsb_id)
 
         try:
