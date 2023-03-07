@@ -13,9 +13,9 @@ class PolymerMinimal(Schema):
 
 class NeoStruct(Schema): 
       struct           : RibosomeStructure
-      ligands          : list[str]
+      ligands          : list[str] | None
       rps              : list[PolymerMinimal]
-      rnas             : list[PolymerMinimal]
+      rnas             : list[PolymerMinimal] | None
 
 
 class Residue(Schema):

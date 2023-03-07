@@ -12,7 +12,7 @@ router = Router()
 @router.get('/v0/get_all_structures', response=list[NeoStruct])
 def get_all_structures(request):
     qo = QueryOps()
-    return qo.get_all_structures()
+    qo.get_all_structures()
 
     
 
