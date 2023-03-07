@@ -1,7 +1,8 @@
 from typing import NewType, TypedDict
 from ninja import Schema
+from pydantic import BaseModel, create_model
 from ribctl.lib.types.types_polymer import RNAClass
-from ribctl.lib.types.types_ribosome import Ligand, Protein, ProteinClass, RibosomeStructure
+from ribctl.lib.types.types_ribosome import Ligand, Protein, ProteinClass, RibosomeStructure, RNA
 """This file documents the possible requests that the API can receive."""
 
 
@@ -11,12 +12,37 @@ class PolymerMinimal(Schema):
     auth_asym_id: str
     entity_poly_seq_one_letter_code: str
 
+
+
+
+class RibosomeHeader(Schema):
+    rcsb_id:    str
+    expMethod:  str
+    resolution: float
+
+    pdbx_keywords:      str | None
+    pdbx_keywords_text: str | None
+
+    rcsb_external_ref_id: list[str]
+    rcsb_external_ref_type: list[str]
+    rcsb_external_ref_link: list[str]
+
+    citation_year        : None | int
+    citation_rcsb_authors: None | list[str]
+    citation_title       : None | str
+    citation_pdbx_doi    : None | str
+
+    src_organism_ids: list[int]
+    src_organism_names: list[str]
+
+    host_organism_ids: list[int]
+    host_organism_names: list[str]
+
 class NeoStruct(Schema): 
-      struct           : RibosomeStructure
+      struct           : RibosomeHeader
       ligands          : list[str] | None
       rps              : list[PolymerMinimal]
       rnas             : list[PolymerMinimal] | None
-
 
 class Residue(Schema):
     residue_name: str

@@ -51,9 +51,7 @@ if args.query:
     qo = QueryOps()
     q  = qo.get_all_structures()
     for qq in q:
-        
         NeoStruct.validate(qq)
-        print("VAlidated 1")
 
     print(len(q))
         # try:
