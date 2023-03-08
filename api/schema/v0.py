@@ -2,17 +2,28 @@ from typing import NewType, TypedDict
 from ninja import Schema
 from pydantic import BaseModel, create_model
 from ribctl.lib.types.types_polymer import RNAClass
-from ribctl.lib.types.types_ribosome import Ligand, Protein, ProteinClass, RibosomeStructure, RNA
+from ribctl.lib.types.types_ribosome import Ligand, Protein, ProteinClass, RibosomeStructure
 """This file documents the possible requests that the API can receive."""
 
-
+class PresentInStruct(Schema): 
+      citation_title         : str
+      description            : str
+      expMethod              : str
+      rcsb_id                : str
+      resolution             : float
+      src_organism_ids       : list[int]
+    
+class LigandInstance(Schema):
+    # TODO: Huge todo. Refactor ligands into classes at the database level.
+    chemicalId : str
+    description: str
+    polymer    : bool
+    presentIn  : PresentInStruct
 
 class PolymerMinimal(Schema):
     nomenclature: list[str]
     auth_asym_id: str
     entity_poly_seq_one_letter_code: str
-
-
 
 
 class RibosomeHeader(Schema):
@@ -52,11 +63,12 @@ class Residue(Schema):
 
 
 
-class BindingSiteChain(Schema):
-    sequence:str
-    nomenclature:list[str]
-    asym_ids:list[str]
-    residues:list[Residue]
+class BindingSiteChain(Schema): 
+      sequence                : str
+      nomenclature            : list[str]
+      asym_ids                : list[str]
+      residues                : list[Residue]
+
 # export type LigandBindingSite = {
 #   [ chainname    :string ] :
 #   { sequence     : string
@@ -65,6 +77,7 @@ class BindingSiteChain(Schema):
 #     residues     : Residue[]
 #   }
 # }
+
 # TODO: Does this work?
 # ? https://stackoverflow.com/questions/72268685/pydantic-checks-on-newtype
 class LigandBindingSite(Schema):
@@ -72,19 +85,21 @@ class LigandBindingSite(Schema):
 
 
 
-
 class PredictionSource(Schema):
     src: str
     auth_asym_id: str
     src_ids: list[int]
+    
 class PredictionTarget(Schema):
     tgt: str
     auth_asym_id: str
     tgt_ids: list[int]
+
 class Alignement(Schema):
     src_aln: str
     tgt_aln: str
     aln_ids: list[int]
+
 class LigandPrediction(Schema):
     __root__: dict[str,dict[str, LigandBindingSite]]
 # export type LigandPrediction = {
@@ -97,12 +112,12 @@ class LigandPrediction(Schema):
 # }
 
 
-class MixedLigand(Schema):
-    category: str | None
-    polymer: bool
-    description: str
-    chemicalId: str |None
-    present_in: LigandBindingSite
+class MixedLigand(Schema): 
+      category           : str | None
+      polymer            : bool
+      description        : str
+      chemicalId         : str |None
+      present_in         : LigandBindingSite
 
 # export interface MixedLigand{
 #     category     ?: string,

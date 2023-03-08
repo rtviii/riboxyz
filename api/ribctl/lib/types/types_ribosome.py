@@ -78,14 +78,14 @@ class Ligand(BaseModel)  :
 
 class RibosomeStructure(BaseModel):
 
-    rcsb_id:    str
-    expMethod:  str
+    rcsb_id   : str
+    expMethod : str
     resolution: float
 
     pdbx_keywords:      str | None
     pdbx_keywords_text: str | None
 
-    rcsb_external_ref_id: list[str]
+    rcsb_external_ref_id  : list[str]
     rcsb_external_ref_type: list[str]
     rcsb_external_ref_link: list[str]
 
@@ -94,10 +94,10 @@ class RibosomeStructure(BaseModel):
     citation_title       : None | str
     citation_pdbx_doi    : None | str
 
-    src_organism_ids: list[int]
+    src_organism_ids  : list[int]
     src_organism_names: list[str]
 
-    host_organism_ids: list[int]
+    host_organism_ids  : list[int]
     host_organism_names: list[str]
 
     proteins: list[Protein]
