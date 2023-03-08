@@ -8,7 +8,7 @@ from neo4j import ManagedTransaction, Transaction
 from api.ribctl.db.data import QueryOps
 from api.ribctl.db.inits.driver import Neo4jDB
 from api.ribctl.lib.types.types_ribosome import Ligand, RibosomeStructure
-from api.schema.v0 import LigandInstance, NeoStruct
+from api.schema.v0 import LigandInstance, LigandlikeInstance, NeoStruct
 from ribctl.lib.types.types_ribosome_assets import  RibosomeAssets
 from ribctl.lib.struct_rcsb_api import current_rcsb_structs
 
@@ -52,24 +52,17 @@ if args.query:
     qo = QueryOps()
     q  = qo.get_all_structures()
 
-    s  = qo.get_struct("3J7Z")
-    NeoStruct.validate(s)
+    ss  = qo.get_struct("3J7Z")
+    NeoStruct.validate(ss)
+
+    ll  = qo.get_individual_ligand("ERY")
+    Ligand.validate(ll)
 
 
-    l  = qo.get_individual_ligand("ERY")
-    Ligand.validate(l)
-
-    alll  = qo.get_all_ligands()
-    # print(alll)
-    for l in alll:
-        print(l)
-        # exit(1)
-        # LigandInstance.validate(l)
-    
-    # pprint(s)
-    # for qq in q:
-    #     NeoStruct.validate(qq)
-    
+    lli = qo.get_all_ligandlike()
+    for lli_i in lli:
+        LigandlikeInstance.validate(lli_i)
+        pprint(lli_i)
 
         # try:
         #     # NeoStruct.validate(q)
