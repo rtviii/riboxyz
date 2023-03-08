@@ -3,7 +3,7 @@ from neo4j import GraphDatabase, Driver, ManagedTransaction, Record, Result, Tra
 from neo4j.graph import Node, Relationship
 from neo4j import ManagedTransaction, Transaction
 from api.ribctl.db.inits.driver import Neo4jDB
-from api.ribctl.lib.types.types_ribosome import Ligand, Protein
+from api.ribctl.lib.types.types_ribosome import Ligand, Protein, RibosomeStructure
 from api.schema.v0 import LigandInstance, NeoStruct
 from ribctl.lib.types.types_polymer import list_LSU_Proteins, list_SSU_Proteins, list_RNAClass
 
@@ -114,4 +114,52 @@ class QueryOps(Neo4jDB):
                             }
                         } ) as liglike
                         return liglike""").data()[0]['liglike']
+            return session.read_transaction(_)
+            
+
+    def get_RibosomeStructure(self,rcsb_id:str)->RibosomeStructure:
+        with self.driver.session() as session:
+            def _(tx: Transaction | ManagedTransaction):
+                return tx.run("""//
+            match (n:RibosomeStructure {rcsb_id:$RCSB_ID})
+
+            optional match (rr:RNA)-[]-(n)
+            with n, collect(rr) as rrna
+
+            optional match (rp:Protein)-[]-(n)
+            with n, rrna,  collect(rp) as rps
+
+            optional match (l:Ligand)-[]-(n)
+            with n, rrna, rps, collect(l) as ligs
+
+            with {
+                        rcsb_id               : n.rcsb_id               ,
+                        expMethod             : n.expMethod             ,
+                        resolution            : n.resolution            ,
+
+                        pdbx_keywords         : n.pdbx_keywords         ,
+                        pdbx_keywords_text    : n.pdbx_keywords_text    ,
+
+                        rcsb_external_ref_id  : n.rcsb_external_ref_id  ,
+                        rcsb_external_ref_type: n.rcsb_external_ref_type,
+                        rcsb_external_ref_link: n.rcsb_external_ref_link,
+
+                        citation_year         : n.citation_year         ,
+                        citation_rcsb_authors : n.citation_rcsb_authors ,
+                        citation_title        : n.citation_title        ,
+                        citation_pdbx_doi     : n.citation_pdbx_doi     ,
+
+                        src_organism_ids      : n.src_organism_ids      ,
+                        src_organism_names    : n.src_organism_names    ,
+
+                        host_organism_ids     : n.host_organism_ids     ,
+                        host_organism_names   : n.host_organism_names   ,
+
+                        proteins : rps,
+                        rnas     : rrna,
+                        ligands  : ligs
+                    } as structure
+
+                    return structure
+                        """,{"RCSB_ID":rcsb_id.upper()}).data()[0]['structure']
             return session.read_transaction(_)

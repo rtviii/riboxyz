@@ -58,12 +58,15 @@ if args.query:
     ll  = qo.get_individual_ligand("ERY")
     Ligand.validate(ll)
 
-
     lli = qo.get_all_ligandlike()
     for lli_i in lli:
         LigandlikeInstance.validate(lli_i)
         pprint(lli_i)
 
+
+    st = qo.get_RibosomeStructure('3J7Z')
+    pprint(st)
+    RibosomeStructure.validate(st)
         # try:
         #     # NeoStruct.validate(q)
 
