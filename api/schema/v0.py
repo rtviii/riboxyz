@@ -1,4 +1,5 @@
 from typing import NewType, TypedDict
+import typing
 from ninja import Schema
 from pydantic import BaseModel, create_model
 from ribctl.lib.types.types_polymer import RNAClass
@@ -17,7 +18,13 @@ class LigandInstance(Schema):
     # TODO: Huge todo. Refactor ligands into classes at the database level.
     chemicalId : str
     description: str
-    polymer    : bool
+    polymer    : typing.Literal[False]
+    presentIn  : PresentInStruct
+
+class LigandlikeInstance(Schema):
+    # TODO: See if ligandlike can be made into classes at the database level.
+    polymer    : typing.Literal[True]
+    description: str
     presentIn  : PresentInStruct
 
 class PolymerMinimal(Schema):

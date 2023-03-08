@@ -93,3 +93,25 @@ class QueryOps(Neo4jDB):
                                         """).data()
 
             return session.read_transaction(_)
+
+    def get_all_ligandlike(self)->list[LigandInstance]:
+        with self.driver.session() as session:
+            def _(tx: Transaction | ManagedTransaction):
+                return tx.run("""//
+                                match (l {ligand_like:true})-[]-(r:RibosomeStructure) 
+                        where r.expMethod <> "X-RAY DIFFRACTION"
+                        with collect ( {
+                            polymer     : true,
+                            description : l.rcsb_pdbx_description,
+                            presentIn  : {
+                                auth_asym_id    : l.auth_asym_id,
+                                src_organism_ids: r.src_organism_ids,
+                                description     : l.rcsb_pdbx_description,
+                                citation_title  : r.citation_title,
+                                expMethod       : r.expMethod,
+                                rcsb_id         : r.rcsb_id,
+                                resolution      : r.resolution
+                            }
+                        } ) as liglike
+                        return liglike""").data()[0]['liglike']
+            return session.read_transaction(_)
