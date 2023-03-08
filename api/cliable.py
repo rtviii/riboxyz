@@ -1,13 +1,14 @@
 #TODO: ( Bring up ) Lift all the useful top-level functions from the package to this level.
 
 import argparse
+import json
 from pprint import pprint
 
 from neo4j import ManagedTransaction, Transaction
 from api.ribctl.db.data import QueryOps
 from api.ribctl.db.inits.driver import Neo4jDB
-from api.ribctl.lib.types.types_ribosome import RibosomeStructure
-from api.schema.v0 import NeoStruct
+from api.ribctl.lib.types.types_ribosome import Ligand, RibosomeStructure
+from api.schema.v0 import LigandInstance, NeoStruct
 from ribctl.lib.types.types_ribosome_assets import  RibosomeAssets
 from ribctl.lib.struct_rcsb_api import current_rcsb_structs
 
@@ -50,10 +51,26 @@ if args.query:
 
     qo = QueryOps()
     q  = qo.get_all_structures()
-    for qq in q:
-        NeoStruct.validate(qq)
 
-    print(len(q))
+    s  = qo.get_struct("3J7Z")
+    NeoStruct.validate(s)
+
+
+    l  = qo.get_individual_ligand("ERY")
+    Ligand.validate(l)
+
+    alll  = qo.get_all_ligands()
+    # print(alll)
+    for l in alll:
+        print(l)
+        # exit(1)
+        # LigandInstance.validate(l)
+    
+    # pprint(s)
+    # for qq in q:
+    #     NeoStruct.validate(qq)
+    
+
         # try:
         #     # NeoStruct.validate(q)
 
