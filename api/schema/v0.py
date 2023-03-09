@@ -117,7 +117,6 @@ class NomenclatureClassMember(Schema):
     entity_poly_polymer_type           : str
     entity_poly_entity_type            : str
     
-
     nomenclature:  list[ProteinClass | RNAClass]
     ligand_like:   bool | None
 
