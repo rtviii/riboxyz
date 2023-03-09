@@ -364,3 +364,5 @@ with n.rcsb_id as struct, collect(r.rcsb_pdbx_description) as rnas
         } as rna
         return rna""",{"RNA_CLASS":class_id}).values('rna')]
             return session.read_transaction(_)
+
+    

@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from ninja import Router
 from ninja import Query, Schema
+from api.ribctl.lib.types.types_polymer import RNAClass
 from api.ribctl.lib.types.types_ribosome import ExogenousRNAByStruct, ProteinClass, RibosomeStructure
 from ribctl.db.data import QueryOps
 from schema.v0 import BanClassMetadata, LigandInstance, LigandlikeInstance, NeoStruct, NomenclatureClass, NomenclatureClassMember
@@ -70,9 +71,9 @@ def proteins_number():
 def get_rnas_by_struct():
     return QO.get_rnas_by_struct()
 
-@router.get('/v0/get_rna_class', response=...)
-def get_rna_class():
-    return QO.get_rna_class()
+@router.get('/v0/get_rna_class', response=list[NomenclatureClassMember])
+def get_rna_class(class_id:RNAClass):
+    return QO.get_rna_class(class_id)
 
 
 
