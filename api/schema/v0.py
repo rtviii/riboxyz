@@ -88,7 +88,7 @@ class Residue(Schema):
 class NomenclatureClassMember(Schema):
     #TODO: Deprecate. lacks host organism info. no surface ratio exists anymore. lazy design
     parent_resolution                  : float
-    parent_year                        : int
+    parent_year                        : int | None
     parent_method                      : str
 
     pfam_accessions  : list[str]
