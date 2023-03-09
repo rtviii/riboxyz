@@ -8,6 +8,7 @@ from neo4j import ManagedTransaction, Transaction
 from api.ribctl.db.data import QueryOps
 from api.ribctl.db.inits.driver import Neo4jDB
 from api.ribctl.lib.types.types_ribosome import Ligand, RibosomeStructure
+from api.schema.data_requests import LigandsByStruct
 from api.schema.v0 import LigandInstance, LigandlikeInstance, NeoStruct
 from ribctl.lib.types.types_ribosome_assets import  RibosomeAssets
 from ribctl.lib.struct_rcsb_api import current_rcsb_structs
@@ -61,12 +62,35 @@ if args.query:
     lli = qo.get_all_ligandlike()
     for lli_i in lli:
         LigandlikeInstance.validate(lli_i)
-        pprint(lli_i)
+        # pprint(lli_i)
 
 
     st = qo.get_RibosomeStructure('3J7Z')
-    pprint(st)
     RibosomeStructure.validate(st)
+
+
+    lig_by_struct = qo.get_ligands_by_struct()
+    # for lbs in lig_by_struct:
+        # LigandsByStruct.validate(lbs)
+        # print("-----------")
+        # pprint(lig_by_struct)
+
+    spw = qo.match_structs_w_proteins( [ 'uL22','uL4'] )
+    # for struct in spw:
+    #     print(struct)
+
+    fs  = qo.get_full_structure("5AFI")
+    NeoStruct.validate(fs)
+
+
+
+
+
+
+        
+
+
+
         # try:
         #     # NeoStruct.validate(q)
 
