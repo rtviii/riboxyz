@@ -62,6 +62,9 @@ def get_nom_classes():
 def gmo_nom_class(class_id:ProteinClass):
     return QO.gmo_nom_class(class_id)
 
+@router.get('/v0/proteins_number', response=int)
+def proteins_number():
+    return QO.proteins_number()
 
 
 

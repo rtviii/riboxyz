@@ -7,7 +7,7 @@ from pprint import pprint
 from neo4j import ManagedTransaction, Transaction
 from api.ribctl.db.data import QueryOps
 from api.ribctl.db.inits.driver import Neo4jDB
-from api.ribctl.lib.types.types_ribosome import Ligand, ProteinClass, RibosomeStructure
+from api.ribctl.lib.types.types_ribosome import ExogenousRNAByStruct, Ligand, ProteinClass, RibosomeStructure
 from api.schema.data_requests import BanclassMetadata, LigandsByStruct
 from api.schema.v0 import BanClassMetadata, LigandInstance, LigandlikeInstance, NeoStruct, NomenclatureClass, NomenclatureClassMember
 from ribctl.lib.types.types_ribosome_assets import  RibosomeAssets
@@ -92,9 +92,17 @@ if args.query:
     #     NomenclatureClass.validate(n)
 
     members = qo.gmo_nom_class('uL2')
-    for m in members:
-        NomenclatureClassMember.validate(m)
-        print(m)
+    # for m in members:
+    #     NomenclatureClassMember.validate(m)
+    #     print(m)
+
+    protnum = qo.proteins_number()
+    print(protnum)
+
+    rbs = qo.get_rnas_by_struct()
+    for r in rbs:
+        ExogenousRNAByStruct.validate(r)
+    print(rbs)
 
     # for bm in meta:
     #     BanClassMetadata.validate(bm)

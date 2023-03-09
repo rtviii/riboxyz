@@ -4,10 +4,10 @@ from neo4j import GraphDatabase, Driver, ManagedTransaction, Record, Result, Res
 from neo4j.graph import Node, Relationship
 from neo4j import ManagedTransaction, Transaction
 from api.ribctl.db.inits.driver import Neo4jDB
-from api.ribctl.lib.types.types_ribosome import Ligand, Protein, ProteinClass, RibosomeStructure
+from api.ribctl.lib.types.types_ribosome import  ExogenousRNAByStruct, Ligand, Protein, ProteinClass, RibosomeStructure
 from api.schema.data_requests import LigandsByStruct
 from api.schema.v0 import BanClassMetadata, LigandInstance, NeoStruct, NomenclatureClass
-from ribctl.lib.types.types_polymer import list_LSU_Proteins, list_SSU_Proteins, list_RNAClass
+from ribctl.lib.types.types_polymer import RNAClass, list_LSU_Proteins, list_SSU_Proteins, list_RNAClass
 
 
 class QueryOps(Neo4jDB):
@@ -296,3 +296,57 @@ class QueryOps(Neo4jDB):
 
 
 
+
+    def proteins_number(self)->int:
+        with self.driver.session() as session:
+            def _(tx: Transaction | ManagedTransaction):
+                return tx.run("""//
+                match (n:Protein) return count(n)
+                    """).value()[0]
+            return session.read_transaction(_)
+
+    def get_rnas_by_struct(self)->list[ExogenousRNAByStruct]:
+        with self.driver.session() as session:
+            def _(tx: Transaction | ManagedTransaction):
+                return tx.run("""//
+match (n:RibosomeStructure)-[]-(r:RNA) 
+where toLower(r.rcsb_pdbx_description) contains "mrna" or 
+toLower(r.rcsb_pdbx_description) contains "trna" or
+toLower(r.rcsb_pdbx_description)  contains "m-rna" or
+toLower(r.rcsb_pdbx_description)  contains "t-rna" or
+toLower(r.rcsb_pdbx_description)  contains "messenger"
+or toLower(r.rcsb_pdbx_description) contains "transfer"
+with n.rcsb_id as struct, collect(r.rcsb_pdbx_description) as rnas
+        return struct,rnas
+                    """).data()
+            return session.read_transaction(_)
+
+
+    def get_rna_class(self, class_id:RNAClass):
+        with self.driver.session() as session:
+            def _(tx: Transaction | ManagedTransaction):
+                return tx.run("""//
+                    match (c:RNAClass { class_id:$RNA_CLASS })-[]-(n)-[]-(rib:RibosomeStructure)
+        return {
+            parent_year                         : rib.citation_year                    ,
+            parent_resolution                   : rib.resolution                       ,
+            parent_citation                     : rib.citation_title                   ,
+            parent_method                       : rib.expMethod                        ,
+            asym_ids                            : n.asym_ids                           ,
+            auth_asym_id                        : n.auth_asym_id                       ,
+            nomenclature                        : c.class_id                           ,
+            parent_rcsb_id                      : n.parent_rcsb_id                     ,
+            src_organism_names                  : n.src_organism_names                 ,
+            host_organism_names                 : n.host_organism_names                ,
+            src_organism_ids                    : n.src_organism_ids                   ,
+            host_organism_ids                   : n.host_organism_ids                  ,
+            rcsb_pdbx_description               : n.rcsb_pdbx_description              ,
+            entity_poly_strand_id               : n.entity_poly_strand_id              ,
+            entity_poly_seq_one_letter_code     : n.entity_poly_seq_one_letter_code    ,
+            entity_poly_seq_one_letter_code_can : n.entity_poly_seq_one_letter_code_can,
+            entity_poly_seq_length              : n.entity_poly_seq_length             ,
+            entity_poly_polymer_type            : n.entity_poly_polymer_type           ,
+            entity_poly_entity_type             : n.entity_poly_entity_type            ,
+            ligand_like                         : n.ligand_like                        
+        }""",{"RNA_CLASS":class_id}).data()
+        return session.read_transaction(_)
