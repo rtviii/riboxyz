@@ -10,6 +10,10 @@ class LastUpdate(BaseModel):
     date: str
     added_structure: str
 
+class ExogenousRNAByStruct(Schema):
+    struct: str
+    rnas: list[str]
+
 class Protein(BaseModel):
 
     asym_ids: list[str]
@@ -64,39 +68,37 @@ class RNA(BaseModel):
 
     ligand_like: bool
 
+class Ligand(BaseModel)  : 
 
-
-class Ligand(BaseModel):
-    chemicalId: str
-    chemicalName: str
-    formula_weight: float
-    pdbx_description: str
-    number_of_instances: int
-
+      chemicalId         : str
+      chemicalName       : str
+      formula_weight     : None | float
+      pdbx_description   : str
+      number_of_instances: int
 
 
 class RibosomeStructure(BaseModel):
 
-    rcsb_id:    str
-    expMethod:  str
+    rcsb_id   : str
+    expMethod : str
     resolution: float
 
     pdbx_keywords:      str | None
     pdbx_keywords_text: str | None
 
-    rcsb_external_ref_id: list[str]
+    rcsb_external_ref_id  : list[str]
     rcsb_external_ref_type: list[str]
     rcsb_external_ref_link: list[str]
 
-    citation_year: int
-    citation_rcsb_authors: list[str]
-    citation_title: str
-    citation_pdbx_doi: str
+    citation_year        : None | int
+    citation_rcsb_authors: None | list[str]
+    citation_title       : None | str
+    citation_pdbx_doi    : None | str
 
-    src_organism_ids: list[int]
+    src_organism_ids  : list[int]
     src_organism_names: list[str]
 
-    host_organism_ids: list[int]
+    host_organism_ids  : list[int]
     host_organism_names: list[str]
 
     proteins: list[Protein]
@@ -112,21 +114,9 @@ class RibosomeStructure(BaseModel):
     #     rib  = RibosomeStructure(**_rib)
 
         # return rib
-# 
-    # def _ingres_split_rename():
-    #     ...
 
-    # def _ingres_extract_bsites():
-    #     ...
-
-    # def _ingres_render_thumbnail():
-    #     ...
-
-    # def _ingres_commit_structure():
-    #     ...
 
 # ※--------------------------------------------------------
-
 
 class InterProFamily(BaseModel):
     family_id: str

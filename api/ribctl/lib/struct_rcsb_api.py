@@ -1,5 +1,4 @@
 import json
-from pprint import pprint
 from typing import Any
 import requests
 from api.ribctl.lib.types.types_ribosome import RNA, Ligand, Protein, RibosomeStructure
@@ -216,14 +215,38 @@ def __reshape_poly_to_protein(plm)->list[Protein]:
         pfam_descriptions = []
         pfam_accessions   = []
 
-    src_organism_ids    = list(map(int, set([org['ncbi_taxonomy_id'] for org in plm['rcsb_entity_source_organism']]))) if plm['rcsb_entity_source_organism'] != None else []
-    host_organism_ids   = list(map(int, set([org['ncbi_taxnonomy_id'] for org in plm['rcsb_entity_host_organism']]))) if plm['rcsb_entity_host_organism']    != None else []
-    src_organism_names  = list(map(str, set([org['scientific_name'] for org in plm['rcsb_entity_source_organism']]))) if plm['rcsb_entity_source_organism']  != None else []
-    host_organism_names = list(map(str, set([org['scientific_name'] for org in plm['rcsb_entity_host_organism']]))) if plm['rcsb_entity_host_organism']      != None else []
+    host_organisms  :list[Any] | None = plm['rcsb_entity_host_organism']
+    source_organisms:list[Any] | None = plm['rcsb_entity_source_organism']
+
+    host_organism_ids   = []
+    host_organism_names = []
+
+    src_organism_ids    = []
+    src_organism_names  = []
+
+
+    if host_organisms != None:
+        for ho in host_organisms:
+            if ho['ncbi_taxonomy_id'] != None:
+                host_organism_ids.append(ho['ncbi_taxonomy_id'])
+            if ho['scientific_name'] != None:
+                host_organism_names.append(ho['scientific_name'])
+
+    if source_organisms != None:
+        for so in source_organisms:
+            if so[ 'ncbi_taxonomy_id' ] != None:
+                src_organism_ids.append(so['ncbi_taxonomy_id'])
+            if so['scientific_name'] != None:
+                src_organism_names.append(so['scientific_name'])
+
+    host_organism_ids   = list(map(int, set(host_organism_ids)))
+    host_organism_names = list(map(str, set(host_organism_names)))
+    src_organism_ids    = list(map(int, set(src_organism_ids)))
+    src_organism_names  = list(map(str, set(src_organism_names)))
 
     nomenclature = __get_protein_nomenclature(plm)
 
-    return [
+    return  [
         Protein(**{
             "nomenclature": nomenclature,
             "asym_ids": plm['rcsb_polymer_entity_container_identifiers']['asym_ids'],
@@ -253,23 +276,24 @@ def process_pdb_record(rcsb_id: str) -> RibosomeStructure:
     returns dict of the shape types_RibosomeStructure 
     """
 
-    response = query_rcsb_api(gql_monolith(rcsb_id.upper()))
-    proteins    = response['polymer_entities']
-    ligands  = response['nonpolymer_entities']
+    response         = query_rcsb_api(gql_monolith(rcsb_id.upper()))
+    poly_entities    = response['polymer_entities']
+    nonpoly_entities = response['nonpolymer_entities']
 
     def is_protein(poly): return poly['entity_poly']['rcsb_entity_polymer_type'] == 'Protein'
 
     proteins, rnas = [], []
-    for poly in proteins:
+    for poly in poly_entities:
         proteins.append(poly) if is_protein(poly) else rnas.append(poly)
 
     reshaped_proteins:list[Protein] = []
     reshaped_rnas    :list[RNA]     = []
 
-    [reshaped_proteins.extend(__reshape_poly_to_protein(poly)) for poly in proteins]
     [reshaped_rnas.extend(__reshape_poly_to_rna(poly)) for poly in rnas]
+    [reshaped_proteins.extend(__reshape_poly_to_protein(poly)) for poly in proteins]
 
-    reshaped_nonpoly:list[Ligand] = [__reshape_to_ligand(nonpoly) for nonpoly in ligands] if ligands != None and len(ligands) > 0 else []
+
+    reshaped_nonpoly:list[Ligand] = [__reshape_to_ligand(nonpoly) for nonpoly in nonpoly_entities] if nonpoly_entities != None and len(nonpoly_entities) > 0 else []
     organisms        = __infer_organisms_from_polymers(reshaped_proteins)  # type: ignore (only accessing commong fields)
     externalRefs     = __extract_external_refs(response['rcsb_external_references'])
 

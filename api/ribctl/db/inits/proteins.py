@@ -56,7 +56,6 @@ return prot, protof, struct
                        "PARENT": parent_rcsb_id}).values('prot', 'protof', 'struct')
     return _
 
-
 def link__prot_to_nomclass(prot: Node) -> Callable[[Transaction | ManagedTransaction], list[list[Node | Relationship]]]:
     def _(tx: Transaction | ManagedTransaction):
         return tx.run("""//

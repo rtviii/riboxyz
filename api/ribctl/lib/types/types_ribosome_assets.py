@@ -1,5 +1,6 @@
 import json
 import os
+from neo4j import Driver
 from pydantic import parse_obj_as
 from ribctl.lib import RIBETL_DATA
 from ribctl.lib.types.types_ribosome import RibosomeStructure
@@ -9,12 +10,16 @@ from ribctl.lib.struct_rcsb_api import process_pdb_record
 from ribctl.lib.struct_split_rename import split_rename
 from ribctl.lib.struct_extract_bsites import get_ligands, get_liglike_polymers, render_ligand, render_liglike_polymer
 
+
+
+
+
 class RibosomeAssets():
     rcsb_id: str
 
     def __init__(self, rcsb_id: str) -> None:
         self.rcsb_id = rcsb_id.upper()
-
+# 
     def _envcheck(self):
         if not RIBETL_DATA:
             raise Exception(
@@ -40,7 +45,7 @@ class RibosomeAssets():
         with open(self._json_profile_filepath(), "r") as f:
             return json.load(f)
 
-    def biopython_sturcture(self):
+    def biopython_structure(self):
         return open_structure(self.rcsb_id, 'cif')
 
     def chains_dir(self):
@@ -86,8 +91,7 @@ class RibosomeAssets():
                 raise Exception("Invalid ribosome structure profile.")
 
             self.save_json_profile(self._json_profile_filepath(), ribosome.dict())
-            print(
-                f"Saved structure profile:\t{self._json_profile_filepath()}")
+            print(f"Saved structure profile:\t{self._json_profile_filepath()}")
             return True
         else:
             if os.path.exists(self._json_profile_filepath()):
@@ -122,12 +126,12 @@ class RibosomeAssets():
             if not os.path.exists(ligand_path(ligand[0])):
                 _flag = False
                 render_ligand(
-                    self.rcsb_id, ligand[0], self.biopython_sturcture(), overwrite)
+                    self.rcsb_id, ligand[0], self.biopython_structure(), overwrite)
 
         for ligandlike_poly in ligandlike_polymers:
             if not os.path.exists(liglike_poly_path(ligandlike_poly.auth_asym_id)):
                 _flag = False
                 render_liglike_polymer(
-                    self.rcsb_id, ligandlike_poly.auth_asym_id, self.biopython_sturcture(), overwrite)
+                    self.rcsb_id, ligandlike_poly.auth_asym_id, self.biopython_structure(), overwrite)
 
         return _flag
