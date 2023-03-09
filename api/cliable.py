@@ -92,9 +92,9 @@ if args.query:
     #     NomenclatureClass.validate(n)
 
     members = qo.gmo_nom_class('uL2')
-    # for m in members:
-    #     NomenclatureClassMember.validate(m)
-    #     print(m)
+    for m in members:
+        NomenclatureClassMember.validate(m)
+        # print(m)
 
     protnum = qo.proteins_number()
     print(protnum)
@@ -102,7 +102,12 @@ if args.query:
     rbs = qo.get_rnas_by_struct()
     for r in rbs:
         ExogenousRNAByStruct.validate(r)
-    print(rbs)
+
+    rc = qo.get_rna_class('5SrRNA')
+
+    for rrr in rc:
+        NomenclatureClassMember.validate(rrr)
+
 
     # for bm in meta:
     #     BanClassMetadata.validate(bm)
