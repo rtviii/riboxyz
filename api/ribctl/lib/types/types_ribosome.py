@@ -10,6 +10,10 @@ class LastUpdate(BaseModel):
     date: str
     added_structure: str
 
+class ExogenousRNAByStruct(Schema):
+    struct: str
+    rnas: list[str]
+
 class Protein(BaseModel):
 
     asym_ids: list[str]

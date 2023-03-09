@@ -85,6 +85,10 @@ class Residue(Schema):
     parent_auth_asym_id: str
 
 
+class ExogenousRNAInStruct(Schema):
+    struct: str
+    rnas: list[str]
+
 class NomenclatureClassMember(Schema):
     #TODO: Deprecate. lacks host organism info. no surface ratio exists anymore. lazy design
     parent_resolution                  : float
