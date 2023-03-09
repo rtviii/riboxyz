@@ -1,3 +1,4 @@
+import typing
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from ninja import Router
@@ -42,6 +43,16 @@ def get_RibosomeStructure(rcsb_id:str):
 @router.get('/v0/match_structs_w_proteins', response=RibosomeStructure)
 def match_structs_w_proteins(has_proteins:list[ProteinClass]):
     return QO.match_structs_w_proteins(has_proteins)
+    
+
+@router.get('/v0/get_banclass_for_chain', response=list[ProteinClass])
+def get_banclass_for_chain(rcsb_id:str, auth_asym_id:str):
+    return QO.get_banclass_for_chain(rcsb_id,auth_asym_id)
+    
+
+@router.get('/v0/get_banclasses_metadata', response=...)
+def get_banclasses_metadata(family:typing.Literal['b','e','u'], subunit:typing.Literal['SSU', 'LSU']):
+    return QO.get_banclasses_metadata(family, subunit)
     
 
 

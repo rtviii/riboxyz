@@ -7,15 +7,15 @@ from pprint import pprint
 from neo4j import ManagedTransaction, Transaction
 from api.ribctl.db.data import QueryOps
 from api.ribctl.db.inits.driver import Neo4jDB
-from api.ribctl.lib.types.types_ribosome import Ligand, RibosomeStructure
-from api.schema.data_requests import LigandsByStruct
-from api.schema.v0 import LigandInstance, LigandlikeInstance, NeoStruct
+from api.ribctl.lib.types.types_ribosome import Ligand, ProteinClass, RibosomeStructure
+from api.schema.data_requests import BanclassMetadata, LigandsByStruct
+from api.schema.v0 import BanClassMetadata, LigandInstance, LigandlikeInstance, NeoStruct, NomenclatureClass
 from ribctl.lib.types.types_ribosome_assets import  RibosomeAssets
 from ribctl.lib.struct_rcsb_api import current_rcsb_structs
 
 import logging
 
-arg = argparse.ArgumentParser(description='RibCtl - A simple tool to control the ribosome')
+arg = argparse.ArgumentParser(description='RibCtl - A simple tool to control the ribosome database')
 
 arg.add_argument('-v', '--version', action='version', version='%(prog)s 0.1.0')
 arg.add_argument('-ts','--ts_typegen', type=str,nargs='+', help='Generate TypeScript types for the API. Point at "types" directory and specify the out directory')
@@ -82,6 +82,18 @@ if args.query:
     fs  = qo.get_full_structure("5AFI")
     NeoStruct.validate(fs)
 
+    bc = qo.get_banclass_for_chain('5AFI', 'I')
+    # pprint(bc)
+    meta = qo.get_banclasses_metadata('e','SSU')
+
+
+    nomclassses = qo.list_nom_classes()
+    for n in nomclassses:
+        NomenclatureClass.validate(n)
+
+    # for bm in meta:
+    #     BanClassMetadata.validate(bm)
+    #     print(meta)
 
 
 

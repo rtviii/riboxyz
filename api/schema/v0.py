@@ -77,6 +77,8 @@ class NeoStruct(Schema):
       rps              : list[PolymerMinimal]
       rnas             : list[PolymerMinimal] | None
 
+
+
 class Residue(Schema):
     residue_name: str
     residue_id: int
@@ -289,4 +291,18 @@ class BanClassMetadata(Schema):
     banClass: ProteinClass
     organisms: list[int]
     comments: list[list[str]]
-    structs: list[RibosomeStructure]
+    structs: list[str]
+
+class RPSummary(Schema):
+    organism_desc: list[str]
+    organism_id  : list[int]
+    uniprot      : list[str]
+    parent       : str
+    parent_reso  : float
+    strand_id    : str
+                        
+#TODO: Merge or disjoin with the BanClassMetadata class
+class NomenclatureClass(Schema): 
+      structs                  : list[str]
+      rps                      : list[RPSummary]
+      banClass                 : ProteinClass
