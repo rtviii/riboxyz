@@ -2,31 +2,48 @@ from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from ninja import Router
 from ninja import Query, Schema
+from api.ribctl.lib.types.types_ribosome import ProteinClass, RibosomeStructure
 from ribctl.db.data import QueryOps
-from schema.v0 import NeoStruct
+from schema.v0 import LigandInstance, LigandlikeInstance, NeoStruct
 
 router = Router()
 QO     = QueryOps()
 
 
-@router.get('/v0/get_struct', response=list[NeoStruct])
+@router.get('/v0/get_all_structures', response=list[NeoStruct])
+def get_all_structures():
+    return QO.get_all_structures()
+
+@router.get('/v0/get_struct', response=NeoStruct)
 def get_struct(rcsb_id:str):
+    return QO.get_struct(rcsb_id.upper())
+
+@router.get('/v0/get_full_structure', response=NeoStruct)
+def get_full_structure(rcsb_id:str):
     return QO.get_struct(rcsb_id.upper())
 
 @router.get('/v0/get_all_ligands', response=list[NeoStruct])
 def get_all_ligands():
     return QO.get_all_ligands()
 
-@router.get('/v0/get_individual_ligand', response=list[NeoStruct])
+@router.get('/v0/get_individual_ligand', response=list[LigandInstance])
 def get_individual_ligand(chemicalId:str):
     return QO.get_individual_ligand(chemicalId)
     
-@router.get('/v0/get_all_structures', response=list[NeoStruct])
-def get_all_structures():
-    return QO.get_all_structures()
+@router.get('/v0/get_all_ligandlike', response=list[LigandlikeInstance])
+def get_all_ligandlike():
+    return QO.get_all_ligandlike()
 
 
+@router.get('/v0/get_RibosomeStructure', response=RibosomeStructure)
+def get_RibosomeStructure(rcsb_id:str):
+    return QO.get_RibosomeStructure(rcsb_id.upper())
+
+@router.get('/v0/match_structs_w_proteins', response=RibosomeStructure)
+def match_structs_w_proteins(has_proteins:list[ProteinClass]):
+    return QO.match_structs_w_proteins(has_proteins)
     
+
 
 
 

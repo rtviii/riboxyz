@@ -6,6 +6,21 @@ from ribctl.lib.types.types_polymer import RNAClass
 from ribctl.lib.types.types_ribosome import Ligand, Protein, ProteinClass, RibosomeStructure
 """This file documents the possible requests that the API can receive."""
 
+
+
+class LigandByStructInstance(Schema):
+     chemid: str
+     name:str
+     number:int
+
+class LigandsByStruct(Schema): 
+      title                  : str
+      struct                 : str
+      organism               : list[str]
+      taxid                  : list[int]
+      ligands                : list[LigandByStructInstance]
+
+
 class PresentInStruct(Schema): 
       citation_title         : str
       description            : str

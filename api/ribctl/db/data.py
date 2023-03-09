@@ -1,9 +1,10 @@
 from typing import Callable
-from neo4j import GraphDatabase, Driver, ManagedTransaction, Record, Result, Transaction
+from neo4j import GraphDatabase, Driver, ManagedTransaction, Record, Result, ResultSummary, Transaction
 from neo4j.graph import Node, Relationship
 from neo4j import ManagedTransaction, Transaction
 from api.ribctl.db.inits.driver import Neo4jDB
-from api.ribctl.lib.types.types_ribosome import Ligand, Protein, RibosomeStructure
+from api.ribctl.lib.types.types_ribosome import Ligand, Protein, ProteinClass, RibosomeStructure
+from api.schema.data_requests import LigandsByStruct
 from api.schema.v0 import LigandInstance, NeoStruct
 from ribctl.lib.types.types_polymer import list_LSU_Proteins, list_SSU_Proteins, list_RNAClass
 
@@ -162,4 +163,48 @@ class QueryOps(Neo4jDB):
 
                     return structure
                         """,{"RCSB_ID":rcsb_id.upper()}).data()[0]['structure']
+            return session.read_transaction(_)
+
+    def get_ligands_by_struct(self)->list[LigandsByStruct]:
+        with self.driver.session() as session:
+            def _(tx: Transaction | ManagedTransaction):
+                return tx.run("""//
+        match (n:RibosomeStructure)-[]-(l:Ligand)
+           with { title: n.citation_title, struct:n.rcsb_id, organism:n.src_organism_names, taxid:n.src_organism_ids, 
+           ligands: collect({ chemid: l.chemicalId, name:l.chemicalName, number:l.number_of_instances })} as struct_ligs
+           return struct_ligs
+                        """).data()[0]['struct_ligs']
+            return session.read_transaction(_)
+
+    def match_structs_w_proteins(self,targets:list[ProteinClass])->list[str]:
+        with self.driver.session() as session:
+            def _(tx: Transaction | ManagedTransaction):
+                return [s[0] for s in tx.run("""//
+                    match (n:RibosomeStructure)-[]-(rp:Protein)
+                    with n, rp, [] as strnoms 
+                    unwind rp.nomenclature as unwound
+                    with collect(unwound) as unwound, n, $T as tgts
+                    where all(x in tgts where x in unwound)
+                    with n.rcsb_id as rcsb_id
+                    return rcsb_id
+                        """,{"T":targets}).values('rcsb_id')]
+
+            return session.read_transaction(_)
+
+
+    def get_full_structure(self,rcsb_id:str)->NeoStruct:
+        #TODO: This method is identical to "get_struct" and was merely queried in a different way. DEPRECATE ONE (AS WELL AS THE API ENDPOINT)
+        with self.driver.session() as session:
+            def _(tx: Transaction | ManagedTransaction):
+                return tx.run("""//
+    match (rib:RibosomeStructure {rcsb_id:$RCSB_ID}) 
+        unwind rib as struct
+        optional match (l:Ligand)-[]-(struct)
+        with collect(l.chemicalId) as ligands, struct
+        optional match (rps:Protein)-[]-(struct)
+        with ligands, struct, collect({auth_asym_id:rps.auth_asym_id, nomenclature:rps.nomenclature, entity_poly_seq_one_letter_code: rps.entity_poly_seq_one_letter_code}) as rps
+        optional match (rnas:RNA)-[]-(struct)
+        with ligands, struct, rps, collect({auth_asym_id: rnas.auth_asym_id, nomenclature: rnas.nomenclature, entity_poly_seq_one_letter_code:rnas.entity_poly_seq_one_letter_code}) as rnas
+        return struct, ligands,rps, rnas
+                        """,{"RCSB_ID":rcsb_id.upper()}).data()[0]
             return session.read_transaction(_)
