@@ -85,6 +85,37 @@ class Residue(Schema):
     parent_auth_asym_id: str
 
 
+class NomenclatureClassMember(Schema):
+    #TODO: Deprecate. lacks host organism info. no surface ratio exists anymore. lazy design
+    parent_resolution                  : float
+    parent_year                        : int
+    parent_method                      : str
+
+    pfam_accessions  : list[str]
+    pfam_comments    : list[str]
+    parent_rcsb_id   : str
+    pfam_descriptions: list[str]
+
+    surface_ratio:float | None
+
+
+    src_organism_names : list[str]
+    src_organism_ids   : list[int]
+
+
+    uniprot_accession: list[str]
+
+    rcsb_pdbx_description: str | None
+
+    entity_poly_strand_id              : str
+    entity_poly_seq_one_letter_code    : str
+    entity_poly_seq_one_letter_code_can: str
+    entity_poly_seq_length             : int
+    entity_poly_polymer_type           : str
+    entity_poly_entity_type            : str
+
+    nomenclature:  list[ProteinClass]
+
 
 
 class BindingSiteChain(Schema): 

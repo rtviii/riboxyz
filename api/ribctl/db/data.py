@@ -244,7 +244,7 @@ class QueryOps(Neo4jDB):
      
 
     def list_nom_classes(self)->list[NomenclatureClass]:
-        #TODO: This method should handle both protein and RNA chains(atm only proteins)
+        #TODO: Merge into get_banclasses_metadata
         with self.driver.session() as session:
             def _(tx: Transaction | ManagedTransaction):
                  return tx.run("""//
@@ -258,7 +258,41 @@ class QueryOps(Neo4jDB):
                         strand_id    : rp.entity_poly_strand_id
                         }) as rps
                     return structs, banClass, rps
-                                        
                  """).data()
             return session.read_transaction(_)
+            
+
+
+    def gmo_nom_class(self,class_id:ProteinClass):
+
+        with self.driver.session() as session:
+            def _(tx: Transaction | ManagedTransaction):
+                 return tx.run("""//
+                    match (rib:RibosomeStructure)-[]-(n:Protein)-[]-(nc:ProteinClass{class_id:$BANCLASS})
+                    with collect({  
+                    parent_resolution                  : rib.resolution,
+                    parent_year                        : rib.citation_year,
+                    parent_method                      : rib.expMethod,
+                    parent_rcsb_id                     : n.parent_rcsb_id,
+                    pfam_accessions                    : n.pfam_accessions,
+                    pfam_comments                      : n.pfam_comments,
+                    pfam_descriptions                  : n.pfam_descriptions,
+                    src_organism_ids                   : n.src_organism_ids,
+                    src_organism_names                 : n.src_organism_names,
+                    uniprot_accession                  : n.uniprot_accession,
+                    rcsb_pdbx_description              : n.rcsb_pdbx_description,
+                    entity_poly_strand_id              : n.entity_poly_strand_id,
+                    entity_poly_seq_one_letter_code    : n.entity_poly_seq_one_letter_code,
+                    entity_poly_seq_one_letter_code_can: n.entity_poly_seq_one_letter_code_can,
+                    entity_poly_seq_length             : n.entity_poly_seq_length,
+                    entity_poly_polymer_type           : n.entity_poly_polymer_type,
+                    entity_poly_entity_type            : n.entity_poly_entity_type,
+                    surface_ratio                      : n.surface_ratio,
+                    nomenclature                       : n.nomenclature
+                        }) as member
+                        return member
+                 """,{"BANCLASS":class_id}).value('member')[0]
+            return session.read_transaction(_)
+
+
 
