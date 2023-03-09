@@ -64,8 +64,6 @@ class RNA(BaseModel):
 
     ligand_like: bool
 
-
-
 class Ligand(BaseModel)  : 
 
       chemicalId         : str
@@ -73,7 +71,6 @@ class Ligand(BaseModel)  :
       formula_weight     : None | float
       pdbx_description   : str
       number_of_instances: int
-
 
 
 class RibosomeStructure(BaseModel):
@@ -113,21 +110,9 @@ class RibosomeStructure(BaseModel):
     #     rib  = RibosomeStructure(**_rib)
 
         # return rib
-# 
-    # def _ingres_split_rename():
-    #     ...
 
-    # def _ingres_extract_bsites():
-    #     ...
-
-    # def _ingres_render_thumbnail():
-    #     ...
-
-    # def _ingres_commit_structure():
-    #     ...
 
 # ※--------------------------------------------------------
-
 
 class InterProFamily(BaseModel):
     family_id: str

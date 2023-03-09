@@ -1,11 +1,12 @@
 from typing import Callable
+import typing
 from neo4j import GraphDatabase, Driver, ManagedTransaction, Record, Result, ResultSummary, Transaction
 from neo4j.graph import Node, Relationship
 from neo4j import ManagedTransaction, Transaction
 from api.ribctl.db.inits.driver import Neo4jDB
 from api.ribctl.lib.types.types_ribosome import Ligand, Protein, ProteinClass, RibosomeStructure
 from api.schema.data_requests import LigandsByStruct
-from api.schema.v0 import LigandInstance, NeoStruct
+from api.schema.v0 import BanClassMetadata, LigandInstance, NeoStruct, NomenclatureClass
 from ribctl.lib.types.types_polymer import list_LSU_Proteins, list_SSU_Proteins, list_RNAClass
 
 
@@ -90,7 +91,7 @@ class QueryOps(Neo4jDB):
                                     entity_poly_seq_one_letter_code: struct_rnas.entity_poly_seq_one_letter_code
                                     }) as rnas
                                 with ligands, rps, rnas, keys(struct) as keys, struct 
-                                return struct, ligands,rps,rnas limit 3
+                                return struct, ligands,rps,rnas
                                         """).data()
 
             return session.read_transaction(_)
@@ -117,7 +118,6 @@ class QueryOps(Neo4jDB):
                         return liglike""").data()[0]['liglike']
             return session.read_transaction(_)
             
-
     def get_RibosomeStructure(self,rcsb_id:str)->RibosomeStructure:
         with self.driver.session() as session:
             def _(tx: Transaction | ManagedTransaction):
@@ -191,10 +191,10 @@ class QueryOps(Neo4jDB):
 
             return session.read_transaction(_)
 
-
     def get_full_structure(self,rcsb_id:str)->NeoStruct:
         #TODO: This method is identical to "get_struct" and was merely queried in a different way. DEPRECATE ONE (AS WELL AS THE API ENDPOINT)
         with self.driver.session() as session:
+
             def _(tx: Transaction | ManagedTransaction):
                 return tx.run("""//
     match (rib:RibosomeStructure {rcsb_id:$RCSB_ID}) 
@@ -208,3 +208,57 @@ class QueryOps(Neo4jDB):
         return struct, ligands,rps, rnas
                         """,{"RCSB_ID":rcsb_id.upper()}).data()[0]
             return session.read_transaction(_)
+
+
+
+    def get_banclass_for_chain(self,rcsb_id:str, auth_asym_id)->list[ProteinClass]:
+        #TODO: This method should handle both protein and RNA chains(atm only proteins)
+        with self.driver.session() as session:
+
+            def _(tx: Transaction | ManagedTransaction):
+                return [pc[0] for pc in tx.run("""//
+                match (n:RibosomeStructure {rcsb_id:$RCSB_ID})-[]-(c:Protein{auth_asym_id:$AUTH_ASYM_ID})-[]-(pc:ProteinClass) return pc.class_id
+                    """,{"RCSB_ID":rcsb_id,"AUTH_ASYM_ID":auth_asym_id}).values('pc.class_id')]
+            return session.read_transaction(_)
+
+    def get_banclasses_metadata(self,family:typing.Literal['b','e','u'], subunit:typing.Literal['SSU', 'LSU'])->list[BanClassMetadata]:
+        #TODO: This method should handle both protein and RNA chains(atm only proteins)
+        with self.driver.session() as session:
+            def _(tx: Transaction | ManagedTransaction):
+
+                 def flag_into_filter(_subunit:str):
+                     if _subunit == "SSU":
+                        return 'toLower(n.class_id) contains "s" or toLower(n.class_id) contains "bthx" or toLower(n.class_id) contains "rack"' 
+                     elif _subunit == "LSU": 
+                        return 'toLower(n.class_id) contains "l"' 
+                     else:
+                         raise ValueError("Subunit must be either 'ssu' or 'lsu'")
+
+                 fstring = flag_into_filter(subunit)
+                 return tx.run("""//
+                        match (n:ProteinClass)-[]-(rp:Protein)-[]-(s:RibosomeStructure) where  toLower(n.class_id) contains "{FAMILY}" and {SUBUNIT} 
+                        unwind s.`src_organism_ids` as orgid
+                        with collect(distinct orgid) as organisms, n.class_id as banClass, collect(s.rcsb_id) as structs, collect(distinct rp.pfam_comments) as comments
+                        return  banClass, organisms, comments, structs""".format_map({"FAMILY":family,"SUBUNIT":fstring})).data() # type: ignore
+            return session.read_transaction(_)
+     
+
+    def list_nom_classes(self)->list[NomenclatureClass]:
+        #TODO: This method should handle both protein and RNA chains(atm only proteins)
+        with self.driver.session() as session:
+            def _(tx: Transaction | ManagedTransaction):
+                 return tx.run("""//
+                    match (b:ProteinClass)-[]-(rp)-[]-(str:RibosomeStructure)
+                    with collect(str.rcsb_id) as structs, b.class_id as banClass, collect({
+                        organism_desc: rp.src_organism_names,
+                        organism_id  : rp.src_organism_ids,
+                        uniprot      : rp.uniprot_accession,
+                        parent       : str.rcsb_id,
+                        parent_reso  : str.resolution,
+                        strand_id    : rp.entity_poly_strand_id
+                        }) as rps
+                    return structs, banClass, rps
+                                        
+                 """).data()
+            return session.read_transaction(_)
+
