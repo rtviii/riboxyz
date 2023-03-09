@@ -6,7 +6,7 @@ from neo4j import ManagedTransaction, Transaction
 from api.ribctl.db.inits.driver import Neo4jDB
 from api.ribctl.lib.types.types_ribosome import  ExogenousRNAByStruct, Ligand, Protein, ProteinClass, RibosomeStructure
 from api.schema.data_requests import LigandsByStruct
-from api.schema.v0 import BanClassMetadata, LigandInstance, NeoStruct, NomenclatureClass
+from api.schema.v0 import BanClassMetadata, LigandInstance, NeoStruct, NomenclatureClass, NomenclatureClassMember
 from ribctl.lib.types.types_polymer import RNAClass, list_LSU_Proteins, list_SSU_Proteins, list_RNAClass
 
 
@@ -209,8 +209,6 @@ class QueryOps(Neo4jDB):
                         """,{"RCSB_ID":rcsb_id.upper()}).data()[0]
             return session.read_transaction(_)
 
-
-
     def get_banclass_for_chain(self,rcsb_id:str, auth_asym_id)->list[ProteinClass]:
         #TODO: This method should handle both protein and RNA chains(atm only proteins)
         with self.driver.session() as session:
@@ -241,7 +239,6 @@ class QueryOps(Neo4jDB):
                         with collect(distinct orgid) as organisms, n.class_id as banClass, collect(s.rcsb_id) as structs, collect(distinct rp.pfam_comments) as comments
                         return  banClass, organisms, comments, structs""".format_map({"FAMILY":family,"SUBUNIT":fstring})).data() # type: ignore
             return session.read_transaction(_)
-     
 
     def list_nom_classes(self)->list[NomenclatureClass]:
         #TODO: Merge into get_banclasses_metadata
@@ -261,9 +258,7 @@ class QueryOps(Neo4jDB):
                  """).data()
             return session.read_transaction(_)
             
-
-
-    def gmo_nom_class(self,class_id:ProteinClass):
+    def gmo_nom_class(self,class_id:ProteinClass)->list[NomenclatureClassMember]:
 
         with self.driver.session() as session:
             def _(tx: Transaction | ManagedTransaction):
@@ -306,9 +301,6 @@ class QueryOps(Neo4jDB):
                  """,{"BANCLASS":class_id}).value('member')[0]
             return session.read_transaction(_)
 
-
-
-
     def proteins_number(self)->int:
         with self.driver.session() as session:
             def _(tx: Transaction | ManagedTransaction):
@@ -333,8 +325,7 @@ with n.rcsb_id as struct, collect(r.rcsb_pdbx_description) as rnas
                     """).data()
             return session.read_transaction(_)
 
-
-    def get_rna_class(self, class_id:RNAClass):
+    def get_rna_class(self, class_id:RNAClass)->list[NomenclatureClassMember]:
         with self.driver.session() as session:
             def _(tx: Transaction | ManagedTransaction):
                 return [ rna[0] for rna in tx.run("""//
