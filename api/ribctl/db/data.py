@@ -270,25 +270,37 @@ class QueryOps(Neo4jDB):
                  return tx.run("""//
                     match (rib:RibosomeStructure)-[]-(n:Protein)-[]-(nc:ProteinClass{class_id:$BANCLASS})
                     with collect({  
+                    parent_rcsb_id                     : rib.parent_rcsb_id,
                     parent_resolution                  : rib.resolution,
+                    parent_citation                    : rib.citation_title,
                     parent_year                        : rib.citation_year,
                     parent_method                      : rib.expMethod,
-                    parent_rcsb_id                     : n.parent_rcsb_id,
+
                     pfam_accessions                    : n.pfam_accessions,
                     pfam_comments                      : n.pfam_comments,
                     pfam_descriptions                  : n.pfam_descriptions,
+
+                    asym_ids                            : n.asym_ids                           ,
+                    auth_asym_id                        : n.auth_asym_id                       ,
+
                     src_organism_ids                   : n.src_organism_ids,
                     src_organism_names                 : n.src_organism_names,
+
+                    host_organism_names                 : n.host_organism_names                ,
+                    host_organism_ids                   : n.host_organism_ids                  ,
+
                     uniprot_accession                  : n.uniprot_accession,
                     rcsb_pdbx_description              : n.rcsb_pdbx_description,
+
                     entity_poly_strand_id              : n.entity_poly_strand_id,
                     entity_poly_seq_one_letter_code    : n.entity_poly_seq_one_letter_code,
                     entity_poly_seq_one_letter_code_can: n.entity_poly_seq_one_letter_code_can,
                     entity_poly_seq_length             : n.entity_poly_seq_length,
                     entity_poly_polymer_type           : n.entity_poly_polymer_type,
                     entity_poly_entity_type            : n.entity_poly_entity_type,
-                    surface_ratio                      : n.surface_ratio,
-                    nomenclature                       : n.nomenclature
+
+                    nomenclature                       : n.nomenclature,
+                    ligand_like                        : n.ligand_like
                         }) as member
                         return member
                  """,{"BANCLASS":class_id}).value('member')[0]
@@ -325,28 +337,39 @@ with n.rcsb_id as struct, collect(r.rcsb_pdbx_description) as rnas
     def get_rna_class(self, class_id:RNAClass):
         with self.driver.session() as session:
             def _(tx: Transaction | ManagedTransaction):
-                return tx.run("""//
+                return [ rna[0] for rna in tx.run("""//
                     match (c:RNAClass { class_id:$RNA_CLASS })-[]-(n)-[]-(rib:RibosomeStructure)
-        return {
+        with {
             parent_year                         : rib.citation_year                    ,
             parent_resolution                   : rib.resolution                       ,
             parent_citation                     : rib.citation_title                   ,
+            parent_rcsb_id                      : rib.parent_rcsb_id                   ,
             parent_method                       : rib.expMethod                        ,
+
+            pfam_accessions                    : n.pfam_accessions                     ,
+            pfam_comments                      : n.pfam_comments                       ,
+            pfam_descriptions                  : n.pfam_descriptions                   ,
+
             asym_ids                            : n.asym_ids                           ,
             auth_asym_id                        : n.auth_asym_id                       ,
-            nomenclature                        : c.class_id                           ,
-            parent_rcsb_id                      : n.parent_rcsb_id                     ,
+
             src_organism_names                  : n.src_organism_names                 ,
-            host_organism_names                 : n.host_organism_names                ,
             src_organism_ids                    : n.src_organism_ids                   ,
+
+            host_organism_names                 : n.host_organism_names                ,
             host_organism_ids                   : n.host_organism_ids                  ,
+            uniprot_accesion                    : n.uniprot_accesion                   ,
             rcsb_pdbx_description               : n.rcsb_pdbx_description              ,
+
             entity_poly_strand_id               : n.entity_poly_strand_id              ,
             entity_poly_seq_one_letter_code     : n.entity_poly_seq_one_letter_code    ,
             entity_poly_seq_one_letter_code_can : n.entity_poly_seq_one_letter_code_can,
             entity_poly_seq_length              : n.entity_poly_seq_length             ,
             entity_poly_polymer_type            : n.entity_poly_polymer_type           ,
             entity_poly_entity_type             : n.entity_poly_entity_type            ,
+
+            nomenclature                        : [c.class_id]                           ,
             ligand_like                         : n.ligand_like                        
-        }""",{"RNA_CLASS":class_id}).data()
-        return session.read_transaction(_)
+        } as rna
+        return rna""",{"RNA_CLASS":class_id}).values('rna')]
+            return session.read_transaction(_)

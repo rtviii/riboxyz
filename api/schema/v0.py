@@ -90,25 +90,24 @@ class ExogenousRNAInStruct(Schema):
     rnas: list[str]
 
 class NomenclatureClassMember(Schema):
-    #TODO: Deprecate. lacks host organism info. no surface ratio exists anymore. lazy design
+    #TODO: Deprecate. lacks  ligand_like and host organism info. no surface ratio exists anymore. lazy design
     parent_resolution                  : float
     parent_year                        : int | None
     parent_method                      : str
+    parent_citation                    :str
+    parent_rcsb_id   : str | None
 
-    pfam_accessions  : list[str]
-    pfam_comments    : list[str]
-    parent_rcsb_id   : str
-    pfam_descriptions: list[str]
+    pfam_accessions  : list[str]  | None
+    pfam_comments    : list[str]  | None
+    pfam_descriptions: list[str]  | None
 
-    surface_ratio:float | None
-
+    asym_ids:list[str]
+    auth_asym_id: str
 
     src_organism_names : list[str]
     src_organism_ids   : list[int]
 
-
-    uniprot_accession: list[str]
-
+    uniprot_accession: list[str]| None
     rcsb_pdbx_description: str | None
 
     entity_poly_strand_id              : str
@@ -117,8 +116,10 @@ class NomenclatureClassMember(Schema):
     entity_poly_seq_length             : int
     entity_poly_polymer_type           : str
     entity_poly_entity_type            : str
+    
 
-    nomenclature:  list[ProteinClass]
+    nomenclature:  list[ProteinClass | RNAClass]
+    ligand_like:   bool | None
 
 
 
