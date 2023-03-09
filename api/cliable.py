@@ -9,7 +9,7 @@ from api.ribctl.db.data import QueryOps
 from api.ribctl.db.inits.driver import Neo4jDB
 from api.ribctl.lib.types.types_ribosome import Ligand, ProteinClass, RibosomeStructure
 from api.schema.data_requests import BanclassMetadata, LigandsByStruct
-from api.schema.v0 import BanClassMetadata, LigandInstance, LigandlikeInstance, NeoStruct, NomenclatureClass
+from api.schema.v0 import BanClassMetadata, LigandInstance, LigandlikeInstance, NeoStruct, NomenclatureClass, NomenclatureClassMember
 from ribctl.lib.types.types_ribosome_assets import  RibosomeAssets
 from ribctl.lib.struct_rcsb_api import current_rcsb_structs
 
@@ -88,8 +88,13 @@ if args.query:
 
 
     nomclassses = qo.list_nom_classes()
-    for n in nomclassses:
-        NomenclatureClass.validate(n)
+    # for n in nomclassses:
+    #     NomenclatureClass.validate(n)
+
+    members = qo.gmo_nom_class('uL2')
+    for m in members:
+        NomenclatureClassMember.validate(m)
+        print(m)
 
     # for bm in meta:
     #     BanClassMetadata.validate(bm)

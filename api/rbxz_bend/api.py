@@ -5,7 +5,7 @@ from ninja import Router
 from ninja import Query, Schema
 from api.ribctl.lib.types.types_ribosome import ProteinClass, RibosomeStructure
 from ribctl.db.data import QueryOps
-from schema.v0 import LigandInstance, LigandlikeInstance, NeoStruct
+from schema.v0 import BanClassMetadata, LigandInstance, LigandlikeInstance, NeoStruct, NomenclatureClass
 
 router = Router()
 QO     = QueryOps()
@@ -50,10 +50,13 @@ def get_banclass_for_chain(rcsb_id:str, auth_asym_id:str):
     return QO.get_banclass_for_chain(rcsb_id,auth_asym_id)
     
 
-@router.get('/v0/get_banclasses_metadata', response=...)
+@router.get('/v0/get_banclasses_metadata', response=list[BanClassMetadata])
 def get_banclasses_metadata(family:typing.Literal['b','e','u'], subunit:typing.Literal['SSU', 'LSU']):
     return QO.get_banclasses_metadata(family, subunit)
     
+@router.get('/v0/get_nom_classes', response=list[NomenclatureClass])
+def get_nom_classes():
+    return QO.list_nom_classes()
 
 
 
