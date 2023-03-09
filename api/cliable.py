@@ -1,7 +1,6 @@
 #TODO: ( Bring up ) Lift all the useful top-level functions from the package to this level.
 
 import argparse
-import json
 from pprint import pprint
 
 from neo4j import ManagedTransaction, Transaction
@@ -29,7 +28,6 @@ args = arg.parse_args()
 
 logging.basicConfig(level=logging.ERROR, filemode='w', format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
-
 
 if args.sync_rcsb:
 
@@ -86,10 +84,7 @@ if args.query:
     # pprint(bc)
     meta = qo.get_banclasses_metadata('e','SSU')
 
-
     nomclassses = qo.list_nom_classes()
-    # for n in nomclassses:
-    #     NomenclatureClass.validate(n)
 
     members = qo.gmo_nom_class('uL2')
     for m in members:
@@ -107,36 +102,6 @@ if args.query:
 
     for rrr in rc:
         NomenclatureClassMember.validate(rrr)
-
-
-    # for bm in meta:
-    #     BanClassMetadata.validate(bm)
-    #     print(meta)
-
-
-
-
-
-        
-
-
-
-        # try:
-        #     # NeoStruct.validate(q)
-
-        # except Exception as e:
-        #     print("Failed to validate NeoStruct:", q.struct.rcsb_id)
-
-    # print(qo.driver)
-    
-    # D        = Neo4jDB()
-    # with qo.driver.session() as session:
-    #     def _(tx: Transaction | ManagedTransaction):
-    #         return tx.run("""//
-    #         match (n:RibosomeStructure) return n.rcsb_id
-    #         """).values()
-    #     print(session.read_transaction(_))
-
 
 if args.database:
 

@@ -8,7 +8,7 @@ from rbxz_bend.api import router
 from ninja import NinjaAPI
 
 api = NinjaAPI()
-api.add_router('/blog/', router)
+api.add_router('', router)
 
 
 urlpatterns = [
