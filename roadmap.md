@@ -1,5 +1,11 @@
 
 
+
+<!-- TODO: -->
+- split ligand classes into instances and classes
+
+
+
 # Features to stability:
 
 - api
@@ -33,3 +39,4 @@
 - https://docs.djangoproject.com/en/4.1/howto/static-files/deployment/
 
 
+## Integrate the PTC/conserved sites scripts scripts into the processing pipeline

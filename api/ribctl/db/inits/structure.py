@@ -6,6 +6,7 @@ from neo4j import ManagedTransaction, Transaction
 from ribctl.lib.types.types_ribosome import RNA, Ligand, Protein, RibosomeStructure
 from ribctl.lib.types.types_polymer import list_LSU_Proteins, list_SSU_Proteins, list_RNAClass
 
+
 def node__structure(_rib: RibosomeStructure) -> Callable[[Transaction | ManagedTransaction], Record | None]:
     R = _rib.dict()
     def _(tx: Transaction | ManagedTransaction):
