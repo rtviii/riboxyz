@@ -3,78 +3,39 @@ services:
   django:
     container_name: django
     restart: always
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile-django
     ports:
       - 8000:8000
     volumes:
       - type: bind
         source: ${RIBETL_DATA:?err}
         target: /home/backend/api/ribetldata
-
       # FOR LIVE DEVELOPMENT -----------------------|
       - ./api:/home/backend/api                    #|  <--- DEV ONLY
       # --------------------------------------------|
-
     environment:
       - NEO4J_URI=bolt://neo:7687
-      # - STRUCT_PROCESS_SCRIPTS=/home/backend/cli/scripts
-      # You could possibly move these out of the dockerfile to here (at least the auths)
-      #(if not the dockerfile will be rebuilt every time you change them)
-      # ENV DJANGO=/home/backend/api
-      # ENV PYMOL_SOURCE=/home/backend/pymol
-      # ENV CLI=/home/backend/ingress
-      # ENV RIBETL_DATA=/home/backend/api/ribetldata
-      # ENV PYMOL_PATH="${PYMOL_SOURCE}/__pymol_lib"
-      # ENV PYTHONPATH="${PYMOL_PATH}/modules" 
-      # ENV PATH="/opt/venv/bin:$PATH"
       - NEO4J_USER=neo4j
       - NEO4J_PASSWORD=55288
       - NEO4J_CURRENTDB=neo4j
-      # ------ CLi ENV VARS ------------------------
-      # - CLI=/home/backend/cli
-      # - COMMIT_STRUCTURE_SH=/home/backend/cli/scripts/commit_structure.sh 
-      # - EXTRACT_BSITES_PY=/home/backend/cli/scripts/extract_bsites.py 
-      # - RENDER_THUMBNAIL_PY=/home/backend/cli/scripts/render_thumbnail.py 
-      # - SPLIT_RENAME_PY=/home/backend/cli/scripts/split_rename.py 
-      # - PYTHONBIN=/opt/venv/bin/python3 
-
 
     links:
       - neo
     depends_on:
       - neo
   neo:
-    image: neo4j:4.4
-    container_name: neo
-    ports:
-      - "7474:7474"
-      - "7687:7687"
-
     hostname: neo
-
-    environment:
-      - NEO4J_dbms_security_procedures_unrestricted=apoc.*
-      - NEO4J_dbms_security_procedures_allowlist=apoc.*
-      - NEO4JLABS_PLUGINS=["apoc"]
-      - NEO4J_apoc_import_file_enabled=true
-      - NEO4J_server_directories_logs=/data
-      - NEO4J_apoc_import_file_use__neo4j__config=false
-      - NEO4J_dbms_memory_pagecache_size=4G
-
-
-      - NEO4J_dbms_default__listen__address=0.0.0.0
-      - NEO4J_dbms_default__advertised__address=neo
-      - NEO4J_dbms_connector_https_advertised__address=0.0.0.0:7473
-      - NEO4J_dbms_connector_http_advertised__address=0.0.0.0:7474
-      - NEO4J_dbms_connector_bolt_advertised__address=0.0.0.0:7687
-      - NEO4J_dbms_security_auth__enabled=false
-
-      # - NEO4J_dbms_ssl_policy_bolt_client__auth=NONE
-      # - NEO4J_dbms_ssl_policy_https_client__auth=NONE
-      
-      #--------------
-
-
+    container_name: neo
+    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile-neo4j
+    ports:
+      - 7473:7473
+      - 7474:7474
+      - 7687:7687
 
     volumes:
       - ./volume/plugins:/plugins
