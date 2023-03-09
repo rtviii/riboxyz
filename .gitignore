@@ -22,3 +22,6 @@ __pycache__/**
 **/local_venv
 local_venv/**
 local_venv
+
+**/*.log
+*.log
