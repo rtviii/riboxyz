@@ -1,6 +1,6 @@
 from ast import List
 from pprint import pprint
-from typing import Dict, LiteralString, Self
+from typing import  Self
 from neo4j import Driver, GraphDatabase, Result, Transaction
 from pyparsing import Any
 from ribctl.db.inits.proteins import add_protein, node__protein_class
@@ -14,7 +14,7 @@ from ribctl.lib.types.types_polymer import list_LSU_Proteins, list_SSU_Proteins,
 function that takes a transaction as its argument."""
 
 # ※ ----------------[ 0.Database  inits: constraints & nomenclature classes]
-NODE_CONSTRAINTS: list[LiteralString] = [
+NODE_CONSTRAINTS = [
     """CREATE CONSTRAINT IF NOT EXISTS ON (ipro:InterProFamily) ASSERT ipro.family_id  IS UNIQUE;""",
     """CREATE CONSTRAINT IF NOT EXISTS ON (go:GOClass) ASSERT go.class_id IS UNIQUE;""",
     """CREATE CONSTRAINT IF NOT EXISTS ON (q:RibosomeStructure) Assert q.rcsb_id IS UNIQUE;""",

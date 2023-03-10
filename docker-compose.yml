@@ -38,8 +38,8 @@ services:
       - 7687:7687
 
     volumes:
-      - ./volume/plugins:/plugins
-      - ./volume/data:/data
+      - /opt/ribxz_neo4j_volume/plugins:/plugins
+      - /opt/ribxz_neo4j_volume/data:/data
 
       - type  : bind
         source: ${RIBETL_DATA:?err}
