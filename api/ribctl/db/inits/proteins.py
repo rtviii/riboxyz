@@ -3,7 +3,7 @@ from typing import Callable
 from neo4j import GraphDatabase, Driver, ManagedTransaction, Record, Result, Transaction
 from neo4j.graph import Node, Relationship
 from neo4j import ManagedTransaction, Transaction
-from api.ribctl.lib.types.types_ribosome import Protein
+from ribctl.lib.types.types_ribosome import Protein
 from ribctl.lib.types.types_polymer import list_LSU_Proteins, list_SSU_Proteins, list_RNAClass
 
 def node__protein(_prot:Protein)->Callable[[Transaction | ManagedTransaction], Node ]:

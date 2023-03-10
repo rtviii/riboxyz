@@ -3,7 +3,7 @@ from typing import Callable
 from neo4j import Driver, ManagedTransaction, Transaction
 from neo4j.graph import Node, Relationship
 from neo4j import ManagedTransaction, Transaction
-from api.ribctl.lib.types.types_ribosome import RNA
+from ribctl.lib.types.types_ribosome import RNA
 
 def node__rna(_rna: RNA) -> Callable[[Transaction | ManagedTransaction], Node]:
     RNA_dict = _rna.dict()

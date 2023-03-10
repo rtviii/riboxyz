@@ -3,10 +3,10 @@ import typing
 from neo4j import GraphDatabase, Driver, ManagedTransaction, Record, Result, ResultSummary, Transaction
 from neo4j.graph import Node, Relationship
 from neo4j import ManagedTransaction, Transaction
-from api.ribctl.db.inits.driver import Neo4jDB
-from api.ribctl.lib.types.types_ribosome import  ExogenousRNAByStruct, Ligand, Protein, ProteinClass, RibosomeStructure
-from api.schema.data_requests import LigandsByStruct
-from api.schema.v0 import BanClassMetadata, LigandInstance, NeoStruct, NomenclatureClass, NomenclatureClassMember
+from ribctl.db.inits.driver import Neo4jDB
+from ribctl.lib.types.types_ribosome import  ExogenousRNAByStruct, Ligand,  ProteinClass, RibosomeStructure
+from schema.data_requests import LigandsByStruct
+from schema.v0 import BanClassMetadata, LigandInstance, NeoStruct, NomenclatureClass, NomenclatureClassMember
 from ribctl.lib.types.types_polymer import RNAClass, list_LSU_Proteins, list_SSU_Proteins, list_RNAClass
 
 
@@ -365,4 +365,3 @@ with n.rcsb_id as struct, collect(r.rcsb_pdbx_description) as rnas
         return rna""",{"RNA_CLASS":class_id}).values('rna')]
             return session.read_transaction(_)
 
-    
