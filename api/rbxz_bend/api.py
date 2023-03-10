@@ -1,5 +1,9 @@
 import typing
+from venv import logger
 from ninja import Router
+from ribctl.lib.struct_rcsb_api import current_rcsb_structs
+from ribctl.lib.types.types_ribosome_assets import RibosomeAssets
+from ribctl.db.inits.driver import Neo4jDB
 from ribctl.lib.types.types_polymer import RNAClass
 from ribctl.lib.types.types_ribosome import ExogenousRNAByStruct, ProteinClass, RibosomeStructure
 from ribctl.db.data import QueryOps
@@ -7,6 +11,25 @@ from schema.v0 import BanClassMetadata, LigandInstance, LigandlikeInstance, NeoS
 
 router = Router()
 QO     = QueryOps()
+
+
+
+@router.get('/sync_with_rcsb', response=list[str])
+def sync_with_rcsb(request):
+    D        = Neo4jDB()
+    synced   = D.get_all_structs()
+    unsynced = sorted(current_rcsb_structs())
+
+    for rcsb_id in set(unsynced ) - set(synced):
+        assets = RibosomeAssets(rcsb_id)
+        try:
+            assets._verify_json_profile(True)
+            D.add_structure(assets)
+        except Exception as e:
+            print(e)
+            logger.error("Exception occurred:", exc_info=True)
+
+    return QO.get_all_structures()
 
 @router.get('/v0/get_all_structures', response=list[NeoStruct])
 def get_all_structures(request,):
