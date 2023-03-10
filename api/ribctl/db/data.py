@@ -1,4 +1,3 @@
-from typing import Callable
 import typing
 from neo4j import GraphDatabase, Driver, ManagedTransaction, Record, Result, ResultSummary, Transaction
 from neo4j.graph import Node, Relationship

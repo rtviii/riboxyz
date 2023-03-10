@@ -32,7 +32,6 @@ def get_individual_ligand(request,chemicalId:str):
 def get_all_ligandlike(request,):
     return QO.get_all_ligandlike()
 
-
 @router.get('/v0/get_RibosomeStructure', response=RibosomeStructure)
 def get_RibosomeStructure(request,rcsb_id:str):
     return QO.get_RibosomeStructure(rcsb_id.upper())
@@ -60,11 +59,11 @@ def gmo_nom_class(request,class_id:ProteinClass):
     return QO.gmo_nom_class(class_id)
 
 @router.get('/v0/proteins_number', response=int)
-def proteins_number(request,):
+def proteins_number(request):
     return QO.proteins_number()
 
 @router.get('/v0/get_rnas_by_struct', response=list[ExogenousRNAByStruct])
-def get_rnas_by_struct(request,):
+def get_rnas_by_struct(request):
     return QO.get_rnas_by_struct()
 
 @router.get('/v0/get_rna_class', response=list[NomenclatureClassMember])
@@ -72,14 +71,3 @@ def get_rna_class(request,class_id:RNAClass):
     return QO.get_rna_class(class_id)
 
 
-
-# @router.get('/resp/{resp_id}')
-# def get_article(request, resp_id: int):
-#     article = [ 1,2,3 ]
-#     return article
-
-
-# @router.get('/resps', response=list[RibosomeResponse])
-# def get_articles(request):
-#     # articles = Article.objects.all()
-#     return ["a", "b", "c"]

@@ -28,7 +28,8 @@ NODE_CONSTRAINTS = [
 # ※ ----------------[ 5.Ingress]
 
 
-def init_driver(uri: str = "neo4j://localhost:7687", username: str = "neo4j", password="neo4j"):
+#? DOCKER: Make sure the host ("neo" or "localhost" or "0.0.0.0") mimics container name.
+def init_driver(uri: str = "neo4j://neo:7687", username: str = "neo4j", password="neo4j"):
     # TODO: Create an instance of the driver here
     api = GraphDatabase.driver(uri, auth=(username, password))
     return api
