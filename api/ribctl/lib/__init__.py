@@ -13,4 +13,4 @@ SSU_map = {k: v for k, v in json.load(open(ssu_path, 'r')).items()}
 
 
 RIBETL_DATA = str(os.environ.get('RIBETL_DATA'))
-sys.path.append(os.environ.get("PYMOL_PATH")) 
+sys.path.append(os.environ.get("PYMOL_PATH"))    

@@ -1,6 +1,5 @@
 from ast import List
 from pprint import pprint
-from typing import  Self
 from neo4j import Driver, GraphDatabase, Result, Transaction
 from pyparsing import Any
 from ribctl.db.inits.proteins import add_protein, node__protein_class
@@ -18,7 +17,6 @@ NODE_CONSTRAINTS = [
     """CREATE CONSTRAINT IF NOT EXISTS ON (ipro:InterProFamily) ASSERT ipro.family_id  IS UNIQUE;""",
     """CREATE CONSTRAINT IF NOT EXISTS ON (go:GOClass) ASSERT go.class_id IS UNIQUE;""",
     """CREATE CONSTRAINT IF NOT EXISTS ON (q:RibosomeStructure) Assert q.rcsb_id IS UNIQUE;""",
-    """CREATE CONSTRAINT IF NOT EXISTS ON (pf:PFAMFamily) assert pf.family_id  is unique;""",
     """CREATE CONSTRAINT IF NOT EXISTS ON (lig:Ligand) assert lig.chemicalId is unique;""",
     """CREATE CONSTRAINT IF NOT EXISTS ON (nc:NomenclatureClass) assert nc.class_id is unique;""",
 ]
