@@ -1,5 +1,5 @@
 from ninja import Schema
-from api.ribctl.lib.types.types_polymer import RNAClass
+from ribctl.lib.types.types_polymer import RNAClass
 from ribctl.lib.types.types_ribosome import Protein, ProteinClass
 """This file documents the possible requests that the API can receive."""
 

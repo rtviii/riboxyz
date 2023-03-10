@@ -1,7 +1,7 @@
 import json
 from typing import Any
 import requests
-from api.ribctl.lib.types.types_ribosome import RNA, Ligand, Protein, RibosomeStructure
+from ribctl.lib.types.types_ribosome import RNA, Ligand, Protein, RibosomeStructure
 from ribctl.lib import LSU_map, SSU_map
 from ribctl.lib.gql_querystrings import monolithic
 import re

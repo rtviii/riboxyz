@@ -1,16 +1,12 @@
 import typing
-from django.contrib.auth.models import User
-from django.shortcuts import get_object_or_404
 from ninja import Router
-from ninja import Query, Schema
-from api.ribctl.lib.types.types_polymer import RNAClass
-from api.ribctl.lib.types.types_ribosome import ExogenousRNAByStruct, ProteinClass, RibosomeStructure
+from ribctl.lib.types.types_polymer import RNAClass
+from ribctl.lib.types.types_ribosome import ExogenousRNAByStruct, ProteinClass, RibosomeStructure
 from ribctl.db.data import QueryOps
 from schema.v0 import BanClassMetadata, LigandInstance, LigandlikeInstance, NeoStruct, NomenclatureClass, NomenclatureClassMember
 
 router = Router()
 QO     = QueryOps()
-
 
 @router.get('/v0/get_all_structures', response=list[NeoStruct])
 def get_all_structures():
