@@ -34,9 +34,7 @@ def init_driver(uri: str = "neo4j://neo:7687", username: str = "neo4j", password
     api = GraphDatabase.driver(uri, auth=(username, password))
     return api
 
-
 driver = init_driver("neo4j://localhost:7687", "neo4j", "neo4j")
-
 
 class Neo4jDB():
 

@@ -103,13 +103,11 @@ if args.query:
 if args.database:
 
     D        = Neo4jDB()
-
     synced   = D.get_all_structs()
     unsynced = sorted(current_rcsb_structs())
 
     for rcsb_id in unsynced:
         assets = RibosomeAssets(rcsb_id)
-
         try:
             assets._verify_json_profile(True)
             D.add_structure(assets)
