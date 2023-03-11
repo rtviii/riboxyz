@@ -3,7 +3,7 @@ from venv import logger
 from ninja import Router
 from ribctl.lib.struct_rcsb_api import current_rcsb_structs
 from ribctl.lib.types.types_ribosome_assets import RibosomeAssets
-from ribctl.db.inits.driver import Neo4jDB
+from api.ribctl.db.ribosomexyz import Neo4jDB
 from ribctl.lib.types.types_polymer import RNAClass
 from ribctl.lib.types.types_ribosome import ExogenousRNAByStruct, ProteinClass, RibosomeStructure
 from ribctl.db.data import QueryOps
@@ -11,6 +11,9 @@ from schema.v0 import BanClassMetadata, LigandInstance, LigandlikeInstance, NeoS
 
 router = Router()
 QO     = QueryOps()
+
+
+
 
 
 

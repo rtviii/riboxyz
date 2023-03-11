@@ -2,12 +2,13 @@
 
 import argparse
 from ribctl.db.data import QueryOps
-from ribctl.db.inits.driver import Neo4jDB
+from ribctl.db.ribosomexyz import Neo4jDB
 from ribctl.lib.types.types_ribosome import ExogenousRNAByStruct, Ligand, ProteinClass, RibosomeStructure
 from schema.data_requests import BanclassMetadata, LigandsByStruct
 from schema.v0 import BanClassMetadata, LigandInstance, LigandlikeInstance, NeoStruct, NomenclatureClass, NomenclatureClassMember
 from ribctl.lib.types.types_ribosome_assets import  RibosomeAssets
 from ribctl.lib.struct_rcsb_api import current_rcsb_structs
+from processing import mp
 
 import logging
 
@@ -20,6 +21,7 @@ arg.add_argument('-db','--database', action='store_true')
 arg.add_argument('-o','--obtain', type=str)
 arg.add_argument('-q','--query', action='store_true')
 arg.add_argument('-pdbsync','--sync_rcsb', action='store_true')
+arg.add_argument('-p','--process', action='store_true')
 
 args = arg.parse_args()
 
@@ -45,6 +47,7 @@ if args.structure:
 
 if args.query:
 
+    #TODO: Make a test suite
     qo = QueryOps()
     q  = qo.get_all_structures()
 
@@ -116,4 +119,9 @@ if args.database:
             print(e)
             logger.error("Exception occurred:", exc_info=True)
 
+
+
+if args.process:
+
+    mp()
 
