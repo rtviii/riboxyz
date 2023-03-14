@@ -19,8 +19,6 @@ QO     = QueryOps()
 
 
 
-
-
 @router.get('/async_test')
 def async_test(request):
 
@@ -41,21 +39,16 @@ def async_test(request):
         formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
         console_handler.setFormatter(formatter)
 
-        # logger.addHandler(console_handler)
+        logger.addHandler(console_handler)
         logger.addHandler(file_handler)
 
         import time
 
         for i in range(10):
-            logger.info()
+            logger.debug("Passed:{}".format(i))
             time.sleep(1)
 
-        logger.debug   ("testf Slept for {} seconds".format(5))
-        logger.info    ("testf 333"                           )
-        logger.debug   ("testf e121 "                         )
-        logger.info    ("testf iiie121 "                      )
-        logger.critical("testf cccc"                          )
-        logger.error   ("testf 13212"                         )
+        logger.info("Done")
 
     executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)
     executor.submit(testf)

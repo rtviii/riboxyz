@@ -1,6 +1,10 @@
-testf Slept for 5 seconds
-testf 333
-testf e121 
-testf iiie121 
-testf cccc
-testf 13212
+Passed:0
+Passed:1
+Passed:2
+Passed:3
+Passed:4
+Passed:5
+Passed:6
+Passed:7
+Passed:8
+Passed:9
