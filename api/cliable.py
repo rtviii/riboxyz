@@ -119,9 +119,5 @@ if args.database:
             print(e)
             logger.error("Exception occurred:", exc_info=True)
 
-
-
 if args.process:
-
     mp()
-
