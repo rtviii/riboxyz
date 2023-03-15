@@ -17,52 +17,51 @@ import os
 router = Router()
 QO     = QueryOps()
 
-logger = logging.getLogger(__name__)
 
 
-@router.get('/log_test')
-def log_test(request):
+# @router.get('/log_test')
+# def log_test(request):
 
-    logger.debug   (__file__ + " - " + "This is a debug"   )
-    logger.info    (__file__ + " - " + "This is a info"    )
-    logger.warning (__file__ + " - " + "This is a warning" )
-    logger.error   (__file__ + " - " + "This is a error"   )
-    logger.critical(__file__ + " - " + "This is a critical")
+#     logger.debug   (__file__ + " - " + "This is a debug"   )
+#     logger.info    (__file__ + " - " + "This is a info"    )
+#     logger.warning (__file__ + " - " + "This is a warning" )
+#     logger.error   (__file__ + " - " + "This is a error"   )
+#     logger.critical(__file__ + " - " + "This is a critical")
 
-@router.get('/async_test')
-def async_test(request):
+# @router.get('/async_test')
+# def async_test(request):
 
-    def testf():
-        # Create a logger with the same name as the file
-        script_name = os.path.splitext(os.path.basename(__file__))[0]
-        script_path = os.path.dirname(os.path.abspath(__file__))
+#     def testf():
+#         # Create a logger with the same name as the file
+#         script_name = os.path.splitext(os.path.basename(__file__))[0]
+#         script_path = os.path.dirname(os.path.abspath(__file__))
 
-        logger = logging.getLogger(script_name)
-        logger.setLevel(logging.DEBUG)
+#         logger = logging.getLogger(script_name)
+#         logger.setLevel(logging.DEBUG)
 
-        console_handler = logging.StreamHandler()
-        console_handler.setLevel(logging.DEBUG)
+#         console_handler = logging.StreamHandler()
+#         console_handler.setLevel(logging.DEBUG)
 
-        file_handler = logging.FileHandler(os.path.join(script_path, f"{script_name}_log.txt"))
-        file_handler.setLevel(logging.INFO)
+#         file_handler = logging.FileHandler(os.path.join(script_path, f"{script_name}_log.txt"))
+#         file_handler.setLevel(logging.INFO)
 
-        formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-        console_handler.setFormatter(formatter)
+#         formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+#         console_handler.setFormatter(formatter)
 
-        logger.addHandler(console_handler)
-        logger.addHandler(file_handler)
+#         logger.addHandler(console_handler)
+#         logger.addHandler(file_handler)
 
-        import time
+#         import time
 
-        for i in range(10):
-            logger.debug("Passed:{}".format(i))
-            time.sleep(1)
+#         for i in range(10):
+#             logger.debug("Passed:{}".format(i))
+#             time.sleep(1)
 
-        logger.info("Done")
+#         logger.info("Done")
 
-    executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)
-    executor.submit(testf)
-    return {"message": "Started work"}
+    # executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)
+    # executor.submit(testf)
+    # return {"message": "Started work"}
 
 
 
