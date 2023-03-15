@@ -15,16 +15,17 @@ class DatedRotatingFileHandler(logging.handlers.RotatingFileHandler):
         super().__init__(filename, mode, maxBytes, backupCount, encoding, delay)
 
 LOGGERS = typing.Literal['general', 'updates', 'accesses','computations']
-def get_logger(loggername: LOGGERS | str)-> logging.Logger:
+def get_logger(loggername: LOGGERS )-> logging.Logger:
+    """if not one of the default loggers is specified, then a rotating log with a new date is created"""
     if loggername not in typing.get_args(LOGGERS):
         # Create a custom logger and handler instance
         logger = logging.getLogger(loggername)
         handler = DatedRotatingFileHandler(os.path.join(BASE_DIR,'logs',loggername), maxBytes=1024*1024*5, backupCount=5)
-        handler.setLevel(logging.INFO)
+        handler.setLevel(logging.DEBUG)
         formatter = logging.Formatter('%(asctime)s - %(filename)s - %(levelname)s - %(message)s')
         handler.setFormatter(formatter)
         logger.addHandler(handler)
-        logger.setLevel(logging.INFO)
+        logger.setLevel(logging.DEBUG)
         return logger
     else:
         return logging.getLogger(loggername)
@@ -184,19 +185,19 @@ LOGGING = {
     'loggers': {
         'general': {
             'handlers': ['general'],
-            'level': 'INFO',
+            'level': 'DEBUG',
         },
         'updates': {
             'handlers': ['updates'],
-            'level': 'INFO',
+            'level': 'DEBUG',
         },
         'accesses': {
             'handlers': ['accesses'],
-            'level': 'INFO',
+            'level': 'DEBUG',
         },
         'computations': {
             'handlers': ['computations'],
-            'level': 'INFO',
+            'level': 'DEBUG',
         },
     },
 }
