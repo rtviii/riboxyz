@@ -103,63 +103,6 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
-# LOGGING = {
-#     'version': 1,
-#     'disable_existing_loggers': False,
-#     'formatters': {
-#         'standard': {
-#             'format': '%(asctime)s - %(filename)s - %(levelname)s - %(message)s',
-#         },
-#     },
-#     'handlers': {
-#         'general': {
-#             'class': 'logging.handlers.RotatingFileHandler',
-#             'filename': os.path.join(BASE_DIR,'logs','general.log'),
-#             'maxBytes': 1024 * 1024 * 5, # 5MB
-#             'backupCount': 5,
-#             'formatter': 'standard',
-#         },
-#         'updates': {
-#             'class': 'logging.handlers.RotatingFileHandler',
-#             'filename': os.path.join(BASE_DIR,'logs','updates.log'),
-#             'maxBytes': 1024 * 1024 * 5, # 5MB
-#             'backupCount': 5,
-#             'formatter': 'standard',
-#         },
-#         'accesses': {
-#             'class'      : 'logging.handlers.RotatingFileHandler',
-#             'filename'   : os.path.join(BASE_DIR,'logs','accesses.log'),
-#             'maxBytes'   : 1024 * 1024 * 5,                              # 5MB
-#             'backupCount': 5,
-#             'formatter'  : 'standard',
-#         },
-#         'computations': {
-#             'class': 'logging.handlers.RotatingFileHandler',
-#             'filename': os.path.join(BASE_DIR,'logs','computations.log'),
-#             'maxBytes': 1024 * 1024 * 5, # 5MB
-#             'backupCount': 5,
-#             'formatter': 'standard',
-#         },
-#     },
-#     'loggers': {
-#         'general': {
-#             'handlers': ['general'],
-#             'level': 'INFO',
-#         },
-#         'updates': {
-#             'handlers': ['updates'],
-#             'level': 'INFO',
-#         },
-#         'accesses': {
-#             'handlers': ['accesses'],
-#             'level': 'INFO',
-#         },
-#         'computations': {
-#             'handlers': ['computations'],
-#             'level': 'INFO',
-#         },
-#     },
-# }
 
 
 def ready():
@@ -168,3 +111,62 @@ def ready():
         os.makedirs(logs_dir)
 
 ready()
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'standard': {
+            'format': '%(asctime)s - %(filename)s - %(levelname)s - %(message)s',
+        },
+    },
+    'handlers': {
+        'general': {
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(BASE_DIR,'logs','general.log'),
+            'maxBytes': 1024 * 1024 * 5, # 5MB
+            'backupCount': 5,
+            'formatter': 'standard',
+        },
+        'updates': {
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(BASE_DIR,'logs','updates.log'),
+            'maxBytes': 1024 * 1024 * 5, # 5MB
+            'backupCount': 5,
+            'formatter': 'standard',
+        },
+        'accesses': {
+            'class'      : 'logging.handlers.RotatingFileHandler',
+            'filename'   : os.path.join(BASE_DIR,'logs','accesses.log'),
+            'maxBytes'   : 1024 * 1024 * 5,                              # 5MB
+            'backupCount': 5,
+            'formatter'  : 'standard',
+        },
+        'computations': {
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(BASE_DIR,'logs','computations.log'),
+            'maxBytes': 1024 * 1024 * 5, # 5MB
+            'backupCount': 5,
+            'formatter': 'standard',
+        },
+    },
+    'loggers': {
+        'general': {
+            'handlers': ['general'],
+            'level': 'INFO',
+        },
+        'updates': {
+            'handlers': ['updates'],
+            'level': 'INFO',
+        },
+        'accesses': {
+            'handlers': ['accesses'],
+            'level': 'INFO',
+        },
+        'computations': {
+            'handlers': ['computations'],
+            'level': 'INFO',
+        },
+    },
+}
+
