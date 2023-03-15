@@ -17,7 +17,17 @@ import os
 router = Router()
 QO     = QueryOps()
 
+logger = logging.getLogger(__name__)
 
+
+@router.get('/log_test')
+def log_test(request):
+
+    logger.debug   (__file__ + " - " + "This is a debug"   )
+    logger.info    (__file__ + " - " + "This is a info"    )
+    logger.warning (__file__ + " - " + "This is a warning" )
+    logger.error   (__file__ + " - " + "This is a error"   )
+    logger.critical(__file__ + " - " + "This is a critical")
 
 @router.get('/async_test')
 def async_test(request):
