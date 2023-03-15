@@ -1,6 +1,36 @@
+import datetime
 import os
-from django.apps import AppConfig
-import os
+import logging.handlers
+import logging
+import typing
+
+class DatedRotatingFileHandler(logging.handlers.RotatingFileHandler):
+    """
+    Handler for rotating log files with a date-based filename.
+    """
+    def __init__(self, filename, mode='a', maxBytes=0, backupCount=0, encoding=None, delay=False):
+        # Append the current datetime to the log filename
+        now = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        filename = os.path.splitext(filename)[0] + '_' + now + os.path.splitext(filename)[1] + '.log'
+        super().__init__(filename, mode, maxBytes, backupCount, encoding, delay)
+
+LOGGERS = typing.Literal['general', 'updates', 'accesses','computations']
+def get_logger(loggername: LOGGERS | str)-> logging.Logger:
+    if loggername not in typing.get_args(LOGGERS):
+        # Create a custom logger and handler instance
+        logger = logging.getLogger(loggername)
+        handler = DatedRotatingFileHandler(os.path.join(BASE_DIR,'logs',loggername), maxBytes=1024*1024*5, backupCount=5)
+        handler.setLevel(logging.INFO)
+        formatter = logging.Formatter('%(asctime)s - %(filename)s - %(levelname)s - %(message)s')
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
+        logger.setLevel(logging.INFO)
+        return logger
+    else:
+        return logging.getLogger(loggername)
+        
+
+
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'ju=n4om3z00jd1+y2(ufn)g^@w-dj*&-45&4yd1_aiun50b6by'
@@ -149,6 +179,7 @@ LOGGING = {
             'backupCount': 5,
             'formatter': 'standard',
         },
+    
     },
     'loggers': {
         'general': {
