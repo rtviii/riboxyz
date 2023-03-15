@@ -3,6 +3,7 @@ import random
 import typing
 from venv import logger
 from ninja import Router
+from rbxz_bend.settings import get_logger
 from ribctl.lib.struct_rcsb_api import current_rcsb_structs
 from ribctl.lib.types.types_ribosome_assets import RibosomeAssets
 from ribctl.db.ribosomexyz import Neo4jDB
@@ -19,14 +20,13 @@ QO     = QueryOps()
 
 
 
-# @router.get('/log_test')
-# def log_test(request):
+@router.get('/log_test')
+def log_test(request):
 
-#     logger.debug   (__file__ + " - " + "This is a debug"   )
-#     logger.info    (__file__ + " - " + "This is a info"    )
-#     logger.warning (__file__ + " - " + "This is a warning" )
-#     logger.error   (__file__ + " - " + "This is a error"   )
-#     logger.critical(__file__ + " - " + "This is a critical")
+   get_logger('computations').info('test')
+   get_logger('computations').critical('test')
+   get_logger('custom').info('test')
+   get_logger('custom2').debug('test')
 
 # @router.get('/async_test')
 # def async_test(request):
