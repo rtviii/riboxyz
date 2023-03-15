@@ -1,13 +1,16 @@
 from ast import List
 from pprint import pprint
+from venv import logger
 from neo4j import Driver, GraphDatabase, Result, Transaction
 from pyparsing import Any
+from ribctl.lib.struct_rcsb_api import current_rcsb_structs
 from ribctl.db.inits.proteins import add_protein, node__protein_class
 from ribctl.db.inits.rna import add_rna, node__rna_class
 from ribctl.db.inits.structure import add_ligand, node__structure
 from ribctl.lib.types.types_ribosome import RibosomeStructure
 from ribctl.lib.types.types_ribosome_assets import RibosomeAssets
 from ribctl.lib.types.types_polymer import list_LSU_Proteins, list_SSU_Proteins, list_RNAClass
+from concurrent.futures import Future, ProcessPoolExecutor
 
 """Functions of the form create_node_xxxx return a closure over their target [xxxx] because the neo4j expects a 'unit-of-work'
 function that takes a transaction as its argument."""
@@ -27,18 +30,43 @@ NODE_CONSTRAINTS = [
 # ※ ----------------[ 4.Ligand Nodes]
 # ※ ----------------[ 5.Ingress]
 
-
 #? DOCKER: Make sure the host ("neo" or "localhost" or "0.0.0.0") mimics container name.
 def init_driver(uri: str = "neo4j://neo:7687", username: str = "neo4j", password="neo4j"):
     # TODO: Create an instance of the driver here
     api = GraphDatabase.driver(uri, auth=(username, password))
     return api
 
-driver = init_driver("neo4j://localhost:7687", "neo4j", "neo4j")
+
+
+
+
+
+
 
 class Neo4jDB():
 
     driver: Driver
+
+
+    def sync_with_rcsb(self)->None:
+
+        def _():
+            D        = Neo4jDB()
+            synced   = D.get_all_structs()
+            unsynced = sorted(current_rcsb_structs())
+
+            for rcsb_id in set(unsynced ) - set(synced):
+                assets = RibosomeAssets(rcsb_id)
+                try:
+                    assets._verify_json_profile(True)
+                    D.add_structure(assets)
+                except Exception as e:
+                    print(e)
+                    logger.error("Exception occurred:", exc_info=True)
+
+        with ProcessPoolExecutor() as executor:
+            future:Future = executor.submit(sync_with_rcsb)
+            print(future)
 
     def __init__(self, **kwargs) -> None:
         self.driver = init_driver(**kwargs)
@@ -49,6 +77,7 @@ class Neo4jDB():
             CALL db.constraints;
                   """)
             return r.data()
+
     def get_all_structs(self) :
         with self.driver.session() as s:
             struct_ids = []

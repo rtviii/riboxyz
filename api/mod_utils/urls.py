@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.urls import path
-from .views import * 
+from .views import *
 
 #TODO:
 # - map old endpoints to new ones
@@ -8,11 +8,11 @@ from .views import *
 # - "last updated" endpoint for fend serving : date, some new structure ids.
 
 urlpatterns = [
-    path('hello/'                , hello                 ),
-    path('struct_commit_new/'     , struct_commit_new     ),
-    path('structs_all_ids/'       , structs_all_ids       ),
-    path('structs_diff_pdb/'      , structs_diff_pdb      ),
-    path('structs_sync_with_pdb/' , structs_sync_with_pdb ),
+    # path('hello/'                , hello                 ),
+    # path('struct_commit_new/'     , struct_commit_new     ),
+    # path('structs_all_ids/'       , structs_all_ids       ),
+    # path('structs_diff_pdb/'      , structs_diff_pdb      ),
+    # path('structs_sync_with_pdb/' , structs_sync_with_pdb ),
 ]
 
 app_name = 'mod_utils'
