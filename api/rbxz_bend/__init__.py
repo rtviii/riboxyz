@@ -9,3 +9,6 @@ class MyAppConfig(AppConfig):
         logs_dir = os.path.join(BASE_DIR, 'logs')
         if not os.path.exists(logs_dir):
             os.makedirs(logs_dir)
+
+
+default_app_config = 'api.rbxz_bend.MyAppConfig'
