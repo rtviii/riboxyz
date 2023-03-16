@@ -91,7 +91,7 @@ ROOT_URLCONF = 'rbxz_bend.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ['templates'],
+        'DIRS': [ 'static/templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
