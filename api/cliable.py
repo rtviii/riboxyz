@@ -43,8 +43,6 @@ if args.structure:
     d  = r.json_profile()
     rs = RibosomeStructure(**d)
 
-
-
 if args.query:
 
     #TODO: Make a test suite
