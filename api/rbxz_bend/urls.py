@@ -20,17 +20,11 @@ from ribctl.lib.types.types_ribosome import ExogenousRNAByStruct, ProteinClass, 
 from ribctl.db.data import QueryOps
 from schema.v0 import BanClassMetadata, LigandInstance, LigandlikeInstance, NeoStruct, NomenclatureClass, NomenclatureClassMember
 from .api import api
-import concurrent.futures
-import logging
 import os
-
-
-
 
 urlpatterns = [
     # path('admin/' , admin.site .urls                   ),
     path('db/', include('mod_db.urls', 'mod_db')),
     path('comp/', include('mod_comp.urls', 'mod_comp')),
-    path('utils/', include('mod_utils.urls', 'mod_utils')),
     path('', api.api.urls),
 ]+ static(STATIC_URL, document_root=STATIC_ROOT)
