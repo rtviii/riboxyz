@@ -71,8 +71,9 @@ INSTALLED_APPS = [
     'mod_comp',
     'mod_db',
     'mod_utils',
-    'rbxz_bend'
+
 ]
+NINJA_DOCS_VIEW='swagger'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
