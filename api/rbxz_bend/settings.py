@@ -68,11 +68,13 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'ninja',
     'mod_comp',
     'mod_db',
     'mod_utils',
-    'rbxz_bend'
+
 ]
+NINJA_DOCS_VIEW='swagger'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -89,7 +91,7 @@ ROOT_URLCONF = 'rbxz_bend.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [ 'static/templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -104,17 +106,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'rbxz_bend.wsgi.application'
 
-
-# Database
-# https://docs.djangoproject.com/en/1.11/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
-}
-
+DATABASES = {}
 
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
@@ -131,8 +123,6 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 
 
@@ -202,6 +192,8 @@ LOGGING = {
     },
 }
 
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR,'rbxz_bend', 'static')
+    os.path.join(BASE_DIR, 'static'),
 ]
