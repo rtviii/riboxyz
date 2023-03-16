@@ -33,4 +33,4 @@ urlpatterns = [
     path('comp/', include('mod_comp.urls', 'mod_comp')),
     path('utils/', include('mod_utils.urls', 'mod_utils')),
     path('', api.api.urls),
-]
+]+ static(STATIC_URL, document_root=STATIC_ROOT)
