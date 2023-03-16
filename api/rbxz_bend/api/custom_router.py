@@ -21,7 +21,7 @@ QO = QueryOps()
 
 
 
-@v0.get('/log_test', tags=['0'])
+@v0.get('/log_test', tags=['0'], )
 def log_test(request):
 
    get_logger('computations').info('test')
