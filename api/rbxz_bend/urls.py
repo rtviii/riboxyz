@@ -5,21 +5,32 @@ from django.urls import include, path
 from django.contrib import admin
 from django.conf.urls.static import static
 from ninja import NinjaAPI
-from .api import ninja_api_router
+from rbxz_bend.settings import STATIC_ROOT, STATIC_URL
+import asyncio
+import random
+import typing
+from venv import logger
+from ninja import Router
+from rbxz_bend.settings import get_logger
+from ribctl.lib.struct_rcsb_api import current_rcsb_structs
+from ribctl.lib.types.types_ribosome_assets import RibosomeAssets
+from ribctl.db.ribosomexyz import Neo4jDB
+from ribctl.lib.types.types_polymer import RNAClass
+from ribctl.lib.types.types_ribosome import ExogenousRNAByStruct, ProteinClass, RibosomeStructure
+from ribctl.db.data import QueryOps
+from schema.v0 import BanClassMetadata, LigandInstance, LigandlikeInstance, NeoStruct, NomenclatureClass, NomenclatureClassMember
+from .api import api
+import concurrent.futures
+import logging
+import os
 
-api = NinjaAPI(
-    title='riboxyz-API',
-)
-api.add_router('', ninja_api_router)
+
 
 
 urlpatterns = [
-    # path('admin/' , admin   .site .urls                   ),
+    # path('admin/' , admin.site .urls                   ),
     path('db/', include('mod_db.urls', 'mod_db')),
     path('comp/', include('mod_comp.urls', 'mod_comp')),
     path('utils/', include('mod_utils.urls', 'mod_utils')),
-    path('api/', api.urls)
-]
-
-# urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-
+    path('', api.api.urls),
+]+ static(STATIC_URL, document_root=STATIC_ROOT)
