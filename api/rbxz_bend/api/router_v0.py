@@ -1,5 +1,3 @@
-import asyncio
-import random
 import typing
 from venv import logger
 from ninja import Router
@@ -11,23 +9,11 @@ from ribctl.lib.types.types_polymer import RNAClass
 from ribctl.lib.types.types_ribosome import ExogenousRNAByStruct, ProteinClass, RibosomeStructure
 from ribctl.db.data import QueryOps
 from schema.v0 import BanClassMetadata, LigandInstance, LigandlikeInstance, NeoStruct, NomenclatureClass, NomenclatureClassMember
-from ninja import NinjaAPI
-import concurrent.futures
-import logging
-import os
 
 v0 = Router()
 QO = QueryOps()
 
 
-
-@v0.get('/log_test', tags=['0'], )
-def log_test(request):
-
-   get_logger('computations').info('test')
-   get_logger('computations').critical('test')
-   get_logger('custom').info('test')
-   get_logger('custom2').debug('test')
 
 # @router.get('/async_test')
 # def async_test(request):
@@ -64,22 +50,6 @@ def log_test(request):
     # executor.submit(testf)
     # return {"message": "Started work"}
 
-
-
-@v0.get('/sync_with_rcsb', response=list[str], tags=['0-Operations'])
-def sync_with_rcsb(request):
-    D        = Neo4jDB()
-    synced   = D.get_all_structs()
-    unsynced = sorted(current_rcsb_structs())
-
-    for rcsb_id in set(unsynced ) - set(synced):
-        assets = RibosomeAssets(rcsb_id)
-        try:
-            assets._verify_json_profile(True)
-            D.add_structure(assets)
-        except Exception as e:
-            print(e)
-            logger.error("Exception occurred:", exc_info=True)
 
 
 @v0.get('/get_all_structures', response=list[NeoStruct], tags=['Structure'])
