@@ -1,13 +1,13 @@
 from ninja import NinjaAPI
-from .custom_router import v0
+from .router_v0 import v0
+from .router_test import test
 
-api              = NinjaAPI(
-    docs_url='/',
+root = NinjaAPI(docs_url='/',
     title='riboxyz-api',
-    description='A programming interface for ribosome data.'
-    
-                            )
-api.add_router('/v0', v0)
+    description='A programming interface for ribosome data.')
+
+root.add_router('/test', test)
+root.add_router('/v0', v0)
 
 
 # ninja_api_router = Router()

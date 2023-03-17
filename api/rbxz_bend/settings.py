@@ -31,8 +31,6 @@ def get_logger(loggername: LOGGERS )-> logging.Logger:
         return logging.getLogger(loggername)
         
 
-
-
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'ju=n4om3z00jd1+y2(ufn)g^@w-dj*&-45&4yd1_aiun50b6by'
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -52,9 +50,9 @@ for var in vars:
         print("Environment variable {} not set".format(var))
         exit(1)
 
-NEO4J_URI = os.getenv("NEO4J_URI")
-NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD")
-NEO4J_USER = os.getenv("NEO4J_USER")
+NEO4J_URI       = os.getenv("NEO4J_URI")
+NEO4J_PASSWORD  = os.getenv("NEO4J_PASSWORD")
+NEO4J_USER      = os.getenv("NEO4J_USER")
 NEO4J_CURRENTDB = os.getenv("NEO4J_CURRENTDB")
 
 DEBUG = True
@@ -71,10 +69,7 @@ INSTALLED_APPS = [
     'ninja',
     'mod_comp',
     'mod_db',
-    'mod_utils',
-
 ]
-NINJA_DOCS_VIEW='swagger'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -134,9 +129,9 @@ def ready():
 ready()
 
 LOGGING = {
-    'version': 1,
+    'version'                 : 1,
     'disable_existing_loggers': False,
-    'formatters': {
+    'formatters'              : {
         'standard': {
             'format': '%(asctime)s - %(filename)s - %(levelname)s - %(message)s',
         },
@@ -192,8 +187,9 @@ LOGGING = {
     },
 }
 
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+NINJA_DOCS_VIEW  = 'swagger'
+STATIC_URL       = '/static/'
+STATIC_ROOT      = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
