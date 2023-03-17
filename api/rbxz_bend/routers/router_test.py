@@ -5,22 +5,18 @@ from rbxz_bend.settings import get_logger
 from ribctl.lib.struct_rcsb_api import current_rcsb_structs
 from ribctl.lib.types.types_ribosome_assets import RibosomeAssets
 from ribctl.db.ribosomexyz import riboxyzDB
-from ribctl.lib.types.types_polymer import RNAClass
-from ribctl.lib.types.types_ribosome import ExogenousRNAByStruct, ProteinClass, RibosomeStructure
-from ribctl.db.data import QueryOps
-from schema.v0 import BanClassMetadata, LigandInstance, LigandlikeInstance, NeoStruct, NomenclatureClass, NomenclatureClassMember
-from .api import qo
+from rbxz_bend.db_connection import db_connection 
 
 test = Router()
 
 
 @test.get('/see_current_auth', tags=['0test'], )
 def current_auth(request):
-    return qo.see_current_auth()
+    return db_connection.see_current_auth()
 
 @test.get('/empty_db_query', tags=['0test'], )
 def any_test(request):
-    return qo.get_any()
+    return db_connection.get_any()
 
 @test.get('/log_test',tags=['0test']  )
 def log_test(request):
