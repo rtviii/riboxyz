@@ -1,5 +1,6 @@
 from ninja import NinjaAPI
-from .custom_router import v0
+from .router_v0 import v0
+from .router_test import test
 
 api              = NinjaAPI(
     docs_url='/',
@@ -8,6 +9,7 @@ api              = NinjaAPI(
     
                             )
 api.add_router('/v0', v0)
+api.add_router('/test', test)
 
 
 # ninja_api_router = Router()
