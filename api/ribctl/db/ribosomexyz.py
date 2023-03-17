@@ -1,6 +1,8 @@
 import typing
 from pyparsing import Any
 from neo4j import Driver, GraphDatabase
+from neo4j.exceptions import AuthError
+from rbxz_bend.settings import NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER
 from ribctl.db.inits.proteins import add_protein, node__protein_class
 from ribctl.db.inits.rna import add_rna, node__rna_class
 from ribctl.db.inits.structure import add_ligand, node__structure
@@ -46,7 +48,20 @@ class riboxyzDB():
     driver: Driver
 
     def __init__(self,uri:str,user:str, password:str) -> None:
-        self.driver = GraphDatabase.driver(uri, auth=(user, password))
+        self.driver = GraphDatabase.driver(uri,auth=(user, password))
+        try:
+            with self.driver.session(database='system') as s:
+                s.run("show users")
+        except Exception as e:
+            print("Failed to initialize the database connection. Perhaps change the default password.")
+            with GraphDatabase.driver(uri, auth=("neo4j","neo4j")).session(database='system') as s:
+                s.run("""ALTER CURRENT USER SET PASSWORD FROM "neo4j" TO "ribosomexyz";""")
+                print("Changed the default Neo4j password.")
+            
+
+
+
+
     
     # def sync_with_rcsb(self)->None:
 
@@ -74,8 +89,9 @@ class riboxyzDB():
             return r.data()
 
     def see_current_auth(self):
+        print("see_current_auth")
+        print(f"NEO4J_VAR: {NEO4J_URI} {NEO4J_USER} {NEO4J_PASSWORD}")
         with self.driver.session(database='system') as s:
-            r = s.run("""show users""")
             # {
             #   "user": "neo4j",
             #   "roles": null,
@@ -83,9 +99,8 @@ class riboxyzDB():
             #   "suspended": null,
             #   "home": null
             # }
+            r = s.run("""show users""")
             users_array = r.data()
-            if users_array[0]["passwordChangeRequired"] == True:
-                self.change_default_neo4j_credentials()
             return users_array
 
 
