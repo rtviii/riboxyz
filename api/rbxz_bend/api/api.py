@@ -8,8 +8,8 @@ api              = NinjaAPI(
     description='A programming interface for ribosome data.'
     
                             )
-api.add_router('/v0', v0)
 api.add_router('/test', test)
+api.add_router('/v0', v0)
 
 
 # ninja_api_router = Router()

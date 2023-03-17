@@ -1,7 +1,8 @@
 from ast import List
 from pprint import pprint
 from venv import logger
-from neo4j import Driver, GraphDatabase, Result, Transaction
+from neo4j import Driver, GraphDatabase, Result, Transaction 
+from neo4j.exceptions import ServiceUnavailable, ClientError
 from pyparsing import Any
 from ribctl.lib.struct_rcsb_api import current_rcsb_structs
 from ribctl.db.inits.proteins import add_protein, node__protein_class
@@ -30,43 +31,63 @@ NODE_CONSTRAINTS = [
 # ※ ----------------[ 4.Ligand Nodes]
 # ※ ----------------[ 5.Ingress]
 
-#? DOCKER: Make sure the host ("neo" or "localhost" or "0.0.0.0") mimics container name.
-def init_driver(uri: str = "neo4j://neo:7687", username: str = "neo4j", password="neo4j"):
+#? DOCKER: Make sure the host ("neo" or "localhost" or "0.0.0.0") conforms to the environment ( localhost or "neo"/service name for docker)
+def init_driver(uri: str = "neo4j://localhost:7687", username: str = "neo4j", password="neo4j"):
     # TODO: Create an instance of the driver here
     api = GraphDatabase.driver(uri, auth=(username, password))
     return api
 
 
+# If you are connecting via a shell or programmatically via a driver,
+# just issue a `ALTER CURRENT USER SET PASSWORD FROM 'current password' TO 'new password'` statement against
+# the system database in the current session, and then restart your driver with the new password configured.
 
+class riboxyzDB():
 
-
-
-
-
-class Neo4jDB():
 
     driver: Driver
 
 
-    def sync_with_rcsb(self)->None:
+    # def sync_with_rcsb(self)->None:
 
-        def _():
-            D        = Neo4jDB()
-            synced   = D.get_all_structs()
-            unsynced = sorted(current_rcsb_structs())
+    #     def _():
+    #         D        = riboxyzDB()
+    #         synced   = D.get_all_structs()
+    #         unsynced = sorted(current_rcsb_structs())
 
-            for rcsb_id in set(unsynced ) - set(synced):
-                assets = RibosomeAssets(rcsb_id)
-                try:
-                    assets._verify_json_profile(True)
-                    D.add_structure(assets)
-                except Exception as e:
-                    print(e)
-                    logger.error("Exception occurred:", exc_info=True)
+    #         for rcsb_id in set(unsynced ) - set(synced):
+    #             assets = RibosomeAssets(rcsb_id)
+    #             try:
+    #                 assets._verify_json_profile(True)
+    #                 D.add_structure(assets)
+    #             except Exception as e:
+    #                 print(e)
+    #                 logger.error("Exception occurred:", exc_info=True)
 
-        with ProcessPoolExecutor() as executor:
-            future:Future = executor.submit(sync_with_rcsb)
-            print(future)
+    #     with ProcessPoolExecutor() as executor:
+    #         future:Future = executor.submit(sync_with_rcsb)
+    #         print(future)
+
+    
+    def change_default_neo4j_credentials(self):
+        with self.driver.session(database='system') as system_s:
+            r = system_s.run("""//
+ALTER CURRENT USER SET PASSWORD FROM 'neo4j' TO 'ribosomexyz';
+                  """)
+            return r.data()
+
+    def see_current_auth(self):
+        with self.driver.session() as s:
+            try:
+                r = s.run("""//
+                CALL dbms.security.authenticatedUser() YIELD username
+                RETURN username, dbms.security.credentials(username) as password
+                      """)
+                return r.data()
+            except ClientError as e:
+                if e.code == "Neo.ClientError.Security.CredentialsExpired":
+                    self.change_default_neo4j_credentials()
+
 
     def __init__(self, **kwargs) -> None:
         self.driver = init_driver(**kwargs)
@@ -88,6 +109,7 @@ class Neo4jDB():
 
     def get_any(self) -> list[dict[str, Any]]:
         with self.driver.session() as s:
+
             return s.read_transaction(lambda tx: tx.run("""//
             match (n) return n limit 10;
             """).data())
