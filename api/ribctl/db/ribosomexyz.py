@@ -1,7 +1,7 @@
 from ast import List
 from pprint import pprint
 from venv import logger
-from neo4j import Driver, GraphDatabase, Result, Transaction 
+from neo4j import Driver, GraphDatabase, Result, Transaction
 from neo4j.exceptions import ServiceUnavailable, ClientError
 from pyparsing import Any
 from ribctl.lib.struct_rcsb_api import current_rcsb_structs
@@ -31,11 +31,6 @@ NODE_CONSTRAINTS = [
 # ※ ----------------[ 4.Ligand Nodes]
 # ※ ----------------[ 5.Ingress]
 
-#? DOCKER: Make sure the host ("neo" or "localhost" or "0.0.0.0") conforms to the environment ( localhost or "neo"/service name for docker)
-def init_driver(uri: str = "neo4j://localhost:7687", username: str = "neo4j", password="neo4j"):
-    # TODO: Create an instance of the driver here
-    api = GraphDatabase.driver(uri, auth=(username, password))
-    return api
 
 
 # If you are connecting via a shell or programmatically via a driver,
@@ -44,9 +39,7 @@ def init_driver(uri: str = "neo4j://localhost:7687", username: str = "neo4j", pa
 
 class riboxyzDB():
 
-
     driver: Driver
-
 
     # def sync_with_rcsb(self)->None:
 
@@ -68,29 +61,32 @@ class riboxyzDB():
     #         future:Future = executor.submit(sync_with_rcsb)
     #         print(future)
 
+    def __init__(self,uri:str,username:str, password:str) -> None:
+        self.driver = GraphDatabase.driver(uri, auth=(username, password))
     
     def change_default_neo4j_credentials(self):
         with self.driver.session(database='system') as system_s:
             r = system_s.run("""//
-ALTER CURRENT USER SET PASSWORD FROM 'neo4j' TO 'ribosomexyz';
+ALTER CURRENT USER SET PASSWORD FROM "neo4j" TO "ribosomexyz";
                   """)
             return r.data()
 
     def see_current_auth(self):
-        with self.driver.session() as s:
-            try:
-                r = s.run("""//
-                CALL dbms.security.authenticatedUser() YIELD username
-                RETURN username, dbms.security.credentials(username) as password
-                      """)
-                return r.data()
-            except ClientError as e:
-                if e.code == "Neo.ClientError.Security.CredentialsExpired":
-                    self.change_default_neo4j_credentials()
+        with self.driver.session(database='system') as s:
+            r = s.run("""show users""")
+            # {
+            #   "user": "neo4j",
+            #   "roles": null,
+            #   "passwordChangeRequired": false,
+            #   "suspended": null,
+            #   "home": null
+            # }
+            users_array = r.data()
+            if users_array[0]["passwordChangeRequired"] == True:
+                self.change_default_neo4j_credentials()
+            return users_array
 
 
-    def __init__(self, **kwargs) -> None:
-        self.driver = init_driver(**kwargs)
 
     def see_constraints(self) -> list[dict[str, Any]]:
         with self.driver.session() as s:

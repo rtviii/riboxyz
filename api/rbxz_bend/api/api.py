@@ -1,13 +1,17 @@
 from ninja import NinjaAPI
+from api.ribctl.db.data import QueryOps
+
+from api.ribctl.db.ribosomexyz import riboxyzDB
 from .router_v0 import v0
 from .router_test import test
 
-api              = NinjaAPI(
-    docs_url='/',
+api              = NinjaAPI(docs_url='/',
     title='riboxyz-api',
-    description='A programming interface for ribosome data.'
-    
-                            )
+    description='A programming interface for ribosome data.')
+
+
+qo = QueryOps()
+
 api.add_router('/test', test)
 api.add_router('/v0', v0)
 

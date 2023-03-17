@@ -9,9 +9,9 @@ from ribctl.lib.types.types_polymer import RNAClass
 from ribctl.lib.types.types_ribosome import ExogenousRNAByStruct, ProteinClass, RibosomeStructure
 from ribctl.db.data import QueryOps
 from schema.v0 import BanClassMetadata, LigandInstance, LigandlikeInstance, NeoStruct, NomenclatureClass, NomenclatureClassMember
+from .api import qo
 
 test = Router()
-qo = QueryOps()
 
 
 @test.get('/see_current_auth', tags=['0test'], )
