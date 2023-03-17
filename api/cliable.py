@@ -2,7 +2,7 @@
 
 import argparse
 from ribctl.db.data import QueryOps
-from ribctl.db.ribosomexyz import Neo4jDB
+from ribctl.db.ribosomexyz import riboxyzDB
 from ribctl.lib.types.types_ribosome import ExogenousRNAByStruct, Ligand, ProteinClass, RibosomeStructure
 from schema.data_requests import BanclassMetadata, LigandsByStruct
 from schema.v0 import BanClassMetadata, LigandInstance, LigandlikeInstance, NeoStruct, NomenclatureClass, NomenclatureClassMember
@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 
 if args.sync_rcsb:
 
-    D             = Neo4jDB()
+    D             = riboxyzDB()
     rcsb_structs  = current_rcsb_structs()
     neo4j_structs = D.get_all_structs()
     print(neo4j_structs)
@@ -103,7 +103,7 @@ if args.query:
 
 if args.database:
 
-    D        = Neo4jDB()
+    D        = riboxyzDB()
     synced   = D.get_all_structs()
     unsynced = sorted(current_rcsb_structs())
 

@@ -4,7 +4,7 @@ from ninja import Router
 from rbxz_bend.settings import get_logger
 from ribctl.lib.struct_rcsb_api import current_rcsb_structs
 from ribctl.lib.types.types_ribosome_assets import RibosomeAssets
-from ribctl.db.ribosomexyz import Neo4jDB
+from ribctl.db.ribosomexyz import riboxyzDB
 from ribctl.lib.types.types_polymer import RNAClass
 from ribctl.lib.types.types_ribosome import ExogenousRNAByStruct, ProteinClass, RibosomeStructure
 from ribctl.db.data import QueryOps
@@ -14,6 +14,9 @@ test = Router()
 qo = QueryOps()
 
 
+@test.get('/see_current_auth', tags=['0test'], )
+def current_auth(request):
+    return qo.see_current_auth()
 
 @test.get('/empty_db_query', tags=['0test'], )
 def any_test(request):
@@ -29,9 +32,9 @@ def log_test(request):
 
 
 
-@test.get('/sync_with_rcsb', response=list[str], tags=['0-Operations'])
+@test.get('/sync_with_rcsb', response=list[str], tags=['0test'])
 def sync_with_rcsb(request):
-    D        = Neo4jDB()
+    D        = riboxyzDB()
     synced   = D.get_all_structs()
     unsynced = sorted(current_rcsb_structs())
 

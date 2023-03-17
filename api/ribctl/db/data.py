@@ -2,14 +2,14 @@ import typing
 from neo4j import GraphDatabase, Driver, ManagedTransaction, Record, Result, ResultSummary, Transaction
 from neo4j.graph import Node, Relationship
 from neo4j import ManagedTransaction, Transaction
-from ribctl.db.ribosomexyz import Neo4jDB
+from ribctl.db.ribosomexyz import riboxyzDB
 from ribctl.lib.types.types_ribosome import  ExogenousRNAByStruct, Ligand,  ProteinClass, RibosomeStructure
 from schema.data_requests import LigandsByStruct
 from schema.v0 import BanClassMetadata, LigandInstance, NeoStruct, NomenclatureClass, NomenclatureClassMember
 from ribctl.lib.types.types_polymer import RNAClass, list_LSU_Proteins, list_SSU_Proteins, list_RNAClass
 
 
-class QueryOps(Neo4jDB):
+class QueryOps(riboxyzDB):
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
 

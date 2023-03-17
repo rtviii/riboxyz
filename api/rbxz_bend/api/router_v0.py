@@ -4,7 +4,7 @@ from ninja import Router
 from rbxz_bend.settings import get_logger
 from ribctl.lib.struct_rcsb_api import current_rcsb_structs
 from ribctl.lib.types.types_ribosome_assets import RibosomeAssets
-from ribctl.db.ribosomexyz import Neo4jDB
+from ribctl.db.ribosomexyz import riboxyzDB
 from ribctl.lib.types.types_polymer import RNAClass
 from ribctl.lib.types.types_ribosome import ExogenousRNAByStruct, ProteinClass, RibosomeStructure
 from ribctl.db.data import QueryOps
@@ -15,40 +15,6 @@ QO = QueryOps()
 
 
 
-# @router.get('/async_test')
-# def async_test(request):
-
-#     def testf():
-#         # Create a logger with the same name as the file
-#         script_name = os.path.splitext(os.path.basename(__file__))[0]
-#         script_path = os.path.dirname(os.path.abspath(__file__))
-
-#         logger = logging.getLogger(script_name)
-#         logger.setLevel(logging.DEBUG)
-
-#         console_handler = logging.StreamHandler()
-#         console_handler.setLevel(logging.DEBUG)
-
-#         file_handler = logging.FileHandler(os.path.join(script_path, f"{script_name}_log.txt"))
-#         file_handler.setLevel(logging.INFO)
-
-#         formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-#         console_handler.setFormatter(formatter)
-
-#         logger.addHandler(console_handler)
-#         logger.addHandler(file_handler)
-
-#         import time
-
-#         for i in range(10):
-#             logger.debug("Passed:{}".format(i))
-#             time.sleep(1)
-
-#         logger.info("Done")
-
-    # executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)
-    # executor.submit(testf)
-    # return {"message": "Started work"}
 
 
 
@@ -83,7 +49,6 @@ def get_RibosomeStructure(request,rcsb_id:str):
 @v0.get('/match_structs_w_proteins', response=RibosomeStructure, tags=['Structure'])
 def match_structs_w_proteins(request,has_proteins:list[ProteinClass]):
     return QO.match_structs_w_proteins(has_proteins)
-    
 
 @v0.get('/get_banclass_for_chain', response=list[ProteinClass], tags=['Classification'])
 def get_banclass_for_chain(request,rcsb_id:str, auth_asym_id:str):
