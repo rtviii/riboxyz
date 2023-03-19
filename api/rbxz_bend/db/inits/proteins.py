@@ -1,10 +1,9 @@
 
 from typing import Callable
-from neo4j import GraphDatabase, Driver, ManagedTransaction, Record, Result, Transaction
+from neo4j import Driver, ManagedTransaction, Transaction
 from neo4j.graph import Node, Relationship
 from neo4j import ManagedTransaction, Transaction
 from ribctl.lib.types.types_ribosome import Protein
-from ribctl.lib.types.types_polymer import list_LSU_Proteins, list_SSU_Proteins, list_RNAClass
 
 def node__protein(_prot:Protein)->Callable[[Transaction | ManagedTransaction], Node ]:
     P = _prot.dict()
@@ -41,7 +40,6 @@ def node__protein(_prot:Protein)->Callable[[Transaction | ManagedTransaction], N
   return rp
         """, **P).single(strict=True)['rp']
     return _
-
 
 def link__prot_to_struct(prot: Node, parent_rcsb_id: str) -> Callable[[Transaction | ManagedTransaction], list[list[Node | Relationship]]]:
 

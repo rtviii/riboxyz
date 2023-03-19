@@ -1,7 +1,6 @@
 import typing
 from pyparsing import Any
 from neo4j import Driver, GraphDatabase
-from neo4j.exceptions import AuthError
 from rbxz_bend.settings import NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER
 from rbxz_bend.db.inits.proteins import add_protein, node__protein_class
 from rbxz_bend.db.inits.rna import add_rna, node__rna_class
@@ -9,14 +8,11 @@ from rbxz_bend.db.inits.structure import add_ligand, node__structure
 from ribctl.lib.types.types_ribosome import RibosomeStructure
 from ribctl.lib.types.types_ribosome_assets import RibosomeAssets
 from ribctl.lib.types.types_polymer import list_LSU_Proteins, list_SSU_Proteins, list_RNAClass
-from neo4j import GraphDatabase, Driver, ManagedTransaction, Record, Result, ResultSummary, Transaction
-from neo4j.graph import Node, Relationship
-from neo4j import ManagedTransaction, Transaction
-from ribctl.lib.types.types_ribosome import  ExogenousRNAByStruct, Ligand,  ProteinClass, RibosomeStructure
+from neo4j import GraphDatabase, Driver, ManagedTransaction, Transaction
+from ribctl.lib.types.types_ribosome import ExogenousRNAByStruct, Ligand,  ProteinClass, RibosomeStructure
 from schema.data_requests import LigandsByStruct
 from schema.v0 import BanClassMetadata, LigandInstance, NeoStruct, NomenclatureClass, NomenclatureClassMember
 from ribctl.lib.types.types_polymer import RNAClass, list_LSU_Proteins, list_SSU_Proteins, list_RNAClass
-
 
 
 """Functions of the form create_node_xxxx return a closure over their target [xxxx] because the neo4j expects a 'unit-of-work'
@@ -38,31 +34,27 @@ NODE_CONSTRAINTS = [
 # ※ ----------------[ 5.Ingress]
 
 
-
 # If you are connecting via a shell or programmatically via a driver,
 # just issue a `ALTER CURRENT USER SET PASSWORD FROM 'current password' TO 'new password'` statement against
 # the system database in the current session, and then restart your driver with the new password configured.
 
-class riboxyzDB():
+class ribosomexyzDB():
 
     driver: Driver
 
-    def __init__(self,uri:str,user:str, password:str) -> None:
-        self.driver = GraphDatabase.driver(uri,auth=(user, password))
+    def __init__(self, uri: str, user: str, password: str) -> None:
+        self.driver = GraphDatabase.driver(uri, auth=(user, password))
         try:
             with self.driver.session(database='system') as s:
                 s.run("show users")
         except Exception as e:
-            print("Failed to initialize the database connection. Perhaps change the default password.")
-            with GraphDatabase.driver(uri, auth=("neo4j","neo4j")).session(database='system') as s:
-                s.run("""ALTER CURRENT USER SET PASSWORD FROM "neo4j" TO "ribosomexyz";""")
+            print(
+                "Failed to initialize the database connection. Perhaps change the default password.")
+            with GraphDatabase.driver(uri, auth=("neo4j", "neo4j")).session(database='system') as s:
+                s.run(
+                    """ALTER CURRENT USER SET PASSWORD FROM "neo4j" TO "ribosomexyz";""")
                 print("Changed the default Neo4j password.")
-            
 
-
-
-
-    
     # def sync_with_rcsb(self)->None:
 
     #     def _():
@@ -85,7 +77,8 @@ class riboxyzDB():
 
     def change_default_neo4j_credentials(self):
         with self.driver.session(database='system') as system_s:
-            r = system_s.run("""//ALTER CURRENT USER SET PASSWORD FROM "neo4j" TO "ribosomexyz";""")
+            r = system_s.run(
+                """//ALTER CURRENT USER SET PASSWORD FROM "neo4j" TO "ribosomexyz";""")
             return r.data()
 
     def see_current_auth(self):
@@ -103,8 +96,6 @@ class riboxyzDB():
             users_array = r.data()
             return users_array
 
-
-
     def see_constraints(self) -> list[dict[str, Any]]:
         with self.driver.session() as s:
             r = s.run("""//
@@ -112,10 +103,10 @@ class riboxyzDB():
                   """)
             return r.data()
 
-    def get_all_structs(self) :
+    def get_all_structs(self):
         with self.driver.session() as s:
             struct_ids = []
-            [struct_ids.extend(struct) for struct in  s.read_transaction(lambda tx: tx.run("""//
+            [struct_ids.extend(struct) for struct in s.read_transaction(lambda tx: tx.run("""//
             match (n:RibosomeStructure) return n.rcsb_id;
             """).values('n.rcsb_id'))]
             return struct_ids
@@ -151,10 +142,9 @@ class riboxyzDB():
 
         R = RibosomeStructure(**struct_assets.json_profile())
 
-        global struct_node_result;
+        global struct_node_result
         with self.driver.session() as s:
-           struct_node_result = s.write_transaction(node__structure(R))
-
+            struct_node_result = s.write_transaction(node__structure(R))
 
         for protein in R.proteins:
             add_protein(self.driver, protein)
@@ -170,9 +160,7 @@ class riboxyzDB():
         print("Added structure: ", R.rcsb_id)
         return struct_node_result.data()
 
-
-
-    def get_all_ligands(self)->list[LigandInstance]:
+    def get_all_ligands(self) -> list[LigandInstance]:
         """this is used by "request all ligands" in the frontend, binding sites action types."""
 
         with self.driver.session() as session:
@@ -254,7 +242,7 @@ class riboxyzDB():
 
             return session.read_transaction(_)
 
-    def get_all_ligandlike(self)->list[LigandInstance]:
+    def get_all_ligandlike(self) -> list[LigandInstance]:
         with self.driver.session() as session:
             def _(tx: Transaction | ManagedTransaction):
                 return tx.run("""//
@@ -275,8 +263,8 @@ class riboxyzDB():
                         } ) as liglike
                         return liglike""").data()[0]['liglike']
             return session.read_transaction(_)
-            
-    def get_RibosomeStructure(self,rcsb_id:str)->RibosomeStructure:
+
+    def get_RibosomeStructure(self, rcsb_id: str) -> RibosomeStructure:
         with self.driver.session() as session:
             def _(tx: Transaction | ManagedTransaction):
                 return tx.run("""//
@@ -320,10 +308,10 @@ class riboxyzDB():
                     } as structure
 
                     return structure
-                        """,{"RCSB_ID":rcsb_id.upper()}).data()[0]['structure']
+                        """, {"RCSB_ID": rcsb_id.upper()}).data()[0]['structure']
             return session.read_transaction(_)
 
-    def get_ligands_by_struct(self)->list[LigandsByStruct]:
+    def get_ligands_by_struct(self) -> list[LigandsByStruct]:
         with self.driver.session() as session:
             def _(tx: Transaction | ManagedTransaction):
                 return tx.run("""//
@@ -334,7 +322,7 @@ class riboxyzDB():
                         """).data()[0]['struct_ligs']
             return session.read_transaction(_)
 
-    def match_structs_w_proteins(self,targets:list[ProteinClass])->list[str]:
+    def match_structs_w_proteins(self, targets: list[ProteinClass]) -> list[str]:
         with self.driver.session() as session:
             def _(tx: Transaction | ManagedTransaction):
                 return [s[0] for s in tx.run("""//
@@ -345,12 +333,12 @@ class riboxyzDB():
                     where all(x in tgts where x in unwound)
                     with n.rcsb_id as rcsb_id
                     return rcsb_id
-                        """,{"T":targets}).values('rcsb_id')]
+                        """, {"T": targets}).values('rcsb_id')]
 
             return session.read_transaction(_)
 
-    def get_full_structure(self,rcsb_id:str)->NeoStruct:
-        #TODO: This method is identical to "get_struct" and was merely queried in a different way. DEPRECATE ONE (AS WELL AS THE API ENDPOINT)
+    def get_full_structure(self, rcsb_id: str) -> NeoStruct:
+        # TODO: This method is identical to "get_struct" and was merely queried in a different way. DEPRECATE ONE (AS WELL AS THE API ENDPOINT)
         with self.driver.session() as session:
 
             def _(tx: Transaction | ManagedTransaction):
@@ -364,45 +352,46 @@ class riboxyzDB():
         optional match (rnas:RNA)-[]-(struct)
         with ligands, struct, rps, collect({auth_asym_id: rnas.auth_asym_id, nomenclature: rnas.nomenclature, entity_poly_seq_one_letter_code:rnas.entity_poly_seq_one_letter_code}) as rnas
         return struct, ligands,rps, rnas
-                        """,{"RCSB_ID":rcsb_id.upper()}).data()[0]
+                        """, {"RCSB_ID": rcsb_id.upper()}).data()[0]
             return session.read_transaction(_)
 
-    def get_banclass_for_chain(self,rcsb_id:str, auth_asym_id)->list[ProteinClass]:
-        #TODO: This method should handle both protein and RNA chains(atm only proteins)
+    def get_banclass_for_chain(self, rcsb_id: str, auth_asym_id) -> list[ProteinClass]:
+        # TODO: This method should handle both protein and RNA chains(atm only proteins)
         with self.driver.session() as session:
 
             def _(tx: Transaction | ManagedTransaction):
                 return [pc[0] for pc in tx.run("""//
                 match (n:RibosomeStructure {rcsb_id:$RCSB_ID})-[]-(c:Protein{auth_asym_id:$AUTH_ASYM_ID})-[]-(pc:ProteinClass) return pc.class_id
-                    """,{"RCSB_ID":rcsb_id,"AUTH_ASYM_ID":auth_asym_id}).values('pc.class_id')]
+                    """, {"RCSB_ID": rcsb_id, "AUTH_ASYM_ID": auth_asym_id}).values('pc.class_id')]
             return session.read_transaction(_)
 
-    def get_banclasses_metadata(self,family:typing.Literal['b','e','u'], subunit:typing.Literal['SSU', 'LSU'])->list[BanClassMetadata]:
-        #TODO: This method should handle both protein and RNA chains(atm only proteins)
+    def get_banclasses_metadata(self, family: typing.Literal['b', 'e', 'u'], subunit: typing.Literal['SSU', 'LSU']) -> list[BanClassMetadata]:
+        # TODO: This method should handle both protein and RNA chains(atm only proteins)
         with self.driver.session() as session:
             def _(tx: Transaction | ManagedTransaction):
 
-                 def flag_into_filter(_subunit:str):
-                     if _subunit == "SSU":
-                        return 'toLower(n.class_id) contains "s" or toLower(n.class_id) contains "bthx" or toLower(n.class_id) contains "rack"' 
-                     elif _subunit == "LSU": 
-                        return 'toLower(n.class_id) contains "l"' 
-                     else:
-                         raise ValueError("Subunit must be either 'ssu' or 'lsu'")
+                def flag_into_filter(_subunit: str):
+                    if _subunit == "SSU":
+                        return 'toLower(n.class_id) contains "s" or toLower(n.class_id) contains "bthx" or toLower(n.class_id) contains "rack"'
+                    elif _subunit == "LSU":
+                        return 'toLower(n.class_id) contains "l"'
+                    else:
+                        raise ValueError(
+                            "Subunit must be either 'ssu' or 'lsu'")
 
-                 fstring = flag_into_filter(subunit)
-                 return tx.run("""//
+                fstring = flag_into_filter(subunit)
+                return tx.run("""//
                         match (n:ProteinClass)-[]-(rp:Protein)-[]-(s:RibosomeStructure) where  toLower(n.class_id) contains "{FAMILY}" and {SUBUNIT} 
                         unwind s.`src_organism_ids` as orgid
                         with collect(distinct orgid) as organisms, n.class_id as banClass, collect(s.rcsb_id) as structs, collect(distinct rp.pfam_comments) as comments
-                        return  banClass, organisms, comments, structs""".format_map({"FAMILY":family,"SUBUNIT":fstring})).data() # type: ignore
+                        return  banClass, organisms, comments, structs""".format_map({"FAMILY": family, "SUBUNIT": fstring})).data()  # type: ignore
             return session.read_transaction(_)
 
-    def list_nom_classes(self)->list[NomenclatureClass]:
-        #TODO: Merge into get_banclasses_metadata
+    def list_nom_classes(self) -> list[NomenclatureClass]:
+        # TODO: Merge into get_banclasses_metadata
         with self.driver.session() as session:
             def _(tx: Transaction | ManagedTransaction):
-                 return tx.run("""//
+                return tx.run("""//
                     match (b:ProteinClass)-[]-(rp)-[]-(str:RibosomeStructure)
                     with collect(str.rcsb_id) as structs, b.class_id as banClass, collect({
                         organism_desc: rp.src_organism_names,
@@ -415,12 +404,12 @@ class riboxyzDB():
                     return structs, banClass, rps
                  """).data()
             return session.read_transaction(_)
-            
-    def gmo_nom_class(self,class_id:ProteinClass)->list[NomenclatureClassMember]:
+
+    def gmo_nom_class(self, class_id: ProteinClass) -> list[NomenclatureClassMember]:
 
         with self.driver.session() as session:
             def _(tx: Transaction | ManagedTransaction):
-                 return tx.run("""//
+                return tx.run("""//
                     match (rib:RibosomeStructure)-[]-(n:Protein)-[]-(nc:ProteinClass{class_id:$BANCLASS})
                     with collect({  
                     parent_rcsb_id                     : rib.parent_rcsb_id,
@@ -456,10 +445,10 @@ class riboxyzDB():
                     ligand_like                        : n.ligand_like
                         }) as member
                         return member
-                 """,{"BANCLASS":class_id}).value('member')[0]
+                 """, {"BANCLASS": class_id}).value('member')[0]
             return session.read_transaction(_)
 
-    def proteins_number(self)->int:
+    def proteins_number(self) -> int:
         with self.driver.session() as session:
             def _(tx: Transaction | ManagedTransaction):
                 return tx.run("""//
@@ -467,7 +456,7 @@ class riboxyzDB():
                     """).value()[0]
             return session.read_transaction(_)
 
-    def get_rnas_by_struct(self)->list[ExogenousRNAByStruct]:
+    def get_rnas_by_struct(self) -> list[ExogenousRNAByStruct]:
         with self.driver.session() as session:
             def _(tx: Transaction | ManagedTransaction):
                 return tx.run("""//
@@ -483,10 +472,10 @@ with n.rcsb_id as struct, collect(r.rcsb_pdbx_description) as rnas
                     """).data()
             return session.read_transaction(_)
 
-    def get_rna_class(self, class_id:RNAClass)->list[NomenclatureClassMember]:
+    def get_rna_class(self, class_id: RNAClass) -> list[NomenclatureClassMember]:
         with self.driver.session() as session:
             def _(tx: Transaction | ManagedTransaction):
-                return [ rna[0] for rna in tx.run("""//
+                return [rna[0] for rna in tx.run("""//
                     match (c:RNAClass { class_id:$RNA_CLASS })-[]-(n)-[]-(rib:RibosomeStructure)
         with {
             parent_year                         : rib.citation_year                    ,
@@ -520,5 +509,5 @@ with n.rcsb_id as struct, collect(r.rcsb_pdbx_description) as rnas
             nomenclature                        : [c.class_id]                           ,
             ligand_like                         : n.ligand_like                        
         } as rna
-        return rna""",{"RNA_CLASS":class_id}).values('rna')]
+        return rna""", {"RNA_CLASS": class_id}).values('rna')]
             return session.read_transaction(_)
