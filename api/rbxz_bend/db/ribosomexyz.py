@@ -505,22 +505,26 @@ with n.rcsb_id as struct, collect(r.rcsb_pdbx_description) as rnas
         unsynced = sorted(current_rcsb_structs())
         futures:list[Future] =  []
 
-        logger.info("Syncing with RCSB") 
-        logger.info("50 structures ")
+        logger.info("Started syncing with RCSB") 
+
+
+        def log_commit_result(f:Future):
+            if not None == f.exception():
+                logger.error(f.exception())
+            else:
+                logger.debug(f.result())
+
+
         with ThreadPoolExecutor(max_workers=workers) as executor:
-            for rcsb_id in list(set(unsynced ) - set(synced))[:10]:
+            for rcsb_id in list(set(unsynced ) - set(synced)):
 
                 assets = RibosomeAssets(rcsb_id)
                 assets._verify_json_profile(True)
-                futures.append(executor.submit(self.add_structure, assets))
+                fut = executor.submit(self.add_structure, assets)
+                fut.add_done_callback(log_commit_result)
+                futures.append(fut)
 
+        wait(futures, return_when=ALL_COMPLETED)
 
-        completed_futures = wait(futures, return_when=ALL_COMPLETED)
-        # Iterate over the completed futures to get their results or exceptions
-        for future in completed_futures.done:
-            if not None == future.exception():
-                logger.error(future.exception())
-            else:
-                logger.debug(future.result())
 
         logger.info("Finished syncing with RCSB")
