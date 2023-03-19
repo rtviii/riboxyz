@@ -87,9 +87,11 @@ class RibosomeAssets():
     def _verify_json_profile(self, overwrite: bool = False) -> bool:
         if overwrite:
             ribosome = process_pdb_record(self.rcsb_id)
+
             if not parse_obj_as(RibosomeStructure, ribosome):
                 raise Exception("Invalid ribosome structure profile.")
 
+            self._verify_dir_exists()
             self.save_json_profile(self._json_profile_filepath(), ribosome.dict())
             print(f"Saved structure profile:\t{self._json_profile_filepath()}")
             return True
@@ -135,3 +137,12 @@ class RibosomeAssets():
                     self.rcsb_id, ligandlike_poly.auth_asym_id, self.biopython_structure(), overwrite)
 
         return _flag
+
+    # def _obtain_assets(self, overwrite: bool = False):
+    #     self._verify_dir_exists()
+    #     # self._verify_cif(overwrite)
+    #     # self._verify_cif_modified(overwrite)
+    #     self._verify_json_profile(overwrite)
+    #     # self._verify_png_thumbnail(overwrite)
+    #     self._verify_chains_dir()
+    #     self._verify_ligads_and_ligandlike_polys(overwrite)

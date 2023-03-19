@@ -1,13 +1,9 @@
 import typing
 from ninja import Router
-from rbxz_bend.settings import get_logger
-from ribctl.lib.struct_rcsb_api import current_rcsb_structs
-from ribctl.lib.types.types_ribosome_assets import RibosomeAssets
 from ribctl.lib.types.types_polymer import RNAClass
 from ribctl.lib.types.types_ribosome import ExogenousRNAByStruct, ProteinClass, RibosomeStructure
 from schema.v0 import BanClassMetadata, LigandInstance, LigandlikeInstance, NeoStruct, NomenclatureClass, NomenclatureClassMember
-
-from rbxz_bend.db_connection import db_connection
+from rbxz_bend.application import db_connection
 
 v0 = Router()
 

@@ -4,6 +4,7 @@ import logging.handlers
 import logging
 import typing
 
+
 class DatedRotatingFileHandler(logging.handlers.RotatingFileHandler):
     """
     Handler for rotating log files with a date-based filename.
@@ -15,8 +16,10 @@ class DatedRotatingFileHandler(logging.handlers.RotatingFileHandler):
         super().__init__(filename, mode, maxBytes, backupCount, encoding, delay)
 
 LOGGERS = typing.Literal['general', 'updates', 'accesses','computations']
+
 def get_logger(loggername: LOGGERS )-> logging.Logger:
     """if not one of the default loggers is specified, then a rotating log with a new date is created"""
+
     if loggername not in typing.get_args(LOGGERS):
         # Create a custom logger and handler instance
         logger = logging.getLogger(loggername)
@@ -36,13 +39,13 @@ SECRET_KEY = 'ju=n4om3z00jd1+y2(ufn)g^@w-dj*&-45&4yd1_aiun50b6by'
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # this should be either docker-mounted or populated through the utils module
 RIBETL_DATA = os.environ["RIBETL_DATA"] if os.environ["RIBETL_DATA"] else os.path.join(
-    BASE_DIR, "ribetldata")
 
+    BASE_DIR, "ribetldata")
 # ※ Dont' forget to export pymol path ( we want to ship a built pymol, but python needs to be aware of it)
 # export PYMOL_PATH=/home/rxz/dev/pymol3.11 && export PYTHONPATH="$PYTHONPATH:$PYMOL_PATH/modules/:"
 
-vars = ["NEO4J_URI", "NEO4J_USER", "NEO4J_PASSWORD",
-        "NEO4J_CURRENTDB", "RIBETL_DATA"]
+RCSB_SYNC_LOG = os.path.join(BASE_DIR, 'logs', 'rcsb_sync.log')
+vars = ["NEO4J_URI", "NEO4J_USER", "NEO4J_PASSWORD","NEO4J_CURRENTDB", "RIBETL_DATA"]
 print(" ---------------------------------------------- App has been reset. -----------------------------------------------")
 for var in vars:
     # print("Environment variable {}:\t{}".format( var, os.getenv(var) ))
@@ -50,10 +53,10 @@ for var in vars:
         print("Environment variable {} not set".format(var))
         exit(1)
 
-NEO4J_URI       = os.getenv("NEO4J_URI")
-NEO4J_PASSWORD  = os.getenv("NEO4J_PASSWORD")
-NEO4J_USER      = os.getenv("NEO4J_USER")
-NEO4J_CURRENTDB = os.getenv("NEO4J_CURRENTDB")
+NEO4J_URI       :str= os.getenv("NEO4J_URI")
+NEO4J_PASSWORD  :str= os.getenv("NEO4J_PASSWORD")
+NEO4J_USER      :str= os.getenv("NEO4J_USER")
+NEO4J_CURRENTDB :str= os.getenv("NEO4J_CURRENTDB")
 
 DEBUG = True
 ALLOWED_HOSTS = ["*"]

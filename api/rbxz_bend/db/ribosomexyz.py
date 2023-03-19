@@ -1,7 +1,10 @@
+from concurrent.futures import ALL_COMPLETED, Future, ThreadPoolExecutor, wait
+import logging
 import typing
 from pyparsing import Any
 from neo4j import Driver, GraphDatabase
-from rbxz_bend.settings import NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER
+from ribctl.lib.struct_rcsb_api import current_rcsb_structs
+from rbxz_bend.settings import NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER, RCSB_SYNC_LOG, DatedRotatingFileHandler
 from rbxz_bend.db.inits.proteins import add_protein, node__protein_class
 from rbxz_bend.db.inits.rna import add_rna, node__rna_class
 from rbxz_bend.db.inits.structure import add_ligand, node__structure
@@ -15,8 +18,6 @@ from schema.v0 import BanClassMetadata, LigandInstance, NeoStruct, NomenclatureC
 from ribctl.lib.types.types_polymer import RNAClass, list_LSU_Proteins, list_SSU_Proteins, list_RNAClass
 
 
-"""Functions of the form create_node_xxxx return a closure over their target [xxxx] because the neo4j expects a 'unit-of-work'
-function that takes a transaction as its argument."""
 
 # ※ ----------------[ 0.Database  inits: constraints & nomenclature classes]
 NODE_CONSTRAINTS = [
@@ -43,6 +44,7 @@ class ribosomexyzDB():
     driver: Driver
 
     def __init__(self, uri: str, user: str, password: str) -> None:
+        """hack for automatically changing the first-boot password. if we ever get multiple users for neo4j, will worry about this."""
         self.driver = GraphDatabase.driver(uri, auth=(user, password))
         try:
             with self.driver.session(database='system') as s:
@@ -54,32 +56,6 @@ class ribosomexyzDB():
                 s.run(
                     """ALTER CURRENT USER SET PASSWORD FROM "neo4j" TO "ribosomexyz";""")
                 print("Changed the default Neo4j password.")
-
-    # def sync_with_rcsb(self)->None:
-
-    #     def _():
-    #         D        = riboxyzDB()
-    #         synced   = D.get_all_structs()
-    #         unsynced = sorted(current_rcsb_structs())
-
-    #         for rcsb_id in set(unsynced ) - set(synced):
-    #             assets = RibosomeAssets(rcsb_id)
-    #             try:
-    #                 assets._verify_json_profile(True)
-    #                 D.add_structure(assets)
-    #             except Exception as e:
-    #                 print(e)
-    #                 logger.error("Exception occurred:", exc_info=True)
-
-    #     with ProcessPoolExecutor() as executor:
-    #         future:Future = executor.submit(sync_with_rcsb)
-    #         print(future)
-
-    def change_default_neo4j_credentials(self):
-        with self.driver.session(database='system') as system_s:
-            r = system_s.run(
-                """//ALTER CURRENT USER SET PASSWORD FROM "neo4j" TO "ribosomexyz";""")
-            return r.data()
 
     def see_current_auth(self):
         print("see_current_auth")
@@ -142,7 +118,8 @@ class ribosomexyzDB():
 
         R = RibosomeStructure(**struct_assets.json_profile())
 
-        global struct_node_result
+
+
         with self.driver.session() as s:
             struct_node_result = s.write_transaction(node__structure(R))
 
@@ -157,7 +134,7 @@ class ribosomexyzDB():
             for ligand in R.ligands:
                 add_ligand(self.driver, ligand, R.rcsb_id)
 
-        print("Added structure: ", R.rcsb_id)
+       
         return struct_node_result.data()
 
     def get_all_ligands(self) -> list[LigandInstance]:
@@ -511,3 +488,39 @@ with n.rcsb_id as struct, collect(r.rcsb_pdbx_description) as rnas
         } as rna
         return rna""", {"RNA_CLASS": class_id}).values('rna')]
             return session.read_transaction(_)
+
+    def sync_with_rcsb(self, workers:int)->None:
+
+        logger = logging.getLogger(__name__)
+        logger.setLevel(logging.DEBUG)
+        filename = RCSB_SYNC_LOG
+        file_handler = logging.FileHandler(filename)
+        file_handler.setLevel(logging.DEBUG)
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        file_handler.setFormatter(formatter)
+        logger.addHandler(file_handler)
+
+
+        synced   = self.get_all_structs()
+        unsynced = sorted(current_rcsb_structs())
+        futures:list[Future] =  []
+
+        logger.info("Syncing with RCSB") 
+        logger.info("50 structures ")
+        with ThreadPoolExecutor(max_workers=workers) as executor:
+            for rcsb_id in list(set(unsynced ) - set(synced))[:10]:
+
+                assets = RibosomeAssets(rcsb_id)
+                assets._verify_json_profile(True)
+                futures.append(executor.submit(self.add_structure, assets))
+
+
+        completed_futures = wait(futures, return_when=ALL_COMPLETED)
+        # Iterate over the completed futures to get their results or exceptions
+        for future in completed_futures.done:
+            if not None == future.exception():
+                logger.error(future.exception())
+            else:
+                logger.debug(future.result())
+
+        logger.info("Finished syncing with RCSB")
