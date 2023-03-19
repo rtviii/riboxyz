@@ -11,8 +11,6 @@ from rbxz_bend.db_connection import db_connection
 
 v0 = Router()
 
-
-
 @v0.get('/get_all_structures', response=list[NeoStruct], tags=['Structure'])
 def get_all_structures(request,):
     return db_connection.get_all_structures()

@@ -4,7 +4,7 @@ from ninja import Router
 from rbxz_bend.settings import get_logger
 from ribctl.lib.struct_rcsb_api import current_rcsb_structs
 from ribctl.lib.types.types_ribosome_assets import RibosomeAssets
-from rbxz_bend.db.ribosomexyz import riboxyzDB
+from rbxz_bend.db.ribosomexyz import ribosomexyzDB
 from rbxz_bend.db_connection import db_connection 
 
 test = Router()
@@ -30,7 +30,7 @@ def log_test(request):
 
 @test.get('/sync_with_rcsb', response=list[str], tags=['0test'])
 def sync_with_rcsb(request):
-    D        = riboxyzDB()
+    D        = ribosomexyzDB()
     synced   = D.get_all_structs()
     unsynced = sorted(current_rcsb_structs())
 
