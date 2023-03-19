@@ -3,9 +3,9 @@ from pyparsing import Any
 from neo4j import Driver, GraphDatabase
 from neo4j.exceptions import AuthError
 from rbxz_bend.settings import NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER
-from ribctl.db.inits.proteins import add_protein, node__protein_class
-from ribctl.db.inits.rna import add_rna, node__rna_class
-from ribctl.db.inits.structure import add_ligand, node__structure
+from rbxz_bend.db.inits.proteins import add_protein, node__protein_class
+from rbxz_bend.db.inits.rna import add_rna, node__rna_class
+from rbxz_bend.db.inits.structure import add_ligand, node__structure
 from ribctl.lib.types.types_ribosome import RibosomeStructure
 from ribctl.lib.types.types_ribosome_assets import RibosomeAssets
 from ribctl.lib.types.types_polymer import list_LSU_Proteins, list_SSU_Proteins, list_RNAClass

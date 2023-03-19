@@ -4,7 +4,7 @@ from ninja import Router
 from rbxz_bend.settings import get_logger
 from ribctl.lib.struct_rcsb_api import current_rcsb_structs
 from ribctl.lib.types.types_ribosome_assets import RibosomeAssets
-from ribctl.db.ribosomexyz import riboxyzDB
+from rbxz_bend.db.ribosomexyz import riboxyzDB
 from rbxz_bend.db_connection import db_connection 
 
 test = Router()
