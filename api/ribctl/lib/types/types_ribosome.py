@@ -1,6 +1,5 @@
 from pydantic import BaseModel
 from pydantic import parse_obj_as
-from ninja import Schema 
 from .types_polymer import LSU_Proteins, RNAClass, SSU_Proteins
 
 ProteinClass = LSU_Proteins | SSU_Proteins

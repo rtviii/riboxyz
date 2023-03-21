@@ -1,6 +1,7 @@
 import typing
-from pydantic import BaseModel
+from pydantic import BaseModel, root_validator
 from pydantic import parse_obj_as
+from Bio.PDB.Residue import Residue
 
 AMINO_ACIDS = {
     "ALA": 0,
@@ -29,52 +30,60 @@ AMINO_ACIDS = {
 NUCLEOTIDES = typing.Literal['A', 'T', 'C', 'G', 'U']
 
 
+class ResidueSummary(BaseModel):
 
-@dataclass(unsafe_hash=True, order=True)
-class BindingSiteChain: 
+    full_id            : tuple[str,int,str,tuple[str,int,str]]
+    
+    resname            : str
+    seqid              : str
+    parent_auth_asym_id: str
 
-      sequence     : str                = field(hash=True, compare=False)
-      nomenclature : list[str]          = field(hash=True, compare=False)
-      asym_ids     : list[str]          = field(hash=True, compare=False)
-      auth_asym_id : str                = field(hash=True, compare=False)
-      residues    : list[ ResidueLite ] = field(hash=True, compare=False)
-
-class BindingSite:
-
-    def __init__(self, data: Dict[str, BindingSiteChain]) -> None:
-        self.data: Dict[str, BindingSiteChain] = data
-
-    def __getitem__(self, chainkey:str)->BindingSiteChain:
-        if chainkey not in self.data:
-            raise KeyError(f"Chain {chainkey} not found in the binding site.")
-        return self.data[chainkey]
-
-    def to_json(self, pathtofile: str) -> None:
-        with open(pathtofile, 'w') as outf:
-            serialized = {}
-            for x in self.data.items():
-                serialized.update({x[0]: dataclasses.asdict(x[1])})
-            json.dump(serialized, outf)
-            print(f"Saved  \033[91m{pathtofile}\033[0m.")
-
-    def to_csv(self, pathtofile: str) -> None:
-        k = [
-            "chainname",
-            "nomenclature",
-            "residue_id",
-            "residue_name"
-        ]
+    def __hash__(self):
+        return hash(self.get_resname() + str(self.get_seqid()) + self.get_parent_auth_asym_id())
 
 
+    def get_resname(self): 
+        return self.resname
+
+    def get_seqid(self): 
+        (structure_id, model_id, chain_id, _) = self.full_id
+        (hetero, seqid, insertion_code )      = _
+        return seqid
+
+    def get_parent_auth_asym_id(self): 
+        (structure_id, model_id, chain_id, _) = self.full_id
+        return chain_id
+        
+
+    @staticmethod
+    def from_biopython_residue(r: Residue):
+
+        (structure_id, model_id, chain_id, _) = r.get_full_id()
+        (hetero, seqid, insertion_code )      = _
+
+        return ResidueSummary(
+            seqid               = seqid,
+            resname             = r.get_resname(),
+            parent_auth_asym_id = chain_id,
+            full_id             = r.get_full_id()
+        )
 
 
-        serialized = dict.fromkeys(k, [])
+class BindingSiteChain(BaseModel): 
+      sequence                   : str
+      nomenclature               : list[str]
+      asym_ids                   : list[str]
+      auth_asym_id               : str
+      residues                   : list[ ResidueSummary ]
+
+
+class BindingSite(BaseModel):
+    __root__:typing.Dict[str,BindingSiteChain]
 
 #TODO: Replace this with an actual polymer class.
-@dataclass(unsafe_hash=True, order=True)
-class __PolymerRef: 
-      parent_rcsb_id          : str = field(hash=True, compare=False)
-      auth_asym_id            : str = field(hash=True, compare=True)
-      rcsb_pdbx_description   : str = field(hash=True, compare=False)
-      entity_poly_seq_length  : int = field(hash=True, compare=False)
-      entity_poly_polymer_type: str = field(hash=True, compare=False)
+class __PolymerRef(BaseModel): 
+      parent_rcsb_id          : str 
+      auth_asym_id            : str 
+      rcsb_pdbx_description   : str 
+      entity_poly_seq_length  : int 
+      entity_poly_polymer_type: str 

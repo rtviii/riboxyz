@@ -1,7 +1,7 @@
-import typing
+from typing import Literal
 # After https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4358319/
 
-RNAClass            = typing.Literal[
+RNAClass            = Literal[
     "5SrRNA",
     "5.8SrRNA",
     "12SrRNA",
@@ -14,7 +14,7 @@ RNAClass            = typing.Literal[
     "mRNA",
     "tRNA"
 ]
-SSU_Proteins = typing.Literal["bS1",
+SSU_Proteins = Literal["bS1",
                               "eS1",
                               "uS2",
                               "uS3",
@@ -58,7 +58,7 @@ SSU_Proteins = typing.Literal["bS1",
 
 
 
-LSU_Proteins = typing.Literal["uL1",
+LSU_Proteins = Literal["uL1",
                               "uL2",
                               "uL3",
                               "uL4",
