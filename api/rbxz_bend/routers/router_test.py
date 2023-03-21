@@ -17,6 +17,14 @@ test = Router()
 def current_auth(request):
     return db_connection.see_current_auth()
 
+@test.get('/see_constraints', tags=['0test'])
+def see_constraints(request):
+    return db_connection.see_constraints()
+
+@test.get('/init_classes', tags=['0test'])
+def create_constraints(request):
+    return db_connection.init_db()
+
 @test.get('/empty_db_query', tags=['0test'], )
 def any_test(request):
     return db_connection.get_any()
@@ -30,14 +38,10 @@ def log_test(request):
 
 
 @test.get('/sync_with_rcsb', tags=['0test'])
-async def sync_with_rcsb(request):
-
+def sync_with_rcsb(request):
     D        = ribosomexyzDB(NEO4J_URI, NEO4J_USER, NEO4J_PASSWORD)
     threading.Thread(target=D.sync_with_rcsb,args=(50,)).start()
-
     return {"message": "Started work"}
-
-
 
 
 
