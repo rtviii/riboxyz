@@ -65,7 +65,7 @@ def get_rnas_by_struct(request):
     return db_connection.get_rnas_by_struct()
 
 @v0.get('/get_rna_class', response=list[NomenclatureClassMember], tags=['RNA'])
-def get_rna_class(request,class_id:RNAClass):
-    return db_connection.get_rna_class(class_id)
+def get_rna_class(request,rna_class:RNAClass):
+    return db_connection.get_rna_class(rna_class)
 
 

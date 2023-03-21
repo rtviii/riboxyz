@@ -8,8 +8,7 @@ from ribctl.lib.struct_rcsb_api import current_rcsb_structs
 from ribctl.lib.types.types_ribosome_assets import RibosomeAssets
 from rbxz_bend.db.ribosomexyz import ribosomexyzDB
 from rbxz_bend.application import db_connection 
-from rbxz_bend.settings import NEO4J_CURRENTDB,NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER
-import asyncio
+from rbxz_bend.settings import NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER
 
 test = Router()
 
@@ -20,11 +19,6 @@ def current_auth(request):
 @test.get('/see_constraints', tags=['0test'])
 def see_constraints(request):
     return db_connection.see_constraints()
-
-@test.get('/init_classes', tags=['0test'])
-def create_constraints(request):
-    return db_connection.init_db()
-
 @test.get('/empty_db_query', tags=['0test'], )
 def any_test(request):
     return db_connection.get_any()
