@@ -1,7 +1,14 @@
 
+<!-- TODO: Migrations -->
 
+- render images for new structs 
+- superimpose [endpoint, script, logs]
+- ligands/bsites [render + predict] [endpoint, script, logs]
+- visualization troubleshoot
 
-<!-- TODO: -->
+<!-- TODO: Next stage-->
+- split ligand classes into instances and classes
+<!-- TODO: Next stage-->
 - split ligand classes into instances and classes
 
 

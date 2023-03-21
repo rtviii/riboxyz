@@ -14,7 +14,7 @@ import itertools
 from dataclasses import dataclass, field
 import itertools
 from ribctl.lib import RIBETL_DATA
-from ribctl.lib.utils import  open_structure, struct_path
+from ribctl.lib import utils
 flatten = itertools.chain.from_iterable
 
 def __get_dict(path:str,)->dict:
@@ -222,7 +222,7 @@ def __getLigandResIds(ligchemid: str, struct: Structure) -> List[Residue]:
 
 #※----------------------------------------------------------------------------
 
-def get_liglike_polymers(struct_profile:dict) -> List[__PolymerRef]:
+def struct_liglike_ids(struct_profile:dict) -> List[__PolymerRef]:
     """Given an rcsb id, open the profile for the corresponding structure
     and return references to all polymers marked ligand-like"""
     liglike = []
@@ -241,7 +241,7 @@ def get_liglike_polymers(struct_profile:dict) -> List[__PolymerRef]:
                        )]
     return liglike
 
-def get_ligands(pdbid: str, profile:dict) -> List[tuple]:
+def struct_ligand_ids(pdbid: str, profile:dict) -> List[tuple]:
     pdbid = pdbid.upper()
     if not profile['ligands']: return []
 
@@ -275,6 +275,22 @@ def render_ligand(rcsb_id:str,chemicalId:str, structure:Structure, save:bool=Fal
 
     return binding_site_ligand
 
+def run(rcsb_id):
+    PDBID = rcsb_id.upper()
+
+    _structure_cif_handle :Structure = open_structure(PDBID,'cif')  # type: ignore
+    struct_profile_handle:dict       = open_structure(PDBID,'json')  # type: ignore
+
+    liglike_polys = struct_liglike_ids(struct_profile_handle)
+    ligands       = struct_ligand_ids(PDBID, struct_profile_handle)
+
+    for polyref in liglike_polys:
+        render_liglike_polymer(polyref.parent_rcsb_id, polyref.auth_asym_id, _structure_cif_handle, args.save)
+
+    for l in ligands:
+        render_ligand(PDBID, l[0], _structure_cif_handle, args.save)
+
+
 if __name__ == "__main__":
 
     parser = argparse. ArgumentParser(description='Split structure into constituent polymers and inject new nomencalture into the .cif file')
@@ -284,11 +300,11 @@ if __name__ == "__main__":
     args  = parser.parse_args()
     PDBID = args.structure.upper()
 
-    _structure_cif_handle :Structure = open_structure(PDBID,'cif')  # type: ignore
-    struct_profile_handle:dict       = open_structure(PDBID,'json')  # type: ignore
+    _structure_cif_handle :Structure = utils.open_structure(PDBID,'cif') 
+    struct_profile_handle:dict       = utils.open_structure(PDBID,'json')  
 
-    liglike_polys = get_liglike_polymers(struct_profile_handle)
-    ligands       = get_ligands(PDBID, struct_profile_handle)
+    liglike_polys = struct_liglike_ids(struct_profile_handle)
+    ligands       = struct_ligand_ids(PDBID, struct_profile_handle)
 
     pprint(ligands)
     pprint(liglike_polys)

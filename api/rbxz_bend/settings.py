@@ -2,8 +2,14 @@ import datetime
 import os
 import logging.handlers
 import logging
+import sys
 import typing
 
+SECRET_KEY = 'ju=n4om3z00jd1+y2(ufn)g^@w-dj*&-45&4yd1_aiun50b6by'
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+sys.path.append(os.path.abspath(os.path.join(BASE_DIR,'ribctl'))) # hack until ribctl is a separate pypi project
+sys.path.append(os.path.abspath(os.path.join(BASE_DIR,'ribctl','lib'))) # hack until ribctl is a separate pypi project
 
 class DatedRotatingFileHandler(logging.handlers.RotatingFileHandler):
     """
@@ -35,8 +41,6 @@ def get_logger(loggername: LOGGERS )-> logging.Logger:
         
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'ju=n4om3z00jd1+y2(ufn)g^@w-dj*&-45&4yd1_aiun50b6by'
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # this should be either docker-mounted or populated through the utils module
 RIBETL_DATA = os.environ["RIBETL_DATA"] if os.environ["RIBETL_DATA"] else os.path.join(
 
@@ -44,8 +48,27 @@ RIBETL_DATA = os.environ["RIBETL_DATA"] if os.environ["RIBETL_DATA"] else os.pat
 # ※ Dont' forget to export pymol path ( we want to ship a built pymol, but python needs to be aware of it)
 # export PYMOL_PATH=/home/rxz/dev/pymol3.11 && export PYTHONPATH="$PYTHONPATH:$PYMOL_PATH/modules/:"
 
-RCSB_SYNC_LOG = os.path.join(BASE_DIR, 'logs', 'rcsb_sync.log')
-vars = ["NEO4J_URI", "NEO4J_USER", "NEO4J_PASSWORD","NEO4J_CURRENTDB", "RIBETL_DATA"]
+
+
+def get_ribxz_logger(loggername: typing.Literal['rcsb_sync','computations'])->logging.Logger:
+
+        logdict = { 
+            'rcsb_sync': os.path.join(BASE_DIR, 'logs', 'rcsb_sync.log'),
+            'computations': os.path.join(BASE_DIR, 'logs', 'computations.log')
+         }
+
+        logger = logging.getLogger(__name__)
+        logger.setLevel(logging.DEBUG)
+        file_handler = logging.FileHandler(logdict[loggername])
+        file_handler.setLevel(logging.DEBUG)
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        file_handler.setFormatter(formatter)
+        logger.addHandler(file_handler)
+        return logger
+
+
+
+vars          = ["NEO4J_URI", "NEO4J_USER", "NEO4J_PASSWORD","NEO4J_CURRENTDB", "RIBETL_DATA"]
 print(" ---------------------------------------------- App has been reset. -----------------------------------------------")
 for var in vars:
     # print("Environment variable {}:\t{}".format( var, os.getenv(var) ))
