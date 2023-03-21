@@ -1,6 +1,6 @@
 import dataclasses
 import json
-import os,sys
+import os
 from pprint import pprint
 from typing import Dict, List
 import operator
@@ -15,101 +15,10 @@ from dataclasses import dataclass, field
 import itertools
 from ribctl.lib import RIBETL_DATA
 from ribctl.lib import utils
+from ribctl.lib.types.ligands.types_binding_site import BindingSite, ResidueSummary
 
 flatten = itertools.chain.from_iterable
 
-def __get_dict(path:str,)->dict:
-	return MMCIF2Dict.MMCIF2Dict(path)
-
-AMINO_ACIDS = {
-    "ALA": 0,
-    'ARG': 1,
-    'ASN': 0,
-    'ASP': -1,
-    'CYS': 0,
-    'GLN': 0,
-    'GLU': -1,
-    'GLY': 0,
-    'HIS': 0,
-    'ILE': 0,
-    'LEU': 0,
-    'LYS': 1,
-    'MET': 0,
-    'PHE': 0,
-    'PRO': 0,
-    'SER': 0,
-    'THR': 0,
-    'TRP': 0,
-    'TYR': 0,
-    'VAL': 0,
-    'SEC': 0,
-    'PYL': 0
-    }
-NUCLEOTIDES = ['A', 'T', 'C', 'G', 'U']
-
-
-def __open_ligand(pdbid: str, ligid: str, ligpath: str |None = None):
-    pdbid = pdbid.upper()
-    ligid = ligid.upper()
-
-    if ligpath == None:
-        ligpath = os.path.join(RIBETL_DATA, pdbid, f'LIGAND_{ligid}.json')
-    with open(ligpath, 'rb') as infile:
-        data = json.load(infile)
-    return data
-
-@dataclass(unsafe_hash=True, order=True)
-class ResidueLite:
-
-    residue_name        : str = field(hash=True, compare=False)
-    residue_id          : int = field(hash=True, compare=True)
-    parent_auth_asym_id : str  = field(hash=True, compare=False)
-
-    @staticmethod
-    def res2reslite(r: Residue):
-        biopy_id_tuple = r.get_full_id()
-        parent_chain   = biopy_id_tuple[2]
-        resname        = r.resname
-        resid          = r.id[1]
-
-        return ResidueLite(resname, resid, parent_chain)
-
-@dataclass(unsafe_hash=True, order=True)
-class BindingSiteChain: 
-
-      sequence     : str                = field(hash=True, compare=False)
-      nomenclature : list[str]          = field(hash=True, compare=False)
-      asym_ids     : list[str]          = field(hash=True, compare=False)
-      auth_asym_id : str                = field(hash=True, compare=False)
-      residues    : list[ ResidueLite ] = field(hash=True, compare=False)
-
-class BindingSite:
-
-    def __init__(self, data: Dict[str, BindingSiteChain]) -> None:
-        self.data: Dict[str, BindingSiteChain] = data
-
-    def __getitem__(self, chainkey:str)->BindingSiteChain:
-        if chainkey not in self.data:
-            raise KeyError(f"Chain {chainkey} not found in the binding site.")
-        return self.data[chainkey]
-
-    def to_json(self, pathtofile: str) -> None:
-        with open(pathtofile, 'w') as outf:
-            serialized = {}
-            for x in self.data.items():
-                serialized.update({x[0]: dataclasses.asdict(x[1])})
-            json.dump(serialized, outf)
-            print(f"Saved  \033[91m{pathtofile}\033[0m.")
-
-    def to_csv(self, pathtofile: str) -> None:
-        k = [
-            "chainname",
-            "nomenclature",
-            "residue_id",
-            "residue_name"
-        ]
-
-        serialized = dict.fromkeys(k, [])
 
 #TODO: Replace this with an actual polymer class.
 @dataclass(unsafe_hash=True, order=True)
@@ -193,16 +102,25 @@ def __get_ligand_nbrs(
 
     # ? Filtering phase
     # Convert residues to the dataclass (hashable), filter non-unique
-    nbr_residues = list(set([* map(ResidueLite.res2reslite, nbr_residues)]))
+    print("residues look thus:",nbr_residues)
+
+    for n in nbr_residues:
+        print(" id :", n.get_id())
+        print(" id :", n.resname)
+    nbr_residues = list(set([* map(ResidueSummary.from_biopython_residue, nbr_residues)]))
+    pprint(nbr_residues)
+    
 
     # Filter the ligand itself, water and other special residues
-    nbr_residues = list(filter(lambda resl: resl.residue_name in [*AMINO_ACIDS.keys(),  *NUCLEOTIDES], nbr_residues))
+    nbr_residues = list(filter(lambda resl: resl.resname in [*AMINO_ACIDS.keys(),  *NUCLEOTIDES], nbr_residues))
     nbr_dict     = {}
-    chain_names  = list(set(map(lambda _:  _.parent_auth_asym_id, nbr_residues)))
+    chain_names  = list(set(map(lambda _:  _.get_parent_auth_asym_id(), nbr_residues)))
+    
 
     for c in chain_names:
         for poly_entity in poly_entities:
             if c == poly_entity['auth_asym_id']:
+
                     nomenclature = poly_entity['nomenclature']
                     asym_ids     = poly_entity['asym_ids']
                     auth_asym_id = poly_entity['auth_asym_id']
@@ -213,8 +131,10 @@ def __get_ligand_nbrs(
                         nomenclature,
                         asym_ids,
                         auth_asym_id,
-                        sorted([residue for residue in nbr_residues if residue.parent_auth_asym_id == c], key=operator.attrgetter('residue_id')))
-
+                        sorted(
+                            [residue for residue in nbr_residues if residue.get_parent_auth_asym_id() == c],
+                            key=operator.attrgetter('seqid')
+                        ))
 
     return BindingSite(nbr_dict)
 

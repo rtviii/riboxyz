@@ -1,6 +1,5 @@
 import json
 import os
-from neo4j import Driver
 from pydantic import parse_obj_as
 from ribctl.lib import RIBETL_DATA
 from ribctl.lib.types.types_ribosome import RibosomeStructure
