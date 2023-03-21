@@ -512,7 +512,7 @@ with n.rcsb_id as struct, collect(r.rcsb_pdbx_description) as rnas
 
     def sync_with_rcsb(self, workers:int)->None:
 
-        logger = get_ribxz_logger(loggername="rcsb_sync")
+        logger = get_ribxz_logger(logname="rcsb_sync")
 
         synced   = self.get_all_structs()
         unsynced = sorted(current_rcsb_structs())

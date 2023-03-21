@@ -13,27 +13,39 @@ class App:
         for file in os.listdir(RIBETL_DATA):
             if len(file) == 4 and os.path.isdir(os.path.join(RIBETL_DATA,file)) :
                 PDBID = file
-                logger = get_ribxz_logger('computations')
+                logger = get_ribxz_logger('computations', __name__)
 
                 _structure_cif_handle :Structure = utils.open_structure(PDBID,'cif')  # type: ignore
                 struct_profile_handle:dict       = utils.open_structure(PDBID,'json')  # type: ignore
 
                 liglike_polys = struct_liglike_ids(struct_profile_handle)
                 ligands       = struct_ligand_ids(PDBID, struct_profile_handle)
+
                 print("Found ligands in {}: {}.".format(PDBID, ligands))
-                print("Found ligandlike polymers in {}: {}.".format(PDBID, liglike_polys))
+                for lig in ligands:
+                    print(lig)
+                print("Found ligandlike polymers in {}:".format(PDBID))
+                for polyref in liglike_polys:
+                    print(polyref)
+
                 print("Rendering to file.")
 
                 for polyref in liglike_polys:
+
                     try:
                         render_liglike_polymer(polyref.parent_rcsb_id, polyref.auth_asym_id, _structure_cif_handle, True)
+                        logger.info("Rendered liglike polymer {} in {}.".format(polyref.auth_asym_id, polyref.parent_rcsb_id))
+
                     except Exception as e:
                         logger.info("Error rendering liglike polymer {} in {}.".format(polyref.auth_asym_id, polyref.parent_rcsb_id))
                         logger.error(e)
 
                 for l in ligands:
+
                     try:
                         render_ligand(PDBID, l[0], _structure_cif_handle, True)
+                        logger.info("Rendered ligand {} in {}.".format(l[0], PDBID))
+
                     except Exception as e:
                         logger.info("Error rendering ligand {} in {}.".format(l[0], PDBID))
                         logger.error(e)

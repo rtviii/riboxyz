@@ -50,16 +50,16 @@ RIBETL_DATA = os.environ["RIBETL_DATA"] if os.environ["RIBETL_DATA"] else os.pat
 
 
 
-def get_ribxz_logger(loggername: typing.Literal['rcsb_sync','computations'])->logging.Logger:
+def get_ribxz_logger(logname: typing.Literal['rcsb_sync','computations'], callee:str)->logging.Logger:
 
         logdict = { 
-            'rcsb_sync': os.path.join(BASE_DIR, 'logs', 'rcsb_sync.log'),
+            'rcsb_sync'   : os.path.join(BASE_DIR, 'logs', 'rcsb_sync.log'),
             'computations': os.path.join(BASE_DIR, 'logs', 'computations.log')
          }
 
-        logger = logging.getLogger(__name__)
+        logger = logging.getLogger(callee)
         logger.setLevel(logging.DEBUG)
-        file_handler = logging.FileHandler(logdict[loggername])
+        file_handler = logging.FileHandler(logdict[logname])
         file_handler.setLevel(logging.DEBUG)
         formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
         file_handler.setFormatter(formatter)
@@ -69,6 +69,7 @@ def get_ribxz_logger(loggername: typing.Literal['rcsb_sync','computations'])->lo
 
 
 vars          = ["NEO4J_URI", "NEO4J_USER", "NEO4J_PASSWORD","NEO4J_CURRENTDB", "RIBETL_DATA"]
+
 print(" ---------------------------------------------- App has been reset. -----------------------------------------------")
 for var in vars:
     # print("Environment variable {}:\t{}".format( var, os.getenv(var) ))
