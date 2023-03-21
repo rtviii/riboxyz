@@ -1,5 +1,7 @@
+from pprint import pprint
 import typing
-from ninja import Router
+from django.forms import ValidationError
+from ninja import Router, Schema
 from ribctl.lib.types.types_polymer import RNAClass
 from ribctl.lib.types.types_ribosome import ExogenousRNAByStruct, ProteinClass, RibosomeStructure
 from schema.v0 import BanClassMetadata, LigandInstance, LigandlikeInstance, NeoStruct, NomenclatureClass, NomenclatureClassMember
@@ -7,9 +9,13 @@ from rbxz_bend.application import db_connection
 
 v0 = Router()
 
-@v0.get('/get_all_structures', response=list[NeoStruct], tags=['Structure'])
+
+
+
+@v0.get('/get_all_structures',  tags=['Structure'], )
 def get_all_structures(request,):
     return db_connection.get_all_structures()
+
 
 @v0.get('/get_struct', response=NeoStruct, tags=['Structure'])
 def get_struct(request,rcsb_id:str):
