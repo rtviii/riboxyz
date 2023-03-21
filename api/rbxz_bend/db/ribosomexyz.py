@@ -67,8 +67,6 @@ class ribosomexyzDB():
 
         print("[INIT]: Done with constraints and classes. >>>Sync with RCSB PDB is manual<<<")
 
-
-
     def __init__(self, uri: str, user: str, password: str) -> None:
         self.uri      = uri
         self.user     = user
@@ -78,6 +76,7 @@ class ribosomexyzDB():
             self.initialize_new_instance()
         except AuthError as ae:
             ...
+
         self.driver = GraphDatabase.driver(uri, auth=(user, password))
 
 
