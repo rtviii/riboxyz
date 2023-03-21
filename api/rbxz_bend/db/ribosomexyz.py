@@ -1,6 +1,7 @@
 from concurrent.futures import ALL_COMPLETED, Future, ThreadPoolExecutor, wait
 import logging
 import typing
+from neo4j.exceptions import AuthError
 from pyparsing import Any
 from neo4j import Driver, GraphDatabase
 from ribctl.lib.struct_rcsb_api import current_rcsb_structs
@@ -40,7 +41,6 @@ NODE_CONSTRAINTS = [
 # the system database in the current session, and then restart your driver with the new password configured.
 
 class ribosomexyzDB():
-
     driver: Driver
     uri: str
     password: str
@@ -75,13 +75,11 @@ class ribosomexyzDB():
         self.password = password
         try:
             self.change_default_pass()
-        except Exception as e:
-            print(e)
+            self.initialize_new_instance()
+        except AuthError as ae:
             ...
-
         self.driver = GraphDatabase.driver(uri, auth=(user, password))
 
-        self.initialize_new_instance()
 
 
 
@@ -446,6 +444,14 @@ class ribosomexyzDB():
             def _(tx: Transaction | ManagedTransaction):
                 return tx.run("""//
                 match (n:Protein) return count(n)
+                    """).value()[0]
+            return session.read_transaction(_)
+
+    def number_of_structures(self) -> int:
+        with self.driver.session() as session:
+            def _(tx: Transaction | ManagedTransaction):
+                return tx.run("""//
+                match (n:RibosomeStructure) return count(n)
                     """).value()[0]
             return session.read_transaction(_)
 
