@@ -7,7 +7,7 @@ from rbxz_bend.settings import get_logger
 from ribctl.lib.struct_rcsb_api import current_rcsb_structs
 from ribctl.lib.types.types_ribosome_assets import RibosomeAssets
 from rbxz_bend.db.ribosomexyz import ribosomexyzDB
-from rbxz_bend.application import db_connection 
+from rbxz_bend.application import db_connection, ribosomexyzApp
 from rbxz_bend.settings import NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER
 
 test = Router()
@@ -19,9 +19,11 @@ def current_auth(request):
 @test.get('/see_constraints', tags=['0test'])
 def see_constraints(request):
     return db_connection.see_constraints()
-@test.get('/empty_db_query', tags=['0test'], )
-def any_test(request):
-    return db_connection.get_any()
+
+
+@test.get('/render_ligands', tags=['0test'], )
+def render_ligands(request):
+    return ribosomexyzApp.render_all_ligands()
 
 @test.get('/log_test',tags=['0test']  )
 def log_test(request):

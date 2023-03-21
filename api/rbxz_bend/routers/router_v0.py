@@ -23,9 +23,8 @@ def get_all_structures(request,):
 @v0.get('/get_struct', 
         # response=NeoStruct, # TODO: validate
         tags=['Structure']
-        
-        
         )
+
 def get_struct(request,rcsb_id:str):
     return db_connection.get_struct(rcsb_id.upper())
 

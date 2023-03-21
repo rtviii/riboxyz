@@ -8,7 +8,7 @@ from ribctl.lib.utils import download_unpack_place, open_structure
 from ribctl.lib.struct_render_thumbnail import render_thumbnail
 from ribctl.lib.struct_rcsb_api import process_pdb_record
 from ribctl.lib.struct_split_rename import split_rename
-from ribctl.lib.struct_extract_bsites import get_ligands, get_liglike_polymers, render_ligand, render_liglike_polymer
+from ribctl.lib.struct_extract_bsites import struct_ligand_ids, struct_liglike_ids, render_ligand, render_liglike_polymer
 
 
 
@@ -119,8 +119,8 @@ class RibosomeAssets():
         def ligand_path(chem_id):            return os.path.join(self._dir_path(), f"LIGAND_{chem_id.upper()}.json")
         def liglike_poly_path(auth_asym_id): return os.path.join(self._dir_path(), f"POLYMER_{auth_asym_id.upper()}.json")
 
-        ligands             = get_ligands(self.rcsb_id, self.json_profile())
-        ligandlike_polymers = get_liglike_polymers(self.json_profile())
+        ligands             = struct_ligand_ids(self.rcsb_id, self.json_profile())
+        ligandlike_polymers = struct_liglike_ids(self.json_profile())
 
         _flag = True
 
