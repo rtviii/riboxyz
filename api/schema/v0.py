@@ -7,6 +7,9 @@ from ribctl.lib.types.types_ribosome import Ligand, Protein, ProteinClass, Ribos
 """This file documents the possible requests that the API can receive."""
 
 
+class ExogenousRNAByStruct(Schema):
+    struct: str
+    rnas: list[str]
 
 class LigandByStructInstance(Schema):
      chemid: str
