@@ -12,8 +12,6 @@ from ribctl.lib.struct_extract_bsites import struct_ligand_ids, struct_liglike_i
 
 
 
-
-
 class RibosomeAssets():
     rcsb_id: str
 

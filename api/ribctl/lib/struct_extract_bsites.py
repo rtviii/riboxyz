@@ -77,12 +77,11 @@ class ResidueLite:
 @dataclass(unsafe_hash=True, order=True)
 class BindingSiteChain: 
 
-      sequence        : str = field(hash=True, compare=False)
-      nomenclature    : list[str]= field(hash=True, compare=False)
-      asym_ids        : list[str]= field(hash=True, compare=False)
-      auth_asym_id    : str= field(hash=True, compare=False)
-
-      residues: list[ ResidueLite ]         = field(hash=True, compare=False)
+      sequence     : str                = field(hash=True, compare=False)
+      nomenclature : list[str]          = field(hash=True, compare=False)
+      asym_ids     : list[str]          = field(hash=True, compare=False)
+      auth_asym_id : str                = field(hash=True, compare=False)
+      residues    : list[ ResidueLite ] = field(hash=True, compare=False)
 
 class BindingSite:
 
@@ -279,20 +278,6 @@ def render_ligand(rcsb_id:str,chemicalId:str, structure:Structure, save:bool=Fal
 
     return binding_site_ligand
 
-# def run(rcsb_id):
-#     PDBID = rcsb_id.upper()
-
-#     _structure_cif_handle :Structure = open_structure(PDBID,'cif')  # type: ignore
-#     struct_profile_handle:dict       = open_structure(PDBID,'json')  # type: ignore
-
-#     liglike_polys = struct_liglike_ids(struct_profile_handle)
-#     ligands       = struct_ligand_ids(PDBID, struct_profile_handle)
-
-#     for polyref in liglike_polys:
-#         render_liglike_polymer(polyref.parent_rcsb_id, polyref.auth_asym_id, _structure_cif_handle, args.save)
-
-#     for l in ligands:
-#         render_ligand(PDBID, l[0], _structure_cif_handle, args.save)
 
 
 if __name__ == "__main__":

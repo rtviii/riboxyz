@@ -3,8 +3,8 @@ import typing
 from django.forms import ValidationError
 from ninja import Router, Schema
 from ribctl.lib.types.types_polymer import RNAClass
-from ribctl.lib.types.types_ribosome import ExogenousRNAByStruct, ProteinClass, RibosomeStructure
-from schema.v0 import BanClassMetadata, LigandInstance, LigandlikeInstance, NeoStruct, NomenclatureClass, NomenclatureClassMember
+from ribctl.lib.types.types_ribosome import  ProteinClass, RibosomeStructure
+from schema.v0 import BanClassMetadata, ExogenousRNAByStruct,LigandInstance, LigandlikeInstance, NeoStruct, NomenclatureClass, NomenclatureClassMember
 from rbxz_bend.application import db_connection
 
 v0 = Router()
