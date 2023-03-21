@@ -41,21 +41,46 @@ NODE_CONSTRAINTS = [
 
 class ribosomexyzDB():
 
-    driver: Driver
+    driver   : Driver
+    uri      : str
+    password : str
+    user     : str
+    databases: list[str]
+
+
+    def initialize_new_instance(self):
+        with GraphDatabase.driver(self.uri, auth=("neo4j", "neo4j")).session(database='system') as s:
+            s.run("""ALTER CURRENT USER SET PASSWORD FROM "neo4j" TO "ribosomexyz";""")
+            print("[INIT]:Changed the default Neo4j password. Initializing new database instance")
+
+            self.__init_constraints()
+            print("[INIT]: Initialized constraints.")
+       
+            self.__init_protein_classes()
+            print("[INIT]: Initialized protein classes.")
+
+            self.__init_rna_classes()
+            print("[INIT]: Initialized rna classes.")
+
+            print("[INIT]: Done with constraints and classes. Sync with RCSB PDB is manual.")
+
+
+
 
     def __init__(self, uri: str, user: str, password: str) -> None:
-        """hack for automatically changing the first-boot password. if we ever get multiple users for neo4j, will worry about this."""
+
         self.driver = GraphDatabase.driver(uri, auth=(user, password))
         try:
-            with self.driver.session(database='system') as s:
-                s.run("show users")
+            self.initialize_new_instance()
         except Exception as e:
-            print(
-                "Failed to initialize the database connection. Perhaps change the default password.")
-            with GraphDatabase.driver(uri, auth=("neo4j", "neo4j")).session(database='system') as s:
-                s.run(
-                    """ALTER CURRENT USER SET PASSWORD FROM "neo4j" TO "ribosomexyz";""")
-                print("Changed the default Neo4j password.")
+            self.driver = GraphDatabase.driver(uri, auth=(user, password))
+
+
+
+    
+
+
+
 
     def see_current_auth(self):
         print("see_current_auth")
@@ -99,20 +124,7 @@ class ribosomexyzDB():
         self.__init_protein_classes()
         self.__init_rna_classes()
 
-    def __init_constraints(self) -> None:
-        with self.driver.session() as s:
-            for c in NODE_CONSTRAINTS:
-                s.write_transaction(lambda tx: tx.run(c))
-
-    def __init_protein_classes(self):
-        with self.driver.session() as s:
-            for protein_class in [*list_LSU_Proteins, *  list_SSU_Proteins]:
-                s.execute_write(node__protein_class(protein_class))
-
-    def __init_rna_classes(self,):
-        with self.driver.session() as s:
-            for rna_class in list_RNAClass:
-                s.execute_write(node__rna_class(rna_class))
+        # TODO : Ligand classes
 
     def add_structure(self, struct_assets: RibosomeAssets):
 
@@ -452,9 +464,9 @@ with n.rcsb_id as struct, collect(r.rcsb_pdbx_description) as rnas
     def get_rna_class(self, class_id: RNAClass) -> list[NomenclatureClassMember]:
         with self.driver.session() as session:
             def _(tx: Transaction | ManagedTransaction):
-                return [rna[0] for rna in tx.run("""//
+                return [ rna[0] for rna in tx.run("""//
                     match (c:RNAClass { class_id:$RNA_CLASS })-[]-(n)-[]-(rib:RibosomeStructure)
-        with {
+            with {
             parent_year                         : rib.citation_year                    ,
             parent_resolution                   : rib.resolution                       ,
             parent_citation                     : rib.citation_title                   ,
@@ -483,10 +495,11 @@ with n.rcsb_id as struct, collect(r.rcsb_pdbx_description) as rnas
             entity_poly_polymer_type            : n.entity_poly_polymer_type           ,
             entity_poly_entity_type             : n.entity_poly_entity_type            ,
 
-            nomenclature                        : [c.class_id]                           ,
+            nomenclature                        : [c.class_id]                         ,
             ligand_like                         : n.ligand_like                        
         } as rna
         return rna""", {"RNA_CLASS": class_id}).values('rna')]
+
             return session.read_transaction(_)
 
     def sync_with_rcsb(self, workers:int)->None:
@@ -528,3 +541,18 @@ with n.rcsb_id as struct, collect(r.rcsb_pdbx_description) as rnas
 
 
         logger.info("Finished syncing with RCSB")
+
+    def __init_constraints(self) -> None:
+        with self.driver.session() as s:
+            for c in NODE_CONSTRAINTS:
+                s.write_transaction(lambda tx: tx.run(c))
+
+    def __init_protein_classes(self):
+        with self.driver.session() as s:
+            for protein_class in [*list_LSU_Proteins, *  list_SSU_Proteins]:
+                s.execute_write(node__protein_class(protein_class))
+
+    def __init_rna_classes(self,):
+        with self.driver.session() as s:
+            for rna_class in list_RNAClass:
+                s.execute_write(node__rna_class(rna_class))
