@@ -12,12 +12,20 @@ v0 = Router()
 
 
 
-@v0.get('/get_all_structures',  tags=['Structure'], )
+@v0.get('/get_all_structures',tags=['Structure'], 
+        # response=list[NeoStruct]
+        # TODO: validate
+        )
 def get_all_structures(request,):
     return db_connection.get_all_structures()
 
 
-@v0.get('/get_struct', response=NeoStruct, tags=['Structure'])
+@v0.get('/get_struct', 
+        # response=NeoStruct, # TODO: validate
+        tags=['Structure']
+        
+        
+        )
 def get_struct(request,rcsb_id:str):
     return db_connection.get_struct(rcsb_id.upper())
 
@@ -25,7 +33,9 @@ def get_struct(request,rcsb_id:str):
 def get_full_structure(request,rcsb_id:str):
     return db_connection.get_struct(rcsb_id.upper())
 
-@v0.get('/get_all_ligands', response=list[NeoStruct], tags=['Ligand'])
+@v0.get('/get_all_ligands', 
+        # response=list[NeoStruct],
+          tags=['Ligand'])
 def get_all_ligands(request,):
     return db_connection.get_all_ligands()
 
