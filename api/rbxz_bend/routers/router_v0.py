@@ -42,7 +42,6 @@ def match_structs_w_proteins(request,has_proteins:list[ProteinClass]):
 @v0.get('/get_banclass_for_chain', response=list[ProteinClass], tags=['Classification'])
 def get_banclass_for_chain(request,rcsb_id:str, auth_asym_id:str):
     return db_connection.get_banclass_for_chain(rcsb_id,auth_asym_id)
-    
 
 @v0.get('/get_banclasses_metadata', response=list[BanClassMetadata], tags=['Classification'])
 def get_banclasses_metadata(request,family:typing.Literal['b','e','u'], subunit:typing.Literal['SSU', 'LSU']):
@@ -59,6 +58,10 @@ def gmo_nom_class(request,class_id:ProteinClass):
 @v0.get('/proteins_number', response=int, tags=['Protein'])
 def proteins_number(request):
     return db_connection.proteins_number()
+
+@v0.get('/number_of_structures', response=int, tags=['Structure'])
+def number_of_structures(request):
+    return db_connection.number_of_structures()
 
 @v0.get('/get_rnas_by_struct', response=list[ExogenousRNAByStruct], tags=['RNA'])
 def get_rnas_by_struct(request):
