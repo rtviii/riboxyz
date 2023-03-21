@@ -525,11 +525,13 @@ with n.rcsb_id as struct, collect(r.rcsb_pdbx_description) as rnas
         logger.info("Started syncing with RCSB") 
 
 
-        def log_commit_result(f:Future):
-            if not None == f.exception():
-                logger.error(f.exception())
-            else:
-                logger.debug(f.result())
+        def log_commit_result( rcsb_id:str):
+            def _(f:Future):
+                if not None == f.exception():
+                    logger.error(rcsb_id + ":" +f.exception().__str__())
+                else:
+                    logger.debug(rcsb_id + ":" + f.result().__str__())
+            return _
 
 
         with ThreadPoolExecutor(max_workers=workers) as executor:
@@ -538,11 +540,10 @@ with n.rcsb_id as struct, collect(r.rcsb_pdbx_description) as rnas
                 assets = RibosomeAssets(rcsb_id)
                 assets._verify_json_profile(True)
                 fut = executor.submit(self.add_structure, assets)
-                fut.add_done_callback(log_commit_result)
+                fut.add_done_callback(log_commit_result(rcsb_id))
                 futures.append(fut)
 
         wait(futures, return_when=ALL_COMPLETED)
-
 
         logger.info("Finished syncing with RCSB")
 
