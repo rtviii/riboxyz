@@ -41,43 +41,47 @@ NODE_CONSTRAINTS = [
 
 class ribosomexyzDB():
 
-    driver   : Driver
-    uri      : str
-    password : str
-    user     : str
+    driver: Driver
+    uri: str
+    password: str
+    user: str
     databases: list[str]
 
 
-    def initialize_new_instance(self):
+    def change_default_pass(self):
         with GraphDatabase.driver(self.uri, auth=("neo4j", "neo4j")).session(database='system') as s:
             s.run("""ALTER CURRENT USER SET PASSWORD FROM "neo4j" TO "ribosomexyz";""")
-            print("[INIT]:Changed the default Neo4j password. Initializing new database instance")
 
-            self.__init_constraints()
-            print("[INIT]: Initialized constraints.")
-       
-            self.__init_protein_classes()
-            print("[INIT]: Initialized protein classes.")
+        print("[INIT]:Changed the default Neo4j password. Initializing new database instance")
 
-            self.__init_rna_classes()
-            print("[INIT]: Initialized rna classes.")
+    def initialize_new_instance(self):
 
-            print("[INIT]: Done with constraints and classes. Sync with RCSB PDB is manual.")
+        self.__init_constraints()
+        print("[INIT]: Initialized constraints.")
+   
+        self.__init_protein_classes()
+        print("[INIT]: Initialized protein classes.")
 
+        self.__init_rna_classes()
+        print("[INIT]: Initialized rna classes.")
+
+        print("[INIT]: Done with constraints and classes. >>>Sync with RCSB PDB is manual<<<")
 
 
 
     def __init__(self, uri: str, user: str, password: str) -> None:
+        self.uri      = uri
+        self.user     = user
+        self.password = password
+        try:
+            self.change_default_pass()
+        except Exception as e:
+            print(e)
+            ...
 
         self.driver = GraphDatabase.driver(uri, auth=(user, password))
-        try:
-            self.initialize_new_instance()
-        except Exception as e:
-            self.driver = GraphDatabase.driver(uri, auth=(user, password))
 
-
-
-    
+        self.initialize_new_instance()
 
 
 
@@ -119,10 +123,10 @@ class ribosomexyzDB():
             match (n) return n limit 10;
             """).data())
 
-    def init_db(self):
-        self.__init_constraints()
-        self.__init_protein_classes()
-        self.__init_rna_classes()
+    # def init_db(self,driver):
+    #     self.__init_constraints(di)
+    #     self.__init_protein_classes()
+    #     self.__init_rna_classes()
 
         # TODO : Ligand classes
 
@@ -552,7 +556,7 @@ with n.rcsb_id as struct, collect(r.rcsb_pdbx_description) as rnas
             for protein_class in [*list_LSU_Proteins, *  list_SSU_Proteins]:
                 s.execute_write(node__protein_class(protein_class))
 
-    def __init_rna_classes(self,):
+    def __init_rna_classes(self):
         with self.driver.session() as s:
             for rna_class in list_RNAClass:
                 s.execute_write(node__rna_class(rna_class))
