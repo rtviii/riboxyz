@@ -9,34 +9,36 @@ from Bio.PDB import FastMMCIFParser
 
 from ribctl.lib import RIBETL_DATA
 
+
 def download_unpack_place(struct_id: str) -> None:
 
     BASE_URL = "http://files.rcsb.org/download/"
-    FORMAT   = ".cif.gz"
+    FORMAT = ".cif.gz"
 
-    structid           = struct_id.upper()
-    url                = BASE_URL + structid + FORMAT
-    compressed         = requests.get(url).content
-    decompressed       = gzip.decompress(compressed)
+    structid = struct_id.upper()
+    url = BASE_URL + structid + FORMAT
+    compressed = requests.get(url).content
+    decompressed = gzip.decompress(compressed)
 
     destination_chains = os.path.join(
-            os.environ["RIBETL_DATA"],
-            structid,
-            "CHAINS"
-        )
+        os.environ["RIBETL_DATA"],
+        structid,
+        "CHAINS"
+    )
 
     if not os.path.exists(destination_chains):
         os.mkdir(destination_chains)
         print(f"Created directory {destination_chains}.")
 
     structfile = os.path.join(
-            os.environ["RIBETL_DATA"],
-            structid,
-            structid + ".cif"
-        )
+        os.environ["RIBETL_DATA"],
+        structid,
+        structid + ".cif"
+    )
 
     with open(structfile, "wb") as f:
         f.write(decompressed)
+
 
 def struct_path(pdbid: str, pftype: typing.Literal["cif", "json", "modified"]):
     if pftype == 'cif':
@@ -46,9 +48,18 @@ def struct_path(pdbid: str, pftype: typing.Literal["cif", "json", "modified"]):
     elif pftype == 'modified':
         return os.path.join(RIBETL_DATA, pdbid.upper(), f"{pdbid.upper()}_modified.cif")
     else:
-        raise ValueError("Invalid path type. Must be 'cif', 'json', or 'modified' ")
+        raise ValueError(
+            "Invalid path type. Must be 'cif', 'json', or 'modified' ")
 
-def open_structure(pdbid: str, path_type: typing.Literal[ "cif", "json", "modified"])->Structure|typing.Any:
+
+def ligand_path(pdbid: str, ligand_id: str, lig_type: typing.Literal["LIGAND", "POLYMER"]):
+    return os.path.join(RIBETL_DATA, pdbid.upper(),  "{}_{}.json".format(
+        "LIGAND" if lig_type == 'LIGAND' else "POLYMER",
+        ligand_id
+    ))
+
+
+def open_structure(pdbid: str, path_type: typing.Literal["cif", "json", "modified"]) -> Structure | typing.Any:
     pdbid = pdbid.upper()
     if path_type == 'cif':
         cifpath = struct_path(pdbid, 'cif')

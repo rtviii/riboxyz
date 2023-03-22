@@ -117,13 +117,30 @@ def open_bsite(path:str)->BindingSite:
 		data = json.load(infile)
 	return BindingSite(nbr_chains=data)
 
+class PredictedResiduesPolymer(BaseModel):
+	class PredictionSource(BaseModel):
+		src: str
+		src_ids: list[int]
+		auth_asym_id: str
+	class PredictionTarget(BaseModel):
+		tgt: str
+		tgt_ids: list[int]
+		auth_asym_id: str
+	class PredictionAlignments(BaseModel):
+		aln_ids: list[int]
+		src_aln: str
+		tgt_aln: str
+
+	source   : PredictionSource
+	target   : PredictionTarget
+	alignment: PredictionAlignments
 	
 def init_transpose_ligand(
 	# source_struct: str,
 	# target_struct: str,
 	target_profile:RibosomeStructure,
 	binding_site : BindingSite
-	)->dict: 
+	)->dict[PolymerClass, PredictedResiduesPolymer]: 
 
 	by_class_origin_polymers:dict[PolymerClass, dict] = {}
 
@@ -178,7 +195,7 @@ def init_transpose_ligand(
 
 
 
-		prediction[nomenclature_class] = {
+		prediction[nomenclature_class] = PredictedResiduesPolymer.parse_obj({
 			"source":{
 				"src"         : src,
 				"src_ids"     : src_ids,
@@ -194,7 +211,7 @@ def init_transpose_ligand(
 				"src_aln": src_aln,
 				"tgt_aln": tgt_aln,
 			},
-		}
+		})
 
 	return prediction
 
