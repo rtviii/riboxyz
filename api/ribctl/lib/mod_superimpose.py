@@ -47,12 +47,12 @@ def ranged_super_by_polyclass(
     for chain in itertools.chain(json_src.proteins, json_src.rnas if json_src.rnas else []):
         if poly_class in chain.nomenclature:
             seq_ids["src_auth_asym_id"] = chain.auth_asym_id
-            seq_ids["src_seq"]          = chain.entity_poly_seq_one_letter_code
+            seq_ids["src_seq"] = chain.entity_poly_seq_one_letter_code
 
     for chain in itertools.chain(json_tgt.proteins, json_tgt.rnas if json_tgt.rnas else []):
         if poly_class in chain.nomenclature:
             seq_ids["tgt_auth_asym_id"] = chain.auth_asym_id
-            seq_ids["tgt_seq"]          = chain.entity_poly_seq_one_letter_code
+            seq_ids["tgt_seq"] = chain.entity_poly_seq_one_letter_code
 
     if len(seq_ids["src_seq"]) < 1 or len(seq_ids["tgt_seq"]) < 1:
         print("""Could not retrieve either of the arguments:
@@ -81,10 +81,10 @@ def ranged_super_by_polyclass(
     print(sm.hl_ixs(sm.tgt, sm.tgt_ids))
 
     return (seq_ids["src_auth_asym_id"],
-        src_chain_path, 
+            src_chain_path,
             source_range,
             seq_ids["tgt_auth_asym_id"],
-             tgt_chain_path, target_range)
+            tgt_chain_path, target_range)
 
 
 def ranged_super(
@@ -98,7 +98,6 @@ def ranged_super(
     """Return a bundle of path + mapped range for a source and a target structure
     for a given polymer class. Feed this into pymol 
     to chop up on the ranges and superimpose resultant snippets."""
-
 
     rstart, rend = rng
 
@@ -155,37 +154,44 @@ def pymol_super(
     target_auth_asym_id: str,
 ):
 
-    source_chain_path = os.path.join(RIBETL_DATA, 
-                                     source_rcsb_id.upper(), 
-                                     "CHAINS", 
-                                     "{}_STRAND_{}.cif".format(source_rcsb_id.upper(), 
+    source_chain_path = os.path.join(RIBETL_DATA,
+                                     source_rcsb_id.upper(),
+                                     "CHAINS",
+                                     "{}_STRAND_{}.cif".format(source_rcsb_id.upper(),
                                                                source_auth_asym_id))
 
-    target_chain_path = os.path.join(RIBETL_DATA, 
-                                     target_rcsb_id.upper(), 
-                                     "CHAINS", 
-                                     "{}_STRAND_{}.cif".format(target_rcsb_id.upper(), 
+    target_chain_path = os.path.join(RIBETL_DATA,
+                                     target_rcsb_id.upper(),
+                                     "CHAINS",
+                                     "{}_STRAND_{}.cif".format(target_rcsb_id.upper(),
                                                                target_auth_asym_id))
 
     # Clip chains with pymol, create snippet objects, align those and save.
+    print("loading ", source_chain_path)
     cmd.load(source_chain_path)
-    cmd.select("resi {}-{} and m. {} ".format(source_range[0], source_range[1], source_rcsb_id))
+    cmd.select("resi {}-{}".format(source_range[0], source_range[1]))
+    # cmd.select("resi {}-{} and m. {} ".format(source_range[0], source_range[1], source_rcsb_id))
     cmd.create("{}_{}".format(source_rcsb_id, source_auth_asym_id), "sele")
     cmd.delete(source_rcsb_id)
 
     cmd.load(target_chain_path)
-    cmd.select("resi {}-{} and m. {} ".format(target_range[0], target_range[1], target_rcsb_id))
+    # cmd.select("resi {}-{} and m. {} ".format(target_range[0], target_range[1], target_rcsb_id))
+    cmd.select("resi {}-{}".format(target_range[0], target_range[1]))
     cmd.create("{}_{}".format(target_rcsb_id, target_auth_asym_id), "sele")
     cmd.delete(target_rcsb_id)
 
     cmd.super("{}_{}".format(source_rcsb_id, source_auth_asym_id),
-              "{}_{}".format(target_rcsb_id, target_auth_asym_id))
+              "{}_{}".format(target_rcsb_id, target_auth_asym_id),
+            #   object="superpose_{}_{}_{}_{}".format(source_rcsb_id, source_auth_asym_id, target_rcsb_id, target_auth_asym_id)
+              )
 
     #  used to be:
     # "/home/rxz/dev/riboxyzbackend/ribetl/static/_TEMP_CHAIN.pdb"
     # cmd.save(os.environ.get("TEMP_CHAIN"))
-	
-    return cmd.get_cifstr()
+
+    return cmd.get_cifstr(
+        # selection="superpose_{}_{}_{}_{}".format(source_rcsb_id, source_auth_asym_id, target_rcsb_id, target_auth_asym_id)
+        )
 
 # if __name__ == "__main__":
 
