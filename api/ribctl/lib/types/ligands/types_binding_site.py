@@ -27,7 +27,7 @@ AMINO_ACIDS = {
     'SEC': 0,
     'PYL': 0
     }
-NUCLEOTIDES = typing.Literal['A', 'T', 'C', 'G', 'U']
+NUCLEOTIDES = ['A', 'T', 'C', 'G', 'U']
 
 
 class ResidueSummary(BaseModel):
@@ -79,11 +79,3 @@ class BindingSiteChain(BaseModel):
 
 class BindingSite(BaseModel):
     __root__:typing.Dict[str,BindingSiteChain]
-
-#TODO: Replace this with an actual polymer class.
-class __PolymerRef(BaseModel): 
-      parent_rcsb_id          : str 
-      auth_asym_id            : str 
-      rcsb_pdbx_description   : str 
-      entity_poly_seq_length  : int 
-      entity_poly_polymer_type: str 
