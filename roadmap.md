@@ -2,14 +2,14 @@
 <!-- TODO: Migrations -->
 
 - render images for new structs 
-- superimpose [endpoint, script, logs]
 - ligands/bsites [render + predict] [endpoint, script, logs]
+- superimpose [endpoint, script, logs]
 - visualization troubleshoot
 
 <!-- TODO: Next stage-->
 - split ligand classes into instances and classes
 <!-- TODO: Next stage-->
-- split ligand classes into instances and classes
+- flash out the taxonomy : [src + host] [nodes in the db, hierarchy in the app(pull in the lib, construct dynamically on app start from assets)]
 
 
 # Features to stability:
