@@ -110,34 +110,16 @@ def struct_ligand_ids(pdbid: str, profile:RibosomeStructure) -> list[str]:
     _ = [* map(lambda x: (x.chemicalId, x.chemicalName),profile.ligands)] 
     return [ ] if len(_) < 1 else [ chemid for (chemid, chemname) in filter(lambda k: "ion" not in k[1].lower(), _)] 
 
-def save_ligandlike_polymer(rcsb_id:str, auth_asym_id:str, structure:Structure, WRITE:bool=False)->BindingSite:
+def save_ligandlike_polymer(auth_asym_id:str, structure:Structure )->BindingSite:
     residues: list[Residue] = get_polymer_residues(auth_asym_id, structure)
     binding_site_polymer: BindingSite = get_polymer_nbrs(residues, structure )
 
-    outfile_json = os.path.join(RIBETL_DATA, rcsb_id.upper(), f'POLYMER_{auth_asym_id}.json')
-    if WRITE:
-        with open(outfile_json, 'w') as outfile:
-            json.dump(json.loads(binding_site_polymer.json()), outfile, indent=4)
-            print("Wrote: ", outfile_json)
-    else:
-        if (os.path.isfile(outfile_json)):
-            print("Exists already: ", outfile_json)
-
     return binding_site_polymer
 
-def save_ligand(rcsb_id:str,chemicalId:str, structure:Structure, WRITE:bool=False)->BindingSite:
+def save_ligand(chemicalId:str, structure:Structure )->BindingSite:
     chemicalId = chemicalId.upper()
     residues: list[Residue] = get_ligand_residue_ids(chemicalId, structure)
     binding_site_ligand: BindingSite   = get_ligand_nbrs(residues, structure)
-
-    outfile_json = os.path.join(RIBETL_DATA, rcsb_id.upper(), f'LIGAND_{chemicalId}.json')
-    if WRITE:
-        with open(outfile_json, 'w') as outfile:
-            json.dump(json.loads(binding_site_ligand.json()), outfile, indent=4)
-            print("Wrote: ", outfile_json)
-
-    elif (os.path.isfile(outfile_json)):
-        print("Exists already: ", outfile_json)
 
     return binding_site_ligand
 

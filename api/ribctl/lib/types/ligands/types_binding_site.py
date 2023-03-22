@@ -1,4 +1,5 @@
 from ctypes import Union
+import json
 import typing
 from pydantic import BaseModel, root_validator, Extra
 from pydantic import parse_obj_as
@@ -79,6 +80,11 @@ class BindingSiteChain(Polymer):
 
 class BindingSite(BaseModel):
     __root__ : typing.Dict[str,BindingSiteChain]
+
+
+    def save(self, filename:str):
+        with open(filename, 'w') as outfile:
+            json.dump(json.loads(self.json()), outfile, indent=4)
 
     def __getattr__(self, attr):
         return super().dict()['__root__'].__getattribute__(attr)

@@ -254,5 +254,5 @@ if __name__ =="__main__":
 	prediction = init_transpose_ligand(target_profile,bsite)
 	fname = f'PREDICTION_{_type}_{SRC_STRUCT}_{TGT_STRUCT}.json'
 	with open(os.path.join(RIBETL_DATA,TGT_STRUCT,fname), 'w') as outfile:
-		json.dump(prediction,outfile)
+		json.dump(prediction.data(),outfile)
 		print("\033[093mSucessfully saved prediction {}\033[0m".format(fname))

@@ -343,7 +343,7 @@ class RPSummary(Schema):
     strand_id    : str
                         
 # #TODO: Merge or disjoin with the BanClassMetadata class
-# class NomenclatureClass(Schema): 
-#       structs                  : list[str]
-#       rps                      : list[RPSummary]
-#       banClass                 : ProteinClass
+class NomenclatureClass(Schema): 
+      structs                  : list[str]
+      rps                      : list[RPSummary]
+      banClass                 : ProteinClass

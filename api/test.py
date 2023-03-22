@@ -1,13 +1,16 @@
+import os
 from pprint import pprint
+from ribctl.lib.types.ligands.types_binding_site import BindingSite, LigandPrediction
 from ribctl.lib.mod_transpose_bsites import init_transpose_ligand, open_bsite
 from ribctl.lib.types.types_ribosome import RibosomeStructure
-from ribctl.lib import utils
+from ribctl.lib import RIBETL_DATA, utils
 from ribctl.lib.mod_extract_bsites import save_ligand, save_ligandlike_polymer, save_ligandlike_polymer, struct_ligand_ids, struct_liglike_ids
+from ribctl.lib.mod_superimpose import ranged_super_by_polyclass
 
 # PDBID = "3J7Z"
 PDBID = "5AFI"
 
-def repair_ligands (PDBID):
+def extract_bsites (PDBID):
     _structure_cif_handle = utils.open_structure(PDBID,'cif')
     struct_profile_handle = RibosomeStructure.parse_obj(utils.open_structure(PDBID,'json')  )
 
@@ -15,13 +18,30 @@ def repair_ligands (PDBID):
     ligands       = struct_ligand_ids(PDBID, struct_profile_handle)
 
     for polyref in liglike_polys:
-        save_ligandlike_polymer(polyref.parent_rcsb_id, polyref.auth_asym_id, _structure_cif_handle, True)
+        bsite_p:BindingSite = save_ligandlike_polymer(polyref.auth_asym_id, _structure_cif_handle)
+        outfile_json = os.path.join(RIBETL_DATA, PDBID.upper(), f'POLYMER_{polyref.auth_asym_id}.json')
+        bsite_p.save(outfile_json)
+        if (os.path.isfile(outfile_json)):
+            print("Exists already: ", outfile_json)
 
-    for l in ligands:
-        save_ligand(PDBID, l, _structure_cif_handle, True)
 
+    for chemid in ligands:
+        bsite_l = save_ligand( chemid, _structure_cif_handle)
+        outfile_json = os.path.join(RIBETL_DATA, PDBID.upper(), f'LIGAND_{chemid}.json')
+        bsite_l.save(outfile_json)
+        if (os.path.isfile(outfile_json)):
+            print("Exists already: ", outfile_json)
 
-# repair_ligands(PDBID)
+def predict_bsite(PDBID_target, ligand_id, ligand_type)->LigandPrediction:
+    bsite          = open_bsite(utils.ligand_path(PDBID_target, ligand_id, ligand_type))
+    target_profile = RibosomeStructure.parse_obj(utils.open_structure(PDBID_target,'json')  )
+    prediction     = init_transpose_ligand(target_profile, bsite)
+
+    return prediction
+
+print(ranged_super_by_polyclass('3j7z','5afi',(0,20),'uL4'))
+
+# extract_bsites(PDBID)
 # 
 # _structure_cif_handle = utils.open_structure(PDBID,'cif')
 # struct_profile_handle = RibosomeStructure.parse_obj(utils.open_structure(PDBID,'json')  )
@@ -53,12 +73,3 @@ def repair_ligands (PDBID):
 
 
 # bsite          = open_bsite(utils.ligand_path(PDBID, 'GDP', 'LIGAND'))
-bsite          = open_bsite(utils.ligand_path(PDBID, 'w', 'POLYMER'))
-target         = '7k00'
-target_profile = RibosomeStructure.parse_obj(utils.open_structure(target,'json')  )
-prediction = init_transpose_ligand(target_profile, bsite)
-print("ul15:",prediction['uL15'])
-print(prediction.dict())
-
-# pprint("Prediction")
-# pprint(prediction)
