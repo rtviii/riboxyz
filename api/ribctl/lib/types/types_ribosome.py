@@ -9,16 +9,11 @@ class LastUpdate(BaseModel):
     date: str
     added_structure: str
 
-
-class Protein(BaseModel):
-
+class Polymer(BaseModel):
     asym_ids: list[str]
     auth_asym_id: str
 
     parent_rcsb_id   : str
-    pfam_accessions  : list[str]
-    pfam_comments    : list[str]
-    pfam_descriptions: list[str]
 
     src_organism_names : list[str]
     host_organism_names: list[str]
@@ -26,8 +21,6 @@ class Protein(BaseModel):
     host_organism_ids  : list[int]
 
     ligand_like: bool
-
-    uniprot_accession: list[str]
 
     rcsb_pdbx_description: str | None
 
@@ -38,31 +31,73 @@ class Protein(BaseModel):
     entity_poly_polymer_type           : str
     entity_poly_entity_type            : str
 
-    nomenclature:  list[ProteinClass]
+    nomenclature:  list[ProteinClass | RNAClass]
 
-class RNA(BaseModel):
+class Protein(Polymer):
 
-    asym_ids: list[str]
+    pfam_accessions  : list[str]
+    pfam_comments    : list[str]
+    pfam_descriptions: list[str]
 
-    auth_asym_id: str
-    nomenclature: list[RNAClass]
-    parent_rcsb_id: str
+    uniprot_accession: list[str]
 
-    src_organism_names: list[str]
-    host_organism_names: list[str]
-    src_organism_ids: list[int]
-    host_organism_ids: list[int]
+class RNA(Polymer):
+    pass
 
-    rcsb_pdbx_description: str | None
-    # entity_polymer
-    entity_poly_strand_id: str
-    entity_poly_seq_one_letter_code: str
-    entity_poly_seq_one_letter_code_can: str
-    entity_poly_seq_length: int
-    entity_poly_polymer_type: str
-    entity_poly_entity_type: str
+# class RNA(BaseModel):
 
-    ligand_like: bool
+#     asym_ids: list[str]
+
+#     auth_asym_id: str
+#     nomenclature: list[RNAClass]
+#     parent_rcsb_id: str
+
+#     src_organism_names: list[str]
+#     host_organism_names: list[str]
+#     src_organism_ids: list[int]
+#     host_organism_ids: list[int]
+
+#     rcsb_pdbx_description: str | None
+#     # entity_polymer
+#     entity_poly_strand_id: str
+#     entity_poly_seq_one_letter_code: str
+#     entity_poly_seq_one_letter_code_can: str
+#     entity_poly_seq_length: int
+#     entity_poly_polymer_type: str
+#     entity_poly_entity_type: str
+
+#     ligand_like: bool
+
+# class Protein(BaseModel):
+
+#     asym_ids: list[str]
+#     auth_asym_id: str
+
+#     parent_rcsb_id   : str
+#     pfam_accessions  : list[str]
+#     pfam_comments    : list[str]
+#     pfam_descriptions: list[str]
+
+#     src_organism_names : list[str]
+#     host_organism_names: list[str]
+#     src_organism_ids   : list[int]
+#     host_organism_ids  : list[int]
+
+#     ligand_like: bool
+
+#     uniprot_accession: list[str]
+
+#     rcsb_pdbx_description: str | None
+
+#     entity_poly_strand_id              : str
+#     entity_poly_seq_one_letter_code    : str
+#     entity_poly_seq_one_letter_code_can: str
+#     entity_poly_seq_length             : int
+#     entity_poly_polymer_type           : str
+#     entity_poly_entity_type            : str
+
+#     nomenclature:  list[ProteinClass]
+
 
 class Ligand(BaseModel)  : 
 
