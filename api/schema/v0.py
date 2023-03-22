@@ -163,10 +163,6 @@ class Alignement(Schema):
     tgt_aln: str
     aln_ids: list[int]
 
-class LigandPrediction(Schema):
-    __root__: dict[str,dict[str, LigandBindingSite]]
-    def __getattr__(self, attr):
-        return self.__root__[attr]
 # export type LigandPrediction = {
 #   [ polypeptide_class :string ] :
 #   {

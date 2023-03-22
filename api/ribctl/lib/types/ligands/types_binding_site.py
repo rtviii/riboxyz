@@ -5,7 +5,7 @@ from pydantic import parse_obj_as
 from Bio.PDB.Residue import Residue
 from pyparsing import Optional
 
-from ribctl.lib.types.types_ribosome import Polymer
+from ribctl.lib.types.types_ribosome import Polymer, PolymerClass
 
 AMINO_ACIDS = {
     "ALA": 0,
@@ -83,6 +83,40 @@ class BindingSite(BaseModel):
     def __getattr__(self, attr):
         return super().dict()['__root__'].__getattribute__(attr)
 
+    def __getitem__(self, attr):
+        return super().dict()['__root__'].__getitem__(attr)
+
     def dict(self,):
         return super().dict()['__root__']
     
+
+class PredictedResiduesPolymer(BaseModel):
+	class PredictionSource(BaseModel):
+		src: str
+		src_ids: list[int]
+		auth_asym_id: str
+	class PredictionTarget(BaseModel):
+		tgt: str
+		tgt_ids: list[int]
+		auth_asym_id: str
+	class PredictionAlignments(BaseModel):
+		aln_ids: list[int]
+		src_aln: str
+		tgt_aln: str
+
+	source   : PredictionSource
+	target   : PredictionTarget
+	alignment: PredictionAlignments
+
+class LigandPrediction(BaseModel):
+    __root__ : typing.Dict[PolymerClass, PredictedResiduesPolymer]
+
+    def __getattr__(self, attr):
+        return super().dict()['__root__'].__getattribute__(attr)
+
+    def __getitem__(self, attr):
+        return super().dict()['__root__'].__getitem__(attr)
+
+    def dict(self,):
+        return super().dict()['__root__']
+

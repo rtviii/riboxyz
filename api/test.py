@@ -58,5 +58,7 @@ target         = '7k00'
 target_profile = RibosomeStructure.parse_obj(utils.open_structure(target,'json')  )
 prediction = init_transpose_ligand(target_profile, bsite)
 
-pprint("Prediction")
-pprint(prediction)
+print("ul15:",prediction['uL15'])
+
+# pprint("Prediction")
+# pprint(prediction)
