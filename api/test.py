@@ -5,7 +5,7 @@ from ribctl.lib.mod_transpose_bsites import init_transpose_ligand, open_bsite
 from ribctl.lib.types.types_ribosome import RibosomeStructure
 from ribctl.lib import RIBETL_DATA, utils
 from ribctl.lib.mod_extract_bsites import save_ligand, save_ligandlike_polymer, save_ligandlike_polymer, struct_ligand_ids, struct_liglike_ids
-from ribctl.lib.mod_superimpose import pymol_super, ranged_super_by_polyclass
+from ribctl.lib.mod_superimpose import pymol_super, ranged_align_by_polyclass
 
 PDBID1     = "7K00"
 PDBID2     = "5AFI"
@@ -44,7 +44,7 @@ def predict_bsite(PDBID_target, ligand_id, ligand_type)->LigandPrediction:
     return prediction
 
 (src_auth_asym_id, src_path, src_range,
- tgt_auth_asym_id, tgt_path, tgt_range) = ranged_super_by_polyclass(PDBID1,PDBID2,resrange,poly_class)
+ tgt_auth_asym_id, tgt_path, tgt_range) = ranged_align_by_polyclass(PDBID1,PDBID2,resrange,poly_class)
 
 cif_str = pymol_super(
     PDBID1,

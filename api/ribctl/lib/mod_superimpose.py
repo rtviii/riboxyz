@@ -21,7 +21,7 @@ and a residue range:
 """
 
 
-def ranged_super_by_polyclass(
+def ranged_align_by_polyclass(
         src_struct: str,
         tgt_struct: str,
         rng: Tuple[int, int],

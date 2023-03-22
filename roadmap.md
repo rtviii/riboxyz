@@ -2,8 +2,22 @@
 <!-- TODO: Migrations -->
 
 - render images for new structs 
-- ligands/bsites [render + predict] [endpoint, script, logs]
-- superimpose [endpoint, script, logs]
+- re-render ligands for all structs
+- ligands/bsites:
+    - render :
+        - endpoint
+        - typed [x]
+        - logs
+    - predict: 
+        - endpoint
+        - typed [x]
+        - logs
+
+- superimpose :
+    - typed [x] 
+    - endpoint 
+    - logs
+
 - visualization troubleshoot
 
 <!-- TODO: Next stage-->
