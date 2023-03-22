@@ -1,5 +1,5 @@
+from typing import Any
 from pydantic import BaseModel
-from pydantic import parse_obj_as
 from .types_polymer import LSU_Proteins, RNAClass, SSU_Proteins
 
 ProteinClass = LSU_Proteins | SSU_Proteins
@@ -40,6 +40,9 @@ class Protein(Polymer):
     pfam_descriptions: list[str]
 
     uniprot_accession: list[str]
+
+    def to_poly(self)->Polymer:
+        return Polymer(**self.dict())
 
 class RNA(Polymer):
     pass
@@ -109,6 +112,7 @@ class Ligand(BaseModel)  :
 
 
 class RibosomeStructure(BaseModel):
+    
 
     rcsb_id   : str
     expMethod : str
@@ -135,16 +139,13 @@ class RibosomeStructure(BaseModel):
     proteins: list[Protein]
     rnas    : list[RNA] | None
     ligands : list[Ligand] | None
+    
 
 
 
-    # @staticmethod
-    # def from_json_profile(rcsb_id: str):
-
-    #     _rib = RibosomeAssets(rcsb_id.upper()).json_profile()
-    #     rib  = RibosomeStructure(**_rib)
-
-        # return rib
+    @staticmethod
+    def from_json_profile(d: Any):
+        return RibosomeStructure(**d)
 
 
 # ※--------------------------------------------------------

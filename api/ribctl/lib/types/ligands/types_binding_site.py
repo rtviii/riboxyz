@@ -3,6 +3,8 @@ from pydantic import BaseModel, root_validator
 from pydantic import parse_obj_as
 from Bio.PDB.Residue import Residue
 
+from ribctl.lib.types.types_ribosome import Polymer
+
 AMINO_ACIDS = {
     "ALA": 0,
     'ARG': 1,
@@ -69,11 +71,7 @@ class ResidueSummary(BaseModel):
         )
 
 
-class BindingSiteChain(BaseModel): 
-      sequence                   : str
-      nomenclature               : list[str]
-      asym_ids                   : list[str]
-      auth_asym_id               : str
+class BindingSiteChain(Polymer): 
       residues                   : list[ ResidueSummary ]
 
 
