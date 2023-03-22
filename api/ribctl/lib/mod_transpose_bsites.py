@@ -148,15 +148,19 @@ def init_transpose_ligand(
 
 
 	origin_polymers = binding_site.dict()
-	target_polymers = itertools.chain(target_profile.rnas if target_profile.rnas is not None else [],target_profile.proteins)
 
 	print("Got the following binding site:")
-	pprint(origin_polymers)
+	# pprint(origin_polymers)
+	print("total keys : ", len(origin_polymers.keys()))
+
 
 	for ( auth_asym_id, polymer ) in origin_polymers.items():
 		if len(polymer['nomenclature']) <1:
+			print("auth asym id " + auth_asym_id + " has no nomenclature:" +  polymer['nomenclature'] +". Skipping -1")
 			continue
+
 		else:
+			print("auth asym id " + auth_asym_id + " has  nomenclature:" +  ",".join(polymer['nomenclature']))
 			by_class_origin_polymers[polymer['nomenclature'][0]] = {
 				'seq'         : polymer['entity_poly_seq_one_letter_code_can'],
 				'auth_asym_id': polymer['auth_asym_id'],
@@ -168,24 +172,33 @@ def init_transpose_ligand(
 	by_class_target_polymers:dict[PolymerClass, dict] = {}
 
 	for nomenclature_class, polymer in by_class_origin_polymers.items():
-		# find a polymer in target structure with same nomenclature class
-		matches =  [*filter(lambda tgt_poly: nomenclature_class in tgt_poly.nomenclature, target_polymers)]
-		if len( matches )  < 1:
-			continue
+		def get_polymer_class(structure:RibosomeStructure, nomenclature_class:PolymerClass):
+			target_polymers = itertools.chain(structure.rnas if structure.rnas is not None else [],structure.proteins)
+			for tgt_polymer in target_polymers:
+				if  nomenclature_class in tgt_polymer.nomenclature:
+					print("Found ", nomenclature_class, " in ", tgt_polymer.nomenclature)
+					return tgt_polymer
+				else:
+					print("Did not find ", nomenclature_class, " in ", tgt_polymer.nomenclature)
 
-		tgt_poly_seq          = matches[0].entity_poly_seq_one_letter_code_can
-		tgt_poly_auth_asym_id = matches[0].auth_asym_id
+			raise Exception("Could not find a polymer class {} in structure {} ".format(nomenclature_class, structure.rcsb_id))
+			
+		try:
+			target_polymer= get_polymer_class(target_profile, nomenclature_class)
+			tgt_poly_seq          = target_polymer.entity_poly_seq_one_letter_code_can
+			tgt_poly_auth_asym_id = target_polymer.auth_asym_id
 
-		by_class_target_polymers[nomenclature_class] ={
-			'seq'         : tgt_poly_seq,
-			'auth_asym_id': tgt_poly_auth_asym_id,
-		}
+			by_class_target_polymers[nomenclature_class] ={
+				'seq'         : tgt_poly_seq,
+				'auth_asym_id': tgt_poly_auth_asym_id,
+			}
+
+		except Exception as e:
+			...
+
 
 	prediction = {}
 	for ( nomenclature_class, seqstats ) in by_class_origin_polymers.items():
-		print("going through nomenclature class: ", nomenclature_class)
-		print("its seqstats  ", seqstats)
-		print("->>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<")
 		if nomenclature_class not in by_class_target_polymers:
 			continue
 
