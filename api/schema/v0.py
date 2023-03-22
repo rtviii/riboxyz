@@ -140,10 +140,11 @@ class BindingSiteChain(Schema):
 #   }
 # }
 
-# TODO: Does this work?
 # ? https://stackoverflow.com/questions/72268685/pydantic-checks-on-newtype
 class LigandBindingSite(Schema):
     __root__: dict[str, BindingSiteChain]
+    def __getattr__(self, attr):
+        return self.__root__[attr]
 
 
 
@@ -164,6 +165,8 @@ class Alignement(Schema):
 
 class LigandPrediction(Schema):
     __root__: dict[str,dict[str, LigandBindingSite]]
+    def __getattr__(self, attr):
+        return self.__root__[attr]
 # export type LigandPrediction = {
 #   [ polypeptide_class :string ] :
 #   {
@@ -191,6 +194,8 @@ class MixedLigand(Schema):
 
 class LigandClass(Schema):
     __root__: dict[str, list[MixedLigand]]
+    def __getattr__(self, attr):
+        return self.__root__[attr]
 
 
 # export type LigandClass = {
@@ -215,6 +220,8 @@ class BindingSite(Schema):
 
 class StructureBindingSites(Schema):
     __root__: dict[str, list[BindingSite]]
+    def __getattr__(self, attr):
+        return self.__root__[attr]
 
 # export type BindingSite  =  {
 #                                  src_organism_ids   : number[],

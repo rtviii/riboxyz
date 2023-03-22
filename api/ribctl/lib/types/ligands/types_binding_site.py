@@ -81,4 +81,5 @@ class BindingSite(BaseModel):
 
     def __getattr__(self, attr):
         return self.__root__[attr]
+
     
