@@ -38,9 +38,9 @@ class RibosomeAssets():
         self._envcheck()
         return f"{self._dir_path()}/{self.rcsb_id}.json"
 
-    def json_profile(self):
+    def json_profile(self)->RibosomeStructure:
         with open(self._json_profile_filepath(), "r") as f:
-            return json.load(f)
+            return RibosomeStructure.parse_obj(json.load(f))
 
     def biopython_structure(self):
         return open_structure(self.rcsb_id, 'cif')
