@@ -115,7 +115,10 @@ def struct_bsites(rcsb_id:str):
 def open_bsite(path:str)->BindingSite:
 	with open(os.path.join(path), 'rb') as infile:
 		data = json.load(infile)
-	return BindingSite(nbr_chains=data)
+	print(data)
+	print("^^^^^^^^ got dat")
+	return BindingSite(__root__=data['nbr_chains'])
+	
 
 class PredictedResiduesPolymer(BaseModel):
 	class PredictionSource(BaseModel):

@@ -49,61 +49,6 @@ class Protein(Polymer):
 class RNA(Polymer):
     pass
 
-# class RNA(BaseModel):
-
-#     asym_ids: list[str]
-
-#     auth_asym_id: str
-#     nomenclature: list[RNAClass]
-#     parent_rcsb_id: str
-
-#     src_organism_names: list[str]
-#     host_organism_names: list[str]
-#     src_organism_ids: list[int]
-#     host_organism_ids: list[int]
-
-#     rcsb_pdbx_description: str | None
-#     # entity_polymer
-#     entity_poly_strand_id: str
-#     entity_poly_seq_one_letter_code: str
-#     entity_poly_seq_one_letter_code_can: str
-#     entity_poly_seq_length: int
-#     entity_poly_polymer_type: str
-#     entity_poly_entity_type: str
-
-#     ligand_like: bool
-
-# class Protein(BaseModel):
-
-#     asym_ids: list[str]
-#     auth_asym_id: str
-
-#     parent_rcsb_id   : str
-#     pfam_accessions  : list[str]
-#     pfam_comments    : list[str]
-#     pfam_descriptions: list[str]
-
-#     src_organism_names : list[str]
-#     host_organism_names: list[str]
-#     src_organism_ids   : list[int]
-#     host_organism_ids  : list[int]
-
-#     ligand_like: bool
-
-#     uniprot_accession: list[str]
-
-#     rcsb_pdbx_description: str | None
-
-#     entity_poly_strand_id              : str
-#     entity_poly_seq_one_letter_code    : str
-#     entity_poly_seq_one_letter_code_can: str
-#     entity_poly_seq_length             : int
-#     entity_poly_polymer_type           : str
-#     entity_poly_entity_type            : str
-
-#     nomenclature:  list[ProteinClass]
-
-
 class Ligand(BaseModel)  : 
 
       chemicalId         : str
@@ -114,7 +59,6 @@ class Ligand(BaseModel)  :
 
 
 class RibosomeStructure(BaseModel):
-    
 
     rcsb_id   : str
     expMethod : str
