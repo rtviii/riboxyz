@@ -4,10 +4,10 @@ from pydantic import parse_obj_as
 from ribctl.lib import RIBETL_DATA
 from ribctl.lib.types.types_ribosome import RibosomeStructure
 from ribctl.lib.utils import download_unpack_place, open_structure
-from ribctl.lib.struct_render_thumbnail import render_thumbnail
+from ribctl.lib.mod_render_thumbnail import render_thumbnail
 from ribctl.lib.struct_rcsb_api import process_pdb_record
-from ribctl.lib.struct_split_rename import split_rename
-from ribctl.lib.struct_extract_bsites import struct_ligand_ids, struct_liglike_ids, render_ligand, render_liglike_polymer
+from ribctl.lib.mod_split_rename import split_rename
+from ribctl.lib.mod_extract_bsites import struct_ligand_ids, struct_liglike_ids, render_ligand, render_liglike_polymer
 
 
 

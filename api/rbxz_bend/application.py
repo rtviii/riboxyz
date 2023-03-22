@@ -1,8 +1,9 @@
 import logging
 import os
 from rbxz_bend.db.ribosomexyz import ribosomexyzDB
+from ribctl.lib.types import RibosomeStructure
 from rbxz_bend.settings import NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER, RIBETL_DATA, get_ribxz_logger
-from ribctl.lib.struct_extract_bsites  import struct_ligand_ids, struct_liglike_ids, render_ligand, render_liglike_polymer
+from ribctl.lib.mod_extract_bsites  import struct_ligand_ids, struct_liglike_ids, render_ligand, render_liglike_polymer
 from ribctl.lib import utils
 
 class App:
@@ -16,7 +17,7 @@ class App:
                 logger = get_ribxz_logger('computations', __name__)
 
                 _structure_cif_handle :Structure = utils.open_structure(PDBID,'cif')  # type: ignore
-                struct_profile_handle:dict       = utils.open_structure(PDBID,'json')  # type: ignore
+                struct_profile_handle       = RibosomeStructure.parse_obj(utils.open_structure(PDBID,'json'))  # type: ignore
 
                 liglike_polys = struct_liglike_ids(struct_profile_handle)
                 ligands       = struct_ligand_ids(PDBID, struct_profile_handle)
