@@ -1,22 +1,16 @@
-import dataclasses
 import json
 import os
 import operator
 import argparse
 import itertools
-from pprint import pprint
-from typing import Any
 from Bio.PDB.NeighborSearch import NeighborSearch
 from Bio.PDB.Residue import Residue
 from Bio.PDB.Structure import Structure
 from Bio.PDB.Chain import Chain
-from dataclasses import dataclass, field
 from ribctl.lib.types.types_ribosome import Polymer, RibosomeStructure
+from ribctl.lib.types.ligands.types_binding_site import AMINO_ACIDS, NUCLEOTIDES, BindingSite, BindingSiteChain, ResidueSummary
 from ribctl.lib import RIBETL_DATA
 from ribctl.lib import utils
-from ribctl.lib.types.ligands.types_binding_site import AMINO_ACIDS, NUCLEOTIDES, BindingSite, BindingSiteChain, ResidueSummary
-
-flatten = itertools.chain.from_iterable
 
 
 def get_polymer_residues(auth_asym_id: str, struct: Structure) -> list[Residue]:
@@ -57,7 +51,6 @@ def get_polymer_nbrs(
                     nbr_dict[c] = BindingSiteChain(
                         **poly_entity.dict(),
                         residues     = sorted([residue for residue in nbr_residues if residue.parent_auth_asym_id == c], key=operator.attrgetter('seqid')))
-
 
     return BindingSite(__root__=nbr_dict)
 
@@ -105,11 +98,9 @@ def get_ligand_residue_ids(ligchemid: str, struct: Structure) -> list[Residue]:
     ligandResidues: list[Residue] = list(filter(lambda x: x.get_resname() == ligchemid, list(struct.get_residues())))
     return ligandResidues
 
-
 def struct_liglike_ids(struct_profile:RibosomeStructure) -> list[Polymer]:
     """Given an rcsb id, open the profile for the corresponding structure
     and return references to all polymers marked ligand-like"""
-    pprint(struct_profile)
     polymers =  itertools.chain(struct_profile.rnas if struct_profile.rnas != None else [] , struct_profile.proteins)
     return list(filter(lambda poly : poly.ligand_like == True, polymers))
 
@@ -127,9 +118,11 @@ def render_liglike_polymer(rcsb_id:str, auth_asym_id:str, structure:Structure, W
     if WRITE:
         with open(outfile_json, 'w') as outfile:
             json.dump(binding_site_polymer.json(), outfile, indent=4)
+            print("Wrote: ", outfile_json)
     else:
         if (os.path.isfile(outfile_json)):
             print("Exists already: ", outfile_json)
+
     return binding_site_polymer
 
 def render_ligand(rcsb_id:str,chemicalId:str, structure:Structure, WRITE:bool=False)->BindingSite:
@@ -141,12 +134,12 @@ def render_ligand(rcsb_id:str,chemicalId:str, structure:Structure, WRITE:bool=Fa
     if WRITE:
         with open(outfile_json, 'w') as outfile:
             json.dump(binding_site_ligand.json(), outfile, indent=4)
+            print("Wrote: ", outfile_json)
 
     elif (os.path.isfile(outfile_json)):
         print("Exists already: ", outfile_json)
 
     return binding_site_ligand
-
 
 if __name__ == "__main__":
 
