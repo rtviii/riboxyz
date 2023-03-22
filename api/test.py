@@ -57,8 +57,8 @@ bsite          = open_bsite(utils.ligand_path(PDBID, 'w', 'POLYMER'))
 target         = '7k00'
 target_profile = RibosomeStructure.parse_obj(utils.open_structure(target,'json')  )
 prediction = init_transpose_ligand(target_profile, bsite)
-
 print("ul15:",prediction['uL15'])
+print(prediction.dict())
 
 # pprint("Prediction")
 # pprint(prediction)
