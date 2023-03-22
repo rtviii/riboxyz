@@ -1,28 +1,21 @@
+from typing import Any
+import typing
 from pydantic import BaseModel
-from pydantic import parse_obj_as
-from ninja import Schema 
 from .types_polymer import LSU_Proteins, RNAClass, SSU_Proteins
 
-ProteinClass = LSU_Proteins | SSU_Proteins
+ProteinClass = typing.Union[LSU_Proteins , SSU_Proteins]
+PolymerClass = typing.Union[ProteinClass, RNAClass]
 
 
 class LastUpdate(BaseModel):
     date: str
     added_structure: str
 
-class ExogenousRNAByStruct(Schema):
-    struct: str
-    rnas: list[str]
-
-class Protein(BaseModel):
-
+class Polymer(BaseModel):
     asym_ids: list[str]
     auth_asym_id: str
 
     parent_rcsb_id   : str
-    pfam_accessions  : list[str]
-    pfam_comments    : list[str]
-    pfam_descriptions: list[str]
 
     src_organism_names : list[str]
     host_organism_names: list[str]
@@ -30,8 +23,6 @@ class Protein(BaseModel):
     host_organism_ids  : list[int]
 
     ligand_like: bool
-
-    uniprot_accession: list[str]
 
     rcsb_pdbx_description: str | None
 
@@ -42,31 +33,21 @@ class Protein(BaseModel):
     entity_poly_polymer_type           : str
     entity_poly_entity_type            : str
 
-    nomenclature:  list[ProteinClass]
+    nomenclature:  list[PolymerClass]
 
-class RNA(BaseModel):
+class Protein(Polymer):
 
-    asym_ids: list[str]
+    pfam_accessions  : list[str]
+    pfam_comments    : list[str]
+    pfam_descriptions: list[str]
 
-    auth_asym_id: str
-    nomenclature: list[RNAClass]
-    parent_rcsb_id: str
+    uniprot_accession: list[str]
 
-    src_organism_names: list[str]
-    host_organism_names: list[str]
-    src_organism_ids: list[int]
-    host_organism_ids: list[int]
+    def to_poly(self)->Polymer:
+        return Polymer(**self.dict())
 
-    rcsb_pdbx_description: str | None
-    # entity_polymer
-    entity_poly_strand_id: str
-    entity_poly_seq_one_letter_code: str
-    entity_poly_seq_one_letter_code_can: str
-    entity_poly_seq_length: int
-    entity_poly_polymer_type: str
-    entity_poly_entity_type: str
-
-    ligand_like: bool
+class RNA(Polymer):
+    pass
 
 class Ligand(BaseModel)  : 
 
@@ -104,16 +85,13 @@ class RibosomeStructure(BaseModel):
     proteins: list[Protein]
     rnas    : list[RNA] | None
     ligands : list[Ligand] | None
+    
 
 
 
-    # @staticmethod
-    # def from_json_profile(rcsb_id: str):
-
-    #     _rib = RibosomeAssets(rcsb_id.upper()).json_profile()
-    #     rib  = RibosomeStructure(**_rib)
-
-        # return rib
+    @staticmethod
+    def from_json_profile(d: Any):
+        return RibosomeStructure(**d)
 
 
 # ※--------------------------------------------------------
@@ -134,6 +112,3 @@ class PFAMFamily(BaseModel):
     annotation: str
     family_type: str
 
-
-class NomeclatureClass(BaseModel):
-    class_id:  ProteinClass | RNAClass
