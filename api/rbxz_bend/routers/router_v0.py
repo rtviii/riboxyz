@@ -6,12 +6,26 @@ from ribctl.lib.types.types_polymer import RNAClass
 from ribctl.lib.types.types_ribosome import  ProteinClass, RibosomeStructure
 from schema.v0 import BanClassMetadata, ExogenousRNAByStruct,LigandInstance, LigandlikeInstance, NeoStruct, NomenclatureClass, NomenclatureClassMember
 from rbxz_bend.application import db_connection
+# from ribctl.lib.mod_superimpose import 
 
 v0 = Router()
 
 
 
 
+  | ranged_align
+  | cif_chain_by_class
+  | ligand_prediction
+  | downloadCifChain
+  | download_ligand_nbhd 
+  | download_structure
+
+@v0.get('/ranged_align',tags=['Operations'])
+def ranged_align(request,):
+    return super
+
+
+## ----- Old data endpoints ----- 
 @v0.get('/get_all_structures',tags=['Structure'], 
         # response=list[NeoStruct]
         # TODO: validate
