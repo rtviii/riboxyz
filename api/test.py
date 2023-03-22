@@ -5,9 +5,9 @@ from ribctl.lib.mod_transpose_bsites import init_transpose_ligand, open_bsite
 from ribctl.lib.types.types_ribosome import RibosomeStructure
 from ribctl.lib import RIBETL_DATA, utils
 from ribctl.lib.mod_extract_bsites import save_ligand, save_ligandlike_polymer, save_ligandlike_polymer, struct_ligand_ids, struct_liglike_ids
-from ribctl.lib.mod_superimpose import ranged_super_by_polyclass
+from ribctl.lib.mod_superimpose import pymol_super, ranged_super_by_polyclass
 
-# PDBID = "3J7Z"
+PDBID = "7k00"
 PDBID = "5AFI"
 
 def extract_bsites (PDBID):
@@ -33,16 +33,27 @@ def extract_bsites (PDBID):
             print("Exists already: ", outfile_json)
 
 def predict_bsite(PDBID_target, ligand_id, ligand_type)->LigandPrediction:
+
     bsite          = open_bsite(utils.ligand_path(PDBID_target, ligand_id, ligand_type))
     target_profile = RibosomeStructure.parse_obj(utils.open_structure(PDBID_target,'json')  )
     prediction     = init_transpose_ligand(target_profile, bsite)
 
     return prediction
 
-print(ranged_super_by_polyclass('3j7z','5afi',(0,20),'uL4'))
+(src_auth_asym_id, src_path, src_range,
+ tgt_auth_asym_id, tgt_path, tgt_range) = ranged_super_by_polyclass('3j7z','5afi',(0,50),'5SrRNA')
+
+cif_str = pymol_super(
+    '3j7z',
+    src_range,
+    src_auth_asym_id,
+    '5afi',
+    tgt_range,
+    tgt_auth_asym_id,
+)
 
 # extract_bsites(PDBID)
-# 
+
 # _structure_cif_handle = utils.open_structure(PDBID,'cif')
 # struct_profile_handle = RibosomeStructure.parse_obj(utils.open_structure(PDBID,'json')  )
 
