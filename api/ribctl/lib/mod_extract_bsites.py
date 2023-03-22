@@ -52,7 +52,7 @@ def get_polymer_nbrs(
                         **poly_entity.dict(),
                         residues     = sorted([residue for residue in nbr_residues if residue.parent_auth_asym_id == c], key=operator.attrgetter('seqid')))
 
-    return BindingSite(__root__=nbr_dict)
+    return BindingSite(nbr_chains=nbr_dict)
 
 def get_ligand_nbrs(
       ligand_residues: list[Residue],
@@ -92,7 +92,7 @@ def get_ligand_nbrs(
                             key=operator.attrgetter('seqid')
                         ))
 
-    return BindingSite(__root__=nbr_dict)
+    return BindingSite(nbr_chains=nbr_dict)
 
 def get_ligand_residue_ids(ligchemid: str, struct: Structure) -> list[Residue]:
     ligandResidues: list[Residue] = list(filter(lambda x: x.get_resname() == ligchemid, list(struct.get_residues())))
@@ -117,7 +117,7 @@ def render_liglike_polymer(rcsb_id:str, auth_asym_id:str, structure:Structure, W
     outfile_json = os.path.join(RIBETL_DATA, rcsb_id.upper(), f'POLYMER_{auth_asym_id}.json')
     if WRITE:
         with open(outfile_json, 'w') as outfile:
-            json.dump(binding_site_polymer.json(), outfile, indent=4)
+            json.dump(binding_site_polymer.dict(), outfile, indent=4)
             print("Wrote: ", outfile_json)
     else:
         if (os.path.isfile(outfile_json)):
@@ -133,7 +133,7 @@ def render_ligand(rcsb_id:str,chemicalId:str, structure:Structure, WRITE:bool=Fa
     outfile_json = os.path.join(RIBETL_DATA, rcsb_id.upper(), f'LIGAND_{chemicalId}.json')
     if WRITE:
         with open(outfile_json, 'w') as outfile:
-            json.dump(binding_site_ligand.json(), outfile, indent=4)
+            json.dump(binding_site_ligand.dict(), outfile, indent=4)
             print("Wrote: ", outfile_json)
 
     elif (os.path.isfile(outfile_json)):

@@ -1,7 +1,7 @@
 import argparse
 import os
 from typing import Tuple
-from ribctl.lib.transpose_ligand import SeqMatch
+from api.ribctl.lib.mod_transpose_bsites import SeqMatch
 from ribctl.lib.utils import open_structure
 
 

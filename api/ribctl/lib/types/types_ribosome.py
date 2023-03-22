@@ -1,8 +1,10 @@
 from typing import Any
+import typing
 from pydantic import BaseModel
 from .types_polymer import LSU_Proteins, RNAClass, SSU_Proteins
 
-ProteinClass = LSU_Proteins | SSU_Proteins
+ProteinClass = typing.Union[LSU_Proteins , SSU_Proteins]
+PolymerClass = typing.Union[ProteinClass, RNAClass]
 
 
 class LastUpdate(BaseModel):
@@ -31,7 +33,7 @@ class Polymer(BaseModel):
     entity_poly_polymer_type           : str
     entity_poly_entity_type            : str
 
-    nomenclature:  list[ProteinClass | RNAClass]
+    nomenclature:  list[PolymerClass]
 
 class Protein(Polymer):
 
@@ -166,6 +168,3 @@ class PFAMFamily(BaseModel):
     annotation: str
     family_type: str
 
-
-class NomeclatureClass(BaseModel):
-    class_id:  ProteinClass | RNAClass

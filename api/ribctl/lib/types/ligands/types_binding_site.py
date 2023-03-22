@@ -1,5 +1,5 @@
 import typing
-from pydantic import BaseModel, root_validator
+from pydantic import BaseModel, root_validator, Extra
 from pydantic import parse_obj_as
 from Bio.PDB.Residue import Residue
 
@@ -37,7 +37,7 @@ class ResidueSummary(BaseModel):
     full_id            : tuple[str,int,str,tuple[str,int,str]]
     
     resname            : str
-    seqid              : str
+    seqid              : int
     parent_auth_asym_id: str
 
     def __hash__(self):
@@ -72,8 +72,10 @@ class ResidueSummary(BaseModel):
 
 
 class BindingSiteChain(Polymer): 
-      residues                   : list[ ResidueSummary ]
+      residues: list[ ResidueSummary ]
 
 
 class BindingSite(BaseModel):
-    __root__:typing.Dict[str,BindingSiteChain]
+    """A mapping from auth_asym_id to BindingSiteChain"""
+    nbr_chains:typing.Dict[str,BindingSiteChain]
+    

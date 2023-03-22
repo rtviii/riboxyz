@@ -5,9 +5,13 @@ import re
 import os
 from typing import List, Union
 import sys
+import typing
 from Bio import pairwise2
 import itertools
-from ribctl.lib.mod_extract_bsites import  BindingSite
+
+from pydantic import BaseModel
+from ribctl.lib.types.types_ribosome import PolymerClass, RibosomeStructure
+from ribctl.lib.mod_extract_bsites import  BindingSite, struct_ligand_ids, struct_liglike_ids
 from ribctl.lib.utils import open_structure
 import numpy as np
 
@@ -15,23 +19,23 @@ flatten = itertools.chain.from_iterable
 n1      = np.array
 
 
-class SeqMatch:
+class SeqMatch(BaseModel):
 
 	def __init__(self,
 		sourceseq:str,
 		targetseq:str, 
-		source_residues:List[int]) -> None:
+		source_residues:list[int]):
 		"""A container for origin and target sequences when matching the resiudes of a ligand binding site
 		to another protein's sequence through BioSeq's Align
 		 """
 
 		#* Computed indices of the ligand-facing in the source sequence.
 		self.src     :str      = sourceseq
-		self.src_ids:List[int] = source_residues
+		self.src_ids:list[int] = source_residues
 
 		#* Indices of predicted residues in target sequence. To be filled.
 		self.tgt     :str      = targetseq
-		self.tgt_ids:List[int] = []
+		self.tgt_ids:list[int] = []
 		
 		_            = pairwise2.align.globalxx(self.src,self.tgt, one_alignment_only=True)
 		self.src_aln = _[0].seqA
@@ -100,110 +104,91 @@ class SeqMatch:
 		return _
 
 
-#! Include sequence into the ligand profiles
-#! exclude the ligand itself from the transposition
-#! match matchable chains from target to prediction
+def struct_bsites(rcsb_id:str):
+	"""Returns a list of binding sites from a structure"""
+	rcsb_id =rcsb_id.upper()
+	struct_profile_handle = RibosomeStructure.parse_obj(open_structure(rcsb_id, 'json'))
+	liglike_polys = struct_liglike_ids(struct_profile_handle)
+	ligands       = struct_ligand_ids(rcsb_id, struct_profile_handle)
+	return ligands, liglike_polys
 
-#? Protocol: 
-#? for every chain in origin, grab same nomenclature in tgt
-#? track ids back, apply forth
-#? apply ids 
+def open_bsite(path:str)->BindingSite:
+	with open(os.path.join(path), 'rb') as infile:
+		data = json.load(infile)
+	return BindingSite(__root__=data)
 
-#3j7z  ERY ---> to 5hl7, 3j9z, 6otl
-#6AZ1  PAR ---> 5t2a l.donovani
-
-# * Ecoli structs :  3j7z, 7k00, 6q97, 5j30
-# ! yeast : 6z6n, 5mrc, 3j6b,6xir, 4u4n
-
-#? PAR:
-# 6az1 , 5tcu, 5iqr, 5el7,4wsd,4l71
-
-#? KIR:
-# 5afi, 4v8q, 4v5s,4v5g, 
-
-# source_struct = str(sys.argv[1] ).upper()
-# target_struct = str(sys.argv[2] ).upper()
-# ligand        = str(sys.argv[3]).upper()
-
-def open_bsite(
-	  poly_lig_flag    : str,
-	  rcsb_id          : str,
-	  auth_asym_id     : Union[str, bool]=False,
-	  ligand_chemicalId: Union[str, bool]=False
-	)->BindingSite or FileNotFoundError     : 
-
-	if poly_lig_flag == 'polymer':
-		with open(os.path.join(RIBETL_DATA,rcsb_id,f'POLYMER_{auth_asym_id}.json'), 'rb') as infile:
-			data = json.load(infile)
-		return BindingSite(data)
-
-	else:
-		assert(poly_lig_flag=='ligand')
-		with open(os.path.join(RIBETL_DATA,rcsb_id,f'LIGAND_{ligand_chemicalId}.json'), 'rb') as infile:
-			data = json.load(infile)
-		return BindingSite(data)
 	
 def init_transpose_ligand(
-	source_struct: str,
-	target_struct: str,
-	target_profile:dict,
+	# source_struct: str,
+	# target_struct: str,
+	target_profile:RibosomeStructure,
 	binding_site : BindingSite
-	)->dict            : 
+	)->dict: 
 
-	origin_chains = {
-	}
-	target_chains = {
-	}
+	by_class_origin_polymers:dict[PolymerClass, dict] = {}
 
-	#? For every chain in a ligand file, if it has nomenclature, append its residues, strand and sequence
-	for chain in binding_site.data:
 
-		if len(binding_site[chain]['nomenclature'] ) <1:
+	origin_polymers = binding_site.nbr_chains
+	target_polymers = itertools.chain(target_profile.rnas if target_profile.rnas is not None else [],target_profile.proteins)
+
+	#? For every chain in a bindingsite, if it has nomenclature, append its residues, strand and sequence
+	for auth_asym_id, polymer in origin_polymers.items():
+		if len(polymer.nomenclature) <1:
 			continue
-
 		else:
-
-			resids :List[int] = [
-				resid for resid in [*map(lambda x : x['residue_id'], binding_site[chain]['residues'])]
-			]
-
-			origin_chains[binding_site.data[chain]['nomenclature'][0]] = {
-				# 'strand'      : chain,
-				'seq'         : binding_site.data[chain]['sequence'],
-				'auth_asym_id': binding_site.data[chain]['auth_asym_id'],
-				'ids'         : resids
+			by_class_origin_polymers[polymer.nomenclature[0]] = {
+				'seq'         : polymer.entity_poly_seq_one_letter_code_can,
+				'auth_asym_id': polymer.auth_asym_id,
+				'ids'         : [ resid for resid in [*map(lambda x : x.seqid, polymer.residues)] ]
 			}
 
-	target_polymers = [*target_profile['rnas'],*target_profile['proteins']]
+	
+	
+	by_class_target_polymers:dict[PolymerClass, dict] = {}
 
-	for nom in origin_chains:
-
-		# goal is to look up the chain in the target struct __by nomenclature__
-		matches =  [*filter(lambda tgt_poly: nom in tgt_poly['nomenclature'], target_polymers)]
+	for nomenclature_class, polymer in by_class_origin_polymers.items():
+		# find a polymer in target structure with same nomenclature class
+		matches =  [*filter(lambda tgt_poly: nomenclature_class in tgt_poly.nomenclature, target_polymers)]
 		if len( matches )  < 1:
 			continue
 
-		seq          = matches[0]['entity_poly_seq_one_letter_code'] 
-		auth_asym_id = matches[0]['auth_asym_id']
+		tgt_poly_seq          = matches[0].entity_poly_seq_one_letter_code_can
+		tgt_poly_auth_asym_id = matches[0].auth_asym_id
 
-		target_chains[nom] ={
-			'seq'         : seq,
-			'auth_asym_id': auth_asym_id
+		by_class_target_polymers[nomenclature_class] ={
+			'seq'         : tgt_poly_seq,
+			'auth_asym_id': tgt_poly_auth_asym_id,
 		}
 
 
-	prediction ={}
+	def transpose_residues(src_seq,tgt_seq,src_ids)->...:
+		"""Transpose residues from source polymer to target polymer"""
+		sq      = SeqMatch(src_seq,tgt_seq,src_ids)
 
-	for name in origin_chains:
+		src_aln = sq.src_aln
+		tgt_aln = sq.tgt_aln
 
-		# If no chain with a given nomenclature found in target --> skip it.
-		if name not in target_chains:
+		aln_ids = sq.aligned_ids
+		tgt_ids = sq.tgt_ids
+
+		return {
+
+			'src_aln': src_aln, # <--- aligned source sequence (with gaps)
+			'tgt_aln': tgt_aln, # <--- aligned tgt sequence (with gaps)
+
+			'src_ids': src_ids, # <--- source ids
+			'aln_ids': aln_ids, # <--- ids corrected for gaps
+			'tgt_ids': tgt_ids  # <--- ids backtracted to the target polymer (accounting for gaps)
+		}
+
+
+	for nomenclature_class in by_class_origin_polymers:
+		if nomenclature_class not in by_class_target_polymers:
 			continue
 
-		src_ids = origin_chains[name]['ids']
-
-		src     = origin_chains[name]['seq']
-		tgt     = target_chains[name]['seq']
+		src_ids = by_class_origin_polymers[nomenclature_class]['ids']
+		src     = by_class_origin_polymers[nomenclature_class]['seq']
+		tgt     = by_class_target_polymers[nomenclature_class]['seq']
 
 		sq      = SeqMatch(src,tgt,src_ids)
 
@@ -214,16 +199,16 @@ def init_transpose_ligand(
 		tgt_ids = sq.tgt_ids
 
 
-		prediction[name] = {
+		prediction[nomenclature_class] = {
 			"source":{
 				"src"         : src,
 				"src_ids"     : src_ids,
-				"auth_asym_id": origin_chains[name]['auth_asym_id']
+				"auth_asym_id": by_class_origin_polymers[nomenclature_class]['auth_asym_id']
 			},
 			"target":{
 				"tgt"         : tgt,
 				"tgt_ids"     : tgt_ids,
-				'auth_asym_id': target_chains[name]['auth_asym_id']
+				'auth_asym_id': by_class_target_polymers[nomenclature_class]['auth_asym_id']
 			},
 			"alignment" :{
 				"aln_ids": aln_ids,
@@ -231,19 +216,6 @@ def init_transpose_ligand(
 				"tgt_aln": tgt_aln,
 			},
 		}
-
-		# print(f"Chain {name}")
-		# print("Source length:", len(sq.src))
-		# print("Target length:", len(sq.tgt))
-		# print("Aligned ids" , src_ids)
-		# print("To ------->" , sq        .aligned_ids  )
-		# print("To targets :", sq        .tgt_ids      )
-
-
-		# print("ORG   : \t",SeqMatch.hl_ixs(sq.src    , sq.src_ids    ),"\n")
-		print("ORG AL: \t",SeqMatch.hl_ixs(sq.src_aln, sq.aligned_ids),"\n")
-		print("TGT AL: \t",SeqMatch.hl_ixs(sq.tgt_aln, sq.aligned_ids),"\n")
-		# print("TGT   : \t",SeqMatch.hl_ixs(sq.tgt    , sq.tgt_ids    ),"\n")
 
 	return prediction
 
