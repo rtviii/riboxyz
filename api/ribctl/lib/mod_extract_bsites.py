@@ -52,7 +52,7 @@ def get_polymer_nbrs(
                         **poly_entity.dict(),
                         residues     = sorted([residue for residue in nbr_residues if residue.parent_auth_asym_id == c], key=operator.attrgetter('seqid')))
 
-    return BindingSite(nbr_chains=nbr_dict)
+    return BindingSite.parse_obj(nbr_dict)
 
 def get_ligand_nbrs(
       ligand_residues: list[Residue],
@@ -92,7 +92,7 @@ def get_ligand_nbrs(
                             key=operator.attrgetter('seqid')
                         ))
 
-    return BindingSite(nbr_chains=nbr_dict)
+    return BindingSite.parse_obj(nbr_dict)
 
 def get_ligand_residue_ids(ligchemid: str, struct: Structure) -> list[Residue]:
     ligandResidues: list[Residue] = list(filter(lambda x: x.get_resname() == ligchemid, list(struct.get_residues())))
@@ -110,14 +110,14 @@ def struct_ligand_ids(pdbid: str, profile:RibosomeStructure) -> list[str]:
     _ = [* map(lambda x: (x.chemicalId, x.chemicalName),profile.ligands)] 
     return [ ] if len(_) < 1 else [ chemid for (chemid, chemname) in filter(lambda k: "ion" not in k[1].lower(), _)] 
 
-def render_liglike_polymer(rcsb_id:str, auth_asym_id:str, structure:Structure, WRITE:bool=False)->BindingSite:
+def save_ligandlike_polymer(rcsb_id:str, auth_asym_id:str, structure:Structure, WRITE:bool=False)->BindingSite:
     residues: list[Residue] = get_polymer_residues(auth_asym_id, structure)
     binding_site_polymer: BindingSite = get_polymer_nbrs(residues, structure )
 
     outfile_json = os.path.join(RIBETL_DATA, rcsb_id.upper(), f'POLYMER_{auth_asym_id}.json')
     if WRITE:
         with open(outfile_json, 'w') as outfile:
-            json.dump(binding_site_polymer.dict(), outfile, indent=4)
+            json.dump(json.loads(binding_site_polymer.json()), outfile, indent=4)
             print("Wrote: ", outfile_json)
     else:
         if (os.path.isfile(outfile_json)):
@@ -125,7 +125,7 @@ def render_liglike_polymer(rcsb_id:str, auth_asym_id:str, structure:Structure, W
 
     return binding_site_polymer
 
-def render_ligand(rcsb_id:str,chemicalId:str, structure:Structure, WRITE:bool=False)->BindingSite:
+def save_ligand(rcsb_id:str,chemicalId:str, structure:Structure, WRITE:bool=False)->BindingSite:
     chemicalId = chemicalId.upper()
     residues: list[Residue] = get_ligand_residue_ids(chemicalId, structure)
     binding_site_ligand: BindingSite   = get_ligand_nbrs(residues, structure)
@@ -133,7 +133,7 @@ def render_ligand(rcsb_id:str,chemicalId:str, structure:Structure, WRITE:bool=Fa
     outfile_json = os.path.join(RIBETL_DATA, rcsb_id.upper(), f'LIGAND_{chemicalId}.json')
     if WRITE:
         with open(outfile_json, 'w') as outfile:
-            json.dump(binding_site_ligand.dict(), outfile, indent=4)
+            json.dump(json.loads(binding_site_ligand.json()), outfile, indent=4)
             print("Wrote: ", outfile_json)
 
     elif (os.path.isfile(outfile_json)):
@@ -158,7 +158,7 @@ if __name__ == "__main__":
 
 
     for polyref in liglike_polys:
-        render_liglike_polymer(polyref.parent_rcsb_id, polyref.auth_asym_id, _structure_cif_handle, args.save)
+        save_ligandlike_polymer(polyref.parent_rcsb_id, polyref.auth_asym_id, _structure_cif_handle, args.save)
 
     for l in ligands:
-        render_ligand(PDBID, l[0], _structure_cif_handle, args.save)
+        save_ligand(PDBID, l[0], _structure_cif_handle, args.save)

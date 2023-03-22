@@ -77,5 +77,8 @@ class BindingSiteChain(Polymer):
 
 class BindingSite(BaseModel):
     """A mapping from auth_asym_id to BindingSiteChain"""
-    nbr_chains:typing.Dict[str,BindingSiteChain]
+    __root__ : typing.Dict[str,BindingSiteChain]
+
+    def __getattr__(self, attr):
+        return self.__root__[attr]
     

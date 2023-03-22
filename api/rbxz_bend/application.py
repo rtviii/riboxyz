@@ -3,7 +3,7 @@ import os
 from rbxz_bend.db.ribosomexyz import ribosomexyzDB
 from ribctl.lib.types import RibosomeStructure
 from rbxz_bend.settings import NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER, RIBETL_DATA, get_ribxz_logger
-from ribctl.lib.mod_extract_bsites  import struct_ligand_ids, struct_liglike_ids, render_ligand, render_liglike_polymer
+from ribctl.lib.mod_extract_bsites  import struct_ligand_ids, struct_liglike_ids, save_ligandlike_polymer, save_ligandlike_polymer
 from ribctl.lib import utils
 
 class App:
@@ -34,7 +34,7 @@ class App:
                 for polyref in liglike_polys:
 
                     try:
-                        render_liglike_polymer(polyref.parent_rcsb_id, polyref.auth_asym_id, _structure_cif_handle, True)
+                        save_ligandlike_polymer(polyref.parent_rcsb_id, polyref.auth_asym_id, _structure_cif_handle, True)
                         logger.info("Rendered liglike polymer {} in {}.".format(polyref.auth_asym_id, polyref.parent_rcsb_id))
 
                     except Exception as e:
@@ -44,7 +44,7 @@ class App:
                 for l in ligands:
 
                     try:
-                        render_ligand(PDBID, l[0], _structure_cif_handle, True)
+                        save_ligandlike_polymer(PDBID, l[0], _structure_cif_handle, True)
                         logger.info("Rendered ligand {} in {}.".format(l[0], PDBID))
 
                     except Exception as e:
