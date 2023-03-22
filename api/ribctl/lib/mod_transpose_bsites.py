@@ -115,7 +115,7 @@ def struct_bsites(rcsb_id:str):
 def open_bsite(path:str)->BindingSite:
 	with open(os.path.join(path), 'rb') as infile:
 		data = json.load(infile)
-	return BindingSite(__root__=data)
+	return BindingSite(nbr_chains=data)
 
 	
 def init_transpose_ligand(
@@ -161,27 +161,6 @@ def init_transpose_ligand(
 		}
 
 
-	def transpose_residues(src_seq,tgt_seq,src_ids)->...:
-		"""Transpose residues from source polymer to target polymer"""
-		sq      = SeqMatch(src_seq,tgt_seq,src_ids)
-
-		src_aln = sq.src_aln
-		tgt_aln = sq.tgt_aln
-
-		aln_ids = sq.aligned_ids
-		tgt_ids = sq.tgt_ids
-
-		return {
-
-			'src_aln': src_aln, # <--- aligned source sequence (with gaps)
-			'tgt_aln': tgt_aln, # <--- aligned tgt sequence (with gaps)
-
-			'src_ids': src_ids, # <--- source ids
-			'aln_ids': aln_ids, # <--- ids corrected for gaps
-			'tgt_ids': tgt_ids  # <--- ids backtracted to the target polymer (accounting for gaps)
-		}
-
-
 	for nomenclature_class in by_class_origin_polymers:
 		if nomenclature_class not in by_class_target_polymers:
 			continue
@@ -192,11 +171,11 @@ def init_transpose_ligand(
 
 		sq      = SeqMatch(src,tgt,src_ids)
 
-		src_aln = sq.src_aln
-		tgt_aln = sq.tgt_aln
+		src_aln = sq.src_aln     # <--- aligned source      sequence (with                        gaps)
+		tgt_aln = sq.tgt_aln     # <--- aligned tgt         sequence (with                        gaps)
+		aln_ids = sq.aligned_ids # <--- ids     corrected   for                                   gaps
+		tgt_ids = sq.tgt_ids     # <--- ids     backtracted to the target polymer (accounting for gaps)
 
-		aln_ids = sq.aligned_ids
-		tgt_ids = sq.tgt_ids
 
 
 		prediction[nomenclature_class] = {
@@ -236,32 +215,22 @@ if __name__ =="__main__":
 
 	prs.add_argument('-src', '--source_structure', type=str, required=True)
 	prs.add_argument('-tgt', '--target_structure', type=str, required=True)
-	prs.add_argument('-poly', '--polymer', type=str)
-	prs.add_argument('-lig' , '--ligand' , type=str)
+	prs.add_argument('-p', '--path', type=str, required=True)
 
 	args = prs.parse_args()
 
 	SRC_STRUCT = args.source_structure.upper()
 	TGT_STRUCT = args.target_structure.upper()
+	lig_path = str( args.path )
 
-	LIG   = args.ligand if args.ligand is not None else False
-	POLY  = args.polymer if args.polymer is not None else False
-	if LIG:
-		bsite_path = os.path.join(RIBETL_DATA, SRC_STRUCT, f"LIGAND_{LIG}.json")
-	elif POLY:
-		bsite_path = os.path.join(RIBETL_DATA, SRC_STRUCT, f"POLYMER_{POLY}.json")
-	else:
-		raise argparse.ArgumentTypeError("Provide either a ligand chem. id or a ligand-like polymer's auth_asym_id.")
 
-	_target_handle_json = open_structure(TGT_STRUCT,'json')
-	bsite      = open_bsite(
-		"ligand" if LIG else "polymer",
-		SRC_STRUCT,
-		auth_asym_id      = POLY,
-		ligand_chemicalId = LIG)
+	target_profile = RibosomeStructure.parse_obj(open_structure(TGT_STRUCT,'json'))
 
-	prediction = init_transpose_ligand(SRC_STRUCT,TGT_STRUCT,_target_handle_json,bsite)
-	fname = f'PREDICTION_{LIG if LIG else POLY}_{SRC_STRUCT}_{TGT_STRUCT}.json'
+	bsite      = open_bsite(lig_path)
+	_type:typing.Literal["LIGAND","POLYMER"] = "LIGAND" if "ligand" in lig_path.lower()  else "POLYMER"
+
+	prediction = init_transpose_ligand(target_profile,bsite)
+	fname = f'PREDICTION_{_type}_{SRC_STRUCT}_{TGT_STRUCT}.json'
 	with open(os.path.join(RIBETL_DATA,TGT_STRUCT,fname), 'w') as outfile:
 		json.dump(prediction,outfile)
 		print("\033[093mSucessfully saved prediction {}\033[0m".format(fname))
