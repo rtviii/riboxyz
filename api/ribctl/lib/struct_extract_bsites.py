@@ -119,37 +119,33 @@ def struct_ligand_ids(pdbid: str, profile:RibosomeStructure) -> list[tuple]:
     _ = [* map(lambda x: (x.chemicalId, x.chemicalName),profile.ligands)] 
     return [ ] if len(_) < 1 else [* filter(lambda k: "ion" not in k[1].lower(), _)] 
 
-def render_liglike_polymer(rcsb_id:str, auth_asym_id:str, structure:Structure, save:bool=False)->BindingSite:
+def render_liglike_polymer(rcsb_id:str, auth_asym_id:str, structure:Structure, WRITE:bool=False)->BindingSite:
     residues: list[Residue] = get_polymer_residues(auth_asym_id, structure)
     binding_site_polymer: BindingSite = get_polymer_nbrs(residues, structure )
 
-    if save:
-        outfile_json = os.path.join(RIBETL_DATA, rcsb_id.upper(), f'POLYMER_{auth_asym_id}.json')
+    outfile_json = os.path.join(RIBETL_DATA, rcsb_id.upper(), f'POLYMER_{auth_asym_id}.json')
+    if WRITE:
+        with open(outfile_json, 'w') as outfile:
+            json.dump(binding_site_polymer.json(), outfile, indent=4)
+    else:
         if (os.path.isfile(outfile_json)):
             print("Exists already: ", outfile_json)
-        else:
-            binding_site_polymer.json()
-            with open(outfile_json, 'w') as outfile:
-                json.dump(binding_site_polymer, outfile, indent=4)
-
     return binding_site_polymer
 
-def render_ligand(rcsb_id:str,chemicalId:str, structure:Structure, save:bool=False)->BindingSite:
+def render_ligand(rcsb_id:str,chemicalId:str, structure:Structure, WRITE:bool=False)->BindingSite:
     chemicalId = chemicalId.upper()
     residues: list[Residue] = get_ligand_residue_ids(chemicalId, structure)
     binding_site_ligand: BindingSite   = get_ligand_nbrs(residues, structure)
 
-    if save:
-        outfile_json = os.path.join(RIBETL_DATA, rcsb_id.upper(), f'LIGAND_{chemicalId}.json')
-        if (os.path.isfile(outfile_json)):
-            print("Exists already: ", outfile_json)
-        else:
-            binding_site_ligand.json()
-            with open(outfile_json, 'w') as outfile:
-                json.dump(binding_site_ligand, outfile, indent=4)
+    outfile_json = os.path.join(RIBETL_DATA, rcsb_id.upper(), f'LIGAND_{chemicalId}.json')
+    if WRITE:
+        with open(outfile_json, 'w') as outfile:
+            json.dump(binding_site_ligand.json(), outfile, indent=4)
+
+    elif (os.path.isfile(outfile_json)):
+        print("Exists already: ", outfile_json)
 
     return binding_site_ligand
-
 
 
 if __name__ == "__main__":
