@@ -1,7 +1,9 @@
+from ctypes import Union
 import typing
 from pydantic import BaseModel, root_validator, Extra
 from pydantic import parse_obj_as
 from Bio.PDB.Residue import Residue
+from pyparsing import Optional
 
 from ribctl.lib.types.types_ribosome import Polymer
 
@@ -76,10 +78,11 @@ class BindingSiteChain(Polymer):
 
 
 class BindingSite(BaseModel):
-    """A mapping from auth_asym_id to BindingSiteChain"""
     __root__ : typing.Dict[str,BindingSiteChain]
 
     def __getattr__(self, attr):
-        return self.__root__[attr]
+        return super().dict()['__root__'].__getattribute__(attr)
 
+    def dict(self,):
+        return super().dict()['__root__']
     

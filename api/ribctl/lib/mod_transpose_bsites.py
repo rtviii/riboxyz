@@ -1,6 +1,7 @@
 import argparse
 from ctypes import alignment
 import json
+from pprint import pprint
 import re
 import os
 from typing import List, Union
@@ -19,8 +20,7 @@ flatten = itertools.chain.from_iterable
 n1      = np.array
 
 
-class SeqMatch(BaseModel):
-
+class SeqMatch():
 	def __init__(self,
 		sourceseq:str,
 		targetseq:str, 
@@ -115,9 +115,7 @@ def struct_bsites(rcsb_id:str):
 def open_bsite(path:str)->BindingSite:
 	with open(os.path.join(path), 'rb') as infile:
 		data = json.load(infile)
-	print(data)
-	print("^^^^^^^^ got dat")
-	return BindingSite(__root__=data['nbr_chains'])
+	return BindingSite.parse_obj(data)
 	
 
 class PredictedResiduesPolymer(BaseModel):
@@ -137,29 +135,32 @@ class PredictedResiduesPolymer(BaseModel):
 	source   : PredictionSource
 	target   : PredictionTarget
 	alignment: PredictionAlignments
-	
+PredictionLBS = typing.Dict[PolymerClass, PredictedResiduesPolymer]
+
 def init_transpose_ligand(
 	# source_struct: str,
 	# target_struct: str,
 	target_profile:RibosomeStructure,
 	binding_site : BindingSite
-	)->dict[PolymerClass, PredictedResiduesPolymer]: 
+	):
 
 	by_class_origin_polymers:dict[PolymerClass, dict] = {}
 
 
-	origin_polymers = binding_site.nbr_chains
+	origin_polymers = binding_site.dict()
 	target_polymers = itertools.chain(target_profile.rnas if target_profile.rnas is not None else [],target_profile.proteins)
 
-	#? For every chain in a bindingsite, if it has nomenclature, append its residues, strand and sequence
-	for auth_asym_id, polymer in origin_polymers.items():
-		if len(polymer.nomenclature) <1:
+	print("Got the following binding site:")
+	pprint(origin_polymers)
+
+	for ( auth_asym_id, polymer ) in origin_polymers.items():
+		if len(polymer['nomenclature']) <1:
 			continue
 		else:
-			by_class_origin_polymers[polymer.nomenclature[0]] = {
-				'seq'         : polymer.entity_poly_seq_one_letter_code_can,
-				'auth_asym_id': polymer.auth_asym_id,
-				'ids'         : [ resid for resid in [*map(lambda x : x.seqid, polymer.residues)] ]
+			by_class_origin_polymers[polymer['nomenclature'][0]] = {
+				'seq'         : polymer['entity_poly_seq_one_letter_code_can'],
+				'auth_asym_id': polymer['auth_asym_id'],
+				'ids'         : [ resid for resid in [*map(lambda x : x['seqid'], polymer['residues'])] ]
 			}
 
 	
@@ -180,8 +181,11 @@ def init_transpose_ligand(
 			'auth_asym_id': tgt_poly_auth_asym_id,
 		}
 
-
-	for nomenclature_class in by_class_origin_polymers:
+	prediction = {}
+	for ( nomenclature_class, seqstats ) in by_class_origin_polymers.items():
+		print("going through nomenclature class: ", nomenclature_class)
+		print("its seqstats  ", seqstats)
+		print("->>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<")
 		if nomenclature_class not in by_class_target_polymers:
 			continue
 
@@ -198,7 +202,9 @@ def init_transpose_ligand(
 
 
 
-		prediction[nomenclature_class] = PredictedResiduesPolymer.parse_obj({
+		prediction = {
+			**prediction,
+			nomenclature_class: PredictedResiduesPolymer.parse_obj({
 			"source":{
 				"src"         : src,
 				"src_ids"     : src_ids,
@@ -215,6 +221,8 @@ def init_transpose_ligand(
 				"tgt_aln": tgt_aln,
 			},
 		})
+		}
+
 
 	return prediction
 
