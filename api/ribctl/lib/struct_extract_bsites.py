@@ -81,12 +81,7 @@ def get_ligand_nbrs(
         for atom in lig_res.child_list:
             nbr_residues.extend(ns.search(atom.get_coord(), 10, level='R'))
 
-
-    for n in nbr_residues:
-        print(" id :", n.get_id())
-        print(" id :", n.resname)
     nbr_residues = list(set([* map(ResidueSummary.from_biopython_residue, nbr_residues)]))
-    
 
     # Filter the ligand itself, water and other special residues
     nbr_residues = list(filter(lambda resl: resl.resname in [*AMINO_ACIDS.keys(),  *NUCLEOTIDES], nbr_residues))
