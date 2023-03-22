@@ -1,17 +1,14 @@
 import argparse
 from ctypes import alignment
-import dataclasses
-import operator
 import json
 import re
-import struct
 import os
-from typing import Dict, List, Tuple, TypedDict, Union, Callable
-import operator
+from typing import List, Union
 import sys
 from Bio import pairwise2
 import itertools
-from __ingress.ciftools.bsite_mixed import BindingSite, open_structure
+from ribctl.lib.mod_extract_bsites import  BindingSite
+from ribctl.lib.utils import open_structure
 import numpy as np
 
 flatten = itertools.chain.from_iterable

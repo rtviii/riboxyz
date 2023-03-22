@@ -1,24 +1,6 @@
 import argparse
-from ctypes import alignment
-import dataclasses
-import operator
-import json
-from pprint import pprint
-import re
-import struct
 import os
-from typing import Dict, List, Tuple, TypedDict, Union, Callable
-import operator
-import sys
-from Bio.PDB.MMCIFParser import FastMMCIFParser, MMCIFParser
-from Bio.PDB.NeighborSearch import NeighborSearch
-from Bio.PDB.Residue import Residue
-from Bio.PDB.Structure import Structure
-from Bio.Align import MultipleSeqAlignment
-from Bio import pairwise2
-import itertools
-from asyncio import run
-import itertools
+from typing import Tuple
 from ribctl.lib.transpose_ligand import SeqMatch
 from ribctl.lib.utils import open_structure
 
