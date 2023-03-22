@@ -1,16 +1,13 @@
 import json
 import os
-from neo4j import Driver
 from pydantic import parse_obj_as
 from ribctl.lib import RIBETL_DATA
 from ribctl.lib.types.types_ribosome import RibosomeStructure
 from ribctl.lib.utils import download_unpack_place, open_structure
-from ribctl.lib.struct_render_thumbnail import render_thumbnail
+from ribctl.lib.mod_render_thumbnail import render_thumbnail
 from ribctl.lib.struct_rcsb_api import process_pdb_record
-from ribctl.lib.struct_split_rename import split_rename
-from ribctl.lib.struct_extract_bsites import struct_ligand_ids, struct_liglike_ids, render_ligand, render_liglike_polymer
-
-
+from ribctl.lib.mod_split_rename import split_rename
+from ribctl.lib.mod_extract_bsites import struct_ligand_ids, struct_liglike_ids, save_ligandlike_polymer, save_ligandlike_polymer
 
 
 
@@ -41,9 +38,9 @@ class RibosomeAssets():
         self._envcheck()
         return f"{self._dir_path()}/{self.rcsb_id}.json"
 
-    def json_profile(self):
+    def json_profile(self)->RibosomeStructure:
         with open(self._json_profile_filepath(), "r") as f:
-            return json.load(f)
+            return RibosomeStructure.parse_obj(json.load(f))
 
     def biopython_structure(self):
         return open_structure(self.rcsb_id, 'cif')
@@ -127,13 +124,13 @@ class RibosomeAssets():
         for ligand in ligands:
             if not os.path.exists(ligand_path(ligand[0])):
                 _flag = False
-                render_ligand(
+                save_ligandlike_polymer(
                     self.rcsb_id, ligand[0], self.biopython_structure(), overwrite)
 
         for ligandlike_poly in ligandlike_polymers:
             if not os.path.exists(liglike_poly_path(ligandlike_poly.auth_asym_id)):
                 _flag = False
-                render_liglike_polymer(
+                save_ligandlike_polymer(
                     self.rcsb_id, ligandlike_poly.auth_asym_id, self.biopython_structure(), overwrite)
 
         return _flag

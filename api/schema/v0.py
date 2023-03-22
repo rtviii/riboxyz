@@ -7,6 +7,9 @@ from ribctl.lib.types.types_ribosome import Ligand, Protein, ProteinClass, Ribos
 """This file documents the possible requests that the API can receive."""
 
 
+class ExogenousRNAByStruct(Schema):
+    struct: str
+    rnas: list[str]
 
 class LigandByStructInstance(Schema):
      chemid: str
@@ -137,10 +140,11 @@ class BindingSiteChain(Schema):
 #   }
 # }
 
-# TODO: Does this work?
 # ? https://stackoverflow.com/questions/72268685/pydantic-checks-on-newtype
 class LigandBindingSite(Schema):
     __root__: dict[str, BindingSiteChain]
+    def __getattr__(self, attr):
+        return self.__root__[attr]
 
 
 
@@ -159,8 +163,6 @@ class Alignement(Schema):
     tgt_aln: str
     aln_ids: list[int]
 
-class LigandPrediction(Schema):
-    __root__: dict[str,dict[str, LigandBindingSite]]
 # export type LigandPrediction = {
 #   [ polypeptide_class :string ] :
 #   {
@@ -188,6 +190,8 @@ class MixedLigand(Schema):
 
 class LigandClass(Schema):
     __root__: dict[str, list[MixedLigand]]
+    def __getattr__(self, attr):
+        return self.__root__[attr]
 
 
 # export type LigandClass = {
@@ -212,6 +216,8 @@ class BindingSite(Schema):
 
 class StructureBindingSites(Schema):
     __root__: dict[str, list[BindingSite]]
+    def __getattr__(self, attr):
+        return self.__root__[attr]
 
 # export type BindingSite  =  {
 #                                  src_organism_ids   : number[],
@@ -336,8 +342,8 @@ class RPSummary(Schema):
     parent_reso  : float
     strand_id    : str
                         
-#TODO: Merge or disjoin with the BanClassMetadata class
-class NomenclatureClass(Schema): 
-      structs                  : list[str]
-      rps                      : list[RPSummary]
-      banClass                 : ProteinClass
+# #TODO: Merge or disjoin with the BanClassMetadata class
+# class NomenclatureClass(Schema): 
+#       structs                  : list[str]
+#       rps                      : list[RPSummary]
+#       banClass                 : ProteinClass

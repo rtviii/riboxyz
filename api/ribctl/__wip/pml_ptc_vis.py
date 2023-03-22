@@ -199,7 +199,6 @@ def ptc_raw_w_markerks(struct: str):
 
     create_marker_at_atom("centroid",midpoint, color_="red")
 
-
 cmd.extend("ptc", ptc_raw_w_markerks)
 cmd.extend("list_bacteria", list_bacteria)
 

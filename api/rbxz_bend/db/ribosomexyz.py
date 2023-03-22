@@ -13,9 +13,9 @@ from ribctl.lib.types.types_ribosome import RibosomeStructure
 from ribctl.lib.types.types_ribosome_assets import RibosomeAssets
 from ribctl.lib.types.types_polymer import list_LSU_Proteins, list_SSU_Proteins, list_RNAClass
 from neo4j import GraphDatabase, Driver, ManagedTransaction, Transaction
-from ribctl.lib.types.types_ribosome import ExogenousRNAByStruct, Ligand,  ProteinClass, RibosomeStructure
+from ribctl.lib.types.types_ribosome import  Ligand,  ProteinClass, RibosomeStructure
 from schema.data_requests import LigandsByStruct
-from schema.v0 import BanClassMetadata, LigandInstance, NeoStruct, NomenclatureClass, NomenclatureClassMember
+from schema.v0 import ExogenousRNAByStruct,BanClassMetadata, LigandInstance, NeoStruct, NomenclatureClass, NomenclatureClassMember
 from ribctl.lib.types.types_polymer import RNAClass, list_LSU_Proteins, list_SSU_Proteins, list_RNAClass
 
 
