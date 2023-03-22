@@ -110,11 +110,7 @@ def ranged_super(
 	for a given polymer class. Feed this into pymol 
 	to chop up on the ranges and superimpose resultant snippets.""" 
 
-	# assert(rng[1]-rng[0]>20)
-
 	rstart    ,rend = rng
-
-
 
 	json_src = open_structure(src_struct.upper(),'json')
 	json_tgt = open_structure(tgt_struct.upper(),'json')
@@ -162,8 +158,6 @@ def ranged_super(
 
 
 if __name__ =="__main__":
-	# load_dotenv(dotenv_path=DOTENV_PATH)
-	# STATIC_ROOT = os.environ.get('STATIC_ROOT')
 	from rbxz_bend.settings import RIBETL_DATA
 
 	prs = argparse.ArgumentParser()

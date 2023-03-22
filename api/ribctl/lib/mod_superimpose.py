@@ -1,12 +1,13 @@
 import argparse
 import os
 from typing import Tuple
-from api.ribctl.lib.mod_transpose_bsites import SeqMatch
+from rbxz_bend.settings import RIBETL_DATA
+from ribctl.lib.mod_transpose_bsites import SeqMatch
 from ribctl.lib.utils import open_structure
 
 
 """ The goal is to have a module that, 
-given two files (assume both same typep, both exist for now)
+given two files 
 and a residue range:
 1. retrieves them
 2. seq-aligns them
@@ -16,28 +17,23 @@ and a residue range:
 6. superimpose the individual snippets
 """
 
-def ranged_super_class(
+def ranged_super_by_polyclass(
 	src_struct: str,
 	tgt_struct: str,
 	rng       : Tuple[int,int],
-	poly_class: str
-
-)->Tuple[str, Tuple[int,int], str, Tuple[int,int]]:
+	poly_class: str)->Tuple[str, Tuple[int,int], str, Tuple[int,int]]:
 
 	"""Return a bundle of path + mapped range for a source and a target structure
 	for a given polymer class. Feed this into pymol 
 	to chop up on the ranges and superimpose resultant snippets.""" 
-
-	# assert(rng[1]-rng[0]>20)
  
-	rstart    ,rend = rng
-
+	rstart, rend = rng
 
 	json_src = open_structure(src_struct.upper(),'json')
 	json_tgt = open_structure(tgt_struct.upper(),'json')
 
 	src_chainind , tgt_chainind = [ None, None ]
-	tgt_seq      , src_seq      = [ None, None ]
+	src_seq      , tgt_seq      = [ None, None ]
 
 
 	for chain in [ *json_src['proteins'], *json_src['rnas'] ]:
@@ -155,10 +151,10 @@ if __name__ =="__main__":
 
 	args = prs.parse_args()
 
-	src_struct      =            args.source_struct.upper()
-	tgt_struct      =            args.target_struct.upper()
+	src_struct        =            args.source_struct.upper()
+	tgt_struct        =            args.target_struct.upper()
 	chain_source      =            args.chain_source
 	chain_target      =            args.chain_target
-	rstart    ,rend = [* map(int,args.residue_range        .split("-")) ]
+	rstart,rend = [* map(int,args.residue_range.split("-")) ]
 
 	print(ranged_super(src_struct,chain_source,tgt_struct,chain_target,(rstart,rend)))
