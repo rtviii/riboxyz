@@ -104,11 +104,11 @@ def struct_liglike_ids(struct_profile:RibosomeStructure) -> list[Polymer]:
     polymers =  itertools.chain(struct_profile.rnas if struct_profile.rnas != None else [] , struct_profile.proteins)
     return list(filter(lambda poly : poly.ligand_like == True, polymers))
 
-def struct_ligand_ids(pdbid: str, profile:RibosomeStructure) -> list[tuple]:
+def struct_ligand_ids(pdbid: str, profile:RibosomeStructure) -> list[str]:
     pdbid = pdbid.upper()
     if not profile.ligands: return []
     _ = [* map(lambda x: (x.chemicalId, x.chemicalName),profile.ligands)] 
-    return [ ] if len(_) < 1 else [* filter(lambda k: "ion" not in k[1].lower(), _)] 
+    return [ ] if len(_) < 1 else [ chemid for (chemid, chemname) in filter(lambda k: "ion" not in k[1].lower(), _)] 
 
 def render_liglike_polymer(rcsb_id:str, auth_asym_id:str, structure:Structure, WRITE:bool=False)->BindingSite:
     residues: list[Residue] = get_polymer_residues(auth_asym_id, structure)
