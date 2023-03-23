@@ -75,8 +75,7 @@ if "targets" in argdict.keys():
 def backwards_match(alntgt: str, resid: int):
     """Returns the target-sequence index of a residue in the (aligned) target sequence"""
     if resid > len(alntgt):
-        exit(IndexError(
-            f"Passed residue with invalid index ({resid}) to back-match to target.Seqlen:{len(alntgt)}"))
+        exit(IndexError(f"Passed residue with invalid index ({resid}) to back-match to target.Seqlen:{len(alntgt)}"))
     counter_proper = 0
     for i, char in enumerate(alntgt):
         if i == resid:
