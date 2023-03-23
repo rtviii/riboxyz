@@ -50,6 +50,7 @@ cif_str = pymol_super(
     PDBID1,
     src_range,
     src_auth_asym_id,
+
     PDBID2,
     tgt_range,
     tgt_auth_asym_id,
