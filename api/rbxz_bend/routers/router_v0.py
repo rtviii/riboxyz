@@ -1,11 +1,13 @@
-from pprint import pprint
+from io import BytesIO
 import typing
-from django.forms import ValidationError
-from ninja import Router, Schema
+from django.http import HttpResponse
+from ninja import Router
+from ribctl.lib.mod_superimpose import pymol_super, ranged_align_by_auth_asym_id, ranged_align_by_polyclass
 from ribctl.lib.types.types_polymer import RNAClass
-from ribctl.lib.types.types_ribosome import  ProteinClass, RibosomeStructure
+from ribctl.lib.types.types_ribosome import  PolymerClass, ProteinClass, RibosomeStructure
 from schema.v0 import BanClassMetadata, ExogenousRNAByStruct,LigandInstance, LigandlikeInstance, NeoStruct, NomenclatureClass, NomenclatureClassMember
 from rbxz_bend.application import db_connection
+from wsgiref.util import FileWrapper
 # from ribctl.lib.mod_superimpose import 
 
 v0 = Router()
@@ -13,16 +15,51 @@ v0 = Router()
 
 
 
-  | ranged_align
-  | cif_chain_by_class
-  | ligand_prediction
-  | downloadCifChain
-  | download_ligand_nbhd 
-  | download_structure
+#   | ranged_align
+#   | cif_chain_by_class
+#   | ligand_prediction
+#   | downloadCifChain
+#   | download_ligand_nbhd 
+#   | download_structure
 
-@v0.get('/ranged_align',tags=['Operations'])
-def ranged_align(request,):
-    return super
+@v0.get('/ranged_align',tags=['Static Files'])
+def ranged_align(request,
+                 range_start     : int,
+                 range_end       : int,
+
+                 src_rcsb_id     : str,
+                 src_auth_asym_id: str,
+
+                 tgt_rcsb_id     : str,
+                 tgt_auth_asym_id: str): 
+
+    print("Hit endpoint ranged align!!")
+    # (src_auth_asym_id, src_path, src_range,
+    #  tgt_auth_asym_id, tgt_path, tgt_range) = ranged_align_by_polyclass(src_rcsb_id, tgt_rcsb_id,res_range,poly_class)
+
+    print("Got parameters")
+    print(f"""      { range_start      }
+                 { range_end        }
+                 { src_rcsb_id      }
+                 { src_auth_asym_id }
+                 { tgt_rcsb_id      }
+                 { tgt_auth_asym_id }""")
+    (  _, _, src_range,
+       _, _, tgt_range) = ranged_align_by_auth_asym_id(src_rcsb_id, src_auth_asym_id, tgt_rcsb_id, tgt_auth_asym_id, ( range_start,range_end ))
+
+    cif_str:str = pymol_super(
+        src_rcsb_id,
+        src_range,
+        src_auth_asym_id,
+
+        tgt_rcsb_id,
+        tgt_range,
+        tgt_auth_asym_id,
+    )
+
+    response = HttpResponse(FileWrapper(BytesIO(bytes(cif_str,'utf-8'))), content_type='chemical/x-mmcif')
+    response['Content-Disposition'] = 'attachment; filename="{}-{}_{}-{}.cif"'.format(src_rcsb_id,src_auth_asym_id,tgt_rcsb_id,tgt_auth_asym_id)
+    return response
 
 
 ## ----- Old data endpoints ----- 
