@@ -22,12 +22,9 @@ PROTEOVISION_URL        = lambda SU, _class, taxids: "https://ribovision3.chemis
 PROTEOVISION_MSA_FOLDER = '/home/rxz/dev/docker_ribxz/api/ribctl/__wip/data/msa_classes_proteovision/'
 
 parser = argparse.ArgumentParser(description='Argument Parser for my ms code.')
-parser.add_argument('-p', '--proteovision', choices=['lsu', 'ssu', 'single'], required=False,
-                    help='Type of proteovision analysis to perform (lsu, ssu, single)')
-parser.add_argument('-a','--addtaxid', type=int, required=False,
-                    help='Additional taxonomic ID to include in the analysis')
-parser.add_argument('-t','--lineage', type=str, required=False,
-                    help='Comma-separated list of taxonomic levels to include in the analysis')
+parser.add_argument('-p', '--proteovision', required=False, help='Type of proteovision analysis to perform (lsu, ssu, single)')
+parser.add_argument('-a','--addtaxid', type=PolymerClass, required=False, help='Additional taxonomic ID to include in the analysis')
+parser.add_argument('-t','--lineage', type=str, required=False, help='Comma-separated list of taxonomic levels to include in the query')
 
 args = parser.parse_args()
 
@@ -130,22 +127,21 @@ def save_aln(protein:ProteinClass):
                 f.write(fasta_lines)
                 print("Wrote {} to {}".format(protein,filename))
 
+                save_aln(nomclass)
+                msa_add_taxonomic_ids(msa_class_proteovision_path(nomclass))
 
-for nomclass in list_LSU_Proteins:
-    try:
-        save_aln(nomclass)
-        msa_add_taxonomic_ids(msa_class_proteovision_path(nomclass))
-    except Exception as e:
-        print(e)
-        ...
+def process_proteovision_alignment(nomclass:ProteinClass):
+    save_aln(nomclass)
+    msa_add_taxonomic_ids(msa_class_proteovision_path(nomclass))
 
-for nomclass in list_SSU_Proteins:
-    try:
-        save_aln(nomclass)
-        msa_add_taxonomic_ids(msa_class_proteovision_path(nomclass))
-    except Exception as e:
-        print(e)
-        ...
+if proteovision_type:
+        for nomclass in [*list_LSU_Proteins, *list_SSU_Proteins]:
+            try:
+                process_proteovision_alignment(nomclass)
+            except Exception as e:
+                print(e)
+                ...
+
 
 # star -----------------------------
 # from ete3 import NcbiTaxa

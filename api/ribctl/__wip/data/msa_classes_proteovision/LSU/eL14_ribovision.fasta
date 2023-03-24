@@ -1,92 +1,238 @@
->Eukaryota_Arabidopsis thaliana |AAD25645.1
--------------------------------------M--GFKRFVEIGRVALVNYGED---YGKLVVIVDVVDQNRALVDA--P-----DMERIQMNLKRLSLTDIVI-D-IN-RVPKKKVLIEAMEKADVKNKWEKSSWGRKLIVQKRRAALND---FDRFKIMLAKIK---RAGIVRQEL-------AKLKREIAA------------------------------------------------------------------------------------------------------------------
->Eukaryota_Aedes albopictus|KXJ71484.1
--------------------------------------M--TFTRFVETGRVAKCASGKY---KGKLVAIVNVIDQNRVLIDG--P-T--TGVPRQQYPVNHLHLTKYRV-K-FP-YTAKSKVVRKALEAYNLKEKFSSTRWQERAAAKAKRCNLSD---FDRFKLRLARSE---RNRIVSAQY-------KKLKKEVVNNGM----------------------LFGKPVKGTKPLPKRRNPIAKK---------------EGKK-KRV---RKNK-KAPAKK------------------------------
->Eukaryota_Bigelowiella natans|A0A6U0CXF2
-----------------------------------MRTM-PSRRSFAEIGRIVCINYGKD---NGKIGVIVDMCDSMTCLIDG--P-----SVERKLINFRRLAFTDIKL-P-IM-KRLRSSLLYKAWTEAGIDEQFAKTTWGQKIANQNKRKELTD---FDRFVVKTLKAK---KNKIIAKKV-------KELKAKK--------------------------------------------------------------------------------------------------------------------
->Eukaryota_Thecamonas trahens ATCC 50062|KNC54986.1
--------------------------------------M--VFTRFVELGRVVLITYGPL---EGKLAVIVNIIDQNKALIDG--P-STVNGVERQAISFKRIALTDIVLPG-VT-PGMNVKSLTKKWEKADAQAKWDASSWAKRRAVRAARAKLND---FDRFKLRKARRK---VAHARHIAL-------KAAKA----------------------------------------------------------------------------------------------------------------------
->Eukaryota_Guillardia theta |XP_001713205.1
-----------------------------------------MRRHNIEIGRFVKIRYGHQ---INSIGVIIDIIDNNRCLIDG--Y-S-----GRQVINSNRIIPTYLKI-Q-IN-RNIKSKKLNQILLNDSILLKVSKLKFMIINKINQEKDKFND---FEAFKFLIGKKF---KSCK---------------------------------------------------------------------------------------------------------------------------------------
->Eukaryota_Rhodomonas salina|A0A6U5AUA2
--------------------------------------------RLVEAGRVCLVNFGPL---VGKLVVIVNVVDGKRVLVDG--P-STVNGVPRQIMPLARLSLTIIKI-D-IE-PGSRLPTLMKAYKAADVQKQWAESSWAKGIAKKAAKTKLSD---FDRFKVMVARKT---RARVVNTHM-------KKMLKK---------------------------------------------------------------------------------------------------------------------
->Eukaryota_Trichomonas vaginalis|A2DZ49
--------------------------------------M--PFKQFVEIGRVALINFGEL---VDKLAIIVDIVDDKRVLIDV--L-E--FDAPRQTIPIQRLKLTDYVA-K-IQ-RNAAPEAAKAA--AKDFIKQFYESAWGKQVIARKNKAQMND---FQRFKYAQLEAK---RDALVAKEL-------NNH------------------------------------------------------------------------------------------------------------------------
->Eukaryota_Drosophila melanogaster |CAA70905.1
--------------------------------------M--PFERFVQTGRIAKASAGPL---KGRLVAIVDVIDQNRVLVDG--P-L--TGVPRQEYRLNNLHLTKYRI-K-FP-YTAPTRIVRKAWTESDLKAQWKVSPWSVKAQNICKRSSLND---FDRFKLRYAKRQ---RNKLLTIAF-------NTLKKRTKADGT----------------------------------PRVLKKDRRE---------------RLRA-EKA---KGGK-KAAAKK------------------------------
->Eukaryota_Latimeria chalumnae|H3B787
--------------------------------------Q--VFKRYVEIGRVAYISFGPH---AGKLVAIVDVIDQNRALVDG--P-C--SGVRRQAMPFKCMQLTDFVI-K-IQ-HRYQIPEVTDFWLVLVFKKKKKKKTWGKTLDKKKKKKKKKKANFLKNFHFIRTQSM---RNKIIKHEI-------KKLQKEAAKKA----------------------------------------------------------------------------------------------------------------
->Eukaryota_Giardia intestinalis|KAE8303677.1
--------------------------------------M--SYHRFVEAGRLVYLGDGPD---KGKLAVIVDILSTAAVLIDG--P-T--TGVKRQVVSLRWAMLTDQVI-N-IS-EKPTTEQLKKEIEASPAIDTFMNSVWGKKIQQQRLRAKATF---EDMGKIAKLRRE---RKMAMKRIA-------MSIK-----------------------------------------------------------------------------------------------------------------------
->Eukaryota_Acanthamoeba castellanii|XP_004341554.1
-MG---------------------R-------SCITQGL--VFKRFVEIGRVAVINYGPD---AGKLCVIIDVLDQNRA------------------IPFKRLALTDLKI-K-IQ-KSPRLKSLVKAYTEAGIQEKWEATSWAKKIALRKKRAALND---FDRFKIMLAKKE---KSRVVRQEL-------RKLTKEFHKKEN-------------------DARVAA--------------------------------------------------KKQ---------------------------------
->Eukaryota_Chondrus crispus|CDF35098.1
--------------------------------------M--TFTRFVETGRVAIINYGPH---VNKLVIIVDILDQSRVLVDG--P-T--CGLRRQVFNVKRLALTSIKV-DGLE-RAAATDVVKAAYEAADVDATFAKSGWGKKIDSKAKRAALDD---FGRFKVMCARIQ---KGKKVREQL-------EKLKTAA--------------------------------------------------------------------------------------------------------------------
->Eukaryota_Rhodella violacea|A0A6V0NEU4
--------------------------------------M--VFKRHVEIGRVALINLGPH---TDKLAVIVDVLDQTRCLVDS--P-D--GSIPRHVSPFRRLALTDITV-P-LRGHGARTGTVRKACEKEGVVGKWEKTAWAGKIEKRKKRAAMGD---FDRFKCMIAKKK---KSAMINKEF-------KKLKKAM--------------------------------------------------------------------------------------------------------------------
->Eukaryota_Trieres chinensis|A0A6U1VQW5
--------------------------------------M--VFTRYVEVGRVVLINYGPE---EGKLATIIDIVDQNKCLIDG--P-ADLTGVVRQVIPYKRIALTDITV-K-IA-RNARAKTLKKAWTEGDVQAKWDGSSWAKKLSSKKKRASLSD---FGRFKVMVAKKK---RSAIVAKKI-------KELKA----------------------------------------------------------------------------------------------------------------------
->Eukaryota_Chlamydomonas reinhardtii|XP_001691600.1
--------------------------------------M--PFKRYVEIGRVALINYGPE---FGKLVVITDVIDQNRALVDF--P-----EQERRVVNFKRLAITDFKV-D-IK-RHAVKKDLKKALADADVVAKFAASSWGQKLAKQAAKAATTD---FDRYKATVAKAK---KARAVRKVL-------NGLKKTAAPKKK---------------------------------------------------------------------------------------------------------------
->Eukaryota_Tetradesmus obliquus|A0A383VUY0
--------------------------------------M--PFKRYVEIGRVALVNFGED---YGKLVVITDVVDQNRALVDA--P-----TETRRIMPFKRMTLTDLTV-E-IP-RLASKKVLTAAFTSADVAGKFAASAWGKKLAARQSKANQND---FERYQAAVAKAK---RNRAVRKAY-------NQLAKSA--------------------------------------------------------------------------------------------------------------------
->Eukaryota_Auxenochlorella protothecoides|XP_011396041.1
--------------------------------------M--PFTRYVEIGRVALINYGPE---YGKLVVISDVVDQNRALVDR--P-----DEIRRVVNFKRLVLTDFKI-D-IP-RLAKKSVLTKALEEADVFAKFSNSSWGRKIAKREAKANLTD---FERHTALVAKVT---RSKKVRTAF-------NALKKAAKN------------------------------------------------------------------------------------------------------------------
->Eukaryota_Ostreococcus tauri|CEF98442.1
--------------------------------------M--PFKRNIEVGRVALVNLKADKR-YGKLVVIVDIVDQNRVLVAA--P-----GVKRDVISLKRVAITDMKV-E-CE-RACDEAALNAAWKAGEVESKWAASAWGKKIARQNARASLTD---FERFKVALARTK---RSALIKKAL-------AA-------------------------------------------------------------------------------------------------------------------------
->Eukaryota_Eremothecium gossypii|Q75DL3
--------------------------------MSAESTVKASNWRLVEVGRVVLVKKGPS---AGKLAAIVEIIDNKRALVDG--P-E--TGVPRQAVSLGHVVLTPLVF-A-LP-RGARTSTVSKKWAAAGVNDKWAASSWAKKIAQRERRAALSD---FERFQVMVLKKR---RGFVLKREV-------ATAVKVAASAE----------------------------------------------------------------------------------------------------------------
->Eukaryota_Tetrahymena thermophila|Q24C27
--------------------------------------M--VFNKFVQVGRVVYINYGAD---KGKLAVIVNIINQNRILIDG--E-----HIVRQVIPIRRVHLTKFQI-DNVE-LNQRTVLLKKKIAKFDLTKKYAETSFAKKQAIKTKRANLGD---FDRFRVMVLKKK---LARTSAKSK----------------------------------------------------------------------------------------------------------------------------------
->Eukaryota_Paramecium tetraurelia|CAK85710.1
-MNINKYKYIIQFIFIRSLFKKIKRI-FKQQKKFVLLKM--VLGKFVEVGRVVKINYGPQ---EGKLATIVEILNDKRVLIDGPTT-----GVQRQVIPIRRLTLTKFNL-KGAT-RGARTGVITKAIKKSDPFAQYAQTIAAKKVAKKALRAKLND---FDRFRVMILRKRRSALLSTQLKSLKKNAG--GKAQAPAKGGNK---------------------------------------------------------------------------KK----------------------------------
->Eukaryota_Caenorhabditis briggsae|A8WWP3
--------------------------------------M--VFNRVVQIGRVVFIASGND---QGKLATVVNVIDGNRVQIDG--P-S--SGVARTVRNLKDLHLTKFVV-K-IR-VGQRSKGVQTAFDAAKVAENFQKTQWAKKIAQRAIRAKLTD---FERYKLMKAKQM---RNRIVRVEL-------AKLKKAQK-------------------------------------------------------------------------------------------------------------------
->Eukaryota_Caenorhabditis elegans |Q9XVE9
--------------------------------------M--VFNRVVQIGRVVFIASGKD---QGKLAAIVNVIDGNRVQIDG--P-S--SDVTRTVRNLKDLQLTKFVL-K-LR-VGQRTKGVKAAFDAAKVTENFQKTQWAKKIAQRAIRAKLTD---FERYKLMKAKQM---RNRIVRVEL-------AKLKKAQK-------------------------------------------------------------------------------------------------------------------
->Eukaryota_Xenopus laevis|NP_001084724.1
--------------------------------------M--VFKRYVQIGRVAYLSFGPH---AGKLVAIVDVIDQNRALVDG--P-C--TGVRRQAMPFKCMQLTDFVI-K-VP-HSARQKYVRRAWEKANVNEKWAESSWAKKIDARQRKAKMSD---FDRFKVMKAKKM---RNKIIRHEM-------KKLQKEAAKKA----------------------------------------------------------------------------------------------------------------
->Eukaryota_Gallus gallus |XP_418775.3
--------------------------------------M--VFKRFVEIGRIAFVSFGRH---AGKLVAIVDVIDQNRALVDG--P-C--SGVRRQAMPFKCMQLTDFVL-K-FP-HSARQKCVRRAWEKENINEKWAATRWAKKIEAREKKAKMTD---FDRYKVMKAKKM---RNRIIKHEI-------KKLQKKTTKKVK---------------------------------------------------------------KTE---------KKQK--------------------------------
->Eukaryota_Pan troglodytes|H2QHY6
--------------------------------------M--VFRRFVEVGRVAYVSFGPH---AGKLVAIVDVIDQNRALVDG--P-C--TQVRRQAMPFKCMQLTDFIL-K-FP-HSARQKYVRQAWQKADINTKWAATRWAKKIEARERKAKMTD---FDRFKVMKAKKM---RNRIIKNEV-------KKLQKAALLKASPKKAPGTKGT-----AAAAAAKVPAKKITAASKKAPAQKVPAQKATGQKAAPAPKAQKGQKAPAQKAPAPKASG-KKA---------------------------------
->Eukaryota_Homo sapiens|AAH00606.1
--------------------------------------M--VFRRFVEVGRVAYVSFGPH---AGKLVAIVDVIDQNRALVDG--P-C--TQVRRQAMPFKCMQLTDFIL-K-FP-HSAHQKYVRQAWQKADINTKWAATRWAKKIEARERKAKMTD---FDRFKVMKAKKM---RNRIIKNEV-------KKLQKAALLKASPKKAPGTKGTAAAAAAAAAAAKVPAKKITAASKKAPAQKVPAQKATGQKAAPAPKAQKGQKAPAQKAPAPKASG-KKA---------------------------------
->Eukaryota_Mus musculus |AAH92249.1
--------------------------------------M--VFRRYVEVGRVAYISFGPH---AGKLVAIVDVIDQNRALVDG--P-C--TRVRRQAMPFKCMQLTDFIL-K-FP-HSARQKYVRKAWEKADINTKWAATRWAKKIDARERKAKMTD---FDRFKVMKAKKM---RNRIIKTEV-------KKLQRAAILKASPKKAAVAKAAIAAAAAAAAKAKVPAKKATGPGKKAAGQKAPAQKAAGQKAAPPAKGQKGQKTPAQKAPAPKAAG-KKA---------------------------------
->Eukaryota_Rattus norvegicus|CAA63926.1
--------------------------------------M--VFRRFVEVGRVAYISFGPH---AGKLVAIVDVIDQNRALVDG--P-C--TRVRRQAMPFKCMQLTDFIL-K-FP-HSARQKYVRKAWEKADINTKWAATRWAKKIDARERKAKMTD---FDRFKVMKAKKM---RNRIIKTEV-------KKLQRAALLKASPKKAAVAKAAI--AAAAAAKAKVPAKKATGPGQKAAAQKASAQKAAGQKAAPPAKGQKGQKTPAQKAPAPKAAG-KKA---------------------------------
->Eukaryota_Monodelphis domestica|XP_001381473.2
--------------------------------------M--VFKRYVEIGRVAYISFGPH---AGKLVAIVDVIDQNRALVDG--P-C--SGVRRQAMPFKCMQLTDFVL-K-FP-HSARQKYVRAAWEKEKINTKWKATRWAKKIEARERKAKMTD---FDRYKVMKAKKM---RNRIIKHEV-------KKLQKASTQKGSLKKGTAQKALASKVS----AKKIPSKKAEGQKAALGPKGQKAAGQKAPAKKGPAQKGPAQKTPAQKAPAQKSAA-SKAKK-------------------------------
->Eukaryota_Danio rerio |AAT68040.1
--------------------------------------M--VFKRFVEIGRVAFIAFGPH---EGKLVAIVDVIDQNRALVDG--P-C--TGVKRQALPFKCLQLTDYVI-K-VP-HRNRQKYVRRAWEKAEISKKWEESSWAKKIEARKKRAAMSD---FDRYKVSKAKKM---RNKIIRHEM-------KKLQKAAAQKKA---------------------------------------------------------------------------------------------------------------
->Eukaryota_Euglena gracilis|QLA09620.1
--------------------------------------MVKAKRNFVEIGRVIYVRFGKN---RDTLAVITDIIDHNWIFADG--R-AFPNGMKRGAVNIKDIALTHMKL-K-MG-HGLRHRHLKELVAKEDVLNKWKKTTVARRLEKQKNKLNSTD---LERWRIQYNRRQ---RSSLIKVKF-------NKLKKKALQTAR---------------------RLHGK--KNPIPFADRKKPQKQAPK-----------EGKVKKDDKGRKLKDSE-RRKIKKCRINYKSLAGWQLDVNPGPIAGSSLVSKVH
->Eukaryota_Leishmania braziliensis MHOM/BR/75/M2904|CAM45213.1
--------------------------------------M--VKSHYIRAGRMVRILRGPR---QDRVGVIVDIVDANRVLVEN--P-E-DAKMWRHVQNLKNVEPLKYCV-S-VG-RNCSAKALKDALDSSKVLEKYAKTRTAARVEAKKACAASTD---FERYQLRVARRS---RAYWARKVF-------DEKDAKTPVSWH----------------------------------KVALKRMQKKASKMDSTEGAKRRMQKAIAARKAKK------------------------------------------
->Eukaryota_Trypanosoma brucei brucei strain 927/4 GUTat10.1|XP_829188.1
--------------------------------------M--VKANYIRAGRLVRILRGPR---QNRVGVIVDIVDANRVLVEN--P-C-EQKMWRHVQNLKNVEPLKFCV-S-IS-RNCSTKALKEALESKKVLEKYAATKSAVRIAAKKAFAESTD---FERYQLRVAKRS---RAYWARKIF-------DDNDKKNPVSWH----------------------------------KVALKKLLKNAKKVDSTPAAKKRVEKARAARKARLAAGKSKTKVAASKK----------------------------
->Eukaryota_Syncephalastrum racemosum|ORY94614.1
-------------------------------------MVQGSFQRQVEVGRVVLLNE------ENKLAVIVDIVDHRRALIEG--P-T--TGVPRQAFPYAHMTLTNLVI-KGLP-RNAGHAVVKKLFEKEDILAKWGKSAWAKKLETREKRANLTD---FEKFKVQKLKAQ---RRYIARSAL-------HAAKKQVAA------------------------------------------------------------------------------------------------------------------
->Eukaryota_Plasmodiophora brassicae|CEO98954.1
--------------------------------------M--VFDKFVEVGRVIFINYGPD---YGKLAVILDVVDQNRALIAG--P-----NVQRQQLVFKRVALTPLKL-N-IP-RSIRQGTLLKAWASADVDAKWAETSFAKKIAKQEKRHSLTD---LGRFEAMIHRKQ---KSFLVNKEV-------AKLKKVAAQ------------------------------------------------------------------------------------------------------------------
->Eukaryota_Dictyostelium discoideum AX4|EAL68160.1
--------------------------------------MISKFSLFVEIGRVVVINYGEY---INKTAVIIDVLDQNRALVAG--P-H--SGVERHIINFKWINLTPLKV-N-IQ-RGARINTLIAAIKAADLETKIAALSAVKKINARATKSNQTD---FERFKANLIRRK---LNKKVSGEV-------KKLVNIANRAAH----------------------------------------------------------KKAVA-QKA---AGHV-KKTL--------------------------------
->Eukaryota_Chrysotila carterae|A0A6T0DK81
--------------------------------------M--TYKRFVEVGRIALICYGPD---AGKLCTIINILDHNRVLVDG--P-EKITGVHRHEINIKRIMLTDLTI-P-AK-LNMKHKELAAVWEAEGVLAKWETSSWAKKLRARKLRAEMTD---FDRFQVMLARKE---RSAARKAAV-------GA-------------------------------------------------------------------------------------------------------------------------
->Eukaryota_Emiliania huxleyi|R1DEL6
--------------------------------------M--TFKRFVEVGRVCLITYGPN---EGKLCTIINMIDQGHVLVDG--TGAGEAGCTRMGISVKRLMLTDLTV-S-IS-LNSTRKKLKAAWEAEGTLAAWEATSWAKKRARSAARKQLTD---FGRFEAMLARKE---RSAARKAKM----------------------------------------------------------------------------------------------------------------------------------
->Eukaryota_Cyanidioschyzon merolae|M1UQG7
--------------------------------------M--AFKRFVEVGRLCIISYGEH---ADKICVIVDIQDQGHVVIDA--T-A-DSGVPRTVINVKRLKLTDVVV-K-LP-RACKTSVVRKALEAQQAVQRFRETAWGQKVEKQRVRARLTD---FDRFRVMVARKR---RSQLIKHEL-------GRLRSETKTSAS---------------------------------------------------------------------------------------------------------------
->Eukaryota_Thalassiosira pseudonana CCMP1335|EED94727.1
--------------------------------------M--GFSRYVEVGRVVLITYGPD---AGKLATVIDVVDQNKCLVQG--P-EEITGVKRQVIPYRRIALTDLTV-K-IQ-RSARAKQLKAAWAEGDTLAKWEGSSWAKKLDGKSKRAALSD---FDRFKVMVAKKQ---KSRIIAQKI-------KELKA----------------------------------------------------------------------------------------------------------------------
->Eukaryota_Saccharomyces cerevisiae S288c|NP_011862.1
--------------------------------MSTDSIVKASNWRLVEVGRVVLIKKGQS---AGKLAAIVEIIDQKKVLIDG--P-K--AGVPRQAINLGQVVLTPLTF-A-LP-RGARTATVSKKWAAAGVCEKWAASSWAKKIAQRERRAALTD---FERFQVMVLRKQ---KRYTVKKAL-------AKA------------------------------------------------------------------------------------------------------------------------
->Eukaryota_Yarrowia lipolytica CLIB122|XP_503376.1
-----------------------------------MTEVKSVNWRLVEAGRIVLINRSDNKSTQGKLAIIAEIVDHGRVLIDG--P-T--TGVARQVANLKHVTLTPHVV-EGVK-RGMKSKTIKAKVEASPAFKEWSESSWAKKIAQRERRRHLTD---FERFQVMVHRRE---RKAALAKAV-------AKA------------------------------------------------------------------------------------------------------------------------
->Eukaryota_Schizosaccharomyces pombe 972h-|NP_593924.1
--------------------------------------M-EGFKRYVEVGRVVLVTKGEY---TGKLAVIVDIVDHKRALIDS--P-C--SEFPRQVIRYGSVVLTHIVM-K-LP-RGARSGIVAKKWKAQDVCNKWASSAWAKKLEAKKVRSQLND---FDRFAVMRLKKQ---RREQVNVAV-------AKALKA---------------------------------------------------------------------------------------------------------------------
->Eukaryota_Plasmodium falciparum 3D7 |CZU00014.1
-MP---------------------RVELTEEEKLYISKKNLLFKRFVEPGRLCLIEYGPY---AGKLCFIVDIVTITRVIVDG--A-F-ITGVPRMVIPLKRLKLLKERI-K-IN-KNCKSGFLRKTVNSTKVLEEFNNSKLGKKMIIKKKRDEATD---FERFQVYFAKRE---LKKKMTTIKNKKNGENKKVKKNVQKVKA---------------------------------------------------------------------------------------------------------------
->Eukaryota_Oryza sativa Japonica Group |BAG68299.1
--------------------------------------M--PFKRFVEIGRVALVNYGKD---YGRLVVIVDVVDQNRALVDA--P-----DMVRCQINFKRLSLTDIKI-D-IK-RVPKKTTLIKAMEEADVKNKWENSSWGKKLIVQKRRASLND---FDRFKVMLAKIK---RGGAIRQEL-------AKLKKTAAA------------------------------------------------------------------------------------------------------------------
+>Eukaryota_Arabidopsis thaliana |AAD25645.1|3702
+-------------------------------------M--GFKRFVEIGRVALVNYGED-
+--YGKLVVIVDVVDQNRALVDA--P-----DMERIQMNLKRLSLTDIVI-D-IN-RVPKK
+KVLIEAMEKADVKNKWEKSSWGRKLIVQKRRAALND---FDRFKIMLAKIK---RAGIVR
+QEL-------AKLKREIAA-----------------------------------------
+------------------------------------------------------------
+-------------
+>Eukaryota_Aedes albopictus|KXJ71484.1|7160
+-------------------------------------M--TFTRFVETGRVAKCASGKY-
+--KGKLVAIVNVIDQNRVLIDG--P-T--TGVPRQQYPVNHLHLTKYRV-K-FP-YTAKS
+KVVRKALEAYNLKEKFSSTRWQERAAAKAKRCNLSD---FDRFKLRLARSE---RNRIVS
+AQY-------KKLKKEVVNNGM----------------------LFGKPVKGTKPLPKRR
+NPIAKK---------------EGKK-KRV---RKNK-KAPAKK-----------------
+-------------
+>Eukaryota_Thecamonas trahens ATCC 50062|KNC54986.1|461836
+-------------------------------------M--VFTRFVELGRVVLITYGPL-
+--EGKLAVIVNIIDQNKALIDG--P-STVNGVERQAISFKRIALTDIVLPG-VT-PGMNV
+KSLTKKWEKADAQAKWDASSWAKRRAVRAARAKLND---FDRFKLRKARRK---VAHARH
+IAL-------KAAKA---------------------------------------------
+------------------------------------------------------------
+-------------
+>Eukaryota_Guillardia theta |XP_001713205.1|55529
+----------------------------------------MRRHNIEIGRFVKIRYGHQ-
+--INSIGVIIDIIDNNRCLIDG--Y-S-----GRQVINSNRIIPTYLKI-Q-IN-RNIKS
+KKLNQILLNDSILLKVSKLKFMIINKINQEKDKFND---FEAFKFLIGKKF---KSCK--
+------------------------------------------------------------
+------------------------------------------------------------
+-------------
+>Eukaryota_Drosophila melanogaster |CAA70905.1|7227
+-------------------------------------M--PFERFVQTGRIAKASAGPL-
+--KGRLVAIVDVIDQNRVLVDG--P-L--TGVPRQEYRLNNLHLTKYRI-K-FP-YTAPT
+RIVRKAWTESDLKAQWKVSPWSVKAQNICKRSSLND---FDRFKLRYAKRQ---RNKLLT
+IAF-------NTLKKRTKADGT----------------------------------PRVL
+KKDRRE---------------RLRA-EKA---KGGK-KAAAKK-----------------
+-------------
+>Eukaryota_Giardia intestinalis|KAE8303677.1|5741
+-------------------------------------M--SYHRFVEAGRLVYLGDGPD-
+--KGKLAVIVDILSTAAVLIDG--P-T--TGVKRQVVSLRWAMLTDQVI-N-IS-EKPTT
+EQLKKEIEASPAIDTFMNSVWGKKIQQQRLRAKATF---EDMGKIAKLRRE---RKMAMK
+RIA-------MSIK----------------------------------------------
+------------------------------------------------------------
+-------------
+>Eukaryota_Acanthamoeba castellanii|XP_004341554.1|1257118
+MG---------------------R-------SCITQGL--VFKRFVEIGRVAVINYGPD-
+--AGKLCVIIDVLDQNRA------------------IPFKRLALTDLKI-K-IQ-KSPRL
+KSLVKAYTEAGIQEKWEATSWAKKIALRKKRAALND---FDRFKIMLAKKE---KSRVVR
+QEL-------RKLTKEFHKKEN-------------------DARVAA-------------
+-------------------------------------KKQ--------------------
+-------------
+>Eukaryota_Chondrus crispus|CDF35098.1|2769
+-------------------------------------M--TFTRFVETGRVAIINYGPH-
+--VNKLVIIVDILDQSRVLVDG--P-T--CGLRRQVFNVKRLALTSIKV-DGLE-RAAAT
+DVVKAAYEAADVDATFAKSGWGKKIDSKAKRAALDD---FGRFKVMCARIQ---KGKKVR
+EQL-------EKLKTAA-------------------------------------------
+------------------------------------------------------------
+-------------
+>Eukaryota_Chlamydomonas reinhardtii|XP_001691600.1|3055
+-------------------------------------M--PFKRYVEIGRVALINYGPE-
+--FGKLVVITDVIDQNRALVDF--P-----EQERRVVNFKRLAITDFKV-D-IK-RHAVK
+KDLKKALADADVVAKFAASSWGQKLAKQAAKAATTD---FDRYKATVAKAK---KARAVR
+KVL-------NGLKKTAAPKKK--------------------------------------
+------------------------------------------------------------
+-------------
+>Eukaryota_Auxenochlorella protothecoides|XP_011396041.1|3075
+-------------------------------------M--PFTRYVEIGRVALINYGPE-
+--YGKLVVISDVVDQNRALVDR--P-----DEIRRVVNFKRLVLTDFKI-D-IP-RLAKK
+SVLTKALEEADVFAKFSNSSWGRKIAKREAKANLTD---FERHTALVAKVT---RSKKVR
+TAF-------NALKKAAKN-----------------------------------------
+------------------------------------------------------------
+-------------
+>Eukaryota_Ostreococcus tauri|CEF98442.1|70448
+-------------------------------------M--PFKRNIEVGRVALVNLKADK
+R-YGKLVVIVDIVDQNRVLVAA--P-----GVKRDVISLKRVAITDMKV-E-CE-RACDE
+AALNAAWKAGEVESKWAASAWGKKIARQNARASLTD---FERFKVALARTK---RSALIK
+KAL-------AA------------------------------------------------
+------------------------------------------------------------
+-------------
+>Eukaryota_Eremothecium gossypii|Q75DL3|33169
+-------------------------------MSAESTVKASNWRLVEVGRVVLVKKGPS-
+--AGKLAAIVEIIDNKRALVDG--P-E--TGVPRQAVSLGHVVLTPLVF-A-LP-RGART
+STVSKKWAAAGVNDKWAASSWAKKIAQRERRAALSD---FERFQVMVLKKR---RGFVLK
+REV-------ATAVKVAASAE---------------------------------------
+------------------------------------------------------------
+-------------
+>Eukaryota_Tetrahymena thermophila|Q24C27|312017
+-------------------------------------M--VFNKFVQVGRVVYINYGAD-
+--KGKLAVIVNIINQNRILIDG--E-----HIVRQVIPIRRVHLTKFQI-DNVE-LNQRT
+VLLKKKIAKFDLTKKYAETSFAKKQAIKTKRANLGD---FDRFRVMVLKKK---LARTSA
+KSK---------------------------------------------------------
+------------------------------------------------------------
+-------------
+>Eukaryota_Paramecium tetraurelia|CAK85710.1|5888
+MNINKYKYIIQFIFIRSLFKKIKRI-FKQQKKFVLLKM--VLGKFVEVGRVVKINYGPQ-
+--EGKLATIVEILNDKRVLIDGPTT-----GVQRQVIPIRRLTLTKFNL-KGAT-RGART
+GVITKAIKKSDPFAQYAQTIAAKKVAKKALRAKLND---FDRFRVMILRKRRSALLSTQL
+KSLKKNAG--GKAQAPAKGGNK--------------------------------------
+-------------------------------------KK---------------------
+-------------
+>Eukaryota_Caenorhabditis elegans |Q9XVE9|6239
+-------------------------------------M--VFNRVVQIGRVVFIASGKD-
+--QGKLAAIVNVIDGNRVQIDG--P-S--SDVTRTVRNLKDLQLTKFVL-K-LR-VGQRT
+KGVKAAFDAAKVTENFQKTQWAKKIAQRAIRAKLTD---FERYKLMKAKQM---RNRIVR
+VEL-------AKLKKAQK------------------------------------------
+------------------------------------------------------------
+-------------
+>Eukaryota_Xenopus laevis|NP_001084724.1|8355
+-------------------------------------M--VFKRYVQIGRVAYLSFGPH-
+--AGKLVAIVDVIDQNRALVDG--P-C--TGVRRQAMPFKCMQLTDFVI-K-VP-HSARQ
+KYVRRAWEKANVNEKWAESSWAKKIDARQRKAKMSD---FDRFKVMKAKKM---RNKIIR
+HEM-------KKLQKEAAKKA---------------------------------------
+------------------------------------------------------------
+-------------
+>Eukaryota_Gallus gallus |XP_418775.3|9031
+-------------------------------------M--VFKRFVEIGRIAFVSFGRH-
+--AGKLVAIVDVIDQNRALVDG--P-C--SGVRRQAMPFKCMQLTDFVL-K-FP-HSARQ
+KCVRRAWEKENINEKWAATRWAKKIEAREKKAKMTD---FDRYKVMKAKKM---RNRIIK
+HEI-------KKLQKKTTKKVK--------------------------------------
+-------------------------KTE---------KKQK-------------------
+-------------
+>Eukaryota_Homo sapiens|AAH00606.1|9606
+-------------------------------------M--VFRRFVEVGRVAYVSFGPH-
+--AGKLVAIVDVIDQNRALVDG--P-C--TQVRRQAMPFKCMQLTDFIL-K-FP-HSAHQ
+KYVRQAWQKADINTKWAATRWAKKIEARERKAKMTD---FDRFKVMKAKKM---RNRIIK
+NEV-------KKLQKAALLKASPKKAPGTKGTAAAAAAAAAAAKVPAKKITAASKKAPAQ
+KVPAQKATGQKAAPAPKAQKGQKAPAQKAPAPKASG-KKA--------------------
+-------------
+>Eukaryota_Mus musculus |AAH92249.1|10090
+-------------------------------------M--VFRRYVEVGRVAYISFGPH-
+--AGKLVAIVDVIDQNRALVDG--P-C--TRVRRQAMPFKCMQLTDFIL-K-FP-HSARQ
+KYVRKAWEKADINTKWAATRWAKKIDARERKAKMTD---FDRFKVMKAKKM---RNRIIK
+TEV-------KKLQRAAILKASPKKAAVAKAAIAAAAAAAAKAKVPAKKATGPGKKAAGQ
+KAPAQKAAGQKAAPPAKGQKGQKTPAQKAPAPKAAG-KKA--------------------
+-------------
+>Eukaryota_Rattus norvegicus|CAA63926.1|10116
+-------------------------------------M--VFRRFVEVGRVAYISFGPH-
+--AGKLVAIVDVIDQNRALVDG--P-C--TRVRRQAMPFKCMQLTDFIL-K-FP-HSARQ
+KYVRKAWEKADINTKWAATRWAKKIDARERKAKMTD---FDRFKVMKAKKM---RNRIIK
+TEV-------KKLQRAALLKASPKKAAVAKAAI--AAAAAAKAKVPAKKATGPGQKAAAQ
+KASAQKAAGQKAAPPAKGQKGQKTPAQKAPAPKAAG-KKA--------------------
+-------------
+>Eukaryota_Monodelphis domestica|XP_001381473.2|13616
+-------------------------------------M--VFKRYVEIGRVAYISFGPH-
+--AGKLVAIVDVIDQNRALVDG--P-C--SGVRRQAMPFKCMQLTDFVL-K-FP-HSARQ
+KYVRAAWEKEKINTKWKATRWAKKIEARERKAKMTD---FDRYKVMKAKKM---RNRIIK
+HEV-------KKLQKASTQKGSLKKGTAQKALASKVS----AKKIPSKKAEGQKAALGPK
+GQKAAGQKAPAKKGPAQKGPAQKTPAQKAPAQKSAA-SKAKK------------------
+-------------
+>Eukaryota_Danio rerio |AAT68040.1|7955
+-------------------------------------M--VFKRFVEIGRVAFIAFGPH-
+--EGKLVAIVDVIDQNRALVDG--P-C--TGVKRQALPFKCLQLTDYVI-K-VP-HRNRQ
+KYVRRAWEKAEISKKWEESSWAKKIEARKKRAAMSD---FDRYKVSKAKKM---RNKIIR
+HEM-------KKLQKAAAQKKA--------------------------------------
+------------------------------------------------------------
+-------------
+>Eukaryota_Euglena gracilis|QLA09620.1|3039
+-------------------------------------MVKAKRNFVEIGRVIYVRFGKN-
+--RDTLAVITDIIDHNWIFADG--R-AFPNGMKRGAVNIKDIALTHMKL-K-MG-HGLRH
+RHLKELVAKEDVLNKWKKTTVARRLEKQKNKLNSTD---LERWRIQYNRRQ---RSSLIK
+VKF-------NKLKKKALQTAR---------------------RLHGK--KNPIPFADRK
+KPQKQAPK-----------EGKVKKDDKGRKLKDSE-RRKIKKCRINYKSLAGWQLDVNP
+GPIAGSSLVSKVH
+>Eukaryota_Leishmania braziliensis MHOM/BR/75/M2904|CAM45213.1|420245
+-------------------------------------M--VKSHYIRAGRMVRILRGPR-
+--QDRVGVIVDIVDANRVLVEN--P-E-DAKMWRHVQNLKNVEPLKYCV-S-VG-RNCSA
+KALKDALDSSKVLEKYAKTRTAARVEAKKACAASTD---FERYQLRVARRS---RAYWAR
+KVF-------DEKDAKTPVSWH----------------------------------KVAL
+KRMQKKASKMDSTEGAKRRMQKAIAARKAKK-----------------------------
+-------------
+>Eukaryota_Trypanosoma brucei brucei strain 927/4 GUTat10.1|XP_829188.1|185431
+-------------------------------------M--VKANYIRAGRLVRILRGPR-
+--QNRVGVIVDIVDANRVLVEN--P-C-EQKMWRHVQNLKNVEPLKFCV-S-IS-RNCST
+KALKEALESKKVLEKYAATKSAVRIAAKKAFAESTD---FERYQLRVAKRS---RAYWAR
+KIF-------DDNDKKNPVSWH----------------------------------KVAL
+KKLLKNAKKVDSTPAAKKRVEKARAARKARLAAGKSKTKVAASKK---------------
+-------------
+>Eukaryota_Syncephalastrum racemosum|ORY94614.1|13706
+------------------------------------MVQGSFQRQVEVGRVVLLNE----
+--ENKLAVIVDIVDHRRALIEG--P-T--TGVPRQAFPYAHMTLTNLVI-KGLP-RNAGH
+AVVKKLFEKEDILAKWGKSAWAKKLETREKRANLTD---FEKFKVQKLKAQ---RRYIAR
+SAL-------HAAKKQVAA-----------------------------------------
+------------------------------------------------------------
+-------------
+>Eukaryota_Plasmodiophora brassicae|CEO98954.1|37360
+-------------------------------------M--VFDKFVEVGRVIFINYGPD-
+--YGKLAVILDVVDQNRALIAG--P-----NVQRQQLVFKRVALTPLKL-N-IP-RSIRQ
+GTLLKAWASADVDAKWAETSFAKKIAKQEKRHSLTD---LGRFEAMIHRKQ---KSFLVN
+KEV-------AKLKKVAAQ-----------------------------------------
+------------------------------------------------------------
+-------------
+>Eukaryota_Dictyostelium discoideum AX4|EAL68160.1|352472
+-------------------------------------MISKFSLFVEIGRVVVINYGEY-
+--INKTAVIIDVLDQNRALVAG--P-H--SGVERHIINFKWINLTPLKV-N-IQ-RGARI
+NTLIAAIKAADLETKIAALSAVKKINARATKSNQTD---FERFKANLIRRK---LNKKVS
+GEV-------KKLVNIANRAAH--------------------------------------
+--------------------KKAVA-QKA---AGHV-KKTL-------------------
+-------------
+>Eukaryota_Thalassiosira pseudonana CCMP1335|EED94727.1|296543
+-------------------------------------M--GFSRYVEVGRVVLITYGPD-
+--AGKLATVIDVVDQNKCLVQG--P-EEITGVKRQVIPYRRIALTDLTV-K-IQ-RSARA
+KQLKAAWAEGDTLAKWEGSSWAKKLDGKSKRAALSD---FDRFKVMVAKKQ---KSRIIA
+QKI-------KELKA---------------------------------------------
+------------------------------------------------------------
+-------------
+>Eukaryota_Saccharomyces cerevisiae S288c|NP_011862.1|559292
+-------------------------------MSTDSIVKASNWRLVEVGRVVLIKKGQS-
+--AGKLAAIVEIIDQKKVLIDG--P-K--AGVPRQAINLGQVVLTPLTF-A-LP-RGART
+ATVSKKWAAAGVCEKWAASSWAKKIAQRERRAALTD---FERFQVMVLRKQ---KRYTVK
+KAL-------AKA-----------------------------------------------
+------------------------------------------------------------
+-------------
+>Eukaryota_Yarrowia lipolytica CLIB122|XP_503376.1|284591
+----------------------------------MTEVKSVNWRLVEAGRIVLINRSDNK
+STQGKLAIIAEIVDHGRVLIDG--P-T--TGVARQVANLKHVTLTPHVV-EGVK-RGMKS
+KTIKAKVEASPAFKEWSESSWAKKIAQRERRRHLTD---FERFQVMVHRRE---RKAALA
+KAV-------AKA-----------------------------------------------
+------------------------------------------------------------
+-------------
+>Eukaryota_Schizosaccharomyces pombe 972h-|NP_593924.1|4896
+-------------------------------------M-EGFKRYVEVGRVVLVTKGEY-
+--TGKLAVIVDIVDHKRALIDS--P-C--SEFPRQVIRYGSVVLTHIVM-K-LP-RGARS
+GIVAKKWKAQDVCNKWASSAWAKKLEAKKVRSQLND---FDRFAVMRLKKQ---RREQVN
+VAV-------AKALKA--------------------------------------------
+------------------------------------------------------------
+-------------
+>Eukaryota_Plasmodium falciparum 3D7 |CZU00014.1|36329
+MP---------------------RVELTEEEKLYISKKNLLFKRFVEPGRLCLIEYGPY-
+--AGKLCFIVDIVTITRVIVDG--A-F-ITGVPRMVIPLKRLKLLKERI-K-IN-KNCKS
+GFLRKTVNSTKVLEEFNNSKLGKKMIIKKKRDEATD---FERFQVYFAKRE---LKKKMT
+TIKNKKNGENKKVKKNVQKVKA--------------------------------------
+------------------------------------------------------------
+-------------
+>Eukaryota_Oryza sativa Japonica Group |BAG68299.1|39947
+-------------------------------------M--PFKRFVEIGRVALVNYGKD-
+--YGRLVVIVDVVDQNRALVDA--P-----DMVRCQINFKRLSLTDIKI-D-IK-RVPKK
+TTLIKAMEEADVKNKWENSSWGKKLIVQKRRASLND---FDRFKVMLAKIK---RGGAIR
+QEL-------AKLKKTAAA-----------------------------------------
+------------------------------------------------------------
+-------------

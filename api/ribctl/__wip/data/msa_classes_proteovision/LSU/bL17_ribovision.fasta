@@ -1,152 +1,456 @@
->Bacteria_Symbiobacterium thermophilum IAM 14863|WP_011197161.1
-M---AKY--QKLGRDSSARKALFRAVVTALFDKE--------------RIETTEAKAKAVQSIAEEMITLAK---------------------------------------RGDLHA-RRQALAYIY------------------------DESVVT-KLFN-QIAPRYADRNGGYTRVIRTG-V-RKGDAAPMAILELV---------------------------------------------------------------------
->Bacteria_Oceanobacillus iheyensis HTE831 |WP_011064547.1
------MA--RKLGRKTDSRMALLRNLASDLIIHE--------------RIETTEAKAKELRSIVEKMITLGK---------------------------------------RGDLHA-RRQAAAFLYNKE------------------TDEDNNVIQ-KLFD-DVAARYEDRQGGYTRVLKLN-E-RQGDGAKMAIIELV---------------------------------------------------------------------
->Bacteria_Bacillus anthracis str. Ames |AAP24192.1
-----MAY--RKLGRTSAQRKAMLRDLATDLIINE--------------RIQTTETRAKELRSVVEKMITLGK---------------------------------------RGDLHA-RRQAAAFIRNEVA----------------NAETGQDALQ-KLFA-DVAPRYAERQGGYTRIAKIG-P-RRGDAAPMVIIELV---------------------------------------------------------------------
->Bacteria_Streptococcus pneumoniae R6 |AAK99020.1
-----MAY--RKLGRTSSQRKAMLRDLTTDLLINE--------------SIVTTEARAKEIRKTVEKMITLGK---------------------------------------RGDLHA-RRQAAAFVRNEIASENY--------DEATDKYTSTTALQ-KLFS-EIAPRYAERNGGYTRILKTE-P-RRGDAAPMAIIELV---------------------------------------------------------------------
->Bacteria_Staphylococcus aureus subsp. aureus MRSA252|CAG41289.1
-----MGY--RKLGRTSDQRKAMLRDLATSLIISE--------------RIETTEARAKEVRSVVEKLITLGK---------------------------------------KGDLAS-RRNAAKTLRNVEIL--------------NEDETTQTALQ-KLFG-EIAERYTERQGGYTRILKQG-P-RRGDGAESVIIELV---------------------------------------------------------------------
->Bacteria_Listeria monocytogenes EGD-e |WP_003723675.1
-----MGY--RKLGRTSSQRKALLRDLATDLIVFE--------------RIETTEARAKEIRKVVEKLITSGK---------------------------------------KGDLHA-RRQAAAFIRHEVVEVVQVDA-KGKDGSTVKKNRPVYALQ-KLFD-DVAPRYAERQGGYTRILKKG-P-RRGDGAPMVIIELV---------------------------------------------------------------------
->Bacteria_Coxiella burnetii RSA 493 |WP_010957469.1
-MHHRKSG--RHLNRTSAHRKAMLRNMAVSLFQHE--------------LIKTTLPKAKELRRVVEPLITLAK---------------------------------------EDTVAN-RRLAFNRLR------------------------DDAIVA-KLFK-EIAPRHKERPGGYCRVLKYG-F-RNGDSAPMAIVELVDREE-SESSED----------------------------------------------------------
->Bacteria_Wolbachia endosymbiont strain TRS of Brugia malayi|WP_011256516.1
-MKHKIKK--RKLSRCTEHRLSMLKNLSISLINHE--------------QIITTLPKAKELRPYVEKFITIAK---------------------------------------NKNTLHGRRLLLSRLH------------------------NNKLVVDKLLN-VLASRYQGCKGGYSRVMKFS-T-RKGDCASMAVIELVNRDV-TAKGKVCDKN-KEKNEVATKS-------------------------------------------
->Bacteria_Blochmannia floridanus|WP_011126499.1
-MKHQKRV--LKFNRSGSHRDAMVKNMMIALILNH--------------IIKTTLSKAKILRQFIEPVITRAK---------------------------------------INTIAN-RRLIFAKIR------------------------NTDSVI-KLFT-QIGPHFYDRPGGYTRILKCG-F-RKGDNAPMAYIELVDRSK-LVIKS-----------------------------------------------------------
->Bacteria_Fusobacterium nucleatum subsp. nucleatum ATCC 25586 |Q8RE45
-MNHNKSY--RKLGRRADHRKAMLKNMTISLIKAE--------------RIETTVTRAKELRKFAERMITFGK---------------------------------------KNTLAS-RRNAFAFLR------------------------DEEVVA-KIFN-EIAPKYAERNGGYTRIIKTS-V-RKGDSAEMAIIELV---------------------------------------------------------------------
->Bacteria_Streptomyces coelicolor A3(2) |WP_003974243.1
-MPKPSKG--ARLGGSAAHEKLLLANLAKSLFEHG--------------RITTTEAKARKLRPYAERLVTKAK---------------------------------------KGDLHN-RRQVLQVIT------------------------DKSIVH-TLFT-EIGPRYENRPGGYTRITKIG-N-RRGDNAPMAVIELVEALT-----VAQQAT-GEAEAAT--KRAAKDAEGSAEVSEAKVDTTKADDEAAAEESKDA---------
->Bacteria_Tropheryma whipplei str. Twist |WP_011102634.1
-MPKPSRG--PRMCSGPDHERLVLANMSASLFLNK--------------KLRTTEARAKRLRPFAEKLVTLSK---------------------------------------RGGLHS-RRRALSILR------------------------NKAALH-ELFT-NIAPLVEDRNGGYTRITKVG-F-RSGDGAPMALIELILEPV-SARTRGTDTL-PDTVTDTGPDSAPDPVPGSEPGSAAGDLPDADTAPADPGESSSNQRVIR----
->Bacteria_Propionibacterium acnes KPA171202 |WP_011183932.1
-MPKPTKG--PRLGGSPAHERIILRNLASQLFEHG--------------HVVTTVTKAKRVRPLAEKLINRAK---------------------------------------TDTVAN-RRFVNRTIT------------------------DRGIVH-ILFT-EIGPRMEGRDGGYTRVTRIG-N-RKGDNAPMAVIEVISDKV-APKAPASAAD-AKAQINT--ATEAKEAEPEAPAEDAAAQAPVADEQKAAEVDEKAEEKPEA---
->Bacteria_Mycobacterium leprae TN |WP_010908642.1
-MPKPTKG--PRLGGSSSHQKALLTNLAASLFEHG--------------RIKTTEPKARALRPYAEKLITHAK---------------------------------------KGTLHN-RREVLKKLP------------------------DKDVVH-ALFA-EIGPFFSDRDGGYTRIIKVE-A-RKGDNAPMAVIELVREKT-VTSEADRARR-VAAASAKAAQAQEKPAQEEEVEATSDEVAYTSEPDKAAEH-------------
->Bacteria_Leifsonia xyli subsp. xyli str. CTCB07|AAT89722.1
-MPQPTKG--PRLGGGPAHERLMLANLAAALFAHK--------------SIKTTETKAKRLRPYAERLITFAK---------------------------------------RGDLHA-RRRVLAVIG------------------------DKTVVH-ELFT-EIAPLLAEREGGYTRITKLG-F-RKGDNAPMAQIELVLEPV-TPKAKPAKS----TAKAAPKSKAPVEETPDEPASEETAEAEAD---------------------
->Bacteria_Bifidobacterium longum DJO10A |WP_010081468.1
-MPTPKKG--PRLASSPAHERLMLANMATSLFQNG--------------RITTTLPKAKRLRPLAERLITFAK---------------------------------------RGDLHS-RRRVMRVIR------------------------NKSVVH-ILFT-QIAEQMEQREGGYTRIVKIA-P-RVGDAAPAAVIELVTEPV-AKKAVVKEAE-AAAKVAEEEAPAVEAEATEAAEAVEAVEAPVEETAAAEAEAPAEEAADAEKAE
->Bacteria_Chlamydophila caviae GPIC |WP_011006088.1
-MQHARKK--FRVGRTSAHNRCMLANMLKSLIHQE--------------RIETTLPKAKELRRCADKMITLAK---------------------------------------KNTLAA-RRLAVARLMVRYNKLTSKEARQAKAGDLSAYNVDRTVIN-KLFD-QLGTRFVSRNGGYTRILKLQ-N-RVGDNARKCIIEFLAD-------------------------------------------------------------------
->Bacteria_Rhodobacter sphaeroides ATCC 17025|WP_011909466.1
-MRHARGY--RRLNRTHEHRKALFANMAGSLIEHE--------------QIKTTLPKAKELRPIIEKLVTLAK---------------------------------------RGDLHA-RRQAAAQLK------------------------EDRHVE-RLFA-ILGPRYAERAGGYVRVLKAG-F-RYGDMAPMAIIEFVDRDP-NAKGAADKAR-VLAEEALED--------------------------------------------
->Bacteria_Polaromonas sp. JS666|WP_011481469.1
-MRHGHGL--RKLNRTSEHRLAMLRNMMNSLLQHE--------------VIKTTLPKAKELRRVVEPMITLAK---------------------------------------EPTVAN-KRLAFDRLR------------------------DRDMVV-KLFA-ELGPRYKARPGGYTRILKMG-F-RVGDNAPMALVELVDRPE-IEDTTADAAKAE----------------------------------------------------
->Bacteria_Deinococcus radiodurans R1 |WP_010888760.1
-MRHGKAG--RKLNRNSSARVALARAQATALLREG--------------RIQTTLTKAKELRPFVEQLITTAK---------------------------------------GGDLHS-RRLVAQDIH------------------------DKDVVR-KVMD-EVAPKYAERPGGYTRILRVG-T-RRGDGVTMALIELV---------------------------------------------------------------------
->Bacteria_Sinorhizobium meliloti 1021 |WP_003536492.1
-MRHGKAG--RKLNRTASHRKAMFANMAASLIEHE--------------QIVTTLPKAKEIRPIVEKLVTLGK---------------------------------------RGDLHA-RRQAISQIR------------------------DVAVVS-KLFD-AIASRYATRNGGYLRIMKAG-F-RQGDNAPLAVIEFVDRDV-DAKGSKDRAR-VSAEAEAAEAA------------------------------------------
->Bacteria_Caulobacter crescentus NA1000|WP_010919152.1
-MRHGKAH--RKLGRTSAHRTAMFANMSASLIKHE--------------QIVTTLPKAKELRPIVEKLVTLAK---------------------------------------RGDLHA-RRQAISSVR------------------------DVEQVG-KLFA-VLGPRYKERQGGYIRVLKAG-F-RYGDNAPMAVIEFVDRDV-SEKGKDSGPV-YVNDAED----------------------------------------------
->Bacteria_Cytophaga hutchinsonii ATCC 33406 |WP_011586484.1
-MRHGKKD--NHLGRTVTHRRALLSNMASSLILHK--------------RISTTVPKAKELRKYVEPLITKAK---------------------------------------ADSTHS-RRTVFSYLQ------------------------NKDSVK-ELFD-NVVEKIAARPGGYTRILKTG-A-RIGDNADMCIIELVDYNE-TYVKDSEVKVAAKRTRRSTAAKKDDSSESTGAEPQA----------------------------
->Bacteria_Bradyrhizobium japonicum USDA 110 |WP_011088131.1
-MRHGKVH--RKLNRTAEHRRAMFANMAAALIKHE--------------QIVTTLPKAKELRPIVEKLVTLGK---------------------------------------KGGLAM-RRQAISEMR------------------------DKDQVK-KLFD-VLATRYKDRQGGYTRIIKAG-F-RYGDNAAMAVIEFVDRDV-DAKGQDSGPV-QEKEAEAA---------------------------------------------
->Bacteria_Agrobacterium tumefaciens str. C58 |AAK87683.1
-MRHGNSG--RKLNRTASHRKAMFANMAASLITHE--------------QIVTTLPKAKEIRPIVERLVTLGK---------------------------------------RGDLHA-RRQAISQIK------------------------DQDAVR-KLFD-AIASRYATRNGGYLRIMKAG-Y-RQGDNAALAVVEFVERDV-DAKGAADKAR-VAAEAAAAEAA------------------------------------------
->Bacteria_Synechococcus sp. PCC 7335 |WP_006453419.1
-MRHGRRV--AKLGKAADQRKALLRSLTTELIRNG--------------RIKTTEVRAKAVRSEAERMVTLAK---------------------------------------DGSLSA-RRRALGYIY------------------------DKQLVH-ALFE-QAPDRYADRDGGYTRIVRTV-S-RRGDNARMAIIELT---------------------------------------------------------------------
->Bacteria_Magnetococcus sp. MC-1 |WP_011712551.1
-MRHKKRG--RRLSRDTSHRQAMIKNMLVSLFKHE--------------RIETTVPRAKELRPVAEKVITLGK---------------------------------------RGDLHA-RRQALSILN-----------------------GDKEVVH-KLFT-DLAERNKDRQGGYTRILKTR-F-RYGDCAPMSFIELVERDA-TSAAE-----------------------------------------------------------
->Bacteria_Thermus thermophilus HB27 |WP_008633358.1
-MRHLKSG--RKLNRHSSHRLALYRNQAKSLLTHG--------------RITTTVPKAKELRGFVDHLIHLAK---------------------------------------RGDLHA-RRLVLRDLQ------------------------DVKLVR-KLFD-EIAPRYRDRQGGYTRVLKLAER-RRGDGAPLALVELVE--------------------------------------------------------------------
->Bacteria_Geobacter sulfurreducens KN400|WP_010943458.1
-MRHNKAG--RRLGRTTSHRIAMFRNMVTSLFAHE--------------RITTTDAKAKELRSIAEKMITLGK---------------------------------------RGDLHA-VRQAASYIR------------------------DKKVVT-KLFS-TIAPRYKERDGGYTRIIKLG-I-RPGDCAPLSVIELVEEQF-EKKVKKSKPT-APAQAVATKPAVEETREAAAAQPQEPEVEISEVKDPAEECEAKAD--------
->Bacteria_Porphyromonas gingivalis W83 |WP_005873882.1
-MRHNKKF--NHLGRKAAHRKAMLSNMAASLILHK--------------RIFTTVAKAKALRIYVEPLLTKTK---------------------------------------EDTTHS-RRIAFSYLQ------------------------NKYALK-ELFG-DVAAKIADRPGGYTRILKTG-Y-RLGDNAAMCFIELVDYNE-NMLGE-AAKK-ATKTRRSRKRKSADVVVEAAPAEETPKAAEE----------------------
->Bacteria_Bacteroides thetaiotaomicron VPI-5482 |WP_008762052.1
-MRHNKKF--NHLGRTASHRSAMLSNMACSLIKHK--------------RITTTVAKAKALKKFVEPLITKSK---------------------------------------EDTTNS-RRVVFSNLQ------------------------DKIAVT-ELFK-EISVKIADRPGGYTRIIKTG-N-RLGDNAEMCFIELVDYNE-NMAKEKVAKK-ATRTRRSKKSAEAAAPAAVEAPATEEPKAESAE--------------------
->Bacteria_Dehalococcoides ethenogenes 195 |WP_010936280.1
-MRHNVSG--RKFDRPTGQRMSLYRNLVTDLLNYE--------------EITISEPRAKEIRSMAEKMITLGK---------------------------------------KGTLAS-RRRALAFVY------------------------IPGIVD-KVFE-DLSKRYAERPGGYTRMTKLG-P-RQGDGAEMVKLELVK--------------------------------------------------------------------
->Bacteria_Xanthomonas axonopodis pv. citri str. 306 |WP_003486665.1
-MRHQKSG--RKFNRTSAHREAMFRNMAASLFKHE--------------LIKTTLPKAKELRRVAEPLITIGK---------------------------------------VDGVAN-RRLAFARLR------------------------DKEAVG-KLFV-ELGPRYATRPGGYLRILKAG-F-RAGDNAPMAYVELVDRPV-VAEEVAE---------------------------------------------------------
->Bacteria_Thermosynechococcus elongatus BP-1 |WP_011055961.1
-MRHQRRV--PQLGRPADQRKALLRALTTELIRHG--------------RITTTKARAKAVRAEAERMITLAK---------------------------------------DGSLAA-RRRALGYLY------------------------DKQLVH-SLFA-QAPERYGDRQGGYTRIIRSV-R-RRGDNAELAVIELV---------------------------------------------------------------------
->Bacteria_Gloeobacter violaceus PCC 7421 |WP_011143559.1
-MRHRCRV--PKLGRPADQRDALIRTLTTELLRHG--------------RISTTLARAKVIRSEADRMITLAK---------------------------------------DGSLAA-RRQASGFLY------------------------DPELVQ-SVFA-AAQERYGSRRGGYTRILRTV-A-RRGDNSPMAIIELV---------------------------------------------------------------------
->Bacteria_Synechocystis sp. PCC 6803 substr. GT-I|WP_010871954.1
-MRHRCRV--PQLGKPADQRKALLRALTTELIRHG--------------QIKTTKARAKAVRSEVDRMITLAK---------------------------------------DGSLAA-RRRALGYMY------------------------DKPTVH-ALFA-DAPSRYKDRDGGYTRIIRTL-R-RRGDNAEMAVIELV---------------------------------------------------------------------
->Bacteria_Azoarcus sp. BH72|CAL96006.1
-MRHRHGL--RKLNRTSSHRQAMFRNMANALLRHE--------------VIKTTLPKAKELRRVVEPMITLGK---------------------------------------KPSLAN-RRLAFDRLR------------------------DREIVV-KLFD-ELGPRYATRNGGYLRILKFG-F-RDGDNAPMALVELLDRPE-AEVAEQEAVAA-----------------------------------------------------
->Bacteria_Helicobacter hepaticus ATCC 51449 |WP_011116244.1
-MRHRHGY--RKLGRTSAHRKALLKNLAIALIEYG--------------KIEIGVFKAKELQSYIEKLITAAR---------------------------------------SGDLNA-HRYVFAYLQ------------------------NKSATK-KLIT-EIAPKYASRNGGYTRIQRTR-L-RRGDASQMAIIELV---------------------------------------------------------------------
->Bacteria_Pseudomonas aeruginosa UCBPP-PA14 |WP_003093672.1
-MRHRKSG--RHLSRTSAHRKAMFQNMAVSLFEHE--------------LIKTTLPKAKELRRVAEPLITLAK---------------------------------------EDSVAN-RRLAFDRTR------------------------SKAAVG-KLFN-DLGKRYANRPGGYLRILKCG-F-RAGDNAPMAYVELVDRPV-GGEVVEAAE-------------------------------------------------------
->Bacteria_Vibrio cholerae O1 biovar El Tor str. N16961 |WP_001216360.1
-MRHRKSG--RQLNRNSSHRKAMFSNMASSLVRHE--------------VIKTTLPKAKELRRVVEPLITLAK---------------------------------------TDSVAN-RRLAFARTR------------------------DNEVVA-KLFN-ELGPRFAARQGGYTRILKCG-F-RAGDKAPMAYIELVDRPE-AAVEAAAE--------------------------------------------------------
->Bacteria_Haemophilus influenzae Rd KW20 |WP_005648400.1
-MRHRKSG--RQLNRNSSHRQAMFRNLASALVSHE--------------IIKTTLPKAKELRRVVEPLITLAK---------------------------------------VDSVAN-RRLAFARTR------------------------NVETVA-KLFN-ELGPRFAQRAGGYTRILKCG-F-RAGDNAPMAYIELVDRPE-VAEATTEE--------------------------------------------------------
->Bacteria_Photorhabdus luminescens subsp. laumondii TTO1 |WP_011148771.1
-MRHRKSG--RQLNRNSSHRQAMFRNMAGSLVRHE--------------IIKTTLPKAKELRRVVEPLITLAK---------------------------------------IDSVAN-RRLAFARTR------------------------DNEIVA-KLFN-ELGPRFASRAGGYTRILKCG-F-RAGDNAPMAYIELVDRAT-EPQTEVATAE------------------------------------------------------
->Bacteria_Yersinia pestis CO92 |CAL18918.1
-MRHRKSG--RQLNRNSSHRQAMFRNMAGSLVRHE--------------IIKTTLPKAKELRRVVEPLITLAK---------------------------------------TDNVAN-RRLAFARTR------------------------DNEIVA-KLFN-ELGPRFASRAGGYTRILKCG-F-RAGDNAPMAYIELVDRAASQAEVVAAE--------------------------------------------------------
->Bacteria_Shewanella oneidensis MR-1 |WP_007644470.1
-MRHRKSG--RQLNRNSSHRQAMFRNMASSLVRHE--------------IIKTTVAKAKELRRVVEPLITLAK---------------------------------------SDSVAN-RRLAFARTR------------------------DAEVVG-KLFT-ELGPRYQERPGGYTRILKCG-L-RAGDKAPMAYIELVGRPE-AAQAVDVEAAE-----------------------------------------------------
->Bacteria_Buchnera aphidicola str. 5A (Acyrthosiphon pisum)|WP_009874449.1
-MRHRKSG--RQLNRSSTHLNSMLKNMACSLFTHE--------------VIKTTLSKAKELRRIVEPIITLSK---------------------------------------IDTVSH-RRLVFSRIR------------------------DNAIVA-KLFK-KLGPCFFSRLGGYTRILKCG-F-RSGDKAPMAYIELVDRVK-NNKKNEILKK------------------------------------------------------
->Bacteria_Nitrosomonas europaea ATCC 19718 |WP_011111062.1
-MRHRNGL--RKLNRTSSHRLAMFRNLTNSLLEHE--------------IIKTTLPKAKELRRVVEPVITLGK---------------------------------------NPSLAG-KRLAFDRLR------------------------NRDNVI-KIFS-ELGPRYQNRNGGYIRILKCG-F-RRGDNAPMAIVELLDRPE-AGIISNDSAD------------------------------------------------------
->Bacteria_Dechloromonas aromatica RCB |WP_011286114.1
-MRHRNGL--RKLNRTSSHRLAMLRNMTVSLLKHE--------------AIKTTVPKAKELRRVVEPIITLGK---------------------------------------NPTLAN-KRLAFDRLR------------------------DRDIVV-KLFA-EIGPRYATRPGGYLRILKCG-F-RVGDNAPMAFVELLDRPE-VTEAVEIEDAAE----------------------------------------------------
->Bacteria_Neisseria gonorrhoeae FA 1090 |WP_002233417.1
-MRHRNGN--RKLNRTSSHRAAMLRNMANSLLTHE--------------TIVTTLPKAKELRRVVEPLITLGK---------------------------------------KPSLAS-RRLAFDRTR------------------------DRDVVV-KLFG-DLGPRFTARNGGYVRVLKYG-F-RKGDNAPLALVELVDKPA-AE--------------------------------------------------------------
->Bacteria_Legionella pneumophila str. Lens|WP_011214629.1
-MRHRNSG--RSFSRTSSHRKAMFSNMCCSLIEHE--------------LIRTTLPKAKDLRRYIEPLITVSK---------------------------------------SDSVAS-RRRAFDILR------------------------SKSAVG-KLFT-DLGPRFAKRPGGYIRIIKCG-Y-RDGDNAPMAIVELMDRPV-ISDDTEE---------------------------------------------------------
->Bacteria_Acinetobacter sp. RUH2624|EEX00541.1
-MRHRNSG--VKLGRTSSHRKAMFQNLANSLFEHE--------------LIKTTVPKAKELRRVAEPLITLAK---------------------------------------NDTVAN-RRLAFARTR------------------------NAATVG-KLFT-VLGPRYKERNGGYLRVLKAG-F-RAGDAAPMAYVELVDREV-NTSAE-----------------------------------------------------------
->Bacteria_Rhodopirellula baltica SH 1 |WP_011123829.1
-MRHRRKG--RVLGRSPAHRKALMRNLSSALFLTERDASLDENAPKVPGRIITTLEKAKEVRPLVEKCITLAKRALPALEEAKKYETSAERGSDEYKKWRKSEQWTQWADARAPYVNA-QRRVLQLIG------------------------DREAVA-VLFD-TIAERFTDRPGGYTRIMRLAKP-RLGDGGTRAILELVGKND-RVTRSAQRPA-FEQDAPESDSAPEAEAKTEEETASAN---------------------------
->Bacteria_Treponema pallidum subsp. pallidum str. Nichols |WP_010881661.1
-MRHRTGF--NPLSCMAAHRRALRRNMVTSLFKFE--------------RITTTKPKAAEVRRAAERLITRSK---------------------------------------SDSVHN-RRQVARFIW------------------------DKAVLH-KLFA-DIGPRMREREGGYTRILKLG-L-RQGDAAHVVVLELVDYTF-EKSLKKRART-DSVPARKGAGKKDASRVSGTVPDGQSQKIGKKKE-------------------
->Bacteria_Zymomonas mobilis subsp. mobilis ATCC 10988|WP_011240448.1
-MRHRVGG--RKLQRTSSHRLALFRNQSAALIKHE--------------QIITTLAKARELRPYTEKLITLAK---------------------------------------KGGLAN-RRLAHSRLL------------------------DDTQLK-KLFD-VLAERYKDRNGGYTRIIKAG-I-RASDAAQMAVIELVDRDT-TAKGQDSGPV-QVEEQENEEA-------------------------------------------
->Bacteria_Thermotoga maritima MSB8 |WP_004081777.1
-MRHRVKR--HKLGRYGSHRKSLLRNLSREIVEHG--------------SIVTTTAKAKALKTFMDKLVSKAIEAAT-------------------------------TDDRARSVHL-RRQINAVLG------------------------DRRLTN-KLVD-EIAKNYVGRRGGYVRVLRIG-F-RRGDAAEMSLVQLVEASS-QEG-------------------------------------------------------------
->Bacteria_Bartonella henselae str. Houston-1|WP_011180890.1
-MRHSKSG--RKLNRTASHRKAMFANMAISLIEHE--------------QIVTTLPKAKEIRPIVERLVTLGK---------------------------------------RGGLHA-RRQAIASLR------------------------DAGKVA-KLFD-TLAPRYASRNGGYLRIMKAG-F-RTGDNAPMAVIEFVDRDV-DAKGAVDRVR-TESSANEKEASS-----------------------------------------
->Bacteria_Chlorobium tepidum TLS |WP_010933814.1
-MRKVKPA--RKLGRTSAHRKATLSNLSTQLLIHK--------------RIETTEAKAKETRKVVEKIITKAR---------------------------------------KGTHHA-QREVFGALR------------------------DKEAVR-ELFE-EIVGRIGSRNGGYTRIIKLA-P-RYGDAAKMAVIELVDYAE-APSAAPVVSK-QDRAKRVKGSKKAESRSQENEGGDAAE--------------------------
->Bacteria_Mesoplasma florum L1 |WP_011183048.1
----MSYI--QKQGKNTAWRVALMRNLTSELIVSE--------------RLEITETRAKELRKHLDKMVTLAK---------------------------------------RGDLHA-RRQAASWLRNIE------------------ASSKEDVLQ-KLFT-TIAKKYKDRDGGYTRILKLD-N-RKGDNAPMVIIELV---------------------------------------------------------------------
->Bacteria_Thermoanaerobacter tengcongensis MB4 |WP_011026309.1
-----MSY--RKLGRPSDQRRAMLRNLVTDFLRYE--------------RITTTEARAKEVRKIAEKMITLGK---------------------------------------RGDLHA-RRQALAYIL------------------------DESVVK-KLFD-DIAPRYKERNGGYTRIFKLG-P-RRGDGAPLAVIELV---------------------------------------------------------------------
->Bacteria_Geobacillus kaustophilus HTA426 |Q5L3R1
-----MSY--RKLGRTTSQRKALLRDLATDLIINE--------------RIETTEARAKELRSVMEKMITLGK---------------------------------------RGDLHA-RRQAAAFIRKEVA----------------NSETGQDALQ-KLFS-DIAPRYQDRQGGYTRIMKLG-P-RRGDGAPMVIIELV---------------------------------------------------------------------
->Bacteria_Magnetospirillum magnetotacticum MS-1 |KIM00055.1
-MRHGMSG--RKLNRDKSARKALFVSLSNALLKHE--------------QIKTTLPKAKDLRPVVEKLITLGK---------------------------------------RGDLHA-RRQAYAFLR------------------------DDKVVA-KLFA-VIGERYKTRNGGYTRVLKAG-F-RYGDCAPMAIIELVDRDP-TAKGTDSGPT-ADKKADAD-EE------------------------------------------
->Bacteria_Gluconobacter oxydans 621H|AAW60138.1
-MRHGVSG--RKLNVTSSHRAAMFRNMAVALIKHE--------------QITTTLPKAKELRPVVEKLITLGK---------------------------------------RGDLHA-RRQAFAQLR------------------------DDAVVT-KLFS-AVAERYKGRAGGYSRVLKAG-V-RYGDNADMAVIELVDRDV-AAKGQDSGP----KQNVAE-EQEAA---------------------------------------
->Bacteria_Novosphingobium aromaticivorans DSM 12444 |ABD26962.1
-MRHKLGQ--RKLGRTSSHRIALLRNMAAALIKHE--------------QITTTLPKARELRPYLEKLITLGK---------------------------------------KGGLSN-RRLAHARLL------------------------DEAQEQ-KLFT-TLAERYADRNGGYTRIIKAG-Y-RASDAAPLAVIELVDRDT-SAKGQDSGPV-LTADEDEFEAA------------------------------------------
->Bacteria_Ralstonia eutropha JMP134 |AAZ62513.1
-MRHRHGL--RKLNRTSSHRLAMLRNMSNSLFQHE--------------LIKTTLPKAKELRKVVEPLITLAK---------------------------------------KDTVAN-RRLAFARLR------------------------DRDMVT-KLFT-ELGPRYNARPGGYTRILKFG-F-RQGDNAPMALVELVDRPE-ITEAPAEEAAE-----------------------------------------------------
->Bacteria_Burkholderia sp. 383 |ABB07076.1
-MRHRHGL--RKLNRTSSHRLAMLRNMSNSLIEHE--------------VIKTTLPKAKELRKVVEPLITLGK---------------------------------------KPSLAN-RRLAFNRLR------------------------DRDSVA-KLFD-VLGPRFANRPGGYLRVLKFG-F-RVGDNAPMALVELLDRPE-VDETENVQEAE-----------------------------------------------------
->Bacteria_Anabaena variabilis ATCC 29413 |ABA20340.1
-MRHRNRV--KKLGKPADQRRALLRALTTELIRHG--------------RITTTLVRAKVVRSEVDKIITLAK---------------------------------------DGSLAA-RRRALGYIY------------------------DKQLVH-ALFE-QVSSRYGNRQGGYTRILHTV-P-RRGDNAEMAIIELV---------------------------------------------------------------------
->Bacteria_Crocosphaera watsonii WH 8501 |EAM49875.1
-MRHRCRV--PQLGKPADQRKALLRSLATELIRHG--------------QIKTTKTRAKAVRSEVDRIITLAK---------------------------------------DGSLAA-RRKAISYLY------------------------DKNLVH-KLFA-NAPERYKDRKGGYTRVVRTV-R-RRGDNAEMAIIELM---------------------------------------------------------------------
->Bacteria_Candidatus Yonathbacteria bacterium|OHA82927.1
-MKHHKSI--RKFGRDQAGRLALMRSLALALVIEE--------------HITTTEARAKELRSFVESLVTKGR---------------------------------------IGDLPS-RRLIISRLGGTV---------------------GEEGAR-KIIE-DIAPRYKTRPGGYTRVVKLP-R-RKGDASKMAVIEFV---------------------------------------------------------------------
->Bacteria_Candidatus Harrisonbacteria bacterium|OGY65863.1
-------M--RKFHRKRGPRRSFLKGLANNLILKE--------------KIETTEARAKEIRSLVEKSVTLAK---------------------------------------KQNLAG-LRLLLSRLP------------------------KDAA-Q-KLYY-DLAPRYKERKGGYLRIIKEA-RARKRDGAPLATIEFIR--------------------------------------------------------------------
->Bacteria_Candidatus Staskawiczbacteria bacterium|OGZ80077.1
-MRKLNKG--RKLSRKKGPRKALLRSLANNFFLHE--------------RIKTTEAKAKELRPIVEKLITRAK---------------------------------------KDTVAN-RRQILRTLI------------------------PEMA-K-KIFV-ETAPKYQDRNGGYTRILRLS-P-RNSDGAKMAIIELVKQ-------------------------------------------------------------------
->Bacteria_Candidatus Falkowbacteria bacterium|OGF42365.1
-MRHRKKG--KILDRKVGPRKALFRNLAVSLVLYE--------------KIKTTKAKAKAIKPIVERLITKGK---------------------------------------DNGIAS-RRNLLKYLY------------------------KESAVK-KILE-ELGPRYKERKGGYTRILNLK-R-RQGDGAEIVQIELV---------------------------------------------------------------------
->Bacteria_Candidatus Woesebacteria bacterium|OGM10277.1
-MRKMVFG--RKLSRGRKAREALFRSLIKALIISG--------------KITTTKAKIKAIQGEIDKLITLSK---------------------------------------KGTLSA-EKRVSAILG------------------------NNRVLA-QILSGKIVKAFGTRTSGFTRMTLLS-R-RKGDAAEMARLEWVEKIS-LEEKKPAAKAKQETKAPPKKTKKTVKKAK-----------------------------------
->Bacteria_Candidatus Gottesmanbacteria bacterium|OGG36157.1
-MRHNVFG--RKLNRDVKERKALFRSLVKAFIDKG--------------RIKTTYAKARAVGSLIEKLVTKAK---------------------------------------DGSRAS-MTQLMSFFN------------------------HKEPVK-KLTD-EIAPRFKDKIGGYIRMIRLG-R-RSGDNAQEVLLEWTVPEP-KIEKAGKVKT-AVKKEISGKKKNKK---------------------------------------
->Bacteria_candidate division WWE3 bacterium|OGC50446.1
-MRHRVHG--TNLNIDTDHRKALNRFLATSFIEKG--------------YAVTTLAKARFVRPYVEKLVTKAK---------------------------------------AGPTSL-SSLK-ASLN------------------------TRFAID-TLLH-TVAPKFASRNGGFTKMSKLG-F-REGDNAPLAKLEWSEKVD-YGKSKEKGKEKESVKNKVVKSGETQKASPKVAKVKEAKK-------------------------
->Bacteria_Candidatus Saccharibacteria bacterium|OGL23411.1
--MHRHGYKGRKFGRERDQRRALLKGLATSLVMHG--------------KIETTLQKAKETSRYIEKVITKAK---------------------------------------KGDLHN-RRQVIAALS------------------------TQTAAF-KLVD-EIAPQLTARNSGHVRVVRTR-L-RVGDGAQLAIIEFVDELKSVPKEEAKA--------------------------------------------------------
->Bacteria_Candidatus Peregrinibacteria bacterium|OGJ46184.1
-MRHRVKK--NSLNMANDHRVLLVKNLVTDLIENG--------------KLKTTEKRAKIIQSELEKLITYAK--------------------------------------THNQLMI-IRRLKQVIL------------------------TESASK-KFLE-EIFPKYKEQKSGFVRIINAG-Y-RAGDAAILCYIELV---------------------------------------------------------------------
->Bacteria_Candidatus Berkelbacteria bacterium|OGD64889.1
-ME-------RVLRSQSDYKQTMLRNQLTSLLLYE--------------AITTTRAKAKALLPFANRFLTRTK---------------------------------------VGGLNA-QKLAHQLLL------------------------DKNAVK-KLFE-DILPRFSPEDSNYLRSISAG-F-RSGDSAEMAVVALLKSAK-PVVAPKTPAT-KEAKTKAKK--------------------------------------------
+>Bacteria_Symbiobacterium thermophilum IAM 14863|WP_011197161.1|2734
+M---AKY--QKLGRDSSARKALFRAVVTALFDKE--------------RIETTEAKAKAV
+QSIAEEMITLAK---------------------------------------RGDLHA-RR
+QALAYIY------------------------DESVVT-KLFN-QIAPRYADRNGGYTRVI
+RTG-V-RKGDAAPMAILELV----------------------------------------
+-----------------------------
+>Bacteria_Oceanobacillus iheyensis HTE831 |WP_011064547.1|182710
+-----MA--RKLGRKTDSRMALLRNLASDLIIHE--------------RIETTEAKAKEL
+RSIVEKMITLGK---------------------------------------RGDLHA-RR
+QAAAFLYNKE------------------TDEDNNVIQ-KLFD-DVAARYEDRQGGYTRVL
+KLN-E-RQGDGAKMAIIELV----------------------------------------
+-----------------------------
+>Bacteria_Bacillus anthracis str. Ames |AAP24192.1|198094
+----MAY--RKLGRTSAQRKAMLRDLATDLIINE--------------RIQTTETRAKEL
+RSVVEKMITLGK---------------------------------------RGDLHA-RR
+QAAAFIRNEVA----------------NAETGQDALQ-KLFA-DVAPRYAERQGGYTRIA
+KIG-P-RRGDAAPMVIIELV----------------------------------------
+-----------------------------
+>Bacteria_Streptococcus pneumoniae R6 |AAK99020.1|171101
+----MAY--RKLGRTSSQRKAMLRDLTTDLLINE--------------SIVTTEARAKEI
+RKTVEKMITLGK---------------------------------------RGDLHA-RR
+QAAAFVRNEIASENY--------DEATDKYTSTTALQ-KLFS-EIAPRYAERNGGYTRIL
+KTE-P-RRGDAAPMAIIELV----------------------------------------
+-----------------------------
+>Bacteria_Staphylococcus aureus subsp. aureus MRSA252|CAG41289.1|282458
+----MGY--RKLGRTSDQRKAMLRDLATSLIISE--------------RIETTEARAKEV
+RSVVEKLITLGK---------------------------------------KGDLAS-RR
+NAAKTLRNVEIL--------------NEDETTQTALQ-KLFG-EIAERYTERQGGYTRIL
+KQG-P-RRGDGAESVIIELV----------------------------------------
+-----------------------------
+>Bacteria_Listeria monocytogenes EGD-e |WP_003723675.1|1637
+----MGY--RKLGRTSSQRKALLRDLATDLIVFE--------------RIETTEARAKEI
+RKVVEKLITSGK---------------------------------------KGDLHA-RR
+QAAAFIRHEVVEVVQVDA-KGKDGSTVKKNRPVYALQ-KLFD-DVAPRYAERQGGYTRIL
+KKG-P-RRGDGAPMVIIELV----------------------------------------
+-----------------------------
+>Bacteria_Coxiella burnetii RSA 493 |WP_010957469.1|777
+MHHRKSG--RHLNRTSAHRKAMLRNMAVSLFQHE--------------LIKTTLPKAKEL
+RRVVEPLITLAK---------------------------------------EDTVAN-RR
+LAFNRLR------------------------DDAIVA-KLFK-EIAPRHKERPGGYCRVL
+KYG-F-RNGDSAPMAIVELVDREE-SESSED-----------------------------
+-----------------------------
+>Bacteria_Wolbachia endosymbiont strain TRS of Brugia malayi|WP_011256516.1|80849
+MKHKIKK--RKLSRCTEHRLSMLKNLSISLINHE--------------QIITTLPKAKEL
+RPYVEKFITIAK---------------------------------------NKNTLHGRR
+LLLSRLH------------------------NNKLVVDKLLN-VLASRYQGCKGGYSRVM
+KFS-T-RKGDCASMAVIELVNRDV-TAKGKVCDKN-KEKNEVATKS--------------
+-----------------------------
+>Bacteria_Blochmannia floridanus|WP_011126499.1|203907
+MKHQKRV--LKFNRSGSHRDAMVKNMMIALILNH--------------IIKTTLSKAKIL
+RQFIEPVITRAK---------------------------------------INTIAN-RR
+LIFAKIR------------------------NTDSVI-KLFT-QIGPHFYDRPGGYTRIL
+KCG-F-RKGDNAPMAYIELVDRSK-LVIKS------------------------------
+-----------------------------
+>Bacteria_Fusobacterium nucleatum subsp. nucleatum ATCC 25586 |Q8RE45|190304
+MNHNKSY--RKLGRRADHRKAMLKNMTISLIKAE--------------RIETTVTRAKEL
+RKFAERMITFGK---------------------------------------KNTLAS-RR
+NAFAFLR------------------------DEEVVA-KIFN-EIAPKYAERNGGYTRII
+KTS-V-RKGDSAEMAIIELV----------------------------------------
+-----------------------------
+>Bacteria_Streptomyces coelicolor A3(2) |WP_003974243.1|1883
+MPKPSKG--ARLGGSAAHEKLLLANLAKSLFEHG--------------RITTTEAKARKL
+RPYAERLVTKAK---------------------------------------KGDLHN-RR
+QVLQVIT------------------------DKSIVH-TLFT-EIGPRYENRPGGYTRIT
+KIG-N-RRGDNAPMAVIELVEALT-----VAQQAT-GEAEAAT--KRAAKDAEGSAEVSE
+AKVDTTKADDEAAAEESKDA---------
+>Bacteria_Tropheryma whipplei str. Twist |WP_011102634.1|2039
+MPKPSRG--PRMCSGPDHERLVLANMSASLFLNK--------------KLRTTEARAKRL
+RPFAEKLVTLSK---------------------------------------RGGLHS-RR
+RALSILR------------------------NKAALH-ELFT-NIAPLVEDRNGGYTRIT
+KVG-F-RSGDGAPMALIELILEPV-SARTRGTDTL-PDTVTDTGPDSAPDPVPGSEPGSA
+AGDLPDADTAPADPGESSSNQRVIR----
+>Bacteria_Propionibacterium acnes KPA171202 |WP_011183932.1|1747
+MPKPTKG--PRLGGSPAHERIILRNLASQLFEHG--------------HVVTTVTKAKRV
+RPLAEKLINRAK---------------------------------------TDTVAN-RR
+FVNRTIT------------------------DRGIVH-ILFT-EIGPRMEGRDGGYTRVT
+RIG-N-RKGDNAPMAVIEVISDKV-APKAPASAAD-AKAQINT--ATEAKEAEPEAPAED
+AAAQAPVADEQKAAEVDEKAEEKPEA---
+>Bacteria_Mycobacterium leprae TN |WP_010908642.1|1769
+MPKPTKG--PRLGGSSSHQKALLTNLAASLFEHG--------------RIKTTEPKARAL
+RPYAEKLITHAK---------------------------------------KGTLHN-RR
+EVLKKLP------------------------DKDVVH-ALFA-EIGPFFSDRDGGYTRII
+KVE-A-RKGDNAPMAVIELVREKT-VTSEADRARR-VAAASAKAAQAQEKPAQEEEVEAT
+SDEVAYTSEPDKAAEH-------------
+>Bacteria_Leifsonia xyli subsp. xyli str. CTCB07|AAT89722.1|281090
+MPQPTKG--PRLGGGPAHERLMLANLAAALFAHK--------------SIKTTETKAKRL
+RPYAERLITFAK---------------------------------------RGDLHA-RR
+RVLAVIG------------------------DKTVVH-ELFT-EIAPLLAEREGGYTRIT
+KLG-F-RKGDNAPMAQIELVLEPV-TPKAKPAKS----TAKAAPKSKAPVEETPDEPASE
+ETAEAEAD---------------------
+>Bacteria_Bifidobacterium longum DJO10A |WP_010081468.1|216816
+MPTPKKG--PRLASSPAHERLMLANMATSLFQNG--------------RITTTLPKAKRL
+RPLAERLITFAK---------------------------------------RGDLHS-RR
+RVMRVIR------------------------NKSVVH-ILFT-QIAEQMEQREGGYTRIV
+KIA-P-RVGDAAPAAVIELVTEPV-AKKAVVKEAE-AAAKVAEEEAPAVEAEATEAAEAV
+EAVEAPVEETAAAEAEAPAEEAADAEKAE
+>Bacteria_Chlamydophila caviae GPIC |WP_011006088.1|83557
+MQHARKK--FRVGRTSAHNRCMLANMLKSLIHQE--------------RIETTLPKAKEL
+RRCADKMITLAK---------------------------------------KNTLAA-RR
+LAVARLMVRYNKLTSKEARQAKAGDLSAYNVDRTVIN-KLFD-QLGTRFVSRNGGYTRIL
+KLQ-N-RVGDNARKCIIEFLAD--------------------------------------
+-----------------------------
+>Bacteria_Rhodobacter sphaeroides ATCC 17025|WP_011909466.1|1653176
+MRHARGY--RRLNRTHEHRKALFANMAGSLIEHE--------------QIKTTLPKAKEL
+RPIIEKLVTLAK---------------------------------------RGDLHA-RR
+QAAAQLK------------------------EDRHVE-RLFA-ILGPRYAERAGGYVRVL
+KAG-F-RYGDMAPMAIIEFVDRDP-NAKGAADKAR-VLAEEALED---------------
+-----------------------------
+>Bacteria_Polaromonas sp. JS666|WP_011481469.1|296591
+MRHGHGL--RKLNRTSEHRLAMLRNMMNSLLQHE--------------VIKTTLPKAKEL
+RRVVEPMITLAK---------------------------------------EPTVAN-KR
+LAFDRLR------------------------DRDMVV-KLFA-ELGPRYKARPGGYTRIL
+KMG-F-RVGDNAPMALVELVDRPE-IEDTTADAAKAE-----------------------
+-----------------------------
+>Bacteria_Deinococcus radiodurans R1 |WP_010888760.1|1299
+MRHGKAG--RKLNRNSSARVALARAQATALLREG--------------RIQTTLTKAKEL
+RPFVEQLITTAK---------------------------------------GGDLHS-RR
+LVAQDIH------------------------DKDVVR-KVMD-EVAPKYAERPGGYTRIL
+RVG-T-RRGDGVTMALIELV----------------------------------------
+-----------------------------
+>Bacteria_Sinorhizobium meliloti 1021 |WP_003536492.1|28105
+MRHGKAG--RKLNRTASHRKAMFANMAASLIEHE--------------QIVTTLPKAKEI
+RPIVEKLVTLGK---------------------------------------RGDLHA-RR
+QAISQIR------------------------DVAVVS-KLFD-AIASRYATRNGGYLRIM
+KAG-F-RQGDNAPLAVIEFVDRDV-DAKGSKDRAR-VSAEAEAAEAA-------------
+-----------------------------
+>Bacteria_Caulobacter crescentus NA1000|WP_010919152.1|155892
+MRHGKAH--RKLGRTSAHRTAMFANMSASLIKHE--------------QIVTTLPKAKEL
+RPIVEKLVTLAK---------------------------------------RGDLHA-RR
+QAISSVR------------------------DVEQVG-KLFA-VLGPRYKERQGGYIRVL
+KAG-F-RYGDNAPMAVIEFVDRDV-SEKGKDSGPV-YVNDAED-----------------
+-----------------------------
+>Bacteria_Cytophaga hutchinsonii ATCC 33406 |WP_011586484.1|985
+MRHGKKD--NHLGRTVTHRRALLSNMASSLILHK--------------RISTTVPKAKEL
+RKYVEPLITKAK---------------------------------------ADSTHS-RR
+TVFSYLQ------------------------NKDSVK-ELFD-NVVEKIAARPGGYTRIL
+KTG-A-RIGDNADMCIIELVDYNE-TYVKDSEVKVAAKRTRRSTAAKKDDSSESTGAEPQ
+A----------------------------
+>Bacteria_Bradyrhizobium japonicum USDA 110 |WP_011088131.1|374
+MRHGKVH--RKLNRTAEHRRAMFANMAAALIKHE--------------QIVTTLPKAKEL
+RPIVEKLVTLGK---------------------------------------KGGLAM-RR
+QAISEMR------------------------DKDQVK-KLFD-VLATRYKDRQGGYTRII
+KAG-F-RYGDNAAMAVIEFVDRDV-DAKGQDSGPV-QEKEAEAA----------------
+-----------------------------
+>Bacteria_Agrobacterium tumefaciens str. C58 |AAK87683.1|176299
+MRHGNSG--RKLNRTASHRKAMFANMAASLITHE--------------QIVTTLPKAKEI
+RPIVERLVTLGK---------------------------------------RGDLHA-RR
+QAISQIK------------------------DQDAVR-KLFD-AIASRYATRNGGYLRIM
+KAG-Y-RQGDNAALAVVEFVERDV-DAKGAADKAR-VAAEAAAAEAA-------------
+-----------------------------
+>Bacteria_Synechococcus sp. PCC 7335 |WP_006453419.1|91464
+MRHGRRV--AKLGKAADQRKALLRSLTTELIRNG--------------RIKTTEVRAKAV
+RSEAERMVTLAK---------------------------------------DGSLSA-RR
+RALGYIY------------------------DKQLVH-ALFE-QAPDRYADRDGGYTRIV
+RTV-S-RRGDNARMAIIELT----------------------------------------
+-----------------------------
+>Bacteria_Magnetococcus sp. MC-1 |WP_011712551.1|1124597
+MRHKKRG--RRLSRDTSHRQAMIKNMLVSLFKHE--------------RIETTVPRAKEL
+RPVAEKVITLGK---------------------------------------RGDLHA-RR
+QALSILN-----------------------GDKEVVH-KLFT-DLAERNKDRQGGYTRIL
+KTR-F-RYGDCAPMSFIELVERDA-TSAAE------------------------------
+-----------------------------
+>Bacteria_Thermus thermophilus HB27 |WP_008633358.1|270
+MRHLKSG--RKLNRHSSHRLALYRNQAKSLLTHG--------------RITTTVPKAKEL
+RGFVDHLIHLAK---------------------------------------RGDLHA-RR
+LVLRDLQ------------------------DVKLVR-KLFD-EIAPRYRDRQGGYTRVL
+KLAER-RRGDGAPLALVELVE---------------------------------------
+-----------------------------
+>Bacteria_Geobacter sulfurreducens KN400|WP_010943458.1|35554
+MRHNKAG--RRLGRTTSHRIAMFRNMVTSLFAHE--------------RITTTDAKAKEL
+RSIAEKMITLGK---------------------------------------RGDLHA-VR
+QAASYIR------------------------DKKVVT-KLFS-TIAPRYKERDGGYTRII
+KLG-I-RPGDCAPLSVIELVEEQF-EKKVKKSKPT-APAQAVATKPAVEETREAAAAQPQ
+EPEVEISEVKDPAEECEAKAD--------
+>Bacteria_Porphyromonas gingivalis W83 |WP_005873882.1|837
+MRHNKKF--NHLGRKAAHRKAMLSNMAASLILHK--------------RIFTTVAKAKAL
+RIYVEPLLTKTK---------------------------------------EDTTHS-RR
+IAFSYLQ------------------------NKYALK-ELFG-DVAAKIADRPGGYTRIL
+KTG-Y-RLGDNAAMCFIELVDYNE-NMLGE-AAKK-ATKTRRSRKRKSADVVVEAAPAEE
+TPKAAEE----------------------
+>Bacteria_Bacteroides thetaiotaomicron VPI-5482 |WP_008762052.1|816
+MRHNKKF--NHLGRTASHRSAMLSNMACSLIKHK--------------RITTTVAKAKAL
+KKFVEPLITKSK---------------------------------------EDTTNS-RR
+VVFSNLQ------------------------DKIAVT-ELFK-EISVKIADRPGGYTRII
+KTG-N-RLGDNAEMCFIELVDYNE-NMAKEKVAKK-ATRTRRSKKSAEAAAPAAVEAPAT
+EEPKAESAE--------------------
+>Bacteria_Dehalococcoides ethenogenes 195 |WP_010936280.1|61435
+MRHNVSG--RKFDRPTGQRMSLYRNLVTDLLNYE--------------EITISEPRAKEI
+RSMAEKMITLGK---------------------------------------KGTLAS-RR
+RALAFVY------------------------IPGIVD-KVFE-DLSKRYAERPGGYTRMT
+KLG-P-RQGDGAEMVKLELVK---------------------------------------
+-----------------------------
+>Bacteria_Xanthomonas axonopodis pv. citri str. 306 |WP_003486665.1|338
+MRHQKSG--RKFNRTSAHREAMFRNMAASLFKHE--------------LIKTTLPKAKEL
+RRVAEPLITIGK---------------------------------------VDGVAN-RR
+LAFARLR------------------------DKEAVG-KLFV-ELGPRYATRPGGYLRIL
+KAG-F-RAGDNAPMAYVELVDRPV-VAEEVAE----------------------------
+-----------------------------
+>Bacteria_Thermosynechococcus elongatus BP-1 |WP_011055961.1|146786
+MRHQRRV--PQLGRPADQRKALLRALTTELIRHG--------------RITTTKARAKAV
+RAEAERMITLAK---------------------------------------DGSLAA-RR
+RALGYLY------------------------DKQLVH-SLFA-QAPERYGDRQGGYTRII
+RSV-R-RRGDNAELAVIELV----------------------------------------
+-----------------------------
+>Bacteria_Gloeobacter violaceus PCC 7421 |WP_011143559.1|33072
+MRHRCRV--PKLGRPADQRDALIRTLTTELLRHG--------------RISTTLARAKVI
+RSEADRMITLAK---------------------------------------DGSLAA-RR
+QASGFLY------------------------DPELVQ-SVFA-AAQERYGSRRGGYTRIL
+RTV-A-RRGDNSPMAIIELV----------------------------------------
+-----------------------------
+>Bacteria_Synechocystis sp. PCC 6803 substr. GT-I|WP_010871954.1|1142
+MRHRCRV--PQLGKPADQRKALLRALTTELIRHG--------------QIKTTKARAKAV
+RSEVDRMITLAK---------------------------------------DGSLAA-RR
+RALGYMY------------------------DKPTVH-ALFA-DAPSRYKDRDGGYTRII
+RTL-R-RRGDNAEMAVIELV----------------------------------------
+-----------------------------
+>Bacteria_Azoarcus sp. BH72|CAL96006.1|418699
+MRHRHGL--RKLNRTSSHRQAMFRNMANALLRHE--------------VIKTTLPKAKEL
+RRVVEPMITLGK---------------------------------------KPSLAN-RR
+LAFDRLR------------------------DREIVV-KLFD-ELGPRYATRNGGYLRIL
+KFG-F-RDGDNAPMALVELLDRPE-AEVAEQEAVAA------------------------
+-----------------------------
+>Bacteria_Helicobacter hepaticus ATCC 51449 |WP_011116244.1|32025
+MRHRHGY--RKLGRTSAHRKALLKNLAIALIEYG--------------KIEIGVFKAKEL
+QSYIEKLITAAR---------------------------------------SGDLNA-HR
+YVFAYLQ------------------------NKSATK-KLIT-EIAPKYASRNGGYTRIQ
+RTR-L-RRGDASQMAIIELV----------------------------------------
+-----------------------------
+>Bacteria_Pseudomonas aeruginosa UCBPP-PA14 |WP_003093672.1|1236
+MRHRKSG--RHLSRTSAHRKAMFQNMAVSLFEHE--------------LIKTTLPKAKEL
+RRVAEPLITLAK---------------------------------------EDSVAN-RR
+LAFDRTR------------------------SKAAVG-KLFN-DLGKRYANRPGGYLRIL
+KCG-F-RAGDNAPMAYVELVDRPV-GGEVVEAAE--------------------------
+-----------------------------
+>Bacteria_Vibrio cholerae O1 biovar El Tor str. N16961 |WP_001216360.1|662
+MRHRKSG--RQLNRNSSHRKAMFSNMASSLVRHE--------------VIKTTLPKAKEL
+RRVVEPLITLAK---------------------------------------TDSVAN-RR
+LAFARTR------------------------DNEVVA-KLFN-ELGPRFAARQGGYTRIL
+KCG-F-RAGDKAPMAYIELVDRPE-AAVEAAAE---------------------------
+-----------------------------
+>Bacteria_Haemophilus influenzae Rd KW20 |WP_005648400.1|724
+MRHRKSG--RQLNRNSSHRQAMFRNLASALVSHE--------------IIKTTLPKAKEL
+RRVVEPLITLAK---------------------------------------VDSVAN-RR
+LAFARTR------------------------NVETVA-KLFN-ELGPRFAQRAGGYTRIL
+KCG-F-RAGDNAPMAYIELVDRPE-VAEATTEE---------------------------
+-----------------------------
+>Bacteria_Photorhabdus luminescens subsp. laumondii TTO1 |WP_011148771.1|91347
+MRHRKSG--RQLNRNSSHRQAMFRNMAGSLVRHE--------------IIKTTLPKAKEL
+RRVVEPLITLAK---------------------------------------IDSVAN-RR
+LAFARTR------------------------DNEIVA-KLFN-ELGPRFASRAGGYTRIL
+KCG-F-RAGDNAPMAYIELVDRAT-EPQTEVATAE-------------------------
+-----------------------------
+>Bacteria_Yersinia pestis CO92 |CAL18918.1|214092
+MRHRKSG--RQLNRNSSHRQAMFRNMAGSLVRHE--------------IIKTTLPKAKEL
+RRVVEPLITLAK---------------------------------------TDNVAN-RR
+LAFARTR------------------------DNEIVA-KLFN-ELGPRFASRAGGYTRIL
+KCG-F-RAGDNAPMAYIELVDRAASQAEVVAAE---------------------------
+-----------------------------
+>Bacteria_Shewanella oneidensis MR-1 |WP_007644470.1|22
+MRHRKSG--RQLNRNSSHRQAMFRNMASSLVRHE--------------IIKTTVAKAKEL
+RRVVEPLITLAK---------------------------------------SDSVAN-RR
+LAFARTR------------------------DAEVVG-KLFT-ELGPRYQERPGGYTRIL
+KCG-L-RAGDKAPMAYIELVGRPE-AAQAVDVEAAE------------------------
+-----------------------------
+>Bacteria_Buchnera aphidicola str. 5A (Acyrthosiphon pisum)|WP_009874449.1|9
+MRHRKSG--RQLNRSSTHLNSMLKNMACSLFTHE--------------VIKTTLSKAKEL
+RRIVEPIITLSK---------------------------------------IDTVSH-RR
+LVFSRIR------------------------DNAIVA-KLFK-KLGPCFFSRLGGYTRIL
+KCG-F-RSGDKAPMAYIELVDRVK-NNKKNEILKK-------------------------
+-----------------------------
+>Bacteria_Nitrosomonas europaea ATCC 19718 |WP_011111062.1|915
+MRHRNGL--RKLNRTSSHRLAMFRNLTNSLLEHE--------------IIKTTLPKAKEL
+RRVVEPVITLGK---------------------------------------NPSLAG-KR
+LAFDRLR------------------------NRDNVI-KIFS-ELGPRYQNRNGGYIRIL
+KCG-F-RRGDNAPMAIVELLDRPE-AGIISNDSAD-------------------------
+-----------------------------
+>Bacteria_Dechloromonas aromatica RCB |WP_011286114.1|259537
+MRHRNGL--RKLNRTSSHRLAMLRNMTVSLLKHE--------------AIKTTVPKAKEL
+RRVVEPIITLGK---------------------------------------NPTLAN-KR
+LAFDRLR------------------------DRDIVV-KLFA-EIGPRYATRPGGYLRIL
+KCG-F-RVGDNAPMAFVELLDRPE-VTEAVEIEDAAE-----------------------
+-----------------------------
+>Bacteria_Neisseria gonorrhoeae FA 1090 |WP_002233417.1|482
+MRHRNGN--RKLNRTSSHRAAMLRNMANSLLTHE--------------TIVTTLPKAKEL
+RRVVEPLITLGK---------------------------------------KPSLAS-RR
+LAFDRTR------------------------DRDVVV-KLFG-DLGPRFTARNGGYVRVL
+KYG-F-RKGDNAPLALVELVDKPA-AE---------------------------------
+-----------------------------
+>Bacteria_Legionella pneumophila str. Lens|WP_011214629.1|446
+MRHRNSG--RSFSRTSSHRKAMFSNMCCSLIEHE--------------LIRTTLPKAKDL
+RRYIEPLITVSK---------------------------------------SDSVAS-RR
+RAFDILR------------------------SKSAVG-KLFT-DLGPRFAKRPGGYIRII
+KCG-Y-RDGDNAPMAIVELMDRPV-ISDDTEE----------------------------
+-----------------------------
+>Bacteria_Acinetobacter sp. RUH2624|EEX00541.1|575564
+MRHRNSG--VKLGRTSSHRKAMFQNLANSLFEHE--------------LIKTTVPKAKEL
+RRVAEPLITLAK---------------------------------------NDTVAN-RR
+LAFARTR------------------------NAATVG-KLFT-VLGPRYKERNGGYLRVL
+KAG-F-RAGDAAPMAYVELVDREV-NTSAE------------------------------
+-----------------------------
+>Bacteria_Rhodopirellula baltica SH 1 |WP_011123829.1|265606
+MRHRRKG--RVLGRSPAHRKALMRNLSSALFLTERDASLDENAPKVPGRIITTLEKAKEV
+RPLVEKCITLAKRALPALEEAKKYETSAERGSDEYKKWRKSEQWTQWADARAPYVNA-QR
+RVLQLIG------------------------DREAVA-VLFD-TIAERFTDRPGGYTRIM
+RLAKP-RLGDGGTRAILELVGKND-RVTRSAQRPA-FEQDAPESDSAPEAEAKTEEETAS
+AN---------------------------
+>Bacteria_Treponema pallidum subsp. pallidum str. Nichols |WP_010881661.1|160
+MRHRTGF--NPLSCMAAHRRALRRNMVTSLFKFE--------------RITTTKPKAAEV
+RRAAERLITRSK---------------------------------------SDSVHN-RR
+QVARFIW------------------------DKAVLH-KLFA-DIGPRMREREGGYTRIL
+KLG-L-RQGDAAHVVVLELVDYTF-EKSLKKRART-DSVPARKGAGKKDASRVSGTVPDG
+QSQKIGKKKE-------------------
+>Bacteria_Zymomonas mobilis subsp. mobilis ATCC 10988|WP_011240448.1|542
+MRHRVGG--RKLQRTSSHRLALFRNQSAALIKHE--------------QIITTLAKAREL
+RPYTEKLITLAK---------------------------------------KGGLAN-RR
+LAHSRLL------------------------DDTQLK-KLFD-VLAERYKDRNGGYTRII
+KAG-I-RASDAAQMAVIELVDRDT-TAKGQDSGPV-QVEEQENEEA--------------
+-----------------------------
+>Bacteria_Thermotoga maritima MSB8 |WP_004081777.1|2335
+MRHRVKR--HKLGRYGSHRKSLLRNLSREIVEHG--------------SIVTTTAKAKAL
+KTFMDKLVSKAIEAAT-------------------------------TDDRARSVHL-RR
+QINAVLG------------------------DRRLTN-KLVD-EIAKNYVGRRGGYVRVL
+RIG-F-RRGDAAEMSLVQLVEASS-QEG--------------------------------
+-----------------------------
+>Bacteria_Bartonella henselae str. Houston-1|WP_011180890.1|38323
+MRHSKSG--RKLNRTASHRKAMFANMAISLIEHE--------------QIVTTLPKAKEI
+RPIVERLVTLGK---------------------------------------RGGLHA-RR
+QAIASLR------------------------DAGKVA-KLFD-TLAPRYASRNGGYLRIM
+KAG-F-RTGDNAPMAVIEFVDRDV-DAKGAVDRVR-TESSANEKEASS------------
+-----------------------------
+>Bacteria_Chlorobium tepidum TLS |WP_010933814.1|1097
+MRKVKPA--RKLGRTSAHRKATLSNLSTQLLIHK--------------RIETTEAKAKET
+RKVVEKIITKAR---------------------------------------KGTHHA-QR
+EVFGALR------------------------DKEAVR-ELFE-EIVGRIGSRNGGYTRII
+KLA-P-RYGDAAKMAVIELVDYAE-APSAAPVVSK-QDRAKRVKGSKKAESRSQENEGGD
+AAE--------------------------
+>Bacteria_Mesoplasma florum L1 |WP_011183048.1|46239
+---MSYI--QKQGKNTAWRVALMRNLTSELIVSE--------------RLEITETRAKEL
+RKHLDKMVTLAK---------------------------------------RGDLHA-RR
+QAASWLRNIE------------------ASSKEDVLQ-KLFT-TIAKKYKDRDGGYTRIL
+KLD-N-RKGDNAPMVIIELV----------------------------------------
+-----------------------------
+>Bacteria_Thermoanaerobacter tengcongensis MB4 |WP_011026309.1|911092
+----MSY--RKLGRPSDQRRAMLRNLVTDFLRYE--------------RITTTEARAKEV
+RKIAEKMITLGK---------------------------------------RGDLHA-RR
+QALAYIL------------------------DESVVK-KLFD-DIAPRYKERNGGYTRIF
+KLG-P-RRGDGAPLAVIELV----------------------------------------
+-----------------------------
+>Bacteria_Geobacillus kaustophilus HTA426 |Q5L3R1|235909
+----MSY--RKLGRTTSQRKALLRDLATDLIINE--------------RIETTEARAKEL
+RSVMEKMITLGK---------------------------------------RGDLHA-RR
+QAAAFIRKEVA----------------NSETGQDALQ-KLFS-DIAPRYQDRQGGYTRIM
+KLG-P-RRGDGAPMVIIELV----------------------------------------
+-----------------------------
+>Bacteria_Magnetospirillum magnetotacticum MS-1 |KIM00055.1|272627
+MRHGMSG--RKLNRDKSARKALFVSLSNALLKHE--------------QIKTTLPKAKDL
+RPVVEKLITLGK---------------------------------------RGDLHA-RR
+QAYAFLR------------------------DDKVVA-KLFA-VIGERYKTRNGGYTRVL
+KAG-F-RYGDCAPMAIIELVDRDP-TAKGTDSGPT-ADKKADAD-EE-------------
+-----------------------------
+>Bacteria_Gluconobacter oxydans 621H|AAW60138.1|290633
+MRHGVSG--RKLNVTSSHRAAMFRNMAVALIKHE--------------QITTTLPKAKEL
+RPVVEKLITLGK---------------------------------------RGDLHA-RR
+QAFAQLR------------------------DDAVVT-KLFS-AVAERYKGRAGGYSRVL
+KAG-V-RYGDNADMAVIELVDRDV-AAKGQDSGP----KQNVAE-EQEAA----------
+-----------------------------
+>Bacteria_Novosphingobium aromaticivorans DSM 12444 |ABD26962.1|279238
+MRHKLGQ--RKLGRTSSHRIALLRNMAAALIKHE--------------QITTTLPKAREL
+RPYLEKLITLGK---------------------------------------KGGLSN-RR
+LAHARLL------------------------DEAQEQ-KLFT-TLAERYADRNGGYTRII
+KAG-Y-RASDAAPLAVIELVDRDT-SAKGQDSGPV-LTADEDEFEAA-------------
+-----------------------------
+>Bacteria_Ralstonia eutropha JMP134 |AAZ62513.1|264198
+MRHRHGL--RKLNRTSSHRLAMLRNMSNSLFQHE--------------LIKTTLPKAKEL
+RKVVEPLITLAK---------------------------------------KDTVAN-RR
+LAFARLR------------------------DRDMVT-KLFT-ELGPRYNARPGGYTRIL
+KFG-F-RQGDNAPMALVELVDRPE-ITEAPAEEAAE------------------------
+-----------------------------
+>Bacteria_Burkholderia sp. 383 |ABB07076.1|482957
+MRHRHGL--RKLNRTSSHRLAMLRNMSNSLIEHE--------------VIKTTLPKAKEL
+RKVVEPLITLGK---------------------------------------KPSLAN-RR
+LAFNRLR------------------------DRDSVA-KLFD-VLGPRFANRPGGYLRVL
+KFG-F-RVGDNAPMALVELLDRPE-VDETENVQEAE------------------------
+-----------------------------
+>Bacteria_Anabaena variabilis ATCC 29413 |ABA20340.1|240292
+MRHRNRV--KKLGKPADQRRALLRALTTELIRHG--------------RITTTLVRAKVV
+RSEVDKIITLAK---------------------------------------DGSLAA-RR
+RALGYIY------------------------DKQLVH-ALFE-QVSSRYGNRQGGYTRIL
+HTV-P-RRGDNAEMAIIELV----------------------------------------
+-----------------------------
+>Bacteria_Crocosphaera watsonii WH 8501 |EAM49875.1|165597
+MRHRCRV--PQLGKPADQRKALLRSLATELIRHG--------------QIKTTKTRAKAV
+RSEVDRIITLAK---------------------------------------DGSLAA-RR
+KAISYLY------------------------DKNLVH-KLFA-NAPERYKDRKGGYTRVV
+RTV-R-RRGDNAEMAIIELM----------------------------------------
+-----------------------------
+>Bacteria_Candidatus Yonathbacteria bacterium|OHA82927.1|1802726
+MKHHKSI--RKFGRDQAGRLALMRSLALALVIEE--------------HITTTEARAKEL
+RSFVESLVTKGR---------------------------------------IGDLPS-RR
+LIISRLGGTV---------------------GEEGAR-KIIE-DIAPRYKTRPGGYTRVV
+KLP-R-RKGDASKMAVIEFV----------------------------------------
+-----------------------------
+>Bacteria_Candidatus Harrisonbacteria bacterium|OGY65863.1|1798407
+------M--RKFHRKRGPRRSFLKGLANNLILKE--------------KIETTEARAKEI
+RSLVEKSVTLAK---------------------------------------KQNLAG-LR
+LLLSRLP------------------------KDAA-Q-KLYY-DLAPRYKERKGGYLRII
+KEA-RARKRDGAPLATIEFIR---------------------------------------
+-----------------------------
+>Bacteria_Candidatus Staskawiczbacteria bacterium|OGZ80077.1|1802224
+MRKLNKG--RKLSRKKGPRKALLRSLANNFFLHE--------------RIKTTEAKAKEL
+RPIVEKLITRAK---------------------------------------KDTVAN-RR
+QILRTLI------------------------PEMA-K-KIFV-ETAPKYQDRNGGYTRIL
+RLS-P-RNSDGAKMAIIELVKQ--------------------------------------
+-----------------------------
+>Bacteria_Candidatus Falkowbacteria bacterium|OGF42365.1|1798009
+MRHRKKG--KILDRKVGPRKALFRNLAVSLVLYE--------------KIKTTKAKAKAI
+KPIVERLITKGK---------------------------------------DNGIAS-RR
+NLLKYLY------------------------KESAVK-KILE-ELGPRYKERKGGYTRIL
+NLK-R-RQGDGAEIVQIELV----------------------------------------
+-----------------------------
+>Bacteria_Candidatus Woesebacteria bacterium|OGM10277.1|1802479
+MRKMVFG--RKLSRGRKAREALFRSLIKALIISG--------------KITTTKAKIKAI
+QGEIDKLITLSK---------------------------------------KGTLSA-EK
+RVSAILG------------------------NNRVLA-QILSGKIVKAFGTRTSGFTRMT
+LLS-R-RKGDAAEMARLEWVEKIS-LEEKKPAAKAKQETKAPPKKTKKTVKKAK------
+-----------------------------
+>Bacteria_Candidatus Gottesmanbacteria bacterium|OGG36157.1|1798391
+MRHNVFG--RKLNRDVKERKALFRSLVKAFIDKG--------------RIKTTYAKARAV
+GSLIEKLVTKAK---------------------------------------DGSRAS-MT
+QLMSFFN------------------------HKEPVK-KLTD-EIAPRFKDKIGGYIRMI
+RLG-R-RSGDNAQEVLLEWTVPEP-KIEKAGKVKT-AVKKEISGKKKNKK----------
+-----------------------------
+>Bacteria_candidate division WWE3 bacterium|OGC50446.1|1802616
+MRHRVHG--TNLNIDTDHRKALNRFLATSFIEKG--------------YAVTTLAKARFV
+RPYVEKLVTKAK---------------------------------------AGPTSL-SS
+LK-ASLN------------------------TRFAID-TLLH-TVAPKFASRNGGFTKMS
+KLG-F-REGDNAPLAKLEWSEKVD-YGKSKEKGKEKESVKNKVVKSGETQKASPKVAKVK
+EAKK-------------------------
+>Bacteria_Candidatus Saccharibacteria bacterium|OGL23411.1|1802133
+-MHRHGYKGRKFGRERDQRRALLKGLATSLVMHG--------------KIETTLQKAKET
+SRYIEKVITKAK---------------------------------------KGDLHN-RR
+QVIAALS------------------------TQTAAF-KLVD-EIAPQLTARNSGHVRVV
+RTR-L-RVGDGAQLAIIEFVDELKSVPKEEAKA---------------------------
+-----------------------------
+>Bacteria_Candidatus Peregrinibacteria bacterium|OGJ46184.1|1801902
+MRHRVKK--NSLNMANDHRVLLVKNLVTDLIENG--------------KLKTTEKRAKII
+QSELEKLITYAK--------------------------------------THNQLMI-IR
+RLKQVIL------------------------TESASK-KFLE-EIFPKYKEQKSGFVRII
+NAG-Y-RAGDAAILCYIELV----------------------------------------
+-----------------------------
+>Bacteria_Candidatus Berkelbacteria bacterium|OGD64889.1|1797471
+ME-------RVLRSQSDYKQTMLRNQLTSLLLYE--------------AITTTRAKAKAL
+LPFANRFLTRTK---------------------------------------VGGLNA-QK
+LAHQLLL------------------------DKNAVK-KLFE-DILPRFSPEDSNYLRSI
+SAG-F-RSGDSAEMAVVALLKSAK-PVVAPKTPAT-KEAKTKAKK---------------
+-----------------------------
