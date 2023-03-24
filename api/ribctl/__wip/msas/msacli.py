@@ -23,7 +23,6 @@ PROTEOVISION_MSA_FOLDER = '/home/rxz/dev/docker_ribxz/api/ribctl/__wip/data/msa_
 
 parser = argparse.ArgumentParser(description='Argument Parser for my ms code.')
 parser.add_argument('-p', '--proteovision', required=False, help='Type of proteovision analysis to perform (lsu, ssu, single)')
-parser.add_argument('-a','--addtaxid', type=PolymerClass, required=False, help='Additional taxonomic ID to include in the analysis')
 parser.add_argument('-t','--lineage', type=str, required=False, help='Comma-separated list of taxonomic levels to include in the query')
 
 args = parser.parse_args()
@@ -140,16 +139,29 @@ def process_proteovision_alignment(nomclass:ProteinClass):
 #             except Exception as e:
 #                 print(e)
 #                 ...
+
+show = True
+if show:
+    nomclass = 'uL23'
+    msa_main = parseMSA(msa_class_proteovision_path(nomclass))
+    for seq in msa_main:
+        print(seq)
+
+
 if proteovision_type is not None:
     process_proteovision_alignment(proteovision_type)
 
 if lineage is not None:
-    """given a substrand in a protein class (say, uL23):
-            - get taxid of its parent structure 
+    
+    # ※ The goal is to minimize evolutionary distance between the set of sequences that connect the polymer being considered to the the MSA *
+    """given a substrand in a polymer class (say, uL23):
+       - get taxid of its parent structure 
+       - search the corresponding proteovision alignment for sequences with the following tax id priority:
 
-       search the corresponding proteovision alignment for sequences with the following tax id priority:
-       the closest level in the lineage (ideally the aln has the same exact tax id)
-       if not, the next closest populated level up in the lineage and its paralels
+               {the closest level in the lineage (ideally the aln has the same exact tax id) }--|
+               {if not, the next closest populated level up in the lineage and its paralels  }  |->  "bridge" sequence
+
+       - do the regular substrand lookup and backtracking into the 
             """
 
 
