@@ -9,7 +9,6 @@ from Bio.PDB import FastMMCIFParser
 
 from ribctl.lib import RIBETL_DATA
 
-
 def download_unpack_place(struct_id: str) -> None:
 
     BASE_URL = "http://files.rcsb.org/download/"
@@ -39,7 +38,6 @@ def download_unpack_place(struct_id: str) -> None:
     with open(structfile, "wb") as f:
         f.write(decompressed)
 
-
 def struct_path(pdbid: str, pftype: typing.Literal["cif", "json", "modified"]):
     if pftype == 'cif':
         return os.path.join(RIBETL_DATA, pdbid.upper(), f"{pdbid.upper()}.cif")
@@ -51,13 +49,11 @@ def struct_path(pdbid: str, pftype: typing.Literal["cif", "json", "modified"]):
         raise ValueError(
             "Invalid path type. Must be 'cif', 'json', or 'modified' ")
 
-
 def ligand_path(pdbid: str, ligand_id: str, lig_type: typing.Literal["LIGAND", "POLYMER"]):
     return os.path.join(RIBETL_DATA, pdbid.upper(),  "{}_{}.json".format(
         "LIGAND" if lig_type == 'LIGAND' else "POLYMER",
         ligand_id
     ))
-
 
 def open_structure(pdbid: str, path_type: typing.Literal["cif", "json", "modified"]) -> Structure | typing.Any:
     pdbid = pdbid.upper()
@@ -80,3 +76,4 @@ def open_structure(pdbid: str, path_type: typing.Literal["cif", "json", "modifie
 
             except Exception as e:
                 return f"\033[93m Parser Error in structure {pdbid} \033[0m : {e}"
+

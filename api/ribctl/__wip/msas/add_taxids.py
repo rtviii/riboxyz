@@ -5,8 +5,7 @@ import subprocess
 import sys
 import numpy as np
 import prody as prd
-from prody import MSA, Sequence, calcShannonEntropy
-import requests
+from prody import MSA, Sequence
 prd.confProDy(verbosity='none')
 
 def muscle_combine_profiles(msa_path1: str, msa_path2: str, out_filepath: str):
@@ -52,11 +51,12 @@ url        = f"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pr
 seq:Sequence
 labels = []
 seqs   = []
-for seq in chief_msa:
-    nih_id = seq.getLabel().split('|')[1]
-    sequence_proper = barr2str(seq.getArray())
-    seqs.append(sequence_proper)
-    labels.append(nih_id)
+# for seq in chief_msa:
+#     nih_id = seq.getLabel().split('|')[1]
+#     sequence_proper = barr2str(seq.getArray())
+    # print(h)
+    # seqs.append(sequence_proper)
+    # labels.append(nih_id)
     # print("label set to ", seq.getLabel())
     # print(seq)
     # response        = requests.get(url)
@@ -67,13 +67,27 @@ for seq in chief_msa:
     #     print("Error: ", response.status_code)
 
 
+for seq in chief_msa:
+    print(seq)
 print("edited labels")
-prd.writeMSA(path, MSA(np.array(seqs),nomclass,labels=labels))
+# prd.writeMSA(path, MSA(np.array(seqs),nomclass,labels=labels))
 
-# response = requests.get(url)
-# protein_summary = response.json()
-# taxid = protein_summary["result"][protein_id]["taxid"]
-# print(taxid)
 
-# for seq in chief_msa:
-#     print(seq)
+# star -----------------------------
+# from ete3 import NcbiTaxa
+
+# # create an instance of the NcbiTaxa class
+# ncbi = NcbiTaxa()
+
+# # define the tax ID of interest
+# tax_id = 9606  # for human
+
+# # retrieve the lineage
+# lineage = ncbi.get_lineage(tax_id)
+
+# # retrieve the scientific names of the lineage
+# lineage_names = ncbi.get_taxid_translator(lineage)
+
+# # print the lineage
+# for taxid, name in lineage_names.items():
+#     print(f"{taxid}\t{name}")
