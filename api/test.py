@@ -43,18 +43,21 @@ def predict_bsite(PDBID_target, ligand_id, ligand_type)->LigandPrediction:
 
     return prediction
 
-(src_auth_asym_id, src_path, src_range,
- tgt_auth_asym_id, tgt_path, tgt_range) = ranged_align_by_polyclass(PDBID1,PDBID2,resrange,poly_class)
+# (src_auth_asym_id, src_path, src_range,
+#  tgt_auth_asym_id, tgt_path, tgt_range) = ranged_align_by_polyclass(PDBID1,PDBID2,resrange,poly_class)
 
-cif_str = pymol_super(
-    PDBID1,
-    src_range,
-    src_auth_asym_id,
+# cif_str = pymol_super(
+#     PDBID1,
+#     src_range,
+#     src_auth_asym_id,
 
-    PDBID2,
-    tgt_range,
-    tgt_auth_asym_id,
-)
+#     PDBID2,
+#     tgt_range,
+#     tgt_auth_asym_id,
+# )
+
+
+
 
 # extract_bsites(PDBID)
 # print(cif_str)
