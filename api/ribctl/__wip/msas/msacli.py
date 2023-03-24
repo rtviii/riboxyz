@@ -1,4 +1,5 @@
 import os
+from pprint import pprint
 import typing
 import requests
 from ribctl.lib.types.types_ribosome import ProteinClass
@@ -63,6 +64,7 @@ def msa_class_proteovision_path(_:ProteinClass):
     return '/home/rxz/dev/docker_ribxz/api/ribctl/__wip/data/msa_classes_proteovision/{}/{}_ribovision.fasta'.format(infer_subunit(_),_)
 
 def msa_add_taxonomic_ids(msa_path:str):
+    print("Adding taxonomic IDs to MSA: {}".format(msa_path))
     msa_main = parseMSA(msa_path)
     url = lambda protein_id: f"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=protein&id={protein_id}&retmode=json"
 
@@ -78,16 +80,23 @@ def msa_add_taxonomic_ids(msa_path:str):
         response        = requests.get(url(nih_protein_id))
         if response.status_code == 200:
             protein_summary = response.json()
-            taxid           = protein_summary["result"][nih_protein_id]["taxid"]
-            new_label = f"{original_label}|{taxid}"
+            # pprint(protein_summary)
+            res       = protein_summary["result"]
+            try:
+                uid       = list(res.keys())[1]
+                taxid     = protein_summary["result"][uid]['taxid']
+                new_label = f"{original_label}|{taxid}"
 
-            _sequences_new.append(sequence_proper)
-            _labels_new.append(new_label)
+                _sequences_new.append(sequence_proper)
+                _labels_new.append(new_label)
+            except Exception as e:
+                print("Failed to identify taxid in {}: {}".format(original_label, e))
+                continue
+
         else:
             print("Omtitting {} Error: ".format(original_label), response.status_code)
 
     prd.writeMSA(msa_path, MSA(np.array(_sequences_new),' ',labels=_labels_new))
-
 
 def save_aln(protein:ProteinClass):
         spec_letters, class_digit = protein.split("S" if infer_subunit(protein) == "SSU" else "L")
@@ -103,7 +112,7 @@ def save_aln(protein:ProteinClass):
             if 'b' in spec_letters:
                 return TAXID_BACTERIA
             if 'u' in spec_letters:
-                return ",".join([TAXID_EUKARYA,TAXID_ARCHEA,TAXID_BACTERIA])
+                return ",".join([str(TAXID_EUKARYA),str(TAXID_ARCHEA),str(TAXID_BACTERIA)])
 
             return tax_string[:-1]
 
@@ -122,9 +131,21 @@ def save_aln(protein:ProteinClass):
                 print("Wrote {} to {}".format(protein,filename))
 
 
-save_aln("uL23")
+for nomclass in list_LSU_Proteins:
+    try:
+        save_aln(nomclass)
+        msa_add_taxonomic_ids(msa_class_proteovision_path(nomclass))
+    except Exception as e:
+        print(e)
+        ...
 
-path = msa_class_proteovision_path("uL23")
+for nomclass in list_SSU_Proteins:
+    try:
+        save_aln(nomclass)
+        msa_add_taxonomic_ids(msa_class_proteovision_path(nomclass))
+    except Exception as e:
+        print(e)
+        ...
 
 # star -----------------------------
 # from ete3 import NcbiTaxa
