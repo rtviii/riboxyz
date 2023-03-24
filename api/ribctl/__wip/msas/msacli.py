@@ -36,9 +36,6 @@ additional_taxid  = args.addtaxid
 lineage           = args.lineage
 
 
-
-
-
 def muscle_combine_profiles(msa_path1: str, msa_path2: str, out_filepath: str):
     """Combine two MSA-profiles into a single one. Used here to "append" a target sequence two the ribovision alignment. """
     cmd = ['/home/rxz/dev/docker_ribxz/cli/scripts/muscle3.8', '-profile','-in1', msa_path1, '-in2', msa_path2, '-out', out_filepath]
@@ -53,15 +50,17 @@ def muscle_combine_profiles(msa_path1: str, msa_path2: str, out_filepath: str):
 
 def barr2str (bArr):
     return ''.join([ x.decode("utf-8") for x in bArr])
-    
-infer_subunit = lambda polymer_class : 'LSU' if 'L' in polymer_class else 'SSU'
-datapath      = lambda subunit, polymer_class : '/home/rxz/dev/docker_ribxz/api/ribctl/__wip/data/msa_classes_proteovision/{}/{}_ribovision.fasta'.format(subunit, polymer_class)
 
+def infer_subunit(protein_class:ProteinClass):
+    if protein_class in list_LSU_Proteins:
+        return "LSU"
+    elif protein_class in list_SSU_Proteins:
+        return "SSU"
+    else:
+        raise ValueError("Unknown protein class: {}".format(protein_class))
 
-nomclass      = 'uL23'
-path          = datapath(infer_subunit(nomclass),nomclass)
-
-
+def msa_class_proteovision_path(_:ProteinClass):
+    return '/home/rxz/dev/docker_ribxz/api/ribctl/__wip/data/msa_classes_proteovision/{}/{}_ribovision.fasta'.format(infer_subunit(_),_)
 
 def msa_add_taxonomic_ids(msa_path:str):
     msa_main = parseMSA(msa_path)
@@ -87,47 +86,11 @@ def msa_add_taxonomic_ids(msa_path:str):
         else:
             print("Omtitting {} Error: ".format(original_label), response.status_code)
 
-    prd.writeMSA(msa_path, MSA(np.array(_sequences_new),nomclass,labels=_labels_new))
+    prd.writeMSA(msa_path, MSA(np.array(_sequences_new),' ',labels=_labels_new))
 
 
-def save_aln(protein:ProteinClass, subunit: typing.Literal["SSU","LSU"]):
-        spec_letters, class_digit = protein.split("S" if subunit == "SSU" else "L")
-
-        # correct for the fact that the proteovision API requires two digits for the single-digit classes (i.e uL1 is uL01)
-        if int(class_digit) < 10:
-            class_digit = "0{}".format(class_digit)
-
-        def tax_string(spec_letters):
-            tax_string = ""
-            if 'e' in spec_letters:
-                return E
-            if 'b' in spec_letters:
-                return B
-            if 'u' in spec_letters:
-                return ",".join([B,E,A])
-
-            return tax_string[:-1]
-
-        URI         = PROTEOVISION_URL(subunit,spec_letters + ( "S" if subunit == "SSU" else "L" ) + class_digit, tax_string(spec_letters))
-        resp        = requests.get(URI)
-        start,end   = resp.text.find("<pre>"), resp.text.find("</pre>")
-        fasta_lines = resp.text[start+len("<pre>"):end].replace("&gt;",">")
-        filename    = "{}_ribovision.fasta".format(protein)
-        outpath = os.path.join(PROTEOVISION_MSA_FOLDER,subunit, filename)
-
-        print("{}\t| {} \t| URI: {}".format(protein,resp.status_code, URI) )
-
-        if resp.status_code == 200:
-            with open(outpath,"w") as f:
-                f.write(fasta_lines)
-                print("Wrote {} to {}".format(protein,filename))
-
-def save_alns(subunit_protein_names: list[str], subunit: typing.Literal["SSU","LSU"]):
-    protnames = subunit_protein_names
-    for protein in protnames:
-
-        print("Fetching {}...".format(protein), end="")
-        spec_letters, class_digit = protein.split("S" if subunit == "SSU" else "L")
+def save_aln(protein:ProteinClass):
+        spec_letters, class_digit = protein.split("S" if infer_subunit(protein) == "SSU" else "L")
 
         # correct for the fact that the proteovision API requires two digits for the single-digit classes (i.e uL1 is uL01)
         if int(class_digit) < 10:
@@ -136,20 +99,20 @@ def save_alns(subunit_protein_names: list[str], subunit: typing.Literal["SSU","L
         def tax_string(spec_letters):
             tax_string = ""
             if 'e' in spec_letters:
-                return E
+                return TAXID_EUKARYA
             if 'b' in spec_letters:
-                return B
+                return TAXID_BACTERIA
             if 'u' in spec_letters:
-                return ",".join([B,E,A])
+                return ",".join([TAXID_EUKARYA,TAXID_ARCHEA,TAXID_BACTERIA])
 
             return tax_string[:-1]
 
-        URI         = PROTEOVISION_URL(subunit,spec_letters + ( "S" if subunit == "SSU" else "L" ) + class_digit, tax_string(spec_letters))
+        URI         = PROTEOVISION_URL(infer_subunit(protein),spec_letters + ( "S" if infer_subunit(protein) == "SSU" else "L" ) + class_digit, tax_string(spec_letters))
         resp        = requests.get(URI)
         start,end   = resp.text.find("<pre>"), resp.text.find("</pre>")
         fasta_lines = resp.text[start+len("<pre>"):end].replace("&gt;",">")
         filename    = "{}_ribovision.fasta".format(protein)
-        outpath = os.path.join(PROTEOVISION_MSA_FOLDER,subunit, filename)
+        outpath = os.path.join(PROTEOVISION_MSA_FOLDER,infer_subunit(protein), filename)
 
         print("{}\t| {} \t| URI: {}".format(protein,resp.status_code, URI) )
 
@@ -157,5 +120,27 @@ def save_alns(subunit_protein_names: list[str], subunit: typing.Literal["SSU","L
             with open(outpath,"w") as f:
                 f.write(fasta_lines)
                 print("Wrote {} to {}".format(protein,filename))
-         
-save_aln('uL23', "LSU")
+
+
+save_aln("uL23")
+
+path = msa_class_proteovision_path("uL23")
+
+# star -----------------------------
+# from ete3 import NcbiTaxa
+
+# # create an instance of the NcbiTaxa class
+# ncbi = NcbiTaxa()
+
+# # define the tax ID of interest
+# tax_id = 9606  # for human
+
+# # retrieve the lineage
+# lineage = ncbi.get_lineage(tax_id)
+
+# # retrieve the scientific names of the lineage
+# lineage_names = ncbi.get_taxid_translator(lineage)
+
+# # print the lineage
+# for taxid, name in lineage_names.items():
+#     print(f"{taxid}\t{name}")
