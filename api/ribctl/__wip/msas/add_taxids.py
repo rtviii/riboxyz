@@ -1,4 +1,3 @@
-import argparse
 import os
 from pprint import pprint
 import subprocess
@@ -6,6 +5,7 @@ import sys
 import numpy as np
 import prody as prd
 from prody import MSA, Sequence
+import requests
 prd.confProDy(verbosity='none')
 
 def muscle_combine_profiles(msa_path1: str, msa_path2: str, out_filepath: str):
@@ -23,54 +23,44 @@ def muscle_combine_profiles(msa_path1: str, msa_path2: str, out_filepath: str):
 def barr2str (bArr):
     return ''.join([ x.decode("utf-8") for x in bArr])
     
-# muscle_combine_profiles(chief_msa_path, control_path, '{}with_{}.fasta'.format(chief_msa_path,control))
-# h, hwctl = compare_entropies(chief_msa_path, '{}with_{}.fasta'.format(chief_msa_path,control))
+infer_subunit = lambda polymer_class : 'LSU' if 'L' in polymer_class else 'SSU'
+datapath      = lambda subunit, polymer_class : '/home/rxz/dev/docker_ribxz/api/ribctl/__wip/data/msa_classes_proteovision/{}/{}_ribovision.fasta'.format(subunit, polymer_class)
 
-# ※ ---------------------
-# Goals are to help Shiqi find the the common landmark for the exit port:
-    # For every domain:
-# 1. Pick the target in one structure X (let's say it's (nucleotide U61 in chain ??) or (amino-acid ?? in uL23)). Call this the origin site: chain + nucleotide/amino-acid.
-# 2. Given the species of X, get an alignment of all the other species in this domain. 
-# 3. Align the original chain into this MSA (profile-profile in muscle). Call the resulting [columns] aligned to the origin site in the MSA: landmark columns/indices
-        # For all other structures of interest in this domain:
-        # 4. Get the chain of the same class and align it into the MSA.
-        # 5. Track back the reference columns from the MSA-stretched chain to the original (count and exclude the gaps basically)
+
+nomclass      = 'uL23'
+path          = datapath(infer_subunit(nomclass),nomclass)
 
 
 
-# ! All the alignments in the proteovision folder are taken for as many domains(2,2157,2759) as possible (at most -- whole 3 domains).
-nomclass  = 'uL23'
-datapath  = lambda subunit,polymer_class : '/home/rxz/dev/docker_ribxz/api/ribctl/__wip/data/msa_classes_proteovision/{}/{}_ribovision.fasta'.format(subunit, polymer_class)
+def msa_add_taxonomic_ids(msa_path:str):
+    msa_main:MSA = prd.parseMSA(msa_path)
+    url = lambda protein_id: f"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=protein&id={protein_id}&retmode=json"
+    seq:Sequence
 
-path      = datapath('LSU',nomclass)
-chief_msa:MSA = prd.parseMSA(path)
+    _sequences_new = []
+    _labels_new   = []
 
-protein_id = "CAL18894.1"
-url        = f"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=protein&id={protein_id}&retmode=json"
+    for seq in msa_main:
+        original_label  = seq.getLabel()
+        nih_protein_id  = original_label.split('|')[1]
+        sequence_proper = barr2str(seq.getArray())
 
-seq:Sequence
-labels = []
-seqs   = []
-# for seq in chief_msa:
-#     nih_id = seq.getLabel().split('|')[1]
-#     sequence_proper = barr2str(seq.getArray())
-    # print(h)
-    # seqs.append(sequence_proper)
-    # labels.append(nih_id)
-    # print("label set to ", seq.getLabel())
-    # print(seq)
-    # response        = requests.get(url)
-    # if response.status_code == 200:
-    #     protein_summary = response.json()
-    #     taxid           = protein_summary["result"][protein_id]["taxid"]
-    # else:
-    #     print("Error: ", response.status_code)
+        response        = requests.get(url(nih_protein_id))
+        if response.status_code == 200:
+            protein_summary = response.json()
+            taxid           = protein_summary["result"][nih_protein_id]["taxid"]
+            new_label = f"{original_label}|{taxid}"
+
+            _sequences_new.append(sequence_proper)
+            _labels_new.append(new_label)
+        else:
+            print("Omtitting {} Error: ".format(original_label), response.status_code)
+
+    prd.writeMSA(msa_path, MSA(np.array(_sequences_new),nomclass,labels=_labels_new))
 
 
-for seq in chief_msa:
-    print(seq)
-print("edited labels")
-# prd.writeMSA(path, MSA(np.array(seqs),nomclass,labels=labels))
+
+
 
 
 # star -----------------------------
