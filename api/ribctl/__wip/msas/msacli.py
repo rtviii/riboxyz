@@ -30,7 +30,6 @@ args = parser.parse_args()
 
 # Access the argument values
 proteovision_type = args.proteovision
-additional_taxid  = args.addtaxid
 lineage           = args.lineage
 
 
@@ -134,13 +133,24 @@ def process_proteovision_alignment(nomclass:ProteinClass):
     save_aln(nomclass)
     msa_add_taxonomic_ids(msa_class_proteovision_path(nomclass))
 
-if proteovision_type:
-        for nomclass in [*list_LSU_Proteins, *list_SSU_Proteins]:
-            try:
-                process_proteovision_alignment(nomclass)
-            except Exception as e:
-                print(e)
-                ...
+# if proteovision_type == 'all':
+#         for nomclass in [*list_LSU_Proteins, *list_SSU_Proteins]:
+#             try:
+#                 process_proteovision_alignment(nomclass)
+#             except Exception as e:
+#                 print(e)
+#                 ...
+if proteovision_type is not None:
+    process_proteovision_alignment(proteovision_type)
+
+if lineage is not None:
+    """given a substrand in a protein class (say, uL23):
+            - get taxid of its parent structure 
+
+       search the corresponding proteovision alignment for sequences with the following tax id priority:
+       the closest level in the lineage (ideally the aln has the same exact tax id)
+       if not, the next closest populated level up in the lineage and its paralels
+            """
 
 
 # star -----------------------------
