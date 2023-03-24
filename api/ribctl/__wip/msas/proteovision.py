@@ -3,15 +3,32 @@ import typing
 import requests
 from ribctl.lib.types.types_ribosome import ProteinClass
 from  ribctl.lib.types.types_polymer import  list_LSU_Proteins,list_SSU_Proteins
+import argparse
 
 
-B            = "2"
-E            = "2759"
-A            = "2157"
-PROTEOVISION_URL = lambda SU, _class, taxids: "https://ribovision3.chemistry.gatech.edu/showAlignment/{}/{}/{}".format(SU,_class,taxids)
+TAXID_BACTERIA          = 2
+TAXID_EUKARYA           = 2759
+TAXID_ARCHEA            = 2157
+PROTEOVISION_URL        = lambda SU, _class, taxids: "https://ribovision3.chemistry.gatech.edu/showAlignment/{}/{}/{}".format(SU,_class,taxids)
+PROTEOVISION_MSA_FOLDER = '/home/rxz/dev/docker_ribxz/api/ribctl/__wip/data/msa_classes_proteovision/'
 
+parser = argparse.ArgumentParser(description='Argument Parser for my ms code.')
 
-PROTEOVISION_MSA_FOLDER =  '/home/rxz/dev/docker_ribxz/api/ribctl/__wip/data/msa_classes_proteovision/'
+# Add the arguments
+parser.add_argument('-p', '--proteovision', choices=['lsu', 'ssu', 'single'], required=False,
+                    help='Type of proteovision analysis to perform (lsu, ssu, single)')
+parser.add_argument('-a','--addtaxid', type=int, required=False,
+                    help='Additional taxonomic ID to include in the analysis')
+parser.add_argument('-t','--lineage', type=str, required=False,
+                    help='Comma-separated list of taxonomic levels to include in the analysis')
+
+# Parse the arguments
+args = parser.parse_args()
+
+# Access the argument values
+proteovision_type = args.proteovision
+additional_taxid  = args.addtaxid
+lineage           = args.lineage
 
 
 def save_aln(protein:ProteinClass, subunit: typing.Literal["SSU","LSU"]):
