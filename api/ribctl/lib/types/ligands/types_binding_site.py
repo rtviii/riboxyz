@@ -1,11 +1,7 @@
-from ctypes import Union
 import json
 import typing
-from pydantic import BaseModel, root_validator, Extra
-from pydantic import parse_obj_as
+from pydantic import BaseModel
 from Bio.PDB.Residue import Residue
-from pyparsing import Optional
-
 from ribctl.lib.types.types_ribosome import Polymer, PolymerClass
 
 AMINO_ACIDS = {
@@ -34,11 +30,9 @@ AMINO_ACIDS = {
     }
 NUCLEOTIDES = ['A', 'T', 'C', 'G', 'U']
 
-
 class ResidueSummary(BaseModel):
 
     full_id            : tuple[str,int,str,tuple[str,int,str]]
-    
     resname            : str
     seqid              : int
     parent_auth_asym_id: str
@@ -73,10 +67,8 @@ class ResidueSummary(BaseModel):
             full_id             = r.get_full_id()
         )
 
-
 class BindingSiteChain(Polymer): 
       residues: list[ ResidueSummary ]
-
 
 class BindingSite(BaseModel):
     __root__ : typing.Dict[str,BindingSiteChain]
@@ -95,7 +87,6 @@ class BindingSite(BaseModel):
     def dict(self,):
         return super().dict()['__root__']
     
-
 class PredictedResiduesPolymer(BaseModel):
 	class PredictionSource(BaseModel):
 		src: str
