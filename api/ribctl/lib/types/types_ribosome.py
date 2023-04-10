@@ -6,7 +6,6 @@ from .types_polymer import LSU_Proteins, RNAClass, SSU_Proteins
 ProteinClass = typing.Union[LSU_Proteins , SSU_Proteins]
 PolymerClass = typing.Union[ProteinClass, RNAClass]
 
-
 class LastUpdate(BaseModel):
     date: str
     added_structure: str
@@ -57,7 +56,6 @@ class Ligand(BaseModel)  :
       pdbx_description   : str
       number_of_instances: int
 
-
 class RibosomeStructure(BaseModel):
 
     rcsb_id   : str
@@ -93,22 +91,16 @@ class RibosomeStructure(BaseModel):
     def from_json_profile(d: Any):
         return RibosomeStructure(**d)
 
-
-# ※--------------------------------------------------------
-
 class InterProFamily(BaseModel):
     family_id: str
     type: str
     description: str
 
-
 class GOClass(BaseModel):
     class_id: str
     annotation: str
-
 
 class PFAMFamily(BaseModel):
     family_id: str
     annotation: str
     family_type: str
-

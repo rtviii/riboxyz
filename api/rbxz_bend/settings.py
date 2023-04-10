@@ -48,15 +48,11 @@ RIBETL_DATA = os.environ["RIBETL_DATA"] if os.environ["RIBETL_DATA"] else os.pat
 # ※ Dont' forget to export pymol path ( we want to ship a built pymol, but python needs to be aware of it)
 # export PYMOL_PATH=/home/rxz/dev/pymol3.11 && export PYTHONPATH="$PYTHONPATH:$PYMOL_PATH/modules/:"
 
-
-
 def get_ribxz_logger(logname: typing.Literal['rcsb_sync','computations'], callee:str)->logging.Logger:
-
         logdict = { 
             'rcsb_sync'   : os.path.join(BASE_DIR, 'logs', 'rcsb_sync.log'),
             'computations': os.path.join(BASE_DIR, 'logs', 'computations.log')
          }
-
         logger = logging.getLogger(callee)
         logger.setLevel(logging.DEBUG)
         file_handler = logging.FileHandler(logdict[logname])
@@ -65,7 +61,6 @@ def get_ribxz_logger(logname: typing.Literal['rcsb_sync','computations'], callee
         file_handler.setFormatter(formatter)
         logger.addHandler(file_handler)
         return logger
-
 
 
 vars          = ["NEO4J_URI", "NEO4J_USER", "NEO4J_PASSWORD","NEO4J_CURRENTDB", "RIBETL_DATA"]
@@ -98,7 +93,6 @@ INSTALLED_APPS = [
     'mod_comp',
     'mod_db',
 ]
-
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -175,13 +169,6 @@ LOGGING = {
         },
     },
     'handlers': {
-        'general': {
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': os.path.join(BASE_DIR,'logs','general.log'),
-            'maxBytes': 1024 * 1024 * 5, # 5MB
-            'backupCount': 5,
-            'formatter': 'standard',
-        },
         'updates': {
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': os.path.join(BASE_DIR,'logs','updates.log'),
@@ -206,10 +193,6 @@ LOGGING = {
     
     },
     'loggers': {
-        'general': {
-            'handlers': ['general'],
-            'level': 'DEBUG',
-        },
         'updates': {
             'handlers': ['updates'],
             'level': 'DEBUG',
