@@ -32,8 +32,8 @@ merge (rna:RNA {
 
   return rna
 """, **RNA_dict).single(strict=True)['rna']
-
     return _
+
 def link__rna_to_nomclass(rna: Node) -> Callable[[Transaction | ManagedTransaction], list[list[Node | Relationship]]]:
     def _(tx: Transaction | ManagedTransaction):
         return tx.run("""//

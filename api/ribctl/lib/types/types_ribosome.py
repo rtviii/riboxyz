@@ -49,7 +49,6 @@ class RNA(Polymer):
     pass
 
 class Ligand(BaseModel)  : 
-
       chemicalId         : str
       chemicalName       : str
       formula_weight     : None | float
