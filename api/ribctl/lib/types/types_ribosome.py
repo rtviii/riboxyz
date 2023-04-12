@@ -48,6 +48,10 @@ class Protein(Polymer):
 class RNA(Polymer):
     pass
 
+# how should a ligand node be parametrized?
+#   what pending data do we work on?
+#  1.ligand nbhds. One way this could be encoded is via a "neighbors" edge between a given ligand node and the nbr polymers.
+#  think of this when we actually do the protein-to-protein interaction learning
 class Ligand(BaseModel)  : 
       chemicalId         : str
       chemicalName       : str
