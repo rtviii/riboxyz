@@ -104,7 +104,6 @@ class SeqMatch():
 			else: 	 	 _ += v
 		return _
 
-
 def struct_bsites(rcsb_id:str):
 	"""Returns a list of binding sites from a structure"""
 	rcsb_id =rcsb_id.upper()

@@ -16,9 +16,6 @@ def __to_names(d:dict):
     return nu
 
 
-
-
-
 def __classify_profile(d:dict)->dict:
     s={}
     for _ in d['source_organisms']:

@@ -1,5 +1,10 @@
 
-<!-- TODO: Migrations -->
+<!-- TODO: WIP -->
+
+- separate assemblies
+- split ligand classes into instances and classes
+
+<!-- TODO: WIP -->
 
 - render images for new structs 
 - re-render ligands for all structs
@@ -20,9 +25,6 @@
 
 - visualization troubleshoot
 
-<!-- TODO: Next stage-->
-- split ligand classes into instances and classes
-<!-- TODO: Next stage-->
 - flash out the taxonomy : [src + host] [nodes in the db, hierarchy in the app(pull in the lib, construct dynamically on app start from assets)]
 
 
