@@ -55,43 +55,56 @@ class Ligand(BaseModel)  :
 class LigandlikePolymer(Polymer): 
     nomenclature: LigandlikePolymerClass
     
-# class RibosomeStructure(BaseModel):
 
-#     rcsb_id   : str
-#     expMethod : str
-#     resolution: float
+class NonpolymerEntityInstance(BaseModel):
+    class NonpolymerEntityInstanceContainerIdentifiers(BaseModel):
+        entity_id: str
+        auth_asym_id: str
+        auth_seq_id: str
+    rcsb_nonpolymer_entity_instance_container_identifiers: NonpolymerEntityInstanceContainerIdentifiers
 
-#     pdbx_keywords:      str | None
-#     pdbx_keywords_text: str | None
+class PolymerEntityInstance(BaseModel):
+    class PolymerEntityInstanceContainerIdentifiers(BaseModel):
+        entity_id: str
+        auth_asym_id: str
+    rcsb_polymer_entity_instance_container_identifiers: PolymerEntityInstanceContainerIdentifiers
 
-#     rcsb_external_ref_id  : list[str]
-#     rcsb_external_ref_type: list[str]
-#     rcsb_external_ref_link: list[str]
 
-#     citation_year        : None | int
-#     citation_rcsb_authors: None | list[str]
-#     citation_title       : None | str
-#     citation_pdbx_doi    : None | str
-
-#     src_organism_ids  : list[int]
-#     src_organism_names: list[str]
-
-#     host_organism_ids  : list[int]
-#     host_organism_names: list[str]
-
-#     proteins: list[Protein]
-#     rnas    : list[RNA] | None
-#     ligands : list[Ligand] | None
+class AssemblyInstancesMap(BaseModel):
+    """
+    This basically specifies which assembly an instnace of a polymer or a nonpolymer belongs to. 
+    Certain PDB structures come with more than a single physical model/assembly packaged in the file,
+    hence every chain and many ligands might be present in 2 or more instances. 
     
-
-#     @staticmethod
-#     def from_json_profile(d: Any):
-#         return RibosomeStructure(**d)
-
-
-class AssemblyMap(BaseModel):
-    auth_asym_id: 
-
+    The RNA/Protein/Ligand suffices to characterizes all instances, yet, to resolve duplicate chains 
+    precisely in space, this information is needed.
+    
+    assemblies{
+    rcsb_id 
+   	nonpolymer_entity_instances{
+  
+      rcsb_nonpolymer_entity_instance_container_identifiers{
+        entity_id
+        comp_id
+        auth_asym_id
+        rcsb_id
+        auth_seq_id
+      }
+    }
+    polymer_entity_instances{
+       rcsb_polymer_entity_instance_container_identifiers {  
+        entity_id
+        asym_id
+        auth_asym_id
+        entry_id
+        entity_id
+      }
+    }
+  }
+    """
+    rcsb_id                    : str # 5AFI-1
+    nonpolymer_entity_instances: list[NonpolymerEntityInstance]
+    polymer_entity_instances   : list[PolymerEntityInstance]
 
 class RibosomeStructure(BaseModel):
 
@@ -117,9 +130,7 @@ class RibosomeStructure(BaseModel):
     host_organism_ids  : list[int]
     host_organism_names: list[str]
 
-
-    assembly_map:
-
+    assembly_map: list[AssemblyInstancesMap]
 
     proteins: list[Protein]
     rnas    : list[RNA] | None
