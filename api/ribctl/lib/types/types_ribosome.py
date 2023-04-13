@@ -1,14 +1,11 @@
 from typing import Any
 import typing
 from pydantic import BaseModel
-from .types_polymer import LSU_Proteins, RNAClass, SSU_Proteins
+from .types_polymer_nonpoly_ligand import LSU_Proteins, LigandlikePolymerClass, RNAClass, SSU_Proteins
 
 ProteinClass = typing.Union[LSU_Proteins , SSU_Proteins]
 PolymerClass = typing.Union[ProteinClass, RNAClass]
 
-class LastUpdate(BaseModel):
-    date: str
-    added_structure: str
 
 class Polymer(BaseModel):
     asym_ids: list[str]
@@ -49,12 +46,52 @@ class RNA(Polymer):
     pass
 
 class Ligand(BaseModel)  : 
-
       chemicalId         : str
       chemicalName       : str
       formula_weight     : None | float
       pdbx_description   : str
       number_of_instances: int
+
+class LigandlikePolymer(Polymer): 
+    nomenclature: LigandlikePolymerClass
+    
+# class RibosomeStructure(BaseModel):
+
+#     rcsb_id   : str
+#     expMethod : str
+#     resolution: float
+
+#     pdbx_keywords:      str | None
+#     pdbx_keywords_text: str | None
+
+#     rcsb_external_ref_id  : list[str]
+#     rcsb_external_ref_type: list[str]
+#     rcsb_external_ref_link: list[str]
+
+#     citation_year        : None | int
+#     citation_rcsb_authors: None | list[str]
+#     citation_title       : None | str
+#     citation_pdbx_doi    : None | str
+
+#     src_organism_ids  : list[int]
+#     src_organism_names: list[str]
+
+#     host_organism_ids  : list[int]
+#     host_organism_names: list[str]
+
+#     proteins: list[Protein]
+#     rnas    : list[RNA] | None
+#     ligands : list[Ligand] | None
+    
+
+#     @staticmethod
+#     def from_json_profile(d: Any):
+#         return RibosomeStructure(**d)
+
+
+class AssemblyMap(BaseModel):
+    auth_asym_id: 
+
 
 class RibosomeStructure(BaseModel):
 
@@ -80,27 +117,15 @@ class RibosomeStructure(BaseModel):
     host_organism_ids  : list[int]
     host_organism_names: list[str]
 
+
+    assembly_map:
+
+
     proteins: list[Protein]
     rnas    : list[RNA] | None
     ligands : list[Ligand] | None
     
 
-
-
     @staticmethod
     def from_json_profile(d: Any):
         return RibosomeStructure(**d)
-
-class InterProFamily(BaseModel):
-    family_id: str
-    type: str
-    description: str
-
-class GOClass(BaseModel):
-    class_id: str
-    annotation: str
-
-class PFAMFamily(BaseModel):
-    family_id: str
-    annotation: str
-    family_type: str

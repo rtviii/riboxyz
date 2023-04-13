@@ -1,10 +1,20 @@
+from typing import Literal
 from pydantic import BaseModel
 
 from api.ribctl.lib.types.types_ribosome import Polymer
 
+LigandlikePolymerClass = Literal[
+      "Elongation Factor",
+      "Initiation Factor",
+      "Translation Factor"
+]
 
 
 class LigandLikePolymer(Polymer):
+      nomenclature:
+      
+
+
 
 
 class Ligand(BaseModel)  : 
