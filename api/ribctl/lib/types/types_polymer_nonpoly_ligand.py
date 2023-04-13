@@ -1,5 +1,21 @@
-from typing import Literal
 # After https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4358319/
+from typing import Literal
+from pydantic import BaseModel
+
+from api.ribctl.lib.types.types_ribosome import Polymer
+
+LigandlikePolymerClass = Literal[
+      "Elongation Factor",
+      "Initiation Factor",
+      "Translation Factor"
+]
+
+LigandClass = Literal[
+      "Antibiotic",
+      "Ion"
+]
+
+
 
 RNAClass = Literal[
     "5SrRNA",

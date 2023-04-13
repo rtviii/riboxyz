@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 from typing import Any
 import requests
-from ribctl.lib.types.types_ribosome import RNA, Ligand, Protein, RibosomeStructure
+from ribctl.lib.types.types_ribosome import RNA, Protein, RibosomeStructure
 from ribctl.lib.gql_querystrings import monolithic
 import re
 
