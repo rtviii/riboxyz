@@ -386,12 +386,12 @@ def process_pdb_record(rcsb_id: str) -> RibosomeStructure:
         host_organism_ids= organisms['host_organism_ids'],
         host_organism_names= organisms['host_organism_names'],
 
-        proteins                = reshaped_proteins,
-        rnas                    = reshaped_rnas,
-        nonpolymeric_ligands = reshaped_nonpoly,
+        proteins             = reshaped_proteins,
+        rnas                 = reshaped_rnas,
 
-        polymeric_factors= ...,
-        assembly_map=...
+        nonpolymeric_ligands = ...,
+        polymeric_factors    = ...,
+        assembly_map         = __parse_assemblies(response['assemblies'])
 
     )
 

@@ -3,9 +3,10 @@
 # import argparse
 import argparse
 from pprint import pprint
+from fuzzywuzzy import process
 # from ribctl.lib.types.types_ribosome import  RibosomeStructure
 from api.ribctl.lib.types.ribosome_assets import RibosomeAssets
-from api.ribctl.lib.types.types_ribosome import AssemblyInstancesMap
+from api.ribctl.lib.types.types_ribosome import RNA, AssemblyInstancesMap, PolymericFactor, Protein
 from ribctl.lib.struct_rcsb_api import gql_monolith,query_rcsb_api
 
 arg = argparse.ArgumentParser(description='RibCtl - A tool to control the ribosome database')
@@ -22,6 +23,23 @@ args = arg.parse_args()
 
 
 
+# def __classify_polymer(poly:dict)->PolymericFactor | Protein | RNA:
+def __classify_polymer(poly:dict):
+    print(poly['rcsb_polymer_entity']['pdbx_description'])
+    matches = {}
+
+    # Use FuzzyWuzzy to find the best match between the string and the set of classes
+    match, score, _ = process.extractOne(s, classes, scorer=fuzz.token_set_ratio)
+    
+    # Add the match and score to the dictionary
+    matches[s] = (match, score)
+
+
+    ...
+
+# def __extract_polymeric_factors(polys:list[dict]) -> list[PolymericFactor]:
+#     'rcsb_polymer_entity': {'pdbx_description': '50S ribosomal protein L36'}
+#     return []
 
 
 # if args.obtain:
@@ -31,8 +49,10 @@ if args.structure:
     qs = query_rcsb_api(gql_monolith(args.structure))
     # pprint(qs)
     print(qs.keys())
-    pprint(qs['assemblies'])
-    parse_assemblies(qs['assemblies'])
+    for  poly in qs['polymer_entities']:
+        __classify_polymer(poly)
+    
+    # parse_assemblies(qs['assemblies'])
     # r = RibosomeAssets(args.structure)
     # d = r.json_profile()
     # rs = RibosomeStructure.parse_obj(d)
