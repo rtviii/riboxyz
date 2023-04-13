@@ -18,8 +18,6 @@ class Polymer(BaseModel):
     src_organism_ids   : list[int]
     host_organism_ids  : list[int]
 
-    ligand_like: bool
-
     rcsb_pdbx_description: str | None
 
     entity_poly_strand_id              : str

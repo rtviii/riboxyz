@@ -1,5 +1,4 @@
 from typing import Any
-import typing
 from pydantic import BaseModel
 from .types_poly_nonpoly_ligand import LSU_Proteins, RNAClass, SSU_Proteins
 
