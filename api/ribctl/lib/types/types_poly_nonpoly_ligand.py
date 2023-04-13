@@ -22,8 +22,8 @@ list_PolymericFactorClass = [
                              "Initiation Factor",
                              "Translation Factor",
                              "Biogenesis Factor",
-    "Release Factor",
-    "Elongation Factor",
+                            "Release Factor",
+                            "Elongation Factor",
                              
                              "Termination Factor",
                              "Nascent Chain",

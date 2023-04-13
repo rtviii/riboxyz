@@ -3,11 +3,11 @@
 # import argparse
 import argparse
 from pprint import pprint
-from fuzzywuzzy import process, fuzz
 # from ribctl.lib.types.types_ribosome import  RibosomeStructure
 from api.ribctl.lib.types.ribosome_assets import RibosomeAssets
 from api.ribctl.lib.types.types_ribosome import RNA, AssemblyInstancesMap, PolymericFactor, Protein
-from api.ribctl.lib.types.types_poly_nonpoly_ligand import list_PolymericFactorClass, list_NonpolymericLigandClass
+from fuzzywuzzy import process, fuzz
+from api.ribctl.lib.types.types_poly_nonpoly_ligand import PolymericFactorClass, list_PolymericFactorClass, list_NonpolymericLigandClass
 
 from ribctl.lib.struct_rcsb_api import gql_monolith,query_rcsb_api
 
@@ -19,41 +19,17 @@ arg.add_argument('-o', '--obtain', type=str)
 arg.add_argument('-ttt', '--test', action='store_true')
 args = arg.parse_args()
 
-# logging.basicConfig(level=logging.ERROR, filemode='w',
-#                     format='%(asctime)s - %(levelname)s - %(message)s')
-# logger = logging.getLogger(__name__)
 
 
-
-# def __classify_polymer(poly:dict)->PolymericFactor | Protein | RNA:
-def __classify_polymeric_factor(description:str):
-    """description is usually polymer['rcsb_polymer_entity']['pdbx_description'] in PDB"""
-    classes = list_PolymericFactorClass
-    # Use FuzzyWuzzy to find the best match between the string and the set of classes
-    # partial_ratio is the way to go.
-    match_score = process.extractOne(description, classes, scorer=fuzz.partial_ratio)
-
-
-    print(desc,"\t",match_score)
-    
-
-
-
-# def __extract_polymeric_factors(polys:list[dict]) -> list[PolymericFactor]:
-#     'rcsb_polymer_entity': {'pdbx_description': '50S ribosomal protein L36'}
-#     return []
-
-
-# if args.obtain:
-#     rcsb_id = args.obtain
-# db.get_full_structure('3J7Z')
 if args.structure:
     qs = query_rcsb_api(gql_monolith(args.structure))
     # pprint(qs)
     print(qs.keys())
     for  poly in qs['polymer_entities']:
         desc = poly['rcsb_polymer_entity']['pdbx_description']
-        __classify_polymeric_factor(desc)
+        match = __classify_polymeric_factor(desc)
+        if match != None :
+            print(f"{desc} is a {match}")
     
     # parse_assemblies(qs['assemblies'])
     # r = RibosomeAssets(args.structure)
