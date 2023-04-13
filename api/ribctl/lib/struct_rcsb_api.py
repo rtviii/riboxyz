@@ -10,10 +10,6 @@ import re
 def gql_monolith(rcsb_id): return monolithic.replace(
     "$RCSB_ID", rcsb_id.upper())
 
-# gql_structs             = lambda rcsb_id: structure_string.replace("$RCSB_ID", rcsb_id.upper())
-# gql_polymer_entities    = lambda rcsb_id: polymer_entities_string.replace("$RCSB_ID", rcsb_id.upper())
-# gql_nonpolymer_entities = lambda rcsb_id: nonpolymer_entities_string.replace("$RCSB_ID", rcsb_id.upper())
-
 def __get_protein_nomenclature(protein):
     banregex = r"/\b([ueb][ls]\d{1,2})\b/gi"
     #     check authors's annotations. if classes are present --> use that.
