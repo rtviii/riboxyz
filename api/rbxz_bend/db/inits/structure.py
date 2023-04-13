@@ -3,8 +3,8 @@ from typing import Callable
 from neo4j import GraphDatabase, Driver, ManagedTransaction, Record, Result, Transaction
 from neo4j.graph import Node, Relationship
 from neo4j import ManagedTransaction, Transaction
-from ribctl.lib.types.types_ribosome import RNA, Ligand, Protein, RibosomeStructure
-from api.ribctl.lib.types.types_polymer_nonpoly_ligand import list_LSU_Proteins, list_SSU_Proteins, list_RNAClass
+from ribctl.lib.types.types_ribosome import RNA, NonpolymericLigand, Protein, RibosomeStructure
+from api.ribctl.lib.types.types_poly_nonpoly_ligand import list_LSU_Proteins, list_SSU_Proteins, list_RNAClass
 
 
 def node__structure(_rib: RibosomeStructure) -> Callable[[Transaction | ManagedTransaction], Record | None]:
@@ -39,7 +39,7 @@ def node__structure(_rib: RibosomeStructure) -> Callable[[Transaction | ManagedT
         """, **R).single()
     return _
 
-def node__ligand(_ligand:Ligand)->Callable[[Transaction | ManagedTransaction], Node ]:
+def node__ligand(_ligand:NonpolymericLigand)->Callable[[Transaction | ManagedTransaction], Node ]:
     L = _ligand.dict()
     def _(tx: Transaction | ManagedTransaction):
      return tx.run("""//
@@ -66,7 +66,7 @@ def link__ligand_to_struct(prot: Node, parent_rcsb_id: str) -> Callable[[Transac
                        "PARENT": parent_rcsb_id}).values('struct', 'ligand', 'contains')
     return _
 
-def add_ligand(driver:Driver,lig:Ligand, parent_rcsb_id:str):
+def add_ligand(driver:Driver,lig:NonpolymericLigand, parent_rcsb_id:str):
     with driver.session() as s:
         node = s.execute_write(node__ligand(lig))
         s.execute_write(link__ligand_to_struct(node, parent_rcsb_id))

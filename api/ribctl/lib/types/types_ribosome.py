@@ -1,7 +1,7 @@
 from typing import Any
 import typing
 from pydantic import BaseModel
-from .types_poly_nonpoly_ligand import LSU_Proteins, PolymericFactors, RNAClass, SSU_Proteins
+from .types_poly_nonpoly_ligand import LSU_Proteins, NonpolymericLigandClass, PolymericFactorClass, RNAClass, SSU_Proteins
 
 ProteinClass = typing.Union[LSU_Proteins , SSU_Proteins]
 PolymerClass = typing.Union[ProteinClass, RNAClass]
@@ -32,7 +32,6 @@ class Polymer(BaseModel):
     nomenclature:  list[PolymerClass]
 
 class Protein(Polymer):
-
     pfam_accessions  : list[str]
     pfam_comments    : list[str]
     pfam_descriptions: list[str]
@@ -45,15 +44,16 @@ class Protein(Polymer):
 class RNA(Polymer):
     pass
 
-class Ligand(BaseModel)  : 
+class NonpolymericLigand(BaseModel)  : 
       chemicalId         : str
       chemicalName       : str
       formula_weight     : None | float
       pdbx_description   : str
       number_of_instances: int
+      nomenclature: NonpolymericLigandClass
 
-class LigandlikePolymer(Polymer): 
-    nomenclature: PolymericFactors
+class PolymericFactor(Polymer): 
+    nomenclature: PolymericFactorClass
     
 
 class NonpolymerEntityInstance(BaseModel):
@@ -132,12 +132,11 @@ class RibosomeStructure(BaseModel):
 
     assembly_map: list[AssemblyInstancesMap]
 
-    proteins: list[Protein]
-    rnas    : list[RNA] | None
-    ligands : list[Ligand] | None
-    polymeric_factors: LigandlikePolymer
+    proteins            : list[Protein]
+    rnas                : list[RNA] | None
+    nonpolymeric_ligands: list[NonpolymericLigand] | None
+    polymeric_factors   : list[PolymericFactor] | None
     
-
     
 
     @staticmethod
