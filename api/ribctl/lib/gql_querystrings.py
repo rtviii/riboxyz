@@ -1,6 +1,27 @@
-monolithic = """{
-  entry(entry_id: "$RCSB_ID") {
-    rcsb_id
+assembly_identification_string = """
+assemblies{
+    rcsb_id 
+   	nonpolymer_entity_instances{
+  
+      rcsb_nonpolymer_entity_instance_container_identifiers{
+        
+        comp_id
+        auth_asym_id
+        rcsb_id
+        auth_seq_id
+      }
+    }
+    polymer_entity_instances{
+       rcsb_polymer_entity_instance_container_identifiers {        
+        asym_id
+        auth_asym_id
+        entry_id
+        entity_id
+      }
+    }
+  }"""
+
+entry_info_string = """
     struct_keywords {
       pdbx_keywords
       text
@@ -26,6 +47,13 @@ monolithic = """{
       pdbx_keywords
       text
     }
+"""
+
+monolithic = """{
+  entry(entry_id: "$RCSB_ID") {
+    rcsb_id
+    {assemlby_identification}
+    {entry_info}
     polymer_entities {
       entry{
         rcsb_id
@@ -79,8 +107,7 @@ monolithic = """{
       }
     }
   }
-}"""
-
+}""".format({"entry_info":entry_info_string, "assembly_identification":assembly_identification_string})
 
 
 polymer_entities_string = """{
