@@ -10,13 +10,13 @@ from rbxz_bend.db.inits.proteins import add_protein, node__protein_class
 from rbxz_bend.db.inits.rna import add_rna, node__rna_class
 from rbxz_bend.db.inits.structure import add_ligand, node__structure
 from ribctl.lib.types.types_ribosome import RibosomeStructure
-from ribctl.lib.types.types_ribosome_assets import RibosomeAssets
-from ribctl.lib.types.types_polymer import list_LSU_Proteins, list_SSU_Proteins, list_RNAClass
+from api.ribctl.lib.types.ribosome_assets import RibosomeAssets
+from api.ribctl.lib.types.types_polymer_nonpoly_ligand import list_LSU_Proteins, list_SSU_Proteins, list_RNAClass
 from neo4j import GraphDatabase, Driver, ManagedTransaction, Transaction
 from ribctl.lib.types.types_ribosome import  Ligand,  ProteinClass, RibosomeStructure
 from schema.data_requests import LigandsByStruct
 from schema.v0 import ExogenousRNAByStruct,BanClassMetadata, LigandInstance, NeoStruct, NomenclatureClass, NomenclatureClassMember
-from ribctl.lib.types.types_polymer import RNAClass, list_LSU_Proteins, list_SSU_Proteins, list_RNAClass
+from api.ribctl.lib.types.types_polymer_nonpoly_ligand import RNAClass, list_LSU_Proteins, list_SSU_Proteins, list_RNAClass
 
 
 

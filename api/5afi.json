@@ -1,0 +1,2493 @@
+{
+  "data": {
+    "entry": {
+      "rcsb_id": "5AFI",
+      "assemblies": [
+        {
+          "nonpolymer_entity_instances": [
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1601"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1602"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1603"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1604"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1605"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1606"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1607"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1608"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1609"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1610"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1611"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1612"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1613"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1614"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1615"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1616"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1617"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1618"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1619"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1620"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1621"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1622"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1623"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1624"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1625"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1626"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1627"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1628"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1629"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1630"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1631"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1632"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1633"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1634"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1635"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1636"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1637"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1638"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1639"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1640"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1641"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1642"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1643"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1644"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1645"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1646"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1647"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1648"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1649"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "60",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1650"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1651"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1652"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1653"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1654"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1655"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1656"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1657"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1658"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1659"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1660"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1661"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1662"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1663"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1664"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1665"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1666"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1667"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1668"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1669"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1670"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1671"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1672"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1673"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1674"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1675"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1676"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1677"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1678"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1679"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1680"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1681"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1682"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1683"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "a",
+                "auth_seq_id": "1684"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "v",
+                "auth_seq_id": "101"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "v",
+                "auth_seq_id": "102"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "v",
+                "auth_seq_id": "103"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "v",
+                "auth_seq_id": "104"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "61",
+                "auth_asym_id": "v",
+                "auth_seq_id": "105"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "62",
+                "auth_asym_id": "z",
+                "auth_seq_id": "401"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "63",
+                "auth_asym_id": "z",
+                "auth_seq_id": "402"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "z",
+                "auth_seq_id": "403"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3001"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3002"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3003"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3004"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3005"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3006"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3007"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3008"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3009"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3010"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3011"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3012"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3013"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3014"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3015"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3016"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3017"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3018"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3019"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3020"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3021"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3022"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3023"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3024"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3025"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3026"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3027"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3028"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3029"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3030"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3031"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3032"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3033"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3034"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3035"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3036"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3037"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3038"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3039"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3040"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3041"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3042"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3043"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3044"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3045"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3046"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3047"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3048"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3049"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3050"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3051"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3052"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3053"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3054"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3055"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3056"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3057"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3058"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3059"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3060"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3061"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3062"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3063"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3064"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3065"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3066"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3067"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3068"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3069"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3070"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3071"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3072"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3073"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3074"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3075"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3076"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3077"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3078"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3079"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3080"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3081"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3082"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3083"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3084"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3085"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3086"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3087"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3088"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3089"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3090"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3091"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3092"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3093"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3094"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3095"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3096"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3097"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3098"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3099"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3100"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3101"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3102"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3103"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3104"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3105"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3106"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3107"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3108"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3109"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3110"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3111"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3112"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3113"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3114"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3115"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3116"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3117"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3118"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3119"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3120"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3121"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3122"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3123"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3124"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3125"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3126"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3127"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3128"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3129"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3130"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3131"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3132"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3133"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3134"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3135"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3136"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3137"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3138"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3139"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3140"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3141"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3142"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3143"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3144"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3145"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3146"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3147"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3148"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3149"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3150"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "60",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3151"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3152"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3153"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3154"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3155"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3156"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3157"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3158"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3159"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3160"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3161"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3162"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3163"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3164"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3165"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3166"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3167"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3168"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3169"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3170"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3171"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3172"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3173"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3174"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3175"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3176"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3177"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3178"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3179"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3180"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3181"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3182"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3183"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3184"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3185"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3186"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3187"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3188"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3189"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3190"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3191"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3192"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3193"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3194"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3195"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3196"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3197"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3198"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3199"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3200"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3201"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3202"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3203"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3204"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3205"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3206"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3207"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3208"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3209"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3210"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3211"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3212"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3213"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3214"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3215"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3216"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3217"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3218"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3219"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3220"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3221"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3222"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3223"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3224"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3225"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3226"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3227"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3228"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3229"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3230"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3231"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3232"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3233"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3234"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "64",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3235"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "A",
+                "auth_seq_id": "3236"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "B",
+                "auth_seq_id": "201"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "B",
+                "auth_seq_id": "202"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "B",
+                "auth_seq_id": "203"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "B",
+                "auth_seq_id": "204"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "B",
+                "auth_seq_id": "205"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "B",
+                "auth_seq_id": "206"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "B",
+                "auth_seq_id": "207"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "64",
+                "auth_asym_id": "B",
+                "auth_seq_id": "208"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "N",
+                "auth_seq_id": "201"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "N",
+                "auth_seq_id": "202"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "0",
+                "auth_seq_id": "101"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "59",
+                "auth_asym_id": "4",
+                "auth_seq_id": "101"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "65",
+                "auth_asym_id": "4",
+                "auth_seq_id": "102"
+              }
+            },
+            {
+              "rcsb_nonpolymer_entity_instance_container_identifiers": {
+                "entity_id": "65",
+                "auth_asym_id": "6",
+                "auth_seq_id": "100"
+              }
+            }
+          ]
+        }
+      ],
+      "nonpolymer_entities": [
+        {
+          "pdbx_entity_nonpoly": {
+            "comp_id": "MG",
+            "name": "MAGNESIUM ION",
+            "entity_id": "59"
+          },
+          "rcsb_nonpolymer_entity": {
+            "formula_weight": 0.024,
+            "pdbx_description": "MAGNESIUM ION",
+            "pdbx_number_of_molecules": 333
+          }
+        },
+        {
+          "pdbx_entity_nonpoly": {
+            "comp_id": "CL",
+            "name": "CHLORIDE ION",
+            "entity_id": "60"
+          },
+          "rcsb_nonpolymer_entity": {
+            "formula_weight": 0.035,
+            "pdbx_description": "CHLORIDE ION",
+            "pdbx_number_of_molecules": 2
+          }
+        },
+        {
+          "pdbx_entity_nonpoly": {
+            "comp_id": "FME",
+            "name": "N-FORMYLMETHIONINE",
+            "entity_id": "61"
+          },
+          "rcsb_nonpolymer_entity": {
+            "formula_weight": 0.177,
+            "pdbx_description": "N-FORMYLMETHIONINE",
+            "pdbx_number_of_molecules": 1
+          }
+        },
+        {
+          "pdbx_entity_nonpoly": {
+            "comp_id": "KIR",
+            "name": "KIRROMYCIN",
+            "entity_id": "62"
+          },
+          "rcsb_nonpolymer_entity": {
+            "formula_weight": 0.797,
+            "pdbx_description": "KIRROMYCIN",
+            "pdbx_number_of_molecules": 1
+          }
+        },
+        {
+          "pdbx_entity_nonpoly": {
+            "comp_id": "GDP",
+            "name": "GUANOSINE-5'-DIPHOSPHATE",
+            "entity_id": "63"
+          },
+          "rcsb_nonpolymer_entity": {
+            "formula_weight": 0.443,
+            "pdbx_description": "GUANOSINE-5'-DIPHOSPHATE",
+            "pdbx_number_of_molecules": 1
+          }
+        },
+        {
+          "pdbx_entity_nonpoly": {
+            "comp_id": "NA",
+            "name": "SODIUM ION",
+            "entity_id": "64"
+          },
+          "rcsb_nonpolymer_entity": {
+            "formula_weight": 0.023,
+            "pdbx_description": "SODIUM ION",
+            "pdbx_number_of_molecules": 2
+          }
+        },
+        {
+          "pdbx_entity_nonpoly": {
+            "comp_id": "ZN",
+            "name": "ZINC ION",
+            "entity_id": "65"
+          },
+          "rcsb_nonpolymer_entity": {
+            "formula_weight": 0.065,
+            "pdbx_description": "ZINC ION",
+            "pdbx_number_of_molecules": 2
+          }
+        }
+      ]
+    }
+  }
+}

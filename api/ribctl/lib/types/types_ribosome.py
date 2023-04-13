@@ -1,7 +1,7 @@
 from typing import Any
 import typing
 from pydantic import BaseModel
-from .types_polymer_nonpoly_ligand import LSU_Proteins, LigandlikePolymerClass, RNAClass, SSU_Proteins
+from .types_poly_nonpoly_ligand import LSU_Proteins, PolymericFactors, RNAClass, SSU_Proteins
 
 ProteinClass = typing.Union[LSU_Proteins , SSU_Proteins]
 PolymerClass = typing.Union[ProteinClass, RNAClass]
@@ -53,7 +53,7 @@ class Ligand(BaseModel)  :
       number_of_instances: int
 
 class LigandlikePolymer(Polymer): 
-    nomenclature: LigandlikePolymerClass
+    nomenclature: PolymericFactors
     
 
 class NonpolymerEntityInstance(BaseModel):
@@ -135,6 +135,9 @@ class RibosomeStructure(BaseModel):
     proteins: list[Protein]
     rnas    : list[RNA] | None
     ligands : list[Ligand] | None
+    polymeric_factors: LigandlikePolymer
+    
+
     
 
     @staticmethod
