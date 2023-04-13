@@ -2,6 +2,7 @@ import json
 import os
 import sys
 from pathlib import Path
+import gql_querystrings
 
 p        = Path(__file__).parents[1]
 

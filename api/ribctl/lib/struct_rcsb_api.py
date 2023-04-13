@@ -2,7 +2,7 @@ import json
 from typing import Any
 import requests
 from ribctl.lib.types.types_ribosome import RNA, Ligand, Protein, RibosomeStructure
-from ribctl.lib import LSU_map, SSU_map
+from ribctl.lib import _LSU_map, _SSU_map
 from ribctl.lib.gql_querystrings import monolithic
 import re
 
@@ -29,9 +29,9 @@ def __get_protein_nomenclature(protein):
         nomenclature = []
         for pfam_id in pfamids:
             [nomenclature.append(kv[0]) if pfam_id in kv[1]
-             ['pfamDomainAccession'] else ... for kv in LSU_map.items()]
+             ['pfamDomainAccession'] else ... for kv in _LSU_map.items()]
             [nomenclature.append(kv[0]) if pfam_id in kv[1]
-             ['pfamDomainAccession'] else ... for kv in SSU_map.items()]
+             ['pfamDomainAccession'] else ... for kv in _SSU_map.items()]
         return list(set(nomenclature))
 
 def __get_rna_nomenclature(polymer):
