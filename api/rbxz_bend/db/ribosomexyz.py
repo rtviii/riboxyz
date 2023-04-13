@@ -51,9 +51,8 @@ class ribosomexyzDB():
     def change_default_pass(self):
         with GraphDatabase.driver(self.uri, auth=("neo4j", "neo4j")).session(database='system') as s:
             s.run("""ALTER CURRENT USER SET PASSWORD FROM "neo4j" TO "ribosomexyz";""")
-
         print("[INIT]:Changed the default Neo4j password. Initializing new database instance")
-
+   
     def initialize_new_instance(self):
 
         self.__init_constraints()
@@ -77,7 +76,6 @@ class ribosomexyzDB():
             self.change_default_pass()
             self.initialize_new_instance()
 
-
     def see_current_auth(self):
         print("see_current_auth")
         print(f"NEO4J_VAR: {NEO4J_URI} {NEO4J_USER} {NEO4J_PASSWORD}")
@@ -93,12 +91,27 @@ class ribosomexyzDB():
             users_array = r.data()
             return users_array
 
+
+    def show_dbs(self):
+        with self.driver.session(database='system') as s:
+            r = s.run("""show databases""")
+            return r.data()
+
+    def write(self, cypher:str):
+        with self.driver.session() as s:
+            r = s.run(cypher)
+            return r.data()
+
     def see_constraints(self) -> list[dict[str, Any]]:
         with self.driver.session() as s:
             r = s.run("""//
             CALL db.constraints;
                   """)
             return r.data()
+
+
+    #※----------------------------------------------------------------------------------------
+
 
     def get_all_structs(self):
         with self.driver.session() as s:
@@ -125,8 +138,6 @@ class ribosomexyzDB():
     def add_structure(self, struct_assets: RibosomeAssets):
 
         R = RibosomeStructure.parse_obj(struct_assets.json_profile())
-
-
 
         with self.driver.session() as s:
             struct_node_result = s.execute_write(node__structure(R))

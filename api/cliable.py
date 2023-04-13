@@ -1,6 +1,7 @@
 # TODO: ( Bring up ) Lift all the useful top-level functions from the package to this level.
 # export DJANGO_SETTINGS_MODULE=api.rbxz_bend                                                                                         [cli]
 # import argparse
+from pprint import pprint
 from api.rbxz_bend.db.ribosomexyz import ribosomexyzDB
 from api.rbxz_bend.settings import NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER
 from ribctl.lib.types.types_ribosome import Ligand, ProteinClass, RibosomeStructure
@@ -29,9 +30,7 @@ import fire
 
 # if args.obtain:
 #     rcsb_id = args.obtain
-db = ribosomexyzDB(NEO4J_URI, NEO4J_USER, NEO4J_PASSWORD)
-fire.Fire(db)
-
+# db.get_full_structure('3J7Z')
 # if args.structure:
 #     r = RibosomeAssets(args.structure)
 #     d = r.json_profile()
