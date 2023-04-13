@@ -78,10 +78,6 @@ class ribosomexyzDB():
             self.initialize_new_instance()
 
 
-
-
-
-
     def see_current_auth(self):
         print("see_current_auth")
         print(f"NEO4J_VAR: {NEO4J_URI} {NEO4J_USER} {NEO4J_PASSWORD}")
@@ -107,7 +103,7 @@ class ribosomexyzDB():
     def get_all_structs(self):
         with self.driver.session() as s:
             struct_ids = []
-            [struct_ids.extend(struct) for struct in s.read_transaction(lambda tx: tx.run("""//
+            [struct_ids.extend(struct) for struct in s.execute_read(lambda tx: tx.run("""//
             match (n:RibosomeStructure) return n.rcsb_id;
             """).values('n.rcsb_id'))]
             return struct_ids
@@ -115,7 +111,7 @@ class ribosomexyzDB():
     def get_any(self) -> list[dict[str, Any]]:
         with self.driver.session() as s:
 
-            return s.read_transaction(lambda tx: tx.run("""//
+            return s.execute_read(lambda tx: tx.run("""//
             match (n) return n limit 10;
             """).data())
 
@@ -128,12 +124,12 @@ class ribosomexyzDB():
 
     def add_structure(self, struct_assets: RibosomeAssets):
 
-        R = RibosomeStructure(**struct_assets.json_profile())
+        R = RibosomeStructure.parse_obj(struct_assets.json_profile())
 
 
 
         with self.driver.session() as s:
-            struct_node_result = s.write_transaction(node__structure(R))
+            struct_node_result = s.execute_write(node__structure(R))
 
         for protein in R.proteins:
             add_protein(self.driver, protein)
@@ -174,13 +170,13 @@ class ribosomexyzDB():
                         }) as lig_instance
                 return lig_instance
                 """).value()[0]
-            return session.read_transaction(_)
+            return session.execute_read(_)
 
     def get_individual_ligand(self, chemId: str) -> Ligand:
         with self.driver.session() as session:
             def _(tx: Transaction | ManagedTransaction):
                 return tx.run("""match (ligand:Ligand{chemicalId: $CHEM_ID}) return ligand""", {"CHEM_ID": chemId}).data()[0]['ligand']
-            return session.read_transaction(_)
+            return session.execute_read(_)
 
     def get_struct(self, rcsb_id: str) -> NeoStruct:
 
@@ -198,7 +194,7 @@ class ribosomexyzDB():
                     return struct, ligands,rnas, rps
                                         """, {"RCSB_ID": rcsb_id.upper()}).data()[0]
 
-            return session.read_transaction(_)
+            return session.execute_read(_)
 
     def get_all_structures(self) -> list[NeoStruct]:
 
@@ -229,7 +225,7 @@ class ribosomexyzDB():
                                 return struct, ligands,rps,rnas
                                         """).data()
 
-            return session.read_transaction(_)
+            return session.execute_read(_)
 
     def get_all_ligandlike(self) -> list[LigandInstance]:
         with self.driver.session() as session:
@@ -251,7 +247,7 @@ class ribosomexyzDB():
                             }
                         } ) as liglike
                         return liglike""").data()[0]['liglike']
-            return session.read_transaction(_)
+            return session.execute_read(_)
 
     def get_RibosomeStructure(self, rcsb_id: str) -> RibosomeStructure:
         with self.driver.session() as session:
@@ -298,7 +294,7 @@ class ribosomexyzDB():
 
                     return structure
                         """, {"RCSB_ID": rcsb_id.upper()}).data()[0]['structure']
-            return session.read_transaction(_)
+            return session.execute_read(_)
 
     def get_ligands_by_struct(self) -> list[LigandsByStruct]:
         with self.driver.session() as session:
@@ -309,7 +305,7 @@ class ribosomexyzDB():
            ligands: collect({ chemid: l.chemicalId, name:l.chemicalName, number:l.number_of_instances })} as struct_ligs
            return struct_ligs
                         """).data()[0]['struct_ligs']
-            return session.read_transaction(_)
+            return session.execute_read(_)
 
     def match_structs_w_proteins(self, targets: list[ProteinClass]) -> list[str]:
         with self.driver.session() as session:
@@ -324,7 +320,7 @@ class ribosomexyzDB():
                     return rcsb_id
                         """, {"T": targets}).values('rcsb_id')]
 
-            return session.read_transaction(_)
+            return session.execute_read(_)
 
     def get_full_structure(self, rcsb_id: str) -> NeoStruct:
         # TODO: This method is identical to "get_struct" and was merely queried in a different way. DEPRECATE ONE (AS WELL AS THE API ENDPOINT)
@@ -342,7 +338,7 @@ class ribosomexyzDB():
         with ligands, struct, rps, collect({auth_asym_id: rnas.auth_asym_id, nomenclature: rnas.nomenclature, entity_poly_seq_one_letter_code:rnas.entity_poly_seq_one_letter_code}) as rnas
         return struct, ligands,rps, rnas
                         """, {"RCSB_ID": rcsb_id.upper()}).data()[0]
-            return session.read_transaction(_)
+            return session.execute_read(_)
 
     def get_banclass_for_chain(self, rcsb_id: str, auth_asym_id) -> list[ProteinClass]:
         # TODO: This method should handle both protein and RNA chains(atm only proteins)
@@ -352,7 +348,7 @@ class ribosomexyzDB():
                 return [pc[0] for pc in tx.run("""//
                 match (n:RibosomeStructure {rcsb_id:$RCSB_ID})-[]-(c:Protein{auth_asym_id:$AUTH_ASYM_ID})-[]-(pc:ProteinClass) return pc.class_id
                     """, {"RCSB_ID": rcsb_id, "AUTH_ASYM_ID": auth_asym_id}).values('pc.class_id')]
-            return session.read_transaction(_)
+            return session.execute_read(_)
 
     def get_banclasses_metadata(self, family: typing.Literal['b', 'e', 'u'], subunit: typing.Literal['SSU', 'LSU']) -> list[BanClassMetadata]:
         # TODO: This method should handle both protein and RNA chains(atm only proteins)
@@ -374,7 +370,7 @@ class ribosomexyzDB():
                         unwind s.`src_organism_ids` as orgid
                         with collect(distinct orgid) as organisms, n.class_id as banClass, collect(s.rcsb_id) as structs, collect(distinct rp.pfam_comments) as comments
                         return  banClass, organisms, comments, structs""".format_map({"FAMILY": family, "SUBUNIT": fstring})).data()  # type: ignore
-            return session.read_transaction(_)
+            return session.execute_read(_)
 
     def list_nom_classes(self) -> list[NomenclatureClass]:
         # TODO: Merge into get_banclasses_metadata
@@ -392,7 +388,7 @@ class ribosomexyzDB():
                         }) as rps
                     return structs, banClass, rps
                  """).data()
-            return session.read_transaction(_)
+            return session.execute_read(_)
 
     def gmo_nom_class(self, class_id: ProteinClass) -> list[NomenclatureClassMember]:
 
@@ -435,7 +431,7 @@ class ribosomexyzDB():
                         }) as member
                         return member
                  """, {"BANCLASS": class_id}).value('member')[0]
-            return session.read_transaction(_)
+            return session.execute_read(_)
 
     def proteins_number(self) -> int:
         with self.driver.session() as session:
@@ -443,7 +439,7 @@ class ribosomexyzDB():
                 return tx.run("""//
                 match (n:Protein) return count(n)
                     """).value()[0]
-            return session.read_transaction(_)
+            return session.execute_read(_)
 
     def number_of_structures(self) -> int:
         with self.driver.session() as session:
@@ -451,7 +447,7 @@ class ribosomexyzDB():
                 return tx.run("""//
                 match (n:RibosomeStructure) return count(n)
                     """).value()[0]
-            return session.read_transaction(_)
+            return session.execute_read(_)
 
     def get_rnas_by_struct(self) -> list[ExogenousRNAByStruct]:
         with self.driver.session() as session:
@@ -467,7 +463,7 @@ or toLower(r.rcsb_pdbx_description) contains "transfer"
 with n.rcsb_id as struct, collect(r.rcsb_pdbx_description) as rnas
         return struct,rnas
                     """).data()
-            return session.read_transaction(_)
+            return session.execute_read(_)
 
     def get_rna_class(self, class_id: RNAClass) -> list[NomenclatureClassMember]:
         with self.driver.session() as session:
@@ -508,11 +504,11 @@ with n.rcsb_id as struct, collect(r.rcsb_pdbx_description) as rnas
         } as rna
         return rna""", {"RNA_CLASS": class_id}).values('rna')]
 
-            return session.read_transaction(_)
+            return session.execute_read(_)
 
     def sync_with_rcsb(self, workers:int)->None:
 
-        logger = get_ribxz_logger(logname="rcsb_sync")
+        logger = get_ribxz_logger("rcsb_sync", "ribosomexyz.py")
 
         synced   = self.get_all_structs()
         unsynced = sorted(current_rcsb_structs())
@@ -546,7 +542,7 @@ with n.rcsb_id as struct, collect(r.rcsb_pdbx_description) as rnas
     def __init_constraints(self) -> None:
         with self.driver.session() as s:
             for c in NODE_CONSTRAINTS:
-                s.write_transaction(lambda tx: tx.run(c))
+                s.execute_write(lambda tx: tx.run(c))
 
     def __init_protein_classes(self):
         with self.driver.session() as s:
