@@ -90,6 +90,7 @@ class PredictedResiduesPolymer(BaseModel):
 		src: str
 		src_ids: list[int]
 		auth_asym_id: str
+
 	class PredictionTarget(BaseModel):
 		tgt: str
 		tgt_ids: list[int]
