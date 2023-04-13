@@ -1,6 +1,7 @@
 # TODO: ( Bring up ) Lift all the useful top-level functions from the package to this level.
 # export DJANGO_SETTINGS_MODULE=api.rbxz_bend                                                                                         [cli]
 # import argparse
+import argparse
 from pprint import pprint
 from api.rbxz_bend.db.ribosomexyz import ribosomexyzDB
 from api.rbxz_bend.settings import NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER
@@ -11,17 +12,17 @@ from api.ribctl.lib.types.ribosome_assets import RibosomeAssets
 from ribctl.lib.struct_rcsb_api import current_rcsb_structs
 import fire
 
-# import logging
+import logging
 
-# arg = argparse.ArgumentParser(
-#     description='RibCtl - A tool to control the ribosome database')
+arg = argparse.ArgumentParser(
+    description='RibCtl - A tool to control the ribosome database')
 
-# arg.add_argument('-dbname', '--database_name', type=str)
-# arg.add_argument('-s', '--structure', type=str)
-# arg.add_argument('-o', '--obtain', type=str)
-# arg.add_argument('-ttt', '--test', action='store_true')
-# # arg.add_argument('-pdbsync', '--sync_rcsb' , action='store_true'                                                                                                         )
-# args = arg.parse_args()
+arg.add_argument('-dbname', '--database_name', type=str)
+arg.add_argument('-s', '--structure', type=str)
+arg.add_argument('-o', '--obtain', type=str)
+arg.add_argument('-ttt', '--test', action='store_true')
+# arg.add_argument('-pdbsync', '--sync_rcsb' , action='store_true'                                                                                                         )
+args = arg.parse_args()
 
 # logging.basicConfig(level=logging.ERROR, filemode='w',
 #                     format='%(asctime)s - %(levelname)s - %(message)s')
@@ -31,10 +32,10 @@ import fire
 # if args.obtain:
 #     rcsb_id = args.obtain
 # db.get_full_structure('3J7Z')
-# if args.structure:
-#     r = RibosomeAssets(args.structure)
-#     d = r.json_profile()
-#     rs = RibosomeStructure.parse_obj(d)
+if args.structure:
+    r = RibosomeAssets(args.structure)
+    d = r.json_profile()
+    rs = RibosomeStructure.parse_obj(d)
 
 # if args.test:
 

@@ -45,15 +45,16 @@ class RNA(Polymer):
     pass
 
 class NonpolymericLigand(BaseModel)  : 
+
       chemicalId         : str
       chemicalName       : str
       formula_weight     : None | float
       pdbx_description   : str
       number_of_instances: int
-      nomenclature: NonpolymericLigandClass
+      nomenclature       : list[NonpolymericLigandClass]
 
 class PolymericFactor(Polymer): 
-    nomenclature: PolymericFactorClass
+    nomenclature: list[PolymericFactorClass]
     
 
 class NonpolymerEntityInstance(BaseModel):
@@ -137,8 +138,6 @@ class RibosomeStructure(BaseModel):
     nonpolymeric_ligands: list[NonpolymericLigand] | None
     polymeric_factors   : list[PolymericFactor] | None
     
-    
-
     @staticmethod
     def from_json_profile(d: Any):
         return RibosomeStructure(**d)
