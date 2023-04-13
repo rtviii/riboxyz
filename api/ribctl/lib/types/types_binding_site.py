@@ -40,7 +40,6 @@ class ResidueSummary(BaseModel):
     def __hash__(self):
         return hash(self.get_resname() + str(self.get_seqid()) + self.get_parent_auth_asym_id())
 
-
     def get_resname(self): 
         return self.resname
 
@@ -53,7 +52,6 @@ class ResidueSummary(BaseModel):
         (structure_id, model_id, chain_id, _) = self.full_id
         return chain_id
         
-
     @staticmethod
     def from_biopython_residue(r: Residue):
 

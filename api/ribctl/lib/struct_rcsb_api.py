@@ -1,11 +1,18 @@
 import json
+import os
+from pathlib import Path
 from typing import Any
 import requests
 from ribctl.lib.types.types_ribosome import RNA, Ligand, Protein, RibosomeStructure
-from ribctl.lib import _LSU_map, _SSU_map
 from ribctl.lib.gql_querystrings import monolithic
 import re
 
+p        = Path(__file__).parents[1]
+lsu_path = os.path.join(p,'assets','subunit_map_LSU.json')
+ssu_path = os.path.join(p,'assets','subunit_map_SSU.json')
+
+LSU_map = {k: v for k, v in json.load(open(lsu_path, 'r')).items()}
+SSU_map = {k: v for k, v in json.load(open(ssu_path, 'r')).items()}
 
 def gql_monolith(rcsb_id): return monolithic.replace(
     "$RCSB_ID", rcsb_id.upper())

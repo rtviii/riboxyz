@@ -1,7 +1,7 @@
 from typing import Literal
 # After https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4358319/
 
-RNAClass            = Literal[
+RNAClass = Literal[
     "5SrRNA",
     "5.8SrRNA",
     "12SrRNA",
@@ -14,7 +14,8 @@ RNAClass            = Literal[
     "mRNA",
     "tRNA"
 ]
-SSU_Proteins = Literal["bS1",
+
+SSU_Proteins = Literal[       "bS1",
                               "eS1",
                               "uS2",
                               "uS3",
@@ -119,7 +120,9 @@ LSU_Proteins = Literal["uL1",
                               "eL42",
                               "eL43",
                               "P1/P2"]
-list_LSU_Proteins = ["uL1",
+
+# These list_ hacks are just for purposes of iteration (given that typing.Literal behaves poorly in some useful contexts)
+list_LSU_Proteins = [         "uL1",
                               "uL2",
                               "uL3",
                               "uL4",

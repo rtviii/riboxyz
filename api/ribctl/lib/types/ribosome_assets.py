@@ -9,9 +9,8 @@ from ribctl.lib.struct_rcsb_api import process_pdb_record
 from ribctl.lib.mod_split_rename import split_rename
 from ribctl.lib.mod_extract_bsites import struct_ligand_ids, struct_liglike_ids, save_ligandlike_polymer, save_ligandlike_polymer
 
-
-
 class RibosomeAssets():
+
     rcsb_id: str
 
     def __init__(self, rcsb_id: str) -> None:
@@ -124,14 +123,12 @@ class RibosomeAssets():
         for ligand in ligands:
             if not os.path.exists(ligand_path(ligand[0])):
                 _flag = False
-                save_ligandlike_polymer(
-                    self.rcsb_id, ligand[0], self.biopython_structure(), overwrite)
+                save_ligandlike_polymer(self.rcsb_id, ligand[0], self.biopython_structure(), overwrite)
 
         for ligandlike_poly in ligandlike_polymers:
             if not os.path.exists(liglike_poly_path(ligandlike_poly.auth_asym_id)):
                 _flag = False
-                save_ligandlike_polymer(
-                    self.rcsb_id, ligandlike_poly.auth_asym_id, self.biopython_structure(), overwrite)
+                save_ligandlike_polymer(self.rcsb_id, ligandlike_poly.auth_asym_id, self.biopython_structure(), overwrite)
 
         return _flag
 

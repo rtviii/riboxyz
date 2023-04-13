@@ -7,12 +7,12 @@ import requests
 from Bio.PDB.Structure import Structure
 from Bio.PDB import FastMMCIFParser
 
-from ribctl.lib import RIBETL_DATA
+RIBETL_DATA = str(os.environ.get('RIBETL_DATA'))
 
 def download_unpack_place(struct_id: str) -> None:
 
     BASE_URL = "http://files.rcsb.org/download/"
-    FORMAT = ".cif.gz"
+    FORMAT   = ".cif.gz"
 
     structid = struct_id.upper()
     url = BASE_URL + structid + FORMAT
