@@ -51,10 +51,61 @@ entry_info_string = """
 
 monolithic = """{
   entry(entry_id: "$RCSB_ID") {
-    rcsb_id""" +  \
-    assembly_identification_string + \
-    entry_info_string + \
-    """polymer_entities {
+    rcsb_id
+
+    assemblies{
+        rcsb_id 
+       	nonpolymer_entity_instances{
+      
+          rcsb_nonpolymer_entity_instance_container_identifiers{
+            
+            comp_id
+            auth_asym_id
+            rcsb_id
+            auth_seq_id
+          }
+        }
+        polymer_entity_instances{
+           rcsb_polymer_entity_instance_container_identifiers {        
+            asym_id
+            auth_asym_id
+            entry_id
+            entity_id
+          }
+        }
+      }
+
+
+
+    struct_keywords {
+        pdbx_keywords
+        text
+      }
+      rcsb_entry_info {
+        resolution_combined
+      }
+      rcsb_external_references {
+        link
+        type
+        id
+      }
+      exptl {
+        method
+      }
+      citation {
+        rcsb_authors
+        year
+        title
+        pdbx_database_id_DOI
+      }
+      struct_keywords {
+        pdbx_keywords
+        text
+      }
+
+
+
+    polymer_entities {
       entry{
         rcsb_id
       }
@@ -94,6 +145,8 @@ monolithic = """{
         type
       }
     }
+
+
     nonpolymer_entities {
       pdbx_entity_nonpoly {
         comp_id
@@ -106,6 +159,8 @@ monolithic = """{
         pdbx_number_of_molecules
       }
     }
+
+
   }
 }"""
 

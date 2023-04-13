@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 from typing import Any
 import requests
-from ribctl.lib.types.types_ribosome import RNA, Protein, RibosomeStructure
+from ribctl.lib.types.types_ribosome import RNA, NonpolymericLigand, Protein, RibosomeStructure
 from ribctl.lib.gql_querystrings import monolithic
 import re
 
@@ -14,8 +14,6 @@ ssu_path = os.path.join(p,'assets','subunit_map_SSU.json')
 LSU_map = {k: v for k, v in json.load(open(lsu_path, 'r')).items()}
 SSU_map = {k: v for k, v in json.load(open(ssu_path, 'r')).items()}
 
-def gql_monolith(rcsb_id): return monolithic.replace(
-    "$RCSB_ID", rcsb_id.upper())
 
 def __get_protein_nomenclature(protein):
     banregex = r"/\b([ueb][ls]\d{1,2})\b/gi"
@@ -36,9 +34,9 @@ def __get_protein_nomenclature(protein):
         nomenclature = []
         for pfam_id in pfamids:
             [nomenclature.append(kv[0]) if pfam_id in kv[1]
-             ['pfamDomainAccession'] else ... for kv in _LSU_map.items()]
+             ['pfamDomainAccession'] else ... for kv in LSU_map.items()]
             [nomenclature.append(kv[0]) if pfam_id in kv[1]
-             ['pfamDomainAccession'] else ... for kv in _SSU_map.items()]
+             ['pfamDomainAccession'] else ... for kv in SSU_map.items()]
         return list(set(nomenclature))
 
 def __get_rna_nomenclature(polymer):
@@ -108,12 +106,21 @@ def __extract_external_refs(external_refs):
 
     return [externalRefIds, externalRefTypes, externalRefLinks]
 
-def __reshape_to_ligand(nonpoly)->Ligand:
-    return Ligand(**{
-        "pdbx_description": nonpoly['rcsb_nonpolymer_entity']['pdbx_description'],
-        "formula_weight": nonpoly['rcsb_nonpolymer_entity']['formula_weight'],
-        "chemicalId": nonpoly['pdbx_entity_nonpoly']['comp_id'],
-        "chemicalName": nonpoly['pdbx_entity_nonpoly']['name'],
+def __reshape_to_nonpolymericligand(nonpoly)->NonpolymericLigand:
+    return NonpolymericLigand(
+        chemicalId          = nonpoly['pdbx_entity_nonpoly']['comp_id'],
+        chemicalName        = nonpoly['pdbx_entity_nonpoly']['name'],
+        pdbx_description    = nonpoly['rcsb_nonpolymer_entity']['pdbx_description'],
+        formula_weight      = nonpoly['rcsb_nonpolymer_entity']['formula_weight'],
+        number_of_instances = nonpoly['rcsb_nonpolymer_entity']['pdbx_number_of_molecules'],
+        #TODO
+        nomenclature        = ["Analog"]
+    )
+    return NonpolymericLigand.parse_obj({
+        "pdbx_description"   : nonpoly['rcsb_nonpolymer_entity']['pdbx_description'],
+        "formula_weight"     : nonpoly['rcsb_nonpolymer_entity']['formula_weight'],
+        "chemicalId"         : nonpoly['pdbx_entity_nonpoly']['comp_id'],
+        "chemicalName"       : nonpoly['pdbx_entity_nonpoly']['name'],
         "number_of_instances": nonpoly['rcsb_nonpolymer_entity']['pdbx_number_of_molecules']
     })
 
@@ -273,66 +280,7 @@ def __reshape_poly_to_protein(plm)->list[Protein]:
         }) for auth_asym_id in plm['rcsb_polymer_entity_container_identifiers']['auth_asym_ids']
     ]
 
-def process_pdb_record(rcsb_id: str) -> RibosomeStructure:
-    """
-    returns dict of the shape types_RibosomeStructure 
-    """
-
-    response         = query_rcsb_api(gql_monolith(rcsb_id.upper()))
-    poly_entities    = response['polymer_entities']
-    nonpoly_entities = response['nonpolymer_entities']
-
-    def is_protein(poly): return poly['entity_poly']['rcsb_entity_polymer_type'] == 'Protein'
-
-    proteins, rnas = [], []
-    for poly in poly_entities:
-        proteins.append(poly) if is_protein(poly) else rnas.append(poly)
-
-    reshaped_proteins:list[Protein] = []
-    reshaped_rnas    :list[RNA]     = []
-
-    [reshaped_rnas.extend(__reshape_poly_to_rna(poly)) for poly in rnas]
-    [reshaped_proteins.extend(__reshape_poly_to_protein(poly)) for poly in proteins]
-
-
-    reshaped_nonpoly:list[Ligand] = [__reshape_to_ligand(nonpoly) for nonpoly in nonpoly_entities] if nonpoly_entities != None and len(nonpoly_entities) > 0 else []
-    organisms        = __infer_organisms_from_polymers(reshaped_proteins)  # type: ignore (only accessing commong fields)
-    externalRefs     = __extract_external_refs(response['rcsb_external_references'])
-
-    if response['citation'] != None and len(response['citation']) > 0:
-        pub         = response['citation'][0]
-    else:
-        pub = {
-            "year"                   : None,
-            "rcsb_authors"           : None,
-            "title"                  : None,
-            "pdbx_database_id_DOI"   : None,
-            "pdbx_database_id_PubMed": None
-        }
-    
-    kwords_text = response['struct_keywords']['text'] if response['struct_keywords']          != None else None
-    kwords      = response['struct_keywords']['pdbx_keywords'] if response['struct_keywords'] != None else None
-
-    reshaped = RibosomeStructure(**{
-        "rcsb_id"               : response['rcsb_id'],
-        "expMethod"             : response['exptl'][0]['method'],
-        "resolution"            : response['rcsb_entry_info']['resolution_combined'][0],
-        "rcsb_external_ref_id"  : externalRefs[0],
-        "rcsb_external_ref_type": externalRefs[1],
-        "rcsb_external_ref_link": externalRefs[2],
-        "citation_year"         : pub['year'],
-        "citation_rcsb_authors" : pub['rcsb_authors'],
-        "citation_title"        : pub['title'],
-        "citation_pdbx_doi"     : pub['pdbx_database_id_DOI'],
-        "pdbx_keywords_text"    : kwords_text,
-        "pdbx_keywords"         : kwords,
-        "proteins"              : reshaped_proteins,
-        "rnas"                  : reshaped_rnas,
-        "ligands"               : reshaped_nonpoly,
-        **organisms,
-    })
-
-    return reshaped
+def gql_monolith(rcsb_id): return monolithic.replace("$RCSB_ID", rcsb_id.upper())
 
 def current_rcsb_structs() -> list[str]:
     """Return all structures in the rcsb that contain the phrase RIBOSOME and have more than 25 protein entities"""
@@ -379,4 +327,94 @@ def query_rcsb_api(gql_string: str) -> dict:
     else:
         raise Exception("No data found for query: {}".format(gql_string))
 
+def process_pdb_record(rcsb_id: str) -> RibosomeStructure:
+    """
+    returns dict of the shape types_RibosomeStructure 
+    """
 
+    response         = query_rcsb_api(gql_monolith(rcsb_id.upper()))
+    poly_entities    = response['polymer_entities']
+    nonpoly_entities = response['nonpolymer_entities']
+
+    def is_protein(poly): return poly['entity_poly']['rcsb_entity_polymer_type'] == 'Protein'
+
+    proteins, rnas = [], []
+    for poly in poly_entities:
+        proteins.append(poly) if is_protein(poly) else rnas.append(poly)
+
+    reshaped_proteins:list[Protein] = []
+    reshaped_rnas    :list[RNA]     = []
+
+    [reshaped_rnas.extend(__reshape_poly_to_rna(poly)) for poly in rnas]
+    [reshaped_proteins.extend(__reshape_poly_to_protein(poly)) for poly in proteins]
+
+    #TODO: Polymeric Factors extraction
+
+    reshaped_nonpoly:list[NonpolymericLigand] = [__reshape_to_nonpolymericligand(nonpoly) for nonpoly in nonpoly_entities] if nonpoly_entities != None and len(nonpoly_entities) > 0 else []
+    organisms        = __infer_organisms_from_polymers(reshaped_proteins)  # type: ignore (only accessing commong fields)
+    externalRefs     = __extract_external_refs(response['rcsb_external_references'])
+
+    if response['citation'] != None and len(response['citation']) > 0:
+        pub         = response['citation'][0]
+    else:
+        pub = {
+            "year"                   : None,
+            "rcsb_authors"           : None,
+            "title"                  : None,
+            "pdbx_database_id_DOI"   : None,
+            "pdbx_database_id_PubMed": None
+        }
+    
+    kwords_text = response['struct_keywords']['text'] if response['struct_keywords']          != None else None
+    kwords      = response['struct_keywords']['pdbx_keywords'] if response['struct_keywords'] != None else None
+
+
+    reshaped = RibosomeStructure(**{
+        "rcsb_id"               : response['rcsb_id'],
+        "expMethod"             : response['exptl'][0]['method'],
+        "resolution"            : response['rcsb_entry_info']['resolution_combined'][0],
+        "rcsb_external_ref_id"  : externalRefs[0],
+        "rcsb_external_ref_type": externalRefs[1],
+        "rcsb_external_ref_link": externalRefs[2],
+        "citation_year"         : pub['year'],
+        "citation_rcsb_authors" : pub['rcsb_authors'],
+        "citation_title"        : pub['title'],
+        "citation_pdbx_doi"     : pub['pdbx_database_id_DOI'],
+        "pdbx_keywords_text"    : kwords_text,
+        "pdbx_keywords"         : kwords,
+        "proteins"              : reshaped_proteins,
+        "rnas"                  : reshaped_rnas,
+        "ligands"               : reshaped_nonpoly,
+        **organisms,
+    })
+
+    reshaped = RibosomeStructure(
+        rcsb_id                 = response['rcsb_id'],
+
+        expMethod               = response['exptl'][0]['method'],
+        resolution              = response['rcsb_entry_info']['resolution_combined'][0],
+        rcsb_external_ref_id    = externalRefs[0],
+        rcsb_external_ref_type  = externalRefs[1],
+        rcsb_external_ref_link  = externalRefs[2],
+        citation_year           = pub['year'],
+        citation_rcsb_authors   = pub['rcsb_authors'],
+        citation_title          = pub['title'],
+        citation_pdbx_doi       = pub['pdbx_database_id_DOI'],
+        pdbx_keywords_text      = kwords_text,
+        pdbx_keywords           = kwords,
+        src_organism_ids= organisms['src_organism_ids'],
+        src_organism_names= organisms['src_organism_names'],
+        
+        host_organism_ids= organisms['host_organism_ids'],
+        host_organism_names= organisms['host_organism_names'],
+
+        proteins                = reshaped_proteins,
+        rnas                    = reshaped_rnas,
+        nonpolymeric_ligands = reshaped_nonpoly,
+
+        polymeric_factors= ...,
+        assembly_map=...
+
+    )
+
+    return reshaped

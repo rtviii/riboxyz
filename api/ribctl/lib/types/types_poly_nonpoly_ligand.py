@@ -5,23 +5,30 @@ PolymericFactorClass = Literal[
     "Elongation Factor",
     "Initiation Factor",
     "Translation Factor",
-    "mRNA",
-    "tRNA",
-
     "Biogenesis Factor",
     "Termination Factor",
+
+    "Nascent Chain",
+
     "Ribozyme",
     "Riboswitch",
     "RNP",
+
+    "mRNA",
+    "tRNA",
     "snoRNA",
     "lncRNA",
+
+    "Other"
 ]
 
 NonpolymericLigandClass = Literal[
     "Antibiotic",
     "Ion",
     "Cofactor",
-    "Analog"
+    "Analog",
+
+    "Other"
 ]
 
 

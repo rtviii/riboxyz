@@ -3,7 +3,7 @@ import argparse
 import json
 import os
 import sys
-from pymol import cmd, util
+from pymol import cmd
 RIBETL_DATA = str(os.environ.get('RIBETL_DATA'))
 
 
@@ -17,7 +17,7 @@ def sload(pdbid: str):
 
 def render_thumbnail(pdbid: str):
 
-    from pymol import cmd, util
+    from pymol import cmd
 
     pdbid = pdbid.upper()
     thumbnail_path = os.path.join(RIBETL_DATA, pdbid, f"_ray_{pdbid}.png")
@@ -33,7 +33,6 @@ def render_thumbnail(pdbid: str):
         cmd.ray(500, 500)
         cmd.png(thumbnail_path)
         print('Saved {}'.format(thumbnail_path))
-
 
 def by_rna(pdbid: str):
     pdbid = pdbid.upper()

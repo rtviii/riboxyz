@@ -1,16 +1,13 @@
 import argparse
-from ctypes import alignment
 import json
-from pprint import pprint
 import re
 import os
-from typing import List, Union
+from typing import List
 import sys
 import typing
 from Bio import pairwise2
 import itertools
 
-from pydantic import BaseModel
 from api.ribctl.lib.types.types_binding_site import LigandPrediction, PredictedResiduesPolymer
 from ribctl.lib.types.types_ribosome import PolymerClass, RibosomeStructure
 from ribctl.lib.mod_extract_bsites import  BindingSite, struct_ligand_ids, struct_liglike_ids

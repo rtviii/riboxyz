@@ -86,6 +86,7 @@ class BindingSite(BaseModel):
         return super().dict()['__root__']
     
 class PredictedResiduesPolymer(BaseModel):
+
 	class PredictionSource(BaseModel):
 		src: str
 		src_ids: list[int]
