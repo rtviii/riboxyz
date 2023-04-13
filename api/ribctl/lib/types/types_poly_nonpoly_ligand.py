@@ -6,6 +6,7 @@ PolymericFactorClass = Literal[
     "Initiation Factor",
     "Translation Factor",
     "Biogenesis Factor",
+    "Release Factor",
     "Termination Factor",
     "Nascent Chain",
     "Ribozyme",
@@ -16,7 +17,22 @@ PolymericFactorClass = Literal[
     "snoRNA",
     "lncRNA",
     "Other"
-];list_PolymericFactorClass = [ "Elongation Factor", "Initiation Factor", "Translation Factor", "Biogenesis Factor", "Termination Factor", "Nascent Chain", "Ribozyme", "Riboswitch", "RNP", "mRNA", "tRNA", "snoRNA", "lncRNA", "Other"]
+]
+list_PolymericFactorClass = [
+                             "Initiation Factor",
+                             "Translation Factor",
+                             "Biogenesis Factor",
+    "Release Factor",
+    "Elongation Factor",
+                             
+                             "Termination Factor",
+                             "Nascent Chain",
+                             "Ribozyme",
+                             "Riboswitch",
+                             "RNP",
+                             "mRNA",
+                             "tRNA",
+                             "snoRNA", "lncRNA", "Other"]
 
 
 NonpolymericLigandClass = Literal[
@@ -25,7 +41,9 @@ NonpolymericLigandClass = Literal[
     "Cofactor",
     "Analog",
     "Other"
-]; list_NonpolymericLigandClass = [ "Antibiotic", "Ion", "Cofactor", "Analog", "Other" ]
+]
+list_NonpolymericLigandClass = [
+    "Antibiotic", "Ion", "Cofactor", "Analog", "Other"]
 
 
 RNAClass = Literal[
