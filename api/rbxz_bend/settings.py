@@ -65,7 +65,7 @@ def get_ribxz_logger(logname: typing.Literal['rcsb_sync','computations'], callee
 
 vars          = ["NEO4J_URI", "NEO4J_USER", "NEO4J_PASSWORD","NEO4J_CURRENTDB", "RIBETL_DATA"]
 
-print(" ---------------------------------------------- App has been reset. -----------------------------------------------")
+# print(" ---------------------------------------------- App has been reset. -----------------------------------------------")
 for var in vars:
     # print("Environment variable {}:\t{}".format( var, os.getenv(var) ))
     if var not in os.environ:
