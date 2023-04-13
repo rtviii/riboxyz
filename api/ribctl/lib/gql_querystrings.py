@@ -58,18 +58,14 @@ monolithic = """{
        	nonpolymer_entity_instances{
       
           rcsb_nonpolymer_entity_instance_container_identifiers{
-            
-            comp_id
             auth_asym_id
-            rcsb_id
             auth_seq_id
+            entity_id
           }
         }
         polymer_entity_instances{
            rcsb_polymer_entity_instance_container_identifiers {        
-            asym_id
             auth_asym_id
-            entry_id
             entity_id
           }
         }
