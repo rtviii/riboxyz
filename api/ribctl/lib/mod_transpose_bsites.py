@@ -11,7 +11,7 @@ from Bio import pairwise2
 import itertools
 
 from pydantic import BaseModel
-from ribctl.lib.types.ligands.types_binding_site import LigandPrediction, PredictedResiduesPolymer
+from api.ribctl.lib.types.types_binding_site import LigandPrediction, PredictedResiduesPolymer
 from ribctl.lib.types.types_ribosome import PolymerClass, RibosomeStructure
 from ribctl.lib.mod_extract_bsites import  BindingSite, struct_ligand_ids, struct_liglike_ids
 from ribctl.lib.utils import open_structure
@@ -117,8 +117,7 @@ def open_bsite(path:str)->BindingSite:
 		data = json.load(infile)
 	return BindingSite.parse_obj(data)
 	
-def init_transpose_ligand(
-	# source_struct: str,
+def init_transpose_ligand( # source_struct: str,
 	# target_struct: str,
 	target_profile:RibosomeStructure,
 	binding_site : BindingSite

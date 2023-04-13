@@ -51,10 +51,10 @@ entry_info_string = """
 
 monolithic = """{
   entry(entry_id: "$RCSB_ID") {
-    rcsb_id
-    {assemlby_identification}
-    {entry_info}
-    polymer_entities {
+    rcsb_id""" +  \
+    assembly_identification_string + \
+    entry_info_string + \
+    """polymer_entities {
       entry{
         rcsb_id
       }
@@ -107,7 +107,7 @@ monolithic = """{
       }
     }
   }
-}""".format({"entry_info":entry_info_string, "assembly_identification":assembly_identification_string})
+}"""
 
 
 polymer_entities_string = """{
