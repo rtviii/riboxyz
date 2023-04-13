@@ -1,7 +1,6 @@
 import json
 import os
 from pydantic import parse_obj_as
-from ribctl.lib import RIBETL_DATA
 from ribctl.lib.types.types_ribosome import RibosomeStructure
 from ribctl.lib.utils import download_unpack_place, open_structure
 from ribctl.lib.mod_render_thumbnail import render_thumbnail
@@ -9,9 +8,13 @@ from ribctl.lib.struct_rcsb_api import process_pdb_record
 from ribctl.lib.mod_split_rename import split_rename
 from ribctl.lib.mod_extract_bsites import struct_ligand_ids, struct_liglike_ids, save_ligandlike_polymer, save_ligandlike_polymer
 
+
+RIBETL_DATA = str(os.environ.get("RIBETL_DATA"))
+
 class RibosomeAssets():
 
     rcsb_id: str
+
 
     def __init__(self, rcsb_id: str) -> None:
         self.rcsb_id = rcsb_id.upper()

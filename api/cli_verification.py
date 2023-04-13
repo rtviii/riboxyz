@@ -3,25 +3,17 @@
 # import argparse
 import argparse
 from pprint import pprint
-from api.rbxz_bend.db.ribosomexyz import ribosomexyzDB
-from api.rbxz_bend.settings import NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER
-from ribctl.lib.types.types_ribosome import NonpolymericLigand, ProteinClass, RibosomeStructure
-from schema.data_requests import BanclassMetadata, LigandsByStruct
-from schema.v0 import BanClassMetadata, ExogenousRNAByStruct, LigandInstance, LigandlikeInstance, NeoStruct, NomenclatureClass, NomenclatureClassMember
+# from ribctl.lib.types.types_ribosome import  RibosomeStructure
 from api.ribctl.lib.types.ribosome_assets import RibosomeAssets
-from ribctl.lib.struct_rcsb_api import current_rcsb_structs
-import fire
+from api.ribctl.lib.types.types_ribosome import AssemblyInstancesMap
+from ribctl.lib.struct_rcsb_api import gql_monolith,query_rcsb_api
 
-import logging
-
-arg = argparse.ArgumentParser(
-    description='RibCtl - A tool to control the ribosome database')
+arg = argparse.ArgumentParser(description='RibCtl - A tool to control the ribosome database')
 
 arg.add_argument('-dbname', '--database_name', type=str)
 arg.add_argument('-s', '--structure', type=str)
 arg.add_argument('-o', '--obtain', type=str)
 arg.add_argument('-ttt', '--test', action='store_true')
-# arg.add_argument('-pdbsync', '--sync_rcsb' , action='store_true'                                                                                                         )
 args = arg.parse_args()
 
 # logging.basicConfig(level=logging.ERROR, filemode='w',
@@ -29,13 +21,21 @@ args = arg.parse_args()
 # logger = logging.getLogger(__name__)
 
 
+
+
+
 # if args.obtain:
 #     rcsb_id = args.obtain
 # db.get_full_structure('3J7Z')
 if args.structure:
-    r = RibosomeAssets(args.structure)
-    d = r.json_profile()
-    rs = RibosomeStructure.parse_obj(d)
+    qs = query_rcsb_api(gql_monolith(args.structure))
+    # pprint(qs)
+    print(qs.keys())
+    pprint(qs['assemblies'])
+    parse_assemblies(qs['assemblies'])
+    # r = RibosomeAssets(args.structure)
+    # d = r.json_profile()
+    # rs = RibosomeStructure.parse_obj(d)
 
 # if args.test:
 

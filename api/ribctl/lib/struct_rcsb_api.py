@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 from typing import Any
 import requests
-from ribctl.lib.types.types_ribosome import RNA, NonpolymericLigand, Protein, RibosomeStructure
+from ribctl.lib.types.types_ribosome import RNA, AssemblyInstancesMap, NonpolymericLigand, Protein, RibosomeStructure
 from ribctl.lib.gql_querystrings import monolithic
 import re
 
@@ -114,15 +114,8 @@ def __reshape_to_nonpolymericligand(nonpoly)->NonpolymericLigand:
         formula_weight      = nonpoly['rcsb_nonpolymer_entity']['formula_weight'],
         number_of_instances = nonpoly['rcsb_nonpolymer_entity']['pdbx_number_of_molecules'],
         #TODO
-        nomenclature        = ["Analog"]
+        nomenclature        = ...
     )
-    return NonpolymericLigand.parse_obj({
-        "pdbx_description"   : nonpoly['rcsb_nonpolymer_entity']['pdbx_description'],
-        "formula_weight"     : nonpoly['rcsb_nonpolymer_entity']['formula_weight'],
-        "chemicalId"         : nonpoly['pdbx_entity_nonpoly']['comp_id'],
-        "chemicalName"       : nonpoly['pdbx_entity_nonpoly']['name'],
-        "number_of_instances": nonpoly['rcsb_nonpolymer_entity']['pdbx_number_of_molecules']
-    })
 
 def __is_ligand_like(polymer, nomenclature: list[str]):
     if 'tRNA' in nomenclature or 'mRNA' in nomenclature:
@@ -280,6 +273,9 @@ def __reshape_poly_to_protein(plm)->list[Protein]:
         }) for auth_asym_id in plm['rcsb_polymer_entity_container_identifiers']['auth_asym_ids']
     ]
 
+def __parse_assemblies(d:list[dict])->list[AssemblyInstancesMap]:
+    return list(map(AssemblyInstancesMap.parse_obj, d))
+
 def gql_monolith(rcsb_id): return monolithic.replace("$RCSB_ID", rcsb_id.upper())
 
 def current_rcsb_structs() -> list[str]:
@@ -348,7 +344,6 @@ def process_pdb_record(rcsb_id: str) -> RibosomeStructure:
     [reshaped_rnas.extend(__reshape_poly_to_rna(poly)) for poly in rnas]
     [reshaped_proteins.extend(__reshape_poly_to_protein(poly)) for poly in proteins]
 
-    #TODO: Polymeric Factors extraction
 
     reshaped_nonpoly:list[NonpolymericLigand] = [__reshape_to_nonpolymericligand(nonpoly) for nonpoly in nonpoly_entities] if nonpoly_entities != None and len(nonpoly_entities) > 0 else []
     organisms        = __infer_organisms_from_polymers(reshaped_proteins)  # type: ignore (only accessing commong fields)
@@ -368,25 +363,8 @@ def process_pdb_record(rcsb_id: str) -> RibosomeStructure:
     kwords_text = response['struct_keywords']['text'] if response['struct_keywords']          != None else None
     kwords      = response['struct_keywords']['pdbx_keywords'] if response['struct_keywords'] != None else None
 
-
-    reshaped = RibosomeStructure(**{
-        "rcsb_id"               : response['rcsb_id'],
-        "expMethod"             : response['exptl'][0]['method'],
-        "resolution"            : response['rcsb_entry_info']['resolution_combined'][0],
-        "rcsb_external_ref_id"  : externalRefs[0],
-        "rcsb_external_ref_type": externalRefs[1],
-        "rcsb_external_ref_link": externalRefs[2],
-        "citation_year"         : pub['year'],
-        "citation_rcsb_authors" : pub['rcsb_authors'],
-        "citation_title"        : pub['title'],
-        "citation_pdbx_doi"     : pub['pdbx_database_id_DOI'],
-        "pdbx_keywords_text"    : kwords_text,
-        "pdbx_keywords"         : kwords,
-        "proteins"              : reshaped_proteins,
-        "rnas"                  : reshaped_rnas,
-        "ligands"               : reshaped_nonpoly,
-        **organisms,
-    })
+    #TODO: Polymeric Factors extraction
+    #TODO: Assembly Map
 
     reshaped = RibosomeStructure(
         rcsb_id                 = response['rcsb_id'],
