@@ -29,6 +29,11 @@ NODE_CONSTRAINTS = [
     """CREATE CONSTRAINT IF NOT EXISTS ON (nc:NomenclatureClass) assert nc.class_id is unique;""",
 ]
 
+# !>>>>>>> Enterprise edition needed
+# The NODE KEY constraint allows you to specify multiple properties that must be unique across all nodes with a specific label. Here's an example of how to create a NODE KEY constraint on the "name" and "email" properties of nodes with the "Person" label:
+# CREATE CONSTRAINT ON (p:Person) ASSERT (p.name, p.email) IS NODE KEY;
+# !<<<<<<<
+
 # ※ ----------------[ 1.Structure Nodes]
 # ※ ----------------[ 2.RNA Nodes]
 # ※ ----------------[ 3.Protein Nodes]
@@ -42,7 +47,6 @@ NODE_CONSTRAINTS = [
 
 class ribosomexyzDB():
     driver: Driver
-
     uri      : str
     password : str
     user     : str
