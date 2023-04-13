@@ -4,7 +4,7 @@
 from pprint import pprint
 from api.rbxz_bend.db.ribosomexyz import ribosomexyzDB
 from api.rbxz_bend.settings import NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER
-from ribctl.lib.types.types_ribosome import Ligand, ProteinClass, RibosomeStructure
+from ribctl.lib.types.types_ribosome import NonpolymericLigand, ProteinClass, RibosomeStructure
 from schema.data_requests import BanclassMetadata, LigandsByStruct
 from schema.v0 import BanClassMetadata, ExogenousRNAByStruct, LigandInstance, LigandlikeInstance, NeoStruct, NomenclatureClass, NomenclatureClassMember
 from api.ribctl.lib.types.ribosome_assets import RibosomeAssets
