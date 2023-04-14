@@ -49,7 +49,7 @@ class NonpolymericLigand(BaseModel)  :
       formula_weight     : None | float
       pdbx_description   : str
       number_of_instances: int
-      nomenclature       : list[NonpolymericLigandClass]
+    #   nomenclature       : list[NonpolymericLigandClass]
 
 class PolymericFactor(Polymer): 
     nomenclature: list[PolymericFactorClass]
