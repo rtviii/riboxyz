@@ -3,7 +3,7 @@ from pprint import pprint
 import typing
 import requests
 from ribctl.lib.types.types_ribosome import ProteinClass
-from  ribctl.lib.types.types_polymer import  list_LSU_Proteins,list_SSU_Proteins
+from  api.ribctl.lib.types.types_poly_nonpoly_ligand import  list_LSU_Proteins,list_SSU_Proteins
 import argparse
 import subprocess
 import sys

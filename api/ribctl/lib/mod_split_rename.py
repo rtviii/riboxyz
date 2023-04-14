@@ -6,11 +6,11 @@ import numpy as np
 import gemmi
 from Bio.PDB import MMCIF2Dict, MMCIFIO
 from Bio.PDB.Structure import Structure
-from ribctl.lib import RIBETL_DATA
 from ribctl.lib.utils import open_structure
 
 flatten     = itertools.chain.from_iterable
 n1          = np.array
+RIBETL_DATA = str(os.environ.get('RIBETL_DATA'))
 
 def __get_dict(path: str,) -> dict:
     return MMCIF2Dict.MMCIF2Dict(path)

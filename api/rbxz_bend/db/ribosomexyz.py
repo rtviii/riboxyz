@@ -10,13 +10,13 @@ from rbxz_bend.db.inits.proteins import add_protein, node__protein_class
 from rbxz_bend.db.inits.rna import add_rna, node__rna_class
 from rbxz_bend.db.inits.structure import add_ligand, node__structure
 from ribctl.lib.types.types_ribosome import RibosomeStructure
-from ribctl.lib.types.types_ribosome_assets import RibosomeAssets
-from ribctl.lib.types.types_polymer import list_LSU_Proteins, list_SSU_Proteins, list_RNAClass
+from api.ribctl.lib.types.ribosome_assets import RibosomeAssets
+from api.ribctl.lib.types.types_poly_nonpoly_ligand import list_LSU_Proteins, list_SSU_Proteins, list_RNAClass
 from neo4j import GraphDatabase, Driver, ManagedTransaction, Transaction
-from ribctl.lib.types.types_ribosome import  Ligand,  ProteinClass, RibosomeStructure
+from ribctl.lib.types.types_ribosome import  NonpolymericLigand,  ProteinClass, RibosomeStructure
 from schema.data_requests import LigandsByStruct
 from schema.v0 import ExogenousRNAByStruct,BanClassMetadata, LigandInstance, NeoStruct, NomenclatureClass, NomenclatureClassMember
-from ribctl.lib.types.types_polymer import RNAClass, list_LSU_Proteins, list_SSU_Proteins, list_RNAClass
+from api.ribctl.lib.types.types_poly_nonpoly_ligand import RNAClass, list_LSU_Proteins, list_SSU_Proteins, list_RNAClass
 
 
 
@@ -56,9 +56,8 @@ class ribosomexyzDB():
     def change_default_pass(self):
         with GraphDatabase.driver(self.uri, auth=("neo4j", "neo4j")).session(database='system') as s:
             s.run("""ALTER CURRENT USER SET PASSWORD FROM "neo4j" TO "ribosomexyz";""")
-
         print("[INIT]:Changed the default Neo4j password. Initializing new database instance")
-
+   
     def initialize_new_instance(self):
 
         self.__init_constraints()
@@ -82,11 +81,6 @@ class ribosomexyzDB():
             self.change_default_pass()
             self.initialize_new_instance()
 
-
-
-
-
-
     def see_current_auth(self):
         print("see_current_auth")
         print(f"NEO4J_VAR: {NEO4J_URI} {NEO4J_USER} {NEO4J_PASSWORD}")
@@ -102,12 +96,27 @@ class ribosomexyzDB():
             users_array = r.data()
             return users_array
 
+
+    def show_dbs(self):
+        with self.driver.session(database='system') as s:
+            r = s.run("""show databases""")
+            return r.data()
+
+    def write(self, cypher:str):
+        with self.driver.session() as s:
+            r = s.run(cypher)
+            return r.data()
+
     def see_constraints(self) -> list[dict[str, Any]]:
         with self.driver.session() as s:
             r = s.run("""//
             CALL db.constraints;
                   """)
             return r.data()
+
+
+    #※----------------------------------------------------------------------------------------
+
 
     def get_all_structs(self):
         with self.driver.session() as s:
@@ -133,9 +142,7 @@ class ribosomexyzDB():
 
     def add_structure(self, struct_assets: RibosomeAssets):
 
-        R = RibosomeStructure(**struct_assets.json_profile())
-
-
+        R = RibosomeStructure.parse_obj(struct_assets.json_profile())
 
         with self.driver.session() as s:
             struct_node_result = s.execute_write(node__structure(R))
@@ -181,7 +188,7 @@ class ribosomexyzDB():
                 """).value()[0]
             return session.execute_read(_)
 
-    def get_individual_ligand(self, chemId: str) -> Ligand:
+    def get_individual_ligand(self, chemId: str) -> NonpolymericLigand:
         with self.driver.session() as session:
             def _(tx: Transaction | ManagedTransaction):
                 return tx.run("""match (ligand:Ligand{chemicalId: $CHEM_ID}) return ligand""", {"CHEM_ID": chemId}).data()[0]['ligand']
@@ -517,7 +524,8 @@ with n.rcsb_id as struct, collect(r.rcsb_pdbx_description) as rnas
 
     def sync_with_rcsb(self, workers:int)->None:
 
-        logger = get_ribxz_logger("rcsb_sync", 'ribosomexyz.py')
+        logger = get_ribxz_logger("rcsb_sync", "ribosomexyz.py")
+
         synced   = self.get_all_structs()
         unsynced = sorted(current_rcsb_structs())
         futures:list[Future] =  []
