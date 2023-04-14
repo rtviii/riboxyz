@@ -1,16 +1,12 @@
-import json
 import os
 import sys
-from pathlib import Path
+# from .mod_extract_bsites import  *
+# from .mod_render_thumbnail import  *
+# from .mod_split_rename import  *
+# from .mod_superimpose import  *
+# from .mod_transpose_bsites import  *
+# from .struct_rcsb_api import  *
+# from .taxonomy import  *
+# from .utils import  *
 
-p        = Path(__file__).parents[1]
-
-lsu_path = os.path.join(p,'assets','subunit_map_LSU.json')
-ssu_path = os.path.join(p,'assets','subunit_map_SSU.json')
-
-LSU_map = {k: v for k, v in json.load(open(lsu_path, 'r')).items()}
-SSU_map = {k: v for k, v in json.load(open(ssu_path, 'r')).items()}
-
-
-RIBETL_DATA = str(os.environ.get('RIBETL_DATA'))
 sys.path.append(os.environ.get("PYMOL_PATH"))    

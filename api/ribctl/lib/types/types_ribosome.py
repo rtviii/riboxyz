@@ -1,14 +1,11 @@
 from typing import Any
 import typing
 from pydantic import BaseModel
-from .types_polymer import LSU_Proteins, RNAClass, SSU_Proteins
+from .types_poly_nonpoly_ligand import LSU_Proteins, NonpolymericLigandClass, PolymericFactorClass, RNAClass, SSU_Proteins
 
 ProteinClass = typing.Union[LSU_Proteins , SSU_Proteins]
 PolymerClass = typing.Union[ProteinClass, RNAClass]
 
-class LastUpdate(BaseModel):
-    date: str
-    added_structure: str
 
 class Polymer(BaseModel):
     asym_ids: list[str]
@@ -20,8 +17,6 @@ class Polymer(BaseModel):
     host_organism_names: list[str]
     src_organism_ids   : list[int]
     host_organism_ids  : list[int]
-
-    ligand_like: bool
 
     rcsb_pdbx_description: str | None
 
@@ -35,7 +30,6 @@ class Polymer(BaseModel):
     nomenclature:  list[PolymerClass]
 
 class Protein(Polymer):
-
     pfam_accessions  : list[str]
     pfam_comments    : list[str]
     pfam_descriptions: list[str]
@@ -48,16 +42,68 @@ class Protein(Polymer):
 class RNA(Polymer):
     pass
 
-# how should a ligand node be parametrized?
-#   what pending data do we work on?
-#  1.ligand nbhds. One way this could be encoded is via a "neighbors" edge between a given ligand node and the nbr polymers.
-#  think of this when we actually do the protein-to-protein interaction learning
-class Ligand(BaseModel)  : 
+class NonpolymericLigand(BaseModel)  : 
+
       chemicalId         : str
       chemicalName       : str
       formula_weight     : None | float
       pdbx_description   : str
       number_of_instances: int
+    #   nomenclature       : list[NonpolymericLigandClass]
+
+class PolymericFactor(Polymer): 
+    nomenclature: list[PolymericFactorClass]
+    
+
+class NonpolymerEntityInstance(BaseModel):
+    class NonpolymerEntityInstanceContainerIdentifiers(BaseModel):
+        entity_id: str
+        auth_asym_id: str
+        auth_seq_id: str
+    rcsb_nonpolymer_entity_instance_container_identifiers: NonpolymerEntityInstanceContainerIdentifiers
+
+class PolymerEntityInstance(BaseModel):
+    class PolymerEntityInstanceContainerIdentifiers(BaseModel):
+        entity_id: str
+        auth_asym_id: str
+    rcsb_polymer_entity_instance_container_identifiers: PolymerEntityInstanceContainerIdentifiers
+
+
+class AssemblyInstancesMap(BaseModel):
+    """
+    This basically specifies which assembly an instnace of a polymer or a nonpolymer belongs to. 
+    Certain PDB structures come with more than a single physical model/assembly packaged in the file,
+    hence every chain and many ligands might be present in 2 or more instances. 
+    
+    The RNA/Protein/Ligand suffices to characterizes all instances, yet, to resolve duplicate chains 
+    precisely in space, this information is needed.
+    
+    assemblies{
+    rcsb_id 
+   	nonpolymer_entity_instances{
+  
+      rcsb_nonpolymer_entity_instance_container_identifiers{
+        entity_id
+        comp_id
+        auth_asym_id
+        rcsb_id
+        auth_seq_id
+      }
+    }
+    polymer_entity_instances{
+       rcsb_polymer_entity_instance_container_identifiers {  
+        entity_id
+        asym_id
+        auth_asym_id
+        entry_id
+        entity_id
+      }
+    }
+  }
+    """
+    rcsb_id                    : str # 5AFI-1
+    nonpolymer_entity_instances: list[NonpolymerEntityInstance]
+    polymer_entity_instances   : list[PolymerEntityInstance]
 
 class RibosomeStructure(BaseModel):
 
@@ -83,27 +129,13 @@ class RibosomeStructure(BaseModel):
     host_organism_ids  : list[int]
     host_organism_names: list[str]
 
-    proteins: list[Protein]
-    rnas    : list[RNA] | None
-    ligands : list[Ligand] | None
+    assembly_map: list[AssemblyInstancesMap]
+
+    proteins            : list[Protein]
+    rnas                : list[RNA] | None
+    nonpolymeric_ligands: list[NonpolymericLigand] | None
+    polymeric_factors   : list[PolymericFactor] | None
     
-
-
-
     @staticmethod
     def from_json_profile(d: Any):
         return RibosomeStructure(**d)
-
-class InterProFamily(BaseModel):
-    family_id: str
-    type: str
-    description: str
-
-class GOClass(BaseModel):
-    class_id: str
-    annotation: str
-
-class PFAMFamily(BaseModel):
-    family_id: str
-    annotation: str
-    family_type: str
