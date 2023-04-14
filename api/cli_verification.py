@@ -7,9 +7,8 @@ from pprint import pprint
 from api.ribctl.lib.types.ribosome_assets import RibosomeAssets
 from api.ribctl.lib.types.types_ribosome import RNA, AssemblyInstancesMap, PolymericFactor, Protein
 from fuzzywuzzy import process, fuzz
-from api.ribctl.lib.types.types_poly_nonpoly_ligand import PolymericFactorClass, list_PolymericFactorClass, list_NonpolymericLigandClass
 
-from ribctl.lib.struct_rcsb_api import gql_monolith,query_rcsb_api
+from ribctl.lib.struct_rcsb_api import gql_monolith,query_rcsb_api, process_pdb_record
 
 arg = argparse.ArgumentParser(description='RibCtl - A tool to control the ribosome database')
 
@@ -23,13 +22,15 @@ args = arg.parse_args()
 
 if args.structure:
     qs = query_rcsb_api(gql_monolith(args.structure))
+    process_pdb_record(args.structure)
+
     # pprint(qs)
-    print(qs.keys())
-    for  poly in qs['polymer_entities']:
-        desc = poly['rcsb_polymer_entity']['pdbx_description']
-        match = __classify_polymeric_factor(desc)
-        if match != None :
-            print(f"{desc} is a {match}")
+    # print(qs.keys())
+    # for  poly in qs['polymer_entities']:
+    #     desc = poly['rcsb_polymer_entity']['pdbx_description']
+        # match = __cassify_polymeric_factor(desc)
+        # if match != None :
+        #     print(f"{desc} is a {match}")
     
     # parse_assemblies(qs['assemblies'])
     # r = RibosomeAssets(args.structure)
