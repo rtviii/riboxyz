@@ -1,7 +1,6 @@
 import json
 import os
 from pydantic import parse_obj_as
-from ribctl.lib import RIBETL_DATA
 from ribctl.lib.types.types_ribosome import RibosomeStructure
 from ribctl.lib.utils import download_unpack_place, open_structure
 from ribctl.lib.mod_render_thumbnail import render_thumbnail
@@ -10,9 +9,12 @@ from ribctl.lib.mod_split_rename import split_rename
 from ribctl.lib.mod_extract_bsites import struct_ligand_ids, struct_liglike_ids, save_ligandlike_polymer, save_ligandlike_polymer
 
 
+RIBETL_DATA = str(os.environ.get("RIBETL_DATA"))
 
 class RibosomeAssets():
+
     rcsb_id: str
+
 
     def __init__(self, rcsb_id: str) -> None:
         self.rcsb_id = rcsb_id.upper()
@@ -124,14 +126,12 @@ class RibosomeAssets():
         for ligand in ligands:
             if not os.path.exists(ligand_path(ligand[0])):
                 _flag = False
-                save_ligandlike_polymer(
-                    self.rcsb_id, ligand[0], self.biopython_structure(), overwrite)
+                save_ligandlike_polymer(self.rcsb_id, ligand[0], self.biopython_structure(), overwrite)
 
         for ligandlike_poly in ligandlike_polymers:
             if not os.path.exists(liglike_poly_path(ligandlike_poly.auth_asym_id)):
                 _flag = False
-                save_ligandlike_polymer(
-                    self.rcsb_id, ligandlike_poly.auth_asym_id, self.biopython_structure(), overwrite)
+                save_ligandlike_polymer(self.rcsb_id, ligandlike_poly.auth_asym_id, self.biopython_structure(), overwrite)
 
         return _flag
 

@@ -5,7 +5,7 @@ from venv import logger
 from ninja import Router
 from rbxz_bend.settings import get_logger
 from ribctl.lib.struct_rcsb_api import current_rcsb_structs
-from ribctl.lib.types.types_ribosome_assets import RibosomeAssets
+from api.ribctl.lib.types.ribosome_assets import RibosomeAssets
 from rbxz_bend.db.ribosomexyz import ribosomexyzDB
 from rbxz_bend.application import db_connection, ribosomexyzApp
 from rbxz_bend.settings import NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER

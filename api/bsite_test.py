@@ -1,6 +1,6 @@
 import os
 from pprint import pprint
-from ribctl.lib.types.ligands.types_binding_site import BindingSite, LigandPrediction
+from api.ribctl.lib.types.types_binding_site import BindingSite, LigandPrediction
 from ribctl.lib.mod_transpose_bsites import init_transpose_ligand, open_bsite
 from ribctl.lib.types.types_ribosome import RibosomeStructure
 from ribctl.lib import RIBETL_DATA, utils
