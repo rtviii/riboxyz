@@ -19,7 +19,6 @@ from schema.v0 import ExogenousRNAByStruct,BanClassMetadata, LigandInstance, Neo
 from api.ribctl.lib.types.types_poly_nonpoly_ligand import RNAClass, list_LSU_Proteins, list_SSU_Proteins, list_RNAClass
 
 
-
 # ※ ----------------[ 0.Database  inits: constraints & nomenclature classes]
 NODE_CONSTRAINTS = [
     """CREATE CONSTRAINT IF NOT EXISTS ON (ipro:InterProFamily) ASSERT ipro.family_id  IS UNIQUE;""",
@@ -95,7 +94,6 @@ class ribosomexyzDB():
             r = s.run("""show users""")
             users_array = r.data()
             return users_array
-
 
     def show_dbs(self):
         with self.driver.session(database='system') as s:
