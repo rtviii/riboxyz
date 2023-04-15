@@ -2,11 +2,10 @@
 # export DJANGO_SETTINGS_MODULE=api.rbxz_bend                                                                                         [cli]
 # import argparse
 import argparse
-from pprint import pprint
 from api.ribctl.lib.types.ribosome_assets import RibosomeAssets
-from api.ribctl.lib.types.types_ribosome import RNA, AssemblyInstancesMap, PolymericFactor, Protein
+from api.ribctl.lib.types.types_ribosome import RNA, AssemblyInstancesMap, PolymericFactor, Protein, RibosomeStructure
 from fuzzywuzzy import process, fuzz
-
+from logs.loggers import updates_logger
 from ribctl.lib.struct_rcsb_api import gql_monolith,query_rcsb_api, process_pdb_record
 
 arg = argparse.ArgumentParser(description='RibCtl - A tool to control the ribosome database')
@@ -20,8 +19,16 @@ args = arg.parse_args()
 
 
 if args.structure:
-    qs = query_rcsb_api(gql_monolith(args.structure))
-    process_pdb_record(args.structure)
+    RCSB_ID = args.structure
+    struct = process_pdb_record(RCSB_ID)
+    RibosomeStructure.parse_obj(struct)
+    assets = RibosomeAssets(RCSB_ID)
+    assets.save_json_profile(assets._json_profile_filepath(), struct.dict())
+
+    try:
+        raise Exception("Done")
+    except Exception as e:
+        updates_logger.exception(e)
 
 # if args.test:
 
