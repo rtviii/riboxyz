@@ -3,7 +3,6 @@
 # import argparse
 import argparse
 from pprint import pprint
-# from ribctl.lib.types.types_ribosome import  RibosomeStructure
 from api.ribctl.lib.types.ribosome_assets import RibosomeAssets
 from api.ribctl.lib.types.types_ribosome import RNA, AssemblyInstancesMap, PolymericFactor, Protein
 from fuzzywuzzy import process, fuzz
@@ -23,19 +22,6 @@ args = arg.parse_args()
 if args.structure:
     qs = query_rcsb_api(gql_monolith(args.structure))
     process_pdb_record(args.structure)
-
-    # pprint(qs)
-    # print(qs.keys())
-    # for  poly in qs['polymer_entities']:
-    #     desc = poly['rcsb_polymer_entity']['pdbx_description']
-        # match = __cassify_polymeric_factor(desc)
-        # if match != None :
-        #     print(f"{desc} is a {match}")
-    
-    # parse_assemblies(qs['assemblies'])
-    # r = RibosomeAssets(args.structure)
-    # d = r.json_profile()
-    # rs = RibosomeStructure.parse_obj(d)
 
 # if args.test:
 

@@ -19,20 +19,19 @@ PolymericFactorClass = Literal[
     "Other"
 ]
 list_PolymericFactorClass = [
-                             "Initiation Factor",
-                             "Translation Factor",
-                             "Biogenesis Factor",
-                            "Release Factor",
-                            "Elongation Factor",
-                             
-                             "Termination Factor",
-                             "Nascent Chain",
-                             "Ribozyme",
-                             "Riboswitch",
-                             "RNP",
-                             "mRNA",
-                             "tRNA",
-                             "snoRNA", "lncRNA", "Other"]
+                         "Initiation Factor",
+                         "Translation Factor",
+                         "Biogenesis Factor",
+                         "Release Factor",
+                         "Elongation Factor",
+                         "Termination Factor",
+                         "Nascent Chain",
+                         "Ribozyme",
+                         "Riboswitch",
+                         "RNP",
+                         "mRNA",
+                         "tRNA",
+                         "snoRNA", "lncRNA", "Other"]
 
 
 NonpolymericLigandClass = Literal[
