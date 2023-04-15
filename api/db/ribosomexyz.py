@@ -39,7 +39,6 @@ NODE_CONSTRAINTS = [
 # ※ ----------------[ 4.Ligand Nodes]
 # ※ ----------------[ 5.Ingress]
 
-
 # If you are connecting via a shell or programmatically via a driver,
 # just issue a `ALTER CURRENT USER SET PASSWORD FROM 'current password' TO 'new password'` statement against
 # the system database in the current session, and then restart your driver with the new password configured.
