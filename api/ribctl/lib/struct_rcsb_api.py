@@ -400,11 +400,14 @@ def process_pdb_record(rcsb_id: str) -> RibosomeStructure:
 
     for poly_prot in proteins:
         if __classify_polymeric_factor(poly_prot['rcsb_polymer_entity']['pdbx_description']) != None:
+            print(poly_prot['rcsb_polymer_entity']['pdbx_description'])
             reshaped_polymeric_factors.extend(__reshape_to_polymeric_factor(poly_prot))
             proteins.remove(poly_prot)
 
     for poly_rna in rnas:
+        print(poly_rna['rcsb_polymer_entity']['pdbx_description'])
         if __classify_polymeric_factor(poly_rna['rcsb_polymer_entity']['pdbx_description']) != None:
+            # print(poly_rna['rcsb_polymer_entity']['pdbx_description'])
             reshaped_polymeric_factors.extend(__reshape_to_polymeric_factor(poly_rna))
             rnas.remove(poly_rna)
 
