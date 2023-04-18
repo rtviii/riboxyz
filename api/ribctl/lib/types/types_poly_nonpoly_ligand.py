@@ -18,14 +18,15 @@ PolymericFactorClass = Literal[
     "lncRNA",
     "Other"
 ]
+
 list_PolymericFactorClass = [
-                         "Initiation Factor",
+                         "Initiation Factor" ,
                          "Translation Factor",
-                         "Biogenesis Factor",
-                         "Release Factor",
-                         "Elongation Factor",
+                         "Biogenesis Factor" ,
+                         "Release Factor"    ,
+                         "Elongation Factor" ,
                          "Termination Factor",
-                         "Nascent Chain",
+                         "Nascent Chain"     ,
                          "Ribozyme",
                          "Riboswitch",
                          "RNP",
