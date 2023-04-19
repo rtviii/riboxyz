@@ -2,7 +2,9 @@
 # export DJANGO_SETTINGS_MODULE=api.rbxz_bend                                                                                         [cli]
 # import argparse
 import argparse
-from api.ribctl.etl.ribosome_assets import RibosomeAssets, sync_all_profiles , RCSB_ID
+import asyncio
+from pprint import pprint
+from api.ribctl.etl.ribosome_assets import Assetlist, RibosomeAssets, obtain_assets, sync_all_profiles , RCSB_ID
 from api.ribctl.lib.types.types_ribosome import RNA, AssemblyInstancesMap, PolymericFactor, Protein, RibosomeStructure
 from fuzzywuzzy import process, fuzz
 from logs.loggers import updates_logger
@@ -17,7 +19,12 @@ arg.add_argument('-ttt', '--test', action='store_true')
 args = arg.parse_args()
 
 if args.obtain:
-    sync_all_profiles([], workers=10, get_all=True)
+    loop = asyncio.get_event_loop()
+    
+    loop.run_until_complete(obtain_assets('8g6x', Assetlist(profile=True, structure=True, structure_modified=True, chains=True, factors=True, png_thumbnail=True), True))
+    loop.close()
+    # print(process_pdb_record('8g6x').dict())
+    # sync_all_profiles([], workers=10, get_all=True)
 
 if args.structure:
     RCSB_ID = args.structure.upper()

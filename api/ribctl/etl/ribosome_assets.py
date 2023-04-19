@@ -1,4 +1,6 @@
+import asyncio
 import json
+from typing import Optional
 from logs.loggers import updates_logger
 from ribctl.lib.mod_extract_bsites import struct_ligand_ids, struct_liglike_ids, save_ligandlike_polymer, save_ligandlike_polymer
 from ribctl.lib.mod_split_rename import split_rename
@@ -6,12 +8,21 @@ from ribctl.etl.struct_rcsb_api import current_rcsb_structs, process_pdb_record
 from ribctl.lib.mod_render_thumbnail import render_thumbnail
 from ribctl.lib.utils import download_unpack_place, open_structure
 from ribctl.lib.types.types_ribosome import RCSB_ID, RibosomeStructure
-from pydantic import parse_obj_as
+from pydantic import BaseModel, parse_obj_as
 import os
 from concurrent.futures import ALL_COMPLETED, Future, ThreadPoolExecutor, wait
 
 
 RIBETL_DATA = str(os.environ.get("RIBETL_DATA"))
+
+
+class Assetlist(BaseModel): 
+      profile             : Optional[bool]
+      structure           : Optional[bool]
+      structure_modified  : Optional[bool]
+      chains              : Optional[bool]
+      factors             : Optional[bool]
+      png_thumbnail       : Optional[bool]
 
 
 class RibosomeAssets():
@@ -84,7 +95,7 @@ class RibosomeAssets():
         else:
             return os.path.exists(self._cif_modified_filepath())
 
-    def _verify_json_profile(self, overwrite: bool = False) -> bool:
+    async def _verify_json_profile(self, overwrite: bool = False) -> bool:
         if overwrite:
             ribosome = process_pdb_record(self.rcsb_id)
 
@@ -92,8 +103,7 @@ class RibosomeAssets():
                 raise Exception("Invalid ribosome structure profile.")
 
             self._verify_dir_exists()
-            self.save_json_profile(
-                self._json_profile_filepath(), ribosome.dict())
+            self.save_json_profile(self._json_profile_filepath(), ribosome.dict())
             print(f"Saved structure profile:\t{self._json_profile_filepath()}")
             return True
         else:
@@ -117,12 +127,10 @@ class RibosomeAssets():
 
     def _verify_ligads_and_ligandlike_polys(self, overwrite: bool = False):
 
-        def ligand_path(chem_id): return os.path.join(
-            self._dir_path(), f"LIGAND_{chem_id.upper()}.json")
-        def liglike_poly_path(auth_asym_id): return os.path.join(
-            self._dir_path(), f"POLYMER_{auth_asym_id.upper()}.json")
+        def ligand_path(chem_id): return os.path.join(self._dir_path(), f"LIGAND_{chem_id.upper()}.json")
+        def liglike_poly_path(auth_asym_id): return os.path.join(self._dir_path(), f"POLYMER_{auth_asym_id.upper()}.json")
 
-        ligands = struct_ligand_ids(self.rcsb_id, self.json_profile())
+        ligands             = struct_ligand_ids(self.rcsb_id, self.json_profile())
         ligandlike_polymers = struct_liglike_ids(self.json_profile())
 
         _flag = True
@@ -130,14 +138,12 @@ class RibosomeAssets():
         for ligand in ligands:
             if not os.path.exists(ligand_path(ligand[0])):
                 _flag = False
-                save_ligandlike_polymer(
-                    self.rcsb_id, ligand[0], self.biopython_structure(), overwrite)
+                save_ligandlike_polymer(self.rcsb_id, ligand[0], self.biopython_structure(), overwrite)
 
         for ligandlike_poly in ligandlike_polymers:
             if not os.path.exists(liglike_poly_path(ligandlike_poly.auth_asym_id)):
                 _flag = False
-                save_ligandlike_polymer(
-                    self.rcsb_id, ligandlike_poly.auth_asym_id, self.biopython_structure(), overwrite)
+                save_ligandlike_polymer(self.rcsb_id, ligandlike_poly.auth_asym_id, self.biopython_structure(), overwrite)
 
         return _flag
 
@@ -151,11 +157,36 @@ class RibosomeAssets():
     #     self._verify_ligads_and_ligandlike_polys(overwrite)
 
 
-def sync_all_profiles(targets:list[str], workers: int=5, get_all:bool=False):
-    """Get all ribosome profiles from RCSB via a threadpool
-    
-    """
+async def obtain_assets(rcsb_id: str,assetlist:Assetlist ,overwrite: bool = False):
+    """Obtain all assets for a given RCSB ID"""
+    assets = RibosomeAssets(rcsb_id)
+    assets._verify_dir_exists()
 
+
+
+    import concurrent.futures 
+
+    if assetlist.profile:
+        await assets._verify_json_profile(overwrite)
+
+        # if assetlist.structure:
+        #     a  = executor.submit(assets._verify_json_profile(overwrite))
+        #     futurelist.append(a)
+            
+
+        # if assetlist.factors:
+        #     assets._verify_ligads_and_ligandlike_polys(overwrite)
+
+        # if assetlist.chains:
+        #     assets._verify_chains_dir()
+        #     if assetlist.structure_modified:
+        #         assets._verify_cif_modified(overwrite)
+
+
+
+
+def sync_all_profiles(targets:list[str], workers: int=5, get_all:bool=False, replace=False):
+    """Get all ribosome profiles from RCSB via a threadpool"""
     logger = updates_logger
     if get_all:
         unsynced = sorted(current_rcsb_structs())
@@ -175,11 +206,16 @@ def sync_all_profiles(targets:list[str], workers: int=5, get_all:bool=False):
         return _
 
     with ThreadPoolExecutor(max_workers=workers) as executor:
+
         def single_struct_process(rcsb_id: str):
                 struct = process_pdb_record(rcsb_id.upper())
                 RibosomeStructure.parse_obj(struct)
                 assets = RibosomeAssets(rcsb_id)
-                assets.save_json_profile(assets._json_profile_filepath(), struct.dict())
+                if os.path.exists(assets._json_profile_filepath()) and not replace:
+                    return
+                else:
+                    assets.save_json_profile(assets._json_profile_filepath(), struct.dict())
+
 
         for rcsb_id in unsynced:
 
