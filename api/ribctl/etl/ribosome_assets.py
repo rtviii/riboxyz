@@ -21,7 +21,7 @@ class Assetlist(BaseModel):
       structure           : Optional[bool]
       structure_modified  : Optional[bool]
       chains              : Optional[bool]
-      factors             : Optional[bool]
+      factors_and_ligands : Optional[bool]
       png_thumbnail       : Optional[bool]
 
 
@@ -78,9 +78,10 @@ class RibosomeAssets():
             os.umask(0)
             os.makedirs(self._dir_path(), 0o777)
 
-    def _verify_cif(self, overwrite: bool = False) -> bool:
+    async def _verify_cif(self, overwrite: bool = False) -> bool:
         if overwrite:
             download_unpack_place(self.rcsb_id)
+            print("Saved structure file:\t", self._cif_filepath())
             return True
         else:
             if os.path.exists(self._cif_filepath()):
@@ -88,7 +89,7 @@ class RibosomeAssets():
             else:
                 return False
 
-    def _verify_cif_modified(self, overwrite: bool = False) -> bool:
+    async def _verify_cif_modified(self, overwrite: bool = False) -> bool:
         if overwrite:
             split_rename(self.rcsb_id)
             return True
@@ -122,10 +123,10 @@ class RibosomeAssets():
             else:
                 return False
 
-    def _verify_chains_dir(self):
+    async def _verify_chains_dir(self):
         split_rename(self.rcsb_id)
 
-    def _verify_ligads_and_ligandlike_polys(self, overwrite: bool = False):
+    async def _verify_ligads_and_ligandlike_polys(self, overwrite: bool = False):
 
         def ligand_path(chem_id): return os.path.join(self._dir_path(), f"LIGAND_{chem_id.upper()}.json")
         def liglike_poly_path(auth_asym_id): return os.path.join(self._dir_path(), f"POLYMER_{auth_asym_id.upper()}.json")
@@ -138,7 +139,7 @@ class RibosomeAssets():
         for ligand in ligands:
             if not os.path.exists(ligand_path(ligand[0])):
                 _flag = False
-                save_ligandlike_polymer(self.rcsb_id, ligand[0], self.biopython_structure(), overwrite)
+                save_ligandlike_polymer( ligand[0], self.biopython_structure())
 
         for ligandlike_poly in ligandlike_polymers:
             if not os.path.exists(liglike_poly_path(ligandlike_poly.auth_asym_id)):
@@ -169,18 +170,18 @@ async def obtain_assets(rcsb_id: str,assetlist:Assetlist ,overwrite: bool = Fals
     if assetlist.profile:
         await assets._verify_json_profile(overwrite)
 
-        # if assetlist.structure:
-        #     a  = executor.submit(assets._verify_json_profile(overwrite))
-        #     futurelist.append(a)
-            
+    if assetlist.structure:
+        await assets._verify_cif(overwrite)
+        
 
-        # if assetlist.factors:
-        #     assets._verify_ligads_and_ligandlike_polys(overwrite)
+    if assetlist.factors_and_ligands:
+        await assets._verify_ligads_and_ligandlike_polys(overwrite)
 
-        # if assetlist.chains:
-        #     assets._verify_chains_dir()
-        #     if assetlist.structure_modified:
-        #         assets._verify_cif_modified(overwrite)
+    if assetlist.chains:
+        await assets._verify_chains_dir()
+        if assetlist.structure_modified:
+            await assets._verify_cif_modified(overwrite)
+
 
 
 

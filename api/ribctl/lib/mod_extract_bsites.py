@@ -7,7 +7,7 @@ from Bio.PDB.NeighborSearch import NeighborSearch
 from Bio.PDB.Residue import Residue
 from Bio.PDB.Structure import Structure
 from Bio.PDB.Chain import Chain
-from ribctl.lib.types.types_ribosome import Polymer, RibosomeStructure
+from ribctl.lib.types.types_ribosome import Polymer, PolymericFactor, RibosomeStructure
 from api.ribctl.lib.types.types_binding_site import AMINO_ACIDS, NUCLEOTIDES, BindingSite, BindingSiteChain, ResidueSummary
 from ribctl.lib import utils
 
@@ -98,16 +98,17 @@ def get_ligand_residue_ids(ligchemid: str, struct: Structure) -> list[Residue]:
     ligandResidues: list[Residue] = list(filter(lambda x: x.get_resname() == ligchemid, list(struct.get_residues())))
     return ligandResidues
 
-def struct_liglike_ids(struct_profile:RibosomeStructure) -> list[Polymer]:
+def struct_liglike_ids(struct_profile:RibosomeStructure) -> list[PolymericFactor]|None:
     """Given an rcsb id, open the profile for the corresponding structure
     and return references to all polymers marked ligand-like"""
-    polymers =  itertools.chain(struct_profile.rnas if struct_profile.rnas != None else [] , struct_profile.proteins)
-    return list(filter(lambda poly : poly.ligand_like == True, polymers))
+    # polymers =  itertools.chain(struct_profile.rnas if struct_profile.rnas != None else [] , struct_profile.proteins)
+    # return list(filter(lambda poly : poly.ligand_like == True, polymers))
+    return struct_profile.polymeric_factors
 
 def struct_ligand_ids(pdbid: str, profile:RibosomeStructure) -> list[str]:
     pdbid = pdbid.upper()
-    if not profile.ligands: return []
-    _ = [* map(lambda x: (x.chemicalId, x.chemicalName),profile.ligands)] 
+    if not profile.nonpolymeric_ligands: return []
+    _ = [* map(lambda x: (x.chemicalId, x.chemicalName),profile.nonpolymeric_ligands)] 
     return [ ] if len(_) < 1 else [ chemid for (chemid, chemname) in filter(lambda k: "ion" not in k[1].lower(), _)] 
 
 def save_ligandlike_polymer(auth_asym_id:str, structure:Structure )->BindingSite:
@@ -139,8 +140,9 @@ if __name__ == "__main__":
     ligands       = struct_ligand_ids(PDBID, struct_profile_handle)
 
 
-    for polyref in liglike_polys:
-        save_ligandlike_polymer(polyref.parent_rcsb_id, polyref.auth_asym_id, _structure_cif_handle, args.save)
+    if liglike_polys != None:
+        for polyref in liglike_polys:
+            save_ligandlike_polymer(polyref.auth_asym_id, _structure_cif_handle)
 
     for l in ligands:
-        save_ligand(PDBID, l[0], _structure_cif_handle, args.save)
+        save_ligand( l[0], _structure_cif_handle)
