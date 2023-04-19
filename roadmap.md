@@ -3,6 +3,7 @@
 
 - [x] separate assemblies
 - [x] split ligand classes into instances 
+- [ ] fit ligand parsing, transposition and fileformats to the new "polymeric factors" schema
 
 <!-- TODO: WIP -->
 - [ ] flash out the taxonomy : [src + host] [nodes in the db, hierarchy in the app(pull in the lib, construct dynamically on app start from assets)]
