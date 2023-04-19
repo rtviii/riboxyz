@@ -1,6 +1,21 @@
 # After https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4358319/
 from typing import Literal
 
+list_PolymericFactorClass = [
+                         "Initiation Factor" ,
+                         "Translation Factor",
+                         "Biogenesis Factor" ,
+                         "Release Factor"    ,
+                         "Elongation Factor" ,
+                         "Termination Factor",
+                         "Nascent Chain"     ,
+                         "Ribozyme",
+                         "Riboswitch",
+                         "RNP",
+                         "mRNA",
+                         "tRNA",
+                         "snoRNA", "lncRNA", "Other"
+                         ]
 PolymericFactorClass = Literal[
     "Elongation Factor",
     "Initiation Factor",
@@ -18,21 +33,7 @@ PolymericFactorClass = Literal[
     "lncRNA",
     "Other"
 ]
-list_PolymericFactorClass = [
-                             "Initiation Factor",
-                             "Translation Factor",
-                             "Biogenesis Factor",
-                            "Release Factor",
-                            "Elongation Factor",
-                             
-                             "Termination Factor",
-                             "Nascent Chain",
-                             "Ribozyme",
-                             "Riboswitch",
-                             "RNP",
-                             "mRNA",
-                             "tRNA",
-                             "snoRNA", "lncRNA", "Other"]
+
 
 
 NonpolymericLigandClass = Literal[

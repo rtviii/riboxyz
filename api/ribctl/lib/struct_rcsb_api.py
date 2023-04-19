@@ -393,25 +393,27 @@ def process_pdb_record(rcsb_id: str) -> RibosomeStructure:
 
     proteins, rnas = [], []
     for poly in poly_entities: proteins.append(poly) if is_protein(poly) else rnas.append(poly)
+    
+    assert(len(proteins) +len(rnas) == len(poly_entities))
 
     reshaped_proteins          :list[Protein]         = []
     reshaped_rnas              :list[RNA]             = []
     reshaped_polymeric_factors :list[PolymericFactor] = []
 
-    for poly_prot in proteins:
+    for ( i,poly_prot ) in enumerate(proteins):
         if __classify_polymeric_factor(poly_prot['rcsb_polymer_entity']['pdbx_description']) != None:
             reshaped_polymeric_factors.extend(__reshape_to_polymeric_factor(poly_prot))
-            proteins.remove(poly_prot)
+        else:
+            reshaped_proteins.extend(__reshape_poly_to_protein(poly_prot))
+            
 
-    for poly_rna in rnas:
+    for ( j,poly_rna ) in enumerate(rnas):
         if __classify_polymeric_factor(poly_rna['rcsb_polymer_entity']['pdbx_description']) != None:
             reshaped_polymeric_factors.extend(__reshape_to_polymeric_factor(poly_rna))
-            rnas.remove(poly_rna)
+        else:
+            reshaped_rnas.extend(__reshape_poly_to_rna(poly_rna))
 
-    
-    [reshaped_rnas.extend(__reshape_poly_to_rna(poly)) for poly in rnas]
-    [reshaped_proteins.extend(__reshape_poly_to_protein(poly)) for poly in proteins]
-    
+
 
     reshaped_nonpoly:list[NonpolymericLigand] = [__reshape_to_nonpolymericligand(nonpoly) for nonpoly in nonpoly_entities] if nonpoly_entities != None and len(nonpoly_entities) > 0 else []
     organisms        = __infer_organisms_from_polymers(reshaped_proteins)  # type: ignore (only accessing commong fields)
@@ -431,27 +433,25 @@ def process_pdb_record(rcsb_id: str) -> RibosomeStructure:
     kwords_text = response['struct_keywords']['text'] if response['struct_keywords']          != None else None
     kwords      = response['struct_keywords']['pdbx_keywords'] if response['struct_keywords'] != None else None
 
-    #TODO: Polymeric Factors extraction
-    #TODO: Assembly Map
 
     reshaped = RibosomeStructure(
-        rcsb_id                 = response['rcsb_id'],
-        expMethod               = response['exptl'][0]['method'],
-        resolution              = response['rcsb_entry_info']['resolution_combined'][0],
-        rcsb_external_ref_id    = externalRefs[0],
-        rcsb_external_ref_type  = externalRefs[1],
-        rcsb_external_ref_link  = externalRefs[2],
-        citation_year           = pub['year'],
-        citation_rcsb_authors   = pub['rcsb_authors'],
-        citation_title          = pub['title'],
-        citation_pdbx_doi       = pub['pdbx_database_id_DOI'],
-        pdbx_keywords_text      = kwords_text,
-        pdbx_keywords           = kwords,
-        src_organism_ids= organisms['src_organism_ids'],
-        src_organism_names= organisms['src_organism_names'],
+        rcsb_id                = response['rcsb_id'],
+        expMethod              = response['exptl'][0]['method'],
+        resolution             = response['rcsb_entry_info']['resolution_combined'][0],
+        rcsb_external_ref_id   = externalRefs[0],
+        rcsb_external_ref_type = externalRefs[1],
+        rcsb_external_ref_link = externalRefs[2],
+        citation_year          = pub['year'],
+        citation_rcsb_authors  = pub['rcsb_authors'],
+        citation_title         = pub['title'],
+        citation_pdbx_doi      = pub['pdbx_database_id_DOI'],
+        pdbx_keywords_text     = kwords_text,
+        pdbx_keywords          = kwords,
+        src_organism_ids       = organisms['src_organism_ids'],
+        src_organism_names     = organisms['src_organism_names'],
         
-        host_organism_ids= organisms['host_organism_ids'],
-        host_organism_names= organisms['host_organism_names'],
+        host_organism_ids   = organisms['host_organism_ids'],
+        host_organism_names = organisms['host_organism_names'],
 
         proteins             = reshaped_proteins,
         rnas                 = reshaped_rnas,
@@ -460,5 +460,9 @@ def process_pdb_record(rcsb_id: str) -> RibosomeStructure:
         assembly_map         = __parse_assemblies(response['assemblies'])
 
     )
+    assert(reshaped.rnas.__len__() if reshaped.rnas != None else 0  
+           + reshaped.proteins.__len__() 
+           + reshaped.polymeric_factors.__len__() if reshaped.polymeric_factors != None else 0 
+           == len(poly_entities))
 
     return reshaped

@@ -1,4 +1,3 @@
-from pprint import pprint
 from typing import Callable
 from neo4j import GraphDatabase, Driver, ManagedTransaction, Record, Result, Transaction
 from neo4j.graph import Node, Relationship
@@ -11,22 +10,21 @@ def node__structure(_rib: RibosomeStructure) -> Callable[[Transaction | ManagedT
     R = _rib.dict()
     def _(tx: Transaction | ManagedTransaction):
         return tx.run("""//
-    merge ( struct:RibosomeStructure{
-              rcsb_id               : $rcsb_id,
-              expMethod             : $expMethod,
-              resolution            : $resolution,
-              citation_rcsb_authors : $citation_rcsb_authors,
-              citation_title        : $citation_title,
+        merge ( struct:RibosomeStructure{
+                  rcsb_id               : $rcsb_id,
+                  expMethod             : $expMethod,
+                  resolution            : $resolution,
+                  citation_rcsb_authors : $citation_rcsb_authors,
+                  citation_title        : $citation_title,
 
-              pdbx_keywords     : $pdbx_keywords     ,
-              pdbx_keywords_text: $pdbx_keywords_text,
+                  pdbx_keywords     : $pdbx_keywords     ,
+                  pdbx_keywords_text: $pdbx_keywords_text,
 
-              src_organism_ids           : $src_organism_ids,
-              src_organism_names         : $src_organism_names,
+                  src_organism_ids           : $src_organism_ids,
+                  src_organism_names         : $src_organism_names,
 
-              host_organism_ids           : $host_organism_ids,
-             host_organism_names          : $host_organism_names
-
+                  host_organism_ids           : $host_organism_ids,
+                  host_organism_names          : $host_organism_names
               })
 
               on create set
