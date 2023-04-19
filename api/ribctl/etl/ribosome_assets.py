@@ -1,24 +1,25 @@
-import json
-import os
-from pydantic import parse_obj_as
-from ribctl.lib.types.types_ribosome import RibosomeStructure
-from ribctl.lib.utils import download_unpack_place, open_structure
-from ribctl.lib.mod_render_thumbnail import render_thumbnail
-from ribctl.lib.struct_rcsb_api import process_pdb_record
-from ribctl.lib.mod_split_rename import split_rename
+from logs.loggers import updates_logger
 from ribctl.lib.mod_extract_bsites import struct_ligand_ids, struct_liglike_ids, save_ligandlike_polymer, save_ligandlike_polymer
+from ribctl.lib.mod_split_rename import split_rename
+from struct_rcsb_api import current_rcsb_structs, process_pdb_record
+from ribctl.lib.mod_render_thumbnail import render_thumbnail
+from ribctl.lib.utils import download_unpack_place, open_structure
+from ribctl.lib.types.types_ribosome import RibosomeStructure
+from pydantic import parse_obj_as
+import os
+from concurrent.futures import ALL_COMPLETED, Future, ThreadPoolExecutor, wait
+json
 
 
 RIBETL_DATA = str(os.environ.get("RIBETL_DATA"))
 
+
 class RibosomeAssets():
-
     rcsb_id: str
-
 
     def __init__(self, rcsb_id: str) -> None:
         self.rcsb_id = rcsb_id.upper()
-# 
+
     def _envcheck(self):
         if not RIBETL_DATA:
             raise Exception(
@@ -40,7 +41,7 @@ class RibosomeAssets():
         self._envcheck()
         return f"{self._dir_path()}/{self.rcsb_id}.json"
 
-    def json_profile(self)->RibosomeStructure:
+    def json_profile(self) -> RibosomeStructure:
         with open(self._json_profile_filepath(), "r") as f:
             return RibosomeStructure.parse_obj(json.load(f))
 
@@ -91,7 +92,8 @@ class RibosomeAssets():
                 raise Exception("Invalid ribosome structure profile.")
 
             self._verify_dir_exists()
-            self.save_json_profile(self._json_profile_filepath(), ribosome.dict())
+            self.save_json_profile(
+                self._json_profile_filepath(), ribosome.dict())
             print(f"Saved structure profile:\t{self._json_profile_filepath()}")
             return True
         else:
@@ -115,10 +117,12 @@ class RibosomeAssets():
 
     def _verify_ligads_and_ligandlike_polys(self, overwrite: bool = False):
 
-        def ligand_path(chem_id):            return os.path.join(self._dir_path(), f"LIGAND_{chem_id.upper()}.json")
-        def liglike_poly_path(auth_asym_id): return os.path.join(self._dir_path(), f"POLYMER_{auth_asym_id.upper()}.json")
+        def ligand_path(chem_id): return os.path.join(
+            self._dir_path(), f"LIGAND_{chem_id.upper()}.json")
+        def liglike_poly_path(auth_asym_id): return os.path.join(
+            self._dir_path(), f"POLYMER_{auth_asym_id.upper()}.json")
 
-        ligands             = struct_ligand_ids(self.rcsb_id, self.json_profile())
+        ligands = struct_ligand_ids(self.rcsb_id, self.json_profile())
         ligandlike_polymers = struct_liglike_ids(self.json_profile())
 
         _flag = True
@@ -126,12 +130,14 @@ class RibosomeAssets():
         for ligand in ligands:
             if not os.path.exists(ligand_path(ligand[0])):
                 _flag = False
-                save_ligandlike_polymer(self.rcsb_id, ligand[0], self.biopython_structure(), overwrite)
+                save_ligandlike_polymer(
+                    self.rcsb_id, ligand[0], self.biopython_structure(), overwrite)
 
         for ligandlike_poly in ligandlike_polymers:
             if not os.path.exists(liglike_poly_path(ligandlike_poly.auth_asym_id)):
                 _flag = False
-                save_ligandlike_polymer(self.rcsb_id, ligandlike_poly.auth_asym_id, self.biopython_structure(), overwrite)
+                save_ligandlike_polymer(
+                    self.rcsb_id, ligandlike_poly.auth_asym_id, self.biopython_structure(), overwrite)
 
         return _flag
 
@@ -143,3 +149,39 @@ class RibosomeAssets():
     #     # self._verify_png_thumbnail(overwrite)
     #     self._verify_chains_dir()
     #     self._verify_ligads_and_ligandlike_polys(overwrite)
+
+
+def sync_all_profiles(targets:list[str] ,workers: int=5):
+    """Get all ribosome profiles from RCSB via a threadpool
+    
+    """
+
+    logger = updates_logger
+    unsynced = sorted(current_rcsb_structs())
+    futures: list[Future] = []
+    logger.info("Begun downloading ribosome profiles via RCSB")
+
+    def log_commit_result(rcsb_id: str):
+        def _(f: Future):
+            if not None == f.exception():
+                logger.error(rcsb_id + ":" + f.exception().__str__())
+            else:
+                logger.debug(rcsb_id + ":" + f.result().__str__())
+        return _
+
+    with ThreadPoolExecutor(max_workers=workers) as executor:
+        for rcsb_id in unsynced:
+
+            def process_pdb_record_single():
+                struct = process_pdb_record(rcsb_id.upper())
+                RibosomeStructure.parse_obj(struct)
+                assets = RibosomeAssets(rcsb_id)
+                assets.save_json_profile(assets._json_profile_filepath(), struct.dict())
+                assets._verify_json_profile(True)
+
+            fut = executor.submit(process_pdb_record_single)
+            fut.add_done_callback(log_commit_result(rcsb_id))
+            futures.append(fut)
+
+    wait(futures, return_when=ALL_COMPLETED)
+    logger.info("Finished syncing with RCSB")

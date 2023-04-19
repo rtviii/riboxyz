@@ -1,17 +1,21 @@
 from typing import Any
 import typing
+from typing import NewType
 from pydantic import BaseModel
 from .types_poly_nonpoly_ligand import LSU_Proteins, NonpolymericLigandClass, PolymericFactorClass, RNAClass, SSU_Proteins
+
+
+
 
 ProteinClass = typing.Union[LSU_Proteins , SSU_Proteins]
 PolymerClass = typing.Union[ProteinClass, RNAClass]
 
-
+RCSB_ID = NewType('RCSB_ID', str)
 class Polymer(BaseModel):
     asym_ids: list[str]
     auth_asym_id: str
 
-    parent_rcsb_id   : str
+    parent_rcsb_id   : RCSB_ID
 
     src_organism_names : list[str]
     host_organism_names: list[str]
