@@ -19,16 +19,16 @@ args = arg.parse_args()
 
 
 if args.structure:
-    RCSB_ID = args.structure
-    struct = process_pdb_record(RCSB_ID)
-    RibosomeStructure.parse_obj(struct)
-    assets = RibosomeAssets(RCSB_ID)
-    assets.save_json_profile(assets._json_profile_filepath(), struct.dict())
-
+    RCSB_ID = args.structure.upper()
     try:
-        raise Exception("Done")
+        struct = process_pdb_record(RCSB_ID)
+        RibosomeStructure.parse_obj(struct)
+        assets = RibosomeAssets(RCSB_ID)
+        assets.save_json_profile(assets._json_profile_filepath(), struct.dict())
+        updates_logger.info(f"Saved {RCSB_ID}.json to {assets._json_profile_filepath()}")
     except Exception as e:
         updates_logger.exception(e)
+
 
 # if args.test:
 
