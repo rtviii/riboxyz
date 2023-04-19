@@ -4,7 +4,6 @@ from loguru import logger
 
 module_dir = os.path.dirname(os.path.abspath(__file__))
 
-
 updates_logger = logger
 updates_logger.remove()
 updates_log_path = os.path.join(module_dir, "db_updates.log")

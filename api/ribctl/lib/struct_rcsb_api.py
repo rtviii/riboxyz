@@ -330,6 +330,7 @@ def __parse_assemblies(d:list[dict])->list[AssemblyInstancesMap]:
 def __classify_polymeric_factor(description:str)-> PolymericFactorClass|None:
     """@description: usually polymer['rcsb_polymer_entity']['pdbx_description'] in PDB"""
     ( match,score ) = process.extractOne(description, list_PolymericFactorClass, scorer=fuzz.partial_ratio)
+    # print(description,"| match: ", match, "score: ", score)
     return None if score != 100 else match
 
 def gql_monolith(rcsb_id): return monolithic.replace("$RCSB_ID", rcsb_id.upper())
@@ -393,27 +394,32 @@ def process_pdb_record(rcsb_id: str) -> RibosomeStructure:
 
     proteins, rnas = [], []
     for poly in poly_entities: proteins.append(poly) if is_protein(poly) else rnas.append(poly)
+    
+    assert(len(proteins) +len(rnas) == len(poly_entities))
+    print("---->", len(rnas))
 
     reshaped_proteins          :list[Protein]         = []
     reshaped_rnas              :list[RNA]             = []
     reshaped_polymeric_factors :list[PolymericFactor] = []
 
-    for poly_prot in proteins:
+    for ( i,poly_prot ) in enumerate(proteins):
         if __classify_polymeric_factor(poly_prot['rcsb_polymer_entity']['pdbx_description']) != None:
-            print(poly_prot['rcsb_polymer_entity']['pdbx_description'])
-            reshaped_polymeric_factors.extend(__reshape_to_polymeric_factor(poly_prot))
-            proteins.remove(poly_prot)
+            reshaped_polymeric_factors.extend(__reshape_to_polymeric_factor(proteins.pop(i)))
+        else:
+            reshaped_proteins.extend(__reshape_poly_to_protein(poly_prot))
+            
 
-    for poly_rna in rnas:
-        print(poly_rna['rcsb_polymer_entity']['pdbx_description'])
+    for ( j,poly_rna ) in enumerate(rnas):
         if __classify_polymeric_factor(poly_rna['rcsb_polymer_entity']['pdbx_description']) != None:
-            # print(poly_rna['rcsb_polymer_entity']['pdbx_description'])
             reshaped_polymeric_factors.extend(__reshape_to_polymeric_factor(poly_rna))
-            rnas.remove(poly_rna)
+        else:
+            reshaped_rnas.extend(__reshape_poly_to_rna(poly_rna))
+
+
 
     
-    [reshaped_rnas.extend(__reshape_poly_to_rna(poly)) for poly in rnas]
-    [reshaped_proteins.extend(__reshape_poly_to_protein(poly)) for poly in proteins]
+    # [reshaped_rnas.extend(__reshape_poly_to_rna(poly)) for poly in rnas]
+    # [reshaped_proteins.extend(__reshape_poly_to_protein(poly)) for poly in proteins]
     
 
     reshaped_nonpoly:list[NonpolymericLigand] = [__reshape_to_nonpolymericligand(nonpoly) for nonpoly in nonpoly_entities] if nonpoly_entities != None and len(nonpoly_entities) > 0 else []
