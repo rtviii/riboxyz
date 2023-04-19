@@ -1,5 +1,5 @@
 from concurrent.futures import ALL_COMPLETED, Future, ThreadPoolExecutor, wait
-import logging
+from logs.loggers import updates_logger
 import typing
 from neo4j.exceptions import AuthError
 from pyparsing import Any
@@ -521,14 +521,13 @@ with n.rcsb_id as struct, collect(r.rcsb_pdbx_description) as rnas
 
     def sync_with_rcsb(self, workers:int)->None:
 
-        logger = get_ribxz_logger("rcsb_sync", "ribosomexyz.py")
+        logger = updates_logger
 
         synced   = self.get_all_structs()
         unsynced = sorted(current_rcsb_structs())
         futures:list[Future] =  []
 
         logger.info("Started syncing with RCSB") 
-
 
         def log_commit_result( rcsb_id:str):
             def _(f:Future):
@@ -549,7 +548,6 @@ with n.rcsb_id as struct, collect(r.rcsb_pdbx_description) as rnas
                 futures.append(fut)
 
         wait(futures, return_when=ALL_COMPLETED)
-
         logger.info("Finished syncing with RCSB")
 
     def __init_constraints(self) -> None:
