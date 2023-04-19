@@ -2,12 +2,10 @@
 # export DJANGO_SETTINGS_MODULE=api.rbxz_bend                                                                                         [cli]
 # import argparse
 import argparse
-from pprint import pprint
-# from ribctl.lib.types.types_ribosome import  RibosomeStructure
 from api.ribctl.lib.types.ribosome_assets import RibosomeAssets
-from api.ribctl.lib.types.types_ribosome import RNA, AssemblyInstancesMap, PolymericFactor, Protein
+from api.ribctl.lib.types.types_ribosome import RNA, AssemblyInstancesMap, PolymericFactor, Protein, RibosomeStructure
 from fuzzywuzzy import process, fuzz
-
+from logs.loggers import updates_logger
 from ribctl.lib.struct_rcsb_api import gql_monolith,query_rcsb_api, process_pdb_record
 
 arg = argparse.ArgumentParser(description='RibCtl - A tool to control the ribosome database')
@@ -21,21 +19,16 @@ args = arg.parse_args()
 
 
 if args.structure:
-    qs = query_rcsb_api(gql_monolith(args.structure))
-    process_pdb_record(args.structure)
+    RCSB_ID = args.structure.upper()
+    try:
+        struct = process_pdb_record(RCSB_ID)
+        RibosomeStructure.parse_obj(struct)
+        assets = RibosomeAssets(RCSB_ID)
+        assets.save_json_profile(assets._json_profile_filepath(), struct.dict())
+        updates_logger.info(f"Saved {RCSB_ID}.json to {assets._json_profile_filepath()}")
+    except Exception as e:
+        updates_logger.exception(e)
 
-    # pprint(qs)
-    # print(qs.keys())
-    # for  poly in qs['polymer_entities']:
-    #     desc = poly['rcsb_polymer_entity']['pdbx_description']
-        # match = __cassify_polymeric_factor(desc)
-        # if match != None :
-        #     print(f"{desc} is a {match}")
-    
-    # parse_assemblies(qs['assemblies'])
-    # r = RibosomeAssets(args.structure)
-    # d = r.json_profile()
-    # rs = RibosomeStructure.parse_obj(d)
 
 # if args.test:
 

@@ -1,5 +1,5 @@
 from concurrent.futures import ALL_COMPLETED, Future, ThreadPoolExecutor, wait
-import logging
+from logs.loggers import updates_logger
 import typing
 from neo4j.exceptions import AuthError
 from pyparsing import Any
@@ -19,15 +19,19 @@ from schema.v0 import ExogenousRNAByStruct,BanClassMetadata, LigandInstance, Neo
 from api.ribctl.lib.types.types_poly_nonpoly_ligand import RNAClass, list_LSU_Proteins, list_SSU_Proteins, list_RNAClass
 
 
-
 # ※ ----------------[ 0.Database  inits: constraints & nomenclature classes]
 NODE_CONSTRAINTS = [
     """CREATE CONSTRAINT IF NOT EXISTS ON (ipro:InterProFamily) ASSERT ipro.family_id  IS UNIQUE;""",
     """CREATE CONSTRAINT IF NOT EXISTS ON (go:GOClass) ASSERT go.class_id IS UNIQUE;""",
-    """CREATE CONSTRAINT IF NOT EXISTS ON (q:RibosomeStructure) Assert q.rcsb_id IS UNIQUE;""",
-    """CREATE CONSTRAINT IF NOT EXISTS ON (lig:Ligand) assert lig.chemicalId is unique;""",
+    """CREATE CONSTRAINT IF NOT EXISTS ON (ribosome:RibosomeStructure) Assert q.rcsb_id IS UNIQUE;""",
+    # """CREATE CONSTRAINT IF NOT EXISTS ON (lig:Ligand) assert lig.chemicalId is unique;""",
     """CREATE CONSTRAINT IF NOT EXISTS ON (nc:NomenclatureClass) assert nc.class_id is unique;""",
 ]
+
+# !>>>>>>> Enterprise edition needed
+# The NODE KEY constraint allows you to specify multiple properties that must be unique across all nodes with a specific label. Here's an example of how to create a NODE KEY constraint on the "name" and "email" properties of nodes with the "Person" label:
+# CREATE CONSTRAINT ON (p:Person) ASSERT (p.name, p.email) IS NODE KEY;
+# !<<<<<<<
 
 # ※ ----------------[ 1.Structure Nodes]
 # ※ ----------------[ 2.RNA Nodes]
@@ -35,16 +39,15 @@ NODE_CONSTRAINTS = [
 # ※ ----------------[ 4.Ligand Nodes]
 # ※ ----------------[ 5.Ingress]
 
-
 # If you are connecting via a shell or programmatically via a driver,
 # just issue a `ALTER CURRENT USER SET PASSWORD FROM 'current password' TO 'new password'` statement against
 # the system database in the current session, and then restart your driver with the new password configured.
 
 class ribosomexyzDB():
     driver: Driver
-    uri: str
-    password: str
-    user: str
+    uri      : str
+    password : str
+    user     : str
     databases: list[str]
 
 
@@ -90,7 +93,6 @@ class ribosomexyzDB():
             r = s.run("""show users""")
             users_array = r.data()
             return users_array
-
 
     def show_dbs(self):
         with self.driver.session(database='system') as s:
@@ -519,14 +521,13 @@ with n.rcsb_id as struct, collect(r.rcsb_pdbx_description) as rnas
 
     def sync_with_rcsb(self, workers:int)->None:
 
-        logger = get_ribxz_logger("rcsb_sync", "ribosomexyz.py")
+        logger = updates_logger
 
         synced   = self.get_all_structs()
         unsynced = sorted(current_rcsb_structs())
         futures:list[Future] =  []
 
         logger.info("Started syncing with RCSB") 
-
 
         def log_commit_result( rcsb_id:str):
             def _(f:Future):
@@ -547,20 +548,19 @@ with n.rcsb_id as struct, collect(r.rcsb_pdbx_description) as rnas
                 futures.append(fut)
 
         wait(futures, return_when=ALL_COMPLETED)
-
         logger.info("Finished syncing with RCSB")
 
     def __init_constraints(self) -> None:
-        with self.driver.session() as s:
+        with self.driver.session() as session:
             for c in NODE_CONSTRAINTS:
-                s.execute_write(lambda tx: tx.run(c))
+                session.execute_write(lambda tx: tx.run(c))
 
     def __init_protein_classes(self):
-        with self.driver.session() as s:
+        with self.driver.session() as session:
             for protein_class in [*list_LSU_Proteins, *  list_SSU_Proteins]:
-                s.execute_write(node__protein_class(protein_class))
+                session.execute_write(node__protein_class(protein_class))
 
     def __init_rna_classes(self):
-        with self.driver.session() as s:
+        with self.driver.session() as session:
             for rna_class in list_RNAClass:
-                s.execute_write(node__rna_class(rna_class))
+                session.execute_write(node__rna_class(rna_class))
