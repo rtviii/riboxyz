@@ -8,7 +8,7 @@ from api.ribctl.lib.types.types_poly_nonpoly_ligand import PolymericFactorClass
 from ribctl.lib.types.types_ribosome import RNA, AssemblyInstancesMap, NonpolymericLigand, PolymericFactor, Protein, RibosomeStructure
 from fuzzywuzzy import process, fuzz
 from api.ribctl.lib.types.types_poly_nonpoly_ligand import PolymericFactorClass, list_PolymericFactorClass, list_NonpolymericLigandClass
-from ribctl.lib.gql_querystrings import monolithic
+from ribctl.etl.gql_querystrings import monolithic
 import re
 
 p        = Path(__file__).parents[1]
