@@ -330,7 +330,6 @@ def __parse_assemblies(d:list[dict])->list[AssemblyInstancesMap]:
 def __classify_polymeric_factor(description:str)-> PolymericFactorClass|None:
     """@description: usually polymer['rcsb_polymer_entity']['pdbx_description'] in PDB"""
     ( match,score ) = process.extractOne(description, list_PolymericFactorClass, scorer=fuzz.partial_ratio)
-    # print(description,"| match: ", match, "score: ", score)
     return None if score != 100 else match
 
 def gql_monolith(rcsb_id): return monolithic.replace("$RCSB_ID", rcsb_id.upper())
@@ -396,7 +395,6 @@ def process_pdb_record(rcsb_id: str) -> RibosomeStructure:
     for poly in poly_entities: proteins.append(poly) if is_protein(poly) else rnas.append(poly)
     
     assert(len(proteins) +len(rnas) == len(poly_entities))
-    print("---->", len(rnas))
 
     reshaped_proteins          :list[Protein]         = []
     reshaped_rnas              :list[RNA]             = []
@@ -417,11 +415,6 @@ def process_pdb_record(rcsb_id: str) -> RibosomeStructure:
 
 
 
-    
-    # [reshaped_rnas.extend(__reshape_poly_to_rna(poly)) for poly in rnas]
-    # [reshaped_proteins.extend(__reshape_poly_to_protein(poly)) for poly in proteins]
-    
-
     reshaped_nonpoly:list[NonpolymericLigand] = [__reshape_to_nonpolymericligand(nonpoly) for nonpoly in nonpoly_entities] if nonpoly_entities != None and len(nonpoly_entities) > 0 else []
     organisms        = __infer_organisms_from_polymers(reshaped_proteins)  # type: ignore (only accessing commong fields)
     externalRefs     = __extract_external_refs(response['rcsb_external_references'])
@@ -440,8 +433,6 @@ def process_pdb_record(rcsb_id: str) -> RibosomeStructure:
     kwords_text = response['struct_keywords']['text'] if response['struct_keywords']          != None else None
     kwords      = response['struct_keywords']['pdbx_keywords'] if response['struct_keywords'] != None else None
 
-    #TODO: Polymeric Factors extraction
-    #TODO: Assembly Map
 
     reshaped = RibosomeStructure(
         rcsb_id                = response['rcsb_id'],
@@ -469,5 +460,9 @@ def process_pdb_record(rcsb_id: str) -> RibosomeStructure:
         assembly_map         = __parse_assemblies(response['assemblies'])
 
     )
+    assert(reshaped.rnas.__len__() if reshaped.rnas != None else 0  
+           + reshaped.proteins.__len__() 
+           + reshaped.polymeric_factors.__len__() if reshaped.polymeric_factors != None else 0 
+           == len(poly_entities))
 
     return reshaped
