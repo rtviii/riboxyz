@@ -404,7 +404,7 @@ def process_pdb_record(rcsb_id: str) -> RibosomeStructure:
 
     for ( i,poly_prot ) in enumerate(proteins):
         if __classify_polymeric_factor(poly_prot['rcsb_polymer_entity']['pdbx_description']) != None:
-            reshaped_polymeric_factors.extend(__reshape_to_polymeric_factor(proteins.pop(i)))
+            reshaped_polymeric_factors.extend(__reshape_to_polymeric_factor(poly_prot))
         else:
             reshaped_proteins.extend(__reshape_poly_to_protein(poly_prot))
             
