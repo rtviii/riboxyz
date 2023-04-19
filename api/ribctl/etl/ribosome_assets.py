@@ -1,14 +1,14 @@
+import json
 from logs.loggers import updates_logger
 from ribctl.lib.mod_extract_bsites import struct_ligand_ids, struct_liglike_ids, save_ligandlike_polymer, save_ligandlike_polymer
 from ribctl.lib.mod_split_rename import split_rename
-from struct_rcsb_api import current_rcsb_structs, process_pdb_record
+from ribctl.etl.struct_rcsb_api import current_rcsb_structs, process_pdb_record
 from ribctl.lib.mod_render_thumbnail import render_thumbnail
 from ribctl.lib.utils import download_unpack_place, open_structure
-from ribctl.lib.types.types_ribosome import RibosomeStructure
+from ribctl.lib.types.types_ribosome import RCSB_ID, RibosomeStructure
 from pydantic import parse_obj_as
 import os
 from concurrent.futures import ALL_COMPLETED, Future, ThreadPoolExecutor, wait
-json
 
 
 RIBETL_DATA = str(os.environ.get("RIBETL_DATA"))
@@ -151,13 +151,17 @@ class RibosomeAssets():
     #     self._verify_ligads_and_ligandlike_polys(overwrite)
 
 
-def sync_all_profiles(targets:list[str] ,workers: int=5):
+def sync_all_profiles(targets:list[str], workers: int=5, get_all:bool=False):
     """Get all ribosome profiles from RCSB via a threadpool
     
     """
 
     logger = updates_logger
-    unsynced = sorted(current_rcsb_structs())
+    if get_all:
+        unsynced = sorted(current_rcsb_structs())
+    else:
+        unsynced = targets
+
     futures: list[Future] = []
     logger.info("Begun downloading ribosome profiles via RCSB")
 
@@ -166,20 +170,20 @@ def sync_all_profiles(targets:list[str] ,workers: int=5):
             if not None == f.exception():
                 logger.error(rcsb_id + ":" + f.exception().__str__())
             else:
-                logger.debug(rcsb_id + ":" + f.result().__str__())
+                logger.info(rcsb_id + ": saved profile successfully.")
+
         return _
 
     with ThreadPoolExecutor(max_workers=workers) as executor:
-        for rcsb_id in unsynced:
-
-            def process_pdb_record_single():
+        def single_struct_process(rcsb_id: str):
                 struct = process_pdb_record(rcsb_id.upper())
                 RibosomeStructure.parse_obj(struct)
                 assets = RibosomeAssets(rcsb_id)
                 assets.save_json_profile(assets._json_profile_filepath(), struct.dict())
-                assets._verify_json_profile(True)
 
-            fut = executor.submit(process_pdb_record_single)
+        for rcsb_id in unsynced:
+
+            fut = executor.submit(single_struct_process, rcsb_id.upper())
             fut.add_done_callback(log_commit_result(rcsb_id))
             futures.append(fut)
 
