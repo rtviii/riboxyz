@@ -16,7 +16,7 @@ from concurrent.futures import ALL_COMPLETED, Future, ThreadPoolExecutor, wait
 RIBETL_DATA = str(os.environ.get("RIBETL_DATA"))
 
 
-class Assetlist(BaseModel)   : 
+class Assetlist(BaseModel): 
       profile                : Optional[bool]
       structure              : Optional[bool]
       structure_modified     : Optional[bool]
@@ -148,7 +148,6 @@ class RibosomeAssets():
                 if not os.path.exists(poly_factor_path(poly.auth_asym_id)):
                     all_verified_flag = False
                     if overwrite:
-                        poly.nomenclature
                         bsite = bsite_polymeric_factor(poly.auth_asym_id, self.biopython_structure())
                         bsite.save(bsite.path_poly_factor(self.rcsb_id, poly.nomenclature[0],poly.auth_asym_id))
 
@@ -164,8 +163,9 @@ class RibosomeAssets():
     #     self._verify_ligads_and_ligandlike_polys(overwrite)
 
 
-async def obtain_assets(rcsb_id: str,assetlist:Assetlist ,overwrite: bool = False):
+def obtain_assets(rcsb_id: str,assetlist:Assetlist ,overwrite: bool = False):
     """Obtain all assets for a given RCSB ID"""
+
     assets = RibosomeAssets(rcsb_id)
     assets._verify_dir_exists()
 
@@ -176,15 +176,12 @@ async def obtain_assets(rcsb_id: str,assetlist:Assetlist ,overwrite: bool = Fals
         await assets._verify_cif(overwrite)
 
     if assetlist.factors_and_ligands:
-        print("ligands and polys")
         await assets._verify_ligads_and_ligandlike_polys(overwrite)
 
     if assetlist.chains_and_modified_cif:
         await assets._verify_cif_modified_and_chains(overwrite)
 
-
-
-def sync_all_profiles(targets:list[str], workers: int=5, get_all:bool=False, replace=False):
+async def sync_all_profiles(targets:list[str], assetlist:Assetlist, workers: int=5, get_all:bool=False, replace=False):
     """Get all ribosome profiles from RCSB via a threadpool"""
     logger = updates_logger
     if get_all:
@@ -201,23 +198,15 @@ def sync_all_profiles(targets:list[str], workers: int=5, get_all:bool=False, rep
                 logger.error(rcsb_id + ":" + f.exception().__str__())
             else:
                 logger.info(rcsb_id + ": saved profile successfully.")
-
         return _
 
     with ThreadPoolExecutor(max_workers=workers) as executor:
 
-        def single_struct_process(rcsb_id: str):
-                struct = process_pdb_record(rcsb_id.upper())
-                RibosomeStructure.parse_obj(struct)
-                assets = RibosomeAssets(rcsb_id)
-                if os.path.exists(assets._json_profile_filepath()) and not replace:
-                    return
-                else:
-                    assets.save_json_profile(assets._json_profile_filepath(), struct.dict())
-
-
         for rcsb_id in unsynced:
 
+            await obtain_assets(rcsb_id,assetlist,replace)
+            
+            fut = asyncio.get_event_loop().run_in_executor(executor, obtain_assets, rcsb_id, assetlist, replace)
             fut = executor.submit(single_struct_process, rcsb_id.upper())
             fut.add_done_callback(log_commit_result(rcsb_id))
             futures.append(fut)

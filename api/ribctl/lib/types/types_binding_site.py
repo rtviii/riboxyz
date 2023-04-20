@@ -29,8 +29,8 @@ AMINO_ACIDS = {
     'SEC': 0,
     'PYL': 0
 }
-NUCLEOTIDES = ['A', 'T', 'C', 'G', 'U']
 
+NUCLEOTIDES = ['A', 'T', 'C', 'G', 'U']
 
 class ResidueSummary(BaseModel):
 
@@ -92,7 +92,6 @@ class BindingSite(BaseModel):
 
     def save(self, filename: str):
         with open(filename, 'w') as outfile:
-            print("SAving to ", filename)
             json.dump(json.loads(self.json()), outfile, indent=4)
 
     def __getattr__(self, attr):
@@ -103,7 +102,6 @@ class BindingSite(BaseModel):
 
     def dict(self,):
         return super().dict()['__root__']
-
 
 class PredictedResiduesPolymer(BaseModel):
 
@@ -126,7 +124,6 @@ class PredictedResiduesPolymer(BaseModel):
     target: PredictionTarget
     alignment: PredictionAlignments
 
-
 class LigandPrediction(BaseModel):
     __root__: typing.Dict[PolymerClass, PredictedResiduesPolymer]
 
@@ -138,7 +135,6 @@ class LigandPrediction(BaseModel):
 
     def dict(self,):
         return super().dict()['__root__']
-
 
 # TODO: A PL feature that lets you transform objects with different schemas into one another up to the typing of the fields.
 # So, optimal transport for types.
