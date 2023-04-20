@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Optional
 import typing
 from typing import NewType
 from pydantic import BaseModel
@@ -14,7 +14,7 @@ class Polymer(BaseModel):
     asym_ids: list[str]
     auth_asym_id: str
 
-    parent_rcsb_id   : RCSB_ID
+    parent_rcsb_id   : str
 
     src_organism_names : list[str]
     host_organism_names: list[str]
@@ -104,13 +104,13 @@ class AssemblyInstancesMap(BaseModel):
     }
   }
     """
-    rcsb_id                    : RCSB_ID # 5AFI-1
-    nonpolymer_entity_instances: list[NonpolymerEntityInstance]
+    rcsb_id                    : str # 5AFI-1
+    nonpolymer_entity_instances: Optional[list[NonpolymerEntityInstance]]
     polymer_entity_instances   : list[PolymerEntityInstance]
 
 class RibosomeStructure(BaseModel):
 
-    rcsb_id   : RCSB_ID
+    rcsb_id   : str
     expMethod : str
     resolution: float
 
