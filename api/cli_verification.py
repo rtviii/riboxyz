@@ -25,7 +25,9 @@ if args.obtain:
     loop.run_until_complete(
         obtain_assets(
             RCSB_ID, 
-            Assetlist(profile=True, structure=True, structure_modified=True, chains_and_modified_cif=True, factors_and_ligands=True, png_thumbnail=True), True)
+            Assetlist(profile=True, structure=True, structure_modified=True, chains_and_modified_cif=True, factors_and_ligands=True, png_thumbnail=True),
+            True
+            )
         )
     loop.close()
     # print(process_pdb_record('8g6x').dict())

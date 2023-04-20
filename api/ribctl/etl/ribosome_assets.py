@@ -176,6 +176,7 @@ async def obtain_assets(rcsb_id: str,assetlist:Assetlist ,overwrite: bool = Fals
         await assets._verify_cif(overwrite)
 
     if assetlist.factors_and_ligands:
+        print("ligands and polys")
         await assets._verify_ligads_and_ligandlike_polys(overwrite)
 
     if assetlist.chains_and_modified_cif:
