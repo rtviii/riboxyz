@@ -116,26 +116,6 @@ def bsite_polymeric_factor(auth_asym_id:str, structure:Structure )->BindingSite:
     binding_site_polymer: BindingSite = get_polymer_nbrs(residues, structure )
     return binding_site_polymer
 
-def bsite_path_nonpoly_ligand( rcsb_id: str, class_:str):
-    return os.path.join(
-        RIBETL_DATA,
-        rcsb_id.upper(),
-        "ligand_",
-        class_.replace(" ","_").lower(),
-        ".json"
-    )
-
-def bsite_path_poly_factor(rcsb_id: str, class_:str, auth_asym_id:str):
-    return os.path.join(
-        RIBETL_DATA,
-        rcsb_id.upper(),
-        "polymer_",
-        class_.replace(" ","_").lower(),
-        auth_asym_id,
-        ".json"
-    )
-
-
 def bsite_nonpolymeric_ligand(chemicalId:str, structure:Structure )->BindingSite:
 
     chemicalId = chemicalId.upper()

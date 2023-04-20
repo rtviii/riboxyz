@@ -132,19 +132,17 @@ class RibosomeAssets():
         def ligand_path(chem_id): return os.path.join(self._dir_path(), f"LIGAND_{chem_id.upper()}.json")
         def poly_factor_path(auth_asym_id): return os.path.join(self._dir_path(), f"POLYMER_{auth_asym_id.upper()}.json")
 
-        ligands             = struct_ligand_ids(self.rcsb_id, self.json_profile())
+        ligands           = struct_ligand_ids(self.rcsb_id, self.json_profile())
         polymeric_factors = struct_polymeric_factor_ids(self.json_profile())
-
         all_verified_flag = True
 
-        for ligand in ligands:
-            print("processing ligand", ligand)
-            if not os.path.exists(ligand_path(ligand)):
+        for ligand_chemid in ligands:
+            if not os.path.exists(ligand_path(ligand_chemid)):
                 all_verified_flag = False
                 if overwrite:
-                    bsite = bsite_nonpolymeric_ligand(ligand, self.biopython_structure())
+                    bsite = bsite_nonpolymeric_ligand(ligand_chemid, self.biopython_structure())
+                    bsite.save(bsite.bsite_path_nonpoly_ligand(self.rcsb_id, ligand_chemid))
                     
-
         if polymeric_factors is not None:
             for poly in polymeric_factors:
                 if not os.path.exists(poly_factor_path(poly.auth_asym_id)):
@@ -152,12 +150,7 @@ class RibosomeAssets():
                     if overwrite:
                         poly.nomenclature
                         bsite = bsite_polymeric_factor(poly.auth_asym_id, self.biopython_structure())
-                        
-
-
-
-
-
+                        bsite.save(bsite.bsite_path_poly_factor(self.rcsb_id, poly.nomenclature[0],poly.auth_asym_id))
 
         return all_verified_flag
 
