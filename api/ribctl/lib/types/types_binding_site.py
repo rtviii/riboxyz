@@ -1,4 +1,5 @@
 import json
+import os
 import typing
 from pydantic import BaseModel
 from Bio.PDB.Residue import Residue
@@ -68,12 +69,15 @@ class ResidueSummary(BaseModel):
 class BindingSiteChain(Polymer): 
       residues: list[ ResidueSummary ]
 
+
 class BindingSite(BaseModel):
     __root__ : typing.Dict[str,BindingSiteChain]
 
-    def bsite_path_nonpoly_ligand( self,rcsb_id: str, class_:str):
+    def bsite_path_nonpoly_ligand(self,rcsb_id: str, class_:str):
+
+        RIBETL_DATA  = os.environ.get('RIBETL_DATA')
         return os.path.join(
-            RIBETL_DATA,
+            str(RIBETL_DATA),
             rcsb_id.upper(),
             "ligand_",
             class_.replace(" ","_").lower(),
@@ -81,8 +85,9 @@ class BindingSite(BaseModel):
         )
 
     def bsite_path_poly_factor(self,rcsb_id: str, class_:str, auth_asym_id:str):
+        RIBETL_DATA  = os.environ.get('RIBETL_DATA')
         return os.path.join(
-            RIBETL_DATA,
+            str(RIBETL_DATA),
             rcsb_id.upper(),
             "polymer_",
             class_.replace(" ","_").lower(),
@@ -134,4 +139,9 @@ class LigandPrediction(BaseModel):
 
     def dict(self,):
         return super().dict()['__root__']
+
+
+# TODO: A PL feature that lets you transform objects with different schemas into one another up to the typing of the fields.
+# So, optimal transport for types.
+
 
