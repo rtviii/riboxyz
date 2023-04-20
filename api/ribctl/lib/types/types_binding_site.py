@@ -28,74 +28,71 @@ AMINO_ACIDS = {
     'VAL': 0,
     'SEC': 0,
     'PYL': 0
-    }
+}
 NUCLEOTIDES = ['A', 'T', 'C', 'G', 'U']
+
 
 class ResidueSummary(BaseModel):
 
-    full_id            : tuple[str,int,str,tuple[str,int,str]]
-    resname            : str
-    seqid              : int
+    full_id: tuple[str, int, str, tuple[str, int, str]]
+    resname: str
+    seqid: int
     parent_auth_asym_id: str
 
     def __hash__(self):
         return hash(self.get_resname() + str(self.get_seqid()) + self.get_parent_auth_asym_id())
 
-    def get_resname(self): 
+    def get_resname(self):
         return self.resname
 
-    def get_seqid(self): 
+    def get_seqid(self):
         (structure_id, model_id, chain_id, _) = self.full_id
-        (hetero, seqid, insertion_code )      = _
+        (hetero, seqid, insertion_code) = _
         return seqid
 
-    def get_parent_auth_asym_id(self): 
+    def get_parent_auth_asym_id(self):
         (structure_id, model_id, chain_id, _) = self.full_id
         return chain_id
-        
+
     @staticmethod
     def from_biopython_residue(r: Residue):
 
         (structure_id, model_id, chain_id, _) = r.get_full_id()
-        (hetero, seqid, insertion_code )      = _
+        (hetero, seqid, insertion_code) = _
 
         return ResidueSummary(
-            seqid               = seqid,
-            resname             = r.get_resname(),
-            parent_auth_asym_id = chain_id,
-            full_id             = r.get_full_id()
+            seqid=seqid,
+            resname=r.get_resname(),
+            parent_auth_asym_id=chain_id,
+            full_id=r.get_full_id()
         )
 
-class BindingSiteChain(Polymer): 
-      residues: list[ ResidueSummary ]
+
+class BindingSiteChain(Polymer):
+    residues: list[ResidueSummary]
 
 
 class BindingSite(BaseModel):
-    __root__ : typing.Dict[str,BindingSiteChain]
+    __root__: typing.Dict[str, BindingSiteChain]
 
-    def bsite_path_nonpoly_ligand(self,rcsb_id: str, class_:str):
-
-        RIBETL_DATA  = os.environ.get('RIBETL_DATA')
+    def path_nonpoly_ligand(self, rcsb_id: str, class_: str):
+        RIBETL_DATA = os.environ.get('RIBETL_DATA')
         return os.path.join(
-            str(RIBETL_DATA),
-            rcsb_id.upper(),
-            "ligand_",
-            class_.replace(" ","_").lower(),
+            str(RIBETL_DATA) +
+            rcsb_id.upper()  +
+            "ligand_"+ 
+            class_.replace(" ", "_").lower()+ 
             ".json"
         )
 
-    def bsite_path_poly_factor(self,rcsb_id: str, class_:str, auth_asym_id:str):
-        RIBETL_DATA  = os.environ.get('RIBETL_DATA')
+    def path_poly_factor(self, rcsb_id: str, class_: str, auth_asym_id: str):
+        RIBETL_DATA = os.environ.get('RIBETL_DATA')
         return os.path.join(
             str(RIBETL_DATA),
-            rcsb_id.upper(),
-            "polymer_",
-            class_.replace(" ","_").lower(),
-            auth_asym_id,
-            ".json"
+            rcsb_id.upper() + "polymer_"+class_.replace(" ", "_").lower() + auth_asym_id+".json"
         )
 
-    def save(self, filename:str):
+    def save(self, filename: str):
         with open(filename, 'w') as outfile:
             json.dump(json.loads(self.json()), outfile, indent=4)
 
@@ -107,29 +104,32 @@ class BindingSite(BaseModel):
 
     def dict(self,):
         return super().dict()['__root__']
-    
+
+
 class PredictedResiduesPolymer(BaseModel):
 
-	class PredictionSource(BaseModel):
-		src: str
-		src_ids: list[int]
-		auth_asym_id: str
+    class PredictionSource(BaseModel):
+        src: str
+        src_ids: list[int]
+        auth_asym_id: str
 
-	class PredictionTarget(BaseModel):
-		tgt: str
-		tgt_ids: list[int]
-		auth_asym_id: str
-	class PredictionAlignments(BaseModel):
-		aln_ids: list[int]
-		src_aln: str
-		tgt_aln: str
+    class PredictionTarget(BaseModel):
+        tgt: str
+        tgt_ids: list[int]
+        auth_asym_id: str
 
-	source   : PredictionSource
-	target   : PredictionTarget
-	alignment: PredictionAlignments
+    class PredictionAlignments(BaseModel):
+        aln_ids: list[int]
+        src_aln: str
+        tgt_aln: str
+
+    source: PredictionSource
+    target: PredictionTarget
+    alignment: PredictionAlignments
+
 
 class LigandPrediction(BaseModel):
-    __root__ : typing.Dict[PolymerClass, PredictedResiduesPolymer]
+    __root__: typing.Dict[PolymerClass, PredictedResiduesPolymer]
 
     def __getattr__(self, attr):
         return super().dict()['__root__'].__getattribute__(attr)
@@ -143,5 +143,3 @@ class LigandPrediction(BaseModel):
 
 # TODO: A PL feature that lets you transform objects with different schemas into one another up to the typing of the fields.
 # So, optimal transport for types.
-
-

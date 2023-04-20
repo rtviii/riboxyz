@@ -141,7 +141,7 @@ class RibosomeAssets():
                 all_verified_flag = False
                 if overwrite:
                     bsite = bsite_nonpolymeric_ligand(ligand_chemid, self.biopython_structure())
-                    bsite.save(bsite.bsite_path_nonpoly_ligand(self.rcsb_id, ligand_chemid))
+                    bsite.save(bsite.path_nonpoly_ligand(self.rcsb_id, ligand_chemid))
                     
         if polymeric_factors is not None:
             for poly in polymeric_factors:
@@ -150,7 +150,7 @@ class RibosomeAssets():
                     if overwrite:
                         poly.nomenclature
                         bsite = bsite_polymeric_factor(poly.auth_asym_id, self.biopython_structure())
-                        bsite.save(bsite.bsite_path_poly_factor(self.rcsb_id, poly.nomenclature[0],poly.auth_asym_id))
+                        bsite.save(bsite.path_poly_factor(self.rcsb_id, poly.nomenclature[0],poly.auth_asym_id))
 
         return all_verified_flag
 
@@ -170,24 +170,16 @@ async def obtain_assets(rcsb_id: str,assetlist:Assetlist ,overwrite: bool = Fals
     assets._verify_dir_exists()
 
     if assetlist.profile:
-        print("Obtaining profile...")
         await assets._verify_json_profile(overwrite)
 
     if assetlist.structure:
-        print("Obtaining structure...")
         await assets._verify_cif(overwrite)
 
     if assetlist.factors_and_ligands:
-        print("processing ligands")
         await assets._verify_ligads_and_ligandlike_polys(overwrite)
 
     if assetlist.chains_and_modified_cif:
-        print("chains and modified")
         await assets._verify_cif_modified_and_chains(overwrite)
-
-    # if png:
-    
-
 
 
 
