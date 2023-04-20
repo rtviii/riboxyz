@@ -2,7 +2,7 @@ import asyncio
 import json
 from typing import Optional
 from logs.loggers import updates_logger
-from ribctl.lib.mod_extract_bsites import struct_ligand_ids, struct_liglike_ids, save_ligandlike_polymer, save_ligandlike_polymer
+from ribctl.lib.mod_extract_bsites import bsite_nonpolymeric_ligand, struct_ligand_ids, struct_polymeric_factor_ids, bsite_polymeric_factor, bsite_polymeric_factor
 from ribctl.lib.mod_split_rename import split_rename
 from ribctl.etl.struct_rcsb_api import current_rcsb_structs, process_pdb_record
 from ribctl.lib.mod_render_thumbnail import render_thumbnail
@@ -16,13 +16,13 @@ from concurrent.futures import ALL_COMPLETED, Future, ThreadPoolExecutor, wait
 RIBETL_DATA = str(os.environ.get("RIBETL_DATA"))
 
 
-class Assetlist(BaseModel): 
-      profile             : Optional[bool]
-      structure           : Optional[bool]
-      structure_modified  : Optional[bool]
-      chains              : Optional[bool]
-      factors_and_ligands : Optional[bool]
-      png_thumbnail       : Optional[bool]
+class Assetlist(BaseModel)   : 
+      profile                : Optional[bool]
+      structure              : Optional[bool]
+      structure_modified     : Optional[bool]
+      chains_and_modified_cif: Optional[bool]
+      factors_and_ligands    : Optional[bool]
+      png_thumbnail          : Optional[bool]
 
 
 class RibosomeAssets():
@@ -89,12 +89,12 @@ class RibosomeAssets():
             else:
                 return False
 
-    async def _verify_cif_modified(self, overwrite: bool = False) -> bool:
+    async def _verify_cif_modified_and_chains(self, overwrite: bool = False) -> bool:
         if overwrite:
             split_rename(self.rcsb_id)
             return True
         else:
-            return os.path.exists(self._cif_modified_filepath())
+            return os.path.exists(self._cif_modified_filepath()) and os.path.isdir(self.chains_dir())
 
     async def _verify_json_profile(self, overwrite: bool = False) -> bool:
         if overwrite:
@@ -126,27 +126,40 @@ class RibosomeAssets():
     async def _verify_chains_dir(self):
         split_rename(self.rcsb_id)
 
+
     async def _verify_ligads_and_ligandlike_polys(self, overwrite: bool = False):
 
         def ligand_path(chem_id): return os.path.join(self._dir_path(), f"LIGAND_{chem_id.upper()}.json")
-        def liglike_poly_path(auth_asym_id): return os.path.join(self._dir_path(), f"POLYMER_{auth_asym_id.upper()}.json")
+        def poly_factor_path(auth_asym_id): return os.path.join(self._dir_path(), f"POLYMER_{auth_asym_id.upper()}.json")
 
         ligands             = struct_ligand_ids(self.rcsb_id, self.json_profile())
-        ligandlike_polymers = struct_liglike_ids(self.json_profile())
+        polymeric_factors = struct_polymeric_factor_ids(self.json_profile())
 
-        _flag = True
+        all_verified_flag = True
 
         for ligand in ligands:
-            if not os.path.exists(ligand_path(ligand[0])):
-                _flag = False
-                save_ligandlike_polymer( ligand[0], self.biopython_structure())
+            print("processing ligand", ligand)
+            if not os.path.exists(ligand_path(ligand)):
+                all_verified_flag = False
+                if overwrite:
+                    bsite = bsite_nonpolymeric_ligand(ligand, self.biopython_structure())
+                    
 
-        for ligandlike_poly in ligandlike_polymers:
-            if not os.path.exists(liglike_poly_path(ligandlike_poly.auth_asym_id)):
-                _flag = False
-                save_ligandlike_polymer(self.rcsb_id, ligandlike_poly.auth_asym_id, self.biopython_structure(), overwrite)
+        if polymeric_factors is not None:
+            for poly in polymeric_factors:
+                if not os.path.exists(poly_factor_path(poly.auth_asym_id)):
+                    all_verified_flag = False
+                    if overwrite:
+                        poly.nomenclature
+                        bsite = bsite_polymeric_factor(poly.auth_asym_id, self.biopython_structure())
+                        
 
-        return _flag
+
+
+
+
+
+        return all_verified_flag
 
     # def _obtain_assets(self, overwrite: bool = False):
     #     self._verify_dir_exists()
@@ -163,25 +176,24 @@ async def obtain_assets(rcsb_id: str,assetlist:Assetlist ,overwrite: bool = Fals
     assets = RibosomeAssets(rcsb_id)
     assets._verify_dir_exists()
 
-
-
-    import concurrent.futures 
-
     if assetlist.profile:
+        print("Obtaining profile...")
         await assets._verify_json_profile(overwrite)
 
     if assetlist.structure:
+        print("Obtaining structure...")
         await assets._verify_cif(overwrite)
-        
 
     if assetlist.factors_and_ligands:
+        print("processing ligands")
         await assets._verify_ligads_and_ligandlike_polys(overwrite)
 
-    if assetlist.chains:
-        await assets._verify_chains_dir()
-        if assetlist.structure_modified:
-            await assets._verify_cif_modified(overwrite)
+    if assetlist.chains_and_modified_cif:
+        print("chains and modified")
+        await assets._verify_cif_modified_and_chains(overwrite)
 
+    # if png:
+    
 
 
 

@@ -20,8 +20,9 @@ args = arg.parse_args()
 
 if args.obtain:
     loop = asyncio.get_event_loop()
+    RCSB_ID = '3J7Z'
     
-    loop.run_until_complete(obtain_assets('8g6x', Assetlist(profile=True, structure=True, structure_modified=True, chains=True, factors_and_ligands=True, png_thumbnail=True), True))
+    loop.run_until_complete(obtain_assets(RCSB_ID, Assetlist(profile=True, structure=True, structure_modified=True, chains_and_modified_cif=True, factors_and_ligands=True, png_thumbnail=True), True))
     loop.close()
     # print(process_pdb_record('8g6x').dict())
     # sync_all_profiles([], workers=10, get_all=True)
