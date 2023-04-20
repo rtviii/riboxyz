@@ -114,8 +114,6 @@ def __reshape_to_nonpolymericligand(nonpoly)->NonpolymericLigand:
         pdbx_description    = nonpoly['rcsb_nonpolymer_entity']['pdbx_description'],
         formula_weight      = nonpoly['rcsb_nonpolymer_entity']['formula_weight'],
         number_of_instances = nonpoly['rcsb_nonpolymer_entity']['pdbx_number_of_molecules'],
-        #TODO
-        nomenclature        = ...
     )
 
 def __is_ligand_like(polymer, nomenclature: list[str]):
@@ -433,6 +431,7 @@ def process_pdb_record(rcsb_id: str) -> RibosomeStructure:
     kwords_text = response['struct_keywords']['text'] if response['struct_keywords']          != None else None
     kwords      = response['struct_keywords']['pdbx_keywords'] if response['struct_keywords'] != None else None
 
+    assembly_maps = __parse_assemblies(response['assemblies'])
 
     reshaped = RibosomeStructure(
         rcsb_id                = response['rcsb_id'],
@@ -457,7 +456,7 @@ def process_pdb_record(rcsb_id: str) -> RibosomeStructure:
         rnas                 = reshaped_rnas,
         polymeric_factors    = reshaped_polymeric_factors,
         nonpolymeric_ligands = reshaped_nonpoly,
-        assembly_map         = __parse_assemblies(response['assemblies'])
+        assembly_map         = assembly_maps
 
     )
     assert(reshaped.rnas.__len__() if reshaped.rnas != None else 0  
