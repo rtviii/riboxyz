@@ -3,10 +3,8 @@
 # import argparse
 import argparse
 import asyncio
-from pprint import pprint
 from api.ribctl.etl.ribosome_assets import Assetlist, RibosomeAssets, obtain_assets, sync_all_profiles , RCSB_ID
-from api.ribctl.lib.types.types_ribosome import RNA, AssemblyInstancesMap, PolymericFactor, Protein, RibosomeStructure
-from fuzzywuzzy import process, fuzz
+from api.ribctl.lib.types.types_ribosome import RibosomeStructure
 from logs.loggers import updates_logger
 from ribctl.etl.struct_rcsb_api import gql_monolith,query_rcsb_api, process_pdb_record
 
@@ -16,31 +14,35 @@ arg.add_argument('-dbname', '--database_name', type=str)
 arg.add_argument('-s', '--structure', type=str)
 arg.add_argument('-o', '--obtain', type=str)
 arg.add_argument('-ttt', '--test', action='store_true')
+
 args = arg.parse_args()
 
 if args.obtain:
-    loop    = asyncio.get_event_loop()
+
     RCSB_ID = '3J7Z'
 
+    loop    = asyncio.get_event_loop()
     loop.run_until_complete(
         obtain_assets(
-            RCSB_ID, 
-            Assetlist(profile=True, structure=True, structure_modified=True, chains_and_modified_cif=True, factors_and_ligands=True, png_thumbnail=True),
-            True
+                RCSB_ID, 
+                Assetlist(profile=True, structure=True, structure_modified=True, chains_and_modified_cif=True, factors_and_ligands=True, png_thumbnail=True),
+                True
             )
         )
     loop.close()
-    # print(process_pdb_record('8g6x').dict())
-    # sync_all_profiles([], workers=10, get_all=True)
 
 if args.structure:
+
     RCSB_ID = args.structure.upper()
+
     try:
+
         struct = process_pdb_record(RCSB_ID)
         RibosomeStructure.parse_obj(struct)
         assets = RibosomeAssets(RCSB_ID)
         assets.save_json_profile(assets._json_profile_filepath(), struct.dict())
         updates_logger.info(f"Saved {RCSB_ID}.json to {assets._json_profile_filepath()}")
+
     except Exception as e:
         updates_logger.exception(e)
 
