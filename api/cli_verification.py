@@ -19,17 +19,22 @@ args = arg.parse_args()
 
 if args.obtain:
 
-    RCSB_ID = '3J7Z'
+    rcsblist = ['3j7z', '5afi']
+    sync_all_profiles(rcsblist,
+                Assetlist(profile=True, structure=True,  factors_and_ligands=True),
+                replace=True
+                      )
+    # RCSB_ID = '3J7Z'
 
-    loop    = asyncio.get_event_loop()
-    loop.run_until_complete(
-        obtain_assets(
-                RCSB_ID, 
-                Assetlist(profile=True, structure=True, structure_modified=True, chains_and_modified_cif=True, factors_and_ligands=True, png_thumbnail=True),
-                True
-            )
-        )
-    loop.close()
+    # loop    = asyncio.get_event_loop()
+    # loop.run_until_complete(
+    #     obtain_assets(
+    #             RCSB_ID, 
+    #             Assetlist(profile=True, structure=True, structure_modified=True, chains_and_modified_cif=True, factors_and_ligands=True, png_thumbnail=True),
+    #             True
+    #         )
+    #     )
+    # loop.close()
 
 if args.structure:
 

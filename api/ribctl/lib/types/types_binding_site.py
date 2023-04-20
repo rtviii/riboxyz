@@ -93,6 +93,7 @@ class BindingSite(BaseModel):
     def save(self, filename: str):
         with open(filename, 'w') as outfile:
             json.dump(json.loads(self.json()), outfile, indent=4)
+            print("Saved: ",filename)
 
     def __getattr__(self, attr):
         return super().dict()['__root__'].__getattribute__(attr)
