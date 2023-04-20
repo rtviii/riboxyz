@@ -23,12 +23,13 @@ def __make_nom_dict(profile):
 
 def __inject_dict(pdbid: str):
 
-    cifpath = os.path.join(RIBETL_DATA, pdbid, pdbid+".cif")
+    cifpath     = os.path.join(RIBETL_DATA, pdbid, pdbid+".cif")
     cifmodified = os.path.join(RIBETL_DATA, pdbid, pdbid+"_modified.cif")
+
     if os.path.exists(cifmodified):
-        
         print("Skipping modified struct. Exists: \t", cifmodified)
         return
+
     structprofile = open_structure(pdbid, 'json')
 
     doc = gemmi.cif.read_file(cifpath)

@@ -1,7 +1,7 @@
 import os
 from ete3 import NCBITaxa, NodeStyle, TreeStyle
 
-from api.ribctl.lib.types.ribosome_assets import RibosomeAssets
+from api.ribctl.etl.ribosome_assets import RibosomeAssets
 
 # Create an instance of the NCBITaxa class
 ncbi = NCBITaxa()
