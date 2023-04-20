@@ -71,6 +71,24 @@ class BindingSiteChain(Polymer):
 class BindingSite(BaseModel):
     __root__ : typing.Dict[str,BindingSiteChain]
 
+    def bsite_path_nonpoly_ligand( self,rcsb_id: str, class_:str):
+        return os.path.join(
+            RIBETL_DATA,
+            rcsb_id.upper(),
+            "ligand_",
+            class_.replace(" ","_").lower(),
+            ".json"
+        )
+
+    def bsite_path_poly_factor(self,rcsb_id: str, class_:str, auth_asym_id:str):
+        return os.path.join(
+            RIBETL_DATA,
+            rcsb_id.upper(),
+            "polymer_",
+            class_.replace(" ","_").lower(),
+            auth_asym_id,
+            ".json"
+        )
 
     def save(self, filename:str):
         with open(filename, 'w') as outfile:

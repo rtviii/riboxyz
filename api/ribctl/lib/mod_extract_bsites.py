@@ -98,7 +98,7 @@ def get_ligand_residue_ids(ligchemid: str, struct: Structure) -> list[Residue]:
     ligandResidues: list[Residue] = list(filter(lambda x: x.get_resname() == ligchemid, list(struct.get_residues())))
     return ligandResidues
 
-def struct_liglike_ids(struct_profile:RibosomeStructure) -> list[PolymericFactor]|None:
+def struct_polymeric_factor_ids(struct_profile:RibosomeStructure) -> list[PolymericFactor]|None:
     """Given an rcsb id, open the profile for the corresponding structure
     and return references to all polymers marked ligand-like"""
     # polymers =  itertools.chain(struct_profile.rnas if struct_profile.rnas != None else [] , struct_profile.proteins)
@@ -109,15 +109,35 @@ def struct_ligand_ids(pdbid: str, profile:RibosomeStructure) -> list[str]:
     pdbid = pdbid.upper()
     if not profile.nonpolymeric_ligands: return []
     _ = [* map(lambda x: (x.chemicalId, x.chemicalName),profile.nonpolymeric_ligands)] 
-    return [ ] if len(_) < 1 else [ chemid for (chemid, chemname) in filter(lambda k: "ion" not in k[1].lower(), _)] 
+    return [] if len(_) < 1 else [ chemid for (chemid, chemname) in filter(lambda k: "ion" not in k[1].lower(), _)] 
 
-def save_ligandlike_polymer(auth_asym_id:str, structure:Structure )->BindingSite:
+def bsite_polymeric_factor(auth_asym_id:str, structure:Structure )->BindingSite:
     residues: list[Residue] = get_polymer_residues(auth_asym_id, structure)
     binding_site_polymer: BindingSite = get_polymer_nbrs(residues, structure )
-
     return binding_site_polymer
 
-def save_ligand(chemicalId:str, structure:Structure )->BindingSite:
+def bsite_path_nonpoly_ligand( rcsb_id: str, class_:str):
+    return os.path.join(
+        RIBETL_DATA,
+        rcsb_id.upper(),
+        "ligand_",
+        class_.replace(" ","_").lower(),
+        ".json"
+    )
+
+def bsite_path_poly_factor(rcsb_id: str, class_:str, auth_asym_id:str):
+    return os.path.join(
+        RIBETL_DATA,
+        rcsb_id.upper(),
+        "polymer_",
+        class_.replace(" ","_").lower(),
+        auth_asym_id,
+        ".json"
+    )
+
+
+def bsite_nonpolymeric_ligand(chemicalId:str, structure:Structure )->BindingSite:
+
     chemicalId = chemicalId.upper()
     residues: list[Residue] = get_ligand_residue_ids(chemicalId, structure)
     binding_site_ligand: BindingSite   = get_ligand_nbrs(residues, structure)
@@ -136,13 +156,13 @@ if __name__ == "__main__":
     _structure_cif_handle :Structure = utils.open_structure(PDBID,'cif')
     struct_profile_handle       = RibosomeStructure.parse_obj(utils.open_structure(PDBID,'json'))
 
-    liglike_polys = struct_liglike_ids(struct_profile_handle)
+    liglike_polys = struct_polymeric_factor_ids(struct_profile_handle)
     ligands       = struct_ligand_ids(PDBID, struct_profile_handle)
 
 
     if liglike_polys != None:
         for polyref in liglike_polys:
-            save_ligandlike_polymer(polyref.auth_asym_id, _structure_cif_handle)
+            bsite_polymeric_factor(polyref.auth_asym_id, _structure_cif_handle)
 
     for l in ligands:
-        save_ligand( l[0], _structure_cif_handle)
+        bsite_nonpolymeric_ligand( l[0], _structure_cif_handle)
