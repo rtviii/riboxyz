@@ -10,7 +10,7 @@ import itertools
 
 from api.ribctl.lib.types.types_binding_site import LigandPrediction, PredictedResiduesPolymer
 from ribctl.lib.types.types_ribosome import PolymerClass, RibosomeStructure
-from ribctl.lib.mod_extract_bsites import  BindingSite, struct_ligand_ids, struct_liglike_ids
+from ribctl.lib.mod_extract_bsites import  BindingSite, struct_ligand_ids, struct_polymeric_factor_ids
 from ribctl.lib.utils import open_structure
 import numpy as np
 
@@ -105,7 +105,7 @@ def struct_bsites(rcsb_id:str):
 	"""Returns a list of binding sites from a structure"""
 	rcsb_id =rcsb_id.upper()
 	struct_profile_handle = RibosomeStructure.parse_obj(open_structure(rcsb_id, 'json'))
-	liglike_polys = struct_liglike_ids(struct_profile_handle)
+	liglike_polys = struct_polymeric_factor_ids(struct_profile_handle)
 	ligands       = struct_ligand_ids(rcsb_id, struct_profile_handle)
 	return ligands, liglike_polys
 

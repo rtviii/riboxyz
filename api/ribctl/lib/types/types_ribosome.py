@@ -1,11 +1,14 @@
-from typing import Any
+from typing import Any, Optional
 import typing
+from typing import NewType
 from pydantic import BaseModel
 from .types_poly_nonpoly_ligand import LSU_Proteins, NonpolymericLigandClass, PolymericFactorClass, RNAClass, SSU_Proteins
 
+RCSB_ID = NewType('RCSB_ID', str)
+
+
 ProteinClass = typing.Union[LSU_Proteins , SSU_Proteins]
 PolymerClass = typing.Union[ProteinClass, RNAClass]
-
 
 class Polymer(BaseModel):
     asym_ids: list[str]
@@ -102,7 +105,7 @@ class AssemblyInstancesMap(BaseModel):
   }
     """
     rcsb_id                    : str # 5AFI-1
-    nonpolymer_entity_instances: list[NonpolymerEntityInstance]
+    nonpolymer_entity_instances: Optional[list[NonpolymerEntityInstance]]
     polymer_entity_instances   : list[PolymerEntityInstance]
 
 class RibosomeStructure(BaseModel):

@@ -2,11 +2,10 @@
 # export DJANGO_SETTINGS_MODULE=api.rbxz_bend                                                                                         [cli]
 # import argparse
 import argparse
-from api.ribctl.lib.types.ribosome_assets import RibosomeAssets
-from api.ribctl.lib.types.types_ribosome import RNA, AssemblyInstancesMap, PolymericFactor, Protein, RibosomeStructure
-from fuzzywuzzy import process, fuzz
+from api.ribctl.etl.ribosome_assets import Assetlist, RibosomeAssets, obtain_assets, obtain_assets_processpool, obtain_assets_threadpool 
+from api.ribctl.lib.types.types_ribosome import RibosomeStructure
 from logs.loggers import updates_logger
-from ribctl.lib.struct_rcsb_api import gql_monolith,query_rcsb_api, process_pdb_record
+from ribctl.etl.struct_rcsb_api import gql_monolith,query_rcsb_api, process_pdb_record
 
 arg = argparse.ArgumentParser(description='RibCtl - A tool to control the ribosome database')
 
@@ -14,18 +13,32 @@ arg.add_argument('-dbname', '--database_name', type=str)
 arg.add_argument('-s', '--structure', type=str)
 arg.add_argument('-o', '--obtain', type=str)
 arg.add_argument('-ttt', '--test', action='store_true')
+
 args = arg.parse_args()
 
+if args.obtain:
 
+    rcsb_list = ['3J7Z', '5afi','4ug0']
+    obtain_assets_threadpool(
+                        rcsb_list,
+                        Assetlist(profile=True,  factors_and_ligands=True),
+                        workers=16,
+                        get_all=True,
+                        replace=True
+                      )
 
 if args.structure:
-    RCSB_ID = args.structure.upper()
+
+    str = args.structure.upper()
+
     try:
-        struct = process_pdb_record(RCSB_ID)
+
+        struct = process_pdb_record(str)
         RibosomeStructure.parse_obj(struct)
-        assets = RibosomeAssets(RCSB_ID)
+        assets = RibosomeAssets(str)
         assets.save_json_profile(assets._json_profile_filepath(), struct.dict())
-        updates_logger.info(f"Saved {RCSB_ID}.json to {assets._json_profile_filepath()}")
+        updates_logger.info(f"Saved {str}.json to {assets._json_profile_filepath()}")
+
     except Exception as e:
         updates_logger.exception(e)
 
