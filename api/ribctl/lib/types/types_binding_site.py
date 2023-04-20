@@ -78,22 +78,21 @@ class BindingSite(BaseModel):
     def path_nonpoly_ligand(self, rcsb_id: str, class_: str):
         RIBETL_DATA = os.environ.get('RIBETL_DATA')
         return os.path.join(
-            str(RIBETL_DATA) +
-            rcsb_id.upper()  +
-            "ligand_"+ 
-            class_.replace(" ", "_").lower()+ 
-            ".json"
+            str(RIBETL_DATA), rcsb_id.upper() , "ligand_" +
+            class_.replace(" ", "_").lower() + ".json"
         )
 
     def path_poly_factor(self, rcsb_id: str, class_: str, auth_asym_id: str):
         RIBETL_DATA = os.environ.get('RIBETL_DATA')
         return os.path.join(
             str(RIBETL_DATA),
-            rcsb_id.upper() + "polymer_"+class_.replace(" ", "_").lower() + auth_asym_id+".json"
+            rcsb_id.upper(), "polymer_"+auth_asym_id +  "_" + 
+            class_.replace(" ", "_").lower() + ".json"
         )
 
     def save(self, filename: str):
         with open(filename, 'w') as outfile:
+            print("SAving to ", filename)
             json.dump(json.loads(self.json()), outfile, indent=4)
 
     def __getattr__(self, attr):
