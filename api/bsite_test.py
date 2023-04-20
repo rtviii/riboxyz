@@ -4,7 +4,7 @@ from api.ribctl.lib.types.types_binding_site import BindingSite, LigandPredictio
 from ribctl.lib.mod_transpose_bsites import init_transpose_ligand, open_bsite
 from ribctl.lib.types.types_ribosome import RibosomeStructure
 from ribctl.lib import RIBETL_DATA, utils
-from ribctl.lib.mod_extract_bsites import save_ligand, save_ligandlike_polymer, save_ligandlike_polymer, struct_ligand_ids, struct_liglike_ids
+from ribctl.lib.mod_extract_bsites import bsite_nonpolymeric_ligand, bsite_polymeric_factor, bsite_polymeric_factor, struct_ligand_ids, struct_polymeric_factor_ids
 from ribctl.lib.mod_superimpose import pymol_super, ranged_align_by_polyclass
 
 PDBID1     = "7K00"
@@ -16,11 +16,11 @@ def extract_bsites (rcsb_id):
     _structure_cif_handle = utils.open_structure(rcsb_id,'cif')
     struct_profile_handle = RibosomeStructure.parse_obj(utils.open_structure(rcsb_id,'json')  )
 
-    liglike_polys = struct_liglike_ids(struct_profile_handle)
+    liglike_polys = struct_polymeric_factor_ids(struct_profile_handle)
     ligands       = struct_ligand_ids(rcsb_id, struct_profile_handle)
 
     for polyref in liglike_polys:
-        bsite_p:BindingSite = save_ligandlike_polymer(polyref.auth_asym_id, _structure_cif_handle)
+        bsite_p:BindingSite = bsite_polymeric_factor(polyref.auth_asym_id, _structure_cif_handle)
         outfile_json = os.path.join(RIBETL_DATA, rcsb_id.upper(), f'POLYMER_{polyref.auth_asym_id}.json')
 
         bsite_p.save(outfile_json)
@@ -28,7 +28,7 @@ def extract_bsites (rcsb_id):
             print("Exists already: ", outfile_json)
 
     for chemid in ligands:
-        bsite_l = save_ligand( chemid, _structure_cif_handle)
+        bsite_l = bsite_nonpolymeric_ligand( chemid, _structure_cif_handle)
         outfile_json = os.path.join(RIBETL_DATA, rcsb_id.upper(), f'LIGAND_{chemid}.json')
 
         bsite_l.save(outfile_json)

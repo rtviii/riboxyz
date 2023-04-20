@@ -10,7 +10,7 @@ from rbxz_bend.db.inits.proteins import add_protein, node__protein_class
 from rbxz_bend.db.inits.rna import add_rna, node__rna_class
 from rbxz_bend.db.inits.structure import add_ligand, node__structure
 from ribctl.lib.types.types_ribosome import RibosomeStructure
-from api.ribctl.lib.types.ribosome_assets import RibosomeAssets
+from api.ribctl.etl.ribosome_assets import RibosomeAssets
 from api.ribctl.lib.types.types_poly_nonpoly_ligand import list_LSU_Proteins, list_SSU_Proteins, list_RNAClass
 from neo4j import GraphDatabase, Driver, ManagedTransaction, Transaction
 from ribctl.lib.types.types_ribosome import  NonpolymericLigand,  ProteinClass, RibosomeStructure
@@ -522,7 +522,6 @@ with n.rcsb_id as struct, collect(r.rcsb_pdbx_description) as rnas
     def sync_with_rcsb(self, workers:int)->None:
 
         logger = updates_logger
-
         synced   = self.get_all_structs()
         unsynced = sorted(current_rcsb_structs())
         futures:list[Future] =  []
