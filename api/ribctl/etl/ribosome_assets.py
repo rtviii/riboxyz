@@ -163,31 +163,36 @@ class RibosomeAssets():
     #     self._verify_ligads_and_ligandlike_polys(overwrite)
 
 
-def obtain_assets(rcsb_id: str,assetlist:Assetlist ,overwrite: bool = False):
+async def obtain_assets(rcsb_id: str,assetlist:Assetlist ,overwrite: bool = False):
     """Obtain all assets for a given RCSB ID"""
 
     assets = RibosomeAssets(rcsb_id)
     assets._verify_dir_exists()
+    
+    coroutines = []
 
     if assetlist.profile:
-        await assets._verify_json_profile(overwrite)
+        coroutines.append(assets._verify_json_profile(overwrite))
 
     if assetlist.structure:
-        await assets._verify_cif(overwrite)
+        coroutines.append(assets._verify_cif(overwrite))
 
     if assetlist.factors_and_ligands:
-        await assets._verify_ligads_and_ligandlike_polys(overwrite)
+        coroutines.append(assets._verify_ligads_and_ligandlike_polys(overwrite))
 
     if assetlist.chains_and_modified_cif:
-        await assets._verify_cif_modified_and_chains(overwrite)
+        coroutines.append(assets._verify_cif_modified_and_chains(overwrite))
 
-async def sync_all_profiles(targets:list[str], assetlist:Assetlist, workers: int=5, get_all:bool=False, replace=False):
+    await asyncio.gather(*coroutines)
+
+def sync_all_profiles(targets:list[str], assetlist:Assetlist, workers: int=5, get_all:bool=False, replace=False):
     """Get all ribosome profiles from RCSB via a threadpool"""
+    
     logger = updates_logger
     if get_all:
         unsynced = sorted(current_rcsb_structs())
     else:
-        unsynced = targets
+        unsynced = list(map(lambda _: _.upper(),targets))
 
     futures: list[Future] = []
     logger.info("Begun downloading ribosome profiles via RCSB")
@@ -197,17 +202,12 @@ async def sync_all_profiles(targets:list[str], assetlist:Assetlist, workers: int
             if not None == f.exception():
                 logger.error(rcsb_id + ":" + f.exception().__str__())
             else:
-                logger.info(rcsb_id + ": saved profile successfully.")
+                logger.info(rcsb_id + ": processed profile successfully.")
         return _
 
     with ThreadPoolExecutor(max_workers=workers) as executor:
-
         for rcsb_id in unsynced:
-
-            await obtain_assets(rcsb_id,assetlist,replace)
-            
-            fut = asyncio.get_event_loop().run_in_executor(executor, obtain_assets, rcsb_id, assetlist, replace)
-            fut = executor.submit(single_struct_process, rcsb_id.upper())
+            fut = executor.submit(asyncio.run, obtain_assets(rcsb_id,assetlist,replace))
             fut.add_done_callback(log_commit_result(rcsb_id))
             futures.append(fut)
 
