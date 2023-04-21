@@ -26,11 +26,8 @@ if args.obtain:
                         get_all=True,
                         replace=True
                       )
-
 if args.structure:
-
     str = args.structure.upper()
-
     try:
 
         struct = process_pdb_record(str)
@@ -38,13 +35,10 @@ if args.structure:
         assets = RibosomeAssets(str)
         assets.save_json_profile(assets._json_profile_filepath(), struct.dict())
         updates_logger.info(f"Saved {str}.json to {assets._json_profile_filepath()}")
-
     except Exception as e:
         updates_logger.exception(e)
 
-
 # if args.test:
-
 #     #TODO: Make a test suite
 #     qo = ribosomexyzDB(NEO4J_URI, NEO4J_USER, NEO4J_PASSWORD)
 #     q  = qo.get_all_structures()
