@@ -141,8 +141,8 @@ def get_sequence_by_nomclass(rcsb_id: str, nomenclature_class: str, canonical:bo
             nomenclature_class, rcsb_id))
     return (STRAND, SEQ)
 
-
 def retrieve_LSU_rRNA(rcsb_id, canonical:bool=True):
+    # TODO: move method to RibosomeStructure please
     annotated_cifpath = os.path.join(RIBETL_DATA, rcsb_id.upper(), f"{rcsb_id.upper()}_modified.cif")
     rna_type          = ""
     #--------------
@@ -206,11 +206,13 @@ def msa_class_proteovision_path(_:ProteinClass):
 
 def msa_add_taxonomic_ids(msa_path:str):
     print("Adding taxonomic IDs to MSA: {}".format(msa_path))
+
     msa_main = parseMSA(msa_path)
-    url = lambda protein_id: f"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=protein&id={protein_id}&retmode=json"
+    url      = lambda protein_id: f"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=protein&id={protein_id}&retmode=json"
 
     _sequences_new = []
-    _labels_new   = []
+    _labels_new    = []
+
     if msa_main == None:
         raise FileNotFoundError("File not found: {}".format(msa_path))
     for seq in msa_main:
@@ -278,18 +280,13 @@ def process_proteovision_alignment(nomclass:ProteinClass):
     save_aln(nomclass)
     msa_add_taxonomic_ids(msa_class_proteovision_path(nomclass))
 
-# if proteovision_type == 'all':
-#         for nomclass in [*list_LSU_Proteins, *list_SSU_Proteins]:
-#             try:
-#                 process_proteovision_alignment(nomclass)
-#             except Exception as e:
-#                 print(e)
-#                 ...
-
 show = True
+
 if show:
+
     nomclass = 'uL23'
     msa_main = parseMSA(msa_class_proteovision_path(nomclass))
+
     for seq in msa_main:
         print(seq)
 
