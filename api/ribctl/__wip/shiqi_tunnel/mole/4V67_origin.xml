@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Tunnels>
+  <Input>../../../../Volumes/LaCie/project2/structure/edited/4V67_edited.pdb</Input>
+  <WorkingDirectory>../../../../Volumes/LaCie/project2/tunnel_geo/4V67/</WorkingDirectory>
+  <Params>
+     <Cavity ProbeRadius="10" InteriorThreshold="1.25" />
+    <Tunnel SurfaceCoverRadius="10" OriginRadius="5" BottleneckTolerance="3" WeightFunction="LengthAndRadius" UseCustomExitsOnly="1"/>
+  </Params>
+  <Export>
+    <Formats Mesh="1" PyMol="1" CSV="1" />
+    <Types Cavities="1" Tunnels="1" />
+    <Mesh Density="1.33" Compress="1" />
+    <PyMol PDBId="4V67" SurfaceType="Spheres"  />
+  </Export>
+  <CustomExits>
+    <Exit>
+      <Point X="45.60599899291992" Y="142.93499755859375" Z="180.5189971923828" />
+    </Exit>
+  </CustomExits>
+  <Origins Auto="0">
+    <Origin>
+      <Point X="-24.64050006866455" Y="117.27250289916992" Z="163.3105010986328" />
+    </Origin>
+  </Origins>
+</Tunnels>

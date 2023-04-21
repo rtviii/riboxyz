@@ -17,15 +17,12 @@ from Bio import SeqRecord
 from pprint import pprint
 import subprocess
 from typing import List, Tuple
-from fuzzywuzzy import process
-from fuzzysearch import find_near_matches
 import re
 from Bio.PDB.Structure import Structure
 from Bio.PDB.Model import Model
 from Bio.PDB.Chain import Chain
 from Bio.PDB.Atom import Atom
 from Bio.PDB.Residue import Residue
-from ribctl.struct_extract_bsites import open_structure
 import pandas
 from Bio import pairwise2
 from Bio import SeqIO

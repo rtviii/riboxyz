@@ -2,7 +2,6 @@ import os
 from pprint import pprint
 import typing
 import requests
-from api.ribctl.__wip.tunnel.ptc_mass import get_sequence_by_nomclass
 from ribctl.lib.types.types_ribosome import ProteinClass
 from  api.ribctl.lib.types.types_poly_nonpoly_ligand import  list_LSU_Proteins,list_SSU_Proteins
 import argparse
@@ -10,11 +9,17 @@ import subprocess
 import sys
 import numpy as np
 import gemmi
+from Bio import pairwise2
+from Bio import SeqIO
+from Bio import SeqRecord
 from prody import MSA, Sequence, MSAFile,parseMSA
 import prody as prd
 import requests
-prd.confProDy(verbosity='none')
 
+
+
+prd.confProDy(verbosity='none')
+RIBETL_DATA = os.environ.get('RIBETL_DATA')
 
 TAXID_BACTERIA          = 2
 TAXID_EUKARYA           = 2759
@@ -33,46 +38,8 @@ args = parser.parse_args()
 proteovision_type = args.proteovision
 lineage           = args.lineage
 
-def muscle_combine_profile(msa_path1: str, msa_path2: str, out_filepath: str):
-    """Combine two MSA-profiles into a single one. Used here to "append" a target sequence two the ribovision alignment. """
-    cmd = ['/home/rxz/dev/docker_ribxz/cli/scripts/muscle3.8', '-profile','-in1', msa_path1, '-in2', msa_path2, '-out', out_filepath]
-    subprocess.Popen(cmd, stdout=subprocess.PIPE,stderr=subprocess.PIPE, env=os.environ.copy()).wait()
-    sys.stdout.flush()
-
-def add_target_to_domain_alignment(rcsb_id: str, domain: str):
-    """
-    @param rcsb_id: PDB ID of target structure
-    @param domain:  Domain of target structure (euk or bac)
-    """
-
-    rcsb_id = argdict["target"]
-    struct_profile = open_structure(rcsb_id, 'json')
-    [chain_id, strand_target] = get_23SrRNA_strandseq(
-        rcsb_id,
-        custom_path=os.path.join(
-            RIBETL_DATA, rcsb_id.upper(), f"{rcsb_id.upper()}_modified.cif")
-    )
-
-    fpath_23s = f'{rcsb_id.upper()}_{chain_id}_23SrRNA.fasta'
-    domain_alignment: str = ''
-    if domain == 'bacteria':
-        domain_alignment = 'data/ribovision.bacteria.fasta'
-    elif domain == 'eukarya':
-        domain_alignment = 'data/ribovision.eukaryota.fasta'
-    else:
-        raise FileNotFoundError(
-            "Domain misspecified. Must be either 'bacteria' or 'eukarya'.")
-
-    seq_to_fasta(rcsb_id, strand_target, fpath_23s)
-    muscle_combine_profile(domain_alignment, fpath_23s,f'combined_{rcsb_id.upper()}_ribovision_{domain}.fasta')
-def seq_to_fasta(rcsb_id: str, _seq: str, outfile: str):
-    from Bio.Seq import Seq
-    _seq          = _seq.replace("\n", "")
-    seq_record    = SeqRecord.SeqRecord(Seq(_seq).upper())
-    seq_record.id = seq_record.description = rcsb_id
-    SeqIO.write(seq_record, outfile, 'fasta',)
-
-def util__backwards_match(alntgt: str, aln_resid: int, verbose: bool = False) -> Tuple[int, str, int]:
+#! util
+def util__backwards_match(alntgt: str, aln_resid: int, verbose: bool = False) -> typing.Tuple[int, str, int]:
     """
     returns (projected i.e. "ungapped" residue id, the residue itself residue)
     """
@@ -94,6 +61,7 @@ def util__backwards_match(alntgt: str, aln_resid: int, verbose: bool = False) ->
 
     raise LookupError()
 
+#! util
 def util__forwards_match(string: str, resid: int):
     """Returns the index of a source-sequence residue in the (aligned) source sequence."""
     if resid >= len(string):
@@ -109,10 +77,33 @@ def util__forwards_match(string: str, resid: int):
         else:
             count_proper += 1
 
-def get_sequence_by_nomclass(rcsb_id: str, nomenclature_class: str, canonical:bool=True,path:str=None) -> Tuple[str, str]:
+#! util
+def barr2str (bArr):
+    return ''.join([ x.decode("utf-8") for x in bArr])
+
+#! util
+def infer_subunit(protein_class:ProteinClass):
+    if protein_class in list_LSU_Proteins:
+        return "LSU"
+    elif protein_class in list_SSU_Proteins:
+        return "SSU"
+    else:
+        raise ValueError("Unknown protein class: {}".format(protein_class))
+
+#! util
+def seq_to_fasta(rcsb_id: str, _seq: str, outfile: str):
+    from Bio.Seq import Seq
+    _seq          = _seq.replace("\n", "")
+    seq_record    = SeqRecord.SeqRecord(Seq(_seq).upper())
+    seq_record.id = seq_record.description = rcsb_id
+    SeqIO.write(seq_record, outfile, 'fasta',)
+
+# TODO: move method to RibosomeStructure please
+def get_sequence_by_nomclass(rcsb_id: str, nomenclature_class: str,path:str, canonical:bool=True) -> typing.Tuple[str, str]:
 
     target       = gemmi.cif.read_file(path)
     block        = target.sole_block()
+
     model        = gemmi.read_structure(path)[0]
 
     STRAND = None
@@ -139,10 +130,11 @@ def get_sequence_by_nomclass(rcsb_id: str, nomenclature_class: str, canonical:bo
     if SEQ == None:
         print("Could not locate {} sequence in {} CIF file".format(
             nomenclature_class, rcsb_id))
+
     return (STRAND, SEQ)
 
+# TODO: move method to RibosomeStructure please
 def retrieve_LSU_rRNA(rcsb_id, canonical:bool=True):
-    # TODO: move method to RibosomeStructure please
     annotated_cifpath = os.path.join(RIBETL_DATA, rcsb_id.upper(), f"{rcsb_id.upper()}_modified.cif")
     rna_type          = ""
     #--------------
@@ -178,109 +170,124 @@ def retrieve_LSU_rRNA(rcsb_id, canonical:bool=True):
 
     return [chain_id, strand_target, rna_type]
 
-def muscle_combine_profiles(msa_path1: str, msa_path2: str, out_filepath: str):
+
+show = True
+
+
+# ※  ------------------ Proteovision stuff --------------
+
+"""append target sequence to proteovision msa profile"""
+def muscle_combine_profile(msa_path1: str, msa_path2: str, out_filepath: str):
     """Combine two MSA-profiles into a single one. Used here to "append" a target sequence two the ribovision alignment. """
     cmd = ['/home/rxz/dev/docker_ribxz/cli/scripts/muscle3.8', '-profile','-in1', msa_path1, '-in2', msa_path2, '-out', out_filepath]
-
-    subprocess.Popen(cmd,
-                      stdout=subprocess.PIPE,
-                      stderr=subprocess.PIPE,
-                      env=os.environ.copy()
-                      ).wait()
-
+    subprocess.Popen(cmd, stdout=subprocess.PIPE,stderr=subprocess.PIPE, env=os.environ.copy()).wait()
     sys.stdout.flush()
 
-def barr2str (bArr):
-    return ''.join([ x.decode("utf-8") for x in bArr])
+"""append target sequence to proteovision msa profile"""
+def add_target_to_domain_alignment(rcsb_id: str, domain: str):
+    """
+    @param rcsb_id: PDB ID of target structure
+    @param domain:  Domain of target structure (euk or bac)
+    """
 
-def infer_subunit(protein_class:ProteinClass):
-    if protein_class in list_LSU_Proteins:
-        return "LSU"
-    elif protein_class in list_SSU_Proteins:
-        return "SSU"
+    struct_profile            = open_structure(rcsb_id, 'json')
+    [chain_id, strand_target] = get_23SrRNA_strandseq(
+        rcsb_id,
+        custom_path=os.path.join(
+            RIBETL_DATA, rcsb_id.upper(), f"{rcsb_id.upper()}_modified.cif")
+    )
+
+    fpath_23s = f'{rcsb_id.upper()}_{chain_id}_23SrRNA.fasta'
+    domain_alignment: str = ''
+    if domain == 'bacteria':
+        domain_alignment = 'data/ribovision.bacteria.fasta'
+    elif domain == 'eukarya':
+        domain_alignment = 'data/ribovision.eukaryota.fasta'
     else:
-        raise ValueError("Unknown protein class: {}".format(protein_class))
+        raise FileNotFoundError(
+            "Domain misspecified. Must be either 'bacteria' or 'eukarya'.")
 
-def msa_class_proteovision_path(_:ProteinClass):
-    return '/home/rxz/dev/docker_ribxz/api/ribctl/__wip/data/msa_classes_proteovision/{}/{}_ribovision.fasta'.format(infer_subunit(_),_)
-
-def msa_add_taxonomic_ids(msa_path:str):
-    print("Adding taxonomic IDs to MSA: {}".format(msa_path))
-
-    msa_main = parseMSA(msa_path)
-    url      = lambda protein_id: f"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=protein&id={protein_id}&retmode=json"
-
-    _sequences_new = []
-    _labels_new    = []
-
-    if msa_main == None:
-        raise FileNotFoundError("File not found: {}".format(msa_path))
-    for seq in msa_main:
-        original_label  = seq.getLabel()
-        nih_protein_id  = original_label.split('|')[1]
-        sequence_proper = barr2str(seq.getArray())
-
-        response        = requests.get(url(nih_protein_id))
-        if response.status_code == 200:
-            protein_summary = response.json()
-            # pprint(protein_summary)
-            res       = protein_summary["result"]
-            try:
-                uid       = list(res.keys())[1]
-                taxid     = protein_summary["result"][uid]['taxid']
-                new_label = f"{original_label}|{taxid}"
-
-                _sequences_new.append(sequence_proper)
-                _labels_new.append(new_label)
-            except Exception as e:
-                print("Failed to identify taxid in {}: {}".format(original_label, e))
-                continue
-
-        else:
-            print("Omtitting {} Error: ".format(original_label), response.status_code)
-
-    prd.writeMSA(msa_path, MSA(np.array(_sequences_new),' ',labels=_labels_new))
-
-def save_aln(protein:ProteinClass):
-        spec_letters, class_digit = protein.split("S" if infer_subunit(protein) == "SSU" else "L")
-
-        # correct for the fact that the proteovision API requires two digits for the single-digit classes (i.e uL1 is uL01)
-        if int(class_digit) < 10:
-            class_digit = "0{}".format(class_digit)
-
-        def tax_string(spec_letters):
-            tax_string = ""
-            if 'e' in spec_letters:
-                return TAXID_EUKARYA
-            if 'b' in spec_letters:
-                return TAXID_BACTERIA
-            if 'u' in spec_letters:
-                return ",".join([str(TAXID_EUKARYA),str(TAXID_ARCHEA),str(TAXID_BACTERIA)])
-
-            return tax_string[:-1]
-
-        URI         = PROTEOVISION_URL(infer_subunit(protein),spec_letters + ( "S" if infer_subunit(protein) == "SSU" else "L" ) + class_digit, tax_string(spec_letters))
-        resp        = requests.get(URI)
-        start,end   = resp.text.find("<pre>"), resp.text.find("</pre>")
-        fasta_lines = resp.text[start+len("<pre>"):end].replace("&gt;",">")
-        filename    = "{}_ribovision.fasta".format(protein)
-        outpath = os.path.join(PROTEOVISION_MSA_FOLDER,infer_subunit(protein), filename)
-
-        print("{}\t| {} \t| URI: {}".format(protein,resp.status_code, URI) )
-
-        if resp.status_code == 200:
-            with open(outpath,"w") as f:
-                f.write(fasta_lines)
-                print("Wrote {} to {}".format(protein,filename))
-
-                save_aln(nomclass)
-                msa_add_taxonomic_ids(msa_class_proteovision_path(nomclass))
+    seq_to_fasta(rcsb_id, strand_target, fpath_23s)
+    muscle_combine_profile(domain_alignment, fpath_23s,f'combined_{rcsb_id.upper()}_ribovision_{domain}.fasta')
 
 def process_proteovision_alignment(nomclass:ProteinClass):
+
+    def msa_class_proteovision_path(_:ProteinClass):
+        return '/home/rxz/dev/docker_ribxz/api/ribctl/__wip/data/msa_classes_proteovision/{}/{}_ribovision.fasta'.format(infer_subunit(_),_)
+
+    def msa_add_taxonomic_ids(msa_path:str):
+
+        msa_main = parseMSA(msa_path)
+        url      = lambda protein_id: f"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=protein&id={protein_id}&retmode=json"
+
+        _sequences_new = []
+        _labels_new    = []
+
+        if msa_main == None:
+            raise FileNotFoundError("File not found: {}".format(msa_path))
+        for seq in msa_main:
+            original_label  = seq.getLabel()
+            nih_protein_id  = original_label.split('|')[1]
+            sequence_proper = barr2str(seq.getArray())
+
+            response        = requests.get(url(nih_protein_id))
+            if response.status_code == 200:
+                protein_summary = response.json()
+                # pprint(protein_summary)
+                res       = protein_summary["result"]
+                try:
+                    uid       = list(res.keys())[1]
+                    taxid     = protein_summary["result"][uid]['taxid']
+                    new_label = f"{original_label}|{taxid}"
+
+                    _sequences_new.append(sequence_proper)
+                    _labels_new.append(new_label)
+                except Exception as e:
+                    print("Failed to identify taxid in {}: {}".format(original_label, e))
+                    continue
+
+            else:
+                print("Omtitting {} Error: ".format(original_label), response.status_code)
+
+        prd.writeMSA(msa_path, MSA(np.array(_sequences_new),' ',labels=_labels_new))
+
+    def save_aln(protein:ProteinClass):
+
+            # correct for the fact that the proteovision API requires two digits for the single-digit classes (i.e uL1 is uL01)
+            spec_letters, class_digit = protein.split("S" if infer_subunit(protein) == "SSU" else "L")
+
+            if int(class_digit) < 10:
+                class_digit = "0{}".format(class_digit)
+
+            def tax_string(spec_letters):
+                tax_string = ""
+                if 'e' in spec_letters:
+                    return TAXID_EUKARYA
+                if 'b' in spec_letters:
+                    return TAXID_BACTERIA
+                if 'u' in spec_letters:
+                    return ",".join([str(TAXID_EUKARYA),str(TAXID_ARCHEA),str(TAXID_BACTERIA)])
+
+                return tax_string[:-1]
+
+            URI         = PROTEOVISION_URL(infer_subunit(protein),spec_letters + ( "S" if infer_subunit(protein) == "SSU" else "L" ) + class_digit, tax_string(spec_letters))
+            resp        = requests.get(URI)
+            start,end   = resp.text.find("<pre>"), resp.text.find("</pre>")
+            fasta_lines = resp.text[start+len("<pre>"):end].replace("&gt;",">")
+            filename    = "{}_ribovision.fasta".format(protein)
+            outpath = os.path.join(PROTEOVISION_MSA_FOLDER,infer_subunit(protein), filename)
+
+            print("{}\t| {} \t| URI: {}".format(protein,resp.status_code, URI) )
+
+            if resp.status_code == 200:
+                with open(outpath,"w") as f:
+                    f.write(fasta_lines)
+
     save_aln(nomclass)
     msa_add_taxonomic_ids(msa_class_proteovision_path(nomclass))
 
-show = True
+
+
 
 if show:
 
