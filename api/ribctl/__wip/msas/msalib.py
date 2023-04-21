@@ -2,6 +2,8 @@ import os
 from pprint import pprint
 import typing
 import requests
+from api.ribctl.etl.ribosome_assets import RibosomeAssets
+from api.ribctl.lib.utils import open_structure
 from ribctl.lib.types.types_ribosome import ProteinClass
 from  api.ribctl.lib.types.types_poly_nonpoly_ligand import  list_LSU_Proteins,list_SSU_Proteins
 import argparse
@@ -98,77 +100,6 @@ def seq_to_fasta(rcsb_id: str, _seq: str, outfile: str):
     seq_record.id = seq_record.description = rcsb_id
     SeqIO.write(seq_record, outfile, 'fasta',)
 
-# TODO: move method to RibosomeStructure please
-def get_sequence_by_nomclass(rcsb_id: str, nomenclature_class: str,path:str, canonical:bool=True) -> typing.Tuple[str, str]:
-
-    target       = gemmi.cif.read_file(path)
-    block        = target.sole_block()
-
-    model        = gemmi.read_structure(path)[0]
-
-    STRAND = None
-    SEQ    = None
-
-    # Locate the chain of given nom. class
-    for (strand, nomclass) in zip(
-        block.find_loop('_ribosome_nomenclature.entity_poly.pdbx_strand_id'),
-        block.find_loop('_ribosome_nomenclature.polymer_class')
-    ):
-        if nomclass == nomenclature_class:
-            STRAND = strand
-            break
-
-    # Now find sequence of this class
-    for (chain_id, one_letter_code) in zip(
-        block.find_loop('_entity_poly.pdbx_strand_id'),
-        block.find_loop('_entity_poly.pdbx_seq_one_letter_code_can') if canonical else block.find_loop('_entity_poly.pdbx_seq_one_letter_code')
-    ):
-        # X-RAY structures have 'dual' chains. Split on comma to check both.
-        if STRAND in chain_id.split(','):
-            SEQ = str(one_letter_code).strip(";").strip("\n")
-
-    if SEQ == None:
-        print("Could not locate {} sequence in {} CIF file".format(
-            nomenclature_class, rcsb_id))
-
-    return (STRAND, SEQ)
-
-# TODO: move method to RibosomeStructure please
-def retrieve_LSU_rRNA(rcsb_id, canonical:bool=True):
-    annotated_cifpath = os.path.join(RIBETL_DATA, rcsb_id.upper(), f"{rcsb_id.upper()}_modified.cif")
-    rna_type          = ""
-    #--------------
-    [chain_id, strand_target] = get_sequence_by_nomclass(
-        rcsb_id,
-        "23SrRNA",
-        canonical,
-        path=os.path.join(
-            RIBETL_DATA, rcsb_id.upper(), f"{rcsb_id.upper()}_modified.cif")
-    )
-    rna_type = "23SrRNA"
-
-    if chain_id == None or strand_target == None:
-        [chain_id, strand_target] = get_sequence_by_nomclass(
-            rcsb_id,
-            "25SrRNA",
-            canonical,
-            path=annotated_cifpath
-        )
-        rna_type = "25SrRNA"
-
-    if chain_id == None or strand_target == None:
-        [chain_id, strand_target] = get_sequence_by_nomclass(
-            rcsb_id,
-            "28SrRNA",
-            canonical,
-            path=annotated_cifpath)
-        rna_type = "28SrRNA"
-
-    if chain_id == None or strand_target == None:
-        print("Failed to locate either 23S or 25S or 28 rRNA in {}".format(rcsb_id))
-        exit(1)
-
-    return [chain_id, strand_target, rna_type]
 
 
 show = True
@@ -183,33 +114,7 @@ def muscle_combine_profile(msa_path1: str, msa_path2: str, out_filepath: str):
     subprocess.Popen(cmd, stdout=subprocess.PIPE,stderr=subprocess.PIPE, env=os.environ.copy()).wait()
     sys.stdout.flush()
 
-"""append target sequence to proteovision msa profile"""
-def add_target_to_domain_alignment(rcsb_id: str, domain: str):
-    """
-    @param rcsb_id: PDB ID of target structure
-    @param domain:  Domain of target structure (euk or bac)
-    """
-
-    struct_profile            = open_structure(rcsb_id, 'json')
-    [chain_id, strand_target] = get_23SrRNA_strandseq(
-        rcsb_id,
-        custom_path=os.path.join(
-            RIBETL_DATA, rcsb_id.upper(), f"{rcsb_id.upper()}_modified.cif")
-    )
-
-    fpath_23s = f'{rcsb_id.upper()}_{chain_id}_23SrRNA.fasta'
-    domain_alignment: str = ''
-    if domain == 'bacteria':
-        domain_alignment = 'data/ribovision.bacteria.fasta'
-    elif domain == 'eukarya':
-        domain_alignment = 'data/ribovision.eukaryota.fasta'
-    else:
-        raise FileNotFoundError(
-            "Domain misspecified. Must be either 'bacteria' or 'eukarya'.")
-
-    seq_to_fasta(rcsb_id, strand_target, fpath_23s)
-    muscle_combine_profile(domain_alignment, fpath_23s,f'combined_{rcsb_id.upper()}_ribovision_{domain}.fasta')
-
+"""download + tax-identify a protein class sequence from proteovision"""
 def process_proteovision_alignment(nomclass:ProteinClass):
 
     def msa_class_proteovision_path(_:ProteinClass):

@@ -1,13 +1,14 @@
 import asyncio
 import json
-from typing import Optional
+from typing import Optional, Tuple
+from api.ribctl.lib.types.types_poly_nonpoly_ligand import RNAClass
 from logs.loggers import updates_logger
 from ribctl.lib.mod_extract_bsites import bsite_nonpolymeric_ligand, struct_ligand_ids, struct_polymeric_factor_ids, bsite_polymeric_factor, bsite_polymeric_factor
 from ribctl.lib.mod_split_rename import split_rename
 from ribctl.etl.struct_rcsb_api import current_rcsb_structs, process_pdb_record
 from ribctl.lib.mod_render_thumbnail import render_thumbnail
 from ribctl.lib.utils import download_unpack_place, open_structure
-from ribctl.lib.types.types_ribosome import RibosomeStructure
+from ribctl.lib.types.types_ribosome import ProteinClass, RibosomeStructure
 from pydantic import BaseModel, parse_obj_as
 import os
 from concurrent.futures import ALL_COMPLETED, Future, ProcessPoolExecutor, ThreadPoolExecutor, wait
@@ -52,7 +53,7 @@ class RibosomeAssets():
         self._envcheck()
         return f"{self._dir_path()}/{self.rcsb_id}.json"
 
-    def json_profile(self) -> RibosomeStructure:
+    def profile(self) -> RibosomeStructure:
         with open(self._json_profile_filepath(), "r") as f:
             return RibosomeStructure.parse_obj(json.load(f))
 
@@ -71,7 +72,64 @@ class RibosomeAssets():
         with open(filepath, "w") as f:
             json.dump(profile, f)
 
-    # ※ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    # ※ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-= Getters =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+    def get_seq_rna_by_nomclass(self, class_: RNAClass, canonical:bool=True) -> Tuple[ str, str] | Tuple[None,None]:
+        profile = self.profile()
+
+        if profile.rnas == None:
+            return ( None,None )
+
+        for rna in profile.rnas:
+            if class_ in rna.nomenclature :
+                if canonical:
+                    return ( rna.entity_poly_seq_one_letter_code_can, rna.auth_asym_id )
+                else:
+                    return ( rna.entity_poly_seq_one_letter_code, rna.auth_asym_id )
+        return ( None,None )
+
+    def get_seq_prot_by_nomclass(self, class_: ProteinClass, canonical:bool=True)-> Tuple[ str,str] | Tuple[None,None] :
+        for prot in self.profile().proteins:
+            if class_ in prot.nomenclature :
+                if canonical:
+                    return ( prot.entity_poly_seq_one_letter_code_can, prot.auth_asym_id )
+                else:
+                    return ( prot.entity_poly_seq_one_letter_code, prot.auth_asym_id )
+        else:
+            return ( None,None )
+
+    def get_LSU_rRNA(self, get_canonical:bool=True)->Tuple[str,str,str]:
+        """retrieve the largest rRNA sequence in the structure
+        @returns (seq, auth_asym_id, rna_type)
+        """
+        annotated_cifpath = self._cif_modified_filepath()
+        rna_type          = ""
+
+        [seq, auth_asym_id] = self.get_seq_rna_by_nomclass("23SrRNA", get_canonical)
+        rna_type = "23SrRNA"
+
+        if seq == None or auth_asym_id == None:
+            [chain_id, strand_target] = self.get_seq_rna_by_nomclass(
+                "25SrRNA",
+                get_canonical
+            )
+
+            rna_type = "25SrRNA"
+
+        if seq == None or auth_asym_id == None:
+            [chain_id, strand_target] = self.get_seq_rna_by_nomclass(
+                "28SrRNA",
+                get_canonical)
+            rna_type = "28SrRNA"
+
+        if seq == None or auth_asym_id == None:
+            raise Exception("No LSU rRNA found in structure")
+
+        return (seq,auth_asym_id, rna_type)
+
+
+
+    # ※ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-= Verification =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
     def _verify_dir_exists(self):
         if not os.path.exists(self._dir_path()):
@@ -126,14 +184,13 @@ class RibosomeAssets():
     async def _verify_chains_dir(self):
         split_rename(self.rcsb_id)
 
-
     async def _verify_ligads_and_ligandlike_polys(self, overwrite: bool = False):
 
         def ligand_path(chem_id): return os.path.join(self._dir_path(), f"LIGAND_{chem_id.upper()}.json")
         def poly_factor_path(auth_asym_id): return os.path.join(self._dir_path(), f"POLYMER_{auth_asym_id.upper()}.json")
 
-        ligands           = struct_ligand_ids(self.rcsb_id, self.json_profile())
-        polymeric_factors = struct_polymeric_factor_ids(self.json_profile())
+        ligands           = struct_ligand_ids(self.rcsb_id, self.profile())
+        polymeric_factors = struct_polymeric_factor_ids(self.profile())
         all_verified_flag = True
 
         for ligand_chemid in ligands:
@@ -153,14 +210,9 @@ class RibosomeAssets():
 
         return all_verified_flag
 
-    # def _obtain_assets(self, overwrite: bool = False):
-    #     self._verify_dir_exists()
-    #     # self._verify_cif(overwrite)
-    #     # self._verify_cif_modified(overwrite)
-    #     self._verify_json_profile(overwrite)
-    #     # self._verify_png_thumbnail(overwrite)
-    #     self._verify_chains_dir()
-    #     self._verify_ligads_and_ligandlike_polys(overwrite)
+
+
+# ※ Mass process methods.
 
 
 async def obtain_assets(rcsb_id: str ,assetlist:Assetlist ,overwrite: bool = False):
