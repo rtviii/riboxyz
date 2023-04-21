@@ -10,7 +10,7 @@ RIBETL_DATA = os.environ.get('RIBETL_DATA')
 
 
 for struct in os.listdir(RIBETL_DATA):
-    print(RibosomeAssets(struct).json_profile())
+    print(RibosomeAssets(struct).profile())
 
 
 

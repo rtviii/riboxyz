@@ -57,7 +57,6 @@ class NonpolymericLigand(BaseModel)  :
 class PolymericFactor(Polymer): 
     nomenclature: list[PolymericFactorClass]
     
-
 class NonpolymerEntityInstance(BaseModel):
     class NonpolymerEntityInstanceContainerIdentifiers(BaseModel):
         entity_id: str

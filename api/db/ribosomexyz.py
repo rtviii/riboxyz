@@ -139,7 +139,7 @@ class ribosomexyzDB():
 
     def add_structure(self, struct_assets: RibosomeAssets):
 
-        R = RibosomeStructure.parse_obj(struct_assets.json_profile())
+        R = RibosomeStructure.parse_obj(struct_assets.profile())
 
         with self.driver.session() as s:
             struct_node_result = s.execute_write(node__structure(R))
