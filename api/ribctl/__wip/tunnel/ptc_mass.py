@@ -57,6 +57,7 @@ if args.canon:
     domain = 'bacteria'
     rcsb_id = argdict["target"].upper()
     struct_profile: Structure = open_structure(rcsb_id, 'cif')
+
     [chain_id, strand_target, rna_type] = retrieve_LSU_rRNA(rcsb_id, False)
 
     if chain_id in struct_profile.child_dict[0].child_dict:
@@ -100,10 +101,11 @@ if args.canon:
         json.dump(PTC_MARKERKS_RAW, outf, indent=4)
         print("Saved {} successfully.".format(outfile))
 
-
 if args.generate:
-    f    = open('rcsb_pdb_ids_20230106032038.txt', 'r')
+
+    f     = open('rcsb_pdb_ids_20230106032038.txt', 'r')
     lines = f.readlines()
+
     f.close()
     bacteria_structs =[*map(lambda _: _.strip("\n"),lines)]
 

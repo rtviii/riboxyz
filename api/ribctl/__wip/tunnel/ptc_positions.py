@@ -45,6 +45,7 @@ DORIS_ET_AL = {
     "subseq_6": "AAGACCC",
     "subseq_8": "GGAUAAC",
     "subseq_9": "GAGCUGGGUUUA",
+
     "e": {
         "site_6": [2400, 2401, 2402, 2403, 2404, 2405, 2406, 2407],
         "site_8": [2811, 2812, 2813, 2814, 2815, 2816, 2817, 2818],
@@ -61,6 +62,7 @@ DORIS_ET_AL = {
                    2584, 2585, 2586, 2587],
     }
 }
+
 # -------------------------------------------------------------------------------------------|
 
 parser = argparse.ArgumentParser(description='CLI for locating PTC residues of 23SrRNA in a given prokaryotic PDB file')
