@@ -13,39 +13,23 @@ import fire
 
 arg = argparse.ArgumentParser(description='RibCtl - A tool to control the ribosome database')
 
-arg.add_argument('-dbname', '--database_name', type=str)
-arg.add_argument('-s', '--structure', type=str)
-arg.add_argument('-o', '--obtain', type=str)
-arg.add_argument('-ttt', '--test', action='store_true')
-arg.add_argument('-db', '--database', action='store_true')
+arg.add_argument('-getall', '--obtain_all_structures', type=str)
 
 args = arg.parse_args()
 
-if args.db:
-    db = ribosomexyzDB(NEO4J_URI, NEO4J_USER, NEO4J_PASSWORD)
-    fire.Fire(db)
-
-if args.obtain:
-
-    rcsb_list = ['3J7Z', '5afi','4ug0']
+if args.obtain_all_structures:
+    ASL = Assetlist(profile= True, factors_and_ligands = True)
     obtain_assets_threadpool(
-                        rcsb_list,
-                        Assetlist(profile=True,  factors_and_ligands=True),
+                        [],
+                        ASL,
                         workers=16,
                         get_all=True,
                         # replace=True
                       )
-if args.structure:
-    str = args.structure.upper()
-    try:
+if args.db:
+    db = ribosomexyzDB(NEO4J_URI, NEO4J_USER, NEO4J_PASSWORD)
+    fire.Fire(db)
 
-        struct = process_pdb_record(str)
-        RibosomeStructure.parse_obj(struct)
-        assets = RibosomeAssets(str)
-        assets.save_json_profile(assets._json_profile_filepath(), struct.dict())
-        updates_logger.info(f"Saved {str}.json to {assets._json_profile_filepath()}")
-    except Exception as e:
-        updates_logger.exception(e)
 
 # if args.test:
 #     #TODO: Make a test suite
