@@ -11,12 +11,10 @@ from ribctl.lib.mod_render_thumbnail import render_thumbnail
 from ribctl.lib.utils import download_unpack_place, open_structure
 from ribctl.lib.types.types_ribosome import ProteinClass, RibosomeStructure
 from pydantic import BaseModel, parse_obj_as
-import os
 from concurrent.futures import ALL_COMPLETED, Future, ProcessPoolExecutor, ThreadPoolExecutor, wait
-
+import os
 
 RIBETL_DATA = str(os.environ.get("RIBETL_DATA"))
-
 
 class Assetlist(BaseModel): 
       profile                : Optional[bool]
@@ -25,7 +23,6 @@ class Assetlist(BaseModel):
       chains_and_modified_cif: Optional[bool]
       factors_and_ligands    : Optional[bool]
       png_thumbnail          : Optional[bool]
-
 
 class RibosomeAssets():
     rcsb_id: str
@@ -237,10 +234,7 @@ class RibosomeAssets():
 
         return all_verified_flag
 
-
-
 # ※ Mass process methods.
-
 
 async def obtain_assets(rcsb_id: str ,assetlist:Assetlist ,overwrite: bool = False):
     """Obtain all assets for a given RCSB ID"""
@@ -264,7 +258,7 @@ async def obtain_assets(rcsb_id: str ,assetlist:Assetlist ,overwrite: bool = Fal
 
     await asyncio.gather(*coroutines)
 
-def obtain_assets_threadpool(targets:list[str], assetlist:Assetlist, workers: int=5, get_all:bool=False, replace=False):
+def obtain_assets_threadpool(targets:list[str], assetlist:Assetlist, workers: int=5, get_all:bool=False, overwrite=False):
     """Get all ribosome profiles from RCSB via a threadpool"""
     logger = updates_logger
     if get_all:
@@ -285,14 +279,14 @@ def obtain_assets_threadpool(targets:list[str], assetlist:Assetlist, workers: in
 
     with ThreadPoolExecutor(max_workers=workers) as executor:
         for rcsb_id in unsynced:
-            fut = executor.submit(asyncio.run, obtain_assets(rcsb_id,assetlist,replace))
+            fut = executor.submit(asyncio.run, obtain_assets(rcsb_id,assetlist,overwrite))
             fut.add_done_callback(log_commit_result(rcsb_id))
             futures.append(fut)
 
     wait(futures, return_when=ALL_COMPLETED)
     logger.info("Finished syncing with RCSB")
 
-def obtain_assets_processpool(targets:list[str], assetlist:Assetlist, workers: int=5, get_all:bool=False, replace=False):
+def obtain_assets_processpool(targets:list[str], assetlist:Assetlist, workers: int=5, get_all:bool=False, overwrite=False):
     """Get all ribosome profiles from RCSB via a threadpool"""
     logger = updates_logger
     if get_all:
@@ -313,7 +307,7 @@ def obtain_assets_processpool(targets:list[str], assetlist:Assetlist, workers: i
 
     with ProcessPoolExecutor(max_workers=workers) as executor:
         for rcsb_id in unsynced:
-            fut = executor.submit(asyncio.run, obtain_assets(rcsb_id,assetlist,replace))
+            fut = executor.submit(asyncio.run, obtain_assets(rcsb_id,assetlist,overwrite))
             fut.add_done_callback(log_commit_result(rcsb_id))
             futures.append(fut)
 

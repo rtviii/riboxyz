@@ -1,7 +1,5 @@
-import asyncio
 import os
 from ete3 import NCBITaxa, NodeStyle, TreeStyle
-
 from api.ribctl.etl.ribosome_assets import Assetlist, RibosomeAssets, obtain_assets, obtain_assets_threadpool
 
 # Create an instance of the NCBITaxa class
@@ -12,22 +10,8 @@ RIBETL_DATA = os.environ.get('RIBETL_DATA')
 # for struct in os.listdir(RIBETL_DATA):
 #     print(RibosomeAssets(struct).profile())
 
-rcsb_list = ['3J7Z', '5afi','4ug0']
-
 rcsb_id = '3J7Z'
 
-ASL = Assetlist(profile= True, factors_and_ligands = True)
-
-loop = asyncio.get_event_loop()
-loop.run_until_complete(obtain_assets(rcsb_id,ASL,overwrite=False))
-
-# obtain_assets_threadpool(
-#                     rcsb_list,
-#                     ASL,
-#                     workers=16,
-#                     get_all=True,
-#                     # replace=True
-#                   )
 
 #TODO: Ignore intermediate taxa (induct the species, strains, subspecies etc. as nodes)
 # - orgnaism
