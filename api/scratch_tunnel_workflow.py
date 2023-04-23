@@ -121,6 +121,7 @@ seq, auth_asym_id, rna_type = rna.entity_poly_seq_one_letter_code_can, rna.auth_
 # pprint(auth_asym_id)
 
 
+# correct for assembly
 print(R.get_rna_by_nomclass("23SrRNA"))
 
 # def extract_ptc_coordinates():
