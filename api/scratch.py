@@ -19,7 +19,7 @@ rcsb_id = '3J7Z'
 ASL = Assetlist(profile= True, factors_and_ligands = True)
 
 loop = asyncio.get_event_loop()
-loop.run_until_complete(obtain_assets(rcsb_id,ASL,overwrite=True))
+loop.run_until_complete(obtain_assets(rcsb_id,ASL,overwrite=False))
 
 # obtain_assets_threadpool(
 #                     rcsb_list,

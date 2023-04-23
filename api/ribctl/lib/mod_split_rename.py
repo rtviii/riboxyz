@@ -79,7 +79,7 @@ def __process_chains(pdbid: str):
             ...
             # print("Exists: ", destination)
 
-def split_rename(pdbid: str):
+async def split_rename(pdbid: str):
     pdbid = pdbid.upper()
     __inject_dict(pdbid)
     __process_chains(pdbid)

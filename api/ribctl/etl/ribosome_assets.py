@@ -138,38 +138,50 @@ class RibosomeAssets():
             os.makedirs(self._dir_path(), 0o777)
 
     async def _verify_cif(self, overwrite: bool = False) -> bool:
-        if overwrite:
-            download_unpack_place(self.rcsb_id)
+        if not os.path.exists(self._cif_filepath()):
+            await download_unpack_place(self.rcsb_id)
             print("Saved structure file:\t", self._cif_filepath())
             return True
         else:
-            if os.path.exists(self._cif_filepath()):
+            if overwrite:
+                await download_unpack_place(self.rcsb_id)
+                print("Saved structure file:\t", self._cif_filepath())
                 return True
             else:
                 return False
 
     async def _verify_cif_modified_and_chains(self, overwrite: bool = False) -> bool:
-        if overwrite:
-            split_rename(self.rcsb_id)
+        if not os.path.isdir(self.chains_dir()):
+            os.makedirs(self.chains_dir())
+            await split_rename(self.rcsb_id)
             return True
         else:
-            return os.path.exists(self._cif_modified_filepath()) and os.path.isdir(self.chains_dir())
+            if overwrite:
+                await split_rename(self.rcsb_id)
+                return True
+            else:
+                return False
 
     async def _verify_json_profile(self, overwrite: bool = False) -> bool:
-        if overwrite:
-            ribosome = process_pdb_record(self.rcsb_id)
+        self._verify_dir_exists()
 
+        if not os.path.exists(self._json_profile_filepath()):
+            ribosome = process_pdb_record(self.rcsb_id)
             if not parse_obj_as(RibosomeStructure, ribosome):
                 raise Exception("Invalid ribosome structure profile.")
-
-            self._verify_dir_exists()
             self.save_json_profile(self._json_profile_filepath(), ribosome.dict())
-            print(f"Saved structure profile:\t{self._json_profile_filepath()}")
+            print(f"Wrote structure profile:\t{self._json_profile_filepath()}")
             return True
         else:
-            if os.path.exists(self._json_profile_filepath()):
+            if overwrite:
+                ribosome = process_pdb_record(self.rcsb_id)
+                if not parse_obj_as(RibosomeStructure, ribosome):
+                    raise Exception("Invalid ribosome structure profile.")
+                self.save_json_profile(self._json_profile_filepath(), ribosome.dict())
+                print(f"Wrote structure profile:\t{self._json_profile_filepath()}")
                 return True
-            return False
+            else:
+                return False
 
     def _verify_png_thumbnail(self, overwrite: bool = False) -> bool:
         if overwrite:
@@ -206,7 +218,6 @@ class RibosomeAssets():
                 else:
                     ...
 
-
                     
         if polymeric_factors is not None:
             for poly in polymeric_factors:
@@ -240,19 +251,15 @@ async def obtain_assets(rcsb_id: str ,assetlist:Assetlist ,overwrite: bool = Fal
     coroutines = []
 
     if assetlist.profile:
-        print("p")
         coroutines.append(assets._verify_json_profile(overwrite))
 
     if assetlist.structure:
-        print("s")
         coroutines.append(assets._verify_cif(overwrite))
 
     if assetlist.factors_and_ligands:
-        print("fl")
         coroutines.append(assets._verify_ligads_and_ligandlike_polys(overwrite))
 
     if assetlist.chains_and_modified_cif:
-        print("modified")
         coroutines.append(assets._verify_cif_modified_and_chains(overwrite))
 
     await asyncio.gather(*coroutines)
