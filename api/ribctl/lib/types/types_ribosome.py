@@ -11,6 +11,8 @@ ProteinClass = typing.Union[LSU_Proteins , SSU_Proteins]
 PolymerClass = typing.Union[ProteinClass, RNAClass]
 
 class Polymer(BaseModel):
+    assembly_id: int
+
     asym_ids: list[str]
     auth_asym_id: str
 
