@@ -1,6 +1,7 @@
 import asyncio
 import json
 from typing import Optional, Tuple
+from api.ribctl.lib.types.types_binding_site import BindingSite
 from api.ribctl.lib.types.types_poly_nonpoly_ligand import RNAClass
 from logs.loggers import updates_logger
 from ribctl.lib.mod_extract_bsites import bsite_nonpolymeric_ligand, struct_ligand_ids, struct_polymeric_factor_ids, bsite_polymeric_factor, bsite_polymeric_factor
@@ -186,27 +187,42 @@ class RibosomeAssets():
 
     async def _verify_ligads_and_ligandlike_polys(self, overwrite: bool = False):
 
-        def ligand_path(chem_id): return os.path.join(self._dir_path(), f"LIGAND_{chem_id.upper()}.json")
-        def poly_factor_path(auth_asym_id): return os.path.join(self._dir_path(), f"POLYMER_{auth_asym_id.upper()}.json")
+        # def ligand_path(chem_id): return os.path.join(self._dir_path(), f"polymer_{chem_id.upper()}.json")
+        # def poly_factor_path(auth_asym_id): return os.path.join(self._dir_path(), f"polymer_{auth_asym_id.upper()}.json")
 
         ligands           = struct_ligand_ids(self.rcsb_id, self.profile())
         polymeric_factors = struct_polymeric_factor_ids(self.profile())
         all_verified_flag = True
 
         for ligand_chemid in ligands:
-            if not os.path.exists(ligand_path(ligand_chemid)):
+            if not os.path.exists(BindingSite.path_nonpoly_ligand(self.rcsb_id,ligand_chemid)):
                 all_verified_flag = False
+                bsite = bsite_nonpolymeric_ligand(ligand_chemid, self.biopython_structure())
+                bsite.save(bsite.path_nonpoly_ligand(self.rcsb_id, ligand_chemid))
+            else:
                 if overwrite:
                     bsite = bsite_nonpolymeric_ligand(ligand_chemid, self.biopython_structure())
                     bsite.save(bsite.path_nonpoly_ligand(self.rcsb_id, ligand_chemid))
+                else:
+                    ...
+
+
                     
         if polymeric_factors is not None:
             for poly in polymeric_factors:
-                if not os.path.exists(poly_factor_path(poly.auth_asym_id)):
+                if not os.path.exists(BindingSite.path_poly_factor(self.rcsb_id, poly.nomenclature[0], poly.auth_asym_id)):
                     all_verified_flag = False
+                    bsite = bsite_polymeric_factor(poly.auth_asym_id, self.biopython_structure())
+                    bsite.save(bsite.path_poly_factor(self.rcsb_id, poly.nomenclature[0],poly.auth_asym_id))
+                else:
                     if overwrite:
                         bsite = bsite_polymeric_factor(poly.auth_asym_id, self.biopython_structure())
                         bsite.save(bsite.path_poly_factor(self.rcsb_id, poly.nomenclature[0],poly.auth_asym_id))
+                    else:
+                        ...
+
+
+        
 
         return all_verified_flag
 
@@ -224,15 +240,19 @@ async def obtain_assets(rcsb_id: str ,assetlist:Assetlist ,overwrite: bool = Fal
     coroutines = []
 
     if assetlist.profile:
+        print("p")
         coroutines.append(assets._verify_json_profile(overwrite))
 
     if assetlist.structure:
+        print("s")
         coroutines.append(assets._verify_cif(overwrite))
 
     if assetlist.factors_and_ligands:
+        print("fl")
         coroutines.append(assets._verify_ligads_and_ligandlike_polys(overwrite))
 
     if assetlist.chains_and_modified_cif:
+        print("modified")
         coroutines.append(assets._verify_cif_modified_and_chains(overwrite))
 
     await asyncio.gather(*coroutines)

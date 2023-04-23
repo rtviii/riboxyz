@@ -6,6 +6,10 @@ from api.ribctl.etl.ribosome_assets import Assetlist, RibosomeAssets, obtain_ass
 from api.ribctl.lib.types.types_ribosome import RibosomeStructure
 from logs.loggers import updates_logger
 from ribctl.etl.struct_rcsb_api import gql_monolith,query_rcsb_api, process_pdb_record
+from api.db.ribosomexyz import ribosomexyzDB
+from api.rbxz_bend.settings import NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER
+import fire
+
 
 arg = argparse.ArgumentParser(description='RibCtl - A tool to control the ribosome database')
 
@@ -13,8 +17,13 @@ arg.add_argument('-dbname', '--database_name', type=str)
 arg.add_argument('-s', '--structure', type=str)
 arg.add_argument('-o', '--obtain', type=str)
 arg.add_argument('-ttt', '--test', action='store_true')
+arg.add_argument('-db', '--database', action='store_true')
 
 args = arg.parse_args()
+
+if args.db:
+    db = ribosomexyzDB(NEO4J_URI, NEO4J_USER, NEO4J_PASSWORD)
+    fire.Fire(db)
 
 if args.obtain:
 
@@ -24,7 +33,7 @@ if args.obtain:
                         Assetlist(profile=True,  factors_and_ligands=True),
                         workers=16,
                         get_all=True,
-                        replace=True
+                        # replace=True
                       )
 if args.structure:
     str = args.structure.upper()

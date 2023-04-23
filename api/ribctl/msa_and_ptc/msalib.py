@@ -111,7 +111,6 @@ def muscle_combine_profile(msa_path1: str, msa_path2: str, out_filepath: str):
     subprocess.Popen(cmd, stdout=subprocess.PIPE,stderr=subprocess.PIPE, env=os.environ.copy()).wait()
     sys.stdout.flush()
 
-# ※  ------------------ Proteovision stuff --------------
 
 def msa_class_proteovision_path(_:ProteinClass):
     return '/home/rxz/dev/docker_ribxz/api/ribctl/__wip/data/msa_classes_proteovision/{}/{}_ribovision.fasta'.format(infer_subunit(_),_)
