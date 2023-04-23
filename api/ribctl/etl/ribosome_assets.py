@@ -1,5 +1,6 @@
 import asyncio
 import json
+from pprint import pprint
 from typing import Optional, Tuple
 from api.ribctl.lib.types.types_binding_site import BindingSite
 from api.ribctl.lib.types.types_poly_nonpoly_ligand import RNAClass
@@ -9,7 +10,7 @@ from ribctl.lib.mod_split_rename import split_rename
 from ribctl.etl.struct_rcsb_api import current_rcsb_structs, process_pdb_record
 from ribctl.lib.mod_render_thumbnail import render_thumbnail
 from ribctl.lib.utils import download_unpack_place, open_structure
-from ribctl.lib.types.types_ribosome import ProteinClass, RibosomeStructure
+from ribctl.lib.types.types_ribosome import RNA, Protein, ProteinClass, RibosomeStructure
 from pydantic import BaseModel, parse_obj_as
 from concurrent.futures import ALL_COMPLETED, Future, ProcessPoolExecutor, ThreadPoolExecutor, wait
 import os
@@ -72,58 +73,50 @@ class RibosomeAssets():
 
     # ※ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-= Getters =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-    def get_seq_rna_by_nomclass(self, class_: RNAClass, canonical:bool=True) -> Tuple[ str, str] | Tuple[None,None]:
+    def get_rna_by_nomclass(self, class_: RNAClass, model:int = 0) -> RNA | None:
+        """@model here stands to specify which of the two or more models the rna comes from
+        in the case that a structure contains multiple models (ex. 4V4Q XRAY)"""
+
         profile = self.profile()
 
         if profile.rnas == None:
-            return ( None,None )
+            return None
+
+        sought = []
 
         for rna in profile.rnas:
             if class_ in rna.nomenclature :
-                if canonical:
-                    return ( rna.entity_poly_seq_one_letter_code_can, rna.auth_asym_id )
-                else:
-                    return ( rna.entity_poly_seq_one_letter_code, rna.auth_asym_id )
-        return ( None,None )
+               sought.append(rna)
 
-    def get_seq_prot_by_nomclass(self, class_: ProteinClass, canonical:bool=True)-> Tuple[ str,str] | Tuple[None,None] :
+        models = self.profile().assembly_map
+        if len(models) == 1:
+            return sought[0]
+        else:
+            return sought[model]
+
+        return sought[0]
+
+    def get_prot_by_nomclass(self, class_: ProteinClass)-> Protein | None:
         for prot in self.profile().proteins:
             if class_ in prot.nomenclature :
-                if canonical:
-                    return ( prot.entity_poly_seq_one_letter_code_can, prot.auth_asym_id )
-                else:
-                    return ( prot.entity_poly_seq_one_letter_code, prot.auth_asym_id )
+                return prot
         else:
-            return ( None,None )
+            return None
 
-    def get_LSU_rRNA(self, get_canonical:bool=True)->Tuple[str,str,str]:
+    def get_LSU_rRNA(self )->RNA:
         """retrieve the largest rRNA sequence in the structure
         @returns (seq, auth_asym_id, rna_type)
         """
-        annotated_cifpath = self._cif_modified_filepath()
-        rna_type          = ""
 
-        [seq, auth_asym_id] = self.get_seq_rna_by_nomclass("23SrRNA", get_canonical)
-        rna_type = "23SrRNA"
-
-        if seq == None or auth_asym_id == None:
-            [chain_id, strand_target] = self.get_seq_rna_by_nomclass(
-                "25SrRNA",
-                get_canonical
-            )
-
-            rna_type = "25SrRNA"
-
-        if seq == None or auth_asym_id == None:
-            [chain_id, strand_target] = self.get_seq_rna_by_nomclass(
-                "28SrRNA",
-                get_canonical)
-            rna_type = "28SrRNA"
-
-        if seq == None or auth_asym_id == None:
+        rna = self.get_rna_by_nomclass("23SrRNA")
+        if rna == None:
+            rna = self.get_rna_by_nomclass("25SrRNA")
+        if rna == None:
+            rna = self.get_rna_by_nomclass("28SrRNA")
+        if rna == None:
             raise Exception("No LSU rRNA found in structure")
-
-        return (seq,auth_asym_id, rna_type)
+        else:
+            return rna
 
 
 
