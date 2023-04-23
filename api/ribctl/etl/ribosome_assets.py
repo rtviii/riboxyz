@@ -1,5 +1,6 @@
 import asyncio
 import json
+from Bio.PDB.Structure import Structure
 from pprint import pprint
 from typing import Optional, Tuple
 from api.ribctl.lib.types.types_binding_site import BindingSite
@@ -72,6 +73,9 @@ class RibosomeAssets():
             json.dump(profile, f)
 
     # ※ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-= Getters =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+    def get_struct_and_profile(self)->tuple[Structure, RibosomeStructure]:
+        return self.biopython_structure(), self.profile()
 
     def get_rna_by_nomclass(self, class_: RNAClass, assembly:int = 0) -> RNA | None:
         """@assembly here stands to specify which of the two or more models the rna comes from
