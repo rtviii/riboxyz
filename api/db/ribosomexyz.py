@@ -4,11 +4,11 @@ import typing
 from neo4j.exceptions import AuthError
 from pyparsing import Any
 from neo4j import Driver, GraphDatabase
-from ribctl.lib.struct_rcsb_api import current_rcsb_structs
+from ribctl.etl.struct_rcsb_api import current_rcsb_structs
 from rbxz_bend.settings import NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER, get_ribxz_logger
-from rbxz_bend.db.inits.proteins import add_protein, node__protein_class
-from rbxz_bend.db.inits.rna import add_rna, node__rna_class
-from rbxz_bend.db.inits.structure import add_ligand, node__structure
+from api.db.inits.proteins import add_protein, node__protein_class
+from api.db.inits.rna import add_rna, node__rna_class
+from api.db.inits.structure import add_ligand, node__structure
 from ribctl.lib.types.types_ribosome import RibosomeStructure
 from api.ribctl.etl.ribosome_assets import RibosomeAssets
 from api.ribctl.lib.types.types_poly_nonpoly_ligand import list_LSU_Proteins, list_SSU_Proteins, list_RNAClass
@@ -139,7 +139,7 @@ class ribosomexyzDB():
 
     def add_structure(self, struct_assets: RibosomeAssets):
 
-        R = RibosomeStructure.parse_obj(struct_assets.json_profile())
+        R = RibosomeStructure.parse_obj(struct_assets.profile())
 
         with self.driver.session() as s:
             struct_node_result = s.execute_write(node__structure(R))

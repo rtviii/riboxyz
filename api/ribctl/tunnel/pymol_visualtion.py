@@ -4,9 +4,7 @@ from pprint import pprint
 from typing import List
 from pymol import cmd
 
-
-RIBETL_DATA = "/home/rxz/dev/static"
-
+RIBETL_DATA = os.environ.get("RIBETL_DATA")
 
 def build_selection_string( chain_name: str, res_ids: List[int]):
     """pymol command being issued"""
@@ -14,7 +12,6 @@ def build_selection_string( chain_name: str, res_ids: List[int]):
     selection_string  = f"c. {chain_name} and "
     selection_string += " OR ".join([*map(lambda x: f"resi {x}", res_ids)])
     return selection_name, selection_string
-
 
 def highlight_ptc(structure: str):
     structure = structure.upper()
@@ -59,7 +56,6 @@ def highlight_ptc(structure: str):
         # cmd.set("cartoon_transparency", 0.5)
         cmd.bg_color("white")
         cmd.reset()
-
 
 def highlight_ptc_fuzzy(structure: str):
     """site 9 conserved residues located via fuzzy search"""
@@ -145,25 +141,20 @@ def highlight_ptc_raw(structure: str):
         cmd.zoom(name9)
         cmd.reset()
 
-
 def list_bacteria():
     pprint(os.listdir(f"{RIBETL_DATA}/PTC_COORDINATES"))
-
 
 def ptc(struct: str):
     cmd.delete("all")
     struct = struct.upper()
-    struct_path = os.path.join(
-        "/home/rxz/dev/static/{}/{}.cif".format(struct, struct))
+    struct_path = os.path.join("/home/rxz/dev/static/{}/{}.cif".format(struct, struct))
     cmd.load(struct_path)
     highlight_ptc(struct)
-
 
 def get_markerspath(struct: str):
     struct = struct.upper()
     _path = os.path.join(RIBETL_DATA, "PTC_MARKERS_RAW", f"{struct}_PTC_MARKERS_RAW.json")
     return _path
-
 
 def create_marker_at_atom(selection_name:str, posn:List[float], color_:str="red", repr="spheres", label=''):
     cmd.pseudoatom(selection_name, pos=posn, vdw=1, color=color_,  label=label)
@@ -192,14 +183,14 @@ def ptc_raw_w_markerks(struct: str):
         ( U_end_pos[1] + U_start_pos[1] ) / 2,
         ( U_end_pos[2] + U_start_pos[2] ) / 2,
     ]
-    # print( "PRESENT::",[ *POSNS[chain].values() ][0].keys())
-    create_marker_at_atom("uridine_comb_start",U_start_pos, color_="green")
-    create_marker_at_atom("uridine_comb_end",U_end_pos, color_="green")
+    create_marker_at_atom("uridine_comb_start", U_start_pos, color_="green")
+    create_marker_at_atom("uridine_comb_end", U_end_pos, color_="green")
     cmd.distance(None, "uridine_comb_start", "uridine_comb_end", mode=0)
 
     create_marker_at_atom("centroid",midpoint, color_="red")
 
-cmd.extend("ptc", ptc_raw_w_markerks)
+cmd.extend("ptc", ptc)
+cmd.extend("ptc_w_markers", ptc_raw_w_markerks)
 cmd.extend("list_bacteria", list_bacteria)
 
 

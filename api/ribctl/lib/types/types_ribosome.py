@@ -11,6 +11,8 @@ ProteinClass = typing.Union[LSU_Proteins , SSU_Proteins]
 PolymerClass = typing.Union[ProteinClass, RNAClass]
 
 class Polymer(BaseModel):
+    assembly_id: int
+
     asym_ids: list[str]
     auth_asym_id: str
 
@@ -55,9 +57,8 @@ class NonpolymericLigand(BaseModel)  :
     #   nomenclature       : list[NonpolymericLigandClass]
 
 class PolymericFactor(Polymer): 
-    nomenclature: list[PolymericFactorClass]
+    nomenclature: list[PolymericFactorClass] 
     
-
 class NonpolymerEntityInstance(BaseModel):
     class NonpolymerEntityInstanceContainerIdentifiers(BaseModel):
         entity_id: str

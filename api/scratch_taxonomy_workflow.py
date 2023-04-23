@@ -1,17 +1,16 @@
 import os
 from ete3 import NCBITaxa, NodeStyle, TreeStyle
-
-from api.ribctl.etl.ribosome_assets import RibosomeAssets
+from api.ribctl.etl.ribosome_assets import Assetlist, RibosomeAssets, obtain_assets, obtain_assets_threadpool
 
 # Create an instance of the NCBITaxa class
-ncbi = NCBITaxa()
+# ncbi = NCBITaxa()
 
 RIBETL_DATA = os.environ.get('RIBETL_DATA')
 
+# for struct in os.listdir(RIBETL_DATA):
+#     print(RibosomeAssets(struct).profile())
 
-for struct in os.listdir(RIBETL_DATA):
-    print(RibosomeAssets(struct).json_profile())
-
+rcsb_id = '3J7Z'
 
 
 #TODO: Ignore intermediate taxa (induct the species, strains, subspecies etc. as nodes)
