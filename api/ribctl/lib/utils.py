@@ -9,7 +9,7 @@ from Bio.PDB import FastMMCIFParser
 
 RIBETL_DATA = str(os.environ.get('RIBETL_DATA'))
 
-def download_unpack_place(struct_id: str) -> None:
+async def download_unpack_place(struct_id: str) -> None:
 
     BASE_URL = "http://files.rcsb.org/download/"
     FORMAT   = ".cif.gz"
@@ -48,12 +48,6 @@ def struct_path(pdbid: str, pftype: typing.Literal["cif", "json", "modified"]):
     else:
         raise ValueError(
             "Invalid path type. Must be 'cif', 'json', or 'modified' ")
-
-def ligand_path(pdbid: str, ligand_id: str, lig_type: typing.Literal["LIGAND", "POLYMER"]):
-    return os.path.join(RIBETL_DATA, pdbid.upper(),  "{}_{}.json".format(
-        "LIGAND" if lig_type == 'LIGAND' else "POLYMER",
-        ligand_id
-    ))
 
 def open_structure(pdbid: str, path_type: typing.Literal["cif", "json", "modified"]) -> Structure | typing.Any:
     pdbid = pdbid.upper()

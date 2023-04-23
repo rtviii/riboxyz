@@ -6,7 +6,6 @@ alignment = pairwise2.align.globalxx("AABBCC","AABBCC")
 # print(format_alignment(*alignment[0]))
 
 
-# !!! ※ TEST FORWRADS AND BACKWARDS MATCH FUNCTIONS
 def util__backwards_match(alntgt: str, resid: int):
     """Returns the target-sequence index of a residue in the (aligned) target sequence"""
     if resid > len(alntgt):

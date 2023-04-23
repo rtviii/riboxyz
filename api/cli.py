@@ -2,49 +2,54 @@
 # export DJANGO_SETTINGS_MODULE=api.rbxz_bend                                                                                         [cli]
 # import argparse
 import argparse
+import asyncio
 from api.ribctl.etl.ribosome_assets import Assetlist, RibosomeAssets, obtain_assets, obtain_assets_processpool, obtain_assets_threadpool 
 from api.ribctl.lib.types.types_ribosome import RibosomeStructure
 from logs.loggers import updates_logger
 from ribctl.etl.struct_rcsb_api import gql_monolith,query_rcsb_api, process_pdb_record
+from api.db.ribosomexyz import ribosomexyzDB
+from api.rbxz_bend.settings import NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER
+import fire
+
 
 arg = argparse.ArgumentParser(description='RibCtl - A tool to control the ribosome database')
 
-arg.add_argument('-dbname', '--database_name', type=str)
-arg.add_argument('-s', '--structure', type=str)
+arg.add_argument('-getall', '--obtain_all_structures', action='store_true')
 arg.add_argument('-o', '--obtain', type=str)
-arg.add_argument('-ttt', '--test', action='store_true')
 
 args = arg.parse_args()
 
-if args.obtain:
-
-    rcsb_list = ['3J7Z', '5afi','4ug0']
+if args.obtain_all_structures:
+    ASL = Assetlist(profile= True)
     obtain_assets_threadpool(
-                        rcsb_list,
-                        Assetlist(profile=True,  factors_and_ligands=True),
+                        [],
+                        ASL,
                         workers=16,
                         get_all=True,
-                        replace=True
+                        overwrite=True
                       )
+if args.obtain:
+    RCSB_ID = str(args.obtain)
 
-if args.structure:
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(
+    obtain_assets(
+    RCSB_ID,
+    Assetlist(profile=True),
+    overwrite=True
+   )
+    )
 
-    str = args.structure.upper()
 
-    try:
 
-        struct = process_pdb_record(str)
-        RibosomeStructure.parse_obj(struct)
-        assets = RibosomeAssets(str)
-        assets.save_json_profile(assets._json_profile_filepath(), struct.dict())
-        updates_logger.info(f"Saved {str}.json to {assets._json_profile_filepath()}")
 
-    except Exception as e:
-        updates_logger.exception(e)
+
+# if args.db:
+#     db = ribosomexyzDB(NEO4J_URI, NEO4J_USER, NEO4J_PASSWORD)
+#     fire.Fire(db)
 
 
 # if args.test:
-
 #     #TODO: Make a test suite
 #     qo = ribosomexyzDB(NEO4J_URI, NEO4J_USER, NEO4J_PASSWORD)
 #     q  = qo.get_all_structures()
