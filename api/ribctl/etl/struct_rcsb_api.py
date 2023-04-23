@@ -116,27 +116,37 @@ def __reshape_to_nonpolymericligand(nonpoly)->NonpolymericLigand:
         number_of_instances = nonpoly['rcsb_nonpolymer_entity']['pdbx_number_of_molecules'],
     )
 
-def __is_ligand_like(polymer, nomenclature: list[str]):
-    # "Obsolete, hopefully"
-    if 'tRNA' in nomenclature or 'mRNA' in nomenclature:
-        return True
-    #   // ? Look for enzymes, factors and antibiotics
-    reg = r"/(\w*(?<!(cha|pro|dom|str))in\b)|(\b\w*zyme\b)|(factor)/gi"
-    match = re.search(reg, polymer['rcsb_polymer_entity']['pdbx_description'])
-    if match != None  \
-            and not 'protein' not in match.string.lower()  \
-            and not ('protein' in polymer['rcsb_polymer_entity']['pdbx_description'].lower()) \
-            and not ('rna' in polymer['rcsb_polymer_entity']['pdbx_description'].lower()):
-        return True
-    else:
-        return False
+# def __is_ligand_like(polymer, nomenclature: list[str]):
+#     # "Obsolete, hopefully"
+#     if 'tRNA' in nomenclature or 'mRNA' in nomenclature:
+#         return True
+#     #   // ? Look for enzymes, factors and antibiotics
+#     reg = r"/(\w*(?<!(cha|pro|dom|str))in\b)|(\b\w*zyme\b)|(factor)/gi"
+#     match = re.search(reg, polymer['rcsb_polymer_entity']['pdbx_description'])
+#     if match != None  \
+#             and not 'protein' not in match.string.lower()  \
+#             and not ('protein' in polymer['rcsb_polymer_entity']['pdbx_description'].lower()) \
+#             and not ('rna' in polymer['rcsb_polymer_entity']['pdbx_description'].lower()):
+#         return True
+#     else:
+#         return False
 
-def __reshape_poly_to_rna(plm) -> list[RNA]:
+
+def assign_poly_to_assembly(assembly_maps:list[AssemblyInstancesMap], auth_asym_id:str)->int:
+    if len(assembly_maps) == 1:
+        return 0
+    else:
+        for A in assembly_maps:
+            for polymer_instance in A.polymer_entity_instances:
+                if polymer_instance.rcsb_polymer_entity_instance_container_identifiers.auth_asym_id == auth_asym_id:
+                    return int(A.rcsb_id.split('-')[1] ) - 1
+        else:
+            raise LookupError()
+
+
+def __reshape_poly_to_rna(plm, assembly_maps:list[AssemblyInstancesMap]) -> list[RNA]:
     """this returns a list because certain polymers accounts for multiple RNA molecules"""
 
-    # class RCSBOrganism:
-    #     ncbi_taxonomy_id:int | None
-    #     scientific_name :str | None
 
 
     host_organisms  :list[Any] | None = plm['rcsb_entity_host_organism']
@@ -178,6 +188,7 @@ def __reshape_poly_to_rna(plm) -> list[RNA]:
 
     return [
         RNA(**{
+            "assembly_id" : assign_poly_to_assembly(assembly_maps, auth_asym_id),
             "nomenclature": nomenclature,
             "asym_ids": plm['rcsb_polymer_entity_container_identifiers']['asym_ids'],
             "auth_asym_id": auth_asym_id,
@@ -199,7 +210,7 @@ def __reshape_poly_to_rna(plm) -> list[RNA]:
         })
         for auth_asym_id in plm['rcsb_polymer_entity_container_identifiers']['auth_asym_ids']]
 
-def __reshape_to_polymeric_factor(plm)->list[PolymericFactor]:
+def __reshape_to_polymeric_factor(plm, assembly_maps:list[AssemblyInstancesMap])->list[PolymericFactor]:
     host_organisms  :list[Any] | None = plm['rcsb_entity_host_organism']
     source_organisms:list[Any] | None = plm['rcsb_entity_source_organism']
 
@@ -233,6 +244,7 @@ def __reshape_to_polymeric_factor(plm)->list[PolymericFactor]:
 
     return [
         PolymericFactor(**{
+            "assembly_id"   : assign_poly_to_assembly(assembly_maps, auth_asym_id),
             "nomenclature"  : nomenclature,
             "asym_ids"      : plm['rcsb_polymer_entity_container_identifiers']['asym_ids'],
             "auth_asym_id"  : auth_asym_id,
@@ -245,16 +257,16 @@ def __reshape_to_polymeric_factor(plm)->list[PolymericFactor]:
 
             "rcsb_pdbx_description": "" if plm['rcsb_polymer_entity']['pdbx_description'] == None else plm['rcsb_polymer_entity']['pdbx_description'],
 
-            "entity_poly_strand_id": plm['entity_poly']['pdbx_strand_id'],
-            "entity_poly_seq_one_letter_code": plm['entity_poly']['pdbx_seq_one_letter_code'],
+            "entity_poly_strand_id"              : plm['entity_poly']['pdbx_strand_id'],
+            "entity_poly_seq_one_letter_code"    : plm['entity_poly']['pdbx_seq_one_letter_code'],
             "entity_poly_seq_one_letter_code_can": plm['entity_poly']['pdbx_seq_one_letter_code_can'],
-            "entity_poly_seq_length": plm['entity_poly']['rcsb_sample_sequence_length'],
-            "entity_poly_entity_type": plm['entity_poly']['type'],
-            "entity_poly_polymer_type": plm['entity_poly']['rcsb_entity_polymer_type']
+            "entity_poly_seq_length"             : plm['entity_poly']['rcsb_sample_sequence_length'],
+            "entity_poly_entity_type"            : plm['entity_poly']['type'],
+            "entity_poly_polymer_type"           : plm['entity_poly']['rcsb_entity_polymer_type']
         })
         for auth_asym_id in plm['rcsb_polymer_entity_container_identifiers']['auth_asym_ids']]
 
-def __reshape_poly_to_protein(plm)->list[Protein]:
+def __reshape_poly_to_protein(plm, assembly_maps:list[AssemblyInstancesMap])->list[Protein]:
 
     if plm['pfams'] != None and len(plm['pfams']) > 0:
 
@@ -300,25 +312,27 @@ def __reshape_poly_to_protein(plm)->list[Protein]:
 
     return  [
         Protein(**{
-            "nomenclature": nomenclature,
-            "asym_ids": plm['rcsb_polymer_entity_container_identifiers']['asym_ids'],
-            "parent_rcsb_id": plm['entry']['rcsb_id'],
-            "auth_asym_id": auth_asym_id,
-            "pfam_accessions": pfam_accessions,
-            "pfam_comments": pfam_comments,
-            "pfam_descriptions": pfam_descriptions,
-            "host_organism_ids": host_organism_ids,
-            "host_organism_names": host_organism_names,
-            "src_organism_ids": src_organism_ids,
-            "src_organism_names": src_organism_names,
-            "uniprot_accession": [entry['rcsb_id'] for entry in plm['uniprots']] if plm['uniprots'] != None and len(plm['uniprots']) > 0 else [],
-            "rcsb_pdbx_description": plm['rcsb_polymer_entity']['pdbx_description'],
-            "entity_poly_strand_id": plm['entity_poly']['pdbx_strand_id'],
-            "entity_poly_seq_one_letter_code": plm['entity_poly']['pdbx_seq_one_letter_code'],
+
+            "assembly_id"   : assign_poly_to_assembly(assembly_maps, auth_asym_id),
+            "nomenclature"                       : nomenclature,
+            "asym_ids"                           : plm['rcsb_polymer_entity_container_identifiers']['asym_ids'],
+            "parent_rcsb_id"                     : plm['entry']['rcsb_id'],
+            "auth_asym_id"                       : auth_asym_id,
+            "pfam_accessions"                    : pfam_accessions,
+            "pfam_comments"                      : pfam_comments,
+            "pfam_descriptions"                  : pfam_descriptions,
+            "host_organism_ids"                  : host_organism_ids,
+            "host_organism_names"                : host_organism_names,
+            "src_organism_ids"                   : src_organism_ids,
+            "src_organism_names"                 : src_organism_names,
+            "uniprot_accession"                  : [entry['rcsb_id'] for entry in plm['uniprots']] if plm['uniprots'] != None and len(plm['uniprots']) > 0 else [],
+            "rcsb_pdbx_description"              : plm['rcsb_polymer_entity']['pdbx_description'],
+            "entity_poly_strand_id"              : plm['entity_poly']['pdbx_strand_id'],
+            "entity_poly_seq_one_letter_code"    : plm['entity_poly']['pdbx_seq_one_letter_code'],
             "entity_poly_seq_one_letter_code_can": plm['entity_poly']['pdbx_seq_one_letter_code_can'],
-            "entity_poly_seq_length": plm['entity_poly']['rcsb_sample_sequence_length'],
-            "entity_poly_entity_type": plm['entity_poly']['type'],
-            "entity_poly_polymer_type": plm['entity_poly']['rcsb_entity_polymer_type']
+            "entity_poly_seq_length"             : plm['entity_poly']['rcsb_sample_sequence_length'],
+            "entity_poly_entity_type"            : plm['entity_poly']['type'],
+            "entity_poly_polymer_type"           : plm['entity_poly']['rcsb_entity_polymer_type']
         }) for auth_asym_id in plm['rcsb_polymer_entity_container_identifiers']['auth_asym_ids']
     ]
 
