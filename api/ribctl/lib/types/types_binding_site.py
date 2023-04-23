@@ -75,14 +75,16 @@ class BindingSiteChain(Polymer):
 class BindingSite(BaseModel):
     __root__: typing.Dict[str, BindingSiteChain]
 
-    def path_nonpoly_ligand(self, rcsb_id: str, class_: str):
+    @staticmethod
+    def path_nonpoly_ligand( rcsb_id: str, class_: str):
         RIBETL_DATA = os.environ.get('RIBETL_DATA')
         return os.path.join(
             str(RIBETL_DATA), rcsb_id.upper() , "ligand_" +
             class_.replace(" ", "_").lower() + ".json"
         )
 
-    def path_poly_factor(self, rcsb_id: str, class_: str, auth_asym_id: str):
+    @staticmethod
+    def path_poly_factor( rcsb_id: str, class_: str, auth_asym_id: str):
         RIBETL_DATA = os.environ.get('RIBETL_DATA')
         return os.path.join(
             str(RIBETL_DATA),
