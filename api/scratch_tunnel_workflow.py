@@ -52,8 +52,8 @@ def pick_match(ms, rna_length: int):
         return ms[0]
 
 
-def ptc_residues_via_alignment(rcsb_id: str, assembly_id: int = 0):
-    R = RibosomeAssets(RCSB_ID)
+def ptc_residues_via_alignment(rcsb_id: str, assembly_id: int = 0)->tuple[list[Residue], str]:
+    R = RibosomeAssets(rcsb_id)
     # R.profile()
 
     struct_profile: Structure = R.biopython_structure()
@@ -77,64 +77,105 @@ def ptc_residues_via_alignment(rcsb_id: str, assembly_id: int = 0):
     m0           = pick_match(matches, len(raw_seq))
     PTC_residues = [ress_sanitized[i] for i in list(range(m0.start, m0.end))]
 
-    return PTC_residues
+    return PTC_residues, auth_asym_id
 
 
-def ptc_coordinates(reslist:list[ Residue ], ):
-    PTC_MARKERKS_RAW = {}
+def ptc_coordinates(reslist:list[ Residue ], auth_asym_id:str )->dict:
+    """
+    chain:
+        residue_id:
+            atom_name: [x, y, z]
+    
+    """
+
+    ptc_coordinates = {}
 
     for res in reslist:
-        if res.id[1] not in PTC_MARKERKS_RAW:
-            PTC_MARKERKS_RAW[res.id[1]] = {}
+        if res.id[1] not in ptc_coordinates:
+            ptc_coordinates[res.id[1]] = {}
         atom:Atom
         for atom in res.child_list:
             atom_name                              = atom.name
             atom_coords                            = atom.get_coord()
-            PTC_MARKERKS_RAW[res.id[1]][atom_name] = list(map(lambda x: float(x), list(atom_coords)))
-
-    # markers_dir = os.path.join(RIBETL_DATA, "PTC_MARKERS_RAW")
-    # outfile     = os.path.join(markers_dir, f"{rcsb_id.upper()}_PTC_MARKERS_RAW.json")
-
-    # with open(outfile, 'w') as outf:
-    #     json.dump(PTC_MARKERKS_RAW, outf, indent=4)
-    #     print("Saved {} successfully.".format(outfile))
+            ptc_coordinates[res.id[1]][atom_name] = list(map(lambda x: float(x), list(atom_coords)))
 
 
-def ptc_midpoint(reslist:list[Residue]):
+    ptc_coordinates = {
+        auth_asym_id: ptc_coordinates
+    }
+    return ptc_coordinates
 
 
-print(DORIS_ET_AL["subseq_9"])
-ptcres = ptc_residues_via_alignment(RCSB_ID, 0)
+def ptc_midpoint(reslist:list[Residue], auth_asym_id:str)->tuple[float,float,float]:
+    """
+    chain:
+        residue_id:
+            atom_name: [x, y, z]
+    
+    """
 
-pprint(ptcres)
+    ptc_coord_dict = ptc_coordinates(reslist, auth_asym_id)
 
+    lsu_rna = [*ptc_coord_dict.keys()][0]
+    if lsu_rna == None: raise Exception("Could not identify chain")
+
+    subseq_residues = ptc_coord_dict[lsu_rna]
+    subseq_length   = len(subseq_residues)
+
+
+    if "O4'" in [ *subseq_residues.values() ][subseq_length - 2]:
+        U_end_pos   = [ *subseq_residues.values() ][subseq_length - 2]["O4'"] # pre  last residue of the comb
+    else:
+        U_end_pos   = [ *subseq_residues.values() ][subseq_length - 2]["C4"] # pre  last residue of the comb
+
+    if "O4'" in [ *subseq_residues.values() ][0]:
+        U_start_pos = [ *subseq_residues.values() ][0]["O4'"]                     # first residue of the comb
+    else:
+        U_start_pos = [ *subseq_residues.values() ][0]["C4"]                     # first residue of the comb
+
+    midpoint = ( 
+        ( U_end_pos[0] + U_start_pos[0] ) / 2,
+        ( U_end_pos[1] + U_start_pos[1] ) / 2,
+        ( U_end_pos[2] + U_start_pos[2] ) / 2,
+     )
+
+    return midpoint
+
+
+idlist = ["6HCM",
+"7A5I",
+"6HCF",
+"3JAJ",
+"4V5H",
+"3J7Z",
+"5LZW",
+"7A5G",
+"5LZZ",
+"6SGC",
+"7A5F",
+"6OLI",
+"5LZX",
+"6HCJ",
+"5LZT",
+"6HCQ",
+"7A5K",
+"3J92",
+"5NWY",
+"7A5H",
+"6XA1",
+"4V6M",
+"6W6L",
+"5LZV",
+"7A5J"]
+
+for rcsb in  idlist:
+    try:
+        ptcres, auth_asym_id = ptc_residues_via_alignment(rcsb, 0)
+        print(rcsb, ptc_midpoint(ptcres, auth_asym_id))
+    except:
+        ...
 
 # def extract_ptc_coordinates():
 #     ...
 
 
-# ./6HCM/polymer_1_nascent_chain.json
-# ./7A5I/polymer_Y2_nascent_chain.json
-# ./6HCF/polymer_1_nascent_chain.json
-# ./3JAJ/polymer_2_nascent_chain.json
-# ./4V5H/polymer_AZ_nascent_chain.json
-# ./3J7Z/polymer_a_nascent_chain.json
-# ./5LZW/polymer_1_nascent_chain.json
-# ./7A5G/polymer_Y2_nascent_chain.json
-# ./5LZZ/polymer_1_nascent_chain.json
-# ./6SGC/polymer_XX_nascent_chain.json
-# ./7A5F/polymer_Y2_nascent_chain.json
-# ./6OLI/polymer_y_nascent_chain.json
-# ./5LZX/polymer_1_nascent_chain.json
-# ./6HCJ/polymer_1_nascent_chain.json
-# ./5LZT/polymer_1_nascent_chain.json
-# ./6HCQ/polymer_1_nascent_chain.json
-# ./7A5K/polymer_Y2_nascent_chain.json
-# ./3J92/polymer_1_nascent_chain.json
-# ./5NWY/polymer_s_nascent_chain.json
-# ./7A5H/polymer_Y2_nascent_chain.json
-# ./6XA1/polymer_NC_nascent_chain.json
-# ./4V6M/polymer_AV_nascent_chain.json
-# ./6W6L/polymer_y_nascent_chain.json
-# ./5LZV/polymer_1_nascent_chain.json
-# ./7A5J/polymer_Y2_nascent_chain.json
