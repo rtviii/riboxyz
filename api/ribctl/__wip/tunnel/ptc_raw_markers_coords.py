@@ -38,8 +38,7 @@ RIBETL_DATA = os.environ.get('RIBETL_DATA')
 
 # -------------------------------------------------------------------------------------------|
 
-parser = argparse.ArgumentParser(
-    description='CLI for locating PTC residues of 23SrRNA in a given prokaryotic PDB file')
+parser = argparse.ArgumentParser(description='CLI for locating PTC residues of 23SrRNA in a given prokaryotic PDB file')
 
 args = parser .parse_args()
 argdict = vars(parser.parse_args())
