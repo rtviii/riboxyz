@@ -4,7 +4,7 @@ from pprint import pprint
 from typing import List
 from pymol import cmd
 
-RIBETL_DATA = "/home/rxz/dev/static"
+RIBETL_DATA = os.environ.get("RIBETL_DATA")
 
 def build_selection_string( chain_name: str, res_ids: List[int]):
     """pymol command being issued"""
