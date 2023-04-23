@@ -73,8 +73,8 @@ class RibosomeAssets():
 
     # ※ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-= Getters =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-    def get_rna_by_nomclass(self, class_: RNAClass, model:int = 0) -> RNA | None:
-        """@model here stands to specify which of the two or more models the rna comes from
+    def get_rna_by_nomclass(self, class_: RNAClass, assembly:int = 0) -> RNA | None:
+        """@assembly here stands to specify which of the two or more models the rna comes from
         in the case that a structure contains multiple models (ex. 4V4Q XRAY)"""
 
         profile = self.profile()
@@ -82,37 +82,27 @@ class RibosomeAssets():
         if profile.rnas == None:
             return None
 
-        sought = []
-
         for rna in profile.rnas:
-            if class_ in rna.nomenclature :
-               sought.append(rna)
+            if class_ in rna.nomenclature and rna.assembly_id == assembly:
+                return rna
 
-        models = self.profile().assembly_map
-        if len(models) == 1:
-            return sought[0]
-        else:
-            return sought[model]
-
-        return sought[0]
-
-    def get_prot_by_nomclass(self, class_: ProteinClass)-> Protein | None:
+    def get_prot_by_nomclass(self, class_: ProteinClass, assembly:int = 0)-> Protein | None:
         for prot in self.profile().proteins:
-            if class_ in prot.nomenclature :
+            if class_ in prot.nomenclature  and prot.assembly_id == assembly:
                 return prot
         else:
             return None
 
-    def get_LSU_rRNA(self )->RNA:
+    def get_LSU_rRNA(self, assembly:int = 0 )->RNA:
         """retrieve the largest rRNA sequence in the structure
         @returns (seq, auth_asym_id, rna_type)
         """
 
-        rna = self.get_rna_by_nomclass("23SrRNA")
+        rna = self.get_rna_by_nomclass("23SrRNA", assembly)
         if rna == None:
-            rna = self.get_rna_by_nomclass("25SrRNA")
+            rna = self.get_rna_by_nomclass("25SrRNA", assembly)
         if rna == None:
-            rna = self.get_rna_by_nomclass("28SrRNA")
+            rna = self.get_rna_by_nomclass("28SrRNA", assembly)
         if rna == None:
             raise Exception("No LSU rRNA found in structure")
         else:

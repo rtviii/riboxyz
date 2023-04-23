@@ -17,11 +17,6 @@ DORIS_ET_AL = {
     "subseq_6": "AAGACCC",
     "subseq_8": "GGAUAAC",
     "subseq_9": "GAGCUGGGUUUA",
-    "e": {
-        "site_6": [2400, 2401, 2402, 2403, 2404, 2405, 2406, 2407],
-        "site_8": [2811, 2812, 2813, 2814, 2815, 2816, 2817, 2818],
-        "site_9": [2941, 2942, 2943, 2944, 2945, 2946, 2947, 2948, 2949, 2950, 2951, 2952, 2953]
-    },
     'b': {
         "site_6": [2059, 2060, 2061,
                    2062, 2063, 2064,
@@ -33,7 +28,6 @@ DORIS_ET_AL = {
                    2584, 2585, 2586, 2587],
     }
 }
-
 
 
 # RCSB_ID = '3J92'
@@ -57,76 +51,66 @@ def pick_match(ms, rna_length: int):
     else:
         return ms[0]
 
-# def ptc_by_alignment(rcsb_id: str, organism:int):
-def ptc_by_alignment():
+
+def ptc_residues_via_alignment(rcsb_id: str, assembly_id: int = 0):
     R = RibosomeAssets(RCSB_ID)
-    profile = R.profile()
-    
-    
+    # R.profile()
+
     struct_profile: Structure = R.biopython_structure()
-    [ strand_target,chain_id, rna_type] = R.get_LSU_rRNA()
-    
+    rna = R.get_LSU_rRNA(assembly_id)
+    auth_asym_id = rna.auth_asym_id
 
-    
-    profile.assembly_map[0]
-    
-    if chain_id in struct_profile.child_dict[0].child_dict:
-        chain3d: Chain = struct_profile.child_dict[0].child_dict[chain_id]
-    else:
-        chain3d: Chain = struct_profile.child_dict[1].child_dict[chain_id]
-
-    ress:list[Residue] = chain3d.child_list
-    ress_sanitized: list[Residue] = [*filter(lambda r: r.get_resname() in ["A", "C", "G", "U", "PSU"], ress)]
+    chain3d: Chain = struct_profile.child_dict[assembly_id].child_dict[auth_asym_id]
+    ress: list[Residue] = chain3d.child_list
+    ress_sanitized: list[Residue] = [
+        *filter(lambda r: r.get_resname() in ["A", "C", "G", "U", "PSU"], ress)]
 
     for _r in ress_sanitized:
         if _r.get_resname() == "PSU":
             _r.resname = "U"
 
+    # create sequence string from residues
+    raw_seq = reduce(lambda x, y: x + y.resname, ress_sanitized, '')
+    # find a subsequences that matches doris with max levenstein distance of 1
 
-    raw_seq         = reduce(lambda x,y: x + y.resname, ress_sanitized,'')
-    matches         = find_near_matches(DORIS_ET_AL["subseq_9"], raw_seq, max_l_dist=1)
-    m0              = pick_match(matches, len(raw_seq))
-    sought_residues = [ ress_sanitized[i] for i in list(range(m0.start, m0.end))]
+    matches      = find_near_matches(DORIS_ET_AL["subseq_9"], raw_seq, max_l_dist=1)
+    m0           = pick_match(matches, len(raw_seq))
+    PTC_residues = [ress_sanitized[i] for i in list(range(m0.start, m0.end))]
 
+    return PTC_residues
+
+
+def ptc_coordinates(reslist:list[ Residue ], ):
     PTC_MARKERKS_RAW = {}
-    for res in sought_residues:
+
+    for res in reslist:
         if res.id[1] not in PTC_MARKERKS_RAW:
             PTC_MARKERKS_RAW[res.id[1]] = {}
         atom:Atom
         for atom in res.child_list:
-            atom_name = atom.name
-            atom_coords = atom.get_coord()
+            atom_name                              = atom.name
+            atom_coords                            = atom.get_coord()
             PTC_MARKERKS_RAW[res.id[1]][atom_name] = list(map(lambda x: float(x), list(atom_coords)))
 
-    PTC_MARKERKS_RAW = {
-        chain_id: PTC_MARKERKS_RAW
-    }
+    # markers_dir = os.path.join(RIBETL_DATA, "PTC_MARKERS_RAW")
+    # outfile     = os.path.join(markers_dir, f"{rcsb_id.upper()}_PTC_MARKERS_RAW.json")
 
-    markers_dir = os.path.join(RIBETL_DATA, "PTC_MARKERS_RAW")
-    outfile     = os.path.join(markers_dir, f"{rcsb_id.upper()}_PTC_MARKERS_RAW.json")
-
-    with open(outfile, 'w') as outf:
-        json.dump(PTC_MARKERKS_RAW, outf, indent=4)
-        print("Saved {} successfully.".format(outfile))
+    # with open(outfile, 'w') as outf:
+    #     json.dump(PTC_MARKERKS_RAW, outf, indent=4)
+    #     print("Saved {} successfully.".format(outfile))
 
 
-R       = RibosomeAssets(RCSB_ID)
-profile = R.profile()
-rna = R.get_LSU_rRNA()
-seq, auth_asym_id, rna_type = rna.entity_poly_seq_one_letter_code_can, rna.auth_asym_id, rna.nomenclature[0] if len(rna.nomenclature) > 0 else None
+def ptc_midpoint(reslist:list[Residue]):
 
 
-# pprint(profile.assembly_map[0].dict())
-# pprint(profile.assembly_map[1].dict())
-# pprint(auth_asym_id)
+print(DORIS_ET_AL["subseq_9"])
+ptcres = ptc_residues_via_alignment(RCSB_ID, 0)
 
+pprint(ptcres)
 
-# correct for assembly
-print(R.get_rna_by_nomclass("23SrRNA"))
 
 # def extract_ptc_coordinates():
 #     ...
-
 
 
 # ./6HCM/polymer_1_nascent_chain.json
