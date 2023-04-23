@@ -2,6 +2,7 @@
 # export DJANGO_SETTINGS_MODULE=api.rbxz_bend                                                                                         [cli]
 # import argparse
 import argparse
+import asyncio
 from api.ribctl.etl.ribosome_assets import Assetlist, RibosomeAssets, obtain_assets, obtain_assets_processpool, obtain_assets_threadpool 
 from api.ribctl.lib.types.types_ribosome import RibosomeStructure
 from logs.loggers import updates_logger
@@ -13,22 +14,39 @@ import fire
 
 arg = argparse.ArgumentParser(description='RibCtl - A tool to control the ribosome database')
 
-arg.add_argument('-getall', '--obtain_all_structures', type=str)
+arg.add_argument('-getall', '--obtain_all_structures', action='store_true')
+arg.add_argument('-o', '--obtain', type=str)
 
 args = arg.parse_args()
 
 if args.obtain_all_structures:
-    ASL = Assetlist(profile= True, factors_and_ligands = True)
+    ASL = Assetlist(profile= True)
     obtain_assets_threadpool(
                         [],
                         ASL,
                         workers=16,
                         get_all=True,
-                        # replace=True
+                        overwrite=True
                       )
-if args.db:
-    db = ribosomexyzDB(NEO4J_URI, NEO4J_USER, NEO4J_PASSWORD)
-    fire.Fire(db)
+if args.obtain:
+    RCSB_ID = str(args.obtain)
+
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(
+    obtain_assets(
+    RCSB_ID,
+    Assetlist(profile=True),
+    overwrite=True
+   )
+    )
+
+
+
+
+
+# if args.db:
+#     db = ribosomexyzDB(NEO4J_URI, NEO4J_USER, NEO4J_PASSWORD)
+#     fire.Fire(db)
 
 
 # if args.test:
