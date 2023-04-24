@@ -63,8 +63,6 @@ def util__backwards_match(alntgt: str, aln_resid: int, verbose: bool = False) ->
     raise LookupError("Could not find residue in aligned sequence.")
 
 #! util
-
-#! util
 def util__forwards_match(string: str, resid: int):
     """Returns the index of a source-sequence residue in the (aligned) source sequence."""
     if resid >= len(string):
@@ -85,14 +83,6 @@ def util__forwards_match(string: str, resid: int):
 def barr2str (bArr):
     return ''.join([ x.decode("utf-8") for x in bArr])
 
-#! util
-def infer_subunit(protein_class:ProteinClass):
-    if protein_class in list_LSU_Proteins:
-        return "LSU"
-    elif protein_class in list_SSU_Proteins:
-        return "SSU"
-    else:
-        raise ValueError("Unknown protein class: {}".format(protein_class))
 
 #! util
 def seq_to_fasta(rcsb_id: str, _seq: str, outfile: str):
@@ -100,7 +90,8 @@ def seq_to_fasta(rcsb_id: str, _seq: str, outfile: str):
     _seq          = _seq.replace("\n", "")
     seq_record    = SeqRecord.SeqRecord(Seq(_seq).upper())
     seq_record.id = seq_record.description = rcsb_id
-    SeqIO.write(seq_record, outfile, 'fasta',)
+    SeqIO.write(seq_record, outfile, 'fasta')
+    
 
 show = True
 
@@ -111,12 +102,26 @@ def muscle_combine_profile(msa_path1: str, msa_path2: str, out_filepath: str):
     subprocess.Popen(cmd, stdout=subprocess.PIPE,stderr=subprocess.PIPE, env=os.environ.copy()).wait()
     sys.stdout.flush()
 
+def msa_class_proteovision_path(class_:ProteinClass):
+    def infer_subunit(protein_class:ProteinClass):
+        if protein_class in list_LSU_Proteins:
+            return "LSU"
+        elif protein_class in list_SSU_Proteins:
+            return "SSU"
+        else:
+            raise ValueError("Unknown protein class: {}".format(protein_class))
+    path = os.path.join(
+        '/home/rxz/dev/docker_ribxz/api',
+        'ribctl',
+        'assets',
+        'msa_profiles/{}/{}_ribovision.fasta'.format(infer_subunit(class_),class_)
+        )
+    assert os.path.exists(path), "File not found: {}".format(path)
 
-def msa_class_proteovision_path(_:ProteinClass):
-    return '/home/rxz/dev/docker_ribxz/api/ribctl/__wip/data/msa_classes_proteovision/{}/{}_ribovision.fasta'.format(infer_subunit(_),_)
+    return path
+
 """download + tax-identify a protein class sequence from proteovision"""
 def process_proteovision_alignment(nomclass:ProteinClass):
-
 
     def msa_add_taxonomic_ids(msa_path:str):
 
