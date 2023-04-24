@@ -3,7 +3,7 @@ import os
 import typing
 from pydantic import BaseModel
 from Bio.PDB.Residue import Residue
-from ribctl.lib.types.types_ribosome import Polymer, PolymerClass
+from api.ribctl.lib.types.types_ribosome import Polymer, PolymerClass
 
 AMINO_ACIDS = {
     "ALA": 0,
@@ -67,10 +67,8 @@ class ResidueSummary(BaseModel):
             full_id=r.get_full_id()
         )
 
-
 class BindingSiteChain(Polymer):
     residues: list[ResidueSummary]
-
 
 class BindingSite(BaseModel):
     __root__: typing.Dict[str, BindingSiteChain]
