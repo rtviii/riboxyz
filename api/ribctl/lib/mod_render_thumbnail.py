@@ -1,23 +1,22 @@
-
 import argparse
 import json
 import os
 import sys
 from pymol import cmd
-RIBETL_DATA = str(os.environ.get('RIBETL_DATA'))
 
+RIBETL_DATA = str(os.environ.get('RIBETL_DATA'))
 
 def sload(pdbid: str):
 
-    pdbid = pdbid.upper()
-    RIBETL_DATA = str(os.environ.get('RIBETL_DATA'))
-    path = os.path.join(RIBETL_DATA, pdbid, f"{pdbid}.cif")
-    cmd.load(path)
 
+    pdbid       = pdbid.upper()
+    RIBETL_DATA = str(os.environ.get('RIBETL_DATA'))
+    path        = os.path.join(RIBETL_DATA, pdbid, f"{pdbid}.cif")
+    cmd.delete('all')
+    cmd.load(path)
 
 def render_thumbnail(pdbid: str):
 
-    from pymol import cmd
 
     pdbid = pdbid.upper()
     thumbnail_path = os.path.join(RIBETL_DATA, pdbid, f"_ray_{pdbid}.png")
@@ -72,7 +71,6 @@ def by_rna(pdbid: str):
         cmd.set('transparency', 0.75, prot_tmp)
         cmd.color(CLR , prot_tmp)
 
-
 cmd.extend("sload", sload)
 cmd.extend("by_rna", by_rna)
 
@@ -98,7 +96,6 @@ if __name__ == "__main__":
         cmd.ray(500, 500)
         cmd.png(thumbnail_path)
         print('Saved {}'.format(thumbnail_path))
-
 
 colormap__LSU_Proteins = {
                           "uL1": "lawrencium",

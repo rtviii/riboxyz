@@ -6,13 +6,13 @@ from pprint import pprint
 from typing import Optional, Tuple
 from api.ribctl.lib.types.types_binding_site import BindingSite
 from api.ribctl.lib.types.types_poly_nonpoly_ligand import RNAClass
-from logs.loggers import updates_logger
-from ribctl.lib.mod_extract_bsites import bsite_nonpolymeric_ligand, struct_ligand_ids, struct_polymeric_factor_ids, bsite_polymeric_factor, bsite_polymeric_factor
-from ribctl.lib.mod_split_rename import split_rename
-from ribctl.etl.struct_rcsb_api import current_rcsb_structs, process_pdb_record
-from ribctl.lib.mod_render_thumbnail import render_thumbnail
-from ribctl.lib.utils import download_unpack_place, open_structure
-from ribctl.lib.types.types_ribosome import RNA, Polymer, PolymericFactor, Protein, ProteinClass, RibosomeStructure
+from api.logs.loggers import updates_logger
+from api.ribctl.lib.mod_extract_bsites import bsite_nonpolymeric_ligand, struct_ligand_ids, struct_polymeric_factor_ids, bsite_polymeric_factor, bsite_polymeric_factor
+from api.ribctl.lib.mod_split_rename import split_rename
+from api.ribctl.etl.struct_rcsb_api import current_rcsb_structs, process_pdb_record
+from api.ribctl.lib.mod_render_thumbnail import render_thumbnail
+from api.ribctl.lib.utils import download_unpack_place, open_structure
+from api.ribctl.lib.types.types_ribosome import RNA, Polymer, PolymericFactor, Protein, ProteinClass, RibosomeStructure
 from pydantic import BaseModel, parse_obj_as
 from concurrent.futures import ALL_COMPLETED, Future, ProcessPoolExecutor, ThreadPoolExecutor, wait
 import os
@@ -20,13 +20,13 @@ import os
 RIBETL_DATA = str(os.environ.get("RIBETL_DATA"))
 
 
-class Assetlist(BaseModel):
-    profile: Optional[bool]
-    structure: Optional[bool]
-    structure_modified: Optional[bool]
-    chains_and_modified_cif: Optional[bool]
-    factors_and_ligands: Optional[bool]
-    png_thumbnail: Optional[bool]
+class Assetlist(BaseModel)   : 
+      profile                : Optional[bool]
+      structure              : Optional[bool]
+      structure_modified     : Optional[bool]
+      chains_and_modified_cif: Optional[bool]
+      factors_and_ligands    : Optional[bool]
+      png_thumbnail          : Optional[bool]
 
 
 class RibosomeAssets():
@@ -80,7 +80,9 @@ class RibosomeAssets():
     def get_struct_and_profile(self) -> tuple[Structure, RibosomeStructure]:
         return self.biopython_structure(), self.profile()
 
-    def get_chain_by_auth_asym_id(self, auth_asym_id: str) -> tuple[RNA | Protein | PolymericFactor | None, typing.Literal["RNA", "Protein", "PolymericFactor"] | None]:
+    def get_chain_by_auth_asym_id(self, auth_asym_id: str) -> tuple[
+        RNA | Protein | PolymericFactor | None,
+        typing.Literal["RNA", "Protein", "PolymericFactor"] | None]:
 
         profile = self.profile()
         for chain in profile.proteins:

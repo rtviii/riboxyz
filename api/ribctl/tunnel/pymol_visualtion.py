@@ -2,6 +2,7 @@ import json
 import os
 from pprint import pprint
 from typing import List
+from api.scratch_tunnel_workflow import ptc_midpoint, ptc_residues_via_alignment, tunnel_obstructions
 from pymol import cmd
 
 RIBETL_DATA = os.environ.get("RIBETL_DATA")
@@ -161,10 +162,11 @@ def create_marker_at_atom(selection_name:str, posn:List[float], color_:str="red"
     cmd.show(repr, selection_name)
 
 def ptc_raw_w_markerks(struct: str):
-    cmd.delete("all")
-    struct      = struct.upper()
-    struct_path = os.path.join("/home/rxz/dev/static/{}/{}.cif".format(struct, struct))
-    cmd.load(struct_path)
+    # cmd.delete("all")
+    # struct      = struct.upper()
+    # struct_path = os.path.join("/home/rxz/dev/static/{}/{}.cif".format(struct, struct))
+    
+    # cmd.load(struct_path)
 
     highlight_ptc_raw(struct)
 
@@ -189,8 +191,33 @@ def ptc_raw_w_markerks(struct: str):
 
     create_marker_at_atom("centroid",midpoint, color_="red")
 
+
+def visualize_obstructions(rcsb_id):
+    ptcres, auth_asym_id = ptc_residues_via_alignment(rcsb_id, 0)
+    midpoint = ptc_midpoint(ptcres, auth_asym_id)
+    polys,nonpolys = tunnel_obstructions(rcsb_id, midpoint)
+
+    cmd.color("white", "all")
+
+    ptc_raw_w_markerks(rcsbuid)
+
+    for poly in polys:
+        cname = "chain_{}".format(poly.auth_asym_id, )
+        csele = "c. {} and m. {}".format(poly.auth_asym_id, rcsb_id.upper()) 
+        cmd.create(cname, csele)
+        cmd.remove(csele)
+        cmd.color("red", cname)
+
+    for res in nonpolys:
+        resname = "res_{}_{}".format(res.parent_auth_asym_id,res.resname)
+        ressele = "m. {} and c. {} and resn {}".format(rcsb_id.upper(),res.parent_auth_asym_id,res.resname)
+        cmd.create(resname,  ressele)
+        cmd.remove(ressele)
+        cmd.color("blue", resname)
+    
 cmd.extend("ptc", ptc)
 cmd.extend("ptc_w_markers", ptc_raw_w_markerks)
 cmd.extend("list_bacteria", list_bacteria)
+cmd.extend("tun_obstructions", visualize_obstructions)
 
 
