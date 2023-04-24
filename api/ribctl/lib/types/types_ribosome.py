@@ -11,6 +11,9 @@ ProteinClass = typing.Union[LSU_Proteins , SSU_Proteins]
 PolymerClass = typing.Union[ProteinClass, RNAClass]
 
 class Polymer(BaseModel):
+    def __hash__(self):
+        return hash(self.auth_asym_id + self.parent_rcsb_id)
+
     assembly_id: int
 
     asym_ids: list[str]
@@ -35,6 +38,10 @@ class Polymer(BaseModel):
     nomenclature:  list[PolymerClass]
 
 class Protein(Polymer):
+
+    def __hash__(self):
+        return hash(self.auth_asym_id + self.parent_rcsb_id)
+
     pfam_accessions  : list[str]
     pfam_comments    : list[str]
     pfam_descriptions: list[str]
@@ -45,7 +52,11 @@ class Protein(Polymer):
         return Polymer(**self.dict())
 
 class RNA(Polymer):
+    def __hash__(self):
+        return hash(self.auth_asym_id + self.parent_rcsb_id)
+
     pass
+
 
 class NonpolymericLigand(BaseModel)  : 
 
@@ -57,6 +68,9 @@ class NonpolymericLigand(BaseModel)  :
     #   nomenclature       : list[NonpolymericLigandClass]
 
 class PolymericFactor(Polymer): 
+    def __hash__(self) -> int:
+        return hash(self.auth_asym_id + self.parent_rcsb_id)
+
     nomenclature: list[PolymericFactorClass] 
     
 class NonpolymerEntityInstance(BaseModel):
@@ -64,6 +78,7 @@ class NonpolymerEntityInstance(BaseModel):
         entity_id: str
         auth_asym_id: str
         auth_seq_id: str
+
     rcsb_nonpolymer_entity_instance_container_identifiers: NonpolymerEntityInstanceContainerIdentifiers
 
 class PolymerEntityInstance(BaseModel):

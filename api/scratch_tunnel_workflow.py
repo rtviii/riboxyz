@@ -177,19 +177,16 @@ def tunnel_obstructions(rcsb_id: str, ptc_midpoint: tuple[float, float, float], 
         if not residue_is_canonical(N):
             foreign_nonpolys.append(N)
 
-        parent = R.get_chain_by_auth_asym_id(N.parent_auth_asym_id)
-        if parent is not None:
-            try:
-                if parse_obj_as(PolymericFactor, parent):
-                    foregin_polymers.append(parent)
-            except ValidationError:
-                pass
+        parent_chain, chain_type = R.get_chain_by_auth_asym_id(N.parent_auth_asym_id)
+        if ( parent_chain, chain_type ) != ( None,None ):
+            if chain_type == "PolymericFactor":
+                foregin_polymers.append(parent_chain)
         else:
             raise LookupError("Parent chain must exist in structure. Something went wrong (with the data, probably)")
 
     print("Inspected midpoint ", ptc_midpoint, " with radius", radius)
 
-    return foregin_polymers, foreign_nonpolys
+    return list(set(foregin_polymers)), list(set(foreign_nonpolys))
 
 
 idlist = [
