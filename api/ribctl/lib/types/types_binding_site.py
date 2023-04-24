@@ -67,10 +67,8 @@ class ResidueSummary(BaseModel):
             full_id=r.get_full_id()
         )
 
-
 class BindingSiteChain(Polymer):
     residues: list[ResidueSummary]
-
 
 class BindingSite(BaseModel):
     __root__: typing.Dict[str, BindingSiteChain]
