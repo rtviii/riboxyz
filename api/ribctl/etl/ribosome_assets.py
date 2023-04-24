@@ -1,29 +1,33 @@
 import asyncio
 import json
+import typing
+from Bio.PDB.Structure import Structure
 from pprint import pprint
 from typing import Optional, Tuple
 from api.ribctl.lib.types.types_binding_site import BindingSite
 from api.ribctl.lib.types.types_poly_nonpoly_ligand import RNAClass
-from logs.loggers import updates_logger
-from ribctl.lib.mod_extract_bsites import bsite_nonpolymeric_ligand, struct_ligand_ids, struct_polymeric_factor_ids, bsite_polymeric_factor, bsite_polymeric_factor
-from ribctl.lib.mod_split_rename import split_rename
-from ribctl.etl.struct_rcsb_api import current_rcsb_structs, process_pdb_record
-from ribctl.lib.mod_render_thumbnail import render_thumbnail
-from ribctl.lib.utils import download_unpack_place, open_structure
-from ribctl.lib.types.types_ribosome import RNA, Protein, ProteinClass, RibosomeStructure
+from api.logs.loggers import updates_logger
+from api.ribctl.lib.mod_extract_bsites import bsite_nonpolymeric_ligand, struct_ligand_ids, struct_polymeric_factor_ids, bsite_polymeric_factor, bsite_polymeric_factor
+from api.ribctl.lib.mod_split_rename import split_rename
+from api.ribctl.etl.struct_rcsb_api import current_rcsb_structs, process_pdb_record
+from api.ribctl.lib.mod_render_thumbnail import render_thumbnail
+from api.ribctl.lib.utils import download_unpack_place, open_structure
+from api.ribctl.lib.types.types_ribosome import RNA, Polymer, PolymericFactor, Protein, ProteinClass, RibosomeStructure
 from pydantic import BaseModel, parse_obj_as
 from concurrent.futures import ALL_COMPLETED, Future, ProcessPoolExecutor, ThreadPoolExecutor, wait
 import os
 
 RIBETL_DATA = str(os.environ.get("RIBETL_DATA"))
 
-class Assetlist(BaseModel): 
+
+class Assetlist(BaseModel)   : 
       profile                : Optional[bool]
       structure              : Optional[bool]
       structure_modified     : Optional[bool]
       chains_and_modified_cif: Optional[bool]
       factors_and_ligands    : Optional[bool]
       png_thumbnail          : Optional[bool]
+
 
 class RibosomeAssets():
     rcsb_id: str
@@ -73,7 +77,31 @@ class RibosomeAssets():
 
     # ※ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-= Getters =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-    def get_rna_by_nomclass(self, class_: RNAClass, assembly:int = 0) -> RNA | None:
+    def get_struct_and_profile(self) -> tuple[Structure, RibosomeStructure]:
+        return self.biopython_structure(), self.profile()
+
+    def get_chain_by_auth_asym_id(self, auth_asym_id: str) -> tuple[
+        RNA | Protein | PolymericFactor | None,
+        typing.Literal["RNA", "Protein", "PolymericFactor"] | None]:
+
+        profile = self.profile()
+        for chain in profile.proteins:
+            if chain.auth_asym_id == auth_asym_id:
+                return ( chain , "Protein" )
+
+        if profile.rnas is not None:
+            for chain in profile.rnas:
+                if chain.auth_asym_id == auth_asym_id:
+                    return ( chain, "RNA" )
+
+        if profile.polymeric_factors is not None:
+            for chain in profile.polymeric_factors:
+                if chain.auth_asym_id == auth_asym_id:
+                    return ( chain, "PolymericFactor" )
+
+        return ( None, None )
+
+    def get_rna_by_nomclass(self, class_: RNAClass, assembly: int = 0) -> RNA | None:
         """@assembly here stands to specify which of the two or more models the rna comes from
         in the case that a structure contains multiple models (ex. 4V4Q XRAY)"""
 
@@ -86,14 +114,14 @@ class RibosomeAssets():
             if class_ in rna.nomenclature and rna.assembly_id == assembly:
                 return rna
 
-    def get_prot_by_nomclass(self, class_: ProteinClass, assembly:int = 0)-> Protein | None:
+    def get_prot_by_nomclass(self, class_: ProteinClass, assembly: int = 0) -> Protein | None:
         for prot in self.profile().proteins:
-            if class_ in prot.nomenclature  and prot.assembly_id == assembly:
+            if class_ in prot.nomenclature and prot.assembly_id == assembly:
                 return prot
         else:
             return None
 
-    def get_LSU_rRNA(self, assembly:int = 0 )->RNA:
+    def get_LSU_rRNA(self, assembly: int = 0) -> RNA:
         """retrieve the largest rRNA sequence in the structure
         @returns (seq, auth_asym_id, rna_type)
         """
@@ -107,8 +135,6 @@ class RibosomeAssets():
             raise Exception("No LSU rRNA found in structure")
         else:
             return rna
-
-
 
     # ※ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-= Verification =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
@@ -149,7 +175,8 @@ class RibosomeAssets():
             ribosome = process_pdb_record(self.rcsb_id)
             if not parse_obj_as(RibosomeStructure, ribosome):
                 raise Exception("Invalid ribosome structure profile.")
-            self.save_json_profile(self._json_profile_filepath(), ribosome.dict())
+            self.save_json_profile(
+                self._json_profile_filepath(), ribosome.dict())
             print(f"Wrote structure profile:\t{self._json_profile_filepath()}")
             return True
         else:
@@ -157,8 +184,10 @@ class RibosomeAssets():
                 ribosome = process_pdb_record(self.rcsb_id)
                 if not parse_obj_as(RibosomeStructure, ribosome):
                     raise Exception("Invalid ribosome structure profile.")
-                self.save_json_profile(self._json_profile_filepath(), ribosome.dict())
-                print(f"Wrote structure profile:\t{self._json_profile_filepath()}")
+                self.save_json_profile(
+                    self._json_profile_filepath(), ribosome.dict())
+                print(
+                    f"Wrote structure profile:\t{self._json_profile_filepath()}")
                 return True
             else:
                 return False
@@ -182,49 +211,54 @@ class RibosomeAssets():
         # def ligand_path(chem_id): return os.path.join(self._dir_path(), f"polymer_{chem_id.upper()}.json")
         # def poly_factor_path(auth_asym_id): return os.path.join(self._dir_path(), f"polymer_{auth_asym_id.upper()}.json")
 
-        ligands           = struct_ligand_ids(self.rcsb_id, self.profile())
+        ligands = struct_ligand_ids(self.rcsb_id, self.profile())
         polymeric_factors = struct_polymeric_factor_ids(self.profile())
         all_verified_flag = True
 
         for ligand_chemid in ligands:
-            if not os.path.exists(BindingSite.path_nonpoly_ligand(self.rcsb_id,ligand_chemid)):
+            if not os.path.exists(BindingSite.path_nonpoly_ligand(self.rcsb_id, ligand_chemid)):
                 all_verified_flag = False
-                bsite = bsite_nonpolymeric_ligand(ligand_chemid, self.biopython_structure())
-                bsite.save(bsite.path_nonpoly_ligand(self.rcsb_id, ligand_chemid))
+                bsite = bsite_nonpolymeric_ligand(
+                    ligand_chemid, self.biopython_structure())
+                bsite.save(bsite.path_nonpoly_ligand(
+                    self.rcsb_id, ligand_chemid))
             else:
                 if overwrite:
-                    bsite = bsite_nonpolymeric_ligand(ligand_chemid, self.biopython_structure())
-                    bsite.save(bsite.path_nonpoly_ligand(self.rcsb_id, ligand_chemid))
+                    bsite = bsite_nonpolymeric_ligand(
+                        ligand_chemid, self.biopython_structure())
+                    bsite.save(bsite.path_nonpoly_ligand(
+                        self.rcsb_id, ligand_chemid))
                 else:
                     ...
 
-                    
         if polymeric_factors is not None:
             for poly in polymeric_factors:
                 if not os.path.exists(BindingSite.path_poly_factor(self.rcsb_id, poly.nomenclature[0], poly.auth_asym_id)):
                     all_verified_flag = False
-                    bsite = bsite_polymeric_factor(poly.auth_asym_id, self.biopython_structure())
-                    bsite.save(bsite.path_poly_factor(self.rcsb_id, poly.nomenclature[0],poly.auth_asym_id))
+                    bsite = bsite_polymeric_factor(
+                        poly.auth_asym_id, self.biopython_structure())
+                    bsite.save(bsite.path_poly_factor(
+                        self.rcsb_id, poly.nomenclature[0], poly.auth_asym_id))
                 else:
                     if overwrite:
-                        bsite = bsite_polymeric_factor(poly.auth_asym_id, self.biopython_structure())
-                        bsite.save(bsite.path_poly_factor(self.rcsb_id, poly.nomenclature[0],poly.auth_asym_id))
+                        bsite = bsite_polymeric_factor(
+                            poly.auth_asym_id, self.biopython_structure())
+                        bsite.save(bsite.path_poly_factor(
+                            self.rcsb_id, poly.nomenclature[0], poly.auth_asym_id))
                     else:
                         ...
-
-
-        
 
         return all_verified_flag
 
 # ※ Mass process methods.
 
-async def obtain_assets(rcsb_id: str ,assetlist:Assetlist ,overwrite: bool = False):
+
+async def obtain_assets(rcsb_id: str, assetlist: Assetlist, overwrite: bool = False):
     """Obtain all assets for a given RCSB ID"""
 
     assets = RibosomeAssets(rcsb_id)
     assets._verify_dir_exists()
-    
+
     coroutines = []
 
     if assetlist.profile:
@@ -234,20 +268,22 @@ async def obtain_assets(rcsb_id: str ,assetlist:Assetlist ,overwrite: bool = Fal
         coroutines.append(assets._verify_cif(overwrite))
 
     if assetlist.factors_and_ligands:
-        coroutines.append(assets._verify_ligads_and_ligandlike_polys(overwrite))
+        coroutines.append(
+            assets._verify_ligads_and_ligandlike_polys(overwrite))
 
     if assetlist.chains_and_modified_cif:
         coroutines.append(assets._verify_cif_modified_and_chains(overwrite))
 
     await asyncio.gather(*coroutines)
 
-def obtain_assets_threadpool(targets:list[str], assetlist:Assetlist, workers: int=5, get_all:bool=False, overwrite=False):
+
+def obtain_assets_threadpool(targets: list[str], assetlist: Assetlist, workers: int = 5, get_all: bool = False, overwrite=False):
     """Get all ribosome profiles from RCSB via a threadpool"""
     logger = updates_logger
     if get_all:
         unsynced = sorted(current_rcsb_structs())
     else:
-        unsynced = list(map(lambda _: _.upper(),targets))
+        unsynced = list(map(lambda _: _.upper(), targets))
 
     futures: list[Future] = []
     logger.info("Begun downloading ribosome profiles via RCSB")
@@ -262,20 +298,22 @@ def obtain_assets_threadpool(targets:list[str], assetlist:Assetlist, workers: in
 
     with ThreadPoolExecutor(max_workers=workers) as executor:
         for rcsb_id in unsynced:
-            fut = executor.submit(asyncio.run, obtain_assets(rcsb_id,assetlist,overwrite))
+            fut = executor.submit(asyncio.run, obtain_assets(
+                rcsb_id, assetlist, overwrite))
             fut.add_done_callback(log_commit_result(rcsb_id))
             futures.append(fut)
 
     wait(futures, return_when=ALL_COMPLETED)
     logger.info("Finished syncing with RCSB")
 
-def obtain_assets_processpool(targets:list[str], assetlist:Assetlist, workers: int=5, get_all:bool=False, overwrite=False):
+
+def obtain_assets_processpool(targets: list[str], assetlist: Assetlist, workers: int = 5, get_all: bool = False, overwrite=False):
     """Get all ribosome profiles from RCSB via a threadpool"""
     logger = updates_logger
     if get_all:
         unsynced = sorted(current_rcsb_structs())
     else:
-        unsynced = list(map(lambda _: _.upper(),targets))
+        unsynced = list(map(lambda _: _.upper(), targets))
 
     futures: list[Future] = []
     logger.info("Begun downloading ribosome profiles via RCSB")
@@ -290,7 +328,8 @@ def obtain_assets_processpool(targets:list[str], assetlist:Assetlist, workers: i
 
     with ProcessPoolExecutor(max_workers=workers) as executor:
         for rcsb_id in unsynced:
-            fut = executor.submit(asyncio.run, obtain_assets(rcsb_id,assetlist,overwrite))
+            fut = executor.submit(asyncio.run, obtain_assets(
+                rcsb_id, assetlist, overwrite))
             fut.add_done_callback(log_commit_result(rcsb_id))
             futures.append(fut)
 

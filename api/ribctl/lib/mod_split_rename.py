@@ -6,7 +6,7 @@ import numpy as np
 import gemmi
 from Bio.PDB import MMCIF2Dict, MMCIFIO
 from Bio.PDB.Structure import Structure
-from ribctl.lib.utils import open_structure
+from api.ribctl.lib.utils import open_structure
 
 flatten     = itertools.chain.from_iterable
 n1          = np.array
