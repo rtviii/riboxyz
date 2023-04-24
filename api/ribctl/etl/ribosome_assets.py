@@ -80,6 +80,7 @@ class RibosomeAssets():
     def get_struct_and_profile(self) -> tuple[Structure, RibosomeStructure]:
         return self.biopython_structure(), self.profile()
 
+
     def get_chain_by_polymer_class(self, poly_class: PolymerClass | PolymericFactorClass, assembly:int=0) -> PolymericFactor | RNA | Protein | None:
         profile = self.profile()
         for prot in profile.proteins:
