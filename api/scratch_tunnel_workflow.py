@@ -1,17 +1,16 @@
 from functools import reduce
 import os
-from pprint import pprint
 import sys
-from fuzzysearch import find_near_matches
 from Bio.PDB.Structure import Structure
 from Bio.PDB.Chain import Chain
 from Bio.PDB.Residue import Residue
 from Bio.PDB.NeighborSearch import NeighborSearch
 from Bio.PDB.Atom import Atom
-from pydantic import ValidationError, parse_obj_as
+import loguru
 from api.ribctl.etl.ribosome_assets import RibosomeAssets
 from api.ribctl.lib.types.types_binding_site import AMINO_ACIDS, NUCLEOTIDES, ResidueSummary
 from api.ribctl.lib.types.types_ribosome import PolymericFactor, RibosomeStructure
+from pymol import cmd
 
 RIBETL_DATA = os.environ.get('RIBETL_DATA')
 
@@ -34,8 +33,6 @@ DORIS_ET_AL = {
 }
 # ※ --------------------------------------------------------------------------------------------- ※
 
-# RCSB_ID = '3J92'
-RCSB_ID = sys.argv[1].upper()
 
 
 def pick_match(ms, rna_length: int):
@@ -77,6 +74,7 @@ def ptc_residues_via_alignment(rcsb_id: str, assembly_id: int = 0) -> tuple[list
     raw_seq = reduce(lambda x, y: x + y.resname, ress_sanitized, '')
     # find a subsequences that matches doris with max levenstein distance of 1
 
+    from fuzzysearch import find_near_matches
     matches = find_near_matches(DORIS_ET_AL["subseq_9"], raw_seq, max_l_dist=1)
     m0 = pick_match(matches, len(raw_seq))
     PTC_residues = [ress_sanitized[i] for i in list(range(m0.start, m0.end))]
@@ -159,11 +157,11 @@ def residue_is_canonical(res: Residue | ResidueSummary) -> bool:
 
 def tunnel_obstructions(rcsb_id: str, ptc_midpoint: tuple[float, float, float], radius: int = 30) -> tuple[list[PolymericFactor], list[ResidueSummary]]:
 
-    R = RibosomeAssets(RCSB_ID)
+    R = RibosomeAssets(rcsb_id)
     structure, profile = R.get_struct_and_profile()
 
     neigbor_search = NeighborSearch(list(structure.get_atoms()))
-    nbr_residues = []
+    nbr_residues   = []
 
     nbr_residues.extend(neigbor_search.search(ptc_midpoint, radius, level='R'))
     nbr_residues = list(
@@ -173,7 +171,6 @@ def tunnel_obstructions(rcsb_id: str, ptc_midpoint: tuple[float, float, float], 
     foregin_polymers = []
 
     for N in nbr_residues:
-
         if not residue_is_canonical(N):
             foreign_nonpolys.append(N)
 
@@ -188,40 +185,36 @@ def tunnel_obstructions(rcsb_id: str, ptc_midpoint: tuple[float, float, float], 
 
     return list(set(foregin_polymers)), list(set(foreign_nonpolys))
 
+# RCSB_ID = '3J92'
+RCSB_ID = sys.argv[1].upper()
 
-idlist = [
-    "6HCM",
-    "7A5I",
-    "6HCF",
-    "3JAJ",
-    "4V5H",
-    "3J7Z",
-    "5LZW",
-    "7A5G",
-    "5LZZ",
-    "6SGC",
-    "7A5F",
-    "6OLI",
-    "5LZX",
-    "6HCJ",
-    "5LZT",
-    "6HCQ",
-    "7A5K",
-    "3J92",
-    "5NWY",
-    "7A5H",
-    "6XA1",
-    "4V6M",
-    "6W6L",
-    "5LZV",
-    "7A5J"
-]
+for RCSB_ID in [
+"6FKR ",
+"7AZS",
+"5NP6",
+"5NWY",
+"7QGN",
+"6TBV",
+"6TC3",
+"7QG8",
+"6I0Y",
+"6Q9A",
+"6YSU",
+"7NSO",
+"7NSP",
+"7OIF",
+"7OT5",
+"5HD1",
+"5W4K"]:
 
-ptcres, auth_asym_id = ptc_residues_via_alignment(RCSB_ID, 0)
-midpoint = ptc_midpoint(ptcres, auth_asym_id)
-poly,nonpoly = tunnel_obstructions(RCSB_ID, midpoint)
-print(poly)
-print(nonpoly)
+    ptcres, auth_asym_id = ptc_residues_via_alignment(RCSB_ID, 0)
+    midpoint             = ptc_midpoint(ptcres, auth_asym_id)
+    poly,nonpoly         = tunnel_obstructions(RCSB_ID, midpoint)
+
+    loguru.logger.info("Polymerics: ")
+    loguru.logger.debug(poly)
+    loguru.logger.debug(nonpoly)
+
 
 
 # for rcsb in idlist:
@@ -230,3 +223,21 @@ print(nonpoly)
 #         print(rcsb, ptc_midpoint(ptcres, auth_asym_id))
 #     except:
 #         ...
+
+
+
+# -- 5np6
+#   "src_organism_names": [
+#     "Enterobacteria phage T4"
+#   ],
+#   "host_organism_names": [],
+#   "src_organism_ids": [
+#     10665
+#   ],
+#   "host_organism_ids": [],
+#   "rcsb_pdbx_description": "DNA topoisomerase small subunit",
+#   "entity_poly_strand_id": "C",
+#   "entity_poly_seq_one_letter_code": "MKFVKIDSSSVDMKKYKLQNNVRRSIKSSSMNYANVAIMTDADHDG",
+#   "entity_poly_seq_one_letter_code_can": "MKFVKIDSSSVDMKKYKLQNNVRRSIKSSSMNYANVAIMTDADHDG",
+#   "entity_poly_seq_length": 46,
+#   "entity_poly_polymer_type": "Protein",

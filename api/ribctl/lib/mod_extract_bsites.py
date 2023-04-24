@@ -7,9 +7,9 @@ from Bio.PDB.NeighborSearch import NeighborSearch
 from Bio.PDB.Residue import Residue
 from Bio.PDB.Structure import Structure
 from Bio.PDB.Chain import Chain
-from ribctl.lib.types.types_ribosome import Polymer, PolymericFactor, RibosomeStructure
+from api.ribctl.lib.types.types_ribosome import Polymer, PolymericFactor, RibosomeStructure
 from api.ribctl.lib.types.types_binding_site import AMINO_ACIDS, NUCLEOTIDES, BindingSite, BindingSiteChain, ResidueSummary
-from ribctl.lib import utils
+from api.ribctl.lib import utils
 
 RIBETL_DATA = str(os.environ.get('RIBETL_DATA'))
 
@@ -18,7 +18,7 @@ def get_polymer_residues(auth_asym_id: str, struct: Structure) -> list[Residue]:
     return [*c.get_residues()]
 
 def get_polymer_nbrs(
-      residues      : list[Residue],
+      polymer_residues      : list[Residue],
       struct        : Structure,
     ) -> BindingSite: 
 
@@ -28,9 +28,9 @@ def get_polymer_nbrs(
     pdbid         = struct.get_id().upper()
     ns            = NeighborSearch(list(struct.get_atoms()))
     nbr_residues  = []
-    parent_strand = residues[0].get_parent().id if len(residues) > 0 else ...
+    parent_strand = polymer_residues[0].get_parent().id if len(polymer_residues) > 0 else ...
 
-    for poly_res in residues:
+    for poly_res in polymer_residues:
         for atom in poly_res.child_list:
             nbr_residues.extend(ns.search(atom.get_coord(), 10, level='R'))
 

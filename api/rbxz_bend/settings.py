@@ -1,66 +1,20 @@
-import datetime
 import os
-import logging.handlers
-import logging
 import sys
-import typing
 
 SECRET_KEY = 'ju=n4om3z00jd1+y2(ufn)g^@w-dj*&-45&4yd1_aiun50b6by'
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-sys.path.append(os.path.abspath(os.path.join(BASE_DIR,'ribctl'))) # hack until ribctl is a separate pypi project
+sys.path.append(os.path.abspath(os.path.join(BASE_DIR,'ribctl')))       # hack until ribctl is a separate pypi project
 sys.path.append(os.path.abspath(os.path.join(BASE_DIR,'ribctl','lib'))) # hack until ribctl is a separate pypi project
 
-class DatedRotatingFileHandler(logging.handlers.RotatingFileHandler):
-    """
-    Handler for rotating log files with a date-based filename.
-    """
-    def __init__(self, filename, mode='a', maxBytes=0, backupCount=0, encoding=None, delay=False):
-        # Append the current datetime to the log filename
-        now = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-        filename = os.path.splitext(filename)[0] + '_' + now + os.path.splitext(filename)[1] + '.log'
-        super().__init__(filename, mode, maxBytes, backupCount, encoding, delay)
-
-LOGGERS = typing.Literal['general', 'updates', 'accesses','computations']
-
-def get_logger(loggername: LOGGERS )-> logging.Logger:
-    """if not one of the default loggers is specified, then a rotating log with a new date is created"""
-
-    if loggername not in typing.get_args(LOGGERS):
-        # Create a custom logger and handler instance
-        logger = logging.getLogger(loggername)
-        handler = DatedRotatingFileHandler(os.path.join(BASE_DIR,'logs',loggername), maxBytes=1024*1024*5, backupCount=5)
-        handler.setLevel(logging.DEBUG)
-        formatter = logging.Formatter('%(asctime)s - %(filename)s - %(levelname)s - %(message)s')
-        handler.setFormatter(formatter)
-        logger.addHandler(handler)
-        logger.setLevel(logging.DEBUG)
-        return logger
-    else:
-        return logging.getLogger(loggername)
         
 
 # SECURITY WARNING: keep the secret key used in production secret!
 # this should be either docker-mounted or populated through the utils module
-RIBETL_DATA = os.environ["RIBETL_DATA"] if os.environ["RIBETL_DATA"] else os.path.join(
-
-    BASE_DIR, "ribetldata")
+RIBETL_DATA = os.environ["RIBETL_DATA"] if os.environ["RIBETL_DATA"] else os.path.join(BASE_DIR, "ribetldata")
 # ※ Dont' forget to export pymol path ( we want to ship a built pymol, but python needs to be aware of it)
 # export PYMOL_PATH=/home/rxz/dev/pymol3.11 && export PYTHONPATH="$PYTHONPATH:$PYMOL_PATH/modules/:"
 
-def get_ribxz_logger(logname: typing.Literal['rcsb_sync','computations'], callee:str)->logging.Logger:
-        logdict = { 
-            'rcsb_sync'   : os.path.join(BASE_DIR, 'logs', 'rcsb_sync.log'),
-            'computations': os.path.join(BASE_DIR, 'logs', 'computations.log')
-         }
-        logger = logging.getLogger(callee)
-        logger.setLevel(logging.DEBUG)
-        file_handler = logging.FileHandler(logdict[logname])
-        file_handler.setLevel(logging.DEBUG)
-        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        file_handler.setFormatter(formatter)
-        logger.addHandler(file_handler)
-        return logger
 
 
 vars          = ["NEO4J_URI", "NEO4J_USER", "NEO4J_PASSWORD","NEO4J_CURRENTDB", "RIBETL_DATA"]
@@ -153,60 +107,13 @@ USE_TZ = True
 
 
 
-def ready():
-    logs_dir = os.path.join(BASE_DIR, 'logs')
-    if not os.path.exists(logs_dir):
-        os.makedirs(logs_dir)
+# def ready():
+#     logs_dir = os.path.join(BASE_DIR, 'logs')
+#     if not os.path.exists(logs_dir):
+#         os.makedirs(logs_dir)
 
-ready()
+# ready()
 
-LOGGING = {
-    'version'                 : 1,
-    'disable_existing_loggers': False,
-    'formatters'              : {
-        'standard': {
-            'format': '%(asctime)s - %(filename)s - %(levelname)s - %(message)s',
-        },
-    },
-    'handlers': {
-        'updates': {
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': os.path.join(BASE_DIR,'logs','updates.log'),
-            'maxBytes': 1024 * 1024 * 5, # 5MB
-            'backupCount': 5,
-            'formatter': 'standard',
-        },
-        'accesses': {
-            'class'      : 'logging.handlers.RotatingFileHandler',
-            'filename'   : os.path.join(BASE_DIR,'logs','accesses.log'),
-            'maxBytes'   : 1024 * 1024 * 5,                              # 5MB
-            'backupCount': 5,
-            'formatter'  : 'standard',
-        },
-        'computations': {
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': os.path.join(BASE_DIR,'logs','computations.log'),
-            'maxBytes': 1024 * 1024 * 5, # 5MB
-            'backupCount': 5,
-            'formatter': 'standard',
-        },
-    
-    },
-    'loggers': {
-        'updates': {
-            'handlers': ['updates'],
-            'level': 'DEBUG',
-        },
-        'accesses': {
-            'handlers': ['accesses'],
-            'level': 'DEBUG',
-        },
-        'computations': {
-            'handlers': ['computations'],
-            'level': 'DEBUG',
-        },
-    },
-}
 
 NINJA_DOCS_VIEW  = 'swagger'
 STATIC_URL       = '/static/'

@@ -3,7 +3,7 @@ import os
 import typing
 from pydantic import BaseModel
 from Bio.PDB.Residue import Residue
-from ribctl.lib.types.types_ribosome import Polymer, PolymerClass
+from api.ribctl.lib.types.types_ribosome import Polymer, PolymerClass
 
 AMINO_ACIDS = {
     "ALA": 0,
