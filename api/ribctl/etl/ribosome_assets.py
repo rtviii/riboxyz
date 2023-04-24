@@ -1,5 +1,6 @@
 import asyncio
 import json
+import typing
 from Bio.PDB.Structure import Structure
 from pprint import pprint
 from typing import Optional, Tuple
@@ -79,24 +80,24 @@ class RibosomeAssets():
     def get_struct_and_profile(self) -> tuple[Structure, RibosomeStructure]:
         return self.biopython_structure(), self.profile()
 
-    def get_chain_by_auth_asym_id(self, auth_asym_id: str) -> RNA | Protein | PolymericFactor | None:
-        print("Lookign for aut aysm id: ", auth_asym_id)
+    def get_chain_by_auth_asym_id(self, auth_asym_id: str) -> tuple[RNA | Protein | PolymericFactor | None, typing.Literal["RNA", "Protein", "PolymericFactor"] | None]:
+
         profile = self.profile()
         for chain in profile.proteins:
             if chain.auth_asym_id == auth_asym_id:
-                return chain
+                return ( chain , "Protein" )
 
         if profile.rnas is not None:
             for chain in profile.rnas:
                 if chain.auth_asym_id == auth_asym_id:
-                    return chain
+                    return ( chain, "RNA" )
 
         if profile.polymeric_factors is not None:
             for chain in profile.polymeric_factors:
                 if chain.auth_asym_id == auth_asym_id:
-                    return chain
+                    return ( chain, "PolymericFactor" )
 
-        return None
+        return ( None, None )
 
     def get_rna_by_nomclass(self, class_: RNAClass, assembly: int = 0) -> RNA | None:
         """@assembly here stands to specify which of the two or more models the rna comes from
