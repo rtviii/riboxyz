@@ -8,9 +8,10 @@ from Bio.PDB.Chain import Chain
 from Bio.PDB.Residue import Residue
 from Bio.PDB.NeighborSearch import NeighborSearch
 from Bio.PDB.Atom import Atom
+from pydantic import ValidationError, parse_obj_as
 from api.ribctl.etl.ribosome_assets import RibosomeAssets
 from api.ribctl.lib.types.types_binding_site import AMINO_ACIDS, NUCLEOTIDES, ResidueSummary
-from api.ribctl.lib.types.types_ribosome import RibosomeStructure
+from api.ribctl.lib.types.types_ribosome import PolymericFactor, RibosomeStructure
 
 RIBETL_DATA = os.environ.get('RIBETL_DATA')
 
@@ -151,47 +152,44 @@ def ptc_midpoint(reslist: list[Residue], auth_asym_id: str) -> tuple[float, floa
 
     return midpoint
 
+
 def residue_is_canonical(res: Residue | ResidueSummary) -> bool:
     return res.resname in [*AMINO_ACIDS.keys(), *NUCLEOTIDES]
 
 
-def tunnel_obstructions(rcsb_id:str, ptc_midpoint:tuple[float,float,float], radius:int=30)->list[dict]:
-    
+def tunnel_obstructions(rcsb_id: str, ptc_midpoint: tuple[float, float, float], radius: int = 30) -> tuple[list[PolymericFactor], list[ResidueSummary]]:
+
     R = RibosomeAssets(RCSB_ID)
     structure, profile = R.get_struct_and_profile()
 
     neigbor_search = NeighborSearch(list(structure.get_atoms()))
-    nbr_residues   = []
+    nbr_residues = []
 
-    nbr_chains = neigbor_search.search(ptc_midpoint, radius, level='C')
-    print("nbr chains")
-    for c in nbr_chains:
-        print(c.id)
-    
     nbr_residues.extend(neigbor_search.search(ptc_midpoint, radius, level='R'))
-    nbr_residues     = list(set([* map(ResidueSummary.from_biopython_residue, nbr_residues)]))
-    foreign_residues = []
+    nbr_residues = list(
+        set([* map(ResidueSummary.from_biopython_residue, nbr_residues)]))
 
+    foreign_nonpolys = []
+    foregin_polymers = []
 
     for N in nbr_residues:
-         parent = R.get_chain_by_auth_asym_id(N.parent_auth_asym_id)
-         if parent is not None:
-             print(parent.auth_asym_id,type(parent), residue_is_canonical(N))
-         else:
-             raise LookupError("Parent chain must exist in structure. Something went wrong (with the data, probably)")
+
+        if not residue_is_canonical(N):
+            foreign_nonpolys.append(N)
+
+        parent = R.get_chain_by_auth_asym_id(N.parent_auth_asym_id)
+        if parent is not None:
+            try:
+                if parse_obj_as(PolymericFactor, parent):
+                    foregin_polymers.append(parent)
+            except ValidationError:
+                pass
+        else:
+            raise LookupError("Parent chain must exist in structure. Something went wrong (with the data, probably)")
+
     print("Inspected midpoint ", ptc_midpoint, " with radius", radius)
-         
 
-
-
-    # print("Looking for stuff aroudn midpoint ", midpoint)
-    # foreign_residues = list(filter(lambda res: res.resname not in [*AMINO_ACIDS.keys(), *NUCLEOTIDES], nbr_residues))
-    # for F in foreign_residues:
-    #     print(F)
-
-    
-
-    return nbr_residues
+    return foregin_polymers, foreign_nonpolys
 
 
 idlist = [
@@ -223,8 +221,10 @@ idlist = [
 ]
 
 ptcres, auth_asym_id = ptc_residues_via_alignment(RCSB_ID, 0)
-midpoint             = ptc_midpoint(ptcres, auth_asym_id)
-tunnel_obstructions(RCSB_ID, midpoint)
+midpoint = ptc_midpoint(ptcres, auth_asym_id)
+poly,nonpoly = tunnel_obstructions(RCSB_ID, midpoint)
+print(poly)
+print(nonpoly)
 
 
 # for rcsb in idlist:
