@@ -1,7 +1,9 @@
 from io import StringIO
+import io
 import os
 from pprint import pprint
 import typing
+import prody
 import requests
 from api.ribctl.etl.ribosome_assets import RibosomeAssets
 from api.ribctl.lib.utils import open_structure
@@ -14,9 +16,12 @@ import sys
 import numpy as np
 import gemmi
 from Bio import pairwise2
+
+from Bio.Seq import Seq
+
 from Bio import SeqIO
 from Bio import SeqRecord
-from prody import MSA, Sequence, MSAFile,parseMSA
+from prody import MSA, Sequence, MSAFile, buildMSA,parseMSA
 import prody as prd
 import requests
 
@@ -97,6 +102,42 @@ def seq_to_fasta(rcsb_id: str, _seq: str, outfile: str):
 
 show = True
 
+def msa_profiles_dict_prd()->dict[str,MSA ]:
+    MSA_PROFILES_PATH  = '/home/rxz/dev/docker_ribxz/api/ribctl/assets/msa_profiles/'
+    msa_dict  = {}
+
+    # LSU
+    LSU_path = os.path.join(MSA_PROFILES_PATH,"LSU")
+    for msafile in os.listdir(LSU_path):
+        classname = msafile.split("_")[0]
+        class_msa       = prody.parseMSA(os.path.join(LSU_path, msafile))
+        msa_dict = {f"{classname}": class_msa, **msa_dict}
+
+    #SSU
+    SSU_path = os.path.join(MSA_PROFILES_PATH,"SSU")
+    for msafile in os.listdir(SSU_path):
+        classname = msafile.split("_")[0]
+        class_msa       = prody.parseMSA(os.path.join(SSU_path, msafile))
+        msa_dict = {f"{classname}": class_msa, **msa_dict}
+    return msa_dict
+def msa_profiles_dict()->dict[str, AlignIO.MultipleSeqAlignment]:
+    MSA_PROFILES_PATH  = '/home/rxz/dev/docker_ribxz/api/ribctl/assets/msa_profiles/'
+    msa_dict  = {}
+
+    # LSU
+    LSU_path = os.path.join(MSA_PROFILES_PATH,"LSU")
+    for msafile in os.listdir(LSU_path):
+        classname = msafile.split("_")[0]
+        class_msa       = AlignIO.read(os.path.join(LSU_path, msafile), "fasta")
+        msa_dict = {f"{classname}": class_msa, **msa_dict}
+
+    #SSU
+    SSU_path = os.path.join(MSA_PROFILES_PATH,"SSU")
+    for msafile in os.listdir(SSU_path):
+        classname = msafile.split("_")[0]
+        class_msa       = AlignIO.read(os.path.join(SSU_path, msafile), "fasta")
+        msa_dict = {f"{classname}": class_msa, **msa_dict}
+    return msa_dict
 
 def get_fasta_string(chain:RNA|Protein| PolymericFactor)->str:
     fasta_description      = "[{}.{}] {} |{}| {}".format(chain.parent_rcsb_id,chain.auth_asym_id, chain.src_organism_names[0], "",  chain.src_organism_ids[0])
@@ -130,7 +171,8 @@ def prot_class_msa_extend(rcsb_id:str, poly_class:ProteinClass)->AlignIO.Multipl
                                stderr=subprocess.PIPE, env=os.environ.copy())
 
     stdout, stderr = process.communicate(input=fasta_target.encode())
-    out,err = stdout.decode(),stderr.decode()
+    out   ,err     = stdout.decode(), stderr.decode()
+
     process.wait()
 
     msa_file = StringIO(out)
@@ -138,7 +180,8 @@ def prot_class_msa_extend(rcsb_id:str, poly_class:ProteinClass)->AlignIO.Multipl
 
     return msa
 
-def msa_class_proteovision_path(class_:ProteinClass):
+
+def msa_class_proteovision_path(prot_class:ProteinClass):
     def infer_subunit(protein_class:ProteinClass):
         if protein_class in list_LSU_Proteins:
             return "LSU"
@@ -150,10 +193,9 @@ def msa_class_proteovision_path(class_:ProteinClass):
         '/home/rxz/dev/docker_ribxz/api',
         'ribctl',
         'assets',
-        'msa_profiles/{}/{}_ribovision.fasta'.format(infer_subunit(class_),class_)
+        'msa_profiles/{}/{}_ribovision.fasta'.format(infer_subunit(prot_class),prot_class)
         )
     assert os.path.exists(path), "File not found: {}".format(path)
-
     return path
 
 """download + tax-identify a protein class sequence from proteovision"""
