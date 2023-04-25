@@ -29,7 +29,7 @@ new_seq = chain.entity_poly_seq_one_letter_code_can.replace("\n","")
 
 
 # msa_dict          = msa_profiles_dict()
-msa_dict          = msa_profiles_dict()
+msa_dict          = msa_profiles_dict_prd()
 similarity_scores = defaultdict(float)
 
 
@@ -40,24 +40,13 @@ def column_entropy(seq:str):
     return H
 
 for class_name, msa in msa_dict.items():
-
-
-
-   
-
-        
-    for i in len(list(msa)):
-        column_entropy(msa[:,i])
-
-
-
-
+    calcShannonEntropy(msa)
 
 
 
 
     # extended = prot_class_msa_extend(rcsb_id,poly_class)
-# 
+
 
 
     # print(class_name, H)
