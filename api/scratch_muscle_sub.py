@@ -11,7 +11,7 @@ from prody import calcShannonEntropy
 import prody
 from api.ribctl.etl.ribosome_assets import RibosomeAssets
 from api.ribctl.lib.types.types_ribosome import RNA, PolymericFactor, Protein, ProteinClass
-from api.ribctl.msa.msalib import msa_class_proteovision_path, msa_profiles_dict, msa_profiles_dict_prd, prot_class_msa_extend
+from api.ribctl.msa.msalib import msa_class_proteovision_path, msa_profiles_dict, msa_profiles_dict_prd, prot_class_msa_extend, prot_class_msa_extend_prd
 
 
 
@@ -39,9 +39,14 @@ def column_entropy(seq:str):
     H = entropy(dist, base=2)
     return H
 
-for class_name, msa in msa_dict.items():
-    calcShannonEntropy(msa)
+for class_name, msa in list( msa_dict.items() )[0:1]:
 
+    print(sum(calcShannonEntropy(msa)))
+    out = prot_class_msa_extend_prd(rcsb_id,poly_class)
+    print(sum(calcShannonEntropy(out)))
+
+
+    # print(out)
 
 
 

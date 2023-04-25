@@ -181,7 +181,7 @@ def prot_class_msa_extend(rcsb_id:str, poly_class:ProteinClass)->AlignIO.Multipl
     return msa
 
 
-def prot_class_msa_extend(rcsb_id:str, poly_class:ProteinClass)->AlignIO.MultipleSeqAlignment:
+def prot_class_msa_extend_prd(rcsb_id:str, poly_class:ProteinClass)->MSA:
     R                 = RibosomeAssets(rcsb_id)
     chain             = R.get_chain_by_polymer_class(poly_class)
     if chain is None:
@@ -206,16 +206,23 @@ def prot_class_msa_extend(rcsb_id:str, poly_class:ProteinClass)->AlignIO.Multipl
 
     stdout, stderr = process.communicate(input=fasta_target.encode())
     out   ,err     = stdout.decode(), stderr.decode()
-
     process.wait()
-    # - parse out to strings and labels
-    # - convert strings to numpy char arrays
-    # - buildMSA()
 
-    msa_file = StringIO(out)
-    msa      = AlignIO.read(msa_file, "fasta")
+    msafile      = MSAFile(StringIO(out), format="fasta")
+    sequences    = []
+    descriptions = []
+    for seq, desc in msafile._iterFasta():
+        sequences.append(seq)
+        descriptions.append(desc)
+    
 
-    return msa
+
+    char_arr     = np.chararray((len(sequences), len(sequences[0])), unicode=True)
+    for i in range(len(sequences)):
+        for j in range(len(sequences[0])):
+            char_arr[i][j] = sequences[i][j]
+
+    return MSA(char_arr, labels=descriptions, title="Class {} profile extended with {}".format( poly_class, rcsb_id))
 
 def msa_class_proteovision_path(prot_class:ProteinClass):
     def infer_subunit(protein_class:ProteinClass):
