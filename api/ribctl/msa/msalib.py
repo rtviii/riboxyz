@@ -102,7 +102,7 @@ def seq_to_fasta(rcsb_id: str, _seq: str, outfile: str):
 
 show = True
 
-def msa_profiles_dict_prd()->dict[str,MSA ]:
+def msa_profiles_dict_prd()->dict[ProteinClass,MSA ]:
     MSA_PROFILES_PATH  = '/home/rxz/dev/docker_ribxz/api/ribctl/assets/msa_profiles/'
     msa_dict  = {}
 
@@ -139,12 +139,16 @@ def msa_profiles_dict()->dict[str, AlignIO.MultipleSeqAlignment]:
         msa_dict = {f"{classname}": class_msa, **msa_dict}
     return msa_dict
 
-def get_fasta_string(chain:RNA|Protein| PolymericFactor)->str:
+def fasta_from_string(seq:str, description:str=""):
+    seq_record             = SeqRecord.SeqRecord(Seq(seq).upper())
+    seq_record.id          = description
+    return seq_record.format('fasta')
+
+def fasta_from_chain(chain:RNA|Protein| PolymericFactor)->str:
     fasta_description      = "[{}.{}] {} |{}| {}".format(chain.parent_rcsb_id,chain.auth_asym_id, chain.src_organism_names[0], "",  chain.src_organism_ids[0])
     _seq                   = chain.entity_poly_seq_one_letter_code_can.replace("\n","")
     seq_record             = SeqRecord.SeqRecord(Seq(_seq).upper())
     seq_record.id          = fasta_description
-    seq_record.description = ""
     return seq_record.format('fasta')
 
 def prot_class_msa_extend(rcsb_id:str, poly_class:ProteinClass)->AlignIO.MultipleSeqAlignment:
@@ -153,7 +157,7 @@ def prot_class_msa_extend(rcsb_id:str, poly_class:ProteinClass)->AlignIO.Multipl
     if chain is None:
         raise LookupError("Could not find chain in {} for protein class: {}".format(rcsb_id,poly_class))
 
-    fasta_target  = get_fasta_string(chain)
+    fasta_target  = fasta_from_chain(chain)
     class_profile = msa_class_proteovision_path(poly_class)
 
     cmd = [
@@ -181,20 +185,15 @@ def prot_class_msa_extend(rcsb_id:str, poly_class:ProteinClass)->AlignIO.Multipl
     return msa
 
 
-def prot_class_msa_extend_prd(rcsb_id:str, poly_class:ProteinClass)->MSA:
-    R                 = RibosomeAssets(rcsb_id)
-    chain             = R.get_chain_by_polymer_class(poly_class)
-    if chain is None:
-        raise LookupError("Could not find chain in {} for protein class: {}".format(rcsb_id,poly_class))
+def prot_class_msa_extend_prd(rcsb_id:str, poly_class:ProteinClass, fasta_target:str)->MSA:
 
-    fasta_target  = get_fasta_string(chain)
-    class_profile = msa_class_proteovision_path(poly_class)
-
+    
+    class_profile_path = msa_class_proteovision_path(poly_class)
     cmd = [
         '/home/rxz/dev/docker_ribxz/api/ribctl/muscle3.8',
         '-profile',
         '-in1',
-        class_profile,
+        class_profile_path,
         '-in2',
         '-',
         '-quiet']
@@ -204,25 +203,19 @@ def prot_class_msa_extend_prd(rcsb_id:str, poly_class:ProteinClass)->MSA:
                                stdin=subprocess.PIPE,
                                stderr=subprocess.PIPE, env=os.environ.copy())
 
-    stdout, stderr = process.communicate(input=fasta_target.encode())
+    stdout, stderr = process.communicate(input=fasta_from_string(fasta_target).encode())
     out   ,err     = stdout.decode(), stderr.decode()
     process.wait()
 
+
     msafile      = MSAFile(StringIO(out), format="fasta")
-    sequences    = []
-    descriptions = []
-    for seq, desc in msafile._iterFasta():
-        sequences.append(seq)
-        descriptions.append(desc)
-    
+    seqs, descs  =  zip(*msafile._iterFasta())
 
+    sequences    = [*map(lambda x : np.fromstring(x,dtype='S1'),seqs)]
+    descriptions = [*descs]
+    chararr      = np.array(sequences).reshape(len(sequences), len(sequences[0]))
 
-    char_arr     = np.chararray((len(sequences), len(sequences[0])), unicode=True)
-    for i in range(len(sequences)):
-        for j in range(len(sequences[0])):
-            char_arr[i][j] = sequences[i][j]
-
-    return MSA(char_arr, labels=descriptions, title="Class {} profile extended with {}".format( poly_class, rcsb_id))
+    return MSA(chararr, labels=descriptions, title="Class {} profile extended with {}".format( poly_class, rcsb_id))
 
 def msa_class_proteovision_path(prot_class:ProteinClass):
     def infer_subunit(protein_class:ProteinClass):
