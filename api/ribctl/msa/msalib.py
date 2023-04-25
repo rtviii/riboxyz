@@ -181,6 +181,42 @@ def prot_class_msa_extend(rcsb_id:str, poly_class:ProteinClass)->AlignIO.Multipl
     return msa
 
 
+def prot_class_msa_extend(rcsb_id:str, poly_class:ProteinClass)->AlignIO.MultipleSeqAlignment:
+    R                 = RibosomeAssets(rcsb_id)
+    chain             = R.get_chain_by_polymer_class(poly_class)
+    if chain is None:
+        raise LookupError("Could not find chain in {} for protein class: {}".format(rcsb_id,poly_class))
+
+    fasta_target  = get_fasta_string(chain)
+    class_profile = msa_class_proteovision_path(poly_class)
+
+    cmd = [
+        '/home/rxz/dev/docker_ribxz/api/ribctl/muscle3.8',
+        '-profile',
+        '-in1',
+        class_profile,
+        '-in2',
+        '-',
+        '-quiet']
+
+    process = subprocess.Popen(cmd,
+                               stdout=subprocess.PIPE,
+                               stdin=subprocess.PIPE,
+                               stderr=subprocess.PIPE, env=os.environ.copy())
+
+    stdout, stderr = process.communicate(input=fasta_target.encode())
+    out   ,err     = stdout.decode(), stderr.decode()
+
+    process.wait()
+    # - parse out to strings and labels
+    # - convert strings to numpy char arrays
+    # - buildMSA()
+
+    msa_file = StringIO(out)
+    msa      = AlignIO.read(msa_file, "fasta")
+
+    return msa
+
 def msa_class_proteovision_path(prot_class:ProteinClass):
     def infer_subunit(protein_class:ProteinClass):
         if protein_class in list_LSU_Proteins:
