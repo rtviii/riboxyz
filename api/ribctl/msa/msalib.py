@@ -151,43 +151,11 @@ def fasta_from_chain(chain:RNA|Protein| PolymericFactor)->str:
     seq_record.id          = fasta_description
     return seq_record.format('fasta')
 
-def prot_class_msa_extend(rcsb_id:str, poly_class:ProteinClass)->AlignIO.MultipleSeqAlignment:
-    R                 = RibosomeAssets(rcsb_id)
-    chain             = R.get_chain_by_polymer_class(poly_class)
-    if chain is None:
-        raise LookupError("Could not find chain in {} for protein class: {}".format(rcsb_id,poly_class))
-
-    fasta_target  = fasta_from_chain(chain)
-    class_profile = msa_class_proteovision_path(poly_class)
-
-    cmd = [
-        '/home/rxz/dev/docker_ribxz/api/ribctl/muscle3.8',
-        '-profile',
-        '-in1',
-        class_profile,
-        '-in2',
-        '-',
-        '-quiet']
-
-    process = subprocess.Popen(cmd,
-                               stdout=subprocess.PIPE,
-                               stdin=subprocess.PIPE,
-                               stderr=subprocess.PIPE, env=os.environ.copy())
-
-    stdout, stderr = process.communicate(input=fasta_target.encode())
-    out   ,err     = stdout.decode(), stderr.decode()
-
-    process.wait()
-
-    msa_file = StringIO(out)
-    msa      = AlignIO.read(msa_file, "fasta")
-
-    return msa
 
 
+
+#TODO : Replace class profile getter with ( in-memory + another pipe )
 def prot_class_msa_extend_prd(rcsb_id:str, poly_class:ProteinClass, fasta_target:str)->MSA:
-
-    
     class_profile_path = msa_class_proteovision_path(poly_class)
     cmd = [
         '/home/rxz/dev/docker_ribxz/api/ribctl/muscle3.8',
