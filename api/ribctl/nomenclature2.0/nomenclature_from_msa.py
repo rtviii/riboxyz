@@ -5,17 +5,15 @@ import sys
 import prody as prd
 from prody import calcShannonEntropy
 
-def muscle_combine_profiles(msa_path1: str, msa_path2: str, out_filepath: str):
-    """Combine two MSA-profiles into a single one. Used here to "append" a target sequence two the ribovision alignment. """
-    cmd = ['/home/rxz/dev/docker_ribxz/cli/scripts/muscle3.8', '-profile','-in1', msa_path1, '-in2', msa_path2, '-out', out_filepath]
-
-    subprocess.Popen(cmd,
-                      stdout=subprocess.PIPE,
-                      stderr=subprocess.PIPE,
-                      env=os.environ.copy()
-                      ).wait()
-
-    sys.stdout.flush()
+# def muscle_combine_profiles(msa_path1: str, msa_path2: str, out_filepath: str):
+#     """Combine two MSA-profiles into a single one. Used here to "append" a target sequence two the ribovision alignment. """
+#     cmd = ['/home/rxz/dev/docker_ribxz/cli/scripts/muscle3.8', '-profile','-in1', msa_path1, '-in2', msa_path2, '-out', out_filepath]
+#     subprocess.Popen(cmd,
+#                       stdout=subprocess.PIPE,
+#                       stderr=subprocess.PIPE,
+#                       env=os.environ.copy()
+#                       ).wait()
+#     sys.stdout.flush()
 
 def barr2str (bArr):
     return ''.join([ x.decode("utf-8") for x in bArr])
@@ -44,7 +42,7 @@ paths = [*map(lambda _: "5afi_unclassified_{}.fasta".format(_),suspects)]
 
 for control in suspects:
     control_path = (lambda _: "5afi_unclassified_{}.fasta".format(_))(control)
-    muscle_combine_profiles(chief_msa_path, control_path, '{}with_{}.fasta'.format(chief_msa_path,control))
+    muscle_combine_profile(chief_msa_path, control_path, '{}with_{}.fasta'.format(chief_msa_path,control))
 
 for control in suspects:
     print("---------")
