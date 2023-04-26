@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from .types_poly_nonpoly_ligand import LSU_Proteins, NonpolymericLigandClass, PolymericFactorClass, RNAClass, SSU_Proteins
+from .types_poly_nonpoly_ligand import LSUProteinClass, NonpolymericLigandClass, PolymericFactorClass, RNAClass, SSUProteinClass
 
 
 class Organism(BaseModel): 
