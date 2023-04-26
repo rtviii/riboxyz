@@ -1,10 +1,14 @@
+from io import StringIO
+import io
 import os
 from pprint import pprint
 import typing
+import prody
 import requests
 from api.ribctl.etl.ribosome_assets import RibosomeAssets
 from api.ribctl.lib.utils import open_structure
-from ribctl.lib.types.types_ribosome import ProteinClass
+from ribctl.lib.types.types_ribosome import RNA, PolymericFactor, Protein, ProteinClass
+from Bio import AlignIO
 from  api.ribctl.lib.types.types_poly_nonpoly_ligand import  list_LSU_Proteins,list_SSU_Proteins
 import argparse
 import subprocess
@@ -12,9 +16,12 @@ import sys
 import numpy as np
 import gemmi
 from Bio import pairwise2
+
+from Bio.Seq import Seq
+
 from Bio import SeqIO
 from Bio import SeqRecord
-from prody import MSA, Sequence, MSAFile,parseMSA
+from prody import MSA, Sequence, MSAFile, buildMSA,parseMSA
 import prody as prd
 import requests
 
@@ -63,8 +70,6 @@ def util__backwards_match(alntgt: str, aln_resid: int, verbose: bool = False) ->
     raise LookupError("Could not find residue in aligned sequence.")
 
 #! util
-
-#! util
 def util__forwards_match(string: str, resid: int):
     """Returns the index of a source-sequence residue in the (aligned) source sequence."""
     if resid >= len(string):
@@ -85,14 +90,6 @@ def util__forwards_match(string: str, resid: int):
 def barr2str (bArr):
     return ''.join([ x.decode("utf-8") for x in bArr])
 
-#! util
-def infer_subunit(protein_class:ProteinClass):
-    if protein_class in list_LSU_Proteins:
-        return "LSU"
-    elif protein_class in list_SSU_Proteins:
-        return "SSU"
-    else:
-        raise ValueError("Unknown protein class: {}".format(protein_class))
 
 #! util
 def seq_to_fasta(rcsb_id: str, _seq: str, outfile: str):
@@ -100,23 +97,121 @@ def seq_to_fasta(rcsb_id: str, _seq: str, outfile: str):
     _seq          = _seq.replace("\n", "")
     seq_record    = SeqRecord.SeqRecord(Seq(_seq).upper())
     seq_record.id = seq_record.description = rcsb_id
-    SeqIO.write(seq_record, outfile, 'fasta',)
+    SeqIO.write(seq_record, outfile, 'fasta')
+    
 
 show = True
 
-"""append target sequence to proteovision msa profile"""
-def muscle_combine_profile(msa_path1: str, msa_path2: str, out_filepath: str):
-    """Combine two MSA-profiles into a single one. Used here to "append" a target sequence two the ribovision alignment. """
-    cmd = ['/home/rxz/dev/docker_ribxz/cli/scripts/muscle3.8', '-profile','-in1', msa_path1, '-in2', msa_path2, '-out', out_filepath]
-    subprocess.Popen(cmd, stdout=subprocess.PIPE,stderr=subprocess.PIPE, env=os.environ.copy()).wait()
-    sys.stdout.flush()
+def msa_profiles_dict_prd()->dict[ProteinClass,MSA ]:
+    MSA_PROFILES_PATH  = '/home/rxz/dev/docker_ribxz/api/ribctl/assets/msa_profiles/'
+    msa_dict  = {}
+
+    # LSU
+    LSU_path = os.path.join(MSA_PROFILES_PATH,"LSU")
+    for msafile in os.listdir(LSU_path):
+        classname = msafile.split("_")[0]
+        class_msa       = prody.parseMSA(os.path.join(LSU_path, msafile))
+        msa_dict = {f"{classname}": class_msa, **msa_dict}
+
+    #SSU
+    SSU_path = os.path.join(MSA_PROFILES_PATH,"SSU")
+    for msafile in os.listdir(SSU_path):
+        classname = msafile.split("_")[0]
+        class_msa       = prody.parseMSA(os.path.join(SSU_path, msafile))
+        msa_dict = {f"{classname}": class_msa, **msa_dict}
+    return msa_dict
+def msa_profiles_dict()->dict[str, AlignIO.MultipleSeqAlignment]:
+    MSA_PROFILES_PATH  = '/home/rxz/dev/docker_ribxz/api/ribctl/assets/msa_profiles/'
+    msa_dict  = {}
+
+    # LSU
+    LSU_path = os.path.join(MSA_PROFILES_PATH,"LSU")
+    for msafile in os.listdir(LSU_path):
+        classname = msafile.split("_")[0]
+        class_msa       = AlignIO.read(os.path.join(LSU_path, msafile), "fasta")
+        msa_dict = {f"{classname}": class_msa, **msa_dict}
+
+    #SSU
+    SSU_path = os.path.join(MSA_PROFILES_PATH,"SSU")
+    for msafile in os.listdir(SSU_path):
+        classname = msafile.split("_")[0]
+        class_msa       = AlignIO.read(os.path.join(SSU_path, msafile), "fasta")
+        msa_dict = {f"{classname}": class_msa, **msa_dict}
+    return msa_dict
+
+def fasta_from_string(seq:str, description:str=""):
+    seq_record             = SeqRecord.SeqRecord(Seq(seq).upper())
+    seq_record.id          = description
+    return seq_record.format('fasta')
+
+def fasta_from_chain(chain:RNA|Protein| PolymericFactor)->str:
+    fasta_description      = "[{}.{}] {} |{}| {}".format(chain.parent_rcsb_id,chain.auth_asym_id, chain.src_organism_names[0], "",  chain.src_organism_ids[0])
+    _seq                   = chain.entity_poly_seq_one_letter_code_can.replace("\n","")
+    seq_record             = SeqRecord.SeqRecord(Seq(_seq).upper())
+    seq_record.id          = fasta_description
+    return seq_record.format('fasta')
 
 
-def msa_class_proteovision_path(_:ProteinClass):
-    return '/home/rxz/dev/docker_ribxz/api/ribctl/__wip/data/msa_classes_proteovision/{}/{}_ribovision.fasta'.format(infer_subunit(_),_)
+
+def prot_class_msa(class_name:ProteinClass)->MSA:
+    _ = prody.parseMSA(msa_class_proteovision_path(class_name))
+    if _ is not None:
+        return _
+    else:
+        raise Exception("MSA for class {} not found or could not be parsed".format(class_name))
+
+
+#TODO : Replace class profile getter with ( in-memory + another pipe )
+def prot_class_msa_extend_prd( poly_class:ProteinClass, poly_class_msa:MSA, fasta_target:str)->MSA:
+
+    class_profile_path = msa_class_proteovision_path(poly_class)
+
+    cmd = [
+        '/home/rxz/dev/docker_ribxz/api/ribctl/muscle3.8',
+        '-profile',
+        '-in1',
+        class_profile_path,
+        '-in2',
+        '-',
+        '-quiet']
+
+    process = subprocess.Popen(cmd,
+                               stdout=subprocess.PIPE,
+                               stdin=subprocess.PIPE,
+                               stderr=subprocess.PIPE, env=os.environ.copy())
+
+    stdout, stderr = process.communicate(input=fasta_from_string(fasta_target).encode())
+    out   ,err     = stdout.decode(), stderr.decode()
+    process.wait()
+
+    msafile      = MSAFile(StringIO(out), format="fasta")
+    seqs, descs  =  zip(*msafile._iterFasta())
+
+    sequences    = [*map(lambda x : np.fromstring(x,dtype='S1'),seqs)]
+    descriptions = [*descs]
+    chararr      = np.array(sequences).reshape(len(sequences), len(sequences[0]))
+
+    return MSA(chararr, labels=descriptions, title="Class {} profile extended.".format( poly_class))
+
+def msa_class_proteovision_path(prot_class:ProteinClass):
+    def infer_subunit(protein_class:ProteinClass):
+        if protein_class in list_LSU_Proteins:
+            return "LSU"
+        elif protein_class in list_SSU_Proteins:
+            return "SSU"
+        else:
+            raise ValueError("Unknown protein class: {}".format(protein_class))
+    path = os.path.join(
+        '/home/rxz/dev/docker_ribxz/api',
+        'ribctl',
+        'assets',
+        'msa_profiles/{}/{}_ribovision.fasta'.format(infer_subunit(prot_class),prot_class)
+        )
+    assert os.path.exists(path), "File not found: {}".format(path)
+    return path
+
 """download + tax-identify a protein class sequence from proteovision"""
 def process_proteovision_alignment(nomclass:ProteinClass):
-
 
     def msa_add_taxonomic_ids(msa_path:str):
 

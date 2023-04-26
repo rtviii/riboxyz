@@ -5,14 +5,14 @@ from Bio.PDB.Structure import Structure
 from pprint import pprint
 from typing import Optional, Tuple
 from api.ribctl.lib.types.types_binding_site import BindingSite
-from api.ribctl.lib.types.types_poly_nonpoly_ligand import RNAClass
+from api.ribctl.lib.types.types_poly_nonpoly_ligand import PolymericFactorClass, RNAClass
 from api.logs.loggers import updates_logger
 from api.ribctl.lib.mod_extract_bsites import bsite_nonpolymeric_ligand, struct_ligand_ids, struct_polymeric_factor_ids, bsite_polymeric_factor, bsite_polymeric_factor
 from api.ribctl.lib.mod_split_rename import split_rename
 from api.ribctl.etl.struct_rcsb_api import current_rcsb_structs, process_pdb_record
 from api.ribctl.lib.mod_render_thumbnail import render_thumbnail
 from api.ribctl.lib.utils import download_unpack_place, open_structure
-from api.ribctl.lib.types.types_ribosome import RNA, Polymer, PolymericFactor, Protein, ProteinClass, RibosomeStructure
+from api.ribctl.lib.types.types_ribosome import RNA, Polymer, PolymerClass, PolymericFactor, Protein, ProteinClass, RibosomeStructure
 from pydantic import BaseModel, parse_obj_as
 from concurrent.futures import ALL_COMPLETED, Future, ProcessPoolExecutor, ThreadPoolExecutor, wait
 import os
@@ -79,6 +79,23 @@ class RibosomeAssets():
 
     def get_struct_and_profile(self) -> tuple[Structure, RibosomeStructure]:
         return self.biopython_structure(), self.profile()
+
+
+    def get_chain_by_polymer_class(self, poly_class: PolymerClass | PolymericFactorClass, assembly:int=0) -> PolymericFactor | RNA | Protein | None:
+        profile = self.profile()
+        for prot in profile.proteins:
+            if poly_class in prot.nomenclature and prot.assembly_id == assembly:
+                return prot
+        if profile.rnas is not None:
+            for rna in profile.rnas:
+                if poly_class in rna.nomenclature and rna.assembly_id == assembly:
+                    return rna
+        if profile.polymeric_factors is not None:
+            for polyf in profile.polymeric_factors:
+                if poly_class in polyf.nomenclature and polyf.assembly_id == assembly:
+                    return polyf
+        return None
+
 
     def get_chain_by_auth_asym_id(self, auth_asym_id: str) -> tuple[
         RNA | Protein | PolymericFactor | None,
@@ -252,7 +269,6 @@ class RibosomeAssets():
 
 # ※ Mass process methods.
 
-
 async def obtain_assets(rcsb_id: str, assetlist: Assetlist, overwrite: bool = False):
     """Obtain all assets for a given RCSB ID"""
 
@@ -275,7 +291,6 @@ async def obtain_assets(rcsb_id: str, assetlist: Assetlist, overwrite: bool = Fa
         coroutines.append(assets._verify_cif_modified_and_chains(overwrite))
 
     await asyncio.gather(*coroutines)
-
 
 def obtain_assets_threadpool(targets: list[str], assetlist: Assetlist, workers: int = 5, get_all: bool = False, overwrite=False):
     """Get all ribosome profiles from RCSB via a threadpool"""
@@ -305,7 +320,6 @@ def obtain_assets_threadpool(targets: list[str], assetlist: Assetlist, workers: 
 
     wait(futures, return_when=ALL_COMPLETED)
     logger.info("Finished syncing with RCSB")
-
 
 def obtain_assets_processpool(targets: list[str], assetlist: Assetlist, workers: int = 5, get_all: bool = False, overwrite=False):
     """Get all ribosome profiles from RCSB via a threadpool"""
