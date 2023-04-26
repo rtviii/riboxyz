@@ -153,10 +153,19 @@ def fasta_from_chain(chain:RNA|Protein| PolymericFactor)->str:
 
 
 
+def prot_class_msa(class_name:ProteinClass)->MSA:
+    _ = prody.parseMSA(msa_class_proteovision_path(class_name))
+    if _ is not None:
+        return _
+    else:
+        raise Exception("MSA for class {} not found or could not be parsed".format(class_name))
+
 
 #TODO : Replace class profile getter with ( in-memory + another pipe )
-def prot_class_msa_extend_prd(rcsb_id:str, poly_class:ProteinClass, fasta_target:str)->MSA:
+def prot_class_msa_extend_prd( poly_class:ProteinClass, poly_class_msa:MSA, fasta_target:str)->MSA:
+
     class_profile_path = msa_class_proteovision_path(poly_class)
+
     cmd = [
         '/home/rxz/dev/docker_ribxz/api/ribctl/muscle3.8',
         '-profile',
@@ -175,7 +184,6 @@ def prot_class_msa_extend_prd(rcsb_id:str, poly_class:ProteinClass, fasta_target
     out   ,err     = stdout.decode(), stderr.decode()
     process.wait()
 
-
     msafile      = MSAFile(StringIO(out), format="fasta")
     seqs, descs  =  zip(*msafile._iterFasta())
 
@@ -183,7 +191,7 @@ def prot_class_msa_extend_prd(rcsb_id:str, poly_class:ProteinClass, fasta_target
     descriptions = [*descs]
     chararr      = np.array(sequences).reshape(len(sequences), len(sequences[0]))
 
-    return MSA(chararr, labels=descriptions, title="Class {} profile extended with {}".format( poly_class, rcsb_id))
+    return MSA(chararr, labels=descriptions, title="Class {} profile extended.".format( poly_class))
 
 def msa_class_proteovision_path(prot_class:ProteinClass):
     def infer_subunit(protein_class:ProteinClass):
