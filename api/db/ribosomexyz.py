@@ -11,12 +11,12 @@ from api.db.inits.rna import add_rna, node__rna_class
 from api.db.inits.structure import add_ligand, node__structure
 from ribctl.lib.types.types_ribosome import RibosomeStructure
 from api.ribctl.etl.ribosome_assets import RibosomeAssets
-from api.ribctl.lib.types.types_poly_nonpoly_ligand import list_LSU_Proteins, list_SSU_Proteins, list_RNAClass
+from api.ribctl.lib.types.types_poly_nonpoly_ligand import list_LSUProteinClass, list_SSUProteinClass, list_RNAClass
 from neo4j import GraphDatabase, Driver, ManagedTransaction, Transaction
 from ribctl.lib.types.types_ribosome import  NonpolymericLigand,  ProteinClass, RibosomeStructure
 from schema.data_requests import LigandsByStruct
 from schema.v0 import ExogenousRNAByStruct,BanClassMetadata, LigandInstance, NeoStruct, NomenclatureClass, NomenclatureClassMember
-from api.ribctl.lib.types.types_poly_nonpoly_ligand import RNAClass, list_LSU_Proteins, list_SSU_Proteins, list_RNAClass
+from api.ribctl.lib.types.types_poly_nonpoly_ligand import RNAClass, list_LSUProteinClass, list_SSUProteinClass, list_RNAClass
 
 
 # ※ ----------------[ 0.Database  inits: constraints & nomenclature classes]
@@ -556,7 +556,7 @@ with n.rcsb_id as struct, collect(r.rcsb_pdbx_description) as rnas
 
     def __init_protein_classes(self):
         with self.driver.session() as session:
-            for protein_class in [*list_LSU_Proteins, *  list_SSU_Proteins]:
+            for protein_class in [*list_LSUProteinClass, *  list_SSUProteinClass]:
                 session.execute_write(node__protein_class(protein_class))
 
     def __init_rna_classes(self):

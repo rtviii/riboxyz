@@ -9,7 +9,7 @@ from api.ribctl.etl.ribosome_assets import RibosomeAssets
 from api.ribctl.lib.utils import open_structure
 from ribctl.lib.types.types_ribosome import RNA, PolymericFactor, Protein, ProteinClass
 from Bio import AlignIO
-from  api.ribctl.lib.types.types_poly_nonpoly_ligand import  list_LSU_Proteins,list_SSU_Proteins
+from  api.ribctl.lib.types.types_poly_nonpoly_ligand import  list_LSUProteinClass,list_SSUProteinClass
 import argparse
 import subprocess
 import sys
@@ -36,16 +36,6 @@ TAXID_ARCHEA            = 2157
 
 PROTEOVISION_URL        = lambda SU, _class, taxids: "https://ribovision3.chemistry.gatech.edu/showAlignment/{}/{}/{}".format(SU,_class,taxids)
 PROTEOVISION_MSA_FOLDER = '/home/rxz/dev/docker_ribxz/api/ribctl/__wip/data/msa_classes_proteovision/'
-
-parser = argparse.ArgumentParser(description='Argument Parser for my ms code.')
-parser.add_argument('-p', '--proteovision', required=False, help='Type of proteovision analysis to perform (lsu, ssu, single)')
-parser.add_argument('-t','--lineage', type=str, required=False, help='Comma-separated list of taxonomic levels to include in the query')
-
-args = parser.parse_args()
-
-# Access the argument values
-proteovision_type = args.proteovision
-lineage           = args.lineage
 
 #! util
 def util__backwards_match(alntgt: str, aln_resid: int, verbose: bool = False) -> typing.Tuple[int, str, int]:
@@ -151,15 +141,12 @@ def fasta_from_chain(chain:RNA|Protein| PolymericFactor)->str:
     seq_record.id          = fasta_description
     return seq_record.format('fasta')
 
-
-
 def prot_class_msa(class_name:ProteinClass)->MSA:
     _ = prody.parseMSA(msa_class_proteovision_path(class_name))
     if _ is not None:
         return _
     else:
         raise Exception("MSA for class {} not found or could not be parsed".format(class_name))
-
 
 #TODO : Replace class profile getter with ( in-memory + another pipe )
 def prot_class_msa_extend_prd( poly_class:ProteinClass, poly_class_msa:MSA, fasta_target:str)->MSA:
@@ -195,9 +182,9 @@ def prot_class_msa_extend_prd( poly_class:ProteinClass, poly_class_msa:MSA, fast
 
 def msa_class_proteovision_path(prot_class:ProteinClass):
     def infer_subunit(protein_class:ProteinClass):
-        if protein_class in list_LSU_Proteins:
+        if protein_class in list_LSUProteinClass:
             return "LSU"
-        elif protein_class in list_SSU_Proteins:
+        elif protein_class in list_SSUProteinClass:
             return "SSU"
         else:
             raise ValueError("Unknown protein class: {}".format(protein_class))

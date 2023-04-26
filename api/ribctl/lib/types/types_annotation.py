@@ -1,6 +1,6 @@
 from typing import Any
 from pydantic import BaseModel
-from .types_poly_nonpoly_ligand import LSU_Proteins, RNAClass, SSU_Proteins
+from .types_poly_nonpoly_ligand import LSUProteinClass, RNAClass, SSUProteinClass
 
 class InterProFamily(BaseModel):
     family_id: str
