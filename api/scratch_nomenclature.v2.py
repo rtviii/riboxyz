@@ -20,7 +20,6 @@ async def compare_against_all_classes(new_seq:str, msa_profiles:dict[ProteinClas
 
     with ThreadPoolExecutor(max_workers=workers) as executor:
         futures = []
-
         for class_name, base_msa in msa_profiles.items():
             fut = executor.submit(seq_asses_protclass_H_fit, class_name, base_msa, new_seq)
             futures.append(fut)
