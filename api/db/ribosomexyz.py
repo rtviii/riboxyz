@@ -1,22 +1,22 @@
 from concurrent.futures import ALL_COMPLETED, Future, ThreadPoolExecutor, wait
-from logs.loggers import updates_logger
+from logs.loggers import get_updates_logger
 import typing
 from neo4j.exceptions import AuthError
 from pyparsing import Any
 from neo4j import Driver, GraphDatabase
 from ribctl.etl.struct_rcsb_api import current_rcsb_structs
-from rbxz_bend.settings import NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER, get_ribxz_logger
+from rbxz_bend.settings import NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER
 from api.db.inits.proteins import add_protein, node__protein_class
 from api.db.inits.rna import add_rna, node__rna_class
 from api.db.inits.structure import add_ligand, node__structure
 from ribctl.lib.types.types_ribosome import RibosomeStructure
 from api.ribctl.etl.ribosome_assets import RibosomeAssets
-from api.ribctl.lib.types.types_poly_nonpoly_ligand import list_LSU_Proteins, list_SSU_Proteins, list_RNAClass
+from api.ribctl.lib.types.types_poly_nonpoly_ligand import list_LSUProteinClass, list_SSUProteinClass, list_RNAClass
 from neo4j import GraphDatabase, Driver, ManagedTransaction, Transaction
 from ribctl.lib.types.types_ribosome import  NonpolymericLigand,  ProteinClass, RibosomeStructure
 from schema.data_requests import LigandsByStruct
 from schema.v0 import ExogenousRNAByStruct,BanClassMetadata, LigandInstance, NeoStruct, NomenclatureClass, NomenclatureClassMember
-from api.ribctl.lib.types.types_poly_nonpoly_ligand import RNAClass, list_LSU_Proteins, list_SSU_Proteins, list_RNAClass
+from api.ribctl.lib.types.types_poly_nonpoly_ligand import RNAClass, list_LSUProteinClass, list_SSUProteinClass, list_RNAClass
 
 
 # ※ ----------------[ 0.Database  inits: constraints & nomenclature classes]
@@ -521,7 +521,7 @@ with n.rcsb_id as struct, collect(r.rcsb_pdbx_description) as rnas
 
     def sync_with_rcsb(self, workers:int)->None:
 
-        logger = updates_logger
+        logger = get_updates_logger()
         synced   = self.get_all_structs()
         unsynced = sorted(current_rcsb_structs())
         futures:list[Future] =  []
@@ -556,7 +556,7 @@ with n.rcsb_id as struct, collect(r.rcsb_pdbx_description) as rnas
 
     def __init_protein_classes(self):
         with self.driver.session() as session:
-            for protein_class in [*list_LSU_Proteins, *  list_SSU_Proteins]:
+            for protein_class in [*list_LSUProteinClass, *  list_SSUProteinClass]:
                 session.execute_write(node__protein_class(protein_class))
 
     def __init_rna_classes(self):

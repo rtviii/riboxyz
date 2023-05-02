@@ -6,7 +6,7 @@ from pprint import pprint
 from typing import Optional, Tuple
 from api.ribctl.lib.types.types_binding_site import BindingSite
 from api.ribctl.lib.types.types_poly_nonpoly_ligand import PolymericFactorClass, RNAClass
-from api.logs.loggers import updates_logger
+from api.logs.loggers import get_updates_logger
 from api.ribctl.lib.mod_extract_bsites import bsite_nonpolymeric_ligand, struct_ligand_ids, struct_polymeric_factor_ids, bsite_polymeric_factor, bsite_polymeric_factor
 from api.ribctl.lib.mod_split_rename import split_rename
 from api.ribctl.etl.struct_rcsb_api import current_rcsb_structs, process_pdb_record
@@ -294,7 +294,7 @@ async def obtain_assets(rcsb_id: str, assetlist: Assetlist, overwrite: bool = Fa
 
 def obtain_assets_threadpool(targets: list[str], assetlist: Assetlist, workers: int = 5, get_all: bool = False, overwrite=False):
     """Get all ribosome profiles from RCSB via a threadpool"""
-    logger = updates_logger
+    logger = get_updates_logger()
     if get_all:
         unsynced = sorted(current_rcsb_structs())
     else:
@@ -323,7 +323,7 @@ def obtain_assets_threadpool(targets: list[str], assetlist: Assetlist, workers: 
 
 def obtain_assets_processpool(targets: list[str], assetlist: Assetlist, workers: int = 5, get_all: bool = False, overwrite=False):
     """Get all ribosome profiles from RCSB via a threadpool"""
-    logger = updates_logger
+    logger = get_updates_logger()
     if get_all:
         unsynced = sorted(current_rcsb_structs())
     else:
