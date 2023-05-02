@@ -57,3 +57,13 @@ for cls in list_ProteinClass:
 # if chain is None:
 #     raise LookupError() 
 
+No MSA for uL1
+No MSA for eL13
+No MSA for eL20
+No MSA for uL29
+No MSA for eL38
+No MSA for P1/P2
+No MSA for bTHX
+No MSA for eS25
+No MSA for eS30
+No MSA for RACK1 - IPR045223
