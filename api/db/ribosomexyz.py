@@ -1,11 +1,11 @@
 from concurrent.futures import ALL_COMPLETED, Future, ThreadPoolExecutor, wait
-from logs.loggers import updates_logger
+from logs.loggers import get_updates_logger
 import typing
 from neo4j.exceptions import AuthError
 from pyparsing import Any
 from neo4j import Driver, GraphDatabase
 from ribctl.etl.struct_rcsb_api import current_rcsb_structs
-from rbxz_bend.settings import NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER, get_ribxz_logger
+from rbxz_bend.settings import NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER
 from api.db.inits.proteins import add_protein, node__protein_class
 from api.db.inits.rna import add_rna, node__rna_class
 from api.db.inits.structure import add_ligand, node__structure
@@ -521,7 +521,7 @@ with n.rcsb_id as struct, collect(r.rcsb_pdbx_description) as rnas
 
     def sync_with_rcsb(self, workers:int)->None:
 
-        logger = updates_logger
+        logger = get_updates_logger()
         synced   = self.get_all_structs()
         unsynced = sorted(current_rcsb_structs())
         futures:list[Future] =  []
