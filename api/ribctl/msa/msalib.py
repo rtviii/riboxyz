@@ -273,3 +273,4 @@ def display_msa_class(nomclass:ProteinClass):
     for seq in msa_main:
         print(seq)
 
+
