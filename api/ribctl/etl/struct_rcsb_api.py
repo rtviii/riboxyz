@@ -407,10 +407,10 @@ def process_pdb_record(rcsb_id: str) -> RibosomeStructure:
     returns dict of the shape types_RibosomeStructure 
     """
 
-    response = query_rcsb_api(gql_monolith(rcsb_id.upper()))
-    poly_entities = response['polymer_entities']
+    response         = query_rcsb_api(gql_monolith(rcsb_id.upper()))
+    poly_entities    = response['polymer_entities']
     nonpoly_entities = response['nonpolymer_entities']
-    assembly_maps = __parse_assemblies(response['assemblies'])
+    assembly_maps    = __parse_assemblies(response['assemblies'])
 
     def is_protein(poly):
         return poly['entity_poly']['rcsb_entity_polymer_type'] == 'Protein'
