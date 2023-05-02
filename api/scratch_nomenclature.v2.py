@@ -5,7 +5,7 @@ from prody import MSA, calcShannonEntropy
 from api.ribctl.etl.ribosome_assets import RibosomeAssets
 from api.ribctl.lib.types.types_poly_nonpoly_ligand import list_ProteinClass
 from api.ribctl.lib.types.types_ribosome import  Protein, ProteinClass
-from api.ribctl.msa.msalib import msa_profiles_dict_prd, prot_class_msa_extend_prd
+from api.ribctl.msa.msalib import msa_profiles_dict, msa_profiles_dict_prd, prot_class_msa_extend_prd
 
 msa_profiles: dict[ProteinClass, MSA] = msa_profiles_dict_prd()
 def seq_asses_protclass_H_fit(base_class: ProteinClass, base_class_msa:MSA, new_seq:str )->dict[ProteinClass, float]:
