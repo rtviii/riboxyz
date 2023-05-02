@@ -140,6 +140,8 @@ def __reshape_to_nonpolymericligand(nonpoly) -> NonpolymericLigand:
 
 
 def assign_poly_to_assembly(assembly_maps: list[AssemblyInstancesMap], auth_asym_id: str) -> int:
+    pprint(assembly_maps)
+    print("Attempting to assing, ", auth_asym_id , " to assembly")
     if len(assembly_maps) == 1:
         return 0
     else:
@@ -347,7 +349,6 @@ def __parse_assemblies(d: list[dict]) -> list[AssemblyInstancesMap]:
 def __classify_polymeric_factor(description: str) -> PolymericFactorClass | None:
     """@description: usually polymer['rcsb_polymer_entity']['pdbx_description'] in PDB"""
     (match, score) = process.extractOne(description,list_PolymericFactorClass, scorer=fuzz.partial_ratio)
-
     return None if score != 100 else match
 
 
@@ -412,8 +413,7 @@ def process_pdb_record(rcsb_id: str) -> RibosomeStructure:
     nonpoly_entities = response['nonpolymer_entities']
     assembly_maps    = __parse_assemblies(response['assemblies'])
 
-    def is_protein(poly):
-        return poly['entity_poly']['rcsb_entity_polymer_type'] == 'Protein'
+    def is_protein(poly): return poly['entity_poly']['rcsb_entity_polymer_type'] == 'Protein'
 
     proteins, rnas = [], []
     for poly in poly_entities:
@@ -421,8 +421,8 @@ def process_pdb_record(rcsb_id: str) -> RibosomeStructure:
 
     assert (len(proteins) + len(rnas) == len(poly_entities))
 
-    reshaped_proteins: list[Protein] = []
-    reshaped_rnas: list[RNA] = []
+    reshaped_proteins         : list[Protein]         = []
+    reshaped_rnas             : list[RNA]             = []
     reshaped_polymeric_factors: list[PolymericFactor] = []
 
     for (i, poly_prot) in enumerate(proteins):
