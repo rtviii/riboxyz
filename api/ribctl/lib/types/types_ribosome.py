@@ -2,12 +2,12 @@ from typing import Any, Optional
 import typing
 from typing import NewType
 from pydantic import BaseModel
-from api.ribctl.lib.types.types_poly_nonpoly_ligand import LSU_Proteins, NonpolymericLigandClass, PolymericFactorClass, RNAClass, SSU_Proteins
+from api.ribctl.lib.types.types_poly_nonpoly_ligand import LSUProteinClass, NonpolymericLigandClass, PolymericFactorClass, RNAClass, SSUProteinClass
 
 RCSB_ID = NewType('RCSB_ID', str)
 
 
-ProteinClass = typing.Union[LSU_Proteins , SSU_Proteins]
+ProteinClass = typing.Union[LSUProteinClass , SSUProteinClass]
 PolymerClass = typing.Union[ProteinClass, RNAClass]
 
 class Polymer(BaseModel):
@@ -56,7 +56,6 @@ class RNA(Polymer):
         return hash(self.auth_asym_id + self.parent_rcsb_id)
 
     pass
-
 
 class NonpolymericLigand(BaseModel)  : 
 

@@ -1,31 +1,19 @@
 from io import StringIO
-import io
 import os
-from pprint import pprint
 import typing
 import prody
 import requests
-from api.ribctl.etl.ribosome_assets import RibosomeAssets
-from api.ribctl.lib.utils import open_structure
 from ribctl.lib.types.types_ribosome import RNA, PolymericFactor, Protein, ProteinClass
 from Bio import AlignIO
-from  api.ribctl.lib.types.types_poly_nonpoly_ligand import  list_LSU_Proteins,list_SSU_Proteins
-import argparse
+from  api.ribctl.lib.types.types_poly_nonpoly_ligand import  list_LSUProteinClass,list_SSUProteinClass
 import subprocess
-import sys
 import numpy as np
-import gemmi
-from Bio import pairwise2
-
 from Bio.Seq import Seq
-
 from Bio import SeqIO
 from Bio import SeqRecord
-from prody import MSA, Sequence, MSAFile, buildMSA,parseMSA
+from prody import MSA, MSAFile,parseMSA
 import prody as prd
 import requests
-
-
 
 prd.confProDy(verbosity='none')
 RIBETL_DATA = os.environ.get('RIBETL_DATA')
@@ -33,19 +21,8 @@ RIBETL_DATA = os.environ.get('RIBETL_DATA')
 TAXID_BACTERIA          = 2
 TAXID_EUKARYA           = 2759
 TAXID_ARCHEA            = 2157
-
 PROTEOVISION_URL        = lambda SU, _class, taxids: "https://ribovision3.chemistry.gatech.edu/showAlignment/{}/{}/{}".format(SU,_class,taxids)
 PROTEOVISION_MSA_FOLDER = '/home/rxz/dev/docker_ribxz/api/ribctl/__wip/data/msa_classes_proteovision/'
-
-parser = argparse.ArgumentParser(description='Argument Parser for my ms code.')
-parser.add_argument('-p', '--proteovision', required=False, help='Type of proteovision analysis to perform (lsu, ssu, single)')
-parser.add_argument('-t','--lineage', type=str, required=False, help='Comma-separated list of taxonomic levels to include in the query')
-
-args = parser.parse_args()
-
-# Access the argument values
-proteovision_type = args.proteovision
-lineage           = args.lineage
 
 #! util
 def util__backwards_match(alntgt: str, aln_resid: int, verbose: bool = False) -> typing.Tuple[int, str, int]:
@@ -90,7 +67,6 @@ def util__forwards_match(string: str, resid: int):
 def barr2str (bArr):
     return ''.join([ x.decode("utf-8") for x in bArr])
 
-
 #! util
 def seq_to_fasta(rcsb_id: str, _seq: str, outfile: str):
     from Bio.Seq import Seq
@@ -98,9 +74,16 @@ def seq_to_fasta(rcsb_id: str, _seq: str, outfile: str):
     seq_record    = SeqRecord.SeqRecord(Seq(_seq).upper())
     seq_record.id = seq_record.description = rcsb_id
     SeqIO.write(seq_record, outfile, 'fasta')
-    
 
-show = True
+def infer_subunit(protein_class:ProteinClass):
+    if protein_class in list_LSUProteinClass:
+        return "LSU"
+
+    elif protein_class in list_SSUProteinClass:
+        return "SSU"
+
+    else:
+        raise ValueError("Unknown protein class: {}".format(protein_class))
 
 def msa_profiles_dict_prd()->dict[ProteinClass,MSA ]:
     MSA_PROFILES_PATH  = '/home/rxz/dev/docker_ribxz/api/ribctl/assets/msa_profiles/'
@@ -119,7 +102,9 @@ def msa_profiles_dict_prd()->dict[ProteinClass,MSA ]:
         classname = msafile.split("_")[0]
         class_msa       = prody.parseMSA(os.path.join(SSU_path, msafile))
         msa_dict = {f"{classname}": class_msa, **msa_dict}
+
     return msa_dict
+
 def msa_profiles_dict()->dict[str, AlignIO.MultipleSeqAlignment]:
     MSA_PROFILES_PATH  = '/home/rxz/dev/docker_ribxz/api/ribctl/assets/msa_profiles/'
     msa_dict  = {}
@@ -151,15 +136,12 @@ def fasta_from_chain(chain:RNA|Protein| PolymericFactor)->str:
     seq_record.id          = fasta_description
     return seq_record.format('fasta')
 
-
-
 def prot_class_msa(class_name:ProteinClass)->MSA:
     _ = prody.parseMSA(msa_class_proteovision_path(class_name))
     if _ is not None:
         return _
     else:
         raise Exception("MSA for class {} not found or could not be parsed".format(class_name))
-
 
 #TODO : Replace class profile getter with ( in-memory + another pipe )
 def prot_class_msa_extend_prd( poly_class:ProteinClass, poly_class_msa:MSA, fasta_target:str)->MSA:
@@ -195,9 +177,9 @@ def prot_class_msa_extend_prd( poly_class:ProteinClass, poly_class_msa:MSA, fast
 
 def msa_class_proteovision_path(prot_class:ProteinClass):
     def infer_subunit(protein_class:ProteinClass):
-        if protein_class in list_LSU_Proteins:
+        if protein_class in list_LSUProteinClass:
             return "LSU"
-        elif protein_class in list_SSU_Proteins:
+        elif protein_class in list_SSUProteinClass:
             return "SSU"
         else:
             raise ValueError("Unknown protein class: {}".format(protein_class))
