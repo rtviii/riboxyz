@@ -19,7 +19,6 @@ import os
 
 RIBETL_DATA = str(os.environ.get("RIBETL_DATA"))
 
-
 class Assetlist(BaseModel)   : 
       profile                : Optional[bool]
       structure              : Optional[bool]
@@ -27,7 +26,6 @@ class Assetlist(BaseModel)   :
       chains_and_modified_cif: Optional[bool]
       factors_and_ligands    : Optional[bool]
       png_thumbnail          : Optional[bool]
-
 
 class RibosomeAssets():
     rcsb_id: str
