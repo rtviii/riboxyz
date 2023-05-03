@@ -22,6 +22,7 @@ class Polymer(BaseModel):
 
     src_organism_names : list[str]
     host_organism_names: list[str]
+
     src_organism_ids   : list[int]
     host_organism_ids  : list[int]
 
