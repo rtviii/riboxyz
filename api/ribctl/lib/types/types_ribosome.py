@@ -6,7 +6,6 @@ from api.ribctl.lib.types.types_poly_nonpoly_ligand import LSUProteinClass, Nonp
 
 RCSB_ID = NewType('RCSB_ID', str)
 
-
 ProteinClass = typing.Union[LSUProteinClass , SSUProteinClass]
 PolymerClass = typing.Union[ProteinClass, RNAClass]
 
