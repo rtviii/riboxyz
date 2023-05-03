@@ -1,16 +1,15 @@
 import asyncio
 from concurrent.futures import ALL_COMPLETED, ThreadPoolExecutor, wait
-import math
 import os
 import sys
 from prody import MSA, calcShannonEntropy
 from api.rbxz_bend.settings import RIBETL_DATA
 from api.ribctl.etl.ribosome_assets import RibosomeAssets
-from api.ribctl.lib.types.types_poly_nonpoly_ligand import list_ProteinClass
 from api.ribctl.lib.types.types_ribosome import  Protein, ProteinClass
-from api.ribctl.msa.msalib import msa_profiles_dict, msa_profiles_dict_prd, prot_class_msa_extend_prd
+from api.ribctl.lib.msalib import msa_profiles_dict, msa_profiles_dict_prd, prot_class_msa_extend_prd
 
 msa_profiles: dict[ProteinClass, MSA] = msa_profiles_dict_prd()
+
 def seq_asses_protclass_H_fit(base_class: ProteinClass, base_class_msa:MSA, new_seq:str )->dict[ProteinClass, float]:
     """Calculate entropy difference for a given protein class MSA without and with a new sequence. Used as a measure of fit."""
     extended_class = prot_class_msa_extend_prd(base_class,base_class_msa, new_seq)
@@ -19,7 +18,7 @@ def seq_asses_protclass_H_fit(base_class: ProteinClass, base_class_msa:MSA, new_
     H_delta        = H_extended - H_original
     return {base_class: H_delta}
 
-async def compare_against_all_classes(new_seq:str, msa_profiles:dict[ProteinClass, MSA], workers:int=10 )->tuple[ProteinClass,dict[ProteinClass, float]]:
+async def compare_chain_against_all_classes(new_seq:str, msa_profiles:dict[ProteinClass, MSA], workers:int=10 )->tuple[ProteinClass,dict[ProteinClass, float]]:
 
     with ThreadPoolExecutor(max_workers=workers) as executor:
         futures = []
@@ -40,24 +39,13 @@ async def compare_against_all_classes(new_seq:str, msa_profiles:dict[ProteinClas
 
 def fit_chain(chain:Protein):
     eloop = asyncio.get_event_loop()
-    best_fit, fit_dict  = eloop.run_until_complete(compare_against_all_classes(chain.entity_poly_seq_one_letter_code_can, msa_profiles))
+    best_fit, fit_dict  = eloop.run_until_complete(compare_chain_against_all_classes(chain.entity_poly_seq_one_letter_code_can, msa_profiles))
     print("Chain with nomenclature {} best fits class {} with delta H = {}".format(chain.nomenclature, best_fit, fit_dict[best_fit]))
 
 rcsb_id:str = sys.argv[1].upper()
 R:RibosomeAssets = RibosomeAssets(rcsb_id)
 
-# for c in R.profile().proteins:
-#     fit_chain(c)
 
-for cls in list_ProteinClass:
-    _ = msa_profiles.get(cls)
-    if _ == None:
-        print("No MSA for {}".format(cls))
-
-
-# TODO: v0 Coverage  for all structs
-# TODO: v1 Coverage  for all structs
-# TODO: v0/v1 diff
 
 
 
@@ -101,9 +89,11 @@ percents = [tup[1]['classified']/tup[1]['rna'] for tup in all]
 print("percentage 33", len(list(filter(lambda x: x < 0.33, percents))))
 print("percentage 50", len(list(filter(lambda x: x < 0.5, percents))))
 print("percentage 75", len(list(filter(lambda x: x < 0.75, percents))))
-
 print("average cov", sum(percents)/len(percents))
 
+# TODO: v0 Coverage  for all structs
+# TODO: v1 Coverage  for all structs
+# TODO: v0/v1 diff
 
 # The test case for whether (1) this works and (2) this is useful is to run the classification on every structure and track:
 # - % of chains where class is assigned for the first time (increased coverage)
