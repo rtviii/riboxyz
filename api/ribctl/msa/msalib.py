@@ -14,6 +14,10 @@ from Bio import SeqRecord
 from prody import MSA, MSAFile,parseMSA
 import prody as prd
 import requests
+import os
+from api.ribctl.lib.types.types_ribosome import ProteinClass
+from ete3 import NCBITaxa
+
 
 prd.confProDy(verbosity='none')
 RIBETL_DATA = os.environ.get('RIBETL_DATA')
@@ -273,4 +277,39 @@ def display_msa_class(nomclass:ProteinClass):
     for seq in msa_main:
         print(seq)
 
+def get_taxid_fastalabel(label: str):
+    """This assumes a given fasta label has '|' as a delimiter between the taxid and the rest of the label.(As returned by InterPRO and curated by me)"""
+    return label.split('|')[-1]
+def msa_pick_taxa(msa: MSA, taxids: list[str])->MSA:
+    """Given a MSA and a list of taxids, return a new MSA with only the sequences that match the taxids. 
+       Assumes '|' as a delimiter between the taxid and the rest of the label."""
+    seqlabel_tups = iter((s, s.getLabel()) for s in msa if get_taxid_fastalabel(s.getLabel()) in taxids)
+    seqs, labels  = zip(*seqlabel_tups)
+    return MSA(seqs, labels=labels)
 
+def phylogenetic_neighborhood(taxids_base: list[str], taxid_target: str, n_neighbors: int = 10)->list[str]:
+    """Given a set of taxids and a target taxid, return a list of the [n_neighbors] phylogenetically closest to the target."""
+   
+    tree            =  NCBITaxa().get_topology(list(set([*taxids_base, taxid_target])))
+    target_node     = tree.search_nodes(name=taxid_target)[0]
+    phylo_all_nodes = [
+        (node.name, tree.get_distance(target_node, node))
+        for node in tree.traverse()]
+
+    phylo_extant_nodes = filter(
+        lambda taxid: taxid[0] in taxids_base, phylo_all_nodes)
+
+    phylo_sorted_nodes = sorted(phylo_extant_nodes, key=lambda x: x[1])
+
+    nbr_taxids = list(
+        map(lambda tax_phydist: tax_phydist[0], phylo_sorted_nodes))
+
+    # the first element is the target node
+    if len(nbr_taxids) < n_neighbors:
+        return nbr_taxids[1:] 
+    else:
+        return nbr_taxids[1:n_neighbors+1]
+
+def msa_yield_taxa_only(msa: MSA)->list[str]:
+    """collect all organism taxids present in a given msa"""
+    return [get_taxid_fastalabel(p.getLabel()) for p in msa]
