@@ -1,7 +1,10 @@
 import asyncio
 from concurrent.futures import ALL_COMPLETED, ThreadPoolExecutor, wait
+import math
+import os
 import sys
 from prody import MSA, calcShannonEntropy
+from api.rbxz_bend.settings import RIBETL_DATA
 from api.ribctl.etl.ribosome_assets import RibosomeAssets
 from api.ribctl.lib.types.types_poly_nonpoly_ligand import list_ProteinClass
 from api.ribctl.lib.types.types_ribosome import  Protein, ProteinClass
@@ -46,15 +49,60 @@ R:RibosomeAssets = RibosomeAssets(rcsb_id)
 # for c in R.profile().proteins:
 #     fit_chain(c)
 
-
 for cls in list_ProteinClass:
     _ = msa_profiles.get(cls)
     if _ == None:
         print("No MSA for {}".format(cls))
 
 
+# TODO: v0 Coverage  for all structs
+# TODO: v1 Coverage  for all structs
+# TODO: v0/v1 diff
 
 
+
+def iter_all_profiles_proteins():
+    total = {}
+    for rcsb_id in os.listdir(RIBETL_DATA):
+        if len( rcsb_id ) != 4 or rcsb_id =='6OXI':
+            continue
+        profile = RibosomeAssets(rcsb_id).profile()
+        total[rcsb_id] = {
+            'proteins'  : len(profile.proteins),
+            'classified': 0
+        }
+        for protein in profile.proteins:
+            if len(protein.nomenclature) != 0:
+                total[rcsb_id]['classified'] += 1
+    return total
+
+def iter_all_profiles_rna():
+    total = {}
+    for rcsb_id in os.listdir(RIBETL_DATA):
+        if len( rcsb_id ) != 4 or rcsb_id =='6OXI':
+            continue
+        profile = RibosomeAssets(rcsb_id).profile()
+        if profile.rnas == None:
+            continue
+
+        total[rcsb_id] = {
+            'rna'  : len(profile.rnas),
+            'classified': 0
+        }
+        for rna in profile.rnas:
+            if len(rna.nomenclature) != 0:
+                total[rcsb_id]['classified'] += 1
+    return total
+
+d        = iter_all_profiles_rna()
+all      = d.items()
+percents = [tup[1]['classified']/tup[1]['rna'] for tup in all]
+
+print("percentage 33", len(list(filter(lambda x: x < 0.33, percents))))
+print("percentage 50", len(list(filter(lambda x: x < 0.5, percents))))
+print("percentage 75", len(list(filter(lambda x: x < 0.75, percents))))
+
+print("average cov", sum(percents)/len(percents))
 
 
 # The test case for whether (1) this works and (2) this is useful is to run the classification on every structure and track:

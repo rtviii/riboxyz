@@ -52,7 +52,6 @@ def pick_match(ms, rna_length: int):
     else:
         return ms[0]
 
-
 def ptc_residues_via_alignment(rcsb_id: str, assembly_id: int = 0) -> tuple[list[Residue], str]:
     R = RibosomeAssets(rcsb_id)
     # R.profile()
@@ -80,7 +79,6 @@ def ptc_residues_via_alignment(rcsb_id: str, assembly_id: int = 0) -> tuple[list
     PTC_residues = [ress_sanitized[i] for i in list(range(m0.start, m0.end))]
 
     return PTC_residues, auth_asym_id
-
 
 def ptc_coordinates(
     reslist: list[Residue],
@@ -150,10 +148,8 @@ def ptc_midpoint(reslist: list[Residue], auth_asym_id: str) -> tuple[float, floa
 
     return midpoint
 
-
 def residue_is_canonical(res: Residue | ResidueSummary) -> bool:
     return res.resname in [*AMINO_ACIDS.keys(), *NUCLEOTIDES]
-
 
 def tunnel_obstructions(rcsb_id: str, ptc_midpoint: tuple[float, float, float], radius: int = 30) -> tuple[list[PolymericFactor], list[ResidueSummary]]:
 
