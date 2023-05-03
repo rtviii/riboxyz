@@ -147,26 +147,70 @@ def prot_class_msa(class_name:ProteinClass)->MSA:
     else:
         raise Exception("MSA for class {} not found or could not be parsed".format(class_name))
 
-#TODO : Replace class profile getter with ( in-memory + another pipe )
-def prot_class_msa_extend_prd( poly_class:ProteinClass, poly_class_msa:MSA, fasta_target:str)->MSA:
+# def msaclass_extend( poly_class:ProteinClass, poly_class_msa:MSA, fasta_target:str)->MSA:
 
-    class_profile_path = msa_class_proteovision_path(poly_class)
+#     class_profile_path = msa_class_proteovision_path(poly_class)
+#     cmd = [
+#         '/home/rxz/dev/docker_ribxz/api/ribctl/muscle3.8',
+#         '-profile',
+#         '-in1',
+#         class_profile_path,
+#         '-in2',
+#         '-',
+#         '-quiet']
+
+#     process = subprocess.Popen(cmd,
+#                                stdout = subprocess.PIPE,
+#                                stdin  = subprocess.PIPE,
+#                                stderr = subprocess.PIPE, env = os.environ.copy())
+
+#     stdout, stderr = process.communicate(input=fasta_from_string(fasta_target).encode())
+#     out   ,err     = stdout.decode(), stderr.decode()
+#     process.wait()
+
+#     msafile      = MSAFile(StringIO(out), format="fasta")
+#     seqs, descs  =  zip(*msafile._iterFasta())
+
+#     sequences    = [*map(lambda x : np.fromstring(x,dtype='S1'),seqs)]
+#     descriptions = [*descs]
+#     chararr      = np.array(sequences).reshape(len(sequences), len(sequences[0]))
+
+#     return MSA(chararr, labels=descriptions, title="Class {} profile extended.".format( poly_class))
+
+def msa_to_fasta_str(msa:MSA)->str:
+    fasta = ''
+    for seq in msa:
+        fasta += '>{}\n{}\n'.format(seq.getLabel(), seq)
+    return fasta
+
+def msaclass_extend_process_sub(poly_class:ProteinClass, poly_class_msa:MSA, fasta_target:str)->MSA:
+
+    class_str  = msa_to_fasta_str(poly_class_msa).strip("\n").encode('utf-8')
+    target_str = fasta_from_string(fasta_target, poly_class).strip("\n").encode('utf-8')
+
+    tmp_msaclass= '{}.fasta.tmp'.format(hash(poly_class_msa.__str__().encode()[:100]))
+    with open(tmp_msaclass, 'wb') as f:
+        f.write(class_str)
+
+    tmp_seq ='{}.fasta.tmp'.format(hash(poly_class + fasta_target))
+    with open(tmp_seq, 'wb') as f:
+        f.write(target_str)
 
     cmd = [
         '/home/rxz/dev/docker_ribxz/api/ribctl/muscle3.8',
         '-profile',
         '-in1',
-        class_profile_path,
+        tmp_msaclass,
         '-in2',
-        '-',
+        tmp_seq,
         '-quiet']
 
     process = subprocess.Popen(cmd,
-                               stdout=subprocess.PIPE,
-                               stdin=subprocess.PIPE,
-                               stderr=subprocess.PIPE, env=os.environ.copy())
+                               stdout = subprocess.PIPE,
+                               stdin  = subprocess.PIPE,
+                               stderr = subprocess.PIPE, env = os.environ.copy())
 
-    stdout, stderr = process.communicate(input=fasta_from_string(fasta_target).encode())
+    stdout, stderr = process.communicate()
     out   ,err     = stdout.decode(), stderr.decode()
     process.wait()
 
@@ -176,6 +220,8 @@ def prot_class_msa_extend_prd( poly_class:ProteinClass, poly_class_msa:MSA, fast
     sequences    = [*map(lambda x : np.fromstring(x,dtype='S1'),seqs)]
     descriptions = [*descs]
     chararr      = np.array(sequences).reshape(len(sequences), len(sequences[0]))
+    os.remove(tmp_msaclass)
+    os.remove(tmp_seq)
 
     return MSA(chararr, labels=descriptions, title="Class {} profile extended.".format( poly_class))
 
