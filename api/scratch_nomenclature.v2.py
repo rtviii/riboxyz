@@ -1,4 +1,5 @@
 import asyncio
+from Bio import AlignIO
 from concurrent.futures import ALL_COMPLETED, ThreadPoolExecutor, wait
 import os
 import sys
@@ -6,7 +7,7 @@ from prody import MSA, calcShannonEntropy
 from api.rbxz_bend.settings import RIBETL_DATA
 from api.ribctl.etl.ribosome_assets import RibosomeAssets
 from api.ribctl.lib.types.types_ribosome import  Protein, ProteinClass
-from api.ribctl.lib.msalib import msa_profiles_dict, msa_profiles_dict_prd, msaclass_extend
+from api.ribctl.lib.msalib import msa_profiles_dict, msa_profiles_dict_prd, msaclass_extend, msaclass_extend_process_sub
 
 msa_profiles: dict[ProteinClass, MSA] = msa_profiles_dict_prd()
 
@@ -42,11 +43,6 @@ def fit_chain(chain:Protein,):
     best_fit, fit_dict  = eloop.run_until_complete(seq_H_fit_class_multi(chain.entity_poly_seq_one_letter_code_can, msa_profiles))
     print("Chain with nomenclature {} best fits class {} with delta H = {}".format(chain.nomenclature, best_fit, fit_dict[best_fit]))
 
-rcsb_id:str = sys.argv[1].upper()
-R:RibosomeAssets = RibosomeAssets(rcsb_id)
-
-
-
 def iter_all_profiles_proteins():
     total = {}
     for rcsb_id in os.listdir(RIBETL_DATA):
@@ -72,7 +68,7 @@ def iter_all_profiles_rna():
             continue
 
         total[rcsb_id] = {
-            'rna'  : len(profile.rnas),
+            'rna'       : len(profile.rnas),
             'classified': 0
         }
         for rna in profile.rnas:
@@ -80,14 +76,30 @@ def iter_all_profiles_rna():
                 total[rcsb_id]['classified'] += 1
     return total
 
-d        = iter_all_profiles_rna()
-all      = d.items()
-percents = [tup[1]['classified']/tup[1]['rna'] for tup in all]
+ 
+rcsb_id:str            = sys.argv[1].upper()
+R      :RibosomeAssets = RibosomeAssets(rcsb_id)
 
-print("percentage 33", len(list(filter(lambda x: x < 0.33, percents))))
-print("percentage 50", len(list(filter(lambda x: x < 0.5, percents))))
-print("percentage 75", len(list(filter(lambda x: x < 0.75, percents))))
-print("average cov", sum(percents)/len(percents))
+
+prot = R.get_prot_by_nomclass('bL12')
+if prot == None: raise LookupError()
+msa = msaclass_extend_process_sub('bL12', msa_profiles['bL12'], prot.entity_poly_seq_one_letter_code_can)
+
+for msa_seq in msa:
+    print(msa_seq)
+
+
+
+
+
+# d        = iter_all_profiles_rna()
+# all      = d.items()
+# percents = [tup[1]['classified']/tup[1]['rna'] for tup in all]
+
+# print("percentage 33", len(list(filter(lambda x: x < 0.33, percents))))
+# print("percentage 50", len(list(filter(lambda x: x < 0.5, percents))))
+# print("percentage 75", len(list(filter(lambda x: x < 0.75, percents))))
+# print("average cov", sum(percents)/len(percents))
 
 # TODO: v0 Coverage  for all structs
 # TODO: v1 Coverage  for all structs
