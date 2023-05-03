@@ -1,7 +1,7 @@
 import os
 from prody import MSA
 from api.ribctl.lib.types.types_ribosome import ProteinClass
-from api.ribctl.msa.msalib import msa_profiles_dict_prd
+from api.ribctl.lib.msalib import msa_profiles_dict_prd
 from ete3 import NCBITaxa
 
 
