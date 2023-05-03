@@ -148,10 +148,9 @@ def prot_class_msa(class_name:ProteinClass)->MSA:
         raise Exception("MSA for class {} not found or could not be parsed".format(class_name))
 
 #TODO : Replace class profile getter with ( in-memory + another pipe )
-def prot_class_msa_extend_prd( poly_class:ProteinClass, poly_class_msa:MSA, fasta_target:str)->MSA:
+def msaclass_extend( poly_class:ProteinClass, poly_class_msa:MSA, fasta_target:str)->MSA:
 
     class_profile_path = msa_class_proteovision_path(poly_class)
-
     cmd = [
         '/home/rxz/dev/docker_ribxz/api/ribctl/muscle3.8',
         '-profile',
@@ -162,9 +161,9 @@ def prot_class_msa_extend_prd( poly_class:ProteinClass, poly_class_msa:MSA, fast
         '-quiet']
 
     process = subprocess.Popen(cmd,
-                               stdout=subprocess.PIPE,
-                               stdin=subprocess.PIPE,
-                               stderr=subprocess.PIPE, env=os.environ.copy())
+                               stdout = subprocess.PIPE,
+                               stdin  = subprocess.PIPE,
+                               stderr = subprocess.PIPE, env = os.environ.copy())
 
     stdout, stderr = process.communicate(input=fasta_from_string(fasta_target).encode())
     out   ,err     = stdout.decode(), stderr.decode()
