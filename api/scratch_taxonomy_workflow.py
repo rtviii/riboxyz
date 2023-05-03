@@ -30,8 +30,7 @@ def lift_rank(taxid: int) -> int:
             node = next(lin)
         return node
 
-
-def msa_pick_taxa(msa: MSA, taxids: list[str]):
+def msa_pick_taxa(msa: MSA, taxids: list[str])->MSA:
     """Given a MSA and a list of taxids, return a new MSA with only the sequences that match the taxids."""
     seqlabel_tups = [(s, s.getLabel())
                      for s in msa if get_fasta_taxid(s.getLabel()) in taxids]
@@ -40,8 +39,7 @@ def msa_pick_taxa(msa: MSA, taxids: list[str]):
 
     return MSA(seqs, labels=labels)
 
-
-def phylogenetic_neighborhood(taxids_base: list[str], taxid_target: str, n_neighbors: int = 10):
+def phylogenetic_neighborhood(taxids_base: list[str], taxid_target: str, n_neighbors: int = 10)->list[str]:
     tree            = ncbi.get_topology([*taxids_base, taxid_target])
     target_node     = tree.search_nodes(name=taxid_target)[0]
     phylo_all_nodes = [
@@ -60,28 +58,16 @@ def phylogenetic_neighborhood(taxids_base: list[str], taxid_target: str, n_neigh
     else:
         return nbr_taxids[1:n_neighbors+1]
 
+def msa_yield_taxa(msa: MSA)->list[str]:
+    return [get_fasta_taxid(p.getLabel()) for p in msa]
 
-list_of_taxids = []
-bl12 = msa_profiles['bL12']
-class_taxids = [get_fasta_taxid(p.getLabel()) for p in bl12]
+bl12           = msa_profiles['bL12']
+class_taxids   = msa_yield_taxa(bl12)
+neigbors       = phylogenetic_neighborhood(class_taxids, '418699', 4)
+bl12_picked    = msa_pick_taxa(bl12, neigbors)
 
 
-neigbors = phylogenetic_neighborhood(class_taxids, '418699', 4)
-print(neigbors)
-bl12_picked = msa_pick_taxa(bl12, neigbors)
-print(bl12)
-for m in bl12[:4]:
-    # print(m)
-    print(m.getLabel())
-# ['418699', '206389', '28216', '259537']
 
-print("************************************************************************")
-print("************************************************************************")
-print("************************************************************************")
-print("************************************************************************")
-for m in bl12_picked:
-    # print(m)
-    print(m.getLabel())
 
 # TODO: Ignore intermediate taxa (induct the species, strains, subspecies etc. as nodes)
 # - orgnaism
