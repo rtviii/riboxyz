@@ -11,10 +11,9 @@ list_PolymericFactorClass = [
     "Nascent Chain",
     "Ribozyme",
     "Riboswitch",
-    "RNP",
-    "mRNA",
-    "tRNA",
-    "snoRNA", "lncRNA", "Other"]
+    "RNP","mRNA","tRNA",
+    "snoRNA", "lncRNA", "Other"
+]
 
 PolymericFactorClass = Literal[
     "Elongation Factor",

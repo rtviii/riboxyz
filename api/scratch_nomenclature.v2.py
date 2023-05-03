@@ -53,6 +53,12 @@ for cls in list_ProteinClass:
         print("No MSA for {}".format(cls))
 
 
-# chain = R.get_chain_by_polymer_class(poly_class)
-# if chain is None:
-#     raise LookupError() 
+
+
+
+
+# The test case for whether (1) this works and (2) this is useful is to run the classification on every structure and track:
+# - % of chains where class is assigned for the first time (increased coverage)
+# - % of chains where the class assigned conflicts with the existing class (increased accuracy)
+# - % of chains where the class assigned is the same as the existing class (no change)
+# - all of the above with/without phylogenetic correction (i.e. picking the [10] closest organisms available in a given class )
