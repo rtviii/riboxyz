@@ -1,6 +1,8 @@
 import asyncio
+import json
 import multiprocessing
 from pprint import pprint
+from concurrent.futures import Future
 import time
 from Bio import AlignIO
 from concurrent.futures import ALL_COMPLETED, ProcessPoolExecutor, ThreadPoolExecutor, wait
@@ -49,21 +51,63 @@ def classify_chain(chain: Protein, vvv=False):
 async def struct_classify_chains(chains: list[Protein],vvv=False):
     return await asyncio.gather(*[seq_H_fit_class_multi(chain, msa_profiles)  for chain in chains] )
 
-background_tasks = set()
+def process_struct(rcsb_id:str):
+    R       = RibosomeAssets(rcsb_id.upper())
+    profile = R.profile()
+    rps     = profile.proteins
 
-R    = RibosomeAssets('3J7Z')
+    if len(profile.assembly_map) > 1:
+        first_assembly = []
+        for chain_inst in profile.assembly_map[0].polymer_entity_instances:
+            first_assembly.append(
+                chain_inst.rcsb_polymer_entity_instance_container_identifiers.auth_asym_id
+            )
+        rps = list(filter(lambda _ : _.auth_asym_id in first_assembly, rps))
+
+    loop   = asyncio.get_event_loop()
+    result = loop.run_until_complete(struct_classify_chains(rps, vvv=True))
+    total  = {}
+    for assigned_class,chain in result:
+        total.update({chain.auth_asym_id : assigned_class})
+    return total
+
+    
+    
+    
+
+
+global counter;
+counter = 0
+
+assets_nomenclaturev2 = os.path.join("/home/rxz/dev/docker_ribxz/api/ribctl/assets/nomenclaturev2")
+
 loop = asyncio.get_event_loop()
-f = loop.run_until_complete(struct_classify_chains(R.profile().proteins, vvv=True))
+with ProcessPoolExecutor(max_workers=10) as pool:
+    for struct in os.listdir(RIBETL_DATA):
+        if len(struct) != 4 or struct == '6OXI':
+            continue
+        x = pool.submit(process_struct, struct)
+        def save_fut_result(rcsb_id):
+            def _(f:Future):
+                global counter 
+                counter +=1
+                if f.exception() is not None:
+                    raise LookupError()
+                else:
+                    r = f.result()
+                    with open(os.path.join(assets_nomenclaturev2, f"{rcsb_id.upper()}.json"),'w') as outfile:
+                        json.dump(r, outfile, indent=4)
+                    print("Processed structs-------------------------------------->: {}".format(counter))
+            return _
 
+        x.add_done_callback(save_fut_result(struct))
 
-print(f)
 # loop.run_until_complete(struct_classify_chains(R.profile().proteins, loop, vvv=True))
 # with ProcessPoolExecutor(max_workers=10) as pool:
 #     coroutines = []
 #     loop.run_until_complete(asyncio.gather(*coroutines))
 
 # =============================
-
 
 # eloop = asyncio.get_event_loop()
 # x = time.time()
