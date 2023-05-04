@@ -2,7 +2,6 @@ import asyncio
 import multiprocessing
 from pprint import pprint
 import time
-from typing import Coroutine
 from Bio import AlignIO
 from concurrent.futures import ALL_COMPLETED, ProcessPoolExecutor, ThreadPoolExecutor, wait
 import os
@@ -24,11 +23,12 @@ def seq_H_fit_class(base_class: ProteinClass, base_class_msa: MSA, new_seq: str)
     H_delta = H_extended - H_original
     return {base_class: H_delta}
 
-async def seq_H_fit_class_multi(new_seq: str, msa_profiles: dict[ProteinClass, MSA], workers=None) -> tuple[ProteinClass, dict[ProteinClass, float]]:
+async def seq_H_fit_class_multi(chain:Protein, msa_profiles: dict[ProteinClass, MSA], workers=None) -> tuple[ProteinClass, Protein]:
+    print("Processing chain {}...".format(chain.auth_asym_id))
     with ThreadPoolExecutor(max_workers=multiprocessing.cpu_count() if workers is None else workers) as executor:
         futures = []
         for class_name, base_msa in msa_profiles.items():
-            fut = executor.submit(seq_H_fit_class, class_name, base_msa, new_seq)
+            fut = executor.submit(seq_H_fit_class, class_name, base_msa, chain.entity_poly_seq_one_letter_code_can)
             futures.append(fut)
 
     wait(futures, return_when=ALL_COMPLETED)
@@ -41,18 +41,13 @@ async def seq_H_fit_class_multi(new_seq: str, msa_profiles: dict[ProteinClass, M
             H_fit.update(f.result())
 
     max_fit = min(H_fit, key=H_fit.get)
-    return max_fit, H_fit
+    return max_fit, chain
 
-def classify_chain(chain: Protein, vvv=False)->Coroutine:
-    print("fitting chain {} of len({})".format(chain.parent_rcsb_id + "." + chain.auth_asym_id, len(chain.entity_poly_seq_one_letter_code_can)))
-    return seq_H_fit_class_multi(chain.entity_poly_seq_one_letter_code_can, msa_profiles)
-    best_fit, fit_dict = await seq_H_fit_class_multi(chain.entity_poly_seq_one_letter_code_can, msa_profiles)
-    if vvv:
-        print("{} with nomenclature {} best fits class {} with H = {}".format(chain.parent_rcsb_id + "."+chain.auth_asym_id, chain.nomenclature, best_fit, fit_dict[best_fit]))
-    return best_fit, chain
+def classify_chain(chain: Protein, vvv=False):
+    return seq_H_fit_class_multi(chain, msa_profiles)
 
 async def struct_classify_chains(chains: list[Protein],vvv=False):
-    return await asyncio.gather(*[seq_H_fit_class_multi(chain.entity_poly_seq_one_letter_code_can, msa_profiles)  for chain in chains] )
+    return await asyncio.gather(*[seq_H_fit_class_multi(chain, msa_profiles)  for chain in chains] )
 
 background_tasks = set()
 
