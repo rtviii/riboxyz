@@ -1,5 +1,6 @@
 from io import StringIO
 import os
+import random
 import typing
 import prody
 import requests
@@ -188,11 +189,11 @@ def msaclass_extend_process_sub(poly_class:ProteinClass, poly_class_msa:MSA, fas
     class_str  = msa_to_fasta_str(poly_class_msa).strip("\n").encode('utf-8')
     target_str = fasta_from_string(fasta_target, poly_class).strip("\n").encode('utf-8')
 
-    tmp_msaclass= '{}.fasta.tmp'.format(hash(poly_class_msa.__str__().encode()[:100]))
+    tmp_msaclass = '{}.fasta.tmp'.format(abs(hash(random.randbytes(10))))
     with open(tmp_msaclass, 'wb') as f:
         f.write(class_str)
 
-    tmp_seq ='{}.fasta.tmp'.format(hash(poly_class + fasta_target))
+    tmp_seq ='{}.fasta.tmp'.format(abs(hash(random.randbytes(10))))
     with open(tmp_seq, 'wb') as f:
         f.write(target_str)
 
@@ -222,8 +223,15 @@ def msaclass_extend_process_sub(poly_class:ProteinClass, poly_class_msa:MSA, fas
     descriptions = [*descs]
     chararr      = np.array(sequences).reshape(len(sequences), len(sequences[0]))
 
-    os.remove(tmp_msaclass)
-    os.remove(tmp_seq)
+    try:
+        os.remove(tmp_msaclass)
+    except Exception as e:
+        print("calss except",e)
+
+    try:
+        os.remove(tmp_seq)
+    except Exception as e:
+        print("seq except", e)
 
     return MSA(chararr, labels=descriptions, title="Class {} profile extended.".format( poly_class))
 
