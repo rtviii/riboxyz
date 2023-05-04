@@ -212,6 +212,7 @@ def msaclass_extend_process_sub(poly_class:ProteinClass, poly_class_msa:MSA, fas
 
     stdout, stderr = process.communicate()
     out   ,err     = stdout.decode(), stderr.decode()
+
     process.wait()
 
     msafile      = MSAFile(StringIO(out), format="fasta")
@@ -220,6 +221,7 @@ def msaclass_extend_process_sub(poly_class:ProteinClass, poly_class_msa:MSA, fas
     sequences    = [*map(lambda x : np.fromstring(x,dtype='S1'),seqs)]
     descriptions = [*descs]
     chararr      = np.array(sequences).reshape(len(sequences), len(sequences[0]))
+
     os.remove(tmp_msaclass)
     os.remove(tmp_seq)
 
