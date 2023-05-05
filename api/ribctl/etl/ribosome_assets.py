@@ -49,6 +49,10 @@ class RibosomeAssets():
     def _cif_modified_filepath(self):
         self._envcheck()
         return f"{self._dir_path()}/{self.rcsb_id}_modified.cif"
+    
+    def _nomenclature_v2(self)->dict[str,ProteinClass]:
+        with open(os.path.join(self._dir_path(), f"{self.rcsb_id}_nomenclaturev2.json"), 'r') as infile:
+            return json.load(infile)
 
     def _json_profile_filepath(self):
         self._envcheck()

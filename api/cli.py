@@ -68,8 +68,6 @@ if args.test:
             json.dump(nascent_chains, f, indent=4)
 
 
-
-
 if args.list_structs:
     all_structs = os.listdir(RIBETL_DATA)
     if args.taxid:
