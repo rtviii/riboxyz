@@ -1,5 +1,6 @@
 from functools import reduce
 import os
+from pprint import pprint
 import sys
 from Bio.PDB.Structure import Structure
 from Bio.PDB.Chain import Chain
@@ -54,16 +55,14 @@ def pick_match(ms, rna_length: int):
 
 def ptc_residues_via_alignment(rcsb_id: str, assembly_id: int = 0) -> tuple[list[Residue], str]:
     R = RibosomeAssets(rcsb_id)
-    # R.profile()
 
-    struct_profile: Structure = R.biopython_structure()
-    rna = R.get_LSU_rRNA(assembly_id)
-    auth_asym_id = rna.auth_asym_id
+    struct_profile = R.biopython_structure()
+    rna            = R.get_LSU_rRNA(assembly_id)
+    auth_asym_id   = rna.auth_asym_id
 
-    chain3d: Chain = struct_profile.child_dict[assembly_id].child_dict[auth_asym_id]
-    ress: list[Residue] = chain3d.child_list
-    ress_sanitized: list[Residue] = [
-        *filter(lambda r: r.get_resname() in ["A", "C", "G", "U", "PSU"], ress)]
+    chain3d       : Chain         = struct_profile.child_dict[assembly_id].child_dict[auth_asym_id]
+    ress          : list[Residue] = chain3d.child_list
+    ress_sanitized: list[Residue] = [*filter(lambda r: r.get_resname() in ["A", "C", "G", "U", "PSU"], ress)]
 
     for _r in ress_sanitized:
         if _r.get_resname() == "PSU":
@@ -107,7 +106,6 @@ def ptc_coordinates(
     }
 
     return ptc_coordinates
-
 
 def ptc_midpoint(reslist: list[Residue], auth_asym_id: str) -> tuple[float, float, float]:
     """
@@ -160,16 +158,15 @@ def tunnel_obstructions(rcsb_id: str, ptc_midpoint: tuple[float, float, float], 
     nbr_residues   = []
 
     nbr_residues.extend(neigbor_search.search(ptc_midpoint, radius, level='R'))
-    nbr_residues = list(
-        set([* map(ResidueSummary.from_biopython_residue, nbr_residues)]))
+    nbr_residues = list(set([* map(ResidueSummary.from_biopython_residue, nbr_residues)]))
 
     foreign_nonpolys = []
     foregin_polymers = []
 
     for N in nbr_residues:
+
         if not residue_is_canonical(N):
             foreign_nonpolys.append(N)
-
         parent_chain, chain_type = R.get_chain_by_auth_asym_id(N.parent_auth_asym_id)
         if ( parent_chain, chain_type ) != ( None,None ):
             if chain_type == "PolymericFactor":
@@ -178,40 +175,48 @@ def tunnel_obstructions(rcsb_id: str, ptc_midpoint: tuple[float, float, float], 
             raise LookupError("Parent chain must exist in structure. Something went wrong (with the data, probably)")
 
     print("Inspected midpoint ", ptc_midpoint, " with radius", radius)
-
     return list(set(foregin_polymers)), list(set(foreign_nonpolys))
 
-# RCSB_ID = '3J92'
-RCSB_ID = sys.argv[1].upper()
+if __name__ == "__main__":
 
-for RCSB_ID in [
-"6FKR ",
-"7AZS",
-"5NP6",
-"5NWY",
-"7QGN",
-"6TBV",
-"6TC3",
-"7QG8",
-"6I0Y",
-"6Q9A",
-"6YSU",
-"7NSO",
-"7NSP",
-"7OIF",
-"7OT5",
-"5HD1",
-"5W4K"]:
+    RCSB_ID = sys.argv[1].upper()
+
+    # for RCSB_ID in [
+    # "6FKR",
+    # "7AZS",
+    # "5NP6",
+    # "5NWY",
+    # "7QGN",
+    # "6TBV",
+    # "6TC3",
+    # "7QG8",
+    # "6I0Y",
+    # "6Q9A",
+    # "6YSU",
+    # "7NSO",
+    # "7NSP",
+    # "7OIF",
+    # "7OT5",
+    # "5HD1",
+    # "5W4K"
+    # ]:
 
     ptcres, auth_asym_id = ptc_residues_via_alignment(RCSB_ID, 0)
     midpoint             = ptc_midpoint(ptcres, auth_asym_id)
     poly,nonpoly         = tunnel_obstructions(RCSB_ID, midpoint)
 
-    loguru.logger.info("Polymerics: ")
-    loguru.logger.debug(poly)
-    loguru.logger.debug(nonpoly)
+    print("-----------POLYMERICS-----------")
+    for pl in poly:
+        pprint(pl)
 
+    print("-----------NONPOLYMERICS-----------")
+    for npl in nonpoly:
+        pprint(npl)
 
+# loguru.logger.debug(poly)
+# loguru.logger.debug(nonpoly)
+
+# E261 on ul23 for exit port
 
 # for rcsb in idlist:
 #     try:
@@ -219,8 +224,6 @@ for RCSB_ID in [
 #         print(rcsb, ptc_midpoint(ptcres, auth_asym_id))
 #     except:
 #         ...
-
-
 
 # -- 5np6
 #   "src_organism_names": [

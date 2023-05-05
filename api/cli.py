@@ -7,18 +7,25 @@ import json
 import os
 from api.ribctl.etl.ribosome_assets import Assetlist, RibosomeAssets, obtain_assets, obtain_assets_processpool, obtain_assets_threadpool
 from api.ribctl.lib.types.types_ribosome import RibosomeStructure
+from api.taxonomy import node_lineage
 from logs.loggers import get_updates_logger
 from ribctl.etl.struct_rcsb_api import current_rcsb_structs, gql_monolith, query_rcsb_api, process_pdb_record
 from api.db.ribosomexyz import ribosomexyzDB
 from api.rbxz_bend.settings import NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER, RIBETL_DATA
+from taxonomy import filter_by_parent_tax, ncbi
 
 
 arg = argparse.ArgumentParser(
     description='RibCtl - A tool to control the ribosome database')
 
 arg.add_argument('-getall', '--obtain_all_structures', action='store_true')
-arg.add_argument('-syncall', '--sync_all_structures_with_pdb', action='store_true')
+arg.add_argument('-syncall', '--sync_all_structures_with_pdb',
+                 action='store_true')
 arg.add_argument('-o', '--obtain', type=str)
+
+arg.add_argument('-ls', '--list_structs', action='store_true')
+struct_filter_arggroup = arg.add_argument_group("Structure filtering options")
+struct_filter_arggroup.add_argument('-tax', '--taxid', type=int)
 
 arg.add_argument('-ttt', '--test', action='store_true')
 args = arg.parse_args()
@@ -42,7 +49,6 @@ if args.obtain:
             overwrite=True
         )
     )
-
 if args.test:
     i = 0
     nascent_chains = []
@@ -50,16 +56,31 @@ if args.test:
 
         if struct == '6OXI':
             continue
-        if len(struct)!=4:
+        if len(struct) != 4:
             continue
         else:
             R = RibosomeAssets(struct)
             s = R.profile()
-            for chain in [ *(s.polymeric_factors if s.polymeric_factors!=None else []) , *s.proteins ]:
-                if 'Nascent Chain' in chain.nomenclature :
+            for chain in [*(s.polymeric_factors if s.polymeric_factors != None else []), *s.proteins]:
+                if 'Nascent Chain' in chain.nomenclature:
                     nascent_chains.append(chain.dict())
         with open('nascent_chains.json', 'w') as f:
             json.dump(nascent_chains, f, indent=4)
+
+
+
+
+if args.list_structs:
+    all_structs = os.listdir(RIBETL_DATA)
+    if args.taxid:
+        print(filter_by_parent_tax(args.taxid))
+
+
+
+
+            
+
+            # all_structs = [struct for struct in all_structs if struct.startswith(str(taxid))]
 
 
 # if args.db:

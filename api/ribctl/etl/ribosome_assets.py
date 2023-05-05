@@ -75,9 +75,12 @@ class RibosomeAssets():
 
     # ※ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-= Getters =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
+    def get_taxids(self)->tuple[list[int],list[int]]:
+        p = self.profile()
+        return (p.src_organism_ids, p.host_organism_ids)
+
     def get_struct_and_profile(self) -> tuple[Structure, RibosomeStructure]:
         return self.biopython_structure(), self.profile()
-
 
     def get_chain_by_polymer_class(self, poly_class: PolymerClass | PolymericFactorClass, assembly:int=0) -> PolymericFactor | RNA | Protein | None:
         profile = self.profile()

@@ -6,17 +6,7 @@ from pymol import cmd
 
 RIBETL_DATA = str(os.environ.get('RIBETL_DATA'))
 
-def sload(pdbid: str):
-
-
-    pdbid       = pdbid.upper()
-    RIBETL_DATA = str(os.environ.get('RIBETL_DATA'))
-    path        = os.path.join(RIBETL_DATA, pdbid, f"{pdbid}.cif")
-    cmd.delete('all')
-    cmd.load(path)
-
 def render_thumbnail(pdbid: str):
-
 
     pdbid = pdbid.upper()
     thumbnail_path = os.path.join(RIBETL_DATA, pdbid, f"_ray_{pdbid}.png")
@@ -33,46 +23,6 @@ def render_thumbnail(pdbid: str):
         cmd.png(thumbnail_path)
         print('Saved {}'.format(thumbnail_path))
 
-def by_rna(pdbid: str):
-    pdbid = pdbid.upper()
-    RIBETL_DATA = str(os.environ.get('RIBETL_DATA'))
-    path = os.path.join(RIBETL_DATA, pdbid, f"{pdbid}.json")
-
-    with open(path, 'rb') as infile:
-        profile = json.load(infile)
-
-    if profile['rnas'] != None:
-        for rna in profile['rnas']:
-            # cmd.color('white', f"chain {rna['auth_asym_id']}")
-            cmd.hide('everything', f"chain {rna['auth_asym_id']}")
-            cmd.show('surface', f"chain {rna['auth_asym_id']}")
-            cmd.color('white', f"chain {rna['auth_asym_id']}")
-            cmd.set('transparency', 0.1, f"chain {rna['auth_asym_id']}")
-
-    for protein in profile['proteins']:
-
-        if len(protein['nomenclature']) != 0:
-            if protein['nomenclature'][0] in colormap__LSU_Proteins:
-                CLR = colormap__LSU_Proteins[protein['nomenclature'][0]]
-            elif protein['nomenclature'][0] in colormap__SSU_Proteins:
-                CLR = colormap__SSU_Proteins[protein['nomenclature'][0]]
-        else:
-            CLR = 'blue'
-
-        prot_tmp = f"protein_tmp_{ protein['auth_asym_id'] }"
-
-        cmd.create(prot_tmp, f"chain {protein[ 'auth_asym_id' ]}")
-        cmd.remove(f"chain {protein[ 'auth_asym_id' ]} and m. {pdbid}")
-        cmd.hide ('everything', prot_tmp)
-        cmd.show ('surface', prot_tmp)
-        cmd.show ('sticks', prot_tmp)
-        cmd.show ('cartoon', prot_tmp)
-        cmd.show ('lines', prot_tmp)
-        cmd.set('transparency', 0.75, prot_tmp)
-        cmd.color(CLR , prot_tmp)
-
-cmd.extend("sload", sload)
-cmd.extend("by_rna", by_rna)
 
 if __name__ == "__main__":
     from pymol import cmd, util

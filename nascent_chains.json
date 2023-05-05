@@ -1,0 +1,218 @@
+[
+    {
+        "assembly_id": 0,
+        "asym_ids": [
+            "HC"
+        ],
+        "auth_asym_id": "1",
+        "parent_rcsb_id": "6HCM",
+        "src_organism_names": [
+            "Oryctolagus cuniculus"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            9986
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "nascent chain",
+        "entity_poly_strand_id": "1",
+        "entity_poly_seq_one_letter_code": "AAAAAAAAAAAAAAAAAAAAAA",
+        "entity_poly_seq_one_letter_code_can": "AAAAAAAAAAAAAAAAAAAAAA",
+        "entity_poly_seq_length": 22,
+        "entity_poly_polymer_type": "Protein",
+        "entity_poly_entity_type": "polypeptide(L)",
+        "nomenclature": [
+            "Nascent Chain"
+        ]
+    },
+    {
+        "assembly_id": 0,
+        "asym_ids": [
+            "FA"
+        ],
+        "auth_asym_id": "z",
+        "parent_rcsb_id": "7ZQ6",
+        "src_organism_names": [
+            "Dictyostelium discoideum"
+        ],
+        "host_organism_names": [
+            "Escherichia coli"
+        ],
+        "src_organism_ids": [
+            44689
+        ],
+        "host_organism_ids": [
+            562
+        ],
+        "rcsb_pdbx_description": "Nascent chain",
+        "entity_poly_strand_id": "z",
+        "entity_poly_seq_one_letter_code": "AGP",
+        "entity_poly_seq_one_letter_code_can": "AGP",
+        "entity_poly_seq_length": 3,
+        "entity_poly_polymer_type": "Protein",
+        "entity_poly_entity_type": "polypeptide(L)",
+        "nomenclature": [
+            "Nascent Chain"
+        ]
+    },
+    {
+        "assembly_id": 0,
+        "asym_ids": [
+            "O"
+        ],
+        "auth_asym_id": "I",
+        "parent_rcsb_id": "7QV3",
+        "src_organism_names": [
+            "Bacillus subtilis subsp. subtilis str. 168"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            224308
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "Nascent chain",
+        "entity_poly_strand_id": "I",
+        "entity_poly_seq_one_letter_code": "(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)",
+        "entity_poly_seq_one_letter_code_can": "XXXXXXXXXXXXXXXXXXXXXXXX",
+        "entity_poly_seq_length": 24,
+        "entity_poly_polymer_type": "Protein",
+        "entity_poly_entity_type": "polypeptide(L)",
+        "nomenclature": [
+            "Nascent Chain"
+        ]
+    },
+    {
+        "assembly_id": 0,
+        "asym_ids": [
+            "A"
+        ],
+        "auth_asym_id": "Y2",
+        "parent_rcsb_id": "7A5I",
+        "src_organism_names": [
+            "Homo sapiens"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            9606
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "nascent chain",
+        "entity_poly_strand_id": "Y2",
+        "entity_poly_seq_one_letter_code": "(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)",
+        "entity_poly_seq_one_letter_code_can": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+        "entity_poly_seq_length": 29,
+        "entity_poly_polymer_type": "Protein",
+        "entity_poly_entity_type": "polypeptide(L)",
+        "nomenclature": [
+            "Nascent Chain"
+        ]
+    },
+    {
+        "assembly_id": 0,
+        "asym_ids": [
+            "HC"
+        ],
+        "auth_asym_id": "1",
+        "parent_rcsb_id": "6HCF",
+        "src_organism_names": [
+            "Oryctolagus cuniculus"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            9986
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "nascent chain",
+        "entity_poly_strand_id": "1",
+        "entity_poly_seq_one_letter_code": "AAAAAAAAAAAAAAAAAAAAAA",
+        "entity_poly_seq_one_letter_code_can": "AAAAAAAAAAAAAAAAAAAAAA",
+        "entity_poly_seq_length": 22,
+        "entity_poly_polymer_type": "Protein",
+        "entity_poly_entity_type": "polypeptide(L)",
+        "nomenclature": [
+            "Nascent Chain"
+        ]
+    },
+    {
+        "assembly_id": 0,
+        "asym_ids": [
+            "C"
+        ],
+        "auth_asym_id": "s",
+        "parent_rcsb_id": "7QWQ",
+        "src_organism_names": [
+            "Homo sapiens"
+        ],
+        "host_organism_names": [
+            "Oryctolagus cuniculus"
+        ],
+        "src_organism_ids": [
+            9606
+        ],
+        "host_organism_ids": [
+            9986
+        ],
+        "rcsb_pdbx_description": "Nascent chain preprolactin",
+        "entity_poly_strand_id": "s",
+        "entity_poly_seq_one_letter_code": "(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)(UNK)",
+        "entity_poly_seq_one_letter_code_can": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+        "entity_poly_seq_length": 112,
+        "entity_poly_polymer_type": "Protein",
+        "entity_poly_entity_type": "polypeptide(L)",
+        "nomenclature": [
+            "Nascent Chain"
+        ]
+    },
+    {
+        "assembly_id": 0,
+        "asym_ids": [
+            "WA"
+        ],
+        "auth_asym_id": "2",
+        "parent_rcsb_id": "3JAJ",
+        "src_organism_names": [
+            "Oryctolagus cuniculus"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            9986
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "Nascent chain",
+        "entity_poly_strand_id": "2",
+        "entity_poly_seq_one_letter_code": "LLLLLLLLLLLLKVGPVPVLVMSLLFIASMV",
+        "entity_poly_seq_one_letter_code_can": "LLLLLLLLLLLLKVGPVPVLVMSLLFIASMV",
+        "entity_poly_seq_length": 31,
+        "entity_poly_polymer_type": "Protein",
+        "entity_poly_entity_type": "polypeptide(L)",
+        "nomenclature": [
+            "Nascent Chain"
+        ]
+    },
+    {
+        "assembly_id": 0,
+        "asym_ids": [
+            "X"
+        ],
+        "auth_asym_id": "AZ",
+        "parent_rcsb_id": "4V5H",
+        "src_organism_names": [
+            "ESCHERICHIA COLI"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            562
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "POLY-ALA NASCENT CHAIN",
+        "entity_poly_strand_id": "AZ",
+        "entity_poly_seq_one_letter_code": "AAAAAAAAAAAAAAAAAAAA",
+        "entity_poly_seq_one_letter_code_can": "AAAAAAAAAAAAAAAAAAAA",
+        "entity_poly_seq_length": 20,
+        "entity_poly_polymer_type": "Protein",
+        "entity_poly_entity_type": "polypeptide(L)",
+        "nomenclature": [
+            "Nascent Chain"
+        ]
+    }
+]
