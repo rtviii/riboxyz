@@ -88,8 +88,10 @@ assets_nomenclaturev2 = os.path.join(
 loop = asyncio.get_event_loop()
 with ProcessPoolExecutor(max_workers=10) as pool:
     for struct in filter_by_parent_tax(2):
+
         def nomv2_path(structid): return os.path.join(
             assets_nomenclaturev2, f"{structid.upper()}.json")
+
         if os.path.exists(nomv2_path(struct)):
             print("Skipping {}".format(struct))
             continue
