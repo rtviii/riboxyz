@@ -7,12 +7,12 @@ import json
 import os
 from api.ribctl.etl.ribosome_assets import Assetlist, RibosomeAssets, obtain_assets, obtain_assets_processpool, obtain_assets_threadpool
 from api.ribctl.lib.types.types_ribosome import RibosomeStructure
-from api.taxonomy import node_lineage
+from api.ribctl.taxonomy import node_lineage
 from logs.loggers import get_updates_logger
 from ribctl.etl.struct_rcsb_api import current_rcsb_structs, gql_monolith, query_rcsb_api, process_pdb_record
 from api.db.ribosomexyz import ribosomexyzDB
 from api.rbxz_bend.settings import NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER, RIBETL_DATA
-from taxonomy import filter_by_parent_tax, ncbi
+from api.ribctl.taxonomy import filter_by_parent_tax, ncbi
 
 
 arg = argparse.ArgumentParser(
@@ -73,10 +73,6 @@ if args.list_structs:
     if args.taxid:
         print(filter_by_parent_tax(args.taxid))
 
-
-
-
-            
 
             # all_structs = [struct for struct in all_structs if struct.startswith(str(taxid))]
 

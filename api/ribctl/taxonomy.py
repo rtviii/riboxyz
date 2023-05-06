@@ -1,9 +1,7 @@
 import os
+from api.rbxz_bend.settings import RIBETL_DATA
 from api.ribctl.etl.ribosome_assets import RibosomeAssets
-from api.ribctl.lib.types.types_ribosome import ProteinClass
-from api.ribctl.lib.msalib import msa_profiles_dict_prd
 from ete3 import NCBITaxa
-from api.scratch_tunnel_workflow import RIBETL_DATA
 
 ncbi = NCBITaxa()
 

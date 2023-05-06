@@ -13,7 +13,7 @@ from api.rbxz_bend.settings import RIBETL_DATA
 from api.ribctl.etl.ribosome_assets import RibosomeAssets
 from api.ribctl.lib.types.types_ribosome import RNA, Polymer, Protein, ProteinClass
 from api.ribctl.lib.msalib import msa_profiles_dict, msa_profiles_dict_prd, msaclass_extend_process_sub
-from api.taxonomy import filter_by_parent_tax
+from api.ribctl.taxonomy import filter_by_parent_tax
 
 msa_profiles: dict[ProteinClass, MSA] = msa_profiles_dict_prd()
 

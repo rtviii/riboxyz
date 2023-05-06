@@ -2,92 +2,91 @@ import json
 import os
 from pprint import pprint
 from typing import List
-from api.scratch_tunnel_workflow import ptc_midpoint, ptc_residues_via_alignment, tunnel_obstructions
 from pymol import cmd
+from api.scratch_tunnel_workflow import ptc_midpoint, ptc_resdiues_get, tunnel_obstructions
 
 RIBETL_DATA = os.environ.get("RIBETL_DATA")
 
-
 colormap__LSU_Proteins = {
-                          "uL1": "lawrencium",
-                          "uL2": "lead",
-                          "uL3": "lithium",
-                          "uL4": "lutetium",
-                          "uL5": "magnesium",
-                          "uL6": "manganese",
-                          "eL6": "meitnerium",
-                          "eL8": "mendelevium",
-                          "bL9": "mercury",
-                          "uL10": "molybdenum",
-                          "uL11": "neodymium",
-                          "bL12": "neon",
-                          "uL13": "neptunium",
-                          "eL13": "nickel",
-                          "uL14": "niobium",
-                          "eL14": "nitrogen",
-                          "uL15": "nobelium",
-                          "eL15": "osmium",
-                          "uL16": "oxygen",
-                          "bL17": "palladium",
-                          "uL18": "phosphorus",
-                          "eL18": "platinum",
-                          "bL19": "plutonium",
-                          "eL19": "polonium",
-                          "bL20": "potassium",
-                          "eL20": "praseodymium",
-                          "bL21": "promethium",
-                          "eL21": "protactinium",
-                          "uL22": "radium",
-                          "eL22": "radon",
-                          "uL23": "rhenium",
-                          "uL24": "rhodium",
-                          "eL24": "rubidium",
-                          "bL25": "ruthenium",
-                          "bL27": "rutherfordium",
-                          "eL27": "samarium",
-                          "bL28": "scandium",
-                          "eL28": "seaborgium",
-                          "uL29": "selenium",
-                          "eL29": "silicon",
-                          "uL30": "silver",
-                          "eL30": "sodium",
-                          "bL31": "strontium",
-                          "eL31": "sulfur",
-                          "bL32": "tantalum",
-                          "eL32": "technetium",
-                          "bL33": "tellurium",
-                          "eL33": "terbium",
-                          "bL34": "thallium",
-                          "eL34": "thorium",
-                          "bL35": "thulium",
-                          "bL36": "tin",
-                          "eL36": "titanium",
-                          "eL37": "tungsten",
-                          "eL38": "uranium",
-                          "eL39": "vanadium",
-                          "eL40": "xenon",
-                          "eL41": "ytterbium",
-                          "eL42": "yttrium",
-                          "eL43": "zinc",
+                          "uL1"  : "lawrencium",
+                          "uL2"  : "lead",
+                          "uL3"  : "lithium",
+                          "uL4"  : "lutetium",
+                          "uL5"  : "magnesium",
+                          "uL6"  : "manganese",
+                          "eL6"  : "meitnerium",
+                          "eL8"  : "mendelevium",
+                          "bL9"  : "mercury",
+                          "uL10" : "molybdenum",
+                          "uL11" : "neodymium",
+                          "bL12" : "neon",
+                          "uL13" : "neptunium",
+                          "eL13" : "nickel",
+                          "uL14" : "niobium",
+                          "eL14" : "nitrogen",
+                          "uL15" : "nobelium",
+                          "eL15" : "osmium",
+                          "uL16" : "oxygen",
+                          "bL17" : "palladium",
+                          "uL18" : "phosphorus",
+                          "eL18" : "platinum",
+                          "bL19" : "plutonium",
+                          "eL19" : "polonium",
+                          "bL20" : "potassium",
+                          "eL20" : "praseodymium",
+                          "bL21" : "promethium",
+                          "eL21" : "protactinium",
+                          "uL22" : "radium",
+                          "eL22" : "radon",
+                          "uL23" : "rhenium",
+                          "uL24" : "rhodium",
+                          "eL24" : "rubidium",
+                          "bL25" : "ruthenium",
+                          "bL27" : "rutherfordium",
+                          "eL27" : "samarium",
+                          "bL28" : "scandium",
+                          "eL28" : "seaborgium",
+                          "uL29" : "selenium",
+                          "eL29" : "silicon",
+                          "uL30" : "silver",
+                          "eL30" : "sodium",
+                          "bL31" : "strontium",
+                          "eL31" : "sulfur",
+                          "bL32" : "tantalum",
+                          "eL32" : "technetium",
+                          "bL33" : "tellurium",
+                          "eL33" : "terbium",
+                          "bL34" : "thallium",
+                          "eL34" : "thorium",
+                          "bL35" : "thulium",
+                          "bL36" : "tin",
+                          "eL36" : "titanium",
+                          "eL37" : "tungsten",
+                          "eL38" : "uranium",
+                          "eL39" : "vanadium",
+                          "eL40" : "xenon",
+                          "eL41" : "ytterbium",
+                          "eL42" : "yttrium",
+                          "eL43" : "zinc",
                           "P1/P2": "zirconium"
                           
                           }
 
 colormap__SSU_Proteins = {
-                     "bS1": "actinium",
-                     "eS1": "aluminum",
-                     "uS2": "americium",
-                     "uS3": "antimony",
-                     "uS4": "argon",
-                     "eS4": "arsenic",
-                     "uS5": "astatine",
-                     "bS6": "barium",
-                     "eS6": "berkelium",
-                     "uS7": "beryllium",
-                     "eS7": "bismuth",
-                     "uS8": "bohrium",
-                     "eS8": "boron",
-                     "uS9": "bromine",
+                     "bS1" : "actinium",
+                     "eS1" : "aluminum",
+                     "uS2" : "americium",
+                     "uS3" : "antimony",
+                     "uS4" : "argon",
+                     "eS4" : "arsenic",
+                     "uS5" : "astatine",
+                     "bS6" : "barium",
+                     "eS6" : "berkelium",
+                     "uS7" : "beryllium",
+                     "eS7" : "bismuth",
+                     "uS8" : "bohrium",
+                     "eS8" : "boron",
+                     "uS9" : "bromine",
                      "uS10": "cadmium",
                      "eS10": "calcium",
                      "uS11": "californium",
@@ -125,23 +124,20 @@ def build_selection_string( chain_name: str, res_ids: List[int]):
 def list_bacteria():
     pprint(os.listdir(f"{RIBETL_DATA}/PTC_COORDINATES"))
 
-def ptc(struct: str):
-    cmd.delete("all")
-    struct = struct.upper()
-    struct_path = os.path.join("/home/rxz/dev/static/{}/{}.cif".format(struct, struct))
-    cmd.load(struct_path)
-    highlight_ptc(struct)
-
 def get_markerspath(struct: str):
+
     struct = struct.upper()
-    _path = os.path.join(RIBETL_DATA, "PTC_MARKERS_RAW", f"{struct}_PTC_MARKERS_RAW.json")
+    _path  = os.path.join(RIBETL_DATA, "PTC_MARKERS_RAW", f"{struct}_PTC_MARKERS_RAW.json")
+
     return _path
 
 def create_marker_at_atom(selection_name:str, posn:List[float], color_:str="red", repr="spheres", label=''):
+
     cmd.pseudoatom(selection_name, pos=posn, vdw=1, color=color_,  label=label)
     cmd.show(repr, selection_name)
 
 def ptc_raw_w_markerks(struct: str):
+
     # cmd.delete("all")
     # struct      = struct.upper()
     # struct_path = os.path.join("/home/rxz/dev/static/{}/{}.cif".format(struct, struct))
@@ -164,6 +160,7 @@ def ptc_raw_w_markerks(struct: str):
         ( U_end_pos[1] + U_start_pos[1] ) / 2,
         ( U_end_pos[2] + U_start_pos[2] ) / 2,
     ]
+
     create_marker_at_atom("uridine_comb_start", U_start_pos, color_="green")
     create_marker_at_atom("uridine_comb_end", U_end_pos, color_="green")
     cmd.distance(None, "uridine_comb_start", "uridine_comb_end", mode=0)
@@ -171,7 +168,7 @@ def ptc_raw_w_markerks(struct: str):
     create_marker_at_atom("centroid",midpoint, color_="red")
 
 def visualize_obstructions(rcsb_id):
-    ptcres, auth_asym_id = ptc_residues_via_alignment(rcsb_id, 0)
+    ptcres, auth_asym_id = ptc_resdiues_get(rcsb_id, 0)
     midpoint = ptc_midpoint(ptcres, auth_asym_id)
     polys,nonpolys = tunnel_obstructions(rcsb_id, midpoint)
 
@@ -244,7 +241,6 @@ def sload(pdbid: str):
 
 cmd.extend("sload", sload)
 cmd.extend("by_chain", struct_paint_chains)
-cmd.extend("ptc", ptc)
 cmd.extend("ptc_w_markers", ptc_raw_w_markerks)
 cmd.extend("list_bacteria", list_bacteria)
 cmd.extend("tun_obstructions", visualize_obstructions)
