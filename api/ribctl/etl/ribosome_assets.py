@@ -50,6 +50,12 @@ class RibosomeAssets():
         self._envcheck()
         return f"{self._dir_path()}/{self.rcsb_id}_modified.cif"
     
+    def _ptc_residues(self)->dict[str, dict[str, list[float]]]:
+        PTC_RESIDUES_PATH = os.path.join(RIBETL_DATA, self.rcsb_id, "{}_PTC_COORDINATES.json".format(self.rcsb_id))
+        with open(PTC_RESIDUES_PATH, 'r') as infile:
+            return json.load(infile)
+
+
     def _nomenclature_v2(self)->dict[str,ProteinClass]:
         if os.path.isfile(os.path.join(self._dir_path(), f"{self.rcsb_id}_nomenclaturev2.json")):
             with open(os.path.join(self._dir_path(), f"{self.rcsb_id}_nomenclaturev2.json"), 'r') as infile:
