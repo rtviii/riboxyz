@@ -5,14 +5,14 @@ from Bio.PDB.Chain import Chain
 from Bio.PDB.Residue import Residue
 from Bio.PDB.NeighborSearch import NeighborSearch
 from Bio.PDB.Atom import Atom
-from ribctl.etl.ribosome_assets import RibosomeAssets
-from ribctl.lib.types.types_binding_site import AMINO_ACIDS, NUCLEOTIDES, ResidueSummary
-from ribctl.lib.types.types_ribosome import PolymericFactor
-from ribctl.taxonomy import filter_by_parent_tax
+import loguru
+from api.ribctl.etl.ribosome_assets import RibosomeAssets
+from api.ribctl.lib.types.types_binding_site import AMINO_ACIDS, NUCLEOTIDES, ResidueSummary
+from api.ribctl.lib.types.types_ribosome import PolymericFactor
+from api.ribctl.taxonomy import filter_by_parent_tax
 
 RIBETL_DATA = os.environ.get('RIBETL_DATA')
 # ※ ---------------------------- 23/25/28SrRNA PTC residue locations ---------------------------- ※
-
 # https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4574749/pdf/1719.pdf
 DORIS_ET_AL = {
     "subseq_6": "AAGACCC",
@@ -185,18 +185,18 @@ if __name__ == "__main__":
 
     for RCSB_ID in filter_by_parent_tax(2):
         print("Processing {}".format(RCSB_ID))
-        PTC_RESIDUES_PATH = os.path.join(RIBETL_DATA, RCSB_ID, "{}_PTC_COORDINATES.json".format(RCSB_ID))
 
+        PTC_RESIDUES_PATH = os.path.join(RIBETL_DATA, RCSB_ID, "{}_PTC_COORDINATES.json".format(RCSB_ID))
         try:
+
             residues,auth_asym_id = ptc_resdiues_get(RCSB_ID, 0)
             ptc_coordinates = ptc_residues_to_atom_coordinates(residues, auth_asym_id)
+
             print("Saving {}".format(PTC_RESIDUES_PATH))
        
         except Exception as e:
+            loguru.logger.error("Failed to extract PTC {}.\n{}".format(RCSB_ID, e))
             ...
-
-
-
 
         # print("Writing to ", PTC_RESIDUES_PATH)
         
