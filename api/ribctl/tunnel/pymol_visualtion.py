@@ -3,7 +3,7 @@ import os
 from pprint import pprint
 from typing import List
 from pymol import cmd
-from api.scratch_tunnel_workflow import ptc_midpoint, ptc_resdiues_get, tunnel_obstructions
+from api.scratch_tunnel_workflow import ptc_residues_calculate_midpoint, ptc_resdiues_get, tunnel_obstructions
 
 RIBETL_DATA = os.environ.get("RIBETL_DATA")
 
@@ -143,8 +143,6 @@ def ptc_raw_w_markerks(struct: str):
     # struct_path = os.path.join("/home/rxz/dev/static/{}/{}.cif".format(struct, struct))
     # cmd.load(struct_path)
 
-    highlight_ptc_raw(struct)
-
     with open(get_markerspath(struct), 'r') as infile:
        POSNS:dict = json.load(infile)
 
@@ -169,7 +167,7 @@ def ptc_raw_w_markerks(struct: str):
 
 def visualize_obstructions(rcsb_id):
     ptcres, auth_asym_id = ptc_resdiues_get(rcsb_id, 0)
-    midpoint = ptc_midpoint(ptcres, auth_asym_id)
+    midpoint = ptc_residues_calculate_midpoint(ptcres, auth_asym_id)
     polys,nonpolys = tunnel_obstructions(rcsb_id, midpoint)
 
     cmd.color("white", "all")
