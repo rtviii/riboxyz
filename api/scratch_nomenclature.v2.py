@@ -44,10 +44,10 @@ async def seq_H_fit_class_multi(chain: Protein, msa_profiles: dict[ProteinClass,
         else:
             H_fit.update(f.result())
 
-    max_fit = min(H_fit, key=H_fit.get)
-    # pprint(H_fit)
-    print("Picked class {}({} sequences) with fit {}".format(max_fit, H_fit[max_fit]))
-    return max_fit, chain
+    meta              = msadict_get_meta_info(msa_profiles)
+    max_fit_classname = min(H_fit, key=H_fit.get)
+    print("Picked class {}({} sequences) with fit {}".format(max_fit_classname,meta[max_fit_classname]['nseqs'], H_fit[max_fit_classname]))
+    return max_fit_classname, chain
 
 
 def classify_chain(chain: Protein, vvv=False):
