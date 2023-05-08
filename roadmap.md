@@ -1,13 +1,12 @@
 
-<!-- TODO: WIP -->
 
 - [x] separate assemblies
 - [x] split ligand classes into instances 
 - [ ] fit ligand parsing, transposition and fileformats to the new "polymeric factors" schema
 
-<!-- TODO: WIP -->
 - [ ] flash out the taxonomy : [src + host] [nodes in the db, hierarchy in the app(pull in the lib, construct dynamically on app start from assets)]
-- [ ] render images for new structs 
+
+     ---> [ ] render images for new structs 
 - [ ] re-render profiles with the new ligand schema and separate assemblies 
 - [ ] re-render ligands for all structs
 
@@ -25,6 +24,8 @@
     - typed [x] 
     - endpoint 
     - logs
+
+- [ ] RAII for peripheral data: PTC viewpoints, new nomenclature, tunnel obstruction profiles,
 
 - visualization troubleshoot
 

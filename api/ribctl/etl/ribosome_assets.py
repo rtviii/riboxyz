@@ -49,6 +49,21 @@ class RibosomeAssets():
     def _cif_modified_filepath(self):
         self._envcheck()
         return f"{self._dir_path()}/{self.rcsb_id}_modified.cif"
+    
+    def _ptc_residues(self)->dict[str, dict[str, list[float]]]:
+        PTC_RESIDUES_PATH = os.path.join(RIBETL_DATA, self.rcsb_id, "{}_PTC_COORDINATES.json".format(self.rcsb_id))
+        with open(PTC_RESIDUES_PATH, 'r') as infile:
+            return json.load(infile)
+
+
+    def _nomenclature_v2(self)->dict[str,ProteinClass]:
+        if os.path.isfile(os.path.join(self._dir_path(), f"{self.rcsb_id}_nomenclaturev2.json")):
+            with open(os.path.join(self._dir_path(), f"{self.rcsb_id}_nomenclaturev2.json"), 'r') as infile:
+                return json.load(infile)
+        
+        else:
+            with open(os.path.join("~/dev/docker_ribxz/api/ribctl/assets/nomenclaturev2/{}.json".format(self.rcsb_id.upper())), 'r') as infile:
+                return json.load(infile)
 
     def _json_profile_filepath(self):
         self._envcheck()
@@ -75,9 +90,12 @@ class RibosomeAssets():
 
     # ※ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-= Getters =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
+    def get_taxids(self)->tuple[list[int],list[int]]:
+        p = self.profile()
+        return (p.src_organism_ids, p.host_organism_ids)
+
     def get_struct_and_profile(self) -> tuple[Structure, RibosomeStructure]:
         return self.biopython_structure(), self.profile()
-
 
     def get_chain_by_polymer_class(self, poly_class: PolymerClass | PolymericFactorClass, assembly:int=0) -> PolymericFactor | RNA | Protein | None:
         profile = self.profile()
