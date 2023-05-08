@@ -20,8 +20,7 @@ msa_profiles: dict[ProteinClass, MSA] = msa_profiles_dict_prd()
 
 def seq_H_fit_class(base_class: ProteinClass, base_class_msa: MSA, target_fasta: str, target_auth_asym_id: str, parent_rcsb_id: str, omitgaps:bool=True) -> dict[ProteinClass, float]:
     """Calculate entropy difference for a given protein class MSA without and with a new sequence. Used as a measure of fit."""
-    extended_class = msaclass_extend_temp(
-        base_class, base_class_msa, target_fasta, target_auth_asym_id, parent_rcsb_id)
+    extended_class = msaclass_extend_temp(base_class, base_class_msa, target_fasta, target_auth_asym_id, parent_rcsb_id)
     H_original = sum(calcShannonEntropy(base_class_msa,omitgaps=omitgaps))
     H_extended = sum(calcShannonEntropy(extended_class,omitgaps=omitgaps))
     H_delta = H_extended - H_original
@@ -92,6 +91,7 @@ def nomv2_duplicates():
 
         classes = list(prof.values())
         dup     = {x for x in classes if classes.count(x) > 1}
+
         print(rcsb_id, dup)
 
         # if rcsb_id in BACTERIAL:
@@ -134,6 +134,10 @@ def _generate_nomenclature(struct_id_list:list[str],gen_all:bool=False):
             x.add_done_callback(save_fut_result(struct))
 
 if __name__ == "__main__":
+    
+    ...
+
+
     # nomv2_duplicates()
     # _generate_nomenclature(["7OF4"])
 
@@ -144,10 +148,9 @@ if __name__ == "__main__":
     # chain, _ = RibosomeAssets('4V87').get_chain_by_auth_asym_id('A3')
     # chain, _ = RibosomeAssets('4V87').get_chain_by_auth_asym_id('AW')
     chain, _ = RibosomeAssets('4V87').get_chain_by_auth_asym_id('AZ')
+
     eloop = asyncio.get_event_loop()
     eloop.run_until_complete(seq_H_fit_class_multi(chain, msa_profiles, workers=1, vvv=True, omitgaps=True))
-
-   
 
 
 # Fitting chain 4WRO.4E (['uS5']):
@@ -155,8 +158,6 @@ if __name__ == "__main__":
 
 # Fitting chain 4WQU.AL (['uL11']):
 # Picked class uL4(162 sequences) with fit 1.8214083307453848
-
-
 
 
 
