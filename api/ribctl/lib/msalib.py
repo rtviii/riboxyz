@@ -80,6 +80,7 @@ def seq_to_fasta(rcsb_id: str, _seq: str, outfile: str):
     seq_record.id = seq_record.description = rcsb_id
     SeqIO.write(seq_record, outfile, 'fasta')
 
+#! util
 def infer_subunit(protein_class:ProteinClass):
     if protein_class in list_LSUProteinClass:
         return "LSU"
@@ -141,50 +142,58 @@ def fasta_from_chain(chain:RNA|Protein| PolymericFactor)->str:
     seq_record.id          = fasta_description
     return seq_record.format('fasta')
 
-def prot_class_msa(class_name:ProteinClass)->MSA:
-    _ = prody.parseMSA(msa_class_proteovision_path(class_name))
-    if _ is not None:
-        return _
-    else:
-        raise Exception("MSA for class {} not found or could not be parsed".format(class_name))
-
-# def msaclass_extend( poly_class:ProteinClass, poly_class_msa:MSA, fasta_target:str)->MSA:
-
-#     class_profile_path = msa_class_proteovision_path(poly_class)
-#     cmd = [
-#         '/home/rxz/dev/docker_ribxz/api/ribctl/muscle3.8',
-#         '-profile',
-#         '-in1',
-#         class_profile_path,
-#         '-in2',
-#         '-',
-#         '-quiet']
-
-#     process = subprocess.Popen(cmd,
-#                                stdout = subprocess.PIPE,
-#                                stdin  = subprocess.PIPE,
-#                                stderr = subprocess.PIPE, env = os.environ.copy())
-
-#     stdout, stderr = process.communicate(input=fasta_from_string(fasta_target).encode())
-#     out   ,err     = stdout.decode(), stderr.decode()
-#     process.wait()
-
-#     msafile      = MSAFile(StringIO(out), format="fasta")
-#     seqs, descs  =  zip(*msafile._iterFasta())
-
-#     sequences    = [*map(lambda x : np.fromstring(x,dtype='S1'),seqs)]
-#     descriptions = [*descs]
-#     chararr      = np.array(sequences).reshape(len(sequences), len(sequences[0]))
-
-#     return MSA(chararr, labels=descriptions, title="Class {} profile extended.".format( poly_class))
-
 def msa_to_fasta_str(msa:MSA)->str:
     fasta = ''
     for seq in msa:
         fasta += '>{}\n{}\n'.format(seq.getLabel(), seq)
     return fasta
 
-def msaclass_extend_process_sub(poly_class:ProteinClass, poly_class_msa:MSA, fasta_target:str)->MSA:
+def msaclass_extend_temp(prot_class_base:ProteinClass, prot_class_msa:MSA, target_fasta:str, target_auth_asym_id:str, target_parent_rcsb_id:str)->MSA:
+
+    class_str             = msa_to_fasta_str(prot_class_msa).strip("\n").encode('utf-8')
+    target_str            = fasta_from_string(target_fasta, prot_class_base).strip("\n").encode('utf-8')
+
+
+    tmp_msaclass_extended = f'msa_ext_{prot_class_base + "_" if len(prot_class_base) == 3 else ""}_with_{target_parent_rcsb_id}.{target_auth_asym_id}.fasta.tmp'
+
+    with open(tmp_msaclass_extended, 'wb') as f:
+        f.write(class_str)
+
+    # tmp_seq ='{}.fasta.tmp'.format(abs(hash(random.randbytes(10))))
+    # with open(tmp_seq, 'wb') as f:
+    #     f.write(target_str)
+
+    cmd = [
+        '/home/rxz/dev/docker_ribxz/api/ribctl/muscle3.8',
+        '-profile',
+        '-in1',
+        tmp_msaclass_extended,
+        '-in2',
+        '-',
+        '-quiet']
+
+    process = subprocess.Popen(cmd,
+                               stdout = subprocess.PIPE,
+                               stdin  = subprocess.PIPE,
+                               stderr = subprocess.PIPE, env = os.environ.copy())
+
+    stdout, stderr = process.communicate(input=target_str)
+    out   ,err     = stdout.decode(), stderr.decode()
+    process.wait()
+
+    os.remove(tmp_msaclass_extended)
+    # os.remove(tmp_seq)
+
+    msafile      = MSAFile(StringIO(out), format="fasta")
+    seqs, descs  =  zip(*msafile._iterFasta())
+
+    sequences    = [*map(lambda x : np.fromstring(x,dtype='S1'),seqs)]
+    descriptions = [*descs]
+    chararr      = np.array(sequences).reshape(len(sequences), len(sequences[0]))
+
+    return MSA(chararr, labels=descriptions, title="Class {} profile extended.".format( prot_class_base))
+
+def msaclass_extend(poly_class:ProteinClass, poly_class_msa:MSA, fasta_target:str)->MSA:
 
     class_str  = msa_to_fasta_str(poly_class_msa).strip("\n").encode('utf-8')
     target_str = fasta_from_string(fasta_target, poly_class).strip("\n").encode('utf-8')
@@ -319,15 +328,14 @@ def process_proteovision_alignment(nomclass:ProteinClass):
     msa_add_taxonomic_ids(msa_class_proteovision_path(nomclass))
 
 def display_msa_class(nomclass:ProteinClass):
-    nomclass = 'uL23'
     msa_main = parseMSA(msa_class_proteovision_path(nomclass))
-
     for seq in msa_main:
         print(seq)
 
 def get_taxid_fastalabel(label: str):
     """This assumes a given fasta label has '|' as a delimiter between the taxid and the rest of the label.(As returned by InterPRO and curated by me)"""
     return label.split('|')[-1]
+
 def msa_pick_taxa(msa: MSA, taxids: list[str])->MSA:
     """Given a MSA and a list of taxids, return a new MSA with only the sequences that match the taxids. 
        Assumes '|' as a delimiter between the taxid and the rest of the label."""

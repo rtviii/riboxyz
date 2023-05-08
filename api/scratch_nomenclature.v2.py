@@ -8,29 +8,30 @@ from prody import MSA, calcShannonEntropy
 from api.rbxz_bend.settings import RIBETL_DATA
 from api.ribctl.etl.ribosome_assets import RibosomeAssets
 from api.ribctl.lib.types.types_ribosome import  Protein, ProteinClass
-from api.ribctl.lib.msalib import  msa_profiles_dict_prd, msaclass_extend_process_sub
+from api.ribctl.lib.msalib import  msa_profiles_dict_prd, msaclass_extend, msaclass_extend_temp
 from api.ribctl.taxonomy import filter_by_parent_tax
 
 msa_profiles: dict[ProteinClass, MSA] = msa_profiles_dict_prd()
 
-def seq_H_fit_class(base_class: ProteinClass, base_class_msa: MSA, new_seq: str) -> dict[ProteinClass, float]:
+def seq_H_fit_class(base_class: ProteinClass, base_class_msa: MSA, target_fasta: str, target_auth_asym_id:str, parent_rcsb_id:str) -> dict[ProteinClass, float]:
     """Calculate entropy difference for a given protein class MSA without and with a new sequence. Used as a measure of fit."""
-    extended_class = msaclass_extend_process_sub(base_class, base_class_msa, new_seq)
-    H_original = sum(calcShannonEntropy(base_class_msa))
-    H_extended = sum(calcShannonEntropy(extended_class))
-    H_delta = H_extended - H_original
+    extended_class = msaclass_extend_temp(base_class, base_class_msa, target_fasta, target_auth_asym_id, parent_rcsb_id)
+    H_original     = sum(calcShannonEntropy(base_class_msa))
+    H_extended     = sum(calcShannonEntropy(extended_class))
+    H_delta        = H_extended - H_original
     return {base_class: H_delta}
 
 
 async def seq_H_fit_class_multi(chain: Protein, msa_profiles: dict[ProteinClass, MSA], workers=None) -> tuple[ProteinClass, Protein]:
-    print("Processing chain {}...".format(chain.auth_asym_id))
     with ThreadPoolExecutor(max_workers=multiprocessing.cpu_count() if workers is None else workers) as executor:
         futures = []
         for class_name, base_msa in msa_profiles.items():
-            fut = executor.submit(seq_H_fit_class, class_name, base_msa, chain.entity_poly_seq_one_letter_code_can)
+            fut = executor.submit(seq_H_fit_class, class_name, base_msa, chain.entity_poly_seq_one_letter_code_can, chain.auth_asym_id, chain.parent_rcsb_id)
             futures.append(fut)
+
     wait(futures, return_when=ALL_COMPLETED)
 
+    print("Fit chain {}.{} to class {}".format(chain.parent_rcsb_id, chain.auth_asym_id))
     H_fit: dict[ProteinClass, float] = {}
     for f in futures:
         if f.exception() is not None:
@@ -44,7 +45,6 @@ async def seq_H_fit_class_multi(chain: Protein, msa_profiles: dict[ProteinClass,
 
 def classify_chain(chain: Protein, vvv=False):
     return seq_H_fit_class_multi(chain, msa_profiles)
-
 
 async def struct_classify_chains(chains: list[Protein], vvv=False):
     return await asyncio.gather(*[seq_H_fit_class_multi(chain, msa_profiles) for chain in chains])
