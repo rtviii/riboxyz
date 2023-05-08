@@ -77,19 +77,15 @@ def __infer_organisms_from_polymers(polymers: list[RNA | Protein]):
     src_organism_ids: list[int] = []
 
     for polymer in polymers:
-        src_organism_names = [*src_organism_names, *polymer.src_organism_names
-                              ] if polymer.src_organism_names != None else src_organism_names
-        src_organism_ids = [*src_organism_ids, *polymer.src_organism_ids
-                            ] if polymer.src_organism_ids != None else src_organism_ids
-        src_organism_names = [*src_organism_names, *polymer.host_organism_names
-                              ] if polymer.host_organism_names != None else src_organism_names
-        src_organism_ids = [*src_organism_ids, *polymer.host_organism_ids
-                            ] if polymer.host_organism_ids != None else src_organism_ids
+        src_organism_names = [*src_organism_names, *polymer.src_organism_names                              ] if polymer.src_organism_names != None else src_organism_names
+        src_organism_ids = [*src_organism_ids, *polymer.src_organism_ids                             ] if polymer.src_organism_ids != None else src_organism_ids
+        src_organism_names = [*src_organism_names, *polymer.host_organism_names                               ] if polymer.host_organism_names != None else src_organism_names
+        src_organism_ids = [*src_organism_ids, *polymer.host_organism_ids ] if polymer.host_organism_ids != None else src_organism_ids
 
     return {
-        "src_organism_ids": list(map(int, set(src_organism_ids))),
-        "src_organism_names": list(map(str, set(src_organism_names))),
-        "host_organism_ids": list(map(int, set(host_organism_ids))),
+        "src_organism_ids"   : list(map(int, set(src_organism_ids))),
+        "src_organism_names" : list(map(str, set(src_organism_names))),
+        "host_organism_ids"  : list(map(int, set(host_organism_ids))),
         "host_organism_names": list(map(str, set(host_organism_names)))
     }
 
@@ -99,7 +95,7 @@ def __extract_external_refs(external_refs):
     external_refs: list[{ link: string; type: string; id: string }]
     """
 
-    externalRefIds: list[str] = []
+    externalRefIds  : list[str] = []
     externalRefTypes: list[str] = []
     externalRefLinks: list[str] = []
 

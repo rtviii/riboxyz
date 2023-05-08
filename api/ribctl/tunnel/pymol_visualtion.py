@@ -2,10 +2,117 @@ import json
 import os
 from pprint import pprint
 from typing import List
-from api.scratch_tunnel_workflow import ptc_midpoint, ptc_residues_via_alignment, tunnel_obstructions
 from pymol import cmd
+from api.scratch_tunnel_workflow import ptc_residues_calculate_midpoint, ptc_resdiues_get, tunnel_obstructions
 
 RIBETL_DATA = os.environ.get("RIBETL_DATA")
+
+colormap__LSU_Proteins = {
+                          "uL1"  : "lawrencium",
+                          "uL2"  : "lead",
+                          "uL3"  : "lithium",
+                          "uL4"  : "lutetium",
+                          "uL5"  : "magnesium",
+                          "uL6"  : "manganese",
+                          "eL6"  : "meitnerium",
+                          "eL8"  : "mendelevium",
+                          "bL9"  : "mercury",
+                          "uL10" : "molybdenum",
+                          "uL11" : "neodymium",
+                          "bL12" : "neon",
+                          "uL13" : "neptunium",
+                          "eL13" : "nickel",
+                          "uL14" : "niobium",
+                          "eL14" : "nitrogen",
+                          "uL15" : "nobelium",
+                          "eL15" : "osmium",
+                          "uL16" : "oxygen",
+                          "bL17" : "palladium",
+                          "uL18" : "phosphorus",
+                          "eL18" : "platinum",
+                          "bL19" : "plutonium",
+                          "eL19" : "polonium",
+                          "bL20" : "potassium",
+                          "eL20" : "praseodymium",
+                          "bL21" : "promethium",
+                          "eL21" : "protactinium",
+                          "uL22" : "radium",
+                          "eL22" : "radon",
+                          "uL23" : "rhenium",
+                          "uL24" : "rhodium",
+                          "eL24" : "rubidium",
+                          "bL25" : "ruthenium",
+                          "bL27" : "rutherfordium",
+                          "eL27" : "samarium",
+                          "bL28" : "scandium",
+                          "eL28" : "seaborgium",
+                          "uL29" : "selenium",
+                          "eL29" : "silicon",
+                          "uL30" : "silver",
+                          "eL30" : "sodium",
+                          "bL31" : "strontium",
+                          "eL31" : "sulfur",
+                          "bL32" : "tantalum",
+                          "eL32" : "technetium",
+                          "bL33" : "tellurium",
+                          "eL33" : "terbium",
+                          "bL34" : "thallium",
+                          "eL34" : "thorium",
+                          "bL35" : "thulium",
+                          "bL36" : "tin",
+                          "eL36" : "titanium",
+                          "eL37" : "tungsten",
+                          "eL38" : "uranium",
+                          "eL39" : "vanadium",
+                          "eL40" : "xenon",
+                          "eL41" : "ytterbium",
+                          "eL42" : "yttrium",
+                          "eL43" : "zinc",
+                          "P1/P2": "zirconium"
+                          
+                          }
+
+colormap__SSU_Proteins = {
+                     "bS1" : "actinium",
+                     "eS1" : "aluminum",
+                     "uS2" : "americium",
+                     "uS3" : "antimony",
+                     "uS4" : "argon",
+                     "eS4" : "arsenic",
+                     "uS5" : "astatine",
+                     "bS6" : "barium",
+                     "eS6" : "berkelium",
+                     "uS7" : "beryllium",
+                     "eS7" : "bismuth",
+                     "uS8" : "bohrium",
+                     "eS8" : "boron",
+                     "uS9" : "bromine",
+                     "uS10": "cadmium",
+                     "eS10": "calcium",
+                     "uS11": "californium",
+                     "uS12": "carbon",
+                     "eS12": "cerium",
+                     "uS13": "cesium",
+                     "uS14": "chlorine",
+                     "uS15": "chromium",
+                     "bS16": "cobalt",
+                     "uS17": "copper",
+                     "eS17": "curium",
+                     "bS18": "deuterium",
+                     "uS19": "dubnium",
+                     "eS19": "dysprosium",
+                     "bS20": "einsteinium",
+                     "bS21": "erbium",
+                     "bTHX": "europium",
+                     "eS21": "fermium",
+                     "eS24": "fluorine",
+                     "eS25": "francium",
+                     "eS26": "gadolinium",
+                     "eS27": "gallium",
+                     "eS28": "germanium",
+                     "eS30": "gold",
+                     "eS31": "hafnium",
+                     }
 
 def build_selection_string( chain_name: str, res_ids: List[int]):
     """pymol command being issued"""
@@ -14,161 +121,27 @@ def build_selection_string( chain_name: str, res_ids: List[int]):
     selection_string += " OR ".join([*map(lambda x: f"resi {x}", res_ids)])
     return selection_name, selection_string
 
-def highlight_ptc(structure: str):
-    structure = structure.upper()
-    ptc_coord_path = os.path.join(
-        RIBETL_DATA,
-        "PTC_COORDINATES",
-        f'{structure}_PTC.json'
-    )
-    with open(ptc_coord_path, 'r') as f:
-        ptc = json.load(f)
-        chain = [*ptc.keys()][0]
-        if chain == None:
-            exit("Could not identify chain")
-
-        for site in ["site_6", "site_8", "site_9"]:
-            name6, selection6 = build_selection_string(
-                site,
-                chain,
-                [*map(lambda truple: truple[0], ptc[chain][site])]
-            )
-
-        name6, selection6 = build_selection_string(
-            "site_6", chain, [*map(lambda truple: truple[0], ptc[chain]["site_6"])])
-        name8, selection8 = build_selection_string(
-            "site_8", chain, [*map(lambda truple: truple[0], ptc[chain]["site_8"])])
-        name9, selection9 = build_selection_string(
-            "site_9", chain, [*map(lambda truple: truple[0], ptc[chain]["site_9"])])
-
-        cmd.create(name6, selection6)
-        cmd.create(name8, selection8)
-        cmd.create(name9, selection9)
-
-        cmd.color("gray60", structure)
-
-        cmd.color("forest", name6)
-        cmd.color("tv_orange", name8)
-        cmd.color("blue", name9)
-
-        cmd.show("surface", name6)
-        cmd.show("surface", name8)
-        cmd.show("surface", name9)
-        # cmd.set("cartoon_transparency", 0.5)
-        cmd.bg_color("white")
-        cmd.reset()
-
-def highlight_ptc_fuzzy(structure: str):
-    """site 9 conserved residues located via fuzzy search"""
-    structure = structure.upper()
-    ptc_fuzzy_coord_path = os.path.join(
-        RIBETL_DATA,
-        "PTC_COORDINATES",
-        f'{structure}_FUZZY_PTC.json'
-    )
-    print(ptc_fuzzy_coord_path)
-    with open(ptc_fuzzy_coord_path, 'r') as f:
-        ptc = json.load(f)
-        chain = [*ptc.keys()][0]
-        if chain == None:
-            exit("Could not identify chain")
-
-        # name6, selection6 = build_selection_string(
-        #     "site_6", chain, ptc[chain]["site_6"])
-        # name8, selection8 = build_selection_string(
-        #     "site_8", chain, ptc[chain]["site_8"])
-        name9, selection9 = build_selection_string("site_9", chain, ptc[chain]["site_9"])
-
-        # cmd.create(name6, selection6)
-        # cmd.create(name8, selection8)
-        cmd.create(name9, selection9)
-
-        cmd.color("gray60", structure)
-
-        # cmd.color("forest", name6)
-        # cmd.color("tv_orange", name8)
-
-        # cmd.show("surface", name6)
-        # cmd.show("surface", name8)
-        # cmd.show("surface", name9)
-        # cmd.show("licorice", name6)
-        # cmd.show("licorice", name8)
-        # cmd.set("cartoon_transparency", 0.5)
-        cmd.bg_color("white")
-        cmd.set("transparency", 0.5)
-
-
-        # SITE_9_OBJ ="site9"
-        # cmd.create(SITE_9_OBJ, name9)
-
-        cmd.show("licorice", name9)
-        cmd.color("blue", name9)
-        # cmd.label(name9, "resi")
-        cmd.set("label_color", "pink")
-        cmd.set("label_size", 5)
-
-
-        cmd.zoom(name9)
-        cmd.reset()
-
-def highlight_ptc_raw(structure: str):
-    structure            = structure.upper()
-    ptc_fuzzy_coord_path = os.path.join(
-        RIBETL_DATA,
-        "PTC_MARKERS_RAW",
-        f'{structure}_PTC_MARKERS_RAW.json'
-    )
-    print(ptc_fuzzy_coord_path)
-    with open(ptc_fuzzy_coord_path, 'r') as f:
-        ptc = json.load(f)
-        chain = [*ptc.keys()][0]
-        if chain == None:
-            exit("Could not identify chain")
-
-        name9, selection9 = build_selection_string(chain, ptc[chain].keys())
-
-        cmd.create(name9, selection9)
-        cmd.color("gray60", structure)
-
-        # cmd.set("cartoon_transparency", 0.5)
-        cmd.bg_color("white")
-        cmd.set("transparency", 0.5)
-
-        cmd.show("licorice", name9)
-        cmd.color("blue", name9)
-        cmd.set("label_color", "pink")
-        cmd.set("label_size", 5)
-
-        cmd.zoom(name9)
-        cmd.reset()
-
 def list_bacteria():
     pprint(os.listdir(f"{RIBETL_DATA}/PTC_COORDINATES"))
 
-def ptc(struct: str):
-    cmd.delete("all")
-    struct = struct.upper()
-    struct_path = os.path.join("/home/rxz/dev/static/{}/{}.cif".format(struct, struct))
-    cmd.load(struct_path)
-    highlight_ptc(struct)
-
 def get_markerspath(struct: str):
+
     struct = struct.upper()
-    _path = os.path.join(RIBETL_DATA, "PTC_MARKERS_RAW", f"{struct}_PTC_MARKERS_RAW.json")
+    _path  = os.path.join(RIBETL_DATA, "PTC_MARKERS_RAW", f"{struct}_PTC_MARKERS_RAW.json")
+
     return _path
 
 def create_marker_at_atom(selection_name:str, posn:List[float], color_:str="red", repr="spheres", label=''):
+
     cmd.pseudoatom(selection_name, pos=posn, vdw=1, color=color_,  label=label)
     cmd.show(repr, selection_name)
 
 def ptc_raw_w_markerks(struct: str):
+
     # cmd.delete("all")
     # struct      = struct.upper()
     # struct_path = os.path.join("/home/rxz/dev/static/{}/{}.cif".format(struct, struct))
-    
     # cmd.load(struct_path)
-
-    highlight_ptc_raw(struct)
 
     with open(get_markerspath(struct), 'r') as infile:
        POSNS:dict = json.load(infile)
@@ -185,21 +158,21 @@ def ptc_raw_w_markerks(struct: str):
         ( U_end_pos[1] + U_start_pos[1] ) / 2,
         ( U_end_pos[2] + U_start_pos[2] ) / 2,
     ]
+
     create_marker_at_atom("uridine_comb_start", U_start_pos, color_="green")
     create_marker_at_atom("uridine_comb_end", U_end_pos, color_="green")
     cmd.distance(None, "uridine_comb_start", "uridine_comb_end", mode=0)
 
     create_marker_at_atom("centroid",midpoint, color_="red")
 
-
 def visualize_obstructions(rcsb_id):
-    ptcres, auth_asym_id = ptc_residues_via_alignment(rcsb_id, 0)
-    midpoint = ptc_midpoint(ptcres, auth_asym_id)
+    ptcres, auth_asym_id = ptc_resdiues_get(rcsb_id, 0)
+    midpoint = ptc_residues_calculate_midpoint(ptcres, auth_asym_id)
     polys,nonpolys = tunnel_obstructions(rcsb_id, midpoint)
 
     cmd.color("white", "all")
 
-    ptc_raw_w_markerks(rcsbuid)
+    ptc_raw_w_markerks(rcsb_id)
 
     for poly in polys:
         cname = "chain_{}".format(poly.auth_asym_id, )
@@ -214,8 +187,58 @@ def visualize_obstructions(rcsb_id):
         cmd.create(resname,  ressele)
         cmd.remove(ressele)
         cmd.color("blue", resname)
-    
-cmd.extend("ptc", ptc)
+
+def struct_paint_chains(pdbid: str):
+    pdbid          = pdbid.upper()
+    RIBETL_DATA    = str(os.environ.get('RIBETL_DATA'))
+    nomenclaturev2 = os.path.join(RIBETL_DATA, pdbid, f"{pdbid}_nomenclaturev2.json")
+    profilepath    = os.path.join(RIBETL_DATA, pdbid, f"{pdbid}.json")
+
+    with open(nomenclaturev2, 'rb') as ninfile:
+        nomenclaturev2 = json.load(ninfile)
+
+    with open(profilepath, 'rb') as infile:
+        profile = json.load(infile)
+
+    if profile['rnas'] != None:
+        for rna in profile['rnas']:
+            # cmd.color('white', f"chain {rna['auth_asym_id']}")
+            cmd.hide('everything', f"chain {rna['auth_asym_id']}")
+            cmd.show('surface', f"chain {rna['auth_asym_id']}")
+            cmd.color('white', f"chain {rna['auth_asym_id']}")
+            cmd.set('transparency', 0.1, f"chain {rna['auth_asym_id']}")
+
+    for protein in profile['proteins']:
+        nomclass = nomenclaturev2[protein['auth_asym_id']]
+
+        if nomclass in colormap__LSU_Proteins:
+            CLR = colormap__LSU_Proteins[nomclass]
+        elif nomclass in colormap__SSU_Proteins:
+            CLR = colormap__SSU_Proteins[nomclass]
+
+        prot_tmp = f"{nomclass}.{protein['auth_asym_id']}"
+
+        cmd.create(prot_tmp, f"chain {protein[ 'auth_asym_id' ]}")
+
+        cmd.remove(f"chain {protein[ 'auth_asym_id' ]} and m. {pdbid}")
+
+        cmd.hide('everything', prot_tmp)
+        cmd.show('surface', prot_tmp)
+        cmd.show('sticks', prot_tmp)
+        cmd.show('cartoon', prot_tmp)
+        cmd.show('lines', prot_tmp)
+        cmd.set('transparency', 0.75, prot_tmp)
+        cmd.color(CLR , prot_tmp)
+
+def sload(pdbid: str):
+    pdbid       = pdbid.upper()
+    RIBETL_DATA = str(os.environ.get('RIBETL_DATA'))
+    path        = os.path.join(RIBETL_DATA, pdbid, f"{pdbid}.cif")
+    cmd.delete('all')
+    cmd.load(path)
+
+cmd.extend("sload", sload)
+cmd.extend("by_chain", struct_paint_chains)
 cmd.extend("ptc_w_markers", ptc_raw_w_markerks)
 cmd.extend("list_bacteria", list_bacteria)
 cmd.extend("tun_obstructions", visualize_obstructions)
