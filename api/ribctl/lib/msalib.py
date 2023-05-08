@@ -164,14 +164,13 @@ def msaclass_extend_temp(prot_class_base:ProteinClass, prot_class_msa:MSA, targe
 
     class_str             = msa_to_fasta_str(prot_class_msa).strip("\n").encode('utf-8')
     target_str            = fasta_from_string(target_fasta, prot_class_base).strip("\n").encode('utf-8')
-    tmp_msaclass_extended = f'msa_ext_{prot_class_base + "_" if len(prot_class_base) == 3 else ""}_with_{target_parent_rcsb_id}.{target_auth_asym_id}.fasta.tmp'
-
+    # tmp_msaclass_extended = f'msa_ext_{prot_class_base + "_" if len(prot_class_base) == 3 else ""}_with_{target_parent_rcsb_id}.{target_auth_asym_id}.fasta.tmp'
+    tmp_msaclass_extended = f'msa_ext_{prot_class_base + "_" if len(prot_class_base) == 3 else ""}_with_{target_parent_rcsb_id}.{target_auth_asym_id}_{abs(hash(random.randbytes(10)))}.fasta.tmp'
     with open(tmp_msaclass_extended, 'wb') as f:
         f.write(class_str)
 
     tmp_seq ='seq_{}.{}.fasta.tmp'.format(target_parent_rcsb_id, target_auth_asym_id)
-
-    if not os.path.exists(tmp_seq):
+    if not os.path.isfile(tmp_seq):
         with open(tmp_seq, 'wb') as f:
             f.write(target_str)
       
