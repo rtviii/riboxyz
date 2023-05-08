@@ -102,7 +102,13 @@ def msadict_get_meta_info(msa:dict[ProteinClass,MSA])->dict[ProteinClass, dict]:
 
     return meta
 
-def msa_profiles_dict_prd()->dict[ProteinClass,MSA ]:
+
+def msa_phylo_nbhd(msa:MSA, phylo_target_taxid:int):
+    msa_taxa   = msa_yield_taxa_only(msa)
+    phylo_nbhd = phylogenetic_neighborhood(msa_taxa, phylo_target_taxid, n_neighbors=10)
+    return msa_pick_taxa(msa, phylo_nbhd) 
+
+def msa_profiles_dict_prd(phylogenetic_correction_taxid:int=-1)->dict[ProteinClass,MSA]:
     MSA_PROFILES_PATH  = '/home/rxz/dev/docker_ribxz/api/ribctl/assets/msa_profiles/'
     msa_dict  = {}
 
@@ -110,17 +116,29 @@ def msa_profiles_dict_prd()->dict[ProteinClass,MSA ]:
     LSU_path = os.path.join(MSA_PROFILES_PATH,"LSU")
     for msafile in os.listdir(LSU_path):
         classname = msafile.split("_")[0]
-        class_msa       = prody.parseMSA(os.path.join(LSU_path, msafile))
-        msa_dict = {f"{classname}": class_msa, **msa_dict}
+        class_msa = prody.parseMSA(os.path.join(LSU_path, msafile))
+
+        if phylogenetic_correction_taxid > 0:
+            class_msa = msa_phylo_nbhd(class_msa, phylogenetic_correction_taxid)
+            msa_dict = {f"{classname}": class_msa, **msa_dict}
+        else:
+            msa_dict = {f"{classname}": class_msa, **msa_dict}
 
     #SSU
     SSU_path = os.path.join(MSA_PROFILES_PATH,"SSU")
     for msafile in os.listdir(SSU_path):
         classname = msafile.split("_")[0]
-        class_msa       = prody.parseMSA(os.path.join(SSU_path, msafile))
-        msa_dict = {f"{classname}": class_msa, **msa_dict}
+        class_msa = prody.parseMSA(os.path.join(SSU_path, msafile))
 
-    return {key: value for key, value in sorted(msa_dict.items())}
+        if phylogenetic_correction_taxid > 0:
+            class_msa = msa_phylo_nbhd(class_msa, phylogenetic_correction_taxid)
+            msa_dict = {f"{classname}": class_msa, **msa_dict}
+        else:
+            msa_dict = {f"{classname}": class_msa, **msa_dict}
+
+    dict_ = {key: value for key, value in sorted(msa_dict.items())}
+
+    return dict_
 
 def msa_profiles_dict()->dict[str, AlignIO.MultipleSeqAlignment]:
     MSA_PROFILES_PATH  = '/home/rxz/dev/docker_ribxz/api/ribctl/assets/msa_profiles/'
@@ -275,6 +293,7 @@ def process_proteovision_alignment(nomclass:ProteinClass):
 
         if msa_main == None:
             raise FileNotFoundError("File not found: {}".format(msa_path))
+
         for seq in msa_main:
             original_label  = seq.getLabel()
             nih_protein_id  = original_label.split('|')[1]
@@ -352,7 +371,7 @@ def msa_pick_taxa(msa: MSA, taxids: list[str])->MSA:
     seqs, labels  = zip(*seqlabel_tups)
     return MSA(seqs, labels=labels)
 
-def phylogenetic_neighborhood(taxids_base: list[str], taxid_target: str, n_neighbors: int = 10)->list[str]:
+def phylogenetic_neighborhood(taxids_base: list[str], taxid_target: int, n_neighbors: int = 10)->list[str]:
     """Given a set of taxids and a target taxid, return a list of the [n_neighbors] phylogenetically closest to the target."""
    
     tree            =  NCBITaxa().get_topology(list(set([*taxids_base, taxid_target])))
