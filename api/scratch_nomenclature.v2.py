@@ -51,9 +51,9 @@ async def seq_H_fit_class_multi(chain: Protein, msa_profiles: dict[ProteinClass,
         print(f"Fitting chain {chain.parent_rcsb_id}.{chain.auth_asym_id} ({CRED + str(chain.nomenclature) + CEND}) of length L={len(chain.entity_poly_seq_one_letter_code_can)}: ")
         for k,v in H_fit.items():
             if k == max_fit_classname:
-                print(f"{CRED}{k}\t(L={len( msa_profiles[k][0] )}):\t{v}{CEND}")
+                print(f"{CRED}{k}\t<{msa_profiles[k].numSequences()} seqs · {len( msa_profiles[k][0])} AAs>:\t{v}{CEND}")
             else:
-                print(f"{k}\t(L={len( msa_profiles[k][0] )}):\t{v}")
+                print(f"{k}\t<{msa_profiles[k].numSequences()} seqs · {len( msa_profiles[k][0])} AAs>:\t{v}")
         print("Picked class {}({} sequences) with fit {}".format(CRED + str( max_fit_classname) + CEND,meta[max_fit_classname]['nseqs'], H_fit[max_fit_classname] ))
     return max_fit_classname, chain
 
@@ -61,7 +61,7 @@ def classify_chain(chain: Protein, vvv=False):
     return seq_H_fit_class_multi(chain, msa_profiles)
 
 async def struct_classify_chains(chains: list[Protein], vvv=False):
-    return await asyncio.gather(*[seq_H_fit_class_multi(chain, msa_profiles) for chain in chains[:5]]) # * <--------
+    return await asyncio.gather(*[seq_H_fit_class_multi(chain, msa_profiles) for chain in chains])
 
 def process_struct(rcsb_id: str):
     R       = RibosomeAssets(rcsb_id.upper())
@@ -86,23 +86,22 @@ def process_struct(rcsb_id: str):
     return total
 
 def nomv2_duplicates():
-    bacterial = filter_by_parent_tax(2)
-    print(bacterial)
     for rcsb_id in os.listdir("./api/ribctl/assets/nomenclaturev2"):
+        with open(os.path.join("./api/ribctl/assets/nomenclaturev2", rcsb_id), 'rb') as f:
+            prof = json.load(f)
 
-        if rcsb_id in bacterial:
-            with open(os.path.join("./api/ribctl/assets/nomenclaturev2", rcsb_id), 'rb') as f:
-                prof = json.load(f)
-            classes = list(prof.values())
-            dup     = {x for x in classes if classes.count(x) > 1}
-            print(rcsb_id, dup)
-        else:
-            print("removing ", os.path.join("./api/ribctl/assets/nomenclaturev2", rcsb_id))
-            os.remove(os.path.join("./api/ribctl/assets/nomenclaturev2", rcsb_id))
+        classes = list(prof.values())
+        dup     = {x for x in classes if classes.count(x) > 1}
+        print(rcsb_id, dup)
+
+        # if rcsb_id in BACTERIAL:
+        # else:
+        #     print("removing ", os.path.join("./api/ribctl/assets/nomenclaturev2", rcsb_id))
+        #     os.remove(os.path.join("./api/ribctl/assets/nomenclaturev2", rcsb_id))
 
 def _generate_nomenclature(struct_id_list:list[str],gen_all:bool=False):
     global counter
-    counter = 0
+    counter               = 0
     assets_nomenclaturev2 = os.path.join(
         "/home/rxz/dev/docker_ribxz/api/ribctl/assets/nomenclaturev2")
     loop = asyncio.get_event_loop()
@@ -112,7 +111,8 @@ def _generate_nomenclature(struct_id_list:list[str],gen_all:bool=False):
         # for struct in os.listdir(RIBETL_DATA):
         for struct in id_list:
 
-            def nomv2_path(structid): return os.path.join(assets_nomenclaturev2, f"{structid.upper()}.json")
+            def nomv2_path(structid): 
+                return os.path.join(assets_nomenclaturev2, f"{structid.upper()}.json")
 
             if len(struct) != 4 or struct == '6OXI':
                 continue
@@ -134,15 +134,19 @@ def _generate_nomenclature(struct_id_list:list[str],gen_all:bool=False):
             x.add_done_callback(save_fut_result(struct))
 
 if __name__ == "__main__":
+    # nomv2_duplicates()
+    # _generate_nomenclature(["7OF4"])
 
     # _generate_nomenclature(BACTERIAL)
-
-    chain, _ = RibosomeAssets('4WRO').get_chain_by_auth_asym_id('4E')
+    # chain, _ = RibosomeAssets('4WRO').get_chain_by_auth_asym_id('4E')
     # chain, _ = RibosomeAssets('4WQU').get_chain_by_auth_asym_id('AL')
-    eloop = asyncio.get_event_loop()
-    eloop.run_until_complete(seq_H_fit_class_multi(chain, msa_profiles, workers=1, vvv=True, omitgaps=False))
 
-    # nomv2_duplicates()
+    # chain, _ = RibosomeAssets('4V87').get_chain_by_auth_asym_id('A3')
+    # chain, _ = RibosomeAssets('4V87').get_chain_by_auth_asym_id('AW')
+    chain, _ = RibosomeAssets('4V87').get_chain_by_auth_asym_id('AZ')
+    eloop = asyncio.get_event_loop()
+    eloop.run_until_complete(seq_H_fit_class_multi(chain, msa_profiles, workers=1, vvv=True, omitgaps=True))
+
    
 
 
@@ -155,65 +159,15 @@ if __name__ == "__main__":
 
 
 
-# -------------------------------------------------------------------------------------
-# loop.run_until_complete(struct_classify_chains(R.profile().proteins, loop, vvv=True))
-# with ProcessPoolExecutor(max_workers=10) as pool:
-#     coroutines = []
-#     loop.run_until_complete(asyncio.gather(*coroutines))
 
-# =============================
+# def old_coverage():
+#     all      = d.items()
+#     percents = [tup[1]['classified']/tup[1]['rna'] for tup in all]
 
-# eloop = asyncio.get_event_loop()
-# x = time.time()
-# for i in range(10):
-#     eloop.run_until_complete(seq_H_fit_class_multi(bl12.entity_poly_seq_one_letter_code_can, msa_profiles))
-# y = time.time()
-# print("Elapsed: {}".format(y-x))
-
-
-# d = classify_chains(R.profile().proteins)
-# pprint(d)
-
-
-# def iter_all_profiles_proteins():
-#     total = {}
-#     for rcsb_id in os.listdir(RIBETL_DATA):
-#         if len( rcsb_id ) != 4 or rcsb_id =='6OXI':
-#             continue
-#         profile = RibosomeAssets(rcsb_id).profile()
-#         total[rcsb_id] = {
-#             'proteins'  : len(profile.proteins),
-#             'classified': 0
-#         }
-#         for protein in profile.proteins:
-#             if len(protein.nomenclature) != 0:
-#                 total[rcsb_id]['classified'] += 1
-#     return total
-
-    #     if len( rcsb_id ) != 4 or rcsb_id =='6OXI':
-    #         continue
-
-    #     profile = RibosomeAssets(rcsb_id).profile()
-    #     if profile.rnas == None:
-    #         continue
-
-    #     total[rcsb_id] = {
-    #         'rna'       : len(profile.rnas),
-    #         'classified': 0
-    #     }
-    #     for rna in profile.rnas:
-    #         if len(rna.nomenclature) != 0:
-    #             total[rcsb_id]['classified'] += 1
-    # return total
-
-
-# all      = d.items()
-# percents = [tup[1]['classified']/tup[1]['rna'] for tup in all]
-
-# print("percentage 33", len(list(filter(lambda x: x < 0.33, percents))))
-# print("percentage 50", len(list(filter(lambda x: x < 0.5, percents))))
-# print("percentage 75", len(list(filter(lambda x: x < 0.75, percents))))
-# print("average cov", sum(percents)/len(percents))
+#     print("percentage 33", len(list(filter(lambda x: x < 0.33, percents))))
+#     print("percentage 50", len(list(filter(lambda x: x < 0.5, percents))))
+#     print("percentage 75", len(list(filter(lambda x: x < 0.75, percents))))
+#     print("average cov", sum(percents)/len(percents))
 
 # TODO: v0 Coverage  for all structs
 # TODO: v1 Coverage  for all structs
