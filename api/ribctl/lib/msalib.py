@@ -91,7 +91,7 @@ def infer_subunit(protein_class:ProteinClass):
     else:
         raise ValueError("Unknown protein class: {}".format(protein_class))
 
-def msadict_get_meta_info(msa:dict[ProteinClass,MSA])->dict:
+def msadict_get_meta_info(msa:dict[ProteinClass,MSA])->dict[ProteinClass, dict]:
     """given a dict of protclass<->msa mapping, yield number of sequeces and organisms contained in each class msa."""
     meta ={}
     for k,v in msa.items():
@@ -164,16 +164,15 @@ def msaclass_extend_temp(prot_class_base:ProteinClass, prot_class_msa:MSA, targe
 
     class_str             = msa_to_fasta_str(prot_class_msa).strip("\n").encode('utf-8')
     target_str            = fasta_from_string(target_fasta, prot_class_base).strip("\n").encode('utf-8')
-    # tmp_msaclass_extended = f'msa_ext_{prot_class_base + "_" if len(prot_class_base) == 3 else ""}_with_{target_parent_rcsb_id}.{target_auth_asym_id}.fasta.tmp'
+
     tmp_msaclass_extended = f'msa_ext_{prot_class_base + "_" if len(prot_class_base) == 3 else ""}_with_{target_parent_rcsb_id}.{target_auth_asym_id}_{abs(hash(random.randbytes(10)))}.fasta.tmp'
     with open(tmp_msaclass_extended, 'wb') as f:
         f.write(class_str)
 
     tmp_seq ='seq_{}.{}.fasta.tmp'.format(target_parent_rcsb_id, target_auth_asym_id)
-    if not os.path.isfile(tmp_seq):
+    if not os.path.exists(tmp_seq):
         with open(tmp_seq, 'wb') as f:
             f.write(target_str)
-      
 
     cmd = [
         '/home/rxz/dev/docker_ribxz/api/ribctl/muscle3.8',
@@ -181,7 +180,7 @@ def msaclass_extend_temp(prot_class_base:ProteinClass, prot_class_msa:MSA, targe
         '-in1',
         tmp_msaclass_extended,
         '-in2',
-        tmp_seq,
+        '-',
         '-quiet']
 
     process = subprocess.Popen(cmd,
@@ -189,12 +188,11 @@ def msaclass_extend_temp(prot_class_base:ProteinClass, prot_class_msa:MSA, targe
                                stdin  = subprocess.PIPE,
                                stderr = subprocess.PIPE, env = os.environ.copy())
 
-    stdout, stderr = process.communicate()
+    stdout, stderr = process.communicate(input=target_str)
     out   ,err     = stdout.decode(), stderr.decode()
     process.wait()
 
     os.remove(tmp_msaclass_extended)
-    # os.remove(tmp_seq)
 
     msafile      = MSAFile(StringIO(out), format="fasta")
     seqs, descs  =  zip(*msafile._iterFasta())
