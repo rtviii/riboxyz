@@ -4,11 +4,12 @@ import multiprocessing
 from concurrent.futures import Future
 from concurrent.futures import ALL_COMPLETED, ProcessPoolExecutor, ThreadPoolExecutor, wait
 import os
+from pprint import pprint
 from prody import MSA, calcShannonEntropy
 from api.rbxz_bend.settings import RIBETL_DATA
 from api.ribctl.etl.ribosome_assets import RibosomeAssets
 from api.ribctl.lib.types.types_ribosome import  Protein, ProteinClass
-from api.ribctl.lib.msalib import  msa_profiles_dict_prd, msaclass_extend, msaclass_extend_temp
+from api.ribctl.lib.msalib import  msadict_get_meta_info, msa_profiles_dict_prd, msaclass_extend, msaclass_extend_temp
 from api.ribctl.taxonomy import filter_by_parent_tax
 
 msa_profiles: dict[ProteinClass, MSA] = msa_profiles_dict_prd()
@@ -19,8 +20,9 @@ def seq_H_fit_class(base_class: ProteinClass, base_class_msa: MSA, target_fasta:
     H_original     = sum(calcShannonEntropy(base_class_msa))
     H_extended     = sum(calcShannonEntropy(extended_class))
     H_delta        = H_extended - H_original
-    return {base_class: H_delta}
+    # pprint("{} class has {} sequences".format(base_class,base_class_msa.numSequences()))
 
+    return {base_class: H_delta}
 
 async def seq_H_fit_class_multi(chain: Protein, msa_profiles: dict[ProteinClass, MSA], workers=None) -> tuple[ProteinClass, Protein]:
     with ThreadPoolExecutor(max_workers=multiprocessing.cpu_count() if workers is None else workers) as executor:
@@ -31,7 +33,7 @@ async def seq_H_fit_class_multi(chain: Protein, msa_profiles: dict[ProteinClass,
 
     wait(futures, return_when=ALL_COMPLETED)
 
-    print("Fit chain {}.{} to class {}".format(chain.parent_rcsb_id, chain.auth_asym_id))
+    print("Fit chain {}.{}:".format(chain.parent_rcsb_id, chain.auth_asym_id))
     H_fit: dict[ProteinClass, float] = {}
     for f in futures:
         if f.exception() is not None:
@@ -39,9 +41,11 @@ async def seq_H_fit_class_multi(chain: Protein, msa_profiles: dict[ProteinClass,
         else:
             H_fit.update(f.result())
 
-    max_fit = min(H_fit, key=H_fit.get)
-    return max_fit, chain
 
+    max_fit = min(H_fit, key=H_fit.get)
+    # pprint(H_fit)
+    print("Picked class {}({} sequences) with fit {}".format(max_fit, H_fit[max_fit]))
+    return max_fit, chain
 
 def classify_chain(chain: Protein, vvv=False):
     return seq_H_fit_class_multi(chain, msa_profiles)
@@ -72,25 +76,31 @@ def process_struct(rcsb_id: str):
     return total
 
 
+def nomv2_duplicates():
+    for rcsb_id in os.listdir("./api/ribctl/assets/nomenclaturev2"):
+        with open(os.path.join("./api/ribctl/assets/nomenclaturev2", rcsb_id), 'rb') as f:
+            prof = json.load(f)
 
+        classes = list(prof.values())
+        dup     = {x for x in classes if classes.count(x) > 1}
+
+        print(rcsb_id, dup)
 
 def ____generate_nomenclature():
     global counter
     counter = 0
-
-    assets_nomenclaturev2 = os.path.join(
-        "/home/rxz/dev/docker_ribxz/api/ribctl/assets/nomenclaturev2")
-
+    assets_nomenclaturev2 = os.path.join("/home/rxz/dev/docker_ribxz/api/ribctl/assets/nomenclaturev2")
     loop = asyncio.get_event_loop()
     with ProcessPoolExecutor(max_workers=10) as pool:
-        for struct in filter_by_parent_tax(2):
+        # for struct in filter_by_parent_tax(2):
+        for struct in ['7OF4']:
 
             def nomv2_path(structid): return os.path.join(
                 assets_nomenclaturev2, f"{structid.upper()}.json")
 
-            if os.path.exists(nomv2_path(struct)):
-                print("Skipping {}".format(struct))
-                continue
+            # if os.path.exists(nomv2_path(struct)):
+            #     print("Skipping {}".format(struct))
+            #     continue
 
             if len(struct) != 4 or struct == '6OXI':
                 continue
@@ -109,6 +119,11 @@ def ____generate_nomenclature():
                 return _
 
             x.add_done_callback(save_fut_result(struct))
+
+
+if __name__ == "__main__":
+    ____generate_nomenclature()
+
 
 #-------------------------------------------------------------------------------------
 # loop.run_until_complete(struct_classify_chains(R.profile().proteins, loop, vvv=True))
@@ -145,16 +160,6 @@ def ____generate_nomenclature():
 #                 total[rcsb_id]['classified'] += 1
 #     return total
 
-def nomv2_duplicates():
-    total = {}
-    for rcsb_id in os.listdir("./api/ribctl/assets/nomenclaturev2"):
-        with open(os.path.join("./api/ribctl/assets/nomenclaturev2", rcsb_id), 'rb') as f:
-            prof = json.load(f)
-
-        classes = list(prof.values())
-        dup     = {x for x in classes if classes.count(x) > 1}
-
-        print(rcsb_id, dup)
     #     if len( rcsb_id ) != 4 or rcsb_id =='6OXI':
     #         continue
 
@@ -172,8 +177,6 @@ def nomv2_duplicates():
     # return total
 
 
-if __name__ == "__main__":
-    process_struct("7OF4")
 
 # all      = d.items()
 # percents = [tup[1]['classified']/tup[1]['rna'] for tup in all]
