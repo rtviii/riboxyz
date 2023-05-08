@@ -28,12 +28,12 @@ def seq_H_fit_class(base_class: ProteinClass, base_class_msa: MSA, target_fasta:
     return {base_class: H_delta}
 
 async def seq_H_fit_class_multi(chain: Protein, msa_profiles: dict[ProteinClass, MSA], workers=None,omitgaps:bool=False, vvv:bool=False) -> tuple[ProteinClass, Protein]:
-    with ThreadPoolExecutor(max_workers=multiprocessing.cpu_count() if workers is None else workers) as executor:
+
+    with ThreadPoolExecutor(max_workers=min(multiprocessing.cpu_count(), len(msa_profiles)) if workers is None else workers) as executor:
         futures = []
         for class_name, base_msa in msa_profiles.items():
             fut = executor.submit(seq_H_fit_class, class_name, base_msa,chain.entity_poly_seq_one_letter_code_can, chain.auth_asym_id, chain.parent_rcsb_id, omitgaps)
             futures.append(fut)
-
     wait(futures, return_when=ALL_COMPLETED)
 
     H_fit: dict[ProteinClass, float] = {}
@@ -135,10 +135,7 @@ def _generate_nomenclature(struct_id_list:list[str],gen_all:bool=False):
 if __name__ == "__main__":
     
     ...
-    chain, _ = RibosomeAssets('4V87').get_chain_by_auth_asym_id('AZ')
-    print(RibosomeAssets('4V87').profile().src_organism_ids)
 
-    msa_profiles: dict[ProteinClass, MSA] = msa_profiles_dict_prd(phylogenetic_correction_taxid=str(300852))
     # msa_profiles: dict[ProteinClass, MSA] = msa_profiles_dict_prd()
 
     # nomv2_duplicates()
@@ -150,7 +147,10 @@ if __name__ == "__main__":
 
     # chain, _ = RibosomeAssets('4V87').get_chain_by_auth_asym_id('A3')
     # chain, _ = RibosomeAssets('4V87').get_chain_by_auth_asym_id('AW')
+    chain, _ = RibosomeAssets('4V87').get_chain_by_auth_asym_id('AZ')
+    # print(RibosomeAssets('4V87').profile().src_organism_ids)
 
+    msa_profiles: dict[ProteinClass, MSA] = msa_profiles_dict_prd(phylogenetic_correction_taxid=str(300852))
 
     eloop = asyncio.get_event_loop()
     eloop.run_until_complete(seq_H_fit_class_multi(chain, msa_profiles, workers=1, vvv=True, omitgaps=True))

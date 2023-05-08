@@ -104,10 +104,7 @@ def msadict_get_meta_info(msa:dict[ProteinClass,MSA])->dict[ProteinClass, dict]:
 
 
 def msa_phylo_nbhd(msa:MSA, phylo_target_taxid:int):
-    print("phylo_target_taxid: ", phylo_target_taxid)
-
     msa_taxa   = msa_yield_taxa_only(msa)
-    print("got msa taxa: ", msa_taxa)
     phylo_nbhd = phylogenetic_neighborhood(msa_taxa, phylo_target_taxid, n_neighbors=10)
     return msa_pick_taxa(msa, phylo_nbhd) 
 
