@@ -104,11 +104,14 @@ def msadict_get_meta_info(msa:dict[ProteinClass,MSA])->dict[ProteinClass, dict]:
 
 
 def msa_phylo_nbhd(msa:MSA, phylo_target_taxid:int):
+    print("phylo_target_taxid: ", phylo_target_taxid)
+
     msa_taxa   = msa_yield_taxa_only(msa)
+    print("got msa taxa: ", msa_taxa)
     phylo_nbhd = phylogenetic_neighborhood(msa_taxa, phylo_target_taxid, n_neighbors=10)
     return msa_pick_taxa(msa, phylo_nbhd) 
 
-def msa_profiles_dict_prd(phylogenetic_correction_taxid:int=-1)->dict[ProteinClass,MSA]:
+def msa_profiles_dict_prd(phylogenetic_correction_taxid:str='')->dict[ProteinClass,MSA]:
     MSA_PROFILES_PATH  = '/home/rxz/dev/docker_ribxz/api/ribctl/assets/msa_profiles/'
     msa_dict  = {}
 
@@ -118,7 +121,8 @@ def msa_profiles_dict_prd(phylogenetic_correction_taxid:int=-1)->dict[ProteinCla
         classname = msafile.split("_")[0]
         class_msa = prody.parseMSA(os.path.join(LSU_path, msafile))
 
-        if phylogenetic_correction_taxid > 0:
+        print("Chekcing class", classname)
+        if phylogenetic_correction_taxid !='':
             class_msa = msa_phylo_nbhd(class_msa, phylogenetic_correction_taxid)
             msa_dict = {f"{classname}": class_msa, **msa_dict}
         else:
@@ -130,7 +134,8 @@ def msa_profiles_dict_prd(phylogenetic_correction_taxid:int=-1)->dict[ProteinCla
         classname = msafile.split("_")[0]
         class_msa = prody.parseMSA(os.path.join(SSU_path, msafile))
 
-        if phylogenetic_correction_taxid > 0:
+        print("Chekcing class", classname)
+        if phylogenetic_correction_taxid !='':
             class_msa = msa_phylo_nbhd(class_msa, phylogenetic_correction_taxid)
             msa_dict = {f"{classname}": class_msa, **msa_dict}
         else:
@@ -371,7 +376,7 @@ def msa_pick_taxa(msa: MSA, taxids: list[str])->MSA:
     seqs, labels  = zip(*seqlabel_tups)
     return MSA(seqs, labels=labels)
 
-def phylogenetic_neighborhood(taxids_base: list[str], taxid_target: int, n_neighbors: int = 10)->list[str]:
+def phylogenetic_neighborhood(taxids_base: list[str], taxid_target: str, n_neighbors: int = 10)->list[str]:
     """Given a set of taxids and a target taxid, return a list of the [n_neighbors] phylogenetically closest to the target."""
    
     tree            =  NCBITaxa().get_topology(list(set([*taxids_base, taxid_target])))
