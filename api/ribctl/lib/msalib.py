@@ -120,8 +120,7 @@ def msa_profiles_dict_prd()->dict[ProteinClass,MSA ]:
         class_msa       = prody.parseMSA(os.path.join(SSU_path, msafile))
         msa_dict = {f"{classname}": class_msa, **msa_dict}
 
-
-    return msa_dict
+    return {key: value for key, value in sorted(msa_dict.items())}
 
 def msa_profiles_dict()->dict[str, AlignIO.MultipleSeqAlignment]:
     MSA_PROFILES_PATH  = '/home/rxz/dev/docker_ribxz/api/ribctl/assets/msa_profiles/'
