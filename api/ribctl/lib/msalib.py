@@ -1,4 +1,5 @@
 from io import StringIO
+import pickle
 from typing_extensions import Unpack
 import os
 import random
@@ -29,6 +30,8 @@ TAXID_EUKARYA           = 2759
 TAXID_ARCHEA            = 2157
 PROTEOVISION_URL        = lambda SU, _class, taxids: "https://ribovision3.chemistry.gatech.edu/showAlignment/{}/{}/{}".format(SU,_class,taxids)
 PROTEOVISION_MSA_FOLDER = '/home/rxz/dev/docker_ribxz/api/ribctl/__wip/data/msa_classes_proteovision/'
+RP_MSAS_PATH            = '/home/rxz/dev/docker_ribxz/api/ribctl/assets/rp_class_msas/'
+RP_MSAS_PRUNED_PATH     = "/home/rxz/dev/docker_ribxz/api/ribctl/assets/rp_class_msas_pruned/"
 
 #! util
 def util__backwards_match(alntgt: str, aln_resid: int, verbose: bool = False) -> typing.Tuple[int, str, int]:
@@ -92,7 +95,7 @@ def infer_subunit(protein_class:ProteinClass):
     else:
         raise ValueError("Unknown protein class: {}".format(protein_class))
 
-def msadict_get_meta_info(msa:dict[ProteinClass,MSA])->dict[ProteinClass, dict]:
+def msa_dict_get_meta_info(msa:dict[ProteinClass,MSA])->dict[ProteinClass, dict]:
     """given a dict of protclass<->msa mapping, yield number of sequeces and organisms contained in each class msa."""
     meta ={}
     for k,v in msa.items():
@@ -103,50 +106,49 @@ def msadict_get_meta_info(msa:dict[ProteinClass,MSA])->dict[ProteinClass, dict]:
 
     return meta
 
-def msa_phylo_nbhd(msa:MSA, phylo_target_taxid:int):
+def msa_phylo_nbhd(msa:MSA, phylo_target_taxid:int, n_neighbors:int=10)->MSA:
     msa_taxa   = msa_yield_taxa_only(msa)
-    phylo_nbhd = phylogenetic_neighborhood(msa_taxa, phylo_target_taxid, n_neighbors=10)
+    phylo_nbhd = phylogenetic_neighborhood(msa_taxa, phylo_target_taxid, n_neighbors)
     return msa_pick_taxa(msa, phylo_nbhd) 
 
-def msa_profiles_dict_prd(phylogenetic_correction_taxid:str='', include_only_classes:list[ProteinClass]=[])->dict[ProteinClass,MSA]: 
+def msa_dict_cache_tax_pruned_( taxid:int,_:dict):
+    dictpath =os.path.join(RP_MSAS_PRUNED_PATH, f"{taxid}.pickle")
+    if os.path.exists(dictpath):
+        return 
+    else:
+        with open(dictpath, 'wb') as outfile:
+            pickle.dump(_, outfile, protocol=pickle.HIGHEST_PROTOCOL)
 
-    MSA_PROFILES_PATH = '/home/rxz/dev/docker_ribxz/api/ribctl/assets/msa_profiles/'
-    msa_dict          = {}
+def msa_dict_load_tax_pruned(taxid:int)->dict[ProteinClass,MSA]:
+    dictpath = os.path.join(RP_MSAS_PRUNED_PATH, f"{taxid}.pickle")
+    if not os.path.exists(dictpath):
+        raise FileNotFoundError(f"MSA dict for {taxid} not found")
+    else:
+        with open(dictpath, 'rb') as handle:
+            return pickle.load(handle)
 
-    # LSU
-    LSU_path = os.path.join(MSA_PROFILES_PATH,"LSU")
-    for msafile in os.listdir(LSU_path):
-        classname = msafile.split("_")[0]
-        if len(include_only_classes) > 0 and classname not in include_only_classes:
-            continue
-
-        class_msa = prody.parseMSA(os.path.join(LSU_path, msafile))
-
-        if phylogenetic_correction_taxid !='':
-            class_msa = msa_phylo_nbhd(class_msa, phylogenetic_correction_taxid)
-            msa_dict = {f"{classname}": class_msa, **msa_dict}
-
-        else:
-            msa_dict = {f"{classname}": class_msa, **msa_dict}
-
-    #SSU
-    SSU_path = os.path.join(MSA_PROFILES_PATH,"SSU")
-    for msafile in os.listdir(SSU_path):
-        classname = msafile.split("_")[0]
-
-        if len(include_only_classes) > 0 and classname not in include_only_classes:
-            continue
-        class_msa = prody.parseMSA(os.path.join(SSU_path, msafile))
-
-        if phylogenetic_correction_taxid !='':
-            class_msa = msa_phylo_nbhd(class_msa, phylogenetic_correction_taxid)
-            msa_dict = {f"{classname}": class_msa, **msa_dict}
-        else:
-            msa_dict = {f"{classname}": class_msa, **msa_dict}
-
-    dict_ = {key: value for key, value in sorted(msa_dict.items())}
-
-    return dict_
+def msa_profiles_dict_prd(phylogenetic_correction_taxid:int=-1, include_only_classes:list[ProteinClass]=[])->dict[ProteinClass,MSA]: 
+    if phylogenetic_correction_taxid > 0:
+        try:
+            pruned_dict = msa_dict_load_tax_pruned(phylogenetic_correction_taxid)
+            return {key: value for key, value in sorted(pruned_dict.items())}
+        except:
+            pruned_dict          = {}
+            for msafile in os.listdir(RP_MSAS_PATH):
+                classname  = msafile.split("_")[0]
+                msa        = prody.parseMSA(os.path.join(RP_MSAS_PATH, msafile))
+                msa_pruned = msa_phylo_nbhd(msa, phylogenetic_correction_taxid)
+                pruned_dict = {f"{classname}": msa_pruned, **pruned_dict}
+            msa_dict_cache_tax_pruned_(phylogenetic_correction_taxid, pruned_dict)
+            return {key: value for key, value in sorted(pruned_dict.items())}
+            
+    else:
+        msa_dict          = {}
+        for msafile in os.listdir(RP_MSAS_PATH):
+            classname = msafile.split("_")[0]
+            msa        = prody.parseMSA(os.path.join(RP_MSAS_PATH, msafile))
+            msa_dict = {f"{classname}": msa, **msa_dict}
+        return {key: value for key, value in sorted(msa_dict.items())}
 
 def msa_profiles_dict()->dict[str, AlignIO.MultipleSeqAlignment]:
     MSA_PROFILES_PATH  = '/home/rxz/dev/docker_ribxz/api/ribctl/assets/msa_profiles/'
@@ -382,8 +384,8 @@ def msa_pick_taxa(msa: MSA, taxids: list[str])->MSA:
 def phylogenetic_neighborhood(taxids_base: list[str], taxid_target: str, n_neighbors: int = 10)->list[str]:
     """Given a set of taxids and a target taxid, return a list of the [n_neighbors] phylogenetically closest to the target."""
    
-    tree            =  NCBITaxa().get_topology(list(set([*taxids_base, taxid_target])))
-    target_node     = tree.search_nodes(name=taxid_target)[0]
+    tree            =  NCBITaxa().get_topology(list(set([*taxids_base, str( taxid_target )])))
+    target_node     = tree.search_nodes(name=str(taxid_target))[0]
     phylo_all_nodes = [
         (node.name, tree.get_distance(target_node, node))
         for node in tree.traverse()]
@@ -403,5 +405,4 @@ def phylogenetic_neighborhood(taxids_base: list[str], taxid_target: str, n_neigh
 
 def msa_yield_taxa_only(msa: MSA)->list[str]:
     """collect all organism taxids present in a given prody.msa"""
-
     return [get_taxid_fastalabel(p.getLabel()) for p in msa]
