@@ -108,7 +108,7 @@ def msa_dict_get_meta_info(msa:dict[ProteinClass,MSA])->dict[ProteinClass, dict]
 
 def msa_phylo_nbhd(msa:MSA, phylo_target_taxid:int, n_neighbors:int=10)->MSA:
     msa_taxa   = msa_yield_taxa_only(msa)
-    phylo_nbhd = phylogenetic_neighborhood(msa_taxa, phylo_target_taxid, n_neighbors)
+    phylo_nbhd = phylogenetic_neighborhood(msa_taxa, str(phylo_target_taxid), n_neighbors)
     return msa_pick_taxa(msa, phylo_nbhd) 
 
 def msa_dict_cache_tax_pruned_( taxid:int,_:dict):
