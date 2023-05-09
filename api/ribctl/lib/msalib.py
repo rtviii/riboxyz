@@ -1,4 +1,5 @@
 from io import StringIO
+from typing_extensions import Unpack
 import os
 import random
 import typing
@@ -102,26 +103,29 @@ def msadict_get_meta_info(msa:dict[ProteinClass,MSA])->dict[ProteinClass, dict]:
 
     return meta
 
-
 def msa_phylo_nbhd(msa:MSA, phylo_target_taxid:int):
     msa_taxa   = msa_yield_taxa_only(msa)
     phylo_nbhd = phylogenetic_neighborhood(msa_taxa, phylo_target_taxid, n_neighbors=10)
     return msa_pick_taxa(msa, phylo_nbhd) 
 
-def msa_profiles_dict_prd(phylogenetic_correction_taxid:str='')->dict[ProteinClass,MSA]:
-    MSA_PROFILES_PATH  = '/home/rxz/dev/docker_ribxz/api/ribctl/assets/msa_profiles/'
-    msa_dict  = {}
+def msa_profiles_dict_prd(phylogenetic_correction_taxid:str='', include_only_classes:list[ProteinClass]=[])->dict[ProteinClass,MSA]: 
+
+    MSA_PROFILES_PATH = '/home/rxz/dev/docker_ribxz/api/ribctl/assets/msa_profiles/'
+    msa_dict          = {}
 
     # LSU
     LSU_path = os.path.join(MSA_PROFILES_PATH,"LSU")
     for msafile in os.listdir(LSU_path):
         classname = msafile.split("_")[0]
+        if len(include_only_classes) > 0 and classname not in include_only_classes:
+            continue
+
         class_msa = prody.parseMSA(os.path.join(LSU_path, msafile))
 
-        print("Chekcing class", classname)
         if phylogenetic_correction_taxid !='':
             class_msa = msa_phylo_nbhd(class_msa, phylogenetic_correction_taxid)
             msa_dict = {f"{classname}": class_msa, **msa_dict}
+
         else:
             msa_dict = {f"{classname}": class_msa, **msa_dict}
 
@@ -129,9 +133,11 @@ def msa_profiles_dict_prd(phylogenetic_correction_taxid:str='')->dict[ProteinCla
     SSU_path = os.path.join(MSA_PROFILES_PATH,"SSU")
     for msafile in os.listdir(SSU_path):
         classname = msafile.split("_")[0]
+
+        if len(include_only_classes) > 0 and classname not in include_only_classes:
+            continue
         class_msa = prody.parseMSA(os.path.join(SSU_path, msafile))
 
-        print("Chekcing class", classname)
         if phylogenetic_correction_taxid !='':
             class_msa = msa_phylo_nbhd(class_msa, phylogenetic_correction_taxid)
             msa_dict = {f"{classname}": class_msa, **msa_dict}
