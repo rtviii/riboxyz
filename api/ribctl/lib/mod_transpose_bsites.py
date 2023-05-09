@@ -114,7 +114,8 @@ def open_bsite(path:str)->BindingSite:
 		data = json.load(infile)
 	return BindingSite.parse_obj(data)
 	
-def init_transpose_ligand( # source_struct: str,
+def init_transpose_ligand( 
+	# source_struct: str,
 	# target_struct: str,
 	target_profile:RibosomeStructure,
 	binding_site : BindingSite
