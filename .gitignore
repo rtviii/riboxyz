@@ -25,3 +25,6 @@ local_venv
 
 **/*.log
 *.log
+
+**/*.pickle
+*.pickle
