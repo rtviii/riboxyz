@@ -150,25 +150,6 @@ def msa_profiles_dict_prd(phylogenetic_correction_taxid:int=-1, include_only_cla
             msa_dict = {f"{classname}": msa, **msa_dict}
         return {key: value for key, value in sorted(msa_dict.items())}
 
-def msa_profiles_dict()->dict[str, AlignIO.MultipleSeqAlignment]:
-    MSA_PROFILES_PATH  = '/home/rxz/dev/docker_ribxz/api/ribctl/assets/msa_profiles/'
-    msa_dict  = {}
-
-    # LSU
-    LSU_path = os.path.join(MSA_PROFILES_PATH,"LSU")
-    for msafile in os.listdir(LSU_path):
-        classname = msafile.split("_")[0]
-        class_msa       = AlignIO.read(os.path.join(LSU_path, msafile), "fasta")
-        msa_dict = {f"{classname}": class_msa, **msa_dict}
-
-    #SSU
-    SSU_path = os.path.join(MSA_PROFILES_PATH,"SSU")
-    for msafile in os.listdir(SSU_path):
-        classname = msafile.split("_")[0]
-        class_msa       = AlignIO.read(os.path.join(SSU_path, msafile), "fasta")
-        msa_dict = {f"{classname}": class_msa, **msa_dict}
-    return msa_dict
-
 def fasta_from_string(seq:str, description:str=""):
     seq_record             = SeqRecord.SeqRecord(Seq(seq).upper())
     seq_record.id          = description
@@ -230,49 +211,6 @@ def msaclass_extend_temp(prot_class_base:ProteinClass, prot_class_msa:MSA, targe
 
     return MSA(chararr, labels=descriptions, title="Class {} profile extended.".format( prot_class_base))
 
-def msaclass_extend(poly_class:ProteinClass, poly_class_msa:MSA, fasta_target:str)->MSA:
-
-    class_str  = msa_to_fasta_str(poly_class_msa).strip("\n").encode('utf-8')
-    target_str = fasta_from_string(fasta_target, poly_class).strip("\n").encode('utf-8')
-
-    tmp_msaclass = '{}.fasta.tmp'.format(abs(hash(random.randbytes(10))))
-    with open(tmp_msaclass, 'wb') as f:
-        f.write(class_str)
-
-    tmp_seq ='{}.fasta.tmp'.format(abs(hash(random.randbytes(10))))
-    with open(tmp_seq, 'wb') as f:
-        f.write(target_str)
-
-    cmd = [
-        '/home/rxz/dev/docker_ribxz/api/ribctl/muscle3.8',
-        '-profile',
-        '-in1',
-        tmp_msaclass,
-        '-in2',
-        tmp_seq,
-        '-quiet']
-
-    process = subprocess.Popen(cmd,
-                               stdout = subprocess.PIPE,
-                               stdin  = subprocess.PIPE,
-                               stderr = subprocess.PIPE, env = os.environ.copy())
-
-    stdout, stderr = process.communicate()
-    out   ,err     = stdout.decode(), stderr.decode()
-    process.wait()
-    os.remove(tmp_msaclass)
-    os.remove(tmp_seq)
-
-    msafile      = MSAFile(StringIO(out), format="fasta")
-    seqs, descs  =  zip(*msafile._iterFasta())
-
-    sequences    = [*map(lambda x : np.fromstring(x,dtype='S1'),seqs)]
-    descriptions = [*descs]
-    chararr      = np.array(sequences).reshape(len(sequences), len(sequences[0]))
-
-
-    return MSA(chararr, labels=descriptions, title="Class {} profile extended.".format( poly_class))
-
 def msa_class_proteovision_path(prot_class:ProteinClass):
     def infer_subunit(protein_class:ProteinClass):
         if protein_class in list_LSUProteinClass:
@@ -289,6 +227,7 @@ def msa_class_proteovision_path(prot_class:ProteinClass):
         )
     assert os.path.exists(path), "File not found: {}".format(path)
     return path
+
 
 """download + tax-identify a protein class sequence from proteovision"""
 def process_proteovision_alignment(nomclass:ProteinClass):
