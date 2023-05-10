@@ -3,6 +3,11 @@
 - [x] separate assemblies
 - [x] split ligand classes into instances 
 - [ ] fit ligand parsing, transposition and fileformats to the new "polymeric factors" schema
+- [ ] rewrite taxonomy inference:
+    - src ids and host ids separately
+    - do toplevel struct even have a src_id in PDB?????
+    - use "taxonomy.tax_infer_by_proportions" for a first-hand notion of what the structure is (add a new field ot the schema)
+
 
 - [ ] flash out the taxonomy : [src + host] [nodes in the db, hierarchy in the app(pull in the lib, construct dynamically on app start from assets)]
 

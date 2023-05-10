@@ -55,7 +55,6 @@ class RibosomeAssets():
         with open(PTC_RESIDUES_PATH, 'r') as infile:
             return json.load(infile)
 
-
     def _nomenclature_v2(self)->dict[str,ProteinClass]:
         if os.path.isfile(os.path.join(self._dir_path(), f"{self.rcsb_id}_nomenclaturev2.json")):
             with open(os.path.join(self._dir_path(), f"{self.rcsb_id}_nomenclaturev2.json"), 'r') as infile:
@@ -111,7 +110,6 @@ class RibosomeAssets():
                 if poly_class in polyf.nomenclature and polyf.assembly_id == assembly:
                     return polyf
         return None
-
 
     def get_chain_by_auth_asym_id(self, auth_asym_id: str) -> tuple[
         RNA | Protein | PolymericFactor | None,
