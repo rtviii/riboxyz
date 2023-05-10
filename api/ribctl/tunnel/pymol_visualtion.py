@@ -191,7 +191,7 @@ def visualize_obstructions(rcsb_id):
 def struct_paint_chains(pdbid: str):
     pdbid          = pdbid.upper()
     RIBETL_DATA    = str(os.environ.get('RIBETL_DATA'))
-    nomenclaturev2 = os.path.join(RIBETL_DATA, pdbid, f"{pdbid}_nomenclaturev2.json")
+    nomenclaturev2 = os.path.join("/home/rxz/dev/docker_ribxz/api/ribctl/assets/nomenclaturev2", f"{pdbid.upper()}.json")
     profilepath    = os.path.join(RIBETL_DATA, pdbid, f"{pdbid}.json")
 
     with open(nomenclaturev2, 'rb') as ninfile:
@@ -204,15 +204,18 @@ def struct_paint_chains(pdbid: str):
         for rna in profile['rnas']:
             # cmd.color('white', f"chain {rna['auth_asym_id']}")
             cmd.hide('everything', f"chain {rna['auth_asym_id']}")
-            cmd.show('surface', f"chain {rna['auth_asym_id']}")
+            # cmd.show('surface', f"chain {rna['auth_asym_id']}")
+            cmd.show('cartoon', f"chain {rna['auth_asym_id']}")
             cmd.color('white', f"chain {rna['auth_asym_id']}")
-            cmd.set('transparency', 0.1, f"chain {rna['auth_asym_id']}")
+            # cmd.set('transparency', 0.1, f"chain {rna['auth_asym_id']}")
+            cmd.set('cartoon_transparency', 0.4, f"chain {rna['auth_asym_id']}")
 
     for protein in profile['proteins']:
         nomclass = nomenclaturev2[protein['auth_asym_id']]
 
         if nomclass in colormap__LSU_Proteins:
             CLR = colormap__LSU_Proteins[nomclass]
+
         elif nomclass in colormap__SSU_Proteins:
             CLR = colormap__SSU_Proteins[nomclass]
 

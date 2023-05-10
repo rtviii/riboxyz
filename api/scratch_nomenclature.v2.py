@@ -9,7 +9,7 @@ from pprint import pprint
 from prody import MSA, calcShannonEntropy
 from api.rbxz_bend.settings import RIBETL_DATA
 from api.ribctl.etl.ribosome_assets import RibosomeAssets
-from api.ribctl.lib.types.types_ribosome import Protein, ProteinClass
+from api.ribctl.lib.types.types_ribosome import Protein, ProteinClass, RibosomeStructure
 from api.ribctl.lib.msalib import msa_dict_get_meta_info, msa_profiles_dict_prd, msaclass_extend, msaclass_extend_temp
 from api.ribctl.taxonomy import filter_by_parent_tax
 
@@ -41,7 +41,6 @@ def seq_H_fit_class(base_class: ProteinClass, base_class_msa: MSA, target_fasta:
     H_extended = sum(calcShannonEntropy(extended_class, omitgaps=omitgaps))
     H_delta = H_extended - H_original
     return {base_class: H_delta}
-
 
 async def seq_H_fit_class_multi(chain: Protein, msa_profiles_dict: dict[ProteinClass, MSA], workers=None, omitgaps: bool = False, vvv: bool = False) -> tuple[ProteinClass, Protein]:
 
@@ -78,7 +77,6 @@ async def seq_H_fit_class_multi(chain: Protein, msa_profiles_dict: dict[ProteinC
 
     return max_fit_classname, chain
 
-
 async def struct_classify_chains(chains: list[Protein], vvv: bool = False, omitgaps=False):
 
     # preload msa profiles by organism
@@ -89,7 +87,6 @@ async def struct_classify_chains(chains: list[Protein], vvv: bool = False, omitg
 
     # classify chains
     return await asyncio.gather(*[seq_H_fit_class_multi(chain, msa_profiles[chain.src_organism_ids[0]],  omitgaps=omitgaps,vvv=vvv ) for chain in chains])
-
 
 def process_struct(rcsb_id: str):
 
@@ -116,7 +113,6 @@ def process_struct(rcsb_id: str):
 
     return total
 
-
 def nomv2_duplicates():
     for rcsb_id in os.listdir("./api/ribctl/assets/nomenclaturev2"):
         with open(os.path.join("./api/ribctl/assets/nomenclaturev2", rcsb_id), 'rb') as f:
@@ -131,7 +127,6 @@ def nomv2_duplicates():
         # else:
         #     print("removing ", os.path.join("./api/ribctl/assets/nomenclaturev2", rcsb_id))
         #     os.remove(os.path.join("./api/ribctl/assets/nomenclaturev2", rcsb_id))
-
 
 def _generate_nomenclature(struct_id_list: list[str], gen_all: bool = False):
     assets_nomenclaturev2 = os.path.join(
@@ -161,11 +156,36 @@ def _generate_nomenclature(struct_id_list: list[str], gen_all: bool = False):
             x.add_done_callback(save_fut_result(struct))
 
 
+def tax_classify_struct_proportions(ribosome:RibosomeStructure)->int:
+
+    ids = []
+    if ribosome.rnas is not None:
+        for rna in ribosome.rnas:
+            ids = [*rna.src_organism_ids, *ids]
+    
+    for protein in ribosome.proteins:
+       ids = [*protein.src_organism_ids, *ids]
+   
+    proportions = {}
+    for i in set(ids):
+        proportions[i] = ids.count(i)/len(ids)
+
+    return max(proportions, key=proportions.get)
+
+
 if __name__ == "__main__":
 
+
+    taxids = {}
     # _generate_nomenclature(["4W29"])
 
-    nomv2_duplicates()
+    for rcsb_id in BACTERIAL:
+        # print(rcsb_id)
+        taxids.update({rcsb_id: true_taxid})
+        with open("true_taxids.json", 'w') as outfile:
+            json.dump(taxids, outfile, indent=4)
+
+    # nomv2_duplicates()
 
 
     # chain, _ = RibosomeAssets('4WRO').get_chain_by_auth_asym_id('4E')
