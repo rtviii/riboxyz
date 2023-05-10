@@ -7,6 +7,7 @@ from Bio.PDB.NeighborSearch import NeighborSearch
 from Bio.PDB.Atom import Atom
 import loguru
 from api.ribctl.etl.ribosome_assets import RibosomeAssets
+from api.ribctl.lib.msalib import msa_dict_load_tax_pruned, msaclass_extend_temp
 from api.ribctl.lib.types.types_binding_site import AMINO_ACIDS, NUCLEOTIDES, ResidueSummary
 from api.ribctl.lib.types.types_ribosome import PolymericFactor
 from api.ribctl.taxonomy import filter_by_parent_tax
@@ -187,10 +188,14 @@ def tunnel_obstructions(rcsb_id: str, ptc_midpoint: tuple[float, float, float], 
 
 
 if __name__ == "__main__":
-
     """Generate ptc residues for bacterial structures"""
-    print(RibosomeAssets("4V4I").get_prot_by_nomclass("uL24"))
 
+    prot_class ='uL24'
+    print(RibosomeAssets("4V4I").get_prot_by_nomclass("uL24"))
+    msa_dict_load_tax_pruned()
+    prot_class_msa =
+
+    msaclass_extend_temp()
 
     # for RCSB_ID in BACTERIAL:
     #     print("Processing {}".format(RCSB_ID))
