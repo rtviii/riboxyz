@@ -7,7 +7,7 @@ from Bio.PDB.NeighborSearch import NeighborSearch
 from Bio.PDB.Atom import Atom
 import loguru
 from api.ribctl.etl.ribosome_assets import RibosomeAssets
-from api.ribctl.lib.msalib import msa_dict 
+from api.ribctl.lib.msalib import msa_dict, msaclass_extend_temp 
 from api.ribctl.lib.types.types_binding_site import AMINO_ACIDS, NUCLEOTIDES, ResidueSummary
 from api.ribctl.lib.types.types_ribosome import PolymericFactor, Protein
 from api.ribctl.taxonomy import filter_by_parent_tax
@@ -183,13 +183,49 @@ def tunnel_obstructions(rcsb_id: str, ptc_midpoint: tuple[float, float, float], 
 
 
 
+def backwards_match(aligned_target:str, resid:int):
+	"""Returns the target-sequence index of a residue in the (aligned) target sequence
+	Basically, "count back ignoring gaps" until you arrive at @resid
+	"""
+	if resid > len(aligned_target):
+		exit(IndexError(f"Passed residue with invalid index ({resid}) to back-match to target.Seqlen:{len(aligned_target)}"))
+	counter_proper = 0
+	for i,char in enumerate(aligned_target):
+		if i == resid:
+			return counter_proper
+		if char =='-':
+			continue
+		else: 
+			counter_proper  +=1
+
+def forwards_match(aligned_seq:str, resid:int):
+	"""Returns the index of a source-sequence residue in the aligned source sequence.
+	Basically, "count forward including gaps until you reach @resid"
+	"""
+
+	count_proper = 0
+	for alignment_indx,char in enumerate( aligned_seq ):
+		if count_proper == resid:
+			return alignment_indx
+		if char =='-':
+			continue
+		else: 
+			count_proper  +=1
+
+
+
 if __name__ == "__main__":
     """Generate ptc residues for bacterial structures"""
 
-    prot_class ='uL24'
-    chain:Protein = RibosomeAssets("4V4I").get_prot_by_nomclass("uL24")
-    prot_class_msa = msa_dict(phylogenetic_correction_taxid=chain.src_organism_ids[0], include_only_classes=[prot_class])
-    print(prot_class_msa)
+    prot_class     = 'uL24'
+    chain:Protein  = RibosomeAssets("4V4I").get_prot_by_nomclass("uL24")
+    prot_class_msa = msa_dict(phylogenetic_correction_taxid=chain.src_organism_ids[0], include_only_classes=[prot_class])[prot_class]
+    extended_msa   = msaclass_extend_temp(prot_class, prot_class_msa, chain.entity_poly_seq_one_letter_code_can,chain.auth_asym_id, chain.parent_rcsb_id)
+
+    for seq in extended_msa:
+        
+        print(seq.getLabel())
+        print(seq)
 
     # msaclass_extend_temp()
 

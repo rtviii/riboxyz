@@ -52,7 +52,9 @@ class SeqMatch():
 			self.tgt_ids.append(self.backwards_match(self.tgt_aln,aln_resid))
 
 	def backwards_match(self, alntgt:str, resid:int):
-		"""Returns the target-sequence index of a residue in the (aligned) target sequence"""
+		"""Returns the target-sequence index of a residue in the (aligned) target sequence
+		Basically, "count back ignoring gaps"
+		"""
 		if resid > len(alntgt):
 			exit(IndexError(f"Passed residue with invalid index ({resid}) to back-match to target.Seqlen:{len(alntgt)}"))
 		counter_proper = 0
@@ -65,7 +67,10 @@ class SeqMatch():
 				counter_proper  +=1
 
 	def forwards_match(self,alnsrc:str, resid:int):
-		"""Returns the index of a source-sequence residue in the aligned source sequence."""
+		"""Returns the index of a source-sequence residue in the aligned source sequence.
+		Basically, "count forward including gaps"
+		"""
+
 		count_proper = 0
 		for alignment_indx,char in enumerate( alnsrc ):
 			if count_proper == resid:
