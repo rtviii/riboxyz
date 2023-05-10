@@ -111,7 +111,7 @@ def msa_phylo_nbhd(msa:MSA, phylo_target_taxid:int, n_neighbors:int=10)->MSA:
     phylo_nbhd = phylogenetic_neighborhood(msa_taxa, str(phylo_target_taxid), n_neighbors)
     return msa_pick_taxa(msa, phylo_nbhd) 
 
-def msa_profiles_dict_prd(
+def msa_dict(
           phylogenetic_correction_taxid: int                 = -1,
           include_only_classes          : list[ProteinClass] = []
         )->dict[ProteinClass,MSA]      : 
@@ -135,7 +135,8 @@ def msa_profiles_dict_prd(
     if phylogenetic_correction_taxid > 0:
         try:
             pruned_dict = msa_dict_load_tax_pruned(phylogenetic_correction_taxid)
-            return {key: value for key, value in sorted(pruned_dict.items())}
+            pruned_dict = sorted(pruned_dict.items())
+            return pruned_dict if len(include_only_classes) == 0 else {k:v for k,v in pruned_dict if k in include_only_classes}
         except:
             pruned_dict          = {}
             for msafile in os.listdir(RP_MSAS_PATH):
@@ -143,15 +144,19 @@ def msa_profiles_dict_prd(
                 msa        = prody.parseMSA(os.path.join(RP_MSAS_PATH, msafile))
                 msa_pruned = msa_phylo_nbhd(msa, phylogenetic_correction_taxid)
                 pruned_dict = {f"{classname}": msa_pruned, **pruned_dict}
+            pruned_dict = sorted(pruned_dict.items())
             msa_dict_cache_tax_pruned_(phylogenetic_correction_taxid, pruned_dict)
-            return {key: value for key, value in sorted(pruned_dict.items())}
+            
+            return pruned_dict if len(include_only_classes) == 0 else {k:v for k,v in pruned_dict if k in include_only_classes}
     else:
         msa_dict          = {}
         for msafile in os.listdir(RP_MSAS_PATH):
             classname = msafile.split("_")[0]
             msa        = prody.parseMSA(os.path.join(RP_MSAS_PATH, msafile))
             msa_dict = {f"{classname}": msa, **msa_dict}
-        return {key: value for key, value in sorted(msa_dict.items())}
+        msa_dict = sorted(msa_dict.items())
+
+        return msa_dict if len(include_only_classes) == 0 else {k:v for k,v in msa_dict if k in include_only_classes}
 
 def fasta_from_string(seq:str, description:str=""):
     seq_record             = SeqRecord.SeqRecord(Seq(seq).upper())
@@ -230,7 +235,6 @@ def msa_class_proteovision_path(prot_class:ProteinClass):
         )
     assert os.path.exists(path), "File not found: {}".format(path)
     return path
-
 
 """download + tax-identify a protein class sequence from proteovision"""
 def process_proteovision_alignment(nomclass:ProteinClass):

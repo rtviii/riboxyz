@@ -8,7 +8,7 @@ from prody import MSA, calcShannonEntropy
 from api.rbxz_bend.settings import RIBETL_DATA
 from api.ribctl.etl.ribosome_assets import RibosomeAssets
 from api.ribctl.lib.types.types_ribosome import Protein, ProteinClass, RibosomeStructure
-from api.ribctl.lib.msalib import msa_dict_get_meta_info, msa_profiles_dict_prd, msaclass_extend, msaclass_extend_temp
+from api.ribctl.lib.msalib import msa_dict_get_meta_info, msa_dict, msaclass_extend, msaclass_extend_temp
 
 CRED      = '\033[91m'
 CEND      = '\033[0m'
@@ -78,7 +78,7 @@ async def struct_classify_chains(chains: list[Protein], vvv: bool = False, omitg
     # preload msa profiles by organism
     msa_profiles = {}
     for chain in chains:
-        msa_profiles[chain.src_organism_ids[0]] = msa_profiles_dict_prd(
+        msa_profiles[chain.src_organism_ids[0]] = msa_dict(
             phylogenetic_correction_taxid=chain.src_organism_ids[0])
 
     # classify chains
