@@ -111,23 +111,27 @@ def msa_phylo_nbhd(msa:MSA, phylo_target_taxid:int, n_neighbors:int=10)->MSA:
     phylo_nbhd = phylogenetic_neighborhood(msa_taxa, str(phylo_target_taxid), n_neighbors)
     return msa_pick_taxa(msa, phylo_nbhd) 
 
-def msa_dict_cache_tax_pruned_( taxid:int,_:dict):
-    dictpath =os.path.join(RP_MSAS_PRUNED_PATH, f"{taxid}.pickle")
-    if os.path.exists(dictpath):
-        return 
-    else:
-        with open(dictpath, 'wb') as outfile:
-            pickle.dump(_, outfile, protocol=pickle.HIGHEST_PROTOCOL)
+def msa_profiles_dict_prd(
+          phylogenetic_correction_taxid: int                 = -1,
+          include_only_classes          : list[ProteinClass] = []
+        )->dict[ProteinClass,MSA]      : 
 
-def msa_dict_load_tax_pruned(taxid:int)->dict[ProteinClass,MSA]:
-    dictpath = os.path.join(RP_MSAS_PRUNED_PATH, f"{taxid}.pickle")
-    if not os.path.exists(dictpath):
-        raise FileNotFoundError(f"MSA dict for {taxid} not found")
-    else:
-        with open(dictpath, 'rb') as handle:
-            return pickle.load(handle)
+    def msa_dict_cache_tax_pruned_( taxid:int,_:dict):
+        dictpath = os.path.join(RP_MSAS_PRUNED_PATH, f"{taxid}.pickle")
+        if os.path.exists(dictpath):
+            return 
+        else:
+            with open(dictpath, 'wb') as outfile:
+                pickle.dump(_, outfile, protocol=pickle.HIGHEST_PROTOCOL)
 
-def msa_profiles_dict_prd(phylogenetic_correction_taxid:int=-1, include_only_classes:list[ProteinClass]=[])->dict[ProteinClass,MSA]: 
+    def msa_dict_load_tax_pruned(taxid:int)->dict[ProteinClass,MSA]:
+        dictpath = os.path.join(RP_MSAS_PRUNED_PATH, f"{taxid}.pickle")
+        if not os.path.exists(dictpath):
+            raise FileNotFoundError(f"MSA dict for {taxid} not found")
+        else:
+            with open(dictpath, 'rb') as handle:
+                return pickle.load(handle)
+
     if phylogenetic_correction_taxid > 0:
         try:
             pruned_dict = msa_dict_load_tax_pruned(phylogenetic_correction_taxid)
@@ -141,7 +145,6 @@ def msa_profiles_dict_prd(phylogenetic_correction_taxid:int=-1, include_only_cla
                 pruned_dict = {f"{classname}": msa_pruned, **pruned_dict}
             msa_dict_cache_tax_pruned_(phylogenetic_correction_taxid, pruned_dict)
             return {key: value for key, value in sorted(pruned_dict.items())}
-            
     else:
         msa_dict          = {}
         for msafile in os.listdir(RP_MSAS_PATH):
