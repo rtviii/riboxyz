@@ -31,7 +31,6 @@ import argparse
 from api.ribctl.etl.ribosome_assets import RibosomeAssets
 from api.ribctl.lib.utils import open_structure
 from api.scratch_tunnel_workflow import DORIS_ET_AL, pick_match
-
 from api.taxonomy import filter_by_parent_tax
 
 RIBETL_DATA = os.environ.get('RIBETL_DATA')
