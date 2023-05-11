@@ -207,8 +207,8 @@ def struct_paint_chains(pdbid: str):
             # cmd.show('surface', f"chain {rna['auth_asym_id']}")
             cmd.show('cartoon', f"chain {rna['auth_asym_id']}")
             cmd.color('white', f"chain {rna['auth_asym_id']}")
-            # cmd.set('transparency', 0.1, f"chain {rna['auth_asym_id']}")
-            cmd.set('cartoon_transparency', 0.4, f"chain {rna['auth_asym_id']}")
+            # cmd.set('transparency', 0.3, f"chain {rna['auth_asym_id']}")
+            cmd.set('cartoon_transparency', 0.2, f"chain {rna['auth_asym_id']}")
 
     for protein in profile['proteins']:
         nomclass = nomenclaturev2[protein['auth_asym_id']]
