@@ -3,7 +3,7 @@ import os
 from pprint import pprint
 from typing import List
 from pymol import cmd
-from api.scratch_tunnel_workflow import ptc_residues_calculate_midpoint, ptc_resdiues_get, tunnel_obstructions
+from api.scratch_tunnel_workflow import exit_port_posn, ptc_residues_calculate_midpoint, ptc_resdiues_get, tunnel_obstructions
 
 RIBETL_DATA = os.environ.get("RIBETL_DATA")
 
@@ -71,7 +71,6 @@ colormap__LSU_Proteins = {
                           "P1/P2": "zirconium"
                           
                           }
-
 colormap__SSU_Proteins = {
                      "bS1" : "actinium",
                      "eS1" : "aluminum",
@@ -136,33 +135,9 @@ def create_marker_at_atom(selection_name:str, posn:List[float], color_:str="red"
     cmd.pseudoatom(selection_name, pos=posn, vdw=1, color=color_,  label=label)
     cmd.show(repr, selection_name)
 
-def ptc_raw_w_markerks(struct: str):
-
-    # cmd.delete("all")
-    # struct      = struct.upper()
-    # struct_path = os.path.join("/home/rxz/dev/static/{}/{}.cif".format(struct, struct))
-    # cmd.load(struct_path)
-
-    with open(get_markerspath(struct), 'r') as infile:
-       POSNS:dict = json.load(infile)
-
-    chain = [*POSNS.keys()][0]
-    if chain == None:
-        exit("Could not identify chain")
-
-    U_end_pos   = [ *POSNS[chain].values() ][len(POSNS[chain]) - 2]["O4'"] # pre  last residue of the comb
-    U_start_pos = [ *POSNS[chain].values() ][0]["O4'"] # firs      residue of the comb
-
-    midpoint = [
-        ( U_end_pos[0] + U_start_pos[0] ) / 2,
-        ( U_end_pos[1] + U_start_pos[1] ) / 2,
-        ( U_end_pos[2] + U_start_pos[2] ) / 2,
-    ]
-
-    create_marker_at_atom("uridine_comb_start", U_start_pos, color_="green")
-    create_marker_at_atom("uridine_comb_end", U_end_pos, color_="green")
-    cmd.distance(None, "uridine_comb_start", "uridine_comb_end", mode=0)
-
+def pseudoatom_ptc(struct: str):
+    reslist,auth_asym_id = ptc_resdiues_get(struct, 0)
+    midpoint = ptc_residues_calculate_midpoint(reslist,auth_asym_id)
     create_marker_at_atom("centroid",midpoint, color_="red")
 
 def visualize_obstructions(rcsb_id):
@@ -172,7 +147,7 @@ def visualize_obstructions(rcsb_id):
 
     cmd.color("white", "all")
 
-    ptc_raw_w_markerks(rcsb_id)
+    pseudoatom_ptc(rcsb_id)
 
     for poly in polys:
         cname = "chain_{}".format(poly.auth_asym_id, )
@@ -191,7 +166,7 @@ def visualize_obstructions(rcsb_id):
 def struct_paint_chains(pdbid: str):
     pdbid          = pdbid.upper()
     RIBETL_DATA    = str(os.environ.get('RIBETL_DATA'))
-    nomenclaturev2 = os.path.join(RIBETL_DATA, pdbid, f"{pdbid}_nomenclaturev2.json")
+    nomenclaturev2 = os.path.join("/home/rxz/dev/docker_ribxz/api/ribctl/assets/nomenclaturev2", f"{pdbid.upper()}.json")
     profilepath    = os.path.join(RIBETL_DATA, pdbid, f"{pdbid}.json")
 
     with open(nomenclaturev2, 'rb') as ninfile:
@@ -204,15 +179,18 @@ def struct_paint_chains(pdbid: str):
         for rna in profile['rnas']:
             # cmd.color('white', f"chain {rna['auth_asym_id']}")
             cmd.hide('everything', f"chain {rna['auth_asym_id']}")
-            cmd.show('surface', f"chain {rna['auth_asym_id']}")
+            # cmd.show('surface', f"chain {rna['auth_asym_id']}")
+            cmd.show('cartoon', f"chain {rna['auth_asym_id']}")
             cmd.color('white', f"chain {rna['auth_asym_id']}")
-            cmd.set('transparency', 0.1, f"chain {rna['auth_asym_id']}")
+            # cmd.set('transparency', 0.3, f"chain {rna['auth_asym_id']}")
+            cmd.set('cartoon_transparency', 0.2, f"chain {rna['auth_asym_id']}")
 
     for protein in profile['proteins']:
         nomclass = nomenclaturev2[protein['auth_asym_id']]
 
         if nomclass in colormap__LSU_Proteins:
             CLR = colormap__LSU_Proteins[nomclass]
+
         elif nomclass in colormap__SSU_Proteins:
             CLR = colormap__SSU_Proteins[nomclass]
 
@@ -237,10 +215,17 @@ def sload(pdbid: str):
     cmd.delete('all')
     cmd.load(path)
 
-cmd.extend("sload", sload)
-cmd.extend("by_chain", struct_paint_chains)
-cmd.extend("ptc_w_markers", ptc_raw_w_markerks)
-cmd.extend("list_bacteria", list_bacteria)
-cmd.extend("tun_obstructions", visualize_obstructions)
+def pseudoatom_exitport(rcsb_id:str):
+    posn = exit_port_posn(rcsb_id)
+    print("Got positions :", posn)
+    create_marker_at_atom("Exitport", posn)
 
+
+cmd.extend("sload"            , sload                  )
+cmd.extend("by_chain"         , struct_paint_chains    )
+cmd.extend("ptc"              , pseudoatom_ptc         )
+cmd.extend("list_bacteria"    , list_bacteria          )
+cmd.extend("tun_obstructions" , visualize_obstructions )
+cmd.extend("exitport"         , pseudoatom_exitport    )
+    
 

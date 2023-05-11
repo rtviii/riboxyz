@@ -7,16 +7,14 @@ import sys
 import typing
 from Bio import pairwise2
 import itertools
-
 from api.ribctl.lib.types.types_binding_site import LigandPrediction, PredictedResiduesPolymer
-from ribctl.lib.types.types_ribosome import PolymerClass, RibosomeStructure
-from ribctl.lib.mod_extract_bsites import  BindingSite, struct_ligand_ids, struct_polymeric_factor_ids
-from ribctl.lib.utils import open_structure
+from api.ribctl.lib.types.types_ribosome import PolymerClass, RibosomeStructure
+from api.ribctl.lib.mod_extract_bsites import  BindingSite, struct_ligand_ids, struct_polymeric_factor_ids
+from api.ribctl.lib.utils import open_structure
 import numpy as np
 
 flatten = itertools.chain.from_iterable
 n1      = np.array
-
 
 class SeqMatch():
 	def __init__(self,
@@ -52,7 +50,9 @@ class SeqMatch():
 			self.tgt_ids.append(self.backwards_match(self.tgt_aln,aln_resid))
 
 	def backwards_match(self, alntgt:str, resid:int):
-		"""Returns the target-sequence index of a residue in the (aligned) target sequence"""
+		"""Returns the target-sequence index of a residue in the (aligned) target sequence
+		Basically, "count back ignoring gaps"
+		"""
 		if resid > len(alntgt):
 			exit(IndexError(f"Passed residue with invalid index ({resid}) to back-match to target.Seqlen:{len(alntgt)}"))
 		counter_proper = 0
@@ -65,7 +65,10 @@ class SeqMatch():
 				counter_proper  +=1
 
 	def forwards_match(self,alnsrc:str, resid:int):
-		"""Returns the index of a source-sequence residue in the aligned source sequence."""
+		"""Returns the index of a source-sequence residue in the aligned source sequence.
+		Basically, "count forward including gaps"
+		"""
+
 		count_proper = 0
 		for alignment_indx,char in enumerate( alnsrc ):
 			if count_proper == resid:
@@ -91,9 +94,9 @@ class SeqMatch():
 		return ''.join(_)
 
 	@staticmethod
-	def hl_ixs(sequence:str,  ixs:List[int]):
+	def hl_ixs(sequence:str,  ixs:List[int], color:int=91):
 		"""Highlight indices"""
-		CRED = '\033[91m'
+		CRED = '\033[{}m'.format(color)
 		CEND = '\033[0m'
 		_ = ''
 		for i,v in enumerate(sequence):
@@ -215,7 +218,6 @@ def init_transpose_ligand(
 
 
 	return LigandPrediction.parse_obj(prediction)
-
 
 if __name__ =="__main__":
 
