@@ -92,7 +92,6 @@ def ptc_resdiues_get(rcsb_id: str, assembly_id: int = 0) -> tuple[list[Residue],
 
     return PTC_residues, auth_asym_id
 
-
 def ptc_residues_to_atom_coordinates(
     reslist: list[Residue],
     auth_asym_id: str
@@ -122,8 +121,7 @@ def ptc_residues_to_atom_coordinates(
 
     return ptc_coordinates
 
-
-def ptc_residues_calculate_midpoint(reslist: list[Residue], auth_asym_id: str) -> tuple[float, float, float]:
+def ptc_residues_calculate_midpoint(reslist: list[Residue], auth_asym_id: str) -> list[float]:
     """
     auth_asym_id:
         residue_id:
@@ -154,14 +152,13 @@ def ptc_residues_calculate_midpoint(reslist: list[Residue], auth_asym_id: str) -
         # first residue of the comb
         U_start_pos = [*subseq_residues.values()][0]["C4"]
 
-    midpoint = (
+    midpoint = [
         (U_end_pos[0] + U_start_pos[0]) / 2,
         (U_end_pos[1] + U_start_pos[1]) / 2,
         (U_end_pos[2] + U_start_pos[2]) / 2,
-    )
+    ]
 
     return midpoint
-
 
 def tunnel_obstructions(rcsb_id: str, ptc_midpoint: tuple[float, float, float], radius: int = 30) -> tuple[list[PolymericFactor], list[ResidueSummary]]:
     R = RibosomeAssets(rcsb_id)
@@ -204,35 +201,6 @@ def msa_class_fit_chain(chain: Protein, prot_class: ProteinClass, custom_seq=Non
         "Could not find sequence in for {} in aligned class. Likely label error {}".format(prot_class))
 
 def extract_exit_port_residues(rcsb_id:str):
-    ra        = RibosomeAssets(rcsb_id)
-    bp_struct = ra.biopython_structure()
-    ul23      = ra.get_prot_by_nomclass('uL23')
-    ul24      = ra.get_prot_by_nomclass('uL24')
-
-    if ul23 == None or ul24 == None:
-        raise LookupError("Could not find uL23 or uL24 in {}".format(rcsb_id))
-
-    bp_ul23_seq = ra.biopython_chain_get_seq(bp_struct, ul23.auth_asym_id, 'protein')
-    bp_ul24_seq = ra.biopython_chain_get_seq(bp_struct, ul24.auth_asym_id, 'protein')
-    
-    bp_ul23 = ra.biopython_get_chain(ul23.auth_asym_id)
-    bp_ul24 = ra.biopython_get_chain(ul24.auth_asym_id)
-
-    aligned_ul23 = msa_class_fit_chain(ul23, 'uL23', custom_seq=bp_ul23_seq)
-    aligned_ul24 = msa_class_fit_chain(ul24, 'uL24', custom_seq=bp_ul24_seq)
-
-    backwards_mapped_ul24 = [util__backwards_match(aligned_ul24, residue) for residue in __ul24()]
-    backwards_mapped_ul23 = [util__backwards_match(aligned_ul23, residue) for residue in __ul23()]
-
-    residues_ul23 = [bp_ul24[i] for i in backwards_mapped_ul24]
-    residues_ul24 = [bp_ul23[i] for i in backwards_mapped_ul23]
-
-    ul23_M = np.average([*map(lambda res:res.center_of_mass(), residues_ul23)])
-    ul24_M = np.average([*map(lambda res:res.center_of_mass(), residues_ul24)])
-
-    return np.average([ul23_M, ul24_M], axis=0)
-if __name__ == "__main__":
-    """Generating midpoint between ul24 and ul23 """
 
     def __ul23():
         aln_conserved = [340, 351]
@@ -295,12 +263,39 @@ if __name__ == "__main__":
                 print(SeqMatch.hl_ixs(str(seq), aln_conserved, color=92))
 
         return aln_conserved
+    ra        = RibosomeAssets(rcsb_id)
+    bp_struct = ra.biopython_structure()
+    ul23      = ra.get_prot_by_nomclass('uL23')
+    ul24      = ra.get_prot_by_nomclass('uL24')
 
-    __ul23()
-    __ul24()
+    if ul23 == None or ul24 == None:
+        raise LookupError("Could not find uL23 or uL24 in {}".format(rcsb_id))
 
+    bp_ul23_seq = ra.biopython_chain_get_seq(bp_struct, ul23.auth_asym_id, 'protein')
+    bp_ul24_seq = ra.biopython_chain_get_seq(bp_struct, ul24.auth_asym_id, 'protein')
+    
+    bp_ul23 = ra.biopython_get_chain(ul23.auth_asym_id)
+    bp_ul24 = ra.biopython_get_chain(ul24.auth_asym_id)
+
+    aligned_ul23 = msa_class_fit_chain(ul23, 'uL23', custom_seq=bp_ul23_seq)
+    aligned_ul24 = msa_class_fit_chain(ul24, 'uL24', custom_seq=bp_ul24_seq)
+
+    backwards_mapped_ul24 = [util__backwards_match(aligned_ul24, residue) for residue in __ul24()]
+    backwards_mapped_ul23 = [util__backwards_match(aligned_ul23, residue) for residue in __ul23()]
+
+    residues_ul23 = [bp_ul24[i] for i in backwards_mapped_ul24]
+    residues_ul24 = [bp_ul23[i] for i in backwards_mapped_ul23]
+
+    ul23_M = np.average([*map(lambda res:res.center_of_mass(), residues_ul23)], axis=0)
+    ul24_M = np.average([*map(lambda res:res.center_of_mass(), residues_ul24)], axis=0)
+
+    return np.average([ul23_M, ul24_M],axis=0).tolist()
+
+
+
+if __name__ == "__main__":
+    """Generating midpoint between ul24 and ul23 """
     # ?-------------- exit_port_midpoint -----------------?#
-
 
 
     for x in BACTERIAL:

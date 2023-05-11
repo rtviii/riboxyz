@@ -136,31 +136,8 @@ def create_marker_at_atom(selection_name:str, posn:List[float], color_:str="red"
     cmd.show(repr, selection_name)
 
 def ptc_raw_w_markerks(struct: str):
-
-    # cmd.delete("all")
-    # struct      = struct.upper()
-    # struct_path = os.path.join("/home/rxz/dev/static/{}/{}.cif".format(struct, struct))
-    # cmd.load(struct_path)
-
-    with open(get_markerspath(struct), 'r') as infile:
-       POSNS:dict = json.load(infile)
-
-    chain = [*POSNS.keys()][0]
-    if chain == None:
-        exit("Could not identify chain")
-
-    U_end_pos   = [ *POSNS[chain].values() ][len(POSNS[chain]) - 2]["O4'"] # pre  last residue of the comb
-    U_start_pos = [ *POSNS[chain].values() ][0]["O4'"] # firs      residue of the comb
-
-    midpoint = [
-        ( U_end_pos[0] + U_start_pos[0] ) / 2,
-        ( U_end_pos[1] + U_start_pos[1] ) / 2,
-        ( U_end_pos[2] + U_start_pos[2] ) / 2,
-    ]
-
-    create_marker_at_atom("uridine_comb_start", U_start_pos, color_="green")
-    create_marker_at_atom("uridine_comb_end", U_end_pos, color_="green")
-    cmd.distance(None, "uridine_comb_start", "uridine_comb_end", mode=0)
+    reslist,auth_asym_id = ptc_resdiues_get(struct, 0)
+    midpoint = ptc_residues_calculate_midpoint(reslist,auth_asym_id)
 
     create_marker_at_atom("centroid",midpoint, color_="red")
 
@@ -239,11 +216,18 @@ def sload(pdbid: str):
     cmd.delete('all')
     cmd.load(path)
 
+def paint_exit_port(rcsb_id:str):
+    posn = extract_exit_port_residues(rcsb_id)
+    print("Got positions :", posn)
+    create_marker_at_atom("Exitport", posn)
+
+
+
 cmd.extend("sload"           , sload                                                                                                  )
 cmd.extend("by_chain"        , struct_paint_chains                                                                                    )
 cmd.extend("ptc_w_markers"   , ptc_raw_w_markerks                                                                                     )
 cmd.extend("list_bacteria"   , list_bacteria                                                                                          )
 cmd.extend("tun_obstructions", visualize_obstructions                                                                                 )
-cmd.extend("exitport"        , lambda                 rcsb_id: create_marker_at_atom("Exit port", extract_exit_port_residues(rcsb_id)))
+cmd.extend("exitport"        , paint_exit_port)
 
 
