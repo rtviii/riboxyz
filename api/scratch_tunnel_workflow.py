@@ -1,3 +1,5 @@
+import json
+import math
 from api.ribctl.lib.msalib import AMINO_ACIDS_3_TO_1_CODE, msa_dict, msaclass_extend_temp, util__backwards_match, util__forwards_match
 from api.ribctl.lib.types.types_ribosome import PolymericFactor, Protein, ProteinClass
 from api.ribctl.lib.types.types_binding_site import AMINO_ACIDS, NUCLEOTIDES, ResidueSummary
@@ -241,7 +243,7 @@ def msa_class_fit_chain(chain: Protein, prot_class: ProteinClass, custom_seq=Non
     raise AssertionError(
         "Could not find sequence in for {} in aligned class. Likely label error {}".format(prot_class))
 
-def extract_exit_port_residues(rcsb_id:str):
+def exit_port_posn(rcsb_id:str)->list[float]:
 
     def __ul23():
         aln_conserved = [340, 351]
@@ -336,18 +338,50 @@ def extract_exit_port_residues(rcsb_id:str):
 
     return np.average([ul23_M, ul24_M],axis=0).tolist()
 
+def make_cylinder(p1:list[float], p2:list[float], R:float):
+    height = math.sqrt((p2[0] - p1[0])**2 + (p2[1] - p1[1])**2 + (p2[2] - p1[2])**2)
+    center = ((p1[0] + p2[0]) / 2, (p1[1] + p2[1]) / 2, (p1[2] + p2[2]) / 2)
+    
+    return {
+        "center": center,
+        "height": height,
+        "radius": R
+    }
+
+def point_inside_cylinder(cylinder, point):
+    distance_xy = math.sqrt((point[0] - cylinder["center"][0])**2 + (point[1] - cylinder["center"][1])**2)
+
+    if distance_xy <= cylinder["radius"]:
+        distance_top    = abs(point[2] - (cylinder["center"][2] + cylinder["height"]/2))
+        distance_bottom = abs(point[2] - (cylinder["center"][2] - cylinder["height"]/2))
+        if distance_top <= cylinder["height"]/2 and distance_bottom <= cylinder["height"]/2:
+            return True
+
+    return False
+
+
 if __name__ == "__main__":
+
     """Generating midpoint between ul24 and ul23 """
     # ?-------------- exit_port_midpoint -----------------?#
 
-
-    for x in BACTERIAL:
+    for rcsb_id in BACTERIAL:
         try:
-            print("Processing {}".format(x))
-            ep = extract_exit_port_residues(x)
-            print(ep)
+            posn_exit_port = exit_port_posn(rcsb_id)
+            posn_ptc       = ptc_residues_calculate_midpoint(*ptc_resdiues_get(rcsb_id, 0))
+            PTC_COMB_PATH  = os.path.join("/home/rxz/dev/docker_ribxz/api/ribctl/assets/landmarks", "{}.json".format(rcsb_id))
+
+            landmarks_dict = {
+                "ptc"      : posn_ptc,
+                "exit_port": posn_exit_port
+            }
+
+            with open(PTC_COMB_PATH, 'w') as f:
+                json.dump(posn_ptc, f)
+
+
         except Exception as e:
-            print("Failed to process {}".format(x))
+            print("Failed to process {}".format(rcsb_id))
             print(e)
     # ?---------------------------------------------------?#
 
