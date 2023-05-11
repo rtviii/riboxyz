@@ -25,7 +25,8 @@ RIBETL_DATA = os.environ.get('RIBETL_DATA')
 TAXID_BACTERIA          = 2
 TAXID_EUKARYA           = 2759
 TAXID_ARCHEA            = 2157
-AMINO_ACIDS_3_TO_1_CODE = {"ALA":"A",
+AMINO_ACIDS_3_TO_1_CODE = {
+"ALA":"A",
 "ARG":"R",
 "ASN":"N",
 "ASP":"D",
