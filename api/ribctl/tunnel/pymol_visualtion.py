@@ -135,10 +135,9 @@ def create_marker_at_atom(selection_name:str, posn:List[float], color_:str="red"
     cmd.pseudoatom(selection_name, pos=posn, vdw=1, color=color_,  label=label)
     cmd.show(repr, selection_name)
 
-def ptc_raw_w_markerks(struct: str):
+def pseudoatom_ptc(struct: str):
     reslist,auth_asym_id = ptc_resdiues_get(struct, 0)
     midpoint = ptc_residues_calculate_midpoint(reslist,auth_asym_id)
-
     create_marker_at_atom("centroid",midpoint, color_="red")
 
 def visualize_obstructions(rcsb_id):
@@ -148,7 +147,7 @@ def visualize_obstructions(rcsb_id):
 
     cmd.color("white", "all")
 
-    ptc_raw_w_markerks(rcsb_id)
+    pseudoatom_ptc(rcsb_id)
 
     for poly in polys:
         cname = "chain_{}".format(poly.auth_asym_id, )
@@ -216,18 +215,17 @@ def sload(pdbid: str):
     cmd.delete('all')
     cmd.load(path)
 
-def paint_exit_port(rcsb_id:str):
+def pseudoatom_exitport(rcsb_id:str):
     posn = extract_exit_port_residues(rcsb_id)
     print("Got positions :", posn)
     create_marker_at_atom("Exitport", posn)
 
 
-
-cmd.extend("sload"           , sload                                                                                                  )
-cmd.extend("by_chain"        , struct_paint_chains                                                                                    )
-cmd.extend("ptc_w_markers"   , ptc_raw_w_markerks                                                                                     )
-cmd.extend("list_bacteria"   , list_bacteria                                                                                          )
-cmd.extend("tun_obstructions", visualize_obstructions                                                                                 )
-cmd.extend("exitport"        , paint_exit_port)
-
+cmd.extend("sload"            , sload                  )
+cmd.extend("by_chain"         , struct_paint_chains    )
+cmd.extend("ptc"              , pseudoatom_ptc         )
+cmd.extend("list_bacteria"    , list_bacteria          )
+cmd.extend("tun_obstructions" , visualize_obstructions )
+cmd.extend("exitport"         , pseudoatom_exitport    )
+    
 
