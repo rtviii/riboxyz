@@ -7,11 +7,10 @@ import sys
 import typing
 from Bio import pairwise2
 import itertools
-
 from api.ribctl.lib.types.types_binding_site import LigandPrediction, PredictedResiduesPolymer
-from ribctl.lib.types.types_ribosome import PolymerClass, RibosomeStructure
-from ribctl.lib.mod_extract_bsites import  BindingSite, struct_ligand_ids, struct_polymeric_factor_ids
-from ribctl.lib.utils import open_structure
+from api.ribctl.lib.types.types_ribosome import PolymerClass, RibosomeStructure
+from api.ribctl.lib.mod_extract_bsites import  BindingSite, struct_ligand_ids, struct_polymeric_factor_ids
+from api.ribctl.lib.utils import open_structure
 import numpy as np
 
 flatten = itertools.chain.from_iterable
