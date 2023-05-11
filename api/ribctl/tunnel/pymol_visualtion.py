@@ -3,7 +3,7 @@ import os
 from pprint import pprint
 from typing import List
 from pymol import cmd
-from api.scratch_tunnel_workflow import extract_exit_port_residues, ptc_residues_calculate_midpoint, ptc_resdiues_get, tunnel_obstructions
+from api.scratch_tunnel_workflow import exit_port_posn, ptc_residues_calculate_midpoint, ptc_resdiues_get, tunnel_obstructions
 
 RIBETL_DATA = os.environ.get("RIBETL_DATA")
 
@@ -216,7 +216,7 @@ def sload(pdbid: str):
     cmd.load(path)
 
 def pseudoatom_exitport(rcsb_id:str):
-    posn = extract_exit_port_residues(rcsb_id)
+    posn = exit_port_posn(rcsb_id)
     print("Got positions :", posn)
     create_marker_at_atom("Exitport", posn)
 
