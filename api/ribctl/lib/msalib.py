@@ -1,12 +1,11 @@
 from io import StringIO
 import pickle
-from typing_extensions import Unpack
 import os
 import random
 import typing
 import prody
 import requests
-from ribctl.lib.types.types_ribosome import RNA, PolymericFactor, Protein, ProteinClass
+from api.ribctl.lib.types.types_ribosome import RNA, PolymericFactor, Protein, ProteinClass
 from Bio import AlignIO
 from api.ribctl.lib.types.types_poly_nonpoly_ligand import list_LSUProteinClass, list_SSUProteinClass
 import subprocess
@@ -20,15 +19,35 @@ import requests
 import os
 from api.ribctl.lib.types.types_ribosome import ProteinClass
 from ete3 import NCBITaxa
-
-
 prd.confProDy(verbosity='none')
 RIBETL_DATA = os.environ.get('RIBETL_DATA')
 
-TAXID_BACTERIA = 2
-TAXID_EUKARYA = 2759
-TAXID_ARCHEA = 2157
-
+TAXID_BACTERIA          = 2
+TAXID_EUKARYA           = 2759
+TAXID_ARCHEA            = 2157
+AMINO_ACIDS_3_TO_1_CODE = {"ALA":"A",
+"ARG":"R",
+"ASN":"N",
+"ASP":"D",
+"ASX":"B",
+"CYS":"C",
+"GLU":"E",
+"GLN":"Q",
+"GLX":"Z",
+"GLY":"G",
+"HIS":"H",
+"ILE":"I",
+"LEU":"L",
+"LYS":"K",
+"MET":"M",
+"PHE":"F",
+"PRO":"P",
+"SER":"S",
+"THR":"T",
+"TRP":"W",
+"TYR":"Y",
+"VAL":"V"};
+AMINO_ACIDS_1_TO_3_CODE = {v:k for k,v in AMINO_ACIDS_3_TO_1_CODE.items()}
 
 def PROTEOVISION_URL(
     SU, _class, taxids): return "https://ribovision3.chemistry.gatech.edu/showAlignment/{}/{}/{}".format(SU, _class, taxids)
@@ -40,50 +59,34 @@ RP_MSAS_PRUNED_PATH = "/home/rxz/dev/docker_ribxz/api/ribctl/assets/rp_class_msa
 
 #! util
 
+def util__backwards_match(aligned_target:str, resid:int):
+	"""Returns the target-sequence index of a residue in the (aligned) target sequence
+	Basically, "count back ignoring gaps" until you arrive at @resid
+	"""
+	if resid > len(aligned_target):
+		exit(IndexError(f"Passed residue with invalid index ({resid}) to back-match to target.Seqlen:{len(aligned_target)}"))
+	counter_proper = 0
+	for i,char in enumerate(aligned_target):
+		if i == resid:
+			return counter_proper
+		if char =='-':
+			continue
+		else: 
+			counter_proper  +=1
 
-def util__backwards_match(alntgt: str, aln_resid: int, verbose: bool = False) -> typing.Tuple[int, str, int]:
-    """
-    returns (projected i.e. "ungapped" residue id, the residue itself residue)
-    """
-    if aln_resid > len(alntgt):
-        raise IndexError(
-            f"Passed residue with invalid index ({aln_resid}) to backwards-match to target. Seqlen:{len(alntgt)}")
+def util__forwards_match(aligned_seq:str, resid:int):
+	"""Returns the index of a source-sequence residue in the aligned source sequence.
+	Basically, "count forward including gaps until you reach @resid"
+	"""
 
-    counter_proper = 0
-    for i, char in enumerate(alntgt):
-        if i == aln_resid:
-            if verbose:
-                print("[ {} ] <-----> id.[aligned: {} | orgiginal: {} ]".format(
-                    alntgt[aln_resid], i, counter_proper))
-            return (counter_proper,  alntgt[i], aln_resid)
-        if char == '-':
-            continue
-        else:
-            counter_proper += 1
-
-    raise LookupError("Could not find residue in aligned sequence.")
-
-#! util
-
-
-def util__forwards_match(string: str, resid: int):
-    """Returns the index of a source-sequence residue in the (aligned) source sequence."""
-    if resid >= len(string):
-        raise IndexError(
-            "Requested residue index({resid}) exceeds aligned(likely already gaps-extended) sequence. Something went wrong.")
-
-    count_proper = 0
-    for alignment_indx, char in enumerate(string):
-        if count_proper == resid:
-            return alignment_indx
-        if char == '-':
-            continue
-        else:
-            count_proper += 1
-
-    raise LookupError("Could not find residue in aligned sequence.")
-
-#! util
+	count_proper = 0
+	for alignment_indx,char in enumerate( aligned_seq ):
+		if count_proper == resid:
+			return alignment_indx
+		if char =='-':
+			continue
+		else: 
+			count_proper  +=1
 
 
 def barr2str(bArr):

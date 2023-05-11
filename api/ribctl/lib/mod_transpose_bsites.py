@@ -17,7 +17,6 @@ import numpy as np
 flatten = itertools.chain.from_iterable
 n1      = np.array
 
-
 class SeqMatch():
 	def __init__(self,
 		sourceseq:str,
@@ -96,9 +95,9 @@ class SeqMatch():
 		return ''.join(_)
 
 	@staticmethod
-	def hl_ixs(sequence:str,  ixs:List[int]):
+	def hl_ixs(sequence:str,  ixs:List[int], color:int=91):
 		"""Highlight indices"""
-		CRED = '\033[91m'
+		CRED = '\033[{}m'.format(color)
 		CEND = '\033[0m'
 		_ = ''
 		for i,v in enumerate(sequence):
@@ -220,7 +219,6 @@ def init_transpose_ligand(
 
 
 	return LigandPrediction.parse_obj(prediction)
-
 
 if __name__ =="__main__":
 

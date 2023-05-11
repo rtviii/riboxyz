@@ -1,9 +1,12 @@
 import asyncio
+from functools import reduce
 import json
 import typing
 from Bio.PDB.Structure import Structure
+from Bio.PDB.Chain import Chain
 from pprint import pprint
 from typing import Optional, Tuple
+from api.ribctl.lib.msalib import AMINO_ACIDS_3_TO_1_CODE
 from api.ribctl.lib.types.types_binding_site import BindingSite
 from api.ribctl.lib.types.types_poly_nonpoly_ligand import PolymericFactorClass, RNAClass
 from api.logs.loggers import get_updates_logger
@@ -12,20 +15,23 @@ from api.ribctl.lib.mod_split_rename import split_rename
 from api.ribctl.etl.struct_rcsb_api import current_rcsb_structs, process_pdb_record
 from api.ribctl.lib.mod_render_thumbnail import render_thumbnail
 from api.ribctl.lib.utils import download_unpack_place, open_structure
-from api.ribctl.lib.types.types_ribosome import RNA, Polymer, PolymerClass, PolymericFactor, Protein, ProteinClass, RibosomeStructure
+from api.ribctl.lib.types.types_ribosome import RNA, PolymerClass, PolymericFactor, Protein, ProteinClass, RibosomeStructure
 from pydantic import BaseModel, parse_obj_as
 from concurrent.futures import ALL_COMPLETED, Future, ProcessPoolExecutor, ThreadPoolExecutor, wait
 import os
 
+
 RIBETL_DATA = str(os.environ.get("RIBETL_DATA"))
+
 
 class Assetlist(BaseModel)   : 
       profile                : Optional[bool]
-      structure              : Optional[bool]
       structure_modified     : Optional[bool]
       chains_and_modified_cif: Optional[bool]
       factors_and_ligands    : Optional[bool]
       png_thumbnail          : Optional[bool]
+      structure              : Optional[bool]
+
 
 class RibosomeAssets():
     rcsb_id: str
@@ -49,17 +55,18 @@ class RibosomeAssets():
     def _cif_modified_filepath(self):
         self._envcheck()
         return f"{self._dir_path()}/{self.rcsb_id}_modified.cif"
-    
-    def _ptc_residues(self)->dict[str, dict[str, list[float]]]:
-        PTC_RESIDUES_PATH = os.path.join(RIBETL_DATA, self.rcsb_id, "{}_PTC_COORDINATES.json".format(self.rcsb_id))
+
+    def _ptc_residues(self) -> dict[str, dict[str, list[float]]]:
+        PTC_RESIDUES_PATH = os.path.join(
+            RIBETL_DATA, self.rcsb_id, "{}_PTC_COORDINATES.json".format(self.rcsb_id))
         with open(PTC_RESIDUES_PATH, 'r') as infile:
             return json.load(infile)
 
-    def _nomenclature_v2(self)->dict[str,ProteinClass]:
+    def _nomenclature_v2(self) -> dict[str, ProteinClass]:
         if os.path.isfile(os.path.join(self._dir_path(), f"{self.rcsb_id}_nomenclaturev2.json")):
             with open(os.path.join(self._dir_path(), f"{self.rcsb_id}_nomenclaturev2.json"), 'r') as infile:
                 return json.load(infile)
-        
+
         else:
             with open(os.path.join("~/dev/docker_ribxz/api/ribctl/assets/nomenclaturev2/{}.json".format(self.rcsb_id.upper())), 'r') as infile:
                 return json.load(infile)
@@ -89,14 +96,14 @@ class RibosomeAssets():
 
     # ※ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-= Getters =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-    def get_taxids(self)->tuple[list[int],list[int]]:
+    def get_taxids(self) -> tuple[list[int], list[int]]:
         p = self.profile()
         return (p.src_organism_ids, p.host_organism_ids)
 
     def get_struct_and_profile(self) -> tuple[Structure, RibosomeStructure]:
         return self.biopython_structure(), self.profile()
 
-    def get_chain_by_polymer_class(self, poly_class: PolymerClass | PolymericFactorClass, assembly:int=0) -> PolymericFactor | RNA | Protein | None:
+    def get_chain_by_polymer_class(self, poly_class: PolymerClass | PolymericFactorClass, assembly: int = 0) -> PolymericFactor | RNA | Protein | None:
         profile = self.profile()
         for prot in profile.proteins:
             if poly_class in prot.nomenclature and prot.assembly_id == assembly:
@@ -112,25 +119,25 @@ class RibosomeAssets():
         return None
 
     def get_chain_by_auth_asym_id(self, auth_asym_id: str) -> tuple[
-        RNA | Protein | PolymericFactor | None,
-        typing.Literal["RNA", "Protein", "PolymericFactor"] | None]:
+            RNA | Protein | PolymericFactor | None,
+            typing.Literal["RNA", "Protein", "PolymericFactor"] | None]:
 
         profile = self.profile()
         for chain in profile.proteins:
             if chain.auth_asym_id == auth_asym_id:
-                return ( chain , "Protein" )
+                return (chain, "Protein")
 
         if profile.rnas is not None:
             for chain in profile.rnas:
                 if chain.auth_asym_id == auth_asym_id:
-                    return ( chain, "RNA" )
+                    return (chain, "RNA")
 
         if profile.polymeric_factors is not None:
             for chain in profile.polymeric_factors:
                 if chain.auth_asym_id == auth_asym_id:
-                    return ( chain, "PolymericFactor" )
+                    return (chain, "PolymericFactor")
 
-        return ( None, None )
+        return (None, None)
 
     def get_rna_by_nomclass(self, class_: RNAClass, assembly: int = 0) -> RNA | None:
         """@assembly here stands to specify which of the two or more models the rna comes from
@@ -166,6 +173,33 @@ class RibosomeAssets():
             raise Exception("No LSU rRNA found in structure")
         else:
             return rna
+
+    def biopython_get_chain(self, auth_asym_id: str) -> Chain:
+        return self.biopython_structure().child_dict[0].child_dict[auth_asym_id]
+
+    @staticmethod
+    def biopython_chain_get_seq(struct: Structure, auth_asym_id: str,protein_rna:typing.Literal["protein","rna"], sanitized: bool = False) -> str:
+
+        chain3d = struct.child_dict[0].child_dict[auth_asym_id]
+        ress    = chain3d.child_list
+
+        # if sanitized == True:
+        #     print("sanitized")
+        #     ress = [*filter(lambda r: r.get_resname()
+        #                     in ["A", "C", "G", "U", "PSU"], ress)]
+
+        #     for _r in ress:
+        #         if _r.get_resname() == "PSU":
+        #             _r.resname = "U"
+        seq = ''
+        for i in ress:
+            if protein_rna == 'rna':
+                seq += i.resname
+            else:
+                seq += AMINO_ACIDS_3_TO_1_CODE[i.resname]
+
+        # return reduce(lambda x, y: x + y.resname if protein_rna == 'rna' else AMINO_ACIDS_3_TO_1_CODE[y.resname], ress, '')
+        return seq
 
     # ※ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-= Verification =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
@@ -283,6 +317,7 @@ class RibosomeAssets():
 
 # ※ Mass process methods.
 
+
 async def obtain_assets(rcsb_id: str, assetlist: Assetlist, overwrite: bool = False):
     """Obtain all assets for a given RCSB ID"""
 
@@ -305,6 +340,7 @@ async def obtain_assets(rcsb_id: str, assetlist: Assetlist, overwrite: bool = Fa
         coroutines.append(assets._verify_cif_modified_and_chains(overwrite))
 
     await asyncio.gather(*coroutines)
+
 
 def obtain_assets_threadpool(targets: list[str], assetlist: Assetlist, workers: int = 5, get_all: bool = False, overwrite=False):
     """Get all ribosome profiles from RCSB via a threadpool"""
@@ -334,6 +370,7 @@ def obtain_assets_threadpool(targets: list[str], assetlist: Assetlist, workers: 
 
     wait(futures, return_when=ALL_COMPLETED)
     logger.info("Finished syncing with RCSB")
+
 
 def obtain_assets_processpool(targets: list[str], assetlist: Assetlist, workers: int = 5, get_all: bool = False, overwrite=False):
     """Get all ribosome profiles from RCSB via a threadpool"""
