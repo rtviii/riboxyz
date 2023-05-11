@@ -11,7 +11,7 @@ from Bio.PDB.NeighborSearch import NeighborSearch
 from Bio.PDB.Atom import Atom
 import loguru
 from api.ribctl.etl.ribosome_assets import RibosomeAssets
-from api.ribctl.lib.msalib import msa_dict, msaclass_extend_temp, util__forwards_match 
+from api.ribctl.lib.msalib import msa_dict, msaclass_extend_temp, util__backwards_match, util__forwards_match 
 from api.ribctl.lib.types.types_binding_site import AMINO_ACIDS, NUCLEOTIDES, ResidueSummary
 from api.ribctl.lib.types.types_ribosome import PolymericFactor, Protein
 
@@ -192,6 +192,8 @@ if __name__ == "__main__":
     """Generating midpoint between ul24 and ul23 """
 
     def __ul23():
+        aln_conserved = [340, 351]
+        return  aln_conserved
         rcsb_id    = '5aka'
         prot_class = 'uL23'
 
@@ -204,7 +206,7 @@ if __name__ == "__main__":
         prot_class_msa = msa_dict(phylogenetic_correction_taxid=chain.src_organism_ids[0], include_only_classes=[prot_class])[prot_class]
         extended_msa   = msaclass_extend_temp(prot_class, prot_class_msa, chainseq_,chain.auth_asym_id, chain.parent_rcsb_id)
 
-        aln_conserved = [340, 351]
+        
         for seq in extended_msa:
             if  prot_class in seq.getLabel():
                 print(seq.getLabel())
@@ -219,6 +221,8 @@ if __name__ == "__main__":
         return aln_conserved
 
     def __ul24():
+        aln_conserved = [123,124,125]
+        return aln_conserved
         rcsb_id    = '5AKA'
         prot_class = 'uL24'
 
@@ -231,7 +235,6 @@ if __name__ == "__main__":
         prot_class_msa = msa_dict(phylogenetic_correction_taxid=chain.src_organism_ids[0], include_only_classes=[prot_class])[prot_class]
         extended_msa   = msaclass_extend_temp(prot_class, prot_class_msa, chainseq_,chain.auth_asym_id, chain.parent_rcsb_id)
 
-        aln_conserved = [123,124,125]
         for seq in extended_msa:
             if  prot_class in seq.getLabel():
                 print(seq.getLabel())
@@ -245,18 +248,54 @@ if __name__ == "__main__":
         return aln_conserved
     
 
-
     __ul23()
-    # backwards = util__forwards_match(seq,50)
-    
-    
-
-
-
-
+    __ul24()
 
     
+    #?-------------- exit_port_midpoint -----------------?#
 
+    rcsb_id = '5AKA'
+    ra      = RibosomeAssets(rcsb_id)
+    bp_struct  = ra.biopython_structure()
+    ul23    = ra.get_prot_by_nomclass('uL23')
+    ul24    = ra.get_prot_by_nomclass('uL24')
+
+    if ul23 == None or ul24 == None: raise LookupError("Could not find uL23 or uL24 in {}".format(rcsb_id))
+
+    bp_ul23 = ra.biopython_chain_get_seq(bp_struct,ul23.auth_asym_id, 'protein')
+    bp_ul24 = ra.biopython_chain_get_seq(bp_struct,ul24.auth_asym_id, 'protein')
+
+
+
+
+    #------
+    prot_class_msa = msa_dict(phylogenetic_correction_taxid=chain.src_organism_ids[0], include_only_classes=[prot_class])[prot_class]
+    extended_msa   = msaclass_extend_temp(prot_class, prot_class_msa, chainseq_,chain.auth_asym_id, chain.parent_rcsb_id)
+
+    for seq in extended_msa:
+        if  prot_class in seq.getLabel():
+            print(seq.getLabel())
+            subseq_ids = [46,47, 48]
+            fwd_resids = [ util__forwards_match(str(seq),aligned_id) for aligned_id in  subseq_ids]
+            print(SeqMatch.hl_ixs(str(seq), fwd_resids))
+        else:
+            print(seq.getLabel())
+            print(SeqMatch.hl_ixs(str(seq), aln_conserved,color=92))
+    #------
+
+    bwd_mapped_ul24 = [ util__backwards_match(bp_ul24, residue) for residue in __ul24() ]
+    bwd_mapped_ul23 = [ util__backwards_match(bp_ul23, residue) for residue in __ul23() ]
+
+    print(bwd_mapped_ul24)
+    print(bwd_mapped_ul23)
+
+
+
+
+
+
+
+    #?---------------------------------------------------?#
 
             
 
