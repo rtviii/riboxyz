@@ -62,14 +62,9 @@ class RibosomeAssets():
         with open(PTC_RESIDUES_PATH, 'r') as infile:
             return json.load(infile)
 
-    def _nomenclature_v2(self) -> dict[str, ProteinClass]:
-        if os.path.isfile(os.path.join(self._dir_path(), f"{self.rcsb_id}_nomenclaturev2.json")):
-            with open(os.path.join(self._dir_path(), f"{self.rcsb_id}_nomenclaturev2.json"), 'r') as infile:
-                return json.load(infile)
-
-        else:
-            with open(os.path.join("~/dev/docker_ribxz/api/ribctl/assets/nomenclaturev2/{}.json".format(self.rcsb_id.upper())), 'r') as infile:
-                return json.load(infile)
+    def ____nomenclature_v2(self) -> dict[str, ProteinClass]:
+        with open("/home/rxz/dev/docker_ribxz/api/ribctl/assets/nomenclaturev2/{}.json".format(self.rcsb_id.upper()), 'r') as infile:
+            return json.load(infile)
 
     def _json_profile_filepath(self):
         self._envcheck()
@@ -152,7 +147,12 @@ class RibosomeAssets():
             if class_ in rna.nomenclature and rna.assembly_id == assembly:
                 return rna
 
+
     def get_prot_by_nomclass(self, class_: ProteinClass, assembly: int = 0) -> Protein | None:
+        _auth_asym_id  = { v:k for k,v in self.____nomenclature_v2().items() }.get(class_,None)
+        if _auth_asym_id!= None: 
+            return self.get_chain_by_auth_asym_id(_auth_asym_id)[0]
+
         for prot in self.profile().proteins:
             if class_ in prot.nomenclature and prot.assembly_id == assembly:
                 return prot
