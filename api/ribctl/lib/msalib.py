@@ -150,6 +150,7 @@ def msa_dict(
                 pickle.dump(_, outfile, protocol=pickle.HIGHEST_PROTOCOL)
 
     def msa_dict_load_tax_pruned(taxid: int) -> dict[ProteinClass, MSA]:
+
         dictpath = os.path.join(RP_MSAS_PRUNED_PATH, f"{taxid}.pickle")
         if not os.path.exists(dictpath):
             raise FileNotFoundError(f"MSA dict for {taxid} not found")
@@ -158,32 +159,35 @@ def msa_dict(
                 return pickle.load(handle)
 
     if phylogenetic_correction_taxid > 0:
+
         try:
-            pruned_dict = msa_dict_load_tax_pruned(
-                phylogenetic_correction_taxid)
+            pruned_dict = msa_dict_load_tax_pruned(phylogenetic_correction_taxid)
             pruned_dict = sorted(pruned_dict.items())
-            return pruned_dict if len(include_only_classes) == 0 else {k: v for k, v in pruned_dict if k in include_only_classes}
+
+            return { k:v for k,v in pruned_dict } if len(include_only_classes) == 0 else {k: v for k, v in pruned_dict if k in include_only_classes}
+
         except:
             pruned_dict = {}
             for msafile in os.listdir(RP_MSAS_PATH):
-                classname = msafile.split("_")[0]
-                msa = prody.parseMSA(os.path.join(RP_MSAS_PATH, msafile))
-                msa_pruned = msa_phylo_nbhd(msa, phylogenetic_correction_taxid)
+                classname   = msafile.split("_")[0]
+                msa         = prody.parseMSA(os.path.join(RP_MSAS_PATH, msafile))
+                msa_pruned  = msa_phylo_nbhd(msa, phylogenetic_correction_taxid)
                 pruned_dict = {f"{classname}": msa_pruned, **pruned_dict}
-            pruned_dict = sorted(pruned_dict.items())
-            msa_dict_cache_tax_pruned_(
-                phylogenetic_correction_taxid, pruned_dict)
 
-            return pruned_dict if len(include_only_classes) == 0 else {k: v for k, v in pruned_dict if k in include_only_classes}
+            pruned_dict = sorted(pruned_dict.items())
+            msa_dict_cache_tax_pruned_(phylogenetic_correction_taxid, pruned_dict)
+
+            return { k:v for k,v in pruned_dict } if len(include_only_classes) == 0 else {k: v for k, v in pruned_dict if k in include_only_classes}
     else:
         msa_dict = {}
         for msafile in os.listdir(RP_MSAS_PATH):
             classname = msafile.split("_")[0]
             msa = prody.parseMSA(os.path.join(RP_MSAS_PATH, msafile))
             msa_dict = {f"{classname}": msa, **msa_dict}
+
         msa_dict = sorted(msa_dict.items())
 
-        return msa_dict if len(include_only_classes) == 0 else {k: v for k, v in msa_dict if k in include_only_classes}
+        return { k:v for k,v in msa_dict } if len(include_only_classes) == 0 else {k: v for k, v in msa_dict if k in include_only_classes}
 
 
 def fasta_from_string(seq: str, _id: str, description=""):
