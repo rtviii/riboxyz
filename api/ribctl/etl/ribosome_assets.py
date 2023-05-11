@@ -6,7 +6,7 @@ from Bio.PDB.Structure import Structure
 from Bio.PDB.Chain import Chain
 from pprint import pprint
 from typing import Optional, Tuple
-from api.ribctl.lib.msalib import AMINO_ACIDS_3_TO_1_CODE
+from api.ribctl.lib.msalib import AMINO_ACIDS_1_TO_3_CODE, AMINO_ACIDS_3_TO_1_CODE
 from api.ribctl.lib.types.types_binding_site import BindingSite
 from api.ribctl.lib.types.types_poly_nonpoly_ligand import PolymericFactorClass, RNAClass
 from api.logs.loggers import get_updates_logger
@@ -193,6 +193,10 @@ class RibosomeAssets():
         #             _r.resname = "U"
         seq = ''
         for i in ress:
+            if i.resname not in AMINO_ACIDS_3_TO_1_CODE.keys():
+                print("Unknown residue:", i.resname)
+                continue
+
             if protein_rna == 'rna':
                 seq += i.resname
             else:
