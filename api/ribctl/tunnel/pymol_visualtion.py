@@ -3,7 +3,7 @@ import os
 from pprint import pprint
 from typing import List
 from pymol import cmd
-from api.scratch_tunnel_workflow import ptc_residues_calculate_midpoint, ptc_resdiues_get, tunnel_obstructions
+from api.scratch_tunnel_workflow import extract_exit_port_residues, ptc_residues_calculate_midpoint, ptc_resdiues_get, tunnel_obstructions
 
 RIBETL_DATA = os.environ.get("RIBETL_DATA")
 
@@ -71,7 +71,6 @@ colormap__LSU_Proteins = {
                           "P1/P2": "zirconium"
                           
                           }
-
 colormap__SSU_Proteins = {
                      "bS1" : "actinium",
                      "eS1" : "aluminum",
@@ -240,10 +239,11 @@ def sload(pdbid: str):
     cmd.delete('all')
     cmd.load(path)
 
-cmd.extend("sload", sload)
-cmd.extend("by_chain", struct_paint_chains)
-cmd.extend("ptc_w_markers", ptc_raw_w_markerks)
-cmd.extend("list_bacteria", list_bacteria)
-cmd.extend("tun_obstructions", visualize_obstructions)
+cmd.extend("sload"           , sload                                                                                                  )
+cmd.extend("by_chain"        , struct_paint_chains                                                                                    )
+cmd.extend("ptc_w_markers"   , ptc_raw_w_markerks                                                                                     )
+cmd.extend("list_bacteria"   , list_bacteria                                                                                          )
+cmd.extend("tun_obstructions", visualize_obstructions                                                                                 )
+cmd.extend("exitport"        , lambda                 rcsb_id: create_marker_at_atom("Exit port", extract_exit_port_residues(rcsb_id)))
 
 

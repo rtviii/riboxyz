@@ -203,15 +203,41 @@ def msa_class_fit_chain(chain: Protein, prot_class: ProteinClass, custom_seq=Non
     raise AssertionError(
         "Could not find sequence in for {} in aligned class. Likely label error {}".format(prot_class))
 
-    
+def extract_exit_port_residues(rcsb_id:str):
+    ra        = RibosomeAssets(rcsb_id)
+    bp_struct = ra.biopython_structure()
+    ul23      = ra.get_prot_by_nomclass('uL23')
+    ul24      = ra.get_prot_by_nomclass('uL24')
 
+    if ul23 == None or ul24 == None:
+        raise LookupError("Could not find uL23 or uL24 in {}".format(rcsb_id))
+
+    bp_ul23_seq = ra.biopython_chain_get_seq(bp_struct, ul23.auth_asym_id, 'protein')
+    bp_ul24_seq = ra.biopython_chain_get_seq(bp_struct, ul24.auth_asym_id, 'protein')
+    
+    bp_ul23 = ra.biopython_get_chain(ul23.auth_asym_id)
+    bp_ul24 = ra.biopython_get_chain(ul24.auth_asym_id)
+
+    aligned_ul23 = msa_class_fit_chain(ul23, 'uL23', custom_seq=bp_ul23_seq)
+    aligned_ul24 = msa_class_fit_chain(ul24, 'uL24', custom_seq=bp_ul24_seq)
+
+    backwards_mapped_ul24 = [util__backwards_match(aligned_ul24, residue) for residue in __ul24()]
+    backwards_mapped_ul23 = [util__backwards_match(aligned_ul23, residue) for residue in __ul23()]
+
+    residues_ul23 = [bp_ul24[i] for i in backwards_mapped_ul24]
+    residues_ul24 = [bp_ul23[i] for i in backwards_mapped_ul23]
+
+    ul23_M = np.average([*map(lambda res:res.center_of_mass(), residues_ul23)])
+    ul24_M = np.average([*map(lambda res:res.center_of_mass(), residues_ul24)])
+
+    return np.average([ul23_M, ul24_M], axis=0)
 if __name__ == "__main__":
     """Generating midpoint between ul24 and ul23 """
 
     def __ul23():
         aln_conserved = [340, 351]
         return aln_conserved
-        rcsb_id = '5aka'
+        rcsb_id    = '5aka'
         prot_class = 'uL23'
 
         RA = RibosomeAssets(rcsb_id)
@@ -239,7 +265,6 @@ if __name__ == "__main__":
                 # print(str(seq))
                 print(SeqMatch.hl_ixs(str(seq), aln_conserved, color=92))
         return aln_conserved
-
     def __ul24():
         aln_conserved = [123, 124, 125]
         return aln_conserved
@@ -276,48 +301,13 @@ if __name__ == "__main__":
 
     # ?-------------- exit_port_midpoint -----------------?#
 
-    def extract_exit_port_residues(rcsb_id:str):
-        ra = RibosomeAssets(rcsb_id)
-        bp_struct = ra.biopython_structure()
-        ul23 = ra.get_prot_by_nomclass('uL23')
-        ul24 = ra.get_prot_by_nomclass('uL24')
 
-        if ul23 == None or ul24 == None:
-            raise LookupError("Could not find uL23 or uL24 in {}".format(rcsb_id))
-
-        bp_ul23_seq = ra.biopython_chain_get_seq(bp_struct, ul23.auth_asym_id, 'protein')
-        bp_ul24_seq = ra.biopython_chain_get_seq(bp_struct, ul24.auth_asym_id, 'protein')
-        
-        bp_ul23 = ra.biopython_get_chain(ul23.auth_asym_id)
-        bp_ul24 = ra.biopython_get_chain(ul24.auth_asym_id)
-
-        aligned_ul23    = msa_class_fit_chain(ul23, 'uL23', custom_seq=bp_ul23_seq)
-        aligned_ul24    = msa_class_fit_chain(ul24, 'uL24', custom_seq=bp_ul24_seq)
-
-        backwards_mapped_ul24 = [util__backwards_match(aligned_ul24, residue) for residue in __ul24()]
-        backwards_mapped_ul23 = [util__backwards_match(aligned_ul23, residue) for residue in __ul23()]
-
-        residues_ul23 =[bp_ul24[i] for i in backwards_mapped_ul24]
-        residues_ul24 =[bp_ul23[i] for i in backwards_mapped_ul23]
-
-        ul23_M = np.average([*map(lambda res:res.center_of_mass(), residues_ul23)])
-        ul24_M = np.average([*map(lambda res:res.center_of_mass(), residues_ul24)])
-        
-        print(ul23_M, ul24_M)
-
-
-
-
-        # print([ AMINO_ACIDS_3_TO_1_CODE[residue.get_resname()] for residue in residues_ul23])
-        # print([ AMINO_ACIDS_3_TO_1_CODE[residue.get_resname()] for residue in residues_ul24])
-
-        # print(backwards_mapped_ul24 ,residues_ul23)
-        # print(backwards_mapped_ul24 ,residues_ul24)
 
     for x in BACTERIAL:
         try:
             print("Processing {}".format(x))
-            extract_exit_port_residues(x)
+            ep = extract_exit_port_residues(x)
+            print(ep)
         except Exception as e:
             print("Failed to process {}".format(x))
             print(e)
