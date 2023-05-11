@@ -8,7 +8,7 @@ from prody import MSA, calcShannonEntropy
 from api.rbxz_bend.settings import RIBETL_DATA
 from api.ribctl.etl.ribosome_assets import RibosomeAssets
 from api.ribctl.lib.types.types_ribosome import Protein, ProteinClass, RibosomeStructure
-from api.ribctl.lib.msalib import msa_dict_get_meta_info, msa_dict, msaclass_extend, msaclass_extend_temp
+from api.ribctl.lib.msalib import msa_dict_get_meta_info, msa_dict, msaclass_extend_temp
 
 CRED      = '\033[91m'
 CEND      = '\033[0m'
@@ -39,7 +39,6 @@ def seq_H_fit_class(base_class: ProteinClass, base_class_msa: MSA, target_fasta:
     return {base_class: H_delta}
 
 async def seq_H_fit_class_multi(chain: Protein, msa_profiles_dict: dict[ProteinClass, MSA], workers=None, omitgaps: bool = False, vvv: bool = False) -> tuple[ProteinClass, Protein]:
-
     with ThreadPoolExecutor(max_workers=min(multiprocessing.cpu_count(), len(msa_profiles_dict)) if workers is None else workers) as executor:
         futures = []
         for class_name, base_msa in msa_profiles_dict.items():
@@ -78,17 +77,16 @@ async def struct_classify_chains(chains: list[Protein], vvv: bool = False, omitg
     # preload msa profiles by organism
     msa_profiles = {}
     for chain in chains:
-        msa_profiles[chain.src_organism_ids[0]] = msa_dict(
-            phylogenetic_correction_taxid=chain.src_organism_ids[0])
+        msa_profiles[chain.src_organism_ids[0]] = msa_dict(phylogenetic_correction_taxid=chain.src_organism_ids[0])
 
     # classify chains
     return await asyncio.gather(*[seq_H_fit_class_multi(chain, msa_profiles[chain.src_organism_ids[0]],  omitgaps=omitgaps,vvv=vvv ) for chain in chains])
 
 def process_struct(rcsb_id: str):
 
-    R = RibosomeAssets(rcsb_id.upper())
+    R       = RibosomeAssets(rcsb_id.upper())
     profile = R.profile()
-    rps = profile.proteins
+    rps     = profile.proteins
 
     # if more than one assemlby is present, only use the first one
     if len(profile.assembly_map) > 1:
@@ -101,7 +99,7 @@ def process_struct(rcsb_id: str):
         rps = list(filter(lambda _: _.auth_asym_id in first_assembly, rps))
 
     loop = asyncio.get_event_loop()
-    result = loop.run_until_complete(struct_classify_chains(rps, vvv=True,omitgaps=False))
+    result = loop.run_until_complete(struct_classify_chains(rps, omitgaps=False))
     total = {}
 
     for assigned_class, chain in result:
@@ -134,15 +132,20 @@ def _generate_nomenclature(struct_id_list: list[str], gen_all: bool = False):
             def nomv2_path(structid):
                 return os.path.join(assets_nomenclaturev2, f"{structid.upper()}.json")
 
+            if os.path.exists(nomv2_path(struct)):
+                print("Skipping {}. Exists.".format(nomv2_path(struct)))
+                continue
+
             if len(struct) != 4 or struct == '6OXI':
                 continue
+
             x = pool.submit(process_struct, struct)
 
             def save_fut_result(rcsb_id):
                 def _(f: Future):
                     if f.exception() is not None:
                         print(f.exception())
-                        raise LookupError()
+                        raise LookupError("")
                     else:
                         r = f.result()
                         with open(nomv2_path(rcsb_id), 'w') as outfile:
@@ -154,11 +157,12 @@ def _generate_nomenclature(struct_id_list: list[str], gen_all: bool = False):
 
 if __name__ == "__main__":
 
-    taxids = {}
-    for rcsb_id in BACTERIAL:
-        taxids.update({rcsb_id: true_taxid})
-        with open("true_taxids.json", 'w') as outfile:
-            json.dump(taxids, outfile, indent=4)
+    _generate_nomenclature(BACTERIAL)
+    # taxids = {}
+    # for rcsb_id in BACTERIAL:
+    #     taxids.update({rcsb_id: true_taxid})
+    #     with open("true_taxids.json", 'w') as outfile:
+    #         json.dump(taxids, outfile, indent=4)
 
     # nomv2_duplicates()
 
