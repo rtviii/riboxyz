@@ -69,7 +69,6 @@ BACTERIAL = ['4V4I', '4WSD', '4V87', '4WQ1', '4V5D', '1NWX', '4V6Z', '6QNR', '5T
               '4V8N', '7M4X', '4V76', '5MDW', '4TUA', '3PIP', '6GSJ', '5ND8', '7SSW', '6BZ8', '1VY7']
 
 RIBETL_DATA = os.environ.get('RIBETL_DATA')
-
 # https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4574749/pdf/1719.pdf
 DORIS_ET_AL = {
     "subseq_6": "AAGACCC",
@@ -348,41 +347,60 @@ def make_cylinder(p1:list[float], p2:list[float], R:float):
         "radius": R
     }
 
-def point_inside_cylinder(cylinder, point):
+def pt_is_inside_cylinder(cylinder, point):
+
     distance_xy = math.sqrt((point[0] - cylinder["center"][0])**2 + (point[1] - cylinder["center"][1])**2)
 
     if distance_xy <= cylinder["radius"]:
+
         distance_top    = abs(point[2] - (cylinder["center"][2] + cylinder["height"]/2))
         distance_bottom = abs(point[2] - (cylinder["center"][2] - cylinder["height"]/2))
+
         if distance_top <= cylinder["height"]/2 and distance_bottom <= cylinder["height"]/2:
             return True
 
     return False
 
-
 if __name__ == "__main__":
 
-    """Generating midpoint between ul24 and ul23 """
-    # ?-------------- exit_port_midpoint -----------------?#
-
-    for rcsb_id in BACTERIAL:
-        try:
-            posn_exit_port = exit_port_posn(rcsb_id)
-            posn_ptc       = ptc_residues_calculate_midpoint(*ptc_resdiues_get(rcsb_id, 0))
-            PTC_COMB_PATH  = os.path.join("/home/rxz/dev/docker_ribxz/api/ribctl/assets/landmarks", "{}.json".format(rcsb_id))
-
-            landmarks_dict = {
-                "ptc"      : posn_ptc,
-                "exit_port": posn_exit_port
-            }
-
-            with open(PTC_COMB_PATH, 'w') as f:
-                json.dump(posn_ptc, f)
+    import numpy as np
+    import matplotlib.pyplot as plt
 
 
-        except Exception as e:
-            print("Failed to process {}".format(rcsb_id))
-            print(e)
+    # rcsb_id = "4V4I"
+    # struct,profile = RibosomeAssets(rcsb_id).get_struct_and_profile()
+    # atoms  = struct.get_atoms()
+    # cylinder = make_cylinder([-170.46199798583984, 20.90049934387207, -82.8115005493164], [-192.08737182617188, 70.13729095458984, -36.43252182006836], 7)
+    # # tunnel_atoms = [*filter(lambda atom: point_inside_cylinder(cylinder, atom.get_coord()), atoms)]
+    # for atom in atoms:
+    #     print(atom.get_coord())
+    #     print(point_inside_cylinder(cylinder, list(atom.get_coord())))
+    # print(len(atoms))
+    # print(len(tunnel_atoms))
+
+    # for rcsb_id in BACTERIAL:
+    #     try:
+    #         PTC_COMB_PATH  = os.path.join("/home/rxz/dev/docker_ribxz/api/ribctl/assets/landmarks", "{}.json".format(rcsb_id))
+    #         if os.path.exists(PTC_COMB_PATH):
+    #             print("File exists, skipping {}".format(PTC_COMB_PATH))
+    #             continue
+    #         posn_exit_port = exit_port_posn(rcsb_id)
+    #         posn_ptc       = ptc_residues_calculate_midpoint(*ptc_resdiues_get(rcsb_id, 0))
+
+    #         landmarks_dict = {
+    #             "ptc"      : posn_ptc,
+    #             "exit_port": posn_exit_port
+    #         }
+
+
+    #         with open(PTC_COMB_PATH, 'w') as f:
+    #             json.dump(landmarks_dict, f)
+    #             print("Saved {}".format(PTC_COMB_PATH))
+
+
+    #     except Exception as e:
+    #         print("Failed to process {}".format(rcsb_id))
+    #         print(e)
     # ?---------------------------------------------------?#
 
     # msaclass_extend_temp()
