@@ -3,25 +3,33 @@ from pyhmmer import hmmsearch,utils
 import pyhmmer
 from pyhmmer.easel import SequenceFile, Sequence,DigitalSequence, Alphabet
 
-HMM_PROFILES = "./prot_hmms"
+from api.ribctl.lib.types.types_poly_nonpoly_ligand import list_ProteinClass
+from api.scratch_tunnel_workflow import BACTERIAL
+
+HMM_PROFILES = "/home/rxz/dev/docker_ribxz/api/prot_hmms/"
+bl12path     = "/home/rxz/dev/docker_ribxz/api/3J7Z_bL12.fasta"
+# class_hmm    = "/home/rxz/dev/docker_ribxz/api/prot_hmms/bL12.hmm"
 
 
-seq       = "/home/rxz/dev/docker_ribxz/api/3J7Z_bL12.fasta"
-class_hmm = "/home/rxz/dev/docker_ribxz/api/prot_hmms/bL12.hmm"
+def compare_seq_to_hmm(seqpath, hmmpath):
+    with pyhmmer.plan7.HMMFile(hmmpath) as hmm_file:
+        hmm = hmm_file.read()
+
+    with pyhmmer.easel.SequenceFile(seqpath, digital=True, alphabet=Alphabet.amino()) as seq_file:
+        sequences = seq_file.read_block()
+
+    pipeline = pyhmmer.plan7.Pipeline(hmm.alphabet)
+    return [ hit for hit in  pipeline.search_hmm(hmm, sequences) ]
+
+for rcsb_id in BACTERIAL:
+    
 
 
-sequence_file = SequenceFile(seq)
-sequence = sequence_file.read()
-print(sequence)
+for i in list_ProteinClass:
+    class_hmm = os.path.join(HMM_PROFILES, f"{i}.hmm")
+    compare_seq_to_hmm(bl12path, class_hmm)
 
-with pyhmmer.plan7.HMMFile(class_hmm) as hmm_file:
-    hmm = hmm_file.read()
 
-with pyhmmer.easel.SequenceFile(seq, digital=True, alphabet=Alphabet.amino()) as seq_file:
-    sequences = seq_file.read_block()
-
-pipeline = pyhmmer.plan7.Pipeline(hmm.alphabet)
-hits     = pipeline.search_hmm(hmm, sequences)
 
 
 # seq          = SequenceFile("/home/rxz/dev/docker_ribxz/api/3J7Z_bL12.fasta", digital=True)
