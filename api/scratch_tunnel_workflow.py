@@ -179,7 +179,7 @@ def ptc_residues_calculate_midpoint(reslist: list[Residue], auth_asym_id: str) -
         raise Exception("Could not identify chain")
 
     subseq_residues = ptc_coord_dict[lsu_rna]
-    subseq_length = len(subseq_residues)
+    subseq_length   = len(subseq_residues)
 
     if "O4'" in [*subseq_residues.values()][subseq_length - 2]:
         # pre last residue of the comb
