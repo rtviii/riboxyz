@@ -23,8 +23,17 @@ __pycache__/**
 local_venv/**
 local_venv
 
+**/*venv/**
+**/*venv
+*venv
+
+
+
 **/*.log
 *.log
 
 **/*.pickle
 *.pickle
+
+
+
