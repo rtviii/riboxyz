@@ -3,7 +3,6 @@ import pickle
 import os
 import random
 import typing
-import prody
 import requests
 from api.ribctl.lib.types.types_ribosome import RNA, PolymericFactor, Protein, ProteinClass
 from Bio import AlignIO
@@ -14,12 +13,12 @@ from Bio.Seq import Seq
 from Bio import SeqIO
 from Bio import SeqRecord
 from prody import MSA, MSAFile, parseMSA
-import prody as prd
+import prody 
 import requests
 import os
 from api.ribctl.lib.types.types_ribosome import ProteinClass
 from ete3 import NCBITaxa
-prd.confProDy(verbosity='none')
+# prd.confProDy(verbosity='none')
 RIBETL_DATA = os.environ.get('RIBETL_DATA')
 
 TAXID_BACTERIA          = 2
