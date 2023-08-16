@@ -1,6 +1,7 @@
 
-
 # Extract `ribctl` from `api` structure
+
+- there ought to be two separate clis for both
 
 # CLI
 

@@ -5,14 +5,13 @@ import argparse
 import asyncio
 import json
 import os
-from api.ribctl.etl.ribosome_assets import Assetlist, RibosomeAssets, obtain_assets, obtain_assets_processpool, obtain_assets_threadpool
-from api.ribctl.lib.types.types_ribosome import RibosomeStructure
-from api.ribctl.taxonomy import __node_lineage
-from logs.loggers import get_updates_logger
+from ribctl.etl.ribosome_assets import Assetlist, RibosomeAssets, obtain_assets, obtain_assets_processpool, obtain_assets_threadpool
+from ribctl.lib.types.types_ribosome import RibosomeStructure
 from ribctl.etl.struct_rcsb_api import current_rcsb_structs, gql_monolith, query_rcsb_api, process_pdb_record
+from ribctl.lib.taxonomy import filter_by_parent_tax, ncbi
+
 from api.db.ribosomexyz import ribosomexyzDB
 from api.rbxz_bend.settings import NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER, RIBETL_DATA
-from api.ribctl.taxonomy import filter_by_parent_tax, ncbi
 
 
 arg = argparse.ArgumentParser(

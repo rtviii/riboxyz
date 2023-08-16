@@ -2,7 +2,7 @@ from typing import Any, Optional
 import typing
 from typing import NewType
 from pydantic import BaseModel
-from api.ribctl.lib.types.types_poly_nonpoly_ligand import LSUProteinClass, NonpolymericLigandClass, PolymericFactorClass, RNAClass, SSUProteinClass
+from ribctl.lib.types.types_poly_nonpoly_ligand import LSUProteinClass, NonpolymericLigandClass, PolymericFactorClass, RNAClass, SSUProteinClass
 
 RCSB_ID = NewType('RCSB_ID', str)
 
