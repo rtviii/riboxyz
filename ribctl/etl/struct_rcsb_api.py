@@ -4,7 +4,6 @@ from pathlib import Path
 from pprint import pprint
 from typing import Any
 import requests
-from ribctl.etl.ribosome_assets import RibosomeAssets
 from ribctl.lib.types.types_poly_nonpoly_ligand import PolymericFactorClass
 from ribctl.lib.types.types_ribosome import RNA, AssemblyInstancesMap, NonpolymericLigand, PolymericFactor, Protein, ProteinClass, RibosomeStructure
 from fuzzywuzzy import process, fuzz
@@ -75,7 +74,7 @@ def factor_classify(description: str) -> PolymericFactorClass | None:
 
 #! Reshaping
 
-def __infer_organisms_from_polymers(polymers: list[RNA | Protein]):
+def infer_organisms_from_polymers(polymers: list[RNA | Protein]):
     """Grabbing taxid from every polymer in the structure to see which taxid prevails proportionally. Only needed because rcsb does not provide unequivocal taxid for structures (sometimes it's host+source)"""
 
     host_organism_names: list[str] = []
@@ -96,7 +95,7 @@ def __infer_organisms_from_polymers(polymers: list[RNA | Protein]):
         "host_organism_names": list(map(str, set(host_organism_names)))
     }
 
-def __extract_external_refs(external_refs):
+def extract_external_refs(external_refs):
     """
     external_refs: list[{ link: string; type: string; id: string }]
     """
@@ -386,15 +385,15 @@ def query_rcsb_api(gql_string: str) -> dict:
 class ETLPipeline:
 
     rcsb_data_dict: dict
-    assets        : RibosomeAssets
     asm_maps      : list[AssemblyInstancesMap]
-    rProteins     : list[Protein]
-    rRNA          : list[RNA]
+    rProteins     : list[Protein] | None
+    rRNA          : list[RNA] | None
 
-    def __init__(self, response: dict, existing_assets: RibosomeAssets):
+    def __init__(self, response: dict):
         self.rcsb_data_dict = response
-        self.assets         = existing_assets
         self.asm_maps       = asm_parse(response['assemblies'])
+        self.rRNA           = None
+        self.rProteins      = None
 
     def process_polypeptides(self)->tuple[list[Protein], list[PolymericFactor]]:
 
@@ -417,6 +416,8 @@ class ETLPipeline:
                     reshaped_proteins.extend(poly_reshape_to_rProtein(poly, self.asm_maps))
             else:
                 ...
+
+        self.rProteins = reshaped_proteins
         return ( reshaped_proteins, reshaped_polymeric_factors )
 
     def process_polynucleotides(self)->tuple[list[RNA], list[PolymericFactor]]:
@@ -438,6 +439,7 @@ class ETLPipeline:
                 #TODO: DIFFERENTIATE BETWEEN MRNA (regex) AND TRNA (HMM workflow )
                 reshaped_rnas.extend(poly_reshape_to_rRNA(poly_rna, self.asm_maps))
 
+        self.rRNA = reshaped_rnas
         return ( reshaped_rnas, reshaped_polymeric_factors )
 
     def process_nonpolymers(self)->list[NonpolymericLigand]:
@@ -447,8 +449,8 @@ class ETLPipeline:
         return reshaped_nonpoly
 
     def process_metadata(self):
-            organisms = __infer_organisms_from_polymers([*self.rProteins, *self.rRNA])
-            externalRefs = __extract_external_refs(self.rcsb_data_dict['rcsb_external_references'])
+            organisms = infer_organisms_from_polymers([*self.rProteins, *self.rRNA])
+            externalRefs = extract_external_refs(self.rcsb_data_dict['rcsb_external_references'])
             if self.rcsb_data_dict['citation'] != None and len(self.rcsb_data_dict['citation']) > 0:
                 pub = self.rcsb_data_dict['citation'][0]
             else:
@@ -466,9 +468,12 @@ class ETLPipeline:
             return [organisms, externalRefs,pub,kwords_text,kwords]
 
     def process_structure(self):
-        [ reshaped_proteins, reshaped_polymeric_factors ] = self.process_polypeptides()
-        [ reshaped_rnas, reshaped_polymeric_factors ]     = self.process_polynucleotides()
-        reshaped_nonpolymers                                           = self.process_nonpolymers()
+        [ reshaped_proteins, reshaped_polymeric_factors_prot ] = self.process_polypeptides()
+        [ reshaped_rnas, reshaped_polymeric_factors_rna ]     = self.process_polynucleotides()
+
+        assert (len(reshaped_proteins) + len(reshaped_rnas) + len(reshaped_polymeric_factors_rna)+len(reshaped_polymeric_factors_prot)) == len(self.rcsb_data_dict['polymer_entities'])
+
+        reshaped_nonpolymers                              = self.process_nonpolymers()
         [organisms, externalRefs,pub,kwords_text,kwords]  = self.process_metadata()
 
         reshaped = RibosomeStructure(
@@ -492,16 +497,12 @@ class ETLPipeline:
 
             proteins             = reshaped_proteins,
             rnas                 = reshaped_rnas,
-            polymeric_factors    = reshaped_polymeric_factors,
+            polymeric_factors    = [*reshaped_polymeric_factors_prot, *reshaped_polymeric_factors_rna],
             nonpolymeric_ligands = reshaped_nonpolymers,
 
             assembly_map         = self.asm_maps
 
         )
-        assert (reshaped.rnas.__len__() if reshaped.rnas != None else 0
-                + reshaped.proteins.__len__()
-                + reshaped.polymeric_factors.__len__() if reshaped.polymeric_factors != None else 0
-                == len(self.rcsb_data_dict['polymer_entities']))
 
         return reshaped
 
@@ -543,8 +544,8 @@ def ____process_pdb_record(rcsb_id: str) -> RibosomeStructure:
         nonpoly) for nonpoly in nonpoly_entities] if nonpoly_entities != None and len(nonpoly_entities) > 0 else []
 
     # type: ignore (only accessing commong fields)
-    organisms = __infer_organisms_from_polymers(reshaped_proteins)
-    externalRefs = __extract_external_refs(response['rcsb_external_references'])
+    organisms = infer_organisms_from_polymers(reshaped_proteins)
+    externalRefs = extract_external_refs(response['rcsb_external_references'])
     if response['citation'] != None and len(response['citation']) > 0:
         pub = response['citation'][0]
     else:
@@ -595,7 +596,7 @@ def ____process_pdb_record(rcsb_id: str) -> RibosomeStructure:
     return reshaped
 
 
-def process_pdb_record(rcsb_id: str) -> RibosomeStructure:
+def ___process_pdb_record(rcsb_id: str) -> RibosomeStructure:
 
     """
     returns dict of the shape types_RibosomeStructure 
@@ -634,8 +635,8 @@ def process_pdb_record(rcsb_id: str) -> RibosomeStructure:
         nonpoly) for nonpoly in nonpoly_entities] if nonpoly_entities != None and len(nonpoly_entities) > 0 else []
 
     # type: ignore (only accessing commong fields)
-    organisms = __infer_organisms_from_polymers(reshaped_proteins)
-    externalRefs = __extract_external_refs(
+    organisms = infer_organisms_from_polymers(reshaped_proteins)
+    externalRefs = extract_external_refs(
         response['rcsb_external_references'])
 
     if response['citation'] != None and len(response['citation']) > 0:
