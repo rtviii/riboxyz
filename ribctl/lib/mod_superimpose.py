@@ -4,10 +4,10 @@ import os
 from typing import Tuple
 from ribctl.lib.types.types_ribosome import RibosomeStructure
 from pymol import cmd
-from rbxz_bend.settings import RIBETL_DATA
 from ribctl.lib.mod_transpose_bsites import SeqMatch
 from ribctl.lib.utils import open_structure
 
+RIBETL_DATA = os.environ.get("RIBETL_DATA")
 
 """ The goal is to have a module that,
 given two files

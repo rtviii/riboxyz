@@ -4,16 +4,16 @@ from pathlib import Path
 from pprint import pprint
 from typing import Any
 import requests
-from api.ribctl.lib.types.types_poly_nonpoly_ligand import PolymericFactorClass
-from api.ribctl.lib.types.types_ribosome import RNA, AssemblyInstancesMap, NonpolymericLigand, PolymericFactor, Protein, ProteinClass, RibosomeStructure
+from ribctl.lib.types.types_poly_nonpoly_ligand import PolymericFactorClass
+from ribctl.lib.types.types_ribosome import RNA, AssemblyInstancesMap, NonpolymericLigand, PolymericFactor, Protein, ProteinClass, RibosomeStructure
 from fuzzywuzzy import process, fuzz
-from api.ribctl.lib.types.types_poly_nonpoly_ligand import PolymericFactorClass, list_PolymericFactorClass, list_NonpolymericLigandClass
-from api.ribctl.etl.gql_querystrings import monolithic
+from ribctl.lib.types.types_poly_nonpoly_ligand import PolymericFactorClass, list_PolymericFactorClass, list_NonpolymericLigandClass
+from ribctl.etl.gql_querystrings import monolithic
 import re
 
 p = Path(__file__).parents[1]
-lsu_path = os.path.join(p, 'assets', 'subunit_map_LSU.json')
-ssu_path = os.path.join(p, 'assets', 'subunit_map_SSU.json')
+lsu_path = os.path.join(p, '_assets', 'subunit_map_LSU.json')
+ssu_path = os.path.join(p, '_assets', 'subunit_map_SSU.json')
 
 LSU_map = {k: v for k, v in json.load(open(lsu_path, 'r')).items()}
 SSU_map = {k: v for k, v in json.load(open(ssu_path, 'r')).items()}

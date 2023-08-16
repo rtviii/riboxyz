@@ -6,16 +6,15 @@ from Bio.PDB.Structure import Structure
 from Bio.PDB.Chain import Chain
 from pprint import pprint
 from typing import Optional, Tuple
-from api.ribctl.lib.msalib import AMINO_ACIDS_1_TO_3_CODE, AMINO_ACIDS_3_TO_1_CODE
-from api.ribctl.lib.types.types_binding_site import BindingSite
-from api.ribctl.lib.types.types_poly_nonpoly_ligand import PolymericFactorClass, RNAClass
-from api.logs.loggers import get_updates_logger
-from api.ribctl.lib.mod_extract_bsites import bsite_nonpolymeric_ligand, struct_ligand_ids, struct_polymeric_factor_ids, bsite_polymeric_factor, bsite_polymeric_factor
-from api.ribctl.lib.mod_split_rename import split_rename
-from api.ribctl.etl.struct_rcsb_api import current_rcsb_structs, process_pdb_record
-from api.ribctl.lib.mod_render_thumbnail import render_thumbnail
-from api.ribctl.lib.utils import download_unpack_place, open_structure
-from api.ribctl.lib.types.types_ribosome import RNA, PolymerClass, PolymericFactor, Protein, ProteinClass, RibosomeStructure
+from ribctl.lib.msalib import AMINO_ACIDS_1_TO_3_CODE, AMINO_ACIDS_3_TO_1_CODE
+from ribctl.lib.types.types_binding_site import BindingSite
+from ribctl.lib.types.types_poly_nonpoly_ligand import PolymericFactorClass, RNAClass
+from ribctl.lib.mod_extract_bsites import bsite_nonpolymeric_ligand, struct_ligand_ids, struct_polymeric_factor_ids, bsite_polymeric_factor, bsite_polymeric_factor
+from ribctl.lib.mod_split_rename import split_rename
+from ribctl.etl.struct_rcsb_api import current_rcsb_structs, process_pdb_record
+from ribctl.lib.mod_render_thumbnail import render_thumbnail
+from ribctl.lib.utils import download_unpack_place, open_structure
+from ribctl.lib.types.types_ribosome import RNA, PolymerClass, PolymericFactor, Protein, ProteinClass, RibosomeStructure
 from pydantic import BaseModel, parse_obj_as
 from concurrent.futures import ALL_COMPLETED, Future, ProcessPoolExecutor, ThreadPoolExecutor, wait
 import os
