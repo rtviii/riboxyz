@@ -4,6 +4,7 @@ from pathlib import Path
 from pprint import pprint
 from typing import Any
 import requests
+from ribctl.etl.ribosome_assets import RibosomeAssets
 from ribctl.lib.types.types_poly_nonpoly_ligand import PolymericFactorClass
 from ribctl.lib.types.types_ribosome import RNA, AssemblyInstancesMap, NonpolymericLigand, PolymericFactor, Protein, ProteinClass, RibosomeStructure
 from fuzzywuzzy import process, fuzz
@@ -326,6 +327,15 @@ def poly_reshape_to_protein(plm, assembly_maps: list[AssemblyInstancesMap]) -> l
 
 def gql_monolith(rcsb_id): return monolithic.replace("$RCSB_ID", rcsb_id.upper())
 
+
+"""This takes a single rcsb_id and observes that the corresponding structure is:\
+     - retrieved from RCSB
+     - processed according to the pipeline of methods 
+     - placed along with derivative files in the correct directory (via RibosomeAssets helper class)
+     - (OPTIONAL) loaded into the database if a connection exists"""
+
+
+
 def current_rcsb_structs() -> list[str]:
     """Return all structures in the rcsb that contain the phrase RIBOSOME and have more than 25 protein entities"""
 
@@ -371,6 +381,42 @@ def query_rcsb_api(gql_string: str) -> dict:
     else:
         raise Exception("No data found for query: {}".format(gql_string))
 
+
+
+class ETLPipeline:
+    rcsb_data_dict: dict
+    assets: RibosomeAssets
+
+    def __init__(self, response: dict, existing_assets: RibosomeAssets):
+        self.rcsb_data_dict = response
+        self.assets = existing_assets
+
+    def process_polypeptides(self):
+
+
+        poly_entities = self.rcsb_data_dict['polymer_entities']
+
+        proteins = []
+        reshaped_proteins         : list[Protein]         = []
+        reshaped_rnas             : list[RNA]             = []
+        reshaped_polymeric_factors: list[PolymericFactor] = []
+
+        def is_protein(poly): return poly['entity_poly']['rcsb_entity_polymer_type'] == 'Protein'
+
+        for poly in poly_entities:
+            # A polymer can be either rna or protein
+
+            if is_protein(poly):
+                # a protein can be either a ribosomal protein, a factor or a nascent chain
+                if factor_classify(poly_prot['rcsb_polymer_entity']['pdbx_description']) != None:
+                    reshaped_polymeric_factors.extend(poly_reshape_to_factor(poly_prot, assembly_maps))
+                else:
+                    reshaped_proteins.extend(poly_reshape_to_protein(poly_prot, assembly_maps))
+
+            else:
+                ...
+
+
 def process_pdb_record(rcsb_id: str) -> RibosomeStructure:
     """
     returns dict of the shape types_RibosomeStructure 
@@ -382,7 +428,6 @@ def process_pdb_record(rcsb_id: str) -> RibosomeStructure:
     assembly_maps    = asm_parse(response['assemblies'])
 
     def is_protein(poly): return poly['entity_poly']['rcsb_entity_polymer_type'] == 'Protein'
-
     proteins, rnas = [], []
     for poly in poly_entities:
         proteins.append(poly) if is_protein(poly) else rnas.append(poly)
@@ -409,6 +454,7 @@ def process_pdb_record(rcsb_id: str) -> RibosomeStructure:
 
     reshaped_nonpoly: list[NonpolymericLigand] = [nonpoly_reshape_to_ligand(
         nonpoly) for nonpoly in nonpoly_entities] if nonpoly_entities != None and len(nonpoly_entities) > 0 else []
+
     # type: ignore (only accessing commong fields)
     organisms = __infer_organisms_from_polymers(reshaped_proteins)
     externalRefs = __extract_external_refs(
@@ -420,7 +466,7 @@ def process_pdb_record(rcsb_id: str) -> RibosomeStructure:
         pub = {
             "year": None,
             "rcsb_authors": None,
-            "title": None,
+            "": None,
             "pdbx_database_id_DOI": None,
             "pdbx_database_id_PubMed": None
         }

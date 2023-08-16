@@ -1,9 +1,7 @@
 
 # Extract `ribctl` from `api` structure
 
-- there ought to be two separate clis for both
-
-# CLI
+- [x]  there ought to be two separate clis for both
 
 # Datastructure
 
@@ -14,6 +12,8 @@
 # Structure Processing 
 
 - [ ] integrate hmm-based classification into the process pipeline
+- [ ] expand classification to rnas, trnas, factors
+
 - [ ] rewrite taxonomy inference:
     - src ids and host ids separately
     - do toplevel struct even have a src_id in PDB?????
