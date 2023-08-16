@@ -1,8 +1,7 @@
-import logging
 import os
-from rbxz_bend.db.ribosomexyz import ribosomexyzDB
+from db.ribosomexyz import ribosomexyzDB
 from ribctl.lib.types import RibosomeStructure
-from rbxz_bend.settings import NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER, RIBETL_DATA, get_ribxz_logger
+from rbxz_bend.settings import NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER, RIBETL_DATA
 from ribctl.lib.mod_extract_bsites  import struct_ligand_ids, struct_polymeric_factor_ids, bsite_polymeric_factor, bsite_polymeric_factor
 from ribctl.lib import utils
 
