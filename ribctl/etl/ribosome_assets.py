@@ -11,7 +11,6 @@ from ribctl.lib.types.types_binding_site import BindingSite
 from ribctl.lib.types.types_poly_nonpoly_ligand import PolymericFactorClass, RNAClass
 from ribctl.lib.mod_extract_bsites import bsite_nonpolymeric_ligand, struct_ligand_ids, struct_polymeric_factor_ids, bsite_polymeric_factor, bsite_polymeric_factor
 from ribctl.lib.mod_split_rename import split_rename
-from ribctl.etl.struct_rcsb_api import current_rcsb_structs, process_pdb_record
 from ribctl.lib.mod_render_thumbnail import render_thumbnail
 from ribctl.lib.utils import download_unpack_place, open_structure
 from ribctl.lib.types.types_ribosome import RNA, PolymerClass, PolymericFactor, Protein, ProteinClass, RibosomeStructure
@@ -21,13 +20,14 @@ from concurrent.futures import ALL_COMPLETED, Future, ProcessPoolExecutor, Threa
 import os
 
 
-class Assetlist(BaseModel)   : 
-      profile                : Optional[bool]
-      structure_modified     : Optional[bool]
-      chains_and_modified_cif: Optional[bool]
-      factors_and_ligands    : Optional[bool]
-      png_thumbnail          : Optional[bool]
-      structure              : Optional[bool]
+class Assetlist(BaseModel):
+    profile: Optional[bool]
+    structure_modified: Optional[bool]
+    chains_and_modified_cif: Optional[bool]
+    factors_and_ligands: Optional[bool]
+    png_thumbnail: Optional[bool]
+    structure: Optional[bool]
+
 
 class RibosomeAssets():
     rcsb_id: str
@@ -143,10 +143,10 @@ class RibosomeAssets():
             if class_ in rna.nomenclature and rna.assembly_id == assembly:
                 return rna
 
-
     def get_prot_by_nomclass(self, class_: ProteinClass, assembly: int = 0) -> Protein | None:
-        _auth_asym_id  = { v:k for k,v in self.____nomenclature_v2().items() }.get(class_,None)
-        if _auth_asym_id!= None: 
+        _auth_asym_id = {
+            v: k for k, v in self.____nomenclature_v2().items()}.get(class_, None)
+        if _auth_asym_id != None:
             return self.get_chain_by_auth_asym_id(_auth_asym_id)[0]
 
         for prot in self.profile().proteins:
@@ -174,10 +174,10 @@ class RibosomeAssets():
         return self.biopython_structure().child_dict[0].child_dict[auth_asym_id]
 
     @staticmethod
-    def biopython_chain_get_seq(struct: Structure, auth_asym_id: str,protein_rna:typing.Literal["protein","rna"], sanitized: bool = False) -> str:
+    def biopython_chain_get_seq(struct: Structure, auth_asym_id: str, protein_rna: typing.Literal["protein", "rna"], sanitized: bool = False) -> str:
 
         chain3d = struct.child_dict[0].child_dict[auth_asym_id]
-        ress    = chain3d.child_list
+        ress = chain3d.child_list
 
         # if sanitized == True:
         #     print("sanitized")
@@ -237,7 +237,7 @@ class RibosomeAssets():
         self._verify_dir_exists()
 
         if not os.path.exists(self._json_profile_filepath()):
-            ribosome = process_pdb_record(self.rcsb_id)
+            ribosome = etl_pipeline(self.rcsb_id)
             if not parse_obj_as(RibosomeStructure, ribosome):
                 raise Exception("Invalid ribosome structure profile.")
             self.save_json_profile(
@@ -246,7 +246,7 @@ class RibosomeAssets():
             return True
         else:
             if overwrite:
-                ribosome = process_pdb_record(self.rcsb_id)
+                ribosome = etl_pipeline(self.rcsb_id)
                 if not parse_obj_as(RibosomeStructure, ribosome):
                     raise Exception("Invalid ribosome structure profile.")
                 self.save_json_profile(
@@ -314,6 +314,7 @@ class RibosomeAssets():
                         ...
 
         return all_verified_flag
+
 
 # ※ Mass process methods.
 

@@ -11,6 +11,7 @@ from ribctl.etl.ribosome_assets import Assetlist, RibosomeAssets, obtain_assets,
 from ribctl.lib.types.types_ribosome import RibosomeStructure
 from ribctl.etl.struct_rcsb_api import current_rcsb_structs, gql_monolith, query_rcsb_api, process_pdb_record
 from ribctl.lib.taxonomy import filter_by_parent_tax
+import requests
 # from api.db.ribosomexyz import ribosomexyzDB
 # from api.rbxz_bend.settings import NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER, RIBETL_DATA
 
@@ -136,3 +137,14 @@ if args.list_structs:
 
 #     for rrr in rc:
 #         NomenclatureClassMember.validate(rrr)
+
+
+
+
+url = 'https://rest.uniprot.org/uniprotkb?query=annotation:(type:rbfa)%20AND%20reviewed:yes&format=fasta&limit=100'
+with requests.get(url, stream=True) as request:
+    request.raise_for_status()
+    with open('rbfa.fasta.gz', 'wb') as f:
+        for chunk in request.iter_content(chunk_size=2**20):
+            f.write(chunk)
+         
