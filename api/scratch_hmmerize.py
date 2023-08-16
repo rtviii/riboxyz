@@ -1,6 +1,4 @@
-from functools import reduce
 import os
-from pprint import pprint
 from pyhmmer import hmmsearch,utils
 import pyhmmer
 from pyhmmer.plan7 import HMM, Pipeline
@@ -10,11 +8,10 @@ from api.ribctl.lib.types.types_poly_nonpoly_ligand import list_ProteinClass
 from api.ribctl.lib.types.types_ribosome import ProteinClass
 from api.scratch_tunnel_workflow import BACTERIAL
 
-# bl12path     = "/home/rxz/dev/docker_ribxz/api/3J7Z_bL12.fasta"
-# class_hmm    = "/home/rxz/dev/docker_ribxz/api/prot_hmms/bL12.hmm"
 
 AMINO        = Alphabet.amino()
 HMM_PROFILES = "/home/rxz/dev/docker_ribxz/api/prot_hmms/"
+
 def get_prot_hmm_dict() ->dict[ProteinClass, HMM]: 
     prot_hmms_dict = {}
     for hmm_class in list_ProteinClass:
@@ -30,7 +27,6 @@ def seq_prot_hmm_evalue(seq:str, hmm:HMM):
     dsb       = DigitalSequenceBlock(AMINO, [seq_.digitize(AMINO)])
     return pyhmmer.plan7.Pipeline(alphabet=AMINO).search_hmm(hmm,dsb)
 
-
 def seq_prot_against_protclasses(seq:str, hmm_dict:dict)->dict[ProteinClass, list[float]]:
     _ = {}
     for (prot_class, hmm) in hmm_dict.items():
@@ -43,7 +39,7 @@ def hmmer_process_struct(rcsb_id:str):
     HMM_CLASS_DICT = get_prot_hmm_dict()
     _, profile = RibosomeAssets(rcsb_id).get_struct_and_profile()
 
-    if len(profile.polymeric_factors) != 0 :
+    if len(profile.polymeric_factors) != 0:
         for chain in profile.polymeric_factors:
             _seq     = chain.entity_poly_seq_one_letter_code_can
             res_dict = seq_prot_against_protclasses(_seq, HMM_CLASS_DICT)
