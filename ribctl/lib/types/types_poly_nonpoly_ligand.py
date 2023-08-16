@@ -15,6 +15,64 @@ list_PolymericFactorClass = [
     "snoRNA", "lncRNA", "Other"
 ]
 
+#TODO: This is a goddamn mess. tRNAs should be partioned into their own categories, likewise with factors.
+    # Ribosome Assembly Factors:
+    #     RbfA
+    #     RimM
+    #     Era
+    #     GTPases: EngA, ObgE
+
+    # Initiation Factors:
+    #     IF1 (Initiation Factor 1)
+    #     IF2 (Initiation Factor 2)
+    #     IF3 (Initiation Factor 3)
+
+    # Elongation Factors:
+    #     EF-Tu (Elongation Factor Tu)
+    #     EF-G (Elongation Factor G)
+    #     EF-P (Elongation Factor P)
+    #     EF-Ts (Elongation Factor Ts)
+    #     EF-1α (Elongation Factor 1α)
+    #     EF-1β (Elongation Factor 1β)
+
+    # Release Factors:
+    #     RF1 (Release Factor 1)
+    #     RF2 (Release Factor 2)
+    #     RF3 (Release Factor 3)
+
+    # Ribosome Recycling Factors:
+    #     RRF (Ribosome Recycling Factor)
+    #     RliB (Ribosome Large Subunit Interface B)
+    #     IF6 (Initiation Factor 6)
+
+    # RNA Helicases:
+    #     RhlB (RNA Helicase B)
+    #     DbpA (ATP-dependent RNA Helicase DbpA)
+    #     DbpB (ATP-dependent RNA Helicase DbpB)
+    #     Prp43 (Pre-mRNA Processing Factor 43)
+
+    # GTPases:
+    #     Era
+    #     Obg (YjeQ)
+    #     LepA
+
+    # Non-Ribosomal Factors:
+    #     HflX
+    #     YjeQ
+    #     YihA
+
+    # Quality Control Factors:
+    #     tmRNA (Transfer-messenger RNA)
+    #     ArfA (Alternative Ribosome-Rescue Factor A)
+    #     ArfB (Alternative Ribosome-Rescue Factor B)
+
+    # Maturation Factors:
+    #     RbfA (Ribosome Binding Factor A)
+    #     RimM (Ribosome Maturation Factor M)
+
+    # Trans-Translation Factors:
+    #     SmpB (Small Protein B)
+    #     tmRNA (Transfer-messenger RNA)
 PolymericFactorClass = Literal[
     "Elongation Factor",
     "Initiation Factor",

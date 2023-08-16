@@ -23,6 +23,7 @@
 
 
 # Media
+
 - [ ] render images for new structs 
 - [ ] re-render profiles with the new ligand schema and separate assemblies 
 - [ ] re-render ligands for all structs
