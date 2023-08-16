@@ -4,12 +4,11 @@ import sys
 SECRET_KEY = 'ju=n4om3z00jd1+y2(ufn)g^@w-dj*&-45&4yd1_aiun50b6by'
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-
 ASSETS_PATH = ...
 MUSCLE38_PATH = ...
 
-sys.path.append(os.path.abspath(os.path.join(BASE_DIR,'ribctl')))       # hack until ribctl is a separate pypi project
-sys.path.append(os.path.abspath(os.path.join(BASE_DIR,'ribctl','lib'))) # hack until ribctl is a separate pypi project
+sys.path.append(os.path.abspath(os.path.join(BASE_DIR,'ribctl')))       #! hack until ribctl is a separate pypi project
+sys.path.append(os.path.abspath(os.path.join(BASE_DIR,'ribctl','lib'))) #! hack until ribctl is a separate pypi project
 
         
 
@@ -20,12 +19,9 @@ RIBETL_DATA = os.environ["RIBETL_DATA"] if os.environ["RIBETL_DATA"] else os.pat
 # export PYMOL_PATH=/home/rxz/dev/pymol3.11 && export PYTHONPATH="$PYTHONPATH:$PYMOL_PATH/modules/:"
 
 
-
 vars          = ["NEO4J_URI", "NEO4J_USER", "NEO4J_PASSWORD","NEO4J_CURRENTDB", "RIBETL_DATA"]
 
-# print(" ---------------------------------------------- App has been reset. -----------------------------------------------")
 for var in vars:
-    # print("Environment variable {}:\t{}".format( var, os.getenv(var) ))
     if var not in os.environ:
         print("Environment variable {} not set".format(var))
         exit(1)

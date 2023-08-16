@@ -13,7 +13,7 @@ class App:
         for file in os.listdir(RIBETL_DATA):
             if len(file) == 4 and os.path.isdir(os.path.join(RIBETL_DATA,file)) :
                 PDBID = file
-                logger = get_ribxz_logger('computations', __name__)
+               # logger = get_ribxz_logger('computations', __name__)
 
                 _structure_cif_handle :Structure = utils.open_structure(PDBID,'cif')  # type: ignore
                 struct_profile_handle       = RibosomeStructure.parse_obj(utils.open_structure(PDBID,'json'))  # type: ignore
@@ -34,21 +34,25 @@ class App:
 
                     try:
                         bsite_polymeric_factor(polyref.parent_rcsb_id, polyref.auth_asym_id, _structure_cif_handle, True)
-                        logger.info("Rendered liglike polymer {} in {}.".format(polyref.auth_asym_id, polyref.parent_rcsb_id))
+                        # logger.info("Rendered liglike polymer {} in {}.".format(polyref.auth_asym_id, polyref.parent_rcsb_id))
 
                     except Exception as e:
-                        logger.info("Error rendering liglike polymer {} in {}.".format(polyref.auth_asym_id, polyref.parent_rcsb_id))
-                        logger.error(e)
+                        print("Error rendering liglike polymer {} in {}.".format(polyref.auth_asym_id, polyref.parent_rcsb_id))
+                        ...
+                        # logger.info("Error rendering liglike polymer {} in {}.".format(polyref.auth_asym_id, polyref.parent_rcsb_id))
+                        # logger.error(e)
 
                 for l in ligands:
 
                     try:
                         bsite_polymeric_factor(PDBID, l[0], _structure_cif_handle, True)
-                        logger.info("Rendered ligand {} in {}.".format(l[0], PDBID))
+                        # logger.info("Rendered ligand {} in {}.".format(l[0], PDBID))
 
                     except Exception as e:
-                        logger.info("Error rendering ligand {} in {}.".format(l[0], PDBID))
-                        logger.error(e)
+                        print("Error rendering ligand {} in {}.".format(l[0], PDBID))
+                        ...
+                        # logger.info("Error rendering ligand {} in {}.".format(l[0], PDBID))
+                        # logger.error(e)
 
 db_connection =  ribosomexyzDB(uri=NEO4J_URI,
                           password=NEO4J_PASSWORD,

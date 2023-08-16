@@ -6,7 +6,7 @@ FROM ubuntu:22.04
 ENV DJANGO=/home/backend/api
 ENV PYMOL_SOURCE=/home/backend/pymol
 # ENV CLI=/home/backend/cli
-ENV RIBETL_DATA=/home/backend/api/ribetldata
+ENV RIBETL_DATA=/home/backend/api/RIBETL_DATA
 
 # set work directory
 RUN mkdir -p $DJANGO
