@@ -11,6 +11,7 @@ from ribctl.lib.types.types_binding_site import BindingSite
 from ribctl.lib.types.types_poly_nonpoly_ligand import PolymericFactorClass, RNAClass
 from ribctl.lib.mod_extract_bsites import bsite_nonpolymeric_ligand, struct_ligand_ids, struct_polymeric_factor_ids, bsite_polymeric_factor, bsite_polymeric_factor
 from ribctl.lib.mod_split_rename import split_rename
+from ribctl.etl.struct_rcsb_api import current_rcsb_structs, ETLPipeline, gql_monolith, query_rcsb_api
 from ribctl.lib.mod_render_thumbnail import render_thumbnail
 from ribctl.lib.utils import download_unpack_place, open_structure
 from ribctl.lib.types.types_ribosome import RNA, PolymerClass, PolymericFactor, Protein, ProteinClass, RibosomeStructure
@@ -237,16 +238,18 @@ class RibosomeAssets():
         self._verify_dir_exists()
 
         if not os.path.exists(self._json_profile_filepath()):
-            ribosome = etl_pipeline(self.rcsb_id)
+
+            ribosome = ETLPipeline(query_rcsb_api(gql_monolith(self.rcsb_id.upper()))).process_structure()
+
             if not parse_obj_as(RibosomeStructure, ribosome):
                 raise Exception("Invalid ribosome structure profile.")
             self.save_json_profile(
                 self._json_profile_filepath(), ribosome.dict())
             print(f"Wrote structure profile:\t{self._json_profile_filepath()}")
-            return True
+            return True;
         else:
             if overwrite:
-                ribosome = etl_pipeline(self.rcsb_id)
+                ribosome = ETLPipeline(query_rcsb_api(gql_monolith(self.rcsb_id.upper()))).process_structure()
                 if not parse_obj_as(RibosomeStructure, ribosome):
                     raise Exception("Invalid ribosome structure profile.")
                 self.save_json_profile(

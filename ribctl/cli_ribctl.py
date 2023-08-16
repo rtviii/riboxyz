@@ -5,11 +5,8 @@ import argparse
 import asyncio
 import json
 import os
-from pprint import pprint
 from ribctl import RIBETL_DATA
-from ribctl.etl.ribosome_assets import Assetlist, RibosomeAssets, obtain_assets, obtain_assets_processpool, obtain_assets_threadpool
-from ribctl.lib.types.types_ribosome import RibosomeStructure
-from ribctl.etl.struct_rcsb_api import current_rcsb_structs, gql_monolith, query_rcsb_api, process_pdb_record
+from ribctl.etl.ribosome_assets import Assetlist, RibosomeAssets, obtain_assets, obtain_assets_threadpool
 from ribctl.lib.taxonomy import filter_by_parent_tax
 import requests
 # from api.db.ribosomexyz import ribosomexyzDB
@@ -141,10 +138,10 @@ if args.list_structs:
 
 
 
-url = 'https://rest.uniprot.org/uniprotkb?query=annotation:(type:rbfa)%20AND%20reviewed:yes&format=fasta&limit=100'
-with requests.get(url, stream=True) as request:
-    request.raise_for_status()
-    with open('rbfa.fasta.gz', 'wb') as f:
-        for chunk in request.iter_content(chunk_size=2**20):
-            f.write(chunk)
+# url = 'https://rest.uniprot.org/uniprotkb?query=annotation:(type:rbfa)%20AND%20reviewed:yes&format=fasta&limit=100'
+# with requests.get(url, stream=True) as request:
+#     request.raise_for_status()
+#     with open('rbfa.fasta.gz', 'wb') as f:
+#         for chunk in request.iter_content(chunk_size=2**20):
+#             f.write(chunk)
          
