@@ -1,9 +1,10 @@
 import json
 import math
-from api.ribctl.lib.msalib import AMINO_ACIDS_3_TO_1_CODE, msa_dict, msaclass_extend_temp, util__backwards_match, util__forwards_match
-from api.ribctl.lib.types.types_ribosome import PolymericFactor, Protein, ProteinClass
-from api.ribctl.lib.types.types_binding_site import AMINO_ACIDS, NUCLEOTIDES, ResidueSummary
-from api.ribctl.etl.ribosome_assets import RibosomeAssets
+from ribctl.lib.msalib import AMINO_ACIDS_3_TO_1_CODE, msa_dict, msaclass_extend_temp, util__backwards_match, util__forwards_match
+from ribctl import RIBETL_DATA
+from ribctl.lib.types.types_ribosome import PolymericFactor, Protein, ProteinClass
+from ribctl.lib.types.types_binding_site import AMINO_ACIDS, NUCLEOTIDES, ResidueSummary
+from ribctl.etl.ribosome_assets import RibosomeAssets
 import loguru
 from Bio.PDB.Atom import Atom
 from Bio.PDB.NeighborSearch import NeighborSearch
@@ -68,7 +69,6 @@ BACTERIAL = ['4V4I', '4WSD', '4V87', '4WQ1', '4V5D', '1NWX', '4V6Z', '6QNR', '5T
               '8G5Z', '6FXC', '6NWY', '6YST', '5V93', '4V56', '8C8X', '7MT7', '7PJV', '7ST7', '5KPW', '4W2H', '6SPF', '7A5J', '4V7P',
               '4V8N', '7M4X', '4V76', '5MDW', '4TUA', '3PIP', '6GSJ', '5ND8', '7SSW', '6BZ8', '1VY7']
 
-RIBETL_DATA = os.environ.get('RIBETL_DATA')
 # https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4574749/pdf/1719.pdf
 DORIS_ET_AL = {
     "subseq_6": "AAGACCC",

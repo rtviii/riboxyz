@@ -15,12 +15,10 @@ from ribctl.etl.struct_rcsb_api import current_rcsb_structs, process_pdb_record
 from ribctl.lib.mod_render_thumbnail import render_thumbnail
 from ribctl.lib.utils import download_unpack_place, open_structure
 from ribctl.lib.types.types_ribosome import RNA, PolymerClass, PolymericFactor, Protein, ProteinClass, RibosomeStructure
+from ribctl import RIBETL_DATA
 from pydantic import BaseModel, parse_obj_as
 from concurrent.futures import ALL_COMPLETED, Future, ProcessPoolExecutor, ThreadPoolExecutor, wait
 import os
-
-
-RIBETL_DATA = str(os.environ.get("RIBETL_DATA"))
 
 
 class Assetlist(BaseModel)   : 
@@ -30,7 +28,6 @@ class Assetlist(BaseModel)   :
       factors_and_ligands    : Optional[bool]
       png_thumbnail          : Optional[bool]
       structure              : Optional[bool]
-
 
 class RibosomeAssets():
     rcsb_id: str
@@ -319,7 +316,6 @@ class RibosomeAssets():
         return all_verified_flag
 
 # ※ Mass process methods.
-
 
 async def obtain_assets(rcsb_id: str, assetlist: Assetlist, overwrite: bool = False):
     """Obtain all assets for a given RCSB ID"""

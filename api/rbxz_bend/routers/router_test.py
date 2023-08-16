@@ -24,8 +24,6 @@ def see_constraints(request):
 def render_ligands(request):
     return ribosomexyzApp.render_all_ligands()
 
-
-
 @test.get('/sync_with_rcsb', tags=['0test'])
 def sync_with_rcsb(request):
     D        = ribosomexyzDB(NEO4J_URI, NEO4J_USER, NEO4J_PASSWORD)

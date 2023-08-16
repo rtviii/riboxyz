@@ -1,6 +1,7 @@
 import json
 import os
 import typing
+import pydantic
 from pydantic import BaseModel
 from Bio.PDB.Residue import Residue
 from ribctl.lib.types.types_ribosome import Polymer, PolymerClass
