@@ -3,9 +3,9 @@ import os
 from pprint import pprint
 from typing import List
 from pymol import cmd
-from api.scratch_tunnel_workflow import exit_port_posn, ptc_residues_calculate_midpoint, ptc_resdiues_get, tunnel_obstructions
+from ribctl._tunnel.scratch_tunnel_workflow import exit_port_posn, ptc_residues_calculate_midpoint, ptc_resdiues_get, tunnel_obstructions
+from ribctl import RIBETL_DATA
 
-RIBETL_DATA = os.environ.get("RIBETL_DATA")
 
 colormap__LSU_Proteins = {
                           "uL1"  : "lawrencium",

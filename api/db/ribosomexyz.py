@@ -1,5 +1,5 @@
 from concurrent.futures import ALL_COMPLETED, Future, ThreadPoolExecutor, wait
-from logs.loggers import get_updates_logger
+from api.logs.loggers import get_updates_logger
 import typing
 from neo4j.exceptions import AuthError
 from pyparsing import Any

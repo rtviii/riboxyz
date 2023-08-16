@@ -7,11 +7,11 @@ from Bio.PDB.NeighborSearch import NeighborSearch
 from Bio.PDB.Residue import Residue
 from Bio.PDB.Structure import Structure
 from Bio.PDB.Chain import Chain
+from ribctl import RIBETL_DATA
 from ribctl.lib.types.types_ribosome import Polymer, PolymericFactor, RibosomeStructure
-from ribctl.lib.types.types_binding_site import AMINO_ACIDS, NUCLEOTIDES, BindingSite, BindingSiteChain, ResidueSummary
+from ribctl.lib.types.types_binding_site import AMINO_ACIDS, NUCLEOTIDES, BindingSite, BindingSiteChain, ResidueSummary 
 from ribctl.lib import utils
 
-RIBETL_DATA = str(os.environ.get('RIBETL_DATA'))
 
 def get_polymer_residues(auth_asym_id: str, struct: Structure) -> list[Residue]:
     c: Chain = struct[0][auth_asym_id]
