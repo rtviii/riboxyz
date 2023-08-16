@@ -398,7 +398,6 @@ def query_rcsb_api(gql_string: str) -> dict:
     else:
         raise Exception("No data found for query: {}".format(gql_string))
 
-
 def process_pdb_record(rcsb_id: str) -> RibosomeStructure:
     """
     returns dict of the shape types_RibosomeStructure 
