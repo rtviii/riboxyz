@@ -13,6 +13,8 @@
 
 - [ ] integrate hmm-based classification into the process pipeline
 - [ ] expand classification to rnas, trnas, factors
+- [ ] improve ligand recognition ( BIRD, CCD?)
+
 
 - [ ] rewrite taxonomy inference:
     - src ids and host ids separately

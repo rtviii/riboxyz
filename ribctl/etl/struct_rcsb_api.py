@@ -259,10 +259,8 @@ def poly_reshape_to_rProtein(plm, assembly_maps: list[AssemblyInstancesMap]) -> 
 
         pfam_comments = list(set([pfam['rcsb_pfam_comment']
                              for pfam in plm['pfams']]))
-        pfam_descriptions = list(
-            set([pfam['rcsb_pfam_description'] for pfam in plm['pfams']]))
-        pfam_accessions = list(
-            set([pfam['rcsb_pfam_accession'] for pfam in plm['pfams']]))
+        pfam_descriptions = list(set([pfam['rcsb_pfam_description'] for pfam in plm['pfams']]))
+        pfam_accessions = list(set([pfam['rcsb_pfam_accession'] for pfam in plm['pfams']]))
 
     else:
         pfam_comments = []
