@@ -135,13 +135,19 @@ if args.list_structs:
 #     for rrr in rc:
 #         NomenclatureClassMember.validate(rrr)
 
+# url = 'https://rest.uniprot.org/uniprotkb?query=annotation:(type:positional)ANDreviewed:yes&format=fasta&limit=100'
 
 
-
-# url = 'https://rest.uniprot.org/uniprotkb?query=annotation:(type:rbfa)%20AND%20reviewed:yes&format=fasta&limit=100'
-# with requests.get(url, stream=True) as request:
+# with requests.get(url.encode()) as request:
+#     print(request)
 #     request.raise_for_status()
 #     with open('rbfa.fasta.gz', 'wb') as f:
 #         for chunk in request.iter_content(chunk_size=2**20):
+#             print("processing chunk", chunk)
 #             f.write(chunk)
          
+
+import requests
+url = 'https://rest.uniprot.org/uniprotkb/stream?compressed=false&format=fasta&query=(rbfa)AND(reviewed:true)'
+all_fastas = requests.get(url).text
+print(all_fastas)

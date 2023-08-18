@@ -333,8 +333,6 @@ def gql_monolith(rcsb_id): return monolithic.replace("$RCSB_ID", rcsb_id.upper()
      - placed along with derivative files in the correct directory (via RibosomeAssets helper class)
      - (OPTIONAL) loaded into the database if a connection exists"""
 
-
-
 def current_rcsb_structs() -> list[str]:
     """Return all structures in the rcsb that contain the phrase RIBOSOME and have more than 25 protein entities"""
 
@@ -379,7 +377,6 @@ def query_rcsb_api(gql_string: str) -> dict:
         return resp['data']['entry']
     else:
         raise Exception("No data found for query: {}".format(gql_string))
-
 
 
 class ETLPipeline:
