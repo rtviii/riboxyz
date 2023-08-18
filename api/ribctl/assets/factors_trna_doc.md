@@ -17,6 +17,11 @@
 |   	|eIF4 (Eukaryotic Initiation Factor 4)   	|   	|   	|   	|
 |   	|eIF5B (Eukaryotic Initiation Factor 5B)   	|   	|   	|   	|
 |   	|eIF6 (Eukaryotic Initiation Factor 6)   	|   	|   	|   	|
+|**Elongation factors**  	|   	|   	|   	|   	|
+|   	|eEF1α (Eukaryotic Elongation Factor 1α)   	| EF-Tu (Elongation Factor Tu)  	|   	|   	|
+|   	|eEF1β (Eukaryotic Elongation Factor 1β)   	| EF-G (Elongation Factor G)  	|   	|   	|
+|   	|eEF2 (Eukaryotic Elongation Factor 2)   	| EF-P (Elongation Factor P)  	|   	|   	|
+|   	|   	                                    | EF-Ts (Elongation Factor Ts)  	|   	|   	|
 |**Release factors**  	|   	|   	|   	|   	|
 |   	|  eRF1 (Eukaryotic Release Factor 1) 	|RF1 (Release Factor 1)   	|   	|   	|
 |   	|  eRF3 (Eukaryotic Release Factor 3) 	|RF2 (Release Factor 2)   	|   	|   	|
@@ -44,6 +49,17 @@
 |   	|   -	| SmpB (Small Protein B)|   	|   	|
 |   	|   -	| tmRNA (Transfer-messenger RNA)  	|   	|   	|
 
+Euk
+    
+    
+    
+
+Bacteria:
+
+    
+    
+    
+    
 
 ## General categories of tRNA  associated with the ribosome's lifecycle
 
