@@ -16,7 +16,7 @@ list_PolymericFactorClass = [
 ]
 
 #TODO: This is a goddamn mess. tRNAs should be partioned into their own categories, likewise with factors.
-    # Ribosome Assembly Factors:
+    # Ribosome Assembly Factors
     #     RbfA
     #     RimM
     #     Era
@@ -73,6 +73,7 @@ list_PolymericFactorClass = [
     # Trans-Translation Factors:
     #     SmpB (Small Protein B)
     #     tmRNA (Transfer-messenger RNA)
+
 PolymericFactorClass = Literal[
     "Elongation Factor",
     "Initiation Factor",

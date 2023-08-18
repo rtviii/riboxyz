@@ -86,7 +86,6 @@ class PolymerEntityInstance(BaseModel):
         auth_asym_id: str
     rcsb_polymer_entity_instance_container_identifiers: PolymerEntityInstanceContainerIdentifiers
 
-
 class AssemblyInstancesMap(BaseModel):
     """
     This basically specifies which assembly an instnace of a polymer or a nonpolymer belongs to. 

@@ -145,9 +145,13 @@ if args.list_structs:
 #         for chunk in request.iter_content(chunk_size=2**20):
 #             print("processing chunk", chunk)
 #             f.write(chunk)
-         
 
-import requests
-url = 'https://rest.uniprot.org/uniprotkb/stream?compressed=false&format=fasta&query=(rbfa)AND(reviewed:true)'
-all_fastas = requests.get(url).text
-print(all_fastas)
+
+# (uniref_cluster_90:UniRef90_Q6F7I0) NOT (accession:A7ZS64
+#  curl https://rest.uniprot.org/uniprotkb/stream\?fields\=accession%2Corganism_id%2Csequence\&format\=tsv\&query\=%28%28uniref_cluster_90%3AUniRef90_Q6F7I0%29+NOT+%28accession%3AA7ZS64%29%29         
+
+
+# import requests
+# url = 'https://rest.uniprot.org/uniprotkb/stream?compressed=false&format=fasta&query=(rbfa)AND(reviewed:true)'
+# all_fastas = requests.get(url).text
+# print(all_fastas)
