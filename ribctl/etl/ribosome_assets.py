@@ -4,14 +4,13 @@ import json
 import typing
 from Bio.PDB.Structure import Structure
 from Bio.PDB.Chain import Chain
-from pprint import pprint
-from typing import Optional, Tuple
+from typing import Optional
 from ribctl.lib.msalib import AMINO_ACIDS_1_TO_3_CODE, AMINO_ACIDS_3_TO_1_CODE
 from ribctl.lib.types.types_binding_site import BindingSite
 from ribctl.lib.types.types_poly_nonpoly_ligand import PolymericFactorClass, RNAClass
 from ribctl.lib.mod_extract_bsites import bsite_nonpolymeric_ligand, struct_ligand_ids, struct_polymeric_factor_ids, bsite_polymeric_factor, bsite_polymeric_factor
 from ribctl.lib.mod_split_rename import split_rename
-from ribctl.etl.struct_rcsb_api import current_rcsb_structs, ETLPipeline, gql_monolith, query_rcsb_api
+from ribctl.etl.etl_pipeline import current_rcsb_structs, ETLPipeline, rcsb_single_structure_graphql, query_rcsb_api
 from ribctl.lib.mod_render_thumbnail import render_thumbnail
 from ribctl.lib.utils import download_unpack_place, open_structure
 from ribctl.lib.types.types_ribosome import RNA, PolymerClass, PolymericFactor, Protein, ProteinClass, RibosomeStructure
@@ -239,7 +238,7 @@ class RibosomeAssets():
 
         if not os.path.exists(self._json_profile_filepath()):
 
-            ribosome = ETLPipeline(query_rcsb_api(gql_monolith(self.rcsb_id.upper()))).process_structure()
+            ribosome = ETLPipeline(query_rcsb_api(rcsb_single_structure_graphql(self.rcsb_id.upper()))).process_structure()
 
             if not parse_obj_as(RibosomeStructure, ribosome):
                 raise Exception("Invalid ribosome structure profile.")
@@ -249,7 +248,7 @@ class RibosomeAssets():
             return True;
         else:
             if overwrite:
-                ribosome = ETLPipeline(query_rcsb_api(gql_monolith(self.rcsb_id.upper()))).process_structure()
+                ribosome = ETLPipeline(query_rcsb_api(rcsb_single_structure_graphql(self.rcsb_id.upper()))).process_structure()
                 if not parse_obj_as(RibosomeStructure, ribosome):
                     raise Exception("Invalid ribosome structure profile.")
                 self.save_json_profile(
@@ -336,8 +335,7 @@ async def obtain_assets(rcsb_id: str, assetlist: Assetlist, overwrite: bool = Fa
         coroutines.append(assets._verify_cif(overwrite))
 
     if assetlist.factors_and_ligands:
-        coroutines.append(
-            assets._verify_ligads_and_ligandlike_polys(overwrite))
+        coroutines.append(assets._verify_ligads_and_ligandlike_polys(overwrite))
 
     if assetlist.chains_and_modified_cif:
         coroutines.append(assets._verify_cif_modified_and_chains(overwrite))

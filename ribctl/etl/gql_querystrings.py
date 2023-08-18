@@ -49,7 +49,7 @@ entry_info_string = """
     }
 """
 
-monolithic = """{
+single_structure_graphql_template = """{
   entry(entry_id: "$RCSB_ID") {
     rcsb_id
 

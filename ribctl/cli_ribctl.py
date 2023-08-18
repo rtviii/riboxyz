@@ -6,9 +6,9 @@ import asyncio
 import json
 import os
 from ribctl import RIBETL_DATA
+from ribctl.etl.etl_pipeline import ETLPipeline, query_rcsb_api, rcsb_single_structure_graphql
 from ribctl.etl.ribosome_assets import Assetlist, RibosomeAssets, obtain_assets, obtain_assets_threadpool
 from ribctl.lib.taxonomy import filter_by_parent_tax
-import requests
 # from api.db.ribosomexyz import ribosomexyzDB
 # from api.rbxz_bend.settings import NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER, RIBETL_DATA
 
@@ -52,7 +52,6 @@ if args.test:
     i = 0
     nascent_chains = []
     for struct in os.listdir(RIBETL_DATA):
-
         if struct == '6OXI':
             continue
         if len(struct) != 4:
@@ -65,6 +64,7 @@ if args.test:
                     nascent_chains.append(chain.dict())
         with open('nascent_chains.json', 'w') as f:
             json.dump(nascent_chains, f, indent=4)
+
 if args.list_structs:
     all_structs = os.listdir(RIBETL_DATA)
     for struct in all_structs:
@@ -75,10 +75,20 @@ if args.list_structs:
             # all_structs = [struct for struct in all_structs if struct.startswith(str(taxid))]
 
 
+
+
+
+ribosome = ETLPipeline(query_rcsb_api(rcsb_single_structure_graphql("3J7Z"))).process_structure()
+print(ribosome)
+
+
+
+
+
+
 # if args.db:
 #     db = ribosomexyzDB(NEO4J_URI, NEO4J_USER, NEO4J_PASSWORD)
 #     fire.Fire(db)
-
 
 # if args.test:
 #     #TODO: Make a test suite
