@@ -7,7 +7,7 @@ from pathlib import Path
 from ribctl.etl.ribosome_assets import RibosomeAssets
 from ribctl.lib.types.types_poly_nonpoly_ligand import list_ProteinClass
 from ribctl.lib.types.types_ribosome import ProteinClass
-from ribctl import ASSET_PATH
+from ribctl import ASSETS
 
 
 # AMINO        = Alphabet.amino()
@@ -15,7 +15,7 @@ HMM_PROFILES = "/home/rxz/dev/docker_ribxz/api/prot_hmms/"
 
 p = Path(__file__).parents[1]
 
-print(p)
+print(ASSETS)
 
 lsu_path = os.path.join(p, '_assets', 'subunit_map_LSU.json')
 ssu_path = os.path.join(p, '_assets', 'subunit_map_SSU.json')
