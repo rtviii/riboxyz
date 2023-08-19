@@ -4,9 +4,7 @@ import os
 import random
 import typing
 import requests
-from api.ribctl.lib.types.types_ribosome import RNA, PolymericFactor, Protein, ProteinClass
 from Bio import AlignIO
-from api.ribctl.lib.types.types_poly_nonpoly_ligand import list_LSUProteinClass, list_SSUProteinClass
 import subprocess
 import numpy as np
 from Bio.Seq import Seq
@@ -16,7 +14,9 @@ from prody import MSA, MSAFile, parseMSA
 import prody 
 import requests
 import os
-from api.ribctl.lib.types.types_ribosome import ProteinClass
+from ribctl.lib.types.types_ribosome import RNA, PolymericFactor, Protein, ProteinClass
+from ribctl.lib.types.types_poly_nonpoly_ligand import list_LSUProteinClass, list_SSUProteinClass
+from ribctl.lib.types.types_ribosome import ProteinClass
 from ete3 import NCBITaxa
 # prd.confProDy(verbosity='none')
 RIBETL_DATA = os.environ.get('RIBETL_DATA')
@@ -49,13 +49,12 @@ AMINO_ACIDS_3_TO_1_CODE = {
 "VAL":"V"};
 AMINO_ACIDS_1_TO_3_CODE = {v:k for k,v in AMINO_ACIDS_3_TO_1_CODE.items()}
 
-def PROTEOVISION_URL(
-    SU, _class, taxids): return "https://ribovision3.chemistry.gatech.edu/showAlignment/{}/{}/{}".format(SU, _class, taxids)
+def PROTEOVISION_URL(SU, _class, taxids): return "https://ribovision3.chemistry.gatech.edu/showAlignment/{}/{}/{}".format(SU, _class, taxids)
 
 
 PROTEOVISION_MSA_FOLDER = '/home/rxz/dev/docker_ribxz/api/ribctl/__wip/data/msa_classes_proteovision/'
-RP_MSAS_PATH = '/home/rxz/dev/docker_ribxz/api/ribctl/assets/rp_class_msas/'
-RP_MSAS_PRUNED_PATH = "/home/rxz/dev/docker_ribxz/api/ribctl/assets/rp_class_msas_pruned/"
+RP_MSAS_PATH            = '/home/rxz/dev/docker_ribxz/api/ribctl/assets/rp_class_msas/'
+RP_MSAS_PRUNED_PATH     = "/home/rxz/dev/docker_ribxz/api/ribctl/assets/rp_class_msas_pruned/"
 
 #! util
 

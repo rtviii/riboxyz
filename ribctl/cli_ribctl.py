@@ -5,14 +5,12 @@ import argparse
 import asyncio
 import json
 import os
-from api.ribctl.etl.ribosome_assets import Assetlist, RibosomeAssets, obtain_assets, obtain_assets_processpool, obtain_assets_threadpool
-from api.ribctl.lib.types.types_ribosome import RibosomeStructure
-from api.ribctl.taxonomy import __node_lineage
-from logs.loggers import get_updates_logger
-from ribctl.etl.struct_rcsb_api import current_rcsb_structs, gql_monolith, query_rcsb_api, process_pdb_record
-from api.db.ribosomexyz import ribosomexyzDB
-from api.rbxz_bend.settings import NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER, RIBETL_DATA
-from api.ribctl.taxonomy import filter_by_parent_tax, ncbi
+from ribctl import RIBETL_DATA
+from ribctl.etl.etl_pipeline import ETLPipeline, query_rcsb_api, rcsb_single_structure_graphql
+from ribctl.etl.ribosome_assets import Assetlist, RibosomeAssets, obtain_assets, obtain_assets_threadpool
+from ribctl.lib.taxonomy import filter_by_parent_tax
+# from api.db.ribosomexyz import ribosomexyzDB
+# from api.rbxz_bend.settings import NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER, RIBETL_DATA
 
 
 arg = argparse.ArgumentParser(
@@ -39,6 +37,7 @@ if args.obtain_all_structures:
         get_all=True,
         # overwrite=True
     )
+
 if args.obtain:
     RCSB_ID = str(args.obtain)
     loop = asyncio.get_event_loop()
@@ -53,7 +52,6 @@ if args.test:
     i = 0
     nascent_chains = []
     for struct in os.listdir(RIBETL_DATA):
-
         if struct == '6OXI':
             continue
         if len(struct) != 4:
@@ -67,20 +65,30 @@ if args.test:
         with open('nascent_chains.json', 'w') as f:
             json.dump(nascent_chains, f, indent=4)
 
-
 if args.list_structs:
     all_structs = os.listdir(RIBETL_DATA)
+    for struct in all_structs:
+        print(struct)
+
     if args.taxid:
         print(filter_by_parent_tax(args.taxid))
-
-
             # all_structs = [struct for struct in all_structs if struct.startswith(str(taxid))]
+
+
+
+
+
+ribosome = ETLPipeline(query_rcsb_api(rcsb_single_structure_graphql("3J7Z"))).process_structure()
+print(ribosome)
+
+
+
+
 
 
 # if args.db:
 #     db = ribosomexyzDB(NEO4J_URI, NEO4J_USER, NEO4J_PASSWORD)
 #     fire.Fire(db)
-
 
 # if args.test:
 #     #TODO: Make a test suite
@@ -136,3 +144,24 @@ if args.list_structs:
 
 #     for rrr in rc:
 #         NomenclatureClassMember.validate(rrr)
+
+# url = 'https://rest.uniprot.org/uniprotkb?query=annotation:(type:positional)ANDreviewed:yes&format=fasta&limit=100'
+
+
+# with requests.get(url.encode()) as request:
+#     print(request)
+#     request.raise_for_status()
+#     with open('rbfa.fasta.gz', 'wb') as f:
+#         for chunk in request.iter_content(chunk_size=2**20):
+#             print("processing chunk", chunk)
+#             f.write(chunk)
+
+
+# (uniref_cluster_90:UniRef90_Q6F7I0) NOT (accession:A7ZS64
+#  curl https://rest.uniprot.org/uniprotkb/stream\?fields\=accession%2Corganism_id%2Csequence\&format\=tsv\&query\=%28%28uniref_cluster_90%3AUniRef90_Q6F7I0%29+NOT+%28accession%3AA7ZS64%29%29         
+
+
+# import requests
+# url = 'https://rest.uniprot.org/uniprotkb/stream?compressed=false&format=fasta&query=(rbfa)AND(reviewed:true)'
+# all_fastas = requests.get(url).text
+# print(all_fastas)
