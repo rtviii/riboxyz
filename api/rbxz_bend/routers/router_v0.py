@@ -3,17 +3,13 @@ import typing
 from django.http import HttpResponse
 from ninja import Router
 from ribctl.lib.mod_superimpose import pymol_super, ranged_align_by_auth_asym_id, ranged_align_by_polyclass
-from api.ribctl.lib.types.types_poly_nonpoly_ligand import RNAClass
-from ribctl.lib.types.types_ribosome import  PolymerClass, ProteinClass, RibosomeStructure
+from ribctl.lib.types.types_poly_nonpoly_ligand import RNAClass
+from ribctl.lib.types.types_ribosome import PolymerClass, ProteinClass, RibosomeStructure
 from schema.v0 import BanClassMetadata, ExogenousRNAByStruct,LigandInstance, LigandlikeInstance, NeoStruct, NomenclatureClass, NomenclatureClassMember
 from rbxz_bend.application import db_connection
 from wsgiref.util import FileWrapper
-# from ribctl.lib.mod_superimpose import 
 
 v0 = Router()
-
-
-
 
 #   | ranged_align
 #   | cif_chain_by_class

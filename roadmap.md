@@ -1,8 +1,7 @@
 
-
 # Extract `ribctl` from `api` structure
 
-# CLI
+- [x]  there ought to be two separate clis for both
 
 # Datastructure
 
@@ -13,6 +12,10 @@
 # Structure Processing 
 
 - [ ] integrate hmm-based classification into the process pipeline
+- [ ] expand classification to rnas, trnas, factors
+- [ ] improve ligand recognition ( BIRD, CCD?)
+
+
 - [ ] rewrite taxonomy inference:
     - src ids and host ids separately
     - do toplevel struct even have a src_id in PDB?????
@@ -22,6 +25,7 @@
 
 
 # Media
+
 - [ ] render images for new structs 
 - [ ] re-render profiles with the new ligand schema and separate assemblies 
 - [ ] re-render ligands for all structs

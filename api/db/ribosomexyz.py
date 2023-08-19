@@ -1,22 +1,22 @@
 from concurrent.futures import ALL_COMPLETED, Future, ThreadPoolExecutor, wait
-from logs.loggers import get_updates_logger
+from api.logs.loggers import get_updates_logger
 import typing
 from neo4j.exceptions import AuthError
 from pyparsing import Any
 from neo4j import Driver, GraphDatabase
-from ribctl.etl.struct_rcsb_api import current_rcsb_structs
+from ribctl.etl.etl_pipeline import current_rcsb_structs
 from rbxz_bend.settings import NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER
 from api.db.inits.proteins import add_protein, node__protein_class
 from api.db.inits.rna import add_rna, node__rna_class
 from api.db.inits.structure import add_ligand, node__structure
 from ribctl.lib.types.types_ribosome import RibosomeStructure
-from api.ribctl.etl.ribosome_assets import RibosomeAssets
-from api.ribctl.lib.types.types_poly_nonpoly_ligand import list_LSUProteinClass, list_SSUProteinClass, list_RNAClass
+from ribctl.etl.ribosome_assets import RibosomeAssets
+from ribctl.lib.types.types_poly_nonpoly_ligand import list_LSUProteinClass, list_SSUProteinClass, list_RNAClass
 from neo4j import GraphDatabase, Driver, ManagedTransaction, Transaction
 from ribctl.lib.types.types_ribosome import  NonpolymericLigand,  ProteinClass, RibosomeStructure
 from schema.data_requests import LigandsByStruct
 from schema.v0 import ExogenousRNAByStruct,BanClassMetadata, LigandInstance, NeoStruct, NomenclatureClass, NomenclatureClassMember
-from api.ribctl.lib.types.types_poly_nonpoly_ligand import RNAClass, list_LSUProteinClass, list_SSUProteinClass, list_RNAClass
+from ribctl.lib.types.types_poly_nonpoly_ligand import RNAClass, list_LSUProteinClass, list_SSUProteinClass, list_RNAClass
 
 
 # ※ ----------------[ 0.Database  inits: constraints & nomenclature classes]

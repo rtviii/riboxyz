@@ -3,10 +3,10 @@ from pyhmmer import hmmsearch,utils
 import pyhmmer
 from pyhmmer.plan7 import HMM, Pipeline
 from pyhmmer.easel import SequenceFile, Sequence,DigitalSequence, Alphabet, SequenceBlock,DigitalSequenceBlock
-from api.ribctl.etl.ribosome_assets import RibosomeAssets
-from api.ribctl.lib.types.types_poly_nonpoly_ligand import list_ProteinClass
-from api.ribctl.lib.types.types_ribosome import ProteinClass
-from api.scratch_tunnel_workflow import BACTERIAL
+from ribctl.etl.ribosome_assets import RibosomeAssets
+from ribctl.lib.types.types_poly_nonpoly_ligand import list_ProteinClass
+from ribctl.lib.types.types_ribosome import ProteinClass
+from ribctl._tunnel.scratch_tunnel_workflow import BACTERIAL
 
 
 AMINO        = Alphabet.amino()

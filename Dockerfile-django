@@ -4,12 +4,13 @@ FROM ubuntu:22.04
 # ----- SETUP -------------------
 # vars inside the container
 ENV DJANGO=/home/backend/api
+ENV RIBCTL=/home/backend/ribctl
 ENV PYMOL_SOURCE=/home/backend/pymol
-# ENV CLI=/home/backend/cli
 ENV RIBETL_DATA=/home/backend/api/RIBETL_DATA
 
 # set work directory
 RUN mkdir -p $DJANGO
+RUN mkdir -p $RIBCTL
 
 # ----- LIBS -------------------------------------------
 RUN apt-get update -y && apt-get install curl git vim \
@@ -70,9 +71,6 @@ RUN . "$NVM_DIR/nvm.sh" && nvm alias default v${NODE_VERSION}
 ENV PATH="/root/.nvm/versions/node/v${NODE_VERSION}/bin/:${PATH}"
 
 # -------------------------------------- NODE AND MODULES INSTALLATION
-# COPY cli $CLI
-# WORKDIR $CLI
-# ADD cli/package.json ${CLI}
 # RUN npm install --no-optional && npm cache clean --force
 RUN npm install -g ts-node
 RUN npm i -g json-schema-to-typescript
@@ -83,6 +81,8 @@ RUN npm i -g json-schema-to-typescript
 # Be careful given that both the whole django project and the main module are called `rbxz_bend`. (hence not using the $DJANGO here)
 COPY api /home/backend/api
 
+RUN pip3 install -r ${DJANGO}/reqs.txt
+COPY ribctl ${RIBCTL}
 # start server
 WORKDIR ${DJANGO}
 ENTRYPOINT ["gunicorn", "--bind", ":8000", "--workers", "3", "rbxz_bend.wsgi:application","--reload"]

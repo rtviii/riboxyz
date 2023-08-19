@@ -6,9 +6,9 @@ from concurrent.futures import ALL_COMPLETED, ProcessPoolExecutor, ThreadPoolExe
 import os
 from prody import MSA, calcShannonEntropy
 from api.rbxz_bend.settings import RIBETL_DATA
-from api.ribctl.etl.ribosome_assets import RibosomeAssets
-from api.ribctl.lib.types.types_ribosome import Protein, ProteinClass, RibosomeStructure
-from api.ribctl.lib.msalib import msa_dict_get_meta_info, msa_dict, msaclass_extend_temp
+from ribctl.etl.ribosome_assets import RibosomeAssets
+from ribctl.lib.types.types_ribosome import Protein, ProteinClass, RibosomeStructure
+from ribctl.lib.msalib import msa_dict_get_meta_info, msa_dict, msaclass_extend_temp
 
 CRED      = '\033[91m'
 CEND      = '\033[0m'

@@ -1,12 +1,12 @@
 import os
-from api.rbxz_bend.settings import RIBETL_DATA
-from api.ribctl.etl.ribosome_assets import RibosomeAssets
+from ribctl.etl.ribosome_assets import RibosomeAssets
 from ete3 import NCBITaxa
-from api.ribctl.lib.types.types_ribosome import RibosomeStructure
+from ribctl.lib.types.types_ribosome import RibosomeStructure
+from ribctl import RIBETL_DATA
 
-ncbi = NCBITaxa()
 
 def is_descendant_of(taxid: int, struct: str):
+   ncbi = NCBITaxa()
    src, hst = RibosomeAssets(struct).get_taxids()
    lineage = ncbi.get_lineage(src[0])
    if lineage is None:

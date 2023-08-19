@@ -4,33 +4,29 @@ import json
 import typing
 from Bio.PDB.Structure import Structure
 from Bio.PDB.Chain import Chain
-from pprint import pprint
-from typing import Optional, Tuple
-from api.ribctl.lib.msalib import AMINO_ACIDS_1_TO_3_CODE, AMINO_ACIDS_3_TO_1_CODE
-from api.ribctl.lib.types.types_binding_site import BindingSite
-from api.ribctl.lib.types.types_poly_nonpoly_ligand import PolymericFactorClass, RNAClass
-from api.logs.loggers import get_updates_logger
-from api.ribctl.lib.mod_extract_bsites import bsite_nonpolymeric_ligand, struct_ligand_ids, struct_polymeric_factor_ids, bsite_polymeric_factor, bsite_polymeric_factor
-from api.ribctl.lib.mod_split_rename import split_rename
-from api.ribctl.etl.struct_rcsb_api import current_rcsb_structs, process_pdb_record
-from api.ribctl.lib.mod_render_thumbnail import render_thumbnail
-from api.ribctl.lib.utils import download_unpack_place, open_structure
-from api.ribctl.lib.types.types_ribosome import RNA, PolymerClass, PolymericFactor, Protein, ProteinClass, RibosomeStructure
+from typing import Optional
+from ribctl.lib.msalib import AMINO_ACIDS_1_TO_3_CODE, AMINO_ACIDS_3_TO_1_CODE
+from ribctl.lib.types.types_binding_site import BindingSite
+from ribctl.lib.types.types_poly_nonpoly_ligand import PolymericFactorClass, RNAClass
+from ribctl.lib.mod_extract_bsites import bsite_nonpolymeric_ligand, struct_ligand_ids, struct_polymeric_factor_ids, bsite_polymeric_factor, bsite_polymeric_factor
+from ribctl.lib.mod_split_rename import split_rename
+from ribctl.etl.etl_pipeline import current_rcsb_structs, ETLPipeline, rcsb_single_structure_graphql, query_rcsb_api
+from ribctl.lib.mod_render_thumbnail import render_thumbnail
+from ribctl.lib.utils import download_unpack_place, open_structure
+from ribctl.lib.types.types_ribosome import RNA, PolymerClass, PolymericFactor, Protein, ProteinClass, RibosomeStructure
+from ribctl import RIBETL_DATA
 from pydantic import BaseModel, parse_obj_as
 from concurrent.futures import ALL_COMPLETED, Future, ProcessPoolExecutor, ThreadPoolExecutor, wait
 import os
 
 
-RIBETL_DATA = str(os.environ.get("RIBETL_DATA"))
-
-
-class Assetlist(BaseModel)   : 
-      profile                : Optional[bool]
-      structure_modified     : Optional[bool]
-      chains_and_modified_cif: Optional[bool]
-      factors_and_ligands    : Optional[bool]
-      png_thumbnail          : Optional[bool]
-      structure              : Optional[bool]
+class Assetlist(BaseModel):
+    profile: Optional[bool]
+    structure_modified: Optional[bool]
+    chains_and_modified_cif: Optional[bool]
+    factors_and_ligands: Optional[bool]
+    png_thumbnail: Optional[bool]
+    structure: Optional[bool]
 
 
 class RibosomeAssets():
@@ -147,10 +143,10 @@ class RibosomeAssets():
             if class_ in rna.nomenclature and rna.assembly_id == assembly:
                 return rna
 
-
     def get_prot_by_nomclass(self, class_: ProteinClass, assembly: int = 0) -> Protein | None:
-        _auth_asym_id  = { v:k for k,v in self.____nomenclature_v2().items() }.get(class_,None)
-        if _auth_asym_id!= None: 
+        _auth_asym_id = {
+            v: k for k, v in self.____nomenclature_v2().items()}.get(class_, None)
+        if _auth_asym_id != None:
             return self.get_chain_by_auth_asym_id(_auth_asym_id)[0]
 
         for prot in self.profile().proteins:
@@ -178,10 +174,10 @@ class RibosomeAssets():
         return self.biopython_structure().child_dict[0].child_dict[auth_asym_id]
 
     @staticmethod
-    def biopython_chain_get_seq(struct: Structure, auth_asym_id: str,protein_rna:typing.Literal["protein","rna"], sanitized: bool = False) -> str:
+    def biopython_chain_get_seq(struct: Structure, auth_asym_id: str, protein_rna: typing.Literal["protein", "rna"], sanitized: bool = False) -> str:
 
         chain3d = struct.child_dict[0].child_dict[auth_asym_id]
-        ress    = chain3d.child_list
+        ress = chain3d.child_list
 
         # if sanitized == True:
         #     print("sanitized")
@@ -241,16 +237,18 @@ class RibosomeAssets():
         self._verify_dir_exists()
 
         if not os.path.exists(self._json_profile_filepath()):
-            ribosome = process_pdb_record(self.rcsb_id)
+
+            ribosome = ETLPipeline(query_rcsb_api(rcsb_single_structure_graphql(self.rcsb_id.upper()))).process_structure()
+
             if not parse_obj_as(RibosomeStructure, ribosome):
                 raise Exception("Invalid ribosome structure profile.")
             self.save_json_profile(
                 self._json_profile_filepath(), ribosome.dict())
             print(f"Wrote structure profile:\t{self._json_profile_filepath()}")
-            return True
+            return True;
         else:
             if overwrite:
-                ribosome = process_pdb_record(self.rcsb_id)
+                ribosome = ETLPipeline(query_rcsb_api(rcsb_single_structure_graphql(self.rcsb_id.upper()))).process_structure()
                 if not parse_obj_as(RibosomeStructure, ribosome):
                     raise Exception("Invalid ribosome structure profile.")
                 self.save_json_profile(
@@ -319,8 +317,8 @@ class RibosomeAssets():
 
         return all_verified_flag
 
-# ※ Mass process methods.
 
+# ※ Mass process methods.
 
 async def obtain_assets(rcsb_id: str, assetlist: Assetlist, overwrite: bool = False):
     """Obtain all assets for a given RCSB ID"""
@@ -337,8 +335,7 @@ async def obtain_assets(rcsb_id: str, assetlist: Assetlist, overwrite: bool = Fa
         coroutines.append(assets._verify_cif(overwrite))
 
     if assetlist.factors_and_ligands:
-        coroutines.append(
-            assets._verify_ligads_and_ligandlike_polys(overwrite))
+        coroutines.append(assets._verify_ligads_and_ligandlike_polys(overwrite))
 
     if assetlist.chains_and_modified_cif:
         coroutines.append(assets._verify_cif_modified_and_chains(overwrite))
