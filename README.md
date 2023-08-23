@@ -1,5 +1,22 @@
+ # Overview 
 
-# Extract `ribctl` from `api` structure
+![alt text](./ray-logo-transp.png)
+
+ RiboXYZ (available at https://ribosome.xyz), a database that provides organized access to ribosome structures, with several tools for visualisation and study. The database is up-to-date with the Protein Data Bank (PDB) but provides a standardized nomenclature that allows for searching and comparing ribosomal components (proteins, RNA, ligands) across all the available structures. In addition to structured and simplified access to the data, the application has several specialized visualization tools, including the identification and prediction of ligand binding sites, and 3D superimposition of ribosomal components.
+ 
+
+# WIP
+
+### Datastructure:
+
+- [ ] integrate hmm-based classification into the process pipeline
+- [ ] expand classification to rnas, trnas, factors 
+    - working on a proposoal with Khanh and Anton
+- [ ] improve ligand recognition ( BIRD, CCD?)
+
+# Roadmap
+
+### Extract `ribctl` from `api` structure
 
 - [x]  there ought to be two separate clis for both
 
@@ -11,18 +28,12 @@
 
 # Structure Processing 
 
-- [ ] integrate hmm-based classification into the process pipeline
-- [ ] expand classification to rnas, trnas, factors
-- [ ] improve ligand recognition ( BIRD, CCD?)
-
-
 - [ ] rewrite taxonomy inference:
     - src ids and host ids separately
     - do toplevel struct even have a src_id in PDB?????
     - use "taxonomy.tax_infer_by_proportions" for a first-hand notion of what the structure is (add a new field ot the schema)
 
 - [ ] flesh out the taxonomy : [src + host] [nodes in the db, hierarchy in the app(pull in the lib, construct dynamically on app start from assets)]
-
 
 # Media
 
@@ -61,8 +72,6 @@
 - "last updated" section
 - automatic update per struct -- cron job every 24 weeks
 
-- [x] rewrite struct init scripts in python
-- [x] rewrtie cli in python
 
 # LIGANDS
 
