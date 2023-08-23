@@ -250,7 +250,6 @@ if args.generate:
     df.to_csv(f"ptc_centroids.csv")
     exit(1)
 
-def PTC_MARKERS_RAW(rcsb_id:str):
 
 
 # if not args.display_all:
