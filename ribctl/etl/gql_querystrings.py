@@ -150,10 +150,40 @@ single_structure_graphql_template = """{
         entity_id
       }
       rcsb_nonpolymer_entity {
+        details
         formula_weight
         pdbx_description
         pdbx_number_of_molecules
       }
+      nonpolymer_comp {
+        chem_comp {
+          id
+          name
+          three_letter_code
+        }
+        rcsb_chem_comp_target {
+          interaction_type
+          name
+          provenance_source
+          reference_database_accession_code
+          reference_database_name
+        }
+
+        drugbank {
+          drugbank_container_identifiers {
+            drugbank_id
+          }
+          drugbank_info {
+            cas_number
+            description
+            indication
+            mechanism_of_action
+            name
+            pharmacology
+          }
+        }
+      }
+      
     }
 
 
@@ -219,17 +249,47 @@ polymer_entities_string = """{
 
 nonpolymer_entities_string = """{
   entry(entry_id: "$RCSB_ID") {
-    nonpolymer_entities {
+     nonpolymer_entities {
       pdbx_entity_nonpoly {
         comp_id
         name
         entity_id
       }
       rcsb_nonpolymer_entity {
+        details
         formula_weight
         pdbx_description
         pdbx_number_of_molecules
       }
+      nonpolymer_comp {
+        chem_comp {
+          id
+          name
+          three_letter_code
+        }
+        rcsb_chem_comp_target {
+          interaction_type
+          name
+          provenance_source
+          reference_database_accession_code
+          reference_database_name
+        }
+
+        drugbank {
+          drugbank_container_identifiers {
+            drugbank_id
+          }
+          drugbank_info {
+            cas_number
+            description
+            indication
+            mechanism_of_action
+            name
+            pharmacology
+          }
+        }
+      }
+      
     }
   }
 }"""

@@ -10,7 +10,7 @@ from ribctl.lib.types.types_binding_site import BindingSite
 from ribctl.lib.types.types_poly_nonpoly_ligand import PolymericFactorClass, RNAClass
 from ribctl.lib.mod_extract_bsites import bsite_nonpolymeric_ligand, struct_ligand_ids, struct_polymeric_factor_ids, bsite_polymeric_factor, bsite_polymeric_factor
 from ribctl.lib.mod_split_rename import split_rename
-from ribctl.etl.etl_pipeline import current_rcsb_structs, ETLPipeline, rcsb_single_structure_graphql, query_rcsb_api
+from ribctl.etl.etl_pipeline import current_rcsb_structs, ReannotationPipeline, rcsb_single_structure_graphql, query_rcsb_api
 from ribctl.lib.mod_render_thumbnail import render_thumbnail
 from ribctl.lib.utils import download_unpack_place, open_structure
 from ribctl.lib.types.types_ribosome import RNA, PolymerClass, PolymericFactor, Protein, ProteinClass, RibosomeStructure
@@ -27,7 +27,6 @@ class Assetlist(BaseModel):
     factors_and_ligands: Optional[bool]
     png_thumbnail: Optional[bool]
     structure: Optional[bool]
-
 
 class RibosomeAssets():
     rcsb_id: str
@@ -237,18 +236,17 @@ class RibosomeAssets():
         self._verify_dir_exists()
 
         if not os.path.exists(self._json_profile_filepath()):
-
-            ribosome = ETLPipeline(query_rcsb_api(rcsb_single_structure_graphql(self.rcsb_id.upper()))).process_structure()
-
+            ribosome = ReannotationPipeline(query_rcsb_api(rcsb_single_structure_graphql(self.rcsb_id.upper()))).process_structure()
             if not parse_obj_as(RibosomeStructure, ribosome):
                 raise Exception("Invalid ribosome structure profile.")
+
             self.save_json_profile(
                 self._json_profile_filepath(), ribosome.dict())
             print(f"Wrote structure profile:\t{self._json_profile_filepath()}")
             return True;
         else:
             if overwrite:
-                ribosome = ETLPipeline(query_rcsb_api(rcsb_single_structure_graphql(self.rcsb_id.upper()))).process_structure()
+                ribosome = ReannotationPipeline(query_rcsb_api(rcsb_single_structure_graphql(self.rcsb_id.upper()))).process_structure()
                 if not parse_obj_as(RibosomeStructure, ribosome):
                     raise Exception("Invalid ribosome structure profile.")
                 self.save_json_profile(

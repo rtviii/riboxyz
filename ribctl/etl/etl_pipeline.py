@@ -8,265 +8,10 @@ from ribctl.etl.gql_querystrings import single_structure_graphql_template
 
 
 
-#! Reshaping
-
-def infer_organisms_from_polymers(polymers: list[RNA | Protein]):
-    """Grabbing taxid from every polymer in the structure to see which taxid prevails proportionally. Only needed because rcsb does not provide unequivocal taxid for structures (sometimes it's host+source)"""
-
-    host_organism_names: list[str] = []
-    src_organism_names : list[str] = []
-    host_organism_ids  : list[int] = []
-    src_organism_ids   : list[int] = []
-
-    for polymer in polymers:
-        src_organism_names = [*src_organism_names, *polymer.src_organism_names                              ] if polymer.src_organism_names != None else src_organism_names
-        src_organism_ids = [*src_organism_ids, *polymer.src_organism_ids                             ] if polymer.src_organism_ids != None else src_organism_ids
-        src_organism_names = [*src_organism_names, *polymer.host_organism_names                               ] if polymer.host_organism_names != None else src_organism_names
-        src_organism_ids = [*src_organism_ids, *polymer.host_organism_ids ] if polymer.host_organism_ids != None else src_organism_ids
-
-    return {
-        "src_organism_ids"   : list(map(int, set(src_organism_ids))),
-        "src_organism_names" : list(map(str, set(src_organism_names))),
-        "host_organism_ids"  : list(map(int, set(host_organism_ids))),
-        "host_organism_names": list(map(str, set(host_organism_names)))
-    }
-
-def extract_external_refs(external_refs):
-    """
-    external_refs: list[{ link: string; type: string; id: string }]
-    """
-
-    externalRefIds  : list[str] = []
-    externalRefTypes: list[str] = []
-    externalRefLinks: list[str] = []
-
-    if external_refs == None:
-        ...
-    else:
-        for ref in external_refs:
-            externalRefIds.append(ref['id'])
-            externalRefTypes.append(ref['type'])
-            externalRefLinks.append(ref['link'])
-
-    return [externalRefIds, externalRefTypes, externalRefLinks]
-
-def nonpoly_reshape_to_ligand(nonpoly) -> NonpolymericLigand:
-    return NonpolymericLigand(
-        chemicalId=nonpoly['pdbx_entity_nonpoly']['comp_id'],
-        chemicalName=nonpoly['pdbx_entity_nonpoly']['name'],
-        pdbx_description=nonpoly['rcsb_nonpolymer_entity']['pdbx_description'],
-        formula_weight=nonpoly['rcsb_nonpolymer_entity']['formula_weight'],
-        number_of_instances=nonpoly['rcsb_nonpolymer_entity']['pdbx_number_of_molecules'],
-    )
-
-def asm_parse(dictionaries: list[dict]) -> list[AssemblyInstancesMap]:
-    return list(map(AssemblyInstancesMap.parse_obj, dictionaries))
-
-def poly_assign_to_asm(assembly_maps: list[AssemblyInstancesMap], auth_asym_id: str) -> int:
-
-    if len(assembly_maps) == 1:
-        return 0
-    else:
-        for assembly_map in assembly_maps:
-            for polymer_instance in assembly_map.polymer_entity_instances:
-                if polymer_instance.rcsb_polymer_entity_instance_container_identifiers.auth_asym_id == auth_asym_id:
-                    return int(assembly_map.rcsb_id.split('-')[1]) - 1
-        else:
-            raise LookupError()
-
-def _poly_reshape_to_rRNA(plm, assembly_maps: list[AssemblyInstancesMap]) -> list[RNA]:
-    """this returns a list because certain polymers accounts for multiple RNA molecules"""
-
-    host_organisms: list[Any] | None = plm['rcsb_entity_host_organism']
-    source_organisms: list[Any] | None = plm['rcsb_entity_source_organism']
-
-    host_organism_ids = []
-    host_organism_names = []
-    src_organism_ids = []
-    src_organism_names = []
-
-    if host_organisms != None:
-        for ho in host_organisms:
-            if ho['ncbi_taxonomy_id'] != None:
-                host_organism_ids.append(ho['ncbi_taxonomy_id'])
-            if ho['scientific_name'] != None:
-                host_organism_names.append(ho['scientific_name'])
-
-    if source_organisms != None:
-        for so in source_organisms:
-            if so['ncbi_taxonomy_id'] != None:
-                src_organism_ids.append(so['ncbi_taxonomy_id'])
-            if so['scientific_name'] != None:
-                src_organism_names.append(so['scientific_name'])
-
-    host_organism_ids = list(map(int, set(host_organism_ids)))
-    host_organism_names = list(map(str, set(host_organism_names)))
-    src_organism_ids = list(map(int, set(src_organism_ids)))
-    src_organism_names = list(map(str, set(src_organism_names)))
-
-    # # ------------
-    # host_organism_ids   = list(map(int, set([org['ncbi_taxonomy_id'] for org in plm['rcsb_entity_host_organism'  ]]))) if plm['rcsb_entity_host_organism'  ] != None else []
-    # host_organism_names = list(map(str, set([org['scientific_name'] for org in plm['rcsb_entity_host_organism'  ]]))) if plm['rcsb_entity_host_organism'  ] != None else []
-
-    # src_organism_ids   = list(map(int, set([org['ncbi_taxonomy_id'] for org in plm['rcsb_entity_source_organism']]))) if plm['rcsb_entity_source_organism'] != None else []
-    # src_organism_names = list(map(str, set([org['scientific_name'] for org in plm['rcsb_entity_source_organism']]))) if plm['rcsb_entity_source_organism']  != None else []
-
-    nomenclature = rna_classify(plm['rcsb_polymer_entity']['pdbx_description'])
-
-    return [
-        RNA(
-            assembly_id                        = poly_assign_to_asm(assembly_maps, auth_asym_id),
-            nomenclature                       = nomenclature,
-            asym_ids                           = plm['rcsb_polymer_entity_container_identifiers']['asym_ids'],
-            auth_asym_id                       = auth_asym_id,
-            parent_rcsb_id                     = plm['entry']['rcsb_id'],
-            host_organism_ids                  = host_organism_ids,
-            host_organism_names                = host_organism_names,
-            src_organism_ids                   = src_organism_ids,
-            src_organism_names                 = src_organism_names,
-            rcsb_pdbx_description              = "" if plm['rcsb_polymer_entity']['pdbx_description'] == None else plm['rcsb_polymer_entity']['pdbx_description'],
-            entity_poly_strand_id              = plm['entity_poly']['pdbx_strand_id'],
-            entity_poly_seq_one_letter_code    = plm['entity_poly']['pdbx_seq_one_letter_code'],
-            entity_poly_seq_one_letter_code_can= plm['entity_poly']['pdbx_seq_one_letter_code_can'],
-            entity_poly_seq_length             = plm['entity_poly']['rcsb_sample_sequence_length'],
-            entity_poly_entity_type            = plm['entity_poly']['type'],
-            entity_poly_polymer_type           = plm['entity_poly']['rcsb_entity_polymer_type']
-        )
-        for auth_asym_id in plm['rcsb_polymer_entity_container_identifiers']['auth_asym_ids']]
-
-def _poly_reshape_to_rFactor(plm, assembly_maps: list[AssemblyInstancesMap]) -> list[PolymericFactor]:
-    host_organisms: list[Any] | None = plm['rcsb_entity_host_organism']
-    source_organisms: list[Any] | None = plm['rcsb_entity_source_organism']
-
-    host_organism_ids = []
-    host_organism_names = []
-    src_organism_ids = []
-    src_organism_names = []
-
-    if host_organisms != None:
-        for ho in host_organisms:
-            if ho['ncbi_taxonomy_id'] != None:
-                host_organism_ids.append(ho['ncbi_taxonomy_id'])
-            if ho['scientific_name'] != None:
-                host_organism_names.append(ho['scientific_name'])
-
-    if source_organisms != None:
-        for so in source_organisms:
-            if so['ncbi_taxonomy_id'] != None:
-                src_organism_ids.append(so['ncbi_taxonomy_id'])
-            if so['scientific_name'] != None:
-                src_organism_names.append(so['scientific_name'])
-
-    host_organism_ids = list(map(int, set(host_organism_ids)))
-    host_organism_names = list(map(str, set(host_organism_names)))
-    src_organism_ids = list(map(int, set(src_organism_ids)))
-    src_organism_names = list(map(str, set(src_organism_names)))
-
-    nomenclature = [ *filter(lambda x: x is not None,
-                             [ factor_classify(plm['rcsb_polymer_entity']['pdbx_description'])  ]
-                             )
-                             ]
-
-    return [
-        PolymericFactor(
-            assembly_id                        = poly_assign_to_asm(assembly_maps, auth_asym_id),
-            nomenclature                       = nomenclature,
-            asym_ids                           = plm['rcsb_polymer_entity_container_identifiers']['asym_ids'],
-            auth_asym_id                       = auth_asym_id,
-            parent_rcsb_id                     = plm['entry']['rcsb_id'],
-            host_organism_ids                  = host_organism_ids,
-            host_organism_names                = host_organism_names,
-            src_organism_ids                   = src_organism_ids,
-            src_organism_names                 = src_organism_names,
-            rcsb_pdbx_description              = "" if plm['rcsb_polymer_entity']['pdbx_description'] == None else plm['rcsb_polymer_entity']['pdbx_description'],
-            entity_poly_strand_id              = plm['entity_poly']['pdbx_strand_id'],
-            entity_poly_seq_one_letter_code    = plm['entity_poly']['pdbx_seq_one_letter_code'],
-            entity_poly_seq_one_letter_code_can= plm['entity_poly']['pdbx_seq_one_letter_code_can'],
-            entity_poly_seq_length             = plm['entity_poly']['rcsb_sample_sequence_length'],
-            entity_poly_entity_type            = plm['entity_poly']['type'],
-            entity_poly_polymer_type           = plm['entity_poly']['rcsb_entity_polymer_type']
-        )
-        for auth_asym_id in plm['rcsb_polymer_entity_container_identifiers']['auth_asym_ids']]
-
-def _poly_reshape_to_rProtein(plm, assembly_maps: list[AssemblyInstancesMap]) -> list[Protein]:
-
-    if plm['pfams'] != None and len(plm['pfams']) > 0:
-
-        pfam_comments = list(set([pfam['rcsb_pfam_comment']
-                             for pfam in plm['pfams']]))
-        pfam_descriptions = list(set([pfam['rcsb_pfam_description'] for pfam in plm['pfams']]))
-        pfam_accessions   = list(set([pfam['rcsb_pfam_accession'] for pfam in plm['pfams']]))
-
-    else:
-        pfam_comments     = []
-        pfam_descriptions = []
-        pfam_accessions   = []
-
-    host_organisms  : list[Any] | None = plm['rcsb_entity_host_organism']
-    source_organisms: list[Any] | None = plm['rcsb_entity_source_organism']
-
-    host_organism_ids   = []
-    host_organism_names = []
-
-    src_organism_ids = []
-    src_organism_names = []
-
-    if host_organisms != None:
-        for ho in host_organisms:
-            if ho['ncbi_taxonomy_id'] != None:
-                host_organism_ids.append(ho['ncbi_taxonomy_id'])
-            if ho['scientific_name'] != None:
-                host_organism_names.append(ho['scientific_name'])
-
-    if source_organisms != None:
-        for so in source_organisms:
-            if so['ncbi_taxonomy_id'] != None:
-                src_organism_ids.append(so['ncbi_taxonomy_id'])
-            if so['scientific_name'] != None:
-                src_organism_names.append(so['scientific_name'])
-
-    host_organism_ids   = list(map(int, set(host_organism_ids)))
-    host_organism_names = list(map(str, set(host_organism_names)))
-    src_organism_ids    = list(map(int, set(src_organism_ids)))
-    src_organism_names  = list(map(str, set(src_organism_names)))
-
-    
-
-    nomenclature =  protein_classify(plm)
-
-    return [
-        Protein(
-            assembly_id                        = poly_assign_to_asm(assembly_maps, auth_asym_id),
-            nomenclature                       = nomenclature,
-            asym_ids                           = plm['rcsb_polymer_entity_container_identifiers']['asym_ids'],
-            parent_rcsb_id                     = plm['entry']['rcsb_id'],
-            auth_asym_id                       = auth_asym_id,
-            pfam_accessions                    = pfam_accessions,
-            pfam_comments                      = pfam_comments,
-            pfam_descriptions                  = pfam_descriptions,
-            host_organism_ids                  = host_organism_ids,
-            host_organism_names                = host_organism_names,
-            src_organism_ids                   = src_organism_ids,
-            src_organism_names                 = src_organism_names,
-            uniprot_accession                  = [entry['rcsb_id'] for entry in plm['uniprots']] if plm['uniprots'] != None and len(plm['uniprots']) > 0 else [],
-            rcsb_pdbx_description              = plm['rcsb_polymer_entity']['pdbx_description'],
-            entity_poly_strand_id              = plm['entity_poly']['pdbx_strand_id'],
-            entity_poly_seq_one_letter_code    = plm['entity_poly']['pdbx_seq_one_letter_code'],
-            entity_poly_seq_one_letter_code_can= plm['entity_poly']['pdbx_seq_one_letter_code_can'],
-            entity_poly_seq_length             = plm['entity_poly']['rcsb_sample_sequence_length'],
-            entity_poly_entity_type            = plm['entity_poly']['type'],
-            entity_poly_polymer_type           = plm['entity_poly']['rcsb_entity_polymer_type']
-        ) for auth_asym_id in plm['rcsb_polymer_entity_container_identifiers']['auth_asym_ids']
-    ]
-
-def rcsb_single_structure_graphql(rcsb_id): return single_structure_graphql_template.replace("$RCSB_ID", rcsb_id.upper())
-
-
-"""This takes a single rcsb_id and observes that the corresponding structure is:\
+"""These methods take a single rcsb_id and observes that the corresponding structure is:\
      - retrieved from RCSB
      - processed according to the pipeline of methods 
-     - placed along with derivative files in the correct directory (via RibosomeAssets helper class)
-     - (OPTIONAL) loaded into the database if a connection exists"""
+"""
 
 def current_rcsb_structs() -> list[str]:
     """Return all structures in the rcsb that contain the phrase RIBOSOME and have more than 25 protein entities"""
@@ -303,6 +48,7 @@ def current_rcsb_structs() -> list[str]:
     return requests.get(query).json()['result_set']
 
 def query_rcsb_api(gql_string: str) -> dict:
+    """This defines a query in the RCSB search language that identifies the structures we view as 'current' i.e. 40+ proteins, smaller than 4A resolution etc."""
 
     reqstring = "https://data.rcsb.org/graphql?query={}".format(gql_string)
     _resp = requests.get(reqstring)
@@ -313,8 +59,22 @@ def query_rcsb_api(gql_string: str) -> dict:
     else:
         raise Exception("No data found for query: {}".format(gql_string))
 
+def rcsb_single_structure_graphql(rcsb_id): return single_structure_graphql_template.replace("$RCSB_ID", rcsb_id.upper())
 
-class ETLPipeline:
+class ReannotationPipeline:
+    """
+    ETL Pipeline as it currently stands takes care of injesting a graphql profile from RCSB and reshaping it into a RibosomeStructure.
+    This is the class that oversees all of the annotations that added/edited on the _semantic profile_(as opposed to the structural files) by us, including:
+
+    - metadat reshaping
+    - rRNA classification
+    - rProtein classification
+    - factors annotation
+    - ligand annotation
+
+
+
+    """
 
     rcsb_data_dict: dict
 
@@ -331,9 +91,77 @@ class ETLPipeline:
     def __init__(self, response: dict):
         self.rcsb_data_dict         = response
         self.hmm_ribosomal_proteins = rp_hmm_dict_init()
-        self.asm_maps               = asm_parse(response['assemblies'])
+        self.asm_maps               = self.asm_parse(response['assemblies'])
         self.rRNA                   = None
         self.rProteins              = None
+
+
+    
+
+    #! Reshaping
+
+    def infer_organisms_from_polymers(self,polymers: list[RNA | Protein]):
+        """Grabbing taxid from every polymer in the structure to see which taxid prevails proportionally. Only needed because rcsb does not provide unequivocal taxid for structures (sometimes it's host+source)"""
+
+        host_organism_names: list[str] = []
+        src_organism_names : list[str] = []
+        host_organism_ids  : list[int] = []
+        src_organism_ids   : list[int] = []
+
+        for polymer in polymers:
+            src_organism_names = [*src_organism_names, *polymer.src_organism_names                              ] if polymer.src_organism_names != None else src_organism_names
+            src_organism_ids = [*src_organism_ids, *polymer.src_organism_ids                             ] if polymer.src_organism_ids != None else src_organism_ids
+            src_organism_names = [*src_organism_names, *polymer.host_organism_names                               ] if polymer.host_organism_names != None else src_organism_names
+            src_organism_ids = [*src_organism_ids, *polymer.host_organism_ids ] if polymer.host_organism_ids != None else src_organism_ids
+
+        return {
+            "src_organism_ids"   : list(map(int, set(src_organism_ids))),
+            "src_organism_names" : list(map(str, set(src_organism_names))),
+            "host_organism_ids"  : list(map(int, set(host_organism_ids))),
+            "host_organism_names": list(map(str, set(host_organism_names)))
+        }
+
+    def extract_external_refs(self,external_refs):
+        """
+        external_refs: list[{ link: string; type: string; id: string }]
+        """
+
+        externalRefIds  : list[str] = []
+        externalRefTypes: list[str] = []
+        externalRefLinks: list[str] = []
+
+        if external_refs == None:
+            ...
+        else:
+            for ref in external_refs:
+                externalRefIds.append(ref['id'])
+                externalRefTypes.append(ref['type'])
+                externalRefLinks.append(ref['link'])
+
+        return [externalRefIds, externalRefTypes, externalRefLinks]
+
+    def nonpoly_reshape_to_ligand(self,nonpoly:dict) -> NonpolymericLigand:
+        return NonpolymericLigand(
+            chemicalId          = nonpoly['pdbx_entity_nonpoly']['comp_id'],
+            chemicalName        = nonpoly['pdbx_entity_nonpoly']['name'],
+            pdbx_description    = nonpoly['rcsb_nonpolymer_entity']['pdbx_description'],
+            formula_weight      = nonpoly['rcsb_nonpolymer_entity']['formula_weight'],
+            number_of_instances = nonpoly['rcsb_nonpolymer_entity']['pdbx_number_of_molecules'],
+        )
+    def asm_parse(self,dictionaries: list[dict]) -> list[AssemblyInstancesMap]:
+        return list(map(AssemblyInstancesMap.parse_obj, dictionaries))
+
+    def poly_assign_to_asm(self,assembly_maps: list[AssemblyInstancesMap], auth_asym_id: str) -> int:
+
+        if len(assembly_maps) == 1:
+            return 0
+        else:
+            for assembly_map in assembly_maps:
+                for polymer_instance in assembly_map.polymer_entity_instances:
+                    if polymer_instance.rcsb_polymer_entity_instance_container_identifiers.auth_asym_id == auth_asym_id:
+                        return int(assembly_map.rcsb_id.split('-')[1]) - 1
+            else:
+                raise LookupError()
 
     def process_polypeptides(self)->tuple[list[Protein], list[PolymericFactor]]:
 
@@ -384,13 +212,13 @@ class ETLPipeline:
 
     def process_nonpolymers(self)->list[NonpolymericLigand]:
         nonpoly_entities = self.rcsb_data_dict['nonpolymer_entities']
-        reshaped_nonpoly = [nonpoly_reshape_to_ligand(nonpoly) for nonpoly in nonpoly_entities] if nonpoly_entities != None and len(nonpoly_entities) > 0 else []
+        reshaped_nonpoly = [self.nonpoly_reshape_to_ligand(nonpoly) for nonpoly in nonpoly_entities] if nonpoly_entities != None and len(nonpoly_entities) > 0 else []
 
         return reshaped_nonpoly
 
     def process_metadata(self):
-            organisms    = infer_organisms_from_polymers([*self.rProteins, *self.rRNA])
-            externalRefs = extract_external_refs(self.rcsb_data_dict['rcsb_external_references'])
+            organisms    = self.infer_organisms_from_polymers([*self.rProteins, *self.rRNA])
+            externalRefs = self.extract_external_refs(self.rcsb_data_dict['rcsb_external_references'])
 
             if self.rcsb_data_dict['citation'] != None and len(self.rcsb_data_dict['citation']) > 0:
                 pub = self.rcsb_data_dict['citation'][0]
@@ -459,7 +287,7 @@ class ETLPipeline:
 
         return [
             Protein(
-                assembly_id                        = poly_assign_to_asm(assembly_maps, auth_asym_id),
+                assembly_id                        = self.poly_assign_to_asm(assembly_maps, auth_asym_id),
                 nomenclature                       = nomenclature,
                 asym_ids                           = plm['rcsb_polymer_entity_container_identifiers']['asym_ids'],
                 parent_rcsb_id                     = plm['entry']['rcsb_id'],
@@ -523,7 +351,7 @@ class ETLPipeline:
 
         return [
             RNA(
-                assembly_id                        = poly_assign_to_asm(assembly_maps, auth_asym_id),
+                assembly_id                        = self.poly_assign_to_asm(assembly_maps, auth_asym_id),
                 nomenclature                       = nomenclature,
                 asym_ids                           = plm['rcsb_polymer_entity_container_identifiers']['asym_ids'],
                 auth_asym_id                       = auth_asym_id,
@@ -577,7 +405,7 @@ class ETLPipeline:
 
         return [
             PolymericFactor(
-                assembly_id                        = poly_assign_to_asm(assembly_maps, auth_asym_id),
+                assembly_id                        = self.poly_assign_to_asm(assembly_maps, auth_asym_id),
                 nomenclature                       = nomenclature,
                 asym_ids                           = plm['rcsb_polymer_entity_container_identifiers']['asym_ids'],
                 auth_asym_id                       = auth_asym_id,
@@ -634,184 +462,3 @@ class ETLPipeline:
         )
 
         return reshaped
-
-def ____process_pdb_record(rcsb_id: str) -> RibosomeStructure:
-
-    """
-    returns dict of the shape types_RibosomeStructure 
-    """
-
-    response         = query_rcsb_api(rcsb_single_structure_graphql(rcsb_id.upper()))
-    poly_entities    = response['polymer_entities']
-    nonpoly_entities = response['nonpolymer_entities']
-    assembly_maps    = asm_parse(response['assemblies'])
-
-    def is_protein(poly): return poly['entity_poly']['rcsb_entity_polymer_type'] == 'Protein'
-    proteins, rnas = [], []
-    for poly in poly_entities:
-        proteins.append(poly) if is_protein(poly) else rnas.append(poly)
-
-    assert (len(proteins) + len(rnas) == len(poly_entities))
-
-    reshaped_proteins         : list[Protein]         = []
-    reshaped_rnas             : list[RNA]             = []
-    reshaped_polymeric_factors: list[PolymericFactor] = []
-
-    for (i, poly_prot) in enumerate(proteins):
-        if factor_classify(poly_prot['rcsb_polymer_entity']['pdbx_description']) != None:
-            reshaped_polymeric_factors.extend(poly_reshape_to_rFactor(poly_prot, assembly_maps))
-        else:
-            reshaped_proteins.extend(poly_reshape_to_rProtein(poly_prot, assembly_maps))
-
-    for (j, poly_rna) in enumerate(rnas):
-        if factor_classify(poly_rna['rcsb_polymer_entity']['pdbx_description']) != None:
-            reshaped_polymeric_factors.extend(poly_reshape_to_rFactor(poly_rna, assembly_maps))
-        else:
-            reshaped_rnas.extend(poly_reshape_to_rRNA(poly_rna, assembly_maps))
-
-    reshaped_nonpoly: list[NonpolymericLigand] = [nonpoly_reshape_to_ligand(
-        nonpoly) for nonpoly in nonpoly_entities] if nonpoly_entities != None and len(nonpoly_entities) > 0 else []
-
-    # type: ignore (only accessing commong fields)
-    organisms = infer_organisms_from_polymers(reshaped_proteins)
-    externalRefs = extract_external_refs(response['rcsb_external_references'])
-    if response['citation'] != None and len(response['citation']) > 0:
-        pub = response['citation'][0]
-    else:
-        pub = {
-            "year": None,
-            "rcsb_authors": None,
-
-            "title": None,
-            "pdbx_database_id_DOI": None,
-            "pdbx_database_id_PubMed": None
-        }
-
-    kwords_text = response['struct_keywords']['text'] if response['struct_keywords'] != None else None
-    kwords = response['struct_keywords']['pdbx_keywords'] if response['struct_keywords'] != None else None
-
-
-    reshaped = RibosomeStructure(
-        rcsb_id=response['rcsb_id'],
-        expMethod=response['exptl'][0]['method'],
-        resolution=response['rcsb_entry_info']['resolution_combined'][0],
-        rcsb_external_ref_id=externalRefs[0],
-        rcsb_external_ref_type=externalRefs[1],
-        rcsb_external_ref_link=externalRefs[2],
-        citation_year=pub['year'],
-        citation_rcsb_authors=pub['rcsb_authors'],
-        citation_title=pub['title'],
-        citation_pdbx_doi=pub['pdbx_database_id_DOI'],
-        pdbx_keywords_text=kwords_text,
-        pdbx_keywords=kwords,
-        src_organism_ids=organisms['src_organism_ids'],
-        src_organism_names=organisms['src_organism_names'],
-
-        host_organism_ids=organisms['host_organism_ids'],
-        host_organism_names=organisms['host_organism_names'],
-
-        proteins=reshaped_proteins,
-        rnas=reshaped_rnas,
-        polymeric_factors=reshaped_polymeric_factors,
-        nonpolymeric_ligands=reshaped_nonpoly,
-        assembly_map=assembly_maps
-
-    )
-    assert (reshaped.rnas.__len__() if reshaped.rnas != None else 0
-            + reshaped.proteins.__len__()
-            + reshaped.polymeric_factors.__len__() if reshaped.polymeric_factors != None else 0
-            == len(poly_entities))
-
-    return reshaped
-
-
-def ___process_pdb_record(rcsb_id: str) -> RibosomeStructure:
-
-    """
-    returns dict of the shape types_RibosomeStructure 
-    """
-
-    response         = query_rcsb_api(rcsb_single_structure_graphql(rcsb_id.upper()))
-    poly_entities    = response['polymer_entities']
-    nonpoly_entities = response['nonpolymer_entities']
-    assembly_maps    = asm_parse(response['assemblies'])
-
-    def is_protein(poly): return poly['entity_poly']['rcsb_entity_polymer_type'] == 'Protein'
-    proteins, rnas = [], []
-    for poly in poly_entities:
-        proteins.append(poly) if is_protein(poly) else rnas.append(poly)
-
-    assert (len(proteins) + len(rnas) == len(poly_entities))
-
-    reshaped_proteins         : list[Protein]         = []
-    reshaped_rnas             : list[RNA]             = []
-    reshaped_polymeric_factors: list[PolymericFactor] = []
-
-    for (i, poly_prot) in enumerate(proteins):
-        if factor_classify(poly_prot['rcsb_polymer_entity']['pdbx_description']) != None:
-            reshaped_polymeric_factors.extend(poly_reshape_to_rFactor(poly_prot, assembly_maps))
-        else:
-            reshaped_proteins.extend(poly_reshape_to_rProtein(poly_prot, assembly_maps))
-
-    for (j, poly_rna) in enumerate(rnas):
-        if factor_classify(poly_rna['rcsb_polymer_entity']['pdbx_description']) != None:
-            reshaped_polymeric_factors.extend(
-                poly_reshape_to_rFactor(poly_rna, assembly_maps))
-        else:
-            reshaped_rnas.extend(poly_reshape_to_rRNA(poly_rna, assembly_maps))
-
-    reshaped_nonpoly: list[NonpolymericLigand] = [nonpoly_reshape_to_ligand(
-        nonpoly) for nonpoly in nonpoly_entities] if nonpoly_entities != None and len(nonpoly_entities) > 0 else []
-
-    # type: ignore (only accessing commong fields)
-    organisms = infer_organisms_from_polymers(reshaped_proteins)
-    externalRefs = extract_external_refs(
-        response['rcsb_external_references'])
-
-    if response['citation'] != None and len(response['citation']) > 0:
-        pub = response['citation'][0]
-    else:
-        pub = {
-            "year": None,
-            "rcsb_authors": None,
-            "": None,
-            "pdbx_database_id_DOI": None,
-            "pdbx_database_id_PubMed": None
-        }
-
-    kwords_text = response['struct_keywords']['text'] if response['struct_keywords'] != None else None
-    kwords = response['struct_keywords']['pdbx_keywords'] if response['struct_keywords'] != None else None
-
-
-    reshaped = RibosomeStructure(
-        rcsb_id=response['rcsb_id'],
-        expMethod=response['exptl'][0]['method'],
-        resolution=response['rcsb_entry_info']['resolution_combined'][0],
-        rcsb_external_ref_id=externalRefs[0],
-        rcsb_external_ref_type=externalRefs[1],
-        rcsb_external_ref_link=externalRefs[2],
-        citation_year=pub['year'],
-        citation_rcsb_authors=pub['rcsb_authors'],
-        citation_title=pub['title'],
-        citation_pdbx_doi=pub['pdbx_database_id_DOI'],
-        pdbx_keywords_text=kwords_text,
-        pdbx_keywords=kwords,
-        src_organism_ids=organisms['src_organism_ids'],
-        src_organism_names=organisms['src_organism_names'],
-
-        host_organism_ids=organisms['host_organism_ids'],
-        host_organism_names=organisms['host_organism_names'],
-
-        proteins=reshaped_proteins,
-        rnas=reshaped_rnas,
-        polymeric_factors=reshaped_polymeric_factors,
-        nonpolymeric_ligands=reshaped_nonpoly,
-        assembly_map=assembly_maps
-
-    )
-    assert (reshaped.rnas.__len__() if reshaped.rnas != None else 0
-            + reshaped.proteins.__len__()
-            + reshaped.polymeric_factors.__len__() if reshaped.polymeric_factors != None else 0
-            == len(poly_entities))
-
-    return reshaped

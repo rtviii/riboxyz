@@ -6,7 +6,7 @@ import asyncio
 import json
 import os
 from ribctl import RIBETL_DATA
-from ribctl.etl.etl_pipeline import ETLPipeline, query_rcsb_api, rcsb_single_structure_graphql
+from ribctl.etl.etl_pipeline import ReannotationPipeline, query_rcsb_api, rcsb_single_structure_graphql
 from ribctl.etl.ribosome_assets import Assetlist, RibosomeAssets, obtain_assets, obtain_assets_threadpool
 from ribctl.lib.taxonomy import filter_by_parent_tax
 # from api.db.ribosomexyz import ribosomexyzDB
@@ -20,12 +20,15 @@ arg.add_argument('-getall', '--obtain_all_structures', action='store_true')
 arg.add_argument('-syncall', '--sync_all_structures_with_pdb',
                  action='store_true')
 arg.add_argument('-o', '--obtain', type=str)
-
 arg.add_argument('-ls', '--list_structs', action='store_true')
+
 struct_filter_arggroup = arg.add_argument_group("Structure filtering options")
 struct_filter_arggroup.add_argument('-tax', '--taxid', type=int)
 
 arg.add_argument('-ttt', '--test', action='store_true')
+
+
+
 args = arg.parse_args()
 
 if args.obtain_all_structures:
@@ -40,7 +43,7 @@ if args.obtain_all_structures:
 
 if args.obtain:
     RCSB_ID = str(args.obtain)
-    loop = asyncio.get_event_loop()
+    loop    = asyncio.get_event_loop()
     loop.run_until_complete(
         obtain_assets(
             RCSB_ID,
@@ -76,10 +79,6 @@ if args.list_structs:
 
 
 
-
-
-ribosome = ETLPipeline(query_rcsb_api(rcsb_single_structure_graphql("3J7Z"))).process_structure()
-print(ribosome)
 
 
 
