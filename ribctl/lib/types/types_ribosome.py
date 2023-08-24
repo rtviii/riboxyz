@@ -59,12 +59,67 @@ class RNA(Polymer):
 
 class NonpolymericLigand(BaseModel)  : 
 
+      class NonpolymerComp(BaseModel):
+        class ChemComp(BaseModel):
+            class ChemCompContainerIdentifiers(BaseModel):
+                id: str
+                name: str
+                three_letter_code: str
+            chem_comp_container_identifiers: ChemCompContainerIdentifiers
+
+        class Drugbank(BaseModel):
+            class DrugbankInfo(BaseModel):
+                cas_number: str
+                description: str
+            class DrugbankContainerIdentifiers(BaseModel):
+                drugbank_id: str
+            drugbank_container_identifiers: DrugbankContainerIdentifiers
+            drugbank_info: DrugbankInfo
+
+        class RcsbChemCompTarget(BaseModel):
+
+            interaction_type                 : str | None
+            name                             : str | None
+            provenance_source                : str | None
+            reference_database_accession_code: str | None
+            reference_database_name          : str | None
+
+        
+        chemp_comp           : ChemComp | None
+        drugbank             : Drugbank | None
+        rcsb_chem_comp_target: list[RcsbChemCompTarget] | None
+       
+
       chemicalId         : str
       chemicalName       : str
       formula_weight     : None | float
+
       pdbx_description   : str
       number_of_instances: int
-    #   nomenclature       : list[NonpolymericLigandClass]
+
+      nonpolymer_comp: NonpolymerComp
+        
+     
+
+        # nonpoly["nonpolymer_comp"]["chem_comp"]["id"]
+        # nonpoly["nonpolymer_comp"]["chem_comp"]["name"]
+        # nonpoly["nonpolymer_comp"]["chem_comp"]["three_letter_code"]
+
+        # nonpoly["nonpolymer_comp"]["drugbank"]["drugbank_container_identifiers"][
+        #     "drugbank_id"
+        # ]
+        # nonpoly["nonpolymer_comp"]["drugbank"]["drugbank_info"]["cas_number"]
+        # nonpoly["nonpolymer_comp"]["drugbank"]["drugbank_info"]["description"]
+
+        # nonpoly["nonpolymer_comp"]["rcsb_chem_comp_target"]
+
+        # {
+        #     "interaction_type": "target",
+        #     "name": "Spermine synthase",
+        #     "provenance_source": "DrugBank",
+        #     "reference_database_accession_code": "P52788",
+        #     "reference_database_name": "UniProt",
+        # },
 
 class PolymericFactor(Polymer): 
     def __hash__(self) -> int:
@@ -72,20 +127,6 @@ class PolymericFactor(Polymer):
 
     nomenclature: list[PolymericFactorClass] 
     
-class NonpolymerEntityInstance(BaseModel):
-    class NonpolymerEntityInstanceContainerIdentifiers(BaseModel):
-        entity_id: str
-        auth_asym_id: str
-        auth_seq_id: str
-
-    rcsb_nonpolymer_entity_instance_container_identifiers: NonpolymerEntityInstanceContainerIdentifiers
-
-class PolymerEntityInstance(BaseModel):
-    class PolymerEntityInstanceContainerIdentifiers(BaseModel):
-        entity_id: str
-        auth_asym_id: str
-    rcsb_polymer_entity_instance_container_identifiers: PolymerEntityInstanceContainerIdentifiers
-
 class AssemblyInstancesMap(BaseModel):
     """
     This basically specifies which assembly an instnace of a polymer or a nonpolymer belongs to. 
@@ -98,26 +139,40 @@ class AssemblyInstancesMap(BaseModel):
     assemblies{
     rcsb_id 
    	nonpolymer_entity_instances{
-  
-      rcsb_nonpolymer_entity_instance_container_identifiers{
-        entity_id
-        comp_id
-        auth_asym_id
-        rcsb_id
-        auth_seq_id
+          rcsb_nonpolymer_entity_instance_container_identifiers{
+            entity_id
+            comp_id
+            auth_asym_id
+            rcsb_id
+            auth_seq_id
+          }
+        }
+        polymer_entity_instances{
+           rcsb_polymer_entity_instance_container_identifiers {  
+            entity_id
+            asym_id
+            auth_asym_id
+            entry_id
+            entity_id
+          }
+        }
       }
-    }
-    polymer_entity_instances{
-       rcsb_polymer_entity_instance_container_identifiers {  
-        entity_id
-        asym_id
-        auth_asym_id
-        entry_id
-        entity_id
-      }
-    }
-  }
     """
+
+    class NonpolymerEntityInstance(BaseModel):
+        class NonpolymerEntityInstanceContainerIdentifiers(BaseModel):
+            entity_id: str
+            auth_asym_id: str
+            auth_seq_id: str
+
+        rcsb_nonpolymer_entity_instance_container_identifiers: NonpolymerEntityInstanceContainerIdentifiers
+
+    class PolymerEntityInstance(BaseModel):
+        class PolymerEntityInstanceContainerIdentifiers(BaseModel):
+            entity_id: str
+            auth_asym_id: str
+        rcsb_polymer_entity_instance_container_identifiers: PolymerEntityInstanceContainerIdentifiers
+
     rcsb_id                    : str # 5AFI-1
     nonpolymer_entity_instances: Optional[list[NonpolymerEntityInstance]]
     polymer_entity_instances   : list[PolymerEntityInstance]
