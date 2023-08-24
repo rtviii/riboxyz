@@ -9,14 +9,26 @@ RiboXYZ (available at https://ribosome.xyz), a database that provides organized 
 
 ### Datastructure:
 
-- [ ] integrate hmm-based classification into the process pipeline
+- [ ] Pydantic 2.0
+
+- [ ] rewrite taxonomy inference: **<<<<<<<<<<**
+    - src ids and host ids separately
+    - use "taxonomy.tax_infer_by_proportions" for a first-hand notion of what the structure is (add a new field ot the schema)
+    - [ ] flesh out the taxonomy : [src + host] [nodes in the db, hierarchy in the app(pull in the lib, construct dynamically on app start from assets)]
+
 - [ ] expand classification to rnas, trnas, factors 
+    - [ ] integrate hmm-based classification into the process pipeline
     - working on a proposoal with Khanh and Anton
+    - can make progress on this without curation
+
 - [ ] improve ligand recognition ( BIRD, CCD?):
     ### TODO:
     - BIRD has types, perhaps that's somewhat better biochemical classification 
+    * Added drugbank and pubchem references, that should be enough for now
+    - [ ] Make sure the new types are propagated everywhere (including the api)
+    - [ ] fit ligand parsing, transposition and fileformats to the new "polymeric factors" schema
 
-- [ ] fit ligand parsing, transposition and fileformats to the new "polymeric factors" schema
+
 
 # Roadmap
 
@@ -31,12 +43,8 @@ RiboXYZ (available at https://ribosome.xyz), a database that provides organized 
 
 ### Structure Processing 
 
-- [ ] rewrite taxonomy inference:
-    - src ids and host ids separately
-    - do toplevel struct even have a src_id in PDB?????
-    - use "taxonomy.tax_infer_by_proportions" for a first-hand notion of what the structure is (add a new field ot the schema)
+- [ ] Logging
 
-- [ ] flesh out the taxonomy : [src + host] [nodes in the db, hierarchy in the app(pull in the lib, construct dynamically on app start from assets)]
 
 ### Media
 

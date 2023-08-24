@@ -5,6 +5,7 @@ from ribctl.lib.types.types_ribosome import RibosomeStructure
 from ribctl import RIBETL_DATA
 
 
+
 def is_descendant_of(taxid: int, struct: str):
    ncbi = NCBITaxa()
    src, hst = RibosomeAssets(struct).get_taxids()
