@@ -12,7 +12,11 @@ RiboXYZ (available at https://ribosome.xyz), a database that provides organized 
 - [ ] integrate hmm-based classification into the process pipeline
 - [ ] expand classification to rnas, trnas, factors 
     - working on a proposoal with Khanh and Anton
-- [ ] improve ligand recognition ( BIRD, CCD?)
+- [ ] improve ligand recognition ( BIRD, CCD?):
+    ### TODO:
+    - BIRD has types, perhaps that's somewhat better biochemical classification 
+
+- [ ] fit ligand parsing, transposition and fileformats to the new "polymeric factors" schema
 
 # Roadmap
 
@@ -20,13 +24,12 @@ RiboXYZ (available at https://ribosome.xyz), a database that provides organized 
 
 - [x]  there ought to be two separate clis for both
 
-# Datastructure
+### Datastructure
 
 - [x] separate assemblies
 - [x] split ligand classes into instances 
-- [ ] fit ligand parsing, transposition and fileformats to the new "polymeric factors" schema
 
-# Structure Processing 
+### Structure Processing 
 
 - [ ] rewrite taxonomy inference:
     - src ids and host ids separately
@@ -35,14 +38,14 @@ RiboXYZ (available at https://ribosome.xyz), a database that provides organized 
 
 - [ ] flesh out the taxonomy : [src + host] [nodes in the db, hierarchy in the app(pull in the lib, construct dynamically on app start from assets)]
 
-# Media
+### Media
 
 - [ ] render images for new structs 
 - [ ] re-render profiles with the new ligand schema and separate assemblies 
 - [ ] re-render ligands for all structs
 
 - ligands/bsites:
-    - render :
+    - render:
         - endpoint
         - typed [x]
         - logs
@@ -51,12 +54,10 @@ RiboXYZ (available at https://ribosome.xyz), a database that provides organized 
         - typed [x]
         - logs
 
-- superimpose :
+- superimpose:
     - typed [x] 
     - endpoint 
     - logs
-
-- [ ] RAII for peripheral data: PTC viewpoints, new nomenclature, tunnel obstruction profiles,
 
 # Debugging 
 
