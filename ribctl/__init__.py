@@ -26,6 +26,34 @@ ASSETS:dict[asset_type, pathlib.Path] = {
 'hmm_trna'              : pathlib.Path(os.path.join(_ASSETS_PATH, 'hmm_trna'))
 }
 
+TAXID_BACTERIA          = 2
+TAXID_EUKARYA           = 2759
+TAXID_ARCHEA            = 2157
+AMINO_ACIDS_3_TO_1_CODE = {
+"ALA":"A",
+"ARG":"R",
+"ASN":"N",
+"ASP":"D",
+"ASX":"B",
+"CYS":"C",
+"GLU":"E",
+"GLN":"Q",
+"GLX":"Z",
+"GLY":"G",
+"HIS":"H",
+"ILE":"I",
+"LEU":"L",
+"LYS":"K",
+"MET":"M",
+"PHE":"F",
+"PRO":"P",
+"SER":"S",
+"THR":"T",
+"TRP":"W",
+"TYR":"Y",
+"VAL":"V"};
+AMINO_ACIDS_1_TO_3_CODE = {v:k for k,v in AMINO_ACIDS_3_TO_1_CODE.items()}
+
 
 
 __version__ = '0.1.0'

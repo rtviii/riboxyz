@@ -6,8 +6,8 @@ import asyncio
 import json
 import os
 from ribctl import RIBETL_DATA
-from ribctl.etl.etl_pipeline import ReannotationPipeline, query_rcsb_api, rcsb_single_structure_graphql
-from ribctl.etl.ribosome_assets import Assetlist, RibosomeAssets, obtain_assets, obtain_assets_threadpool
+# from ribctl.etl.etl_pipeline import ReannotationPipeline, query_rcsb_api, rcsb_single_structure_graphql
+# from ribctl.etl.ribosome_assets import Assetlist, RibosomeAssets, obtain_assets, obtain_assets_threadpool
 from ribctl.lib.taxonomy import filter_by_parent_tax
 # from api.db.ribosomexyz import ribosomexyzDB
 # from api.rbxz_bend.settings import NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER, RIBETL_DATA
@@ -17,8 +17,7 @@ arg = argparse.ArgumentParser(
     description='RibCtl - A tool to control the ribosome database')
 
 arg.add_argument('-getall', '--obtain_all_structures', action='store_true')
-arg.add_argument('-syncall', '--sync_all_structures_with_pdb',
-                 action='store_true')
+arg.add_argument('-syncall', '--sync_all_structures_with_pdb',   action='store_true')
 arg.add_argument('-o', '--obtain', type=str)
 arg.add_argument('-ls', '--list_structs', action='store_true')
 
