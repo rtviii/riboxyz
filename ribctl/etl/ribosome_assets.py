@@ -19,7 +19,6 @@ from pydantic import BaseModel, parse_obj_as
 from concurrent.futures import ALL_COMPLETED, Future, ProcessPoolExecutor, ThreadPoolExecutor, wait
 import os
 
-
 class Assetlist(BaseModel):
     profile: Optional[bool]
     structure_modified: Optional[bool]
@@ -315,7 +314,6 @@ class RibosomeAssets():
 
         return all_verified_flag
 
-
 # ※ Mass process methods.
 
 async def obtain_assets(rcsb_id: str, assetlist: Assetlist, overwrite: bool = False):
@@ -339,7 +337,6 @@ async def obtain_assets(rcsb_id: str, assetlist: Assetlist, overwrite: bool = Fa
         coroutines.append(assets._verify_cif_modified_and_chains(overwrite))
 
     await asyncio.gather(*coroutines)
-
 
 def obtain_assets_threadpool(targets: list[str], assetlist: Assetlist, workers: int = 5, get_all: bool = False, overwrite=False):
     """Get all ribosome profiles from RCSB via a threadpool"""
@@ -369,7 +366,6 @@ def obtain_assets_threadpool(targets: list[str], assetlist: Assetlist, workers: 
 
     wait(futures, return_when=ALL_COMPLETED)
     logger.info("Finished syncing with RCSB")
-
 
 def obtain_assets_processpool(targets: list[str], assetlist: Assetlist, workers: int = 5, get_all: bool = False, overwrite=False):
     """Get all ribosome profiles from RCSB via a threadpool"""
