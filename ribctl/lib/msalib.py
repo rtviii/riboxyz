@@ -21,33 +21,6 @@ from ete3 import NCBITaxa
 # prd.confProDy(verbosity='none')
 RIBETL_DATA = os.environ.get('RIBETL_DATA')
 
-TAXID_BACTERIA          = 2
-TAXID_EUKARYA           = 2759
-TAXID_ARCHEA            = 2157
-AMINO_ACIDS_3_TO_1_CODE = {
-"ALA":"A",
-"ARG":"R",
-"ASN":"N",
-"ASP":"D",
-"ASX":"B",
-"CYS":"C",
-"GLU":"E",
-"GLN":"Q",
-"GLX":"Z",
-"GLY":"G",
-"HIS":"H",
-"ILE":"I",
-"LEU":"L",
-"LYS":"K",
-"MET":"M",
-"PHE":"F",
-"PRO":"P",
-"SER":"S",
-"THR":"T",
-"TRP":"W",
-"TYR":"Y",
-"VAL":"V"};
-AMINO_ACIDS_1_TO_3_CODE = {v:k for k,v in AMINO_ACIDS_3_TO_1_CODE.items()}
 
 def PROTEOVISION_URL(SU, _class, taxids): return "https://ribovision3.chemistry.gatech.edu/showAlignment/{}/{}/{}".format(SU, _class, taxids)
 

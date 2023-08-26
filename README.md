@@ -1,22 +1,35 @@
- # Overview 
+ # Overview
 
 <img src="./ray-logo-transp.png" height="200" width="220" >
 RiboXYZ (available at https://ribosome.xyz), a database that provides organized access to ribosome structures, with several tools for visualisation and study. The database is up-to-date with the Protein Data Bank (PDB) but provides a standardized nomenclature that allows for searching and comparing ribosomal components (proteins, RNA, ligands) across all the available structures. In addition to structured and simplified access to the data, the application has several specialized visualization tools, including the identification and prediction of ligand binding sites, and 3D superimposition of ribosomal components.
 
- 
+
+
 
 # WIP
 
 ### Datastructure:
 
-- [ ] integrate hmm-based classification into the process pipeline
-- [ ] expand classification to rnas, trnas, factors 
+- [ ] Pydantic 2.0
+
+- [ ] rewrite taxonomy inference: **<<<<<<<<<<**
+    - src ids and host ids separately
+    - use "taxonomy.tax_infer_by_proportions" for a first-hand notion of what the structure is (add a new field ot the schema)
+    - [ ] flesh out the taxonomy : [src + host] [nodes in the db, hierarchy in the app(pull in the lib, construct dynamically on app start from assets)]
+
+- [ ] expand classification to rnas, trnas, factors
+    - [ ] integrate hmm-based classification into the process pipeline
     - working on a proposoal with Khanh and Anton
+    - can make progress on this without curation
+
 - [ ] improve ligand recognition ( BIRD, CCD?):
     ### TODO:
-    - BIRD has types, perhaps that's somewhat better biochemical classification 
+    - BIRD has types, perhaps that's somewhat better biochemical classification
+    * Added drugbank and pubchem references, that should be enough for now
+    - [ ] Make sure the new types are propagated everywhere (including the api)
+    - [ ] fit ligand parsing, transposition and fileformats to the new "polymeric factors" schema
 
-- [ ] fit ligand parsing, transposition and fileformats to the new "polymeric factors" schema
+
 
 # Roadmap
 
@@ -27,21 +40,17 @@ RiboXYZ (available at https://ribosome.xyz), a database that provides organized 
 ### Datastructure
 
 - [x] separate assemblies
-- [x] split ligand classes into instances 
+- [x] split ligand classes into instances
 
-### Structure Processing 
+### Structure Processing
 
-- [ ] rewrite taxonomy inference:
-    - src ids and host ids separately
-    - do toplevel struct even have a src_id in PDB?????
-    - use "taxonomy.tax_infer_by_proportions" for a first-hand notion of what the structure is (add a new field ot the schema)
+- [ ] Logging
 
-- [ ] flesh out the taxonomy : [src + host] [nodes in the db, hierarchy in the app(pull in the lib, construct dynamically on app start from assets)]
 
 ### Media
 
-- [ ] render images for new structs 
-- [ ] re-render profiles with the new ligand schema and separate assemblies 
+- [ ] render images for new structs
+- [ ] re-render profiles with the new ligand schema and separate assemblies
 - [ ] re-render ligands for all structs
 
 - ligands/bsites:
@@ -49,23 +58,23 @@ RiboXYZ (available at https://ribosome.xyz), a database that provides organized 
         - endpoint
         - typed [x]
         - logs
-    - predict: 
+    - predict:
         - endpoint
         - typed [x]
         - logs
 
 - superimpose:
-    - typed [x] 
-    - endpoint 
+    - typed [x]
+    - endpoint
     - logs
 
-# Debugging 
+# Debugging
 
 - [ ] visualization troubleshoot
 
 # DevOps:
 
-- one-click docker deployment 
+- one-click docker deployment
 - how can we benefit from github actions?
 
 # Later:
