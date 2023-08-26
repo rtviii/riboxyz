@@ -7,7 +7,8 @@ import requests
 from Bio.PDB.Structure import Structure
 from Bio.PDB import FastMMCIFParser
 
-RIBETL_DATA = str(os.environ.get('RIBETL_DATA'))
+from ribctl import RIBETL_DATA
+
 
 async def download_unpack_place(struct_id: str) -> None:
 
