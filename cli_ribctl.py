@@ -14,8 +14,7 @@ from pymol2 import cmd2
 # from api.rbxz_bend.settings import NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER, RIBETL_DATA
 
 
-arg = argparse.ArgumentParser(
-    description='RibCtl - A tool to control the ribosome database')
+arg = argparse.ArgumentParser(description='RibCtl - A tool to control the ribosome database')
 
 arg.add_argument('-getall', '--obtain_all_structures', action='store_true')
 arg.add_argument('-syncall', '--sync_all_structures_with_pdb',   action='store_true')
