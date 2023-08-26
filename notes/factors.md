@@ -24,3 +24,11 @@ Xu et Al. 2022 Elongation Factors Review
 
     EF-G integrates the energy regimes of a motor protein and a GTPase,
     and promotes tRNA motion through the combined use of power stroke and Brownian ratchet mechanisms
+
+
+
+## Open Problems
+
+The physiological significance of phosphorylated EF-G still needs to be elucidated.
+The molecular mechanism of how ADP-ribosylation impairs the function of eEF2 has not been fully elucidated
+EF4 may contribute to the cell survival under adverse conditions, but the physiological role of the protein remains unclear.
