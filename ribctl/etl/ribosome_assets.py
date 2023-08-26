@@ -1,11 +1,10 @@
 import asyncio
-from functools import reduce
 import json
 import typing
 from Bio.PDB.Structure import Structure
 from Bio.PDB.Chain import Chain
 from typing import Optional
-from ribctl.lib.msalib import AMINO_ACIDS_1_TO_3_CODE, AMINO_ACIDS_3_TO_1_CODE
+from ribctl import AMINO_ACIDS_3_TO_1_CODE
 from ribctl.lib.types.types_binding_site import BindingSite
 from ribctl.lib.types.types_poly_nonpoly_ligand import PolymericFactorClass, RNAClass
 from ribctl.lib.mod_extract_bsites import bsite_nonpolymeric_ligand, struct_ligand_ids, struct_polymeric_factor_ids, bsite_polymeric_factor, bsite_polymeric_factor
