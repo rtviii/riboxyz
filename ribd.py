@@ -1,6 +1,10 @@
 import argparse
+import os
+from driver import test
+from ribctl import RIBETL_DATA
 
-parser = argparse.ArgumentParser(description="Command line interface for the `ribctl` package.")
+from ribctl.etl.ribosome_assets import Assetlist, obtain_assets_threadpool
+
 
 
 
@@ -19,72 +23,90 @@ parser = argparse.ArgumentParser(description="Command line interface for the `ri
 
 
 
+parser     = argparse.ArgumentParser(description="Command line interface for the `ribctl` package.")
 subparsers = parser.add_subparsers(title='Subcommands', dest='command')
 
 #! -------------------------- --- -------------------------- #
-#! -------------------------- ETL -------------------------- #
+#! -------------------------- etl -------------------------- #
 #! -------------------------- --- -------------------------- #
 
 parser_cmd_etl = subparsers.add_parser('etl', help='Acquisition and processing of ribosomal structures and assets.')
 parser_cmd_etl.add_argument('-getall', '--obtain_all_structures', action='store_true')
 
 def cmd_etl(args):
-    print("Executing command 1 with arg:", args.obtain_all_structures)
+    if args.obtain_all_structures != None:
+        ASL = Assetlist(profile=True)
+        obtain_assets_threadpool(
+            [],
+            ASL,
+            workers=16,
+            get_all=True,
+            # overwrite=True
+        )
 
-parser.set_defaults(func=cmd_etl)
-
-
-#! -------------------------- -------- -------------------------- #
-#! -------------------------- Command2 -------------------------- #
-#! -------------------------- -------- -------------------------- #
-parser_cmd2 = subparsers.add_parser('sync', help='Syncronization with the PDB, updates and database uploads')
-parser_cmd2.add_argument('--option2', help='Option for command 2')
-
-parser_cmd2sub = parser_cmd2.add_subparsers(title='Subcommands', dest='subcommand2')
-
-parser_cmd2sub.add_parser('subcommand2a', help='Subcommand 2a help')
-parser_cmd2sub.add_parser('subcommand2b', help='Subcommand 2b help')
-
-def cmd_2(args):
-    print("Executing command 2")
-    if args.subcommand2 == 'subcommand2a':
-        print("Executing subcommand 2a")
-    elif args.subcommand2 == 'subcommand2b':
-        print("Executing subcommand 2b")
-
-parser_cmd2.set_defaults(func=cmd_2)
+parser_cmd_etl.set_defaults(func=cmd_etl)
 
 
 #! -------------------------- -------- -------------------------- #
-#! -------------------------- Command2 -------------------------- #
+#! -------------------------- sync     -------------------------- #
 #! -------------------------- -------- -------------------------- #
+parser_sync = subparsers.add_parser('sync_db', help='Syncronization with the PDB, updates and database uploads')
+# parser_cmd2sub = parser_sync.add_subparsers(title='Subcommands', dest='subcommand2')
+# parser_cmd2sub.add_parser('db', help='Upload local structures to the neo4j database')
 
-parser_cmd2 = subparsers.add_parser('sync', help='Syncronization with the PDB, updates and database uploads')
-parser_cmd2.add_argument('--option2', help='Option for command 2')
+def cmd_sync(args):
+    print("Uploading structures to Neo4j")
 
-parser_cmd2sub = parser_cmd2.add_subparsers(title='Subcommands', dest='subcommand2')
+parser_sync.set_defaults(func=cmd_sync)
 
-parser_cmd2sub.add_parser('subcommand2a', help='Subcommand 2a help')
-parser_cmd2sub.add_parser('subcommand2b', help='Subcommand 2b help')
 
-def cmd_2(args):
-    print("Executing command 2")
-    if args.subcommand2 == 'subcommand2a':
-        print("Executing subcommand 2a")
-    elif args.subcommand2 == 'subcommand2b':
-        print("Executing subcommand 2b")
+# #! -------------------------- -------- -------------------------- #
+# #! -------------------------- ls       -------------------------- #
+# #! -------------------------- -------- -------------------------- #
+parser_cmd_ls = subparsers.add_parser('ls', help='List information')
 
-parser_cmd2.set_defaults(func=cmd_2)
+parser_cmd_ls.add_argument('-struct', help="Structure ID")
+parser_cmd_ls.add_argument('-spec', '--species', help="Species ID")
+parser_cmd_ls.add_argument('-elem', '--subelement', help="Subelement type (rna,protein,ligand)")
 
-#! -------------------------- ------------------- -------------------------- #
+def cmd_ls(args):
+
+    all_structs = os.listdir(RIBETL_DATA)
+
+    if args.struct != None:
+        print("Listing structure information for", args.struct)
+    elif args.species != None:
+        print("Listing species information for", args.species)
+    elif args.subelement != None:
+        print("Listing subelement information for", args.subelement)
+    else:
+        print("Listing all information")
+
+parser_cmd_ls.set_defaults(func=cmd_ls)
+
+
+def parse_comma_separated_list(value):
+    return value.split(',')
+
 #! -------------------------- Filerts and options -------------------------- #
-#! -------------------------- ------------------- -------------------------- #
-parser.add_argument('--modifier-option', help="Global option description")
+parser.add_argument('--has_protein', type=parse_comma_separated_list, help="Global option description")
+parser.add_argument('--taxid')
+parser.add_argument('--t', action='store_true')
+#?---------------------------------------------------------------------------------------------------------
+#?---------------------------------------------------------------------------------------------------------
+#?---------------------------------------------------------------------------------------------------------
+
+
+
+
+
 
 
 args = parser.parse_args()
-if hasattr(args, 'func'):
-    args.func(args)
-    print(args.modifier_option, "++")
+if args.t:
+    test()
 else:
-    parser.print_help()
+    if hasattr(args, 'func'):
+        args.func(args)
+    else:
+        parser.print_help()

@@ -67,18 +67,12 @@ if args.test:
 
 if args.list_structs:
     all_structs = os.listdir(RIBETL_DATA)
-    for struct in all_structs:
-        print(struct)
-
     if args.taxid:
         print(filter_by_parent_tax(args.taxid))
+    else:
+        for struct in all_structs:
+            print(struct)
             # all_structs = [struct for struct in all_structs if struct.startswith(str(taxid))]
-
-
-
-
-
-
 
 
 
