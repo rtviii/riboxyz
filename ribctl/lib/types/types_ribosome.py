@@ -15,7 +15,7 @@ class Polymer(BaseModel):
 
     assembly_id: int
 
-    asym_ids: list[str]
+    asym_ids    : list[str]
     auth_asym_id: str
 
     parent_rcsb_id   : str
