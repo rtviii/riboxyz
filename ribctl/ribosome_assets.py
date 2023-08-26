@@ -4,6 +4,7 @@ import typing
 from Bio.PDB.Structure import Structure
 from Bio.PDB.Chain import Chain
 from typing import Optional
+from api.logs.loggers import get_updates_logger
 from ribctl import AMINO_ACIDS_3_TO_1_CODE
 from ribctl.lib.types.types_binding_site import BindingSite
 from ribctl.lib.types.types_poly_nonpoly_ligand import PolymericFactorClass, RNAClass
@@ -81,6 +82,12 @@ class RibosomeAssets():
     def save_json_profile(self, filepath: str, profile: dict):
         with open(filepath, "w") as f:
             json.dump(profile, f)
+
+    @staticmethod
+    def list_all_structs():
+        return os.listdir(RIBETL_DATA)
+
+
 
     # ※ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-= Getters =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 

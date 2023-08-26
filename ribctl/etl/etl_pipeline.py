@@ -196,8 +196,8 @@ class ReannotationPipeline:
         return [externalRefIds, externalRefTypes, externalRefLinks]
 
     def nonpoly_reshape_to_ligand(self, nonpoly: dict) -> NonpolymericLigand:
-        print("got a nonpoly elem")
-        pprint(nonpoly)
+        # print("got a nonpoly elem")
+        # pprint(nonpoly)
 
         # nonpoly["nonpolymer_comp"]["chem_comp"]["id"]
         # nonpoly["nonpolymer_comp"]["chem_comp"]["name"]
@@ -236,12 +236,17 @@ class ReannotationPipeline:
         return list(map(AssemblyInstancesMap.parse_obj, dictionaries))
 
     def poly_assign_to_asm(
-        self, assembly_maps: list[AssemblyInstancesMap], auth_asym_id: str
+        self,  auth_asym_id: str
     ) -> int:
-        if len(assembly_maps) == 1:
+        """
+        Every structure in PDB might have 1 or more "assemblies", i.e. *almost* identical models sitting next to each other in space.
+        The purpose of this method is to assign a polymer to the correct assembly, given its auth_asym_id.
+        """
+
+        if len(self.asm_maps) == 1:
             return 0
         else:
-            for assembly_map in assembly_maps:
+            for assembly_map in self.asm_maps:
                 for polymer_instance in assembly_map.polymer_entity_instances:
                     if (
                         polymer_instance.rcsb_polymer_entity_instance_container_identifiers.auth_asym_id
@@ -356,7 +361,7 @@ class ReannotationPipeline:
         return [organisms, externalRefs, pub, kwords_text, kwords]
 
     def poly_reshape_to_rProtein(
-        self, plm, assembly_maps: list[AssemblyInstancesMap]
+        self, plm
     ) -> list[Protein]:
         if plm["pfams"] != None and len(plm["pfams"]) > 0:
             pfam_comments = list(
@@ -419,7 +424,7 @@ class ReannotationPipeline:
 
         return [
             Protein(
-                assembly_id=self.poly_assign_to_asm(assembly_maps, auth_asym_id),
+                assembly_id=self.poly_assign_to_asm(auth_asym_id),
                 nomenclature=nomenclature,
                 asym_ids=plm["rcsb_polymer_entity_container_identifiers"]["asym_ids"],
                 parent_rcsb_id=plm["entry"]["rcsb_id"],
@@ -454,7 +459,7 @@ class ReannotationPipeline:
         ]
 
     def poly_reshape_to_rRNA(
-        self, plm, assembly_maps: list[AssemblyInstancesMap]
+        self, plm 
     ) -> list[RNA]:
         """this returns a list because certain polymers accounts for multiple RNA molecules"""
 
@@ -496,7 +501,7 @@ class ReannotationPipeline:
 
         return [
             RNA(
-                assembly_id=self.poly_assign_to_asm(assembly_maps, auth_asym_id),
+                assembly_id=self.poly_assign_to_asm( auth_asym_id),
                 nomenclature=nomenclature,
                 asym_ids=plm["rcsb_polymer_entity_container_identifiers"]["asym_ids"],
                 auth_asym_id=auth_asym_id,
@@ -527,9 +532,10 @@ class ReannotationPipeline:
         ]
 
     def poly_reshape_to_rFactor(
-        self, plm, assembly_maps: list[AssemblyInstancesMap]
+        self, plm
     ) -> list[PolymericFactor]:
-        host_organisms: list[Any] | None = plm["rcsb_entity_host_organism"]
+
+        host_organisms  : list[Any] | None = plm["rcsb_entity_host_organism"]
         source_organisms: list[Any] | None = plm["rcsb_entity_source_organism"]
 
         host_organism_ids = []
@@ -551,10 +557,10 @@ class ReannotationPipeline:
                 if so["scientific_name"] != None:
                     src_organism_names.append(so["scientific_name"])
 
-        host_organism_ids = list(map(int, set(host_organism_ids)))
+        host_organism_ids   = list(map(int, set(host_organism_ids)))
         host_organism_names = list(map(str, set(host_organism_names)))
-        src_organism_ids = list(map(int, set(src_organism_ids)))
-        src_organism_names = list(map(str, set(src_organism_names)))
+        src_organism_ids    = list(map(int, set(src_organism_ids)))
+        src_organism_names  = list(map(str, set(src_organism_names)))
 
         nomenclature = [
             *filter(
@@ -565,7 +571,7 @@ class ReannotationPipeline:
 
         return [
             PolymericFactor(
-                assembly_id=self.poly_assign_to_asm(assembly_maps, auth_asym_id),
+                assembly_id=self.poly_assign_to_asm(auth_asym_id),
                 nomenclature=nomenclature,
                 asym_ids=plm["rcsb_polymer_entity_container_identifiers"]["asym_ids"],
                 auth_asym_id=auth_asym_id,
@@ -596,14 +602,22 @@ class ReannotationPipeline:
         ]
 
     def process_structure(self):
-        [
-            reshaped_proteins,
-            reshaped_polymeric_factors_prot,
-        ] = self.process_polypeptides()
-        [reshaped_rnas, reshaped_polymeric_factors_rna] = self.process_polynucleotides()
+
+         
+        [reshaped_proteins,reshaped_polymeric_factors_prot] = self.process_polypeptides()
+        [reshaped_rnas, reshaped_polymeric_factors_rna]     = self.process_polynucleotides()
+
+
+        pprint(self.rcsb_data_dict["polymer_entities"])
+        pprint(len(self.rcsb_data_dict["polymer_entities"]))
+        print(len(reshaped_proteins))
+        print(len(reshaped_rnas))
+        print(len(reshaped_polymeric_factors_rna))
+        print(len(reshaped_polymeric_factors_prot))
+
 
         assert (
-            len(reshaped_proteins)
+              len(reshaped_proteins)
             + len(reshaped_rnas)
             + len(reshaped_polymeric_factors_rna)
             + len(reshaped_polymeric_factors_prot)
