@@ -6,8 +6,8 @@ import asyncio
 import json
 import os
 from ribctl import RIBETL_DATA
-# from ribctl.etl.etl_pipeline import ReannotationPipeline, query_rcsb_api, rcsb_single_structure_graphql
-# from ribctl.etl.ribosome_assets import Assetlist, RibosomeAssets, obtain_assets, obtain_assets_threadpool
+from ribctl.etl.etl_pipeline import ReannotationPipeline, query_rcsb_api, rcsb_single_structure_graphql
+from ribctl.etl.ribosome_assets import Assetlist, RibosomeAssets, obtain_assets, obtain_assets_threadpool
 from ribctl.lib.taxonomy import filter_by_parent_tax
 from pymol2 import cmd2
 # from api.db.ribosomexyz import ribosomexyzDB
@@ -26,8 +26,6 @@ struct_filter_arggroup = arg.add_argument_group("Structure filtering options")
 struct_filter_arggroup.add_argument('-tax', '--taxid', type=int)
 
 arg.add_argument('-ttt', '--test', action='store_true')
-
-
 
 args = arg.parse_args()
 
