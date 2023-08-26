@@ -220,24 +220,20 @@ class ReannotationPipeline:
         # },
 
         return NonpolymericLigand(
-
-
-            nonpolymer_comp=nonpoly['nonpolymer_comp'],
-
-            chemicalId          = nonpoly["pdbx_entity_nonpoly"]["comp_id"],
-            chemicalName        = nonpoly["pdbx_entity_nonpoly"]["name"],
-
-            pdbx_description    = nonpoly["rcsb_nonpolymer_entity"]["pdbx_description"],
-            formula_weight      = nonpoly["rcsb_nonpolymer_entity"]["formula_weight"],
-            number_of_instances = nonpoly["rcsb_nonpolymer_entity"]["pdbx_number_of_molecules"],
+            nonpolymer_comp=nonpoly["nonpolymer_comp"],
+            chemicalId=nonpoly["pdbx_entity_nonpoly"]["comp_id"],
+            chemicalName=nonpoly["pdbx_entity_nonpoly"]["name"],
+            pdbx_description=nonpoly["rcsb_nonpolymer_entity"]["pdbx_description"],
+            formula_weight=nonpoly["rcsb_nonpolymer_entity"]["formula_weight"],
+            number_of_instances=nonpoly["rcsb_nonpolymer_entity"][
+                "pdbx_number_of_molecules"
+            ],
         )
 
     def asm_parse(self, dictionaries: list[dict]) -> list[AssemblyInstancesMap]:
         return list(map(AssemblyInstancesMap.parse_obj, dictionaries))
 
-    def poly_assign_to_asm(
-        self,  auth_asym_id: str
-    ) -> int:
+    def poly_assign_to_asm(self, auth_asym_id: str) -> int:
         """
         Every structure in PDB might have 1 or more "assemblies", i.e. *almost* identical models sitting next to each other in space.
         The purpose of this method is to assign a polymer to the correct assembly, given its auth_asym_id.
@@ -259,7 +255,7 @@ class ReannotationPipeline:
     def process_polypeptides(self) -> tuple[list[Protein], list[PolymericFactor]]:
         poly_entities = self.rcsb_data_dict["polymer_entities"]
 
-        reshaped_proteins: list[Protein] = []
+        reshaped_proteins         : list[Protein]         = []
         reshaped_polymeric_factors: list[PolymericFactor] = []
 
         def is_protein(poly):
@@ -279,9 +275,7 @@ class ReannotationPipeline:
                     )
                 else:
                     # TODO: MOVE TO HMM BASED CLASSIFICATION METHOD
-                    reshaped_proteins.extend(
-                        self.poly_reshape_to_rProtein(poly, self.asm_maps)
-                    )
+                    reshaped_proteins.extend(self.poly_reshape_to_rProtein(poly))
             else:
                 ...
 
@@ -298,7 +292,7 @@ class ReannotationPipeline:
         for poly in poly_entities:
             rnas.append(poly) if is_rna(poly) else ...
 
-        reshaped_rnas: list[RNA] = []
+        reshaped_rnas             : list[RNA]             = []
         reshaped_polymeric_factors: list[PolymericFactor] = []
 
         for j, poly_rna in enumerate(rnas):
@@ -307,12 +301,10 @@ class ReannotationPipeline:
                 != None
             ):
                 # TODO: HMM WORKFLOW
-                reshaped_polymeric_factors.extend(
-                    self.poly_reshape_to_rFactor(poly_rna, self.asm_maps)
-                )
+                reshaped_polymeric_factors.extend(self.poly_reshape_to_rFactor(poly_rna))
             else:
                 # TODO: DIFFERENTIATE BETWEEN MRNA (regex) AND TRNA (HMM workflow )
-                reshaped_rnas.extend(self.poly_reshape_to_rRNA(poly_rna, self.asm_maps))
+                reshaped_rnas.extend(self.poly_reshape_to_rRNA(poly_rna))
 
         self.rRNA = reshaped_rnas
         return (reshaped_rnas, reshaped_polymeric_factors)
@@ -360,9 +352,7 @@ class ReannotationPipeline:
 
         return [organisms, externalRefs, pub, kwords_text, kwords]
 
-    def poly_reshape_to_rProtein(
-        self, plm
-    ) -> list[Protein]:
+    def poly_reshape_to_rProtein(self, plm) -> list[Protein]:
         if plm["pfams"] != None and len(plm["pfams"]) > 0:
             pfam_comments = list(
                 set([pfam["rcsb_pfam_comment"] for pfam in plm["pfams"]])
@@ -458,9 +448,7 @@ class ReannotationPipeline:
             ]
         ]
 
-    def poly_reshape_to_rRNA(
-        self, plm 
-    ) -> list[RNA]:
+    def poly_reshape_to_rRNA(self, plm) -> list[RNA]:
         """this returns a list because certain polymers accounts for multiple RNA molecules"""
 
         host_organisms: list[Any] | None = plm["rcsb_entity_host_organism"]
@@ -501,7 +489,7 @@ class ReannotationPipeline:
 
         return [
             RNA(
-                assembly_id=self.poly_assign_to_asm( auth_asym_id),
+                assembly_id=self.poly_assign_to_asm(auth_asym_id),
                 nomenclature=nomenclature,
                 asym_ids=plm["rcsb_polymer_entity_container_identifiers"]["asym_ids"],
                 auth_asym_id=auth_asym_id,
@@ -531,12 +519,9 @@ class ReannotationPipeline:
             ]
         ]
 
-    def poly_reshape_to_rFactor(
-        self, plm
-    ) -> list[PolymericFactor]:
-
-        host_organisms  : list[Any] | None = plm["rcsb_entity_host_organism"]
-        source_organisms: list[Any] | None = plm["rcsb_entity_source_organism"]
+    def poly_reshape_to_rFactor(self, plm) -> list[PolymericFactor]: 
+        host_organisms                                             : list[Any] | None = plm["rcsb_entity_host_organism"]
+        source_organisms                                           : list[Any] | None = plm["rcsb_entity_source_organism"]
 
         host_organism_ids = []
         host_organism_names = []
@@ -602,22 +587,30 @@ class ReannotationPipeline:
         ]
 
     def process_structure(self):
+        [
+            reshaped_proteins,
+            reshaped_polymeric_factors_prot,
+        ] = self.process_polypeptides()
 
-         
-        [reshaped_proteins,reshaped_polymeric_factors_prot] = self.process_polypeptides()
-        [reshaped_rnas, reshaped_polymeric_factors_rna]     = self.process_polynucleotides()
-
+        [reshaped_rnas, reshaped_polymeric_factors_rna] = self.process_polynucleotides()
 
         pprint(self.rcsb_data_dict["polymer_entities"])
-        pprint(len(self.rcsb_data_dict["polymer_entities"]))
-        print(len(reshaped_proteins))
-        print(len(reshaped_rnas))
-        print(len(reshaped_polymeric_factors_rna))
-        print(len(reshaped_polymeric_factors_prot))
-
+        print("Total polymers:",len(self.rcsb_data_dict["polymer_entities"]))
+        print("Reshaped proteins:", len(reshaped_proteins))
+        print("reshaped rnas:", len(reshaped_rnas))
+        print("Reshaped factors rna:", len(reshaped_polymeric_factors_rna))
+        print("Reshaped factors protein:", len(reshaped_polymeric_factors_prot))
+        
+        # pprint(reshaped_rnas)
+        # pprint(reshaped_proteins)
+        for x in reshaped_polymeric_factors_prot:
+            print(x)
+        print("---------++++++++++++++++++++++++++++++++++++=======")
+        for y in reshaped_polymeric_factors_rna:
+            print(y)
 
         assert (
-              len(reshaped_proteins)
+            len(reshaped_proteins)
             + len(reshaped_rnas)
             + len(reshaped_polymeric_factors_rna)
             + len(reshaped_polymeric_factors_prot)
@@ -654,3 +647,5 @@ class ReannotationPipeline:
         )
 
         return reshaped
+
+
