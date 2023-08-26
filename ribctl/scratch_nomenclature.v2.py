@@ -6,7 +6,7 @@ from concurrent.futures import ALL_COMPLETED, ProcessPoolExecutor, ThreadPoolExe
 import os
 from prody import MSA, calcShannonEntropy
 from api.rbxz_bend.settings import RIBETL_DATA
-from ribctl.etl.ribosome_assets import RibosomeAssets
+from ribctl.ribosome_assets import RibosomeAssets
 from ribctl.lib.types.types_ribosome import Protein, ProteinClass, RibosomeStructure
 from ribctl.lib.msalib import msa_dict_get_meta_info, msa_dict, msaclass_extend_temp
 
