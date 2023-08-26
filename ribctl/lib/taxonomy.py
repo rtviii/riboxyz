@@ -22,7 +22,7 @@ def filter_by_parent_tax(taxid:int):
 def __node_lineage(node):
     return NCBITaxa().get_lineage(node.taxid)
 
-def __lift_rank_to_species(taxid: int) -> int:
+def __lift_rank_to_species(taxkd: int) -> int:
     """Given a taxid, make sure that it's a SPECIES (as opposed to strain, subspecies, isolate, norank etc.)"""
     ncbi = NCBITaxa()
     if ncbi.get_rank([taxid])[taxid] == 'species':
