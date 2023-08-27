@@ -4,7 +4,7 @@ from ribctl.lib.msalib import AMINO_ACIDS_3_TO_1_CODE, msa_dict, msaclass_extend
 from ribctl import RIBETL_DATA
 from ribctl.lib.types.types_ribosome import PolymericFactor, Protein, ProteinClass
 from ribctl.lib.types.types_binding_site import AMINO_ACIDS, NUCLEOTIDES, ResidueSummary
-from ribctl.etl.ribosome_assets import RibosomeAssets
+from ribctl.ribosome_assets import RibosomeAssets
 import loguru
 from Bio.PDB.Atom import Atom
 from Bio.PDB.NeighborSearch import NeighborSearch

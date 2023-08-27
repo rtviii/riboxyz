@@ -18,14 +18,20 @@ RiboXYZ (available at https://ribosome.xyz), a database that provides organized 
     - [ ] flesh out the taxonomy : [src + host] [nodes in the db, hierarchy in the app(pull in the lib, construct dynamically on app start from assets)]
 
 - [ ] expand classification to rnas, trnas, factors
-    - [ ] integrate hmm-based classification into the process pipeline
-    - working on a proposoal with Khanh and Anton
-    - can make progress on this without curation
+    - [ ] integrate hmm-based classification into the process pipeline:
+        - [ ] rRNA
+        - [x] Proteins
+        - [ ] Initiation Factors
+        - [ ] Elongation Factors
+        - [ ] Recycling Factors
+        - [ ] tRNA
 
-- [ ] improve ligand recognition ( BIRD, CCD?):
+    - [ ] working on a proposoal with Khanh and Anton
+    - [ ] can make progress on this without curation
+
+- [ ] Ligand improvements ( you can assume one has medicinal value/signficance if it's in drugbank)
     ### TODO:
-    - BIRD has types, perhaps that's somewhat better biochemical classification
-    * Added drugbank and pubchem references, that should be enough for now
+    - [x] Added drugbank and pubchem references, that should be enough for now
     - [ ] Make sure the new types are propagated everywhere (including the api)
     - [ ] fit ligand parsing, transposition and fileformats to the new "polymeric factors" schema
 

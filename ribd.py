@@ -1,9 +1,11 @@
 import argparse
+import asyncio
 import os
 from driver import test
 from ribctl import RIBETL_DATA
+from ribctl.ribosome_assets import Assetlist, obtain_assets, obtain_assets_threadpool
 
-from ribctl.etl.ribosome_assets import Assetlist, obtain_assets_threadpool
+
 
 
 
@@ -32,16 +34,29 @@ subparsers = parser.add_subparsers(title='Subcommands', dest='command')
 
 parser_cmd_etl = subparsers.add_parser('etl', help='Acquisition and processing of ribosomal structures and assets.')
 parser_cmd_etl.add_argument('-getall', '--obtain_all_structures', action='store_true')
+parser_cmd_etl.add_argument('-get', '--obtain_structure')
 
 def cmd_etl(args):
-    if args.obtain_all_structures != None:
+    print("")
+    if args.obtain_all_structures:
         ASL = Assetlist(profile=True)
         obtain_assets_threadpool(
             [],
             ASL,
             workers=16,
             get_all=True,
-            # overwrite=True
+            overwrite=True
+        )
+
+    if args.obtain_structure:
+        RCSB_ID = str(args.obtain_structure)
+        loop    = asyncio.get_event_loop()
+        loop.run_until_complete(
+            obtain_assets(
+                RCSB_ID,
+                Assetlist(profile=True),
+                overwrite=True
+            )
         )
 
 parser_cmd_etl.set_defaults(func=cmd_etl)
@@ -110,3 +125,7 @@ else:
         args.func(args)
     else:
         parser.print_help()
+
+# Notes
+
+# `awk '/ERROR/ {print $3}' | sed 's/:.*$//'`  to get every structure in the log file that failed
