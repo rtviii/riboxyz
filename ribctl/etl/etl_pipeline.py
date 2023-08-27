@@ -292,6 +292,8 @@ class ReannotationPipeline:
         reshaped_polymeric_factors: list[PolymericFactor] = []
 
         def is_protein(poly):
+            #* According to RCSB schema, polymer_entites include Proteins, RNA but also DNA, NA-Hybrids and "Other". 
+            #* We only make the distinction between Proteins and RNA and Other for purposes of simplicity
             return poly["entity_poly"]["rcsb_entity_polymer_type"] == "Protein"
 
         for poly in poly_entities:
@@ -318,10 +320,11 @@ class ReannotationPipeline:
         rnas          = []
 
         print("Processing polypeptides :")
-
         print(len(poly_entities))
 
         def is_rna(poly):
+            #* According to RCSB schema, polymer_entites include Proteins, RNA but also DNA, NA-Hybrids and "Other". 
+            #* We only make the distinction between Proteins and RNA and Other for purposes of simplicity
             return poly["entity_poly"]["rcsb_entity_polymer_type"] == "RNA"
 
         for poly in poly_entities:

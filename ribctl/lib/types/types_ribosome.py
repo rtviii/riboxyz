@@ -26,7 +26,7 @@ class Polymer(BaseModel):
     src_organism_ids   : list[int]
     host_organism_ids  : list[int]
 
-    rcsb_pdbx_description: str | None
+    rcsb_pdbx_description: Optional[str] 
 
     entity_poly_strand_id              : str
     entity_poly_seq_one_letter_code    : str
@@ -69,8 +69,8 @@ class NonpolymericLigand(BaseModel)  :
 
         class Drugbank(BaseModel):
             class DrugbankInfo(BaseModel):
-                cas_number: str
-                description: str | None
+                cas_number: Optional[str]
+                description: Optional[str]
             class DrugbankContainerIdentifiers(BaseModel):
                 drugbank_id: str
             drugbank_container_identifiers: DrugbankContainerIdentifiers
@@ -78,21 +78,21 @@ class NonpolymericLigand(BaseModel)  :
 
         class RcsbChemCompTarget(BaseModel):
 
-            interaction_type                 : str | None
-            name                             : str | None
-            provenance_source                : str | None
-            reference_database_accession_code: str | None
-            reference_database_name          : str | None
+            interaction_type                 : Optional[str] 
+            name                             : Optional[str] 
+            provenance_source                : Optional[str] 
+            reference_database_accession_code: Optional[str] 
+            reference_database_name          : Optional[str] 
 
         
-        chemp_comp           : ChemComp | None
-        drugbank             : Drugbank | None
-        rcsb_chem_comp_target: list[RcsbChemCompTarget] | None
+        chemp_comp           : Optional[ChemComp]
+        drugbank             : Optional[Drugbank]
+        rcsb_chem_comp_target: Optional[list[RcsbChemCompTarget]]
        
 
       chemicalId         : str
       chemicalName       : str
-      formula_weight     : None | float
+      formula_weight     : Optional[float]
 
       pdbx_description   : str
       number_of_instances: int
@@ -186,17 +186,17 @@ class RibosomeStructure(BaseModel):
     expMethod : str
     resolution: float
 
-    pdbx_keywords:      str | None
-    pdbx_keywords_text: str | None
+    pdbx_keywords:      Optional[str]
+    pdbx_keywords_text: Optional[str]
 
     rcsb_external_ref_id  : list[str]
     rcsb_external_ref_type: list[str]
     rcsb_external_ref_link: list[str]
 
-    citation_year        : None | int
-    citation_rcsb_authors: None | list[str]
-    citation_title       : None | str
-    citation_pdbx_doi    : None | str
+    citation_year        : Optional[int]
+    citation_rcsb_authors: Optional[list[str]]
+    citation_title       : Optional[str]
+    citation_pdbx_doi    : Optional[str]
 
     src_organism_ids  : list[int]
     src_organism_names: list[str]
@@ -207,9 +207,9 @@ class RibosomeStructure(BaseModel):
     assembly_map: list[AssemblyInstancesMap]
 
     proteins            : list[Protein]
-    rnas                : list[RNA] | None
-    nonpolymeric_ligands: list[NonpolymericLigand] | None
-    polymeric_factors   : list[PolymericFactor] | None
+    rnas                : Optional[list[RNA] ]
+    nonpolymeric_ligands: Optional[list[NonpolymericLigand] ]
+    polymeric_factors   : Optional[list[PolymericFactor] ]
     
     @staticmethod
     def from_json_profile(d: Any):
