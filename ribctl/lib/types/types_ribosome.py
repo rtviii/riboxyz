@@ -160,10 +160,12 @@ class AssemblyInstancesMap(BaseModel):
     """
 
     class NonpolymerEntityInstance(BaseModel):
+
         class NonpolymerEntityInstanceContainerIdentifiers(BaseModel):
-            entity_id: str
+
+            entity_id   : str
             auth_asym_id: str
-            auth_seq_id: str
+            auth_seq_id : str
 
         rcsb_nonpolymer_entity_instance_container_identifiers: NonpolymerEntityInstanceContainerIdentifiers
 
@@ -171,9 +173,10 @@ class AssemblyInstancesMap(BaseModel):
         class PolymerEntityInstanceContainerIdentifiers(BaseModel):
             entity_id: str
             auth_asym_id: str
+
         rcsb_polymer_entity_instance_container_identifiers: PolymerEntityInstanceContainerIdentifiers
 
-    rcsb_id                    : str # 5AFI-1
+    rcsb_id                    : str # ex. 5AFI-1
     nonpolymer_entity_instances: Optional[list[NonpolymerEntityInstance]]
     polymer_entity_instances   : list[PolymerEntityInstance]
 

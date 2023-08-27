@@ -1,3 +1,4 @@
+import functools
 import json
 from pprint import pprint
 from typing import Any
@@ -104,6 +105,9 @@ def rcsb_single_structure_graphql(rcsb_id):
     return single_structure_graphql_template.replace("$RCSB_ID", rcsb_id.upper())
 
 
+
+
+
 class ReannotationPipeline:
     """
     ETL Pipeline as it currently stands takes care of injesting a graphql profile from RCSB and reshaping it into a RibosomeStructure.
@@ -119,23 +123,50 @@ class ReannotationPipeline:
 
     """
 
+    # ? Input data:
     rcsb_data_dict: dict
 
+
+    # ? Initialized classification resources:
     hmm_ribosomal_proteins: dict[ProteinClass, HMM]
     # hmm_ribosomal_rnas:dict[RNAClass, HMM]
     # hmm_ribosomal_factors:dict[PolymericFactorClass, HMM]
     # hmm_ribosomal_ligands:dict[NonpolymericLigandClass, HMM]
 
-    asm_maps: list[AssemblyInstancesMap]
-    rProteins: list[Protein] | None
-    rRNA: list[RNA] | None
+    # ? Housekeeping
+    asm_maps : list[AssemblyInstancesMap]
+    rcsb_polymers: int
+    rcsb_nonpolymers: int
+
+
+    # rProteins: list[Protein] | None
+    # rRNA     : list[RNA] | None
 
     def __init__(self, response: dict):
-        self.rcsb_data_dict = response
+        self.rcsb_data_dict         = response
         self.hmm_ribosomal_proteins = rp_hmm_dict_init()
-        self.asm_maps = self.asm_parse(response["assemblies"])
-        self.rRNA = None
-        self.rProteins = None
+        self.asm_maps               = self.asm_parse(response["assemblies"])
+        
+        self.rcsb_polymers    = len(self.rcsb_data_dict["polymer_entities"])
+        self.rcsb_nonpolymers = len(self.rcsb_data_dict["nonpolymer_entities"])
+
+        # What is this garbage, you ask? Let me tell you.
+        # The rcsb_data_dict contains a list of polymer entities, each of which has 4 properties(hidden in ..._container_identifiers):
+
+        # - auth_asym_ids: this is the closest you have to an id of the polymer in the structure, but if there are multiple assemblies, this is an array of the two chains that are the same polymer in each assembly.
+        # - asym_ids: this is the ids of the this AND all other chains that are the same assymteric unit as the given polymer. So, useless for purposes of identification: 
+        # - entity_id: so far as I can tell, this only serves to connect a polymer to its assembly container ( why this is not done via auth_asym_id directly is beyond me, legacy reasons this and that probably)
+        # - pdbx_strand_id: confusing piece of garbage that sometimes overlaps with auth_asym_id 
+
+        # Ex. 4V8E.DD
+        # assembly_id=1 asym_ids=['BB', 'CD', 'ED', 'ZA'] auth_asym_id='DD' parent_rcsb_id='4V8E' src_organism_names=[] host_organism_names=[] src_organism_ids=[] host_organism_ids=[] rcsb_pdbx_description='TRNA-TYR' entity_poly_strand_id='BB,BD,DB,DD' entity_poly_seq_one_letter_code='GGUGGGGUUCCCGAGCGGCCAAAGGGAGCAGACUGUA(MIA)AUCUGCCGUCAUCGACUUCGAAGGUUCGAAUCCUUCCCCCACCACCA' entity_poly_seq_one_letter_code_can='GGUGGGGUUCCCGAGCGGCCAAAGGGAGCAGACUGUAAAUCUGCCGUCAUCGACUUCGAAGGUUCGAAUCCUUCCCCCACCACCA' entity_poly_seq_length=85 entity_poly_polymer_type='RNA' entity_poly_entity_type='polyribonucleotide' nomenclature=['tRNA']
+
+        # Given this state of affairs, if we want to be able to uniquely (coordinate-wise) identify each chain, we need to account for cases where PDB has provided two and sometimes four polymer collapsed into one representation.
+        # We do this by counting assymetric_ids of each polymer and hold that as a 
+
+        self.flattened_polymers_target = functools.reduce(lambda count,poly: count+len( poly["rcsb_polymer_entity_container_identifiers"]['asym_ids'] ),  self.rcsb_data_dict["polymer_entities"] , 0)
+
+
 
     #! Reshaping
 
@@ -143,9 +174,9 @@ class ReannotationPipeline:
         """Grabbing taxid from every polymer in the structure to see which taxid prevails proportionally. Only needed because rcsb does not provide unequivocal taxid for structures (sometimes it's host+source)"""
 
         host_organism_names: list[str] = []
-        src_organism_names: list[str] = []
-        host_organism_ids: list[int] = []
-        src_organism_ids: list[int] = []
+        src_organism_names : list[str] = []
+        host_organism_ids  : list[int] = []
+        src_organism_ids   : list[int] = []
 
         for polymer in polymers:
             src_organism_names = (
@@ -220,12 +251,12 @@ class ReannotationPipeline:
         # },
 
         return NonpolymericLigand(
-            nonpolymer_comp=nonpoly["nonpolymer_comp"],
-            chemicalId=nonpoly["pdbx_entity_nonpoly"]["comp_id"],
-            chemicalName=nonpoly["pdbx_entity_nonpoly"]["name"],
-            pdbx_description=nonpoly["rcsb_nonpolymer_entity"]["pdbx_description"],
-            formula_weight=nonpoly["rcsb_nonpolymer_entity"]["formula_weight"],
-            number_of_instances=nonpoly["rcsb_nonpolymer_entity"][
+            nonpolymer_comp     = nonpoly["nonpolymer_comp"],
+            chemicalId          = nonpoly["pdbx_entity_nonpoly"]["comp_id"],
+            chemicalName        = nonpoly["pdbx_entity_nonpoly"]["name"],
+            pdbx_description    = nonpoly["rcsb_nonpolymer_entity"]["pdbx_description"],
+            formula_weight      = nonpoly["rcsb_nonpolymer_entity"]["formula_weight"],
+            number_of_instances = nonpoly["rcsb_nonpolymer_entity"][
                 "pdbx_number_of_molecules"
             ],
         )
@@ -594,27 +625,12 @@ class ReannotationPipeline:
 
         [reshaped_rnas, reshaped_polymeric_factors_rna] = self.process_polynucleotides()
 
-        pprint(self.rcsb_data_dict["polymer_entities"])
-        print("Total polymers:",len(self.rcsb_data_dict["polymer_entities"]))
-        print("Reshaped proteins:", len(reshaped_proteins))
-        print("reshaped rnas:", len(reshaped_rnas))
-        print("Reshaped factors rna:", len(reshaped_polymeric_factors_rna))
-        print("Reshaped factors protein:", len(reshaped_polymeric_factors_prot))
-        
-        # pprint(reshaped_rnas)
-        # pprint(reshaped_proteins)
-        for x in reshaped_polymeric_factors_prot:
-            print(x)
-        print("---------++++++++++++++++++++++++++++++++++++=======")
-        for y in reshaped_polymeric_factors_rna:
-            print(y)
-
         assert (
             len(reshaped_proteins)
             + len(reshaped_rnas)
             + len(reshaped_polymeric_factors_rna)
             + len(reshaped_polymeric_factors_prot)
-        ) == len(self.rcsb_data_dict["polymer_entities"])
+        ) == self.flattened_polymers_target
 
         reshaped_nonpolymers = self.process_nonpolymers()
         [organisms, externalRefs, pub, kwords_text, kwords] = self.process_metadata()
