@@ -177,9 +177,9 @@ class ReannotationPipeline:
         """Grabbing taxid from every polymer in the structure to see which taxid prevails proportionally. Only needed because rcsb does not provide unequivocal taxid for structures (sometimes it's host+source)"""
 
         host_organism_names: list[str] = []
-        src_organism_names: list[str] = []
-        host_organism_ids: list[int] = []
-        src_organism_ids: list[int] = []
+        src_organism_names : list[str] = []
+        host_organism_ids  : list[int] = []
+        src_organism_ids   : list[int] = []
 
         for polymer in polymers:
             src_organism_names = (
@@ -204,9 +204,9 @@ class ReannotationPipeline:
             )
 
         return {
-            "src_organism_ids": list(map(int, set(src_organism_ids))),
-            "src_organism_names": list(map(str, set(src_organism_names))),
-            "host_organism_ids": list(map(int, set(host_organism_ids))),
+            "src_organism_ids"   : list(map(int, set(src_organism_ids))),
+            "src_organism_names" : list(map(str, set(src_organism_names))),
+            "host_organism_ids"  : list(map(int, set(host_organism_ids))),
             "host_organism_names": list(map(str, set(host_organism_names))),
         }
 

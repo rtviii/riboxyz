@@ -13,13 +13,24 @@ Separately implement the source/host thing for structs.
 """
 
 
-def tax_list_filterby_taxid(targets: list[int], filter_by: int):
+
+
+def get_descendants_of( parent:int, targets:list[int]):
+    ncbi = NCBITaxa()
     
+    # Get the taxonomic lineage of the parent tax id
+    parent_lineage = ncbi.get_lineage(parent)
+    
+    # Get the descendants of the parent tax id
+    descendants = set()
 
-    # all_structs = os.listdir(RIBETL_DATA)
-    # descendants = list(filter(lambda x: is_descendant_of(filter_by, x), all_structs))
-    return 0
-
+    for tax_id in targets:
+        lineage = ncbi.get_lineage(tax_id)
+        if parent in lineage:
+            descendants.add(tax_id)
+    
+    print(descendants)
+    return descendants
 
 # ? Struct-specific functions
 
