@@ -28,10 +28,10 @@ from Bio import pairwise2
 from Bio import SeqIO
 import gemmi
 import argparse
-from ribctl.etl.ribosome_assets import RibosomeAssets
+from ribctl.ribosome_assets import RibosomeAssets
 from ribctl.lib.utils import open_structure
 from ribctl._tunnel.scratch_tunnel_workflow import DORIS_ET_AL, pick_match
-from ribctl.lib.taxonomy import filter_by_parent_tax
+from ribctl.lib.util_taxonomy import filter_by_parent_tax
 from ribctl import RIBETL_DATA
 
 
