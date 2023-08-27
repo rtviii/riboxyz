@@ -70,7 +70,7 @@ class NonpolymericLigand(BaseModel)  :
         class Drugbank(BaseModel):
             class DrugbankInfo(BaseModel):
                 cas_number: str
-                description: str
+                description: str | None
             class DrugbankContainerIdentifiers(BaseModel):
                 drugbank_id: str
             drugbank_container_identifiers: DrugbankContainerIdentifiers
