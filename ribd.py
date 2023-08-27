@@ -9,6 +9,8 @@ from ribctl.ribosome_assets import Assetlist, obtain_assets, obtain_assets_threa
 
 
 
+
+
 # arg.add_argument('-getall', '--obtain_all_structures', action='store_true')
 # arg.add_argument('-syncall', '--sync_all_structures_with_pdb',   action='store_true')
 # arg.add_argument('-o', '--obtain', type=str)
@@ -123,3 +125,7 @@ else:
         args.func(args)
     else:
         parser.print_help()
+
+# Notes
+
+# `awk '/ERROR/ {print $3}' | sed 's/:.*$//'`  to get every structure in the log file that failed
