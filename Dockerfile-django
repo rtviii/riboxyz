@@ -39,6 +39,7 @@ RUN apt-get install -y neo4j
 # ----- PYMOL_INSTALLATION -------------
 RUN pip3 install virtualenv netCDF4
 #  the following pathing is elaborated on here: https://sourceforge.net/p/pymol/mailman/message/35988916/
+#  be mindful of the OS dependencies 
 COPY pymol_source $PYMOL_SOURCE
 ADD pymol_source $PYMOL_SOURCE
 ENV PYMOL_PATH="${PYMOL_SOURCE}/__pymol_lib"
