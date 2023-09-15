@@ -20,12 +20,13 @@ from concurrent.futures import ALL_COMPLETED, Future, ProcessPoolExecutor, Threa
 import os
 
 class Assetlist(BaseModel):
-    profile: Optional[bool]
-    structure_modified: Optional[bool]
+
+    profile                : Optional[bool]
+    structure_modified     : Optional[bool]
     chains_and_modified_cif: Optional[bool]
-    factors_and_ligands: Optional[bool]
-    png_thumbnail: Optional[bool]
-    structure: Optional[bool]
+    factors_and_ligands    : Optional[bool]
+    png_thumbnail          : Optional[bool]
+    structure              : Optional[bool]
 
 class RibosomeAssets():
     rcsb_id: str
@@ -365,8 +366,7 @@ def obtain_assets_threadpool(targets: list[str], assetlist: Assetlist, workers: 
 
     with ThreadPoolExecutor(max_workers=workers) as executor:
         for rcsb_id in unsynced:
-            fut = executor.submit(asyncio.run, obtain_assets(
-                rcsb_id, assetlist, overwrite))
+            fut = executor.submit(asyncio.run, obtain_assets(rcsb_id, assetlist, overwrite))
             fut.add_done_callback(log_commit_result(rcsb_id))
             futures.append(fut)
 

@@ -1,13 +1,15 @@
 import argparse
 import asyncio
 import os
-from driver import test
+# from driver import test
 from ribctl import RIBETL_DATA
 from ribctl.ribosome_assets import Assetlist, obtain_assets, obtain_assets_threadpool
 
 
 
 
+def test():
+    ...
 
 
 
@@ -45,7 +47,7 @@ def cmd_etl(args):
             ASL,
             workers=16,
             get_all=True,
-            overwrite=True
+            overwrite=False
         )
 
     if args.obtain_structure:
