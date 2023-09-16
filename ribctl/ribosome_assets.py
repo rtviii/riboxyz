@@ -52,8 +52,7 @@ class RibosomeAssets():
         return f"{self._dir_path()}/{self.rcsb_id}_modified.cif"
 
     def _ptc_residues(self) -> dict[str, dict[str, list[float]]]:
-        PTC_RESIDUES_PATH = os.path.join(
-            RIBETL_DATA, self.rcsb_id, "{}_PTC_COORDINATES.json".format(self.rcsb_id))
+        PTC_RESIDUES_PATH = os.path.join(RIBETL_DATA, self.rcsb_id, "{}_PTC_COORDINATES.json".format(self.rcsb_id))
         with open(PTC_RESIDUES_PATH, 'r') as infile:
             return json.load(infile)
 
@@ -88,9 +87,18 @@ class RibosomeAssets():
     def list_all_structs():
         return os.listdir(RIBETL_DATA)
 
+        
 
 
     # ※ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-= Getters =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+    @staticmethod
+    def struct_profiles()->dict[str,RibosomeStructure]:
+        structs = {}
+        for struct in os.listdir(RIBETL_DATA):
+            with open(RibosomeAssets(struct)._json_profile_filepath(), 'r') as f:
+               structs[struct]=RibosomeStructure(**json.load(f))
+        return structs
 
     def get_taxids(self) -> tuple[list[int], list[int]]:
         p = self.profile()
