@@ -13,10 +13,10 @@ RiboXYZ (available at https://ribosome.xyz), a database that provides organized 
 
 - [ ] Pydantic 2.0
 
-- [ ] rewrite taxonomy inference: **<<<<<<<<<<**;
+- [x] rewrite taxonomy inference: **<<<<<<<<<<**;
     - src ids and host ids separately
     - use "taxonomy.tax_infer_by_proportions" for a first-hand notion of what the structure is (add a new field ot the schema)
-    - [ ] flesh out the taxonomy : [src + host] [nodes in the db, hierarchy in the app(pull in the lib, construct dynamically on app start from assets)]
+    - [x] flesh out the taxonomy : [src + host] [nodes in the db, hierarchy in the app(pull in the lib, construct dynamically on app start from assets)]
 
 - [ ] expand classification to rnas, trnas, factors
     - [ ] integrate hmm-based classification into the process pipeline:
@@ -27,8 +27,6 @@ RiboXYZ (available at https://ribosome.xyz), a database that provides organized 
         - [ ] Recycling Factors
         - [ ] tRNA
 
-    - [ ] working on a proposoal with Khanh and Anton
-    - [ ] can make progress on this without curation
 
 - [ ] Ligand improvements ( you can assume one has medicinal value/signficance if it's in drugbank)
     ### TODO:
@@ -48,10 +46,6 @@ RiboXYZ (available at https://ribosome.xyz), a database that provides organized 
 
 - [x] separate assemblies
 - [x] split ligand classes into instances
-
-### Structure Processing
-
-- [ ] Logging
 
 
 ### Media
