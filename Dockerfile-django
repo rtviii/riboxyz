@@ -3,14 +3,16 @@ FROM ubuntu:22.04
 
 # ----- SETUP -------------------
 # vars inside the container
-ENV DJANGO=/home/backend/api
+ENV API=/home/backend/api
 ENV RIBCTL=/home/backend/ribctl
 ENV PYMOL_SOURCE=/home/backend/pymol
-ENV RIBETL_DATA=/home/backend/api/RIBETL_DATA
+ENV RIBETL_DATA=/home/backend/RIBETL_DATA
 
 # set work directory
-RUN mkdir -p $DJANGO
+RUN mkdir -p $API
 RUN mkdir -p $RIBCTL
+RUN mkdir -p $RIBETL_DATA
+RUN mkdir -p $PYMOL_SOURCE
 
 # ----- LIBS -------------------------------------------
 RUN apt-get update -y && apt-get install curl git vim \
@@ -52,10 +54,10 @@ RUN python3 setup.py build install --home="${PYMOL_PATH}" --install-lib="${PYMOL
 
 
 # ------- WORKDIR $DJANGO ---------------
-ADD api/reqs.txt $DJANGO
+ADD api/reqs.txt $API
 RUN python3 -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
-RUN pip3 install -r ${DJANGO}/reqs.txt
+RUN pip3 install -r ${API}/reqs.txt
 RUN pip3 install pytz   --upgrade
 RUN pip3 install tzdata --upgrade
 RUN pip3 install gunicorn
@@ -80,10 +82,10 @@ RUN npm i -g json-schema-to-typescript
 # --- 
 
 # Be careful given that both the whole django project and the main module are called `rbxz_bend`. (hence not using the $DJANGO here)
-COPY api /home/backend/api
-
-RUN pip3 install -r ${DJANGO}/reqs.txt
+COPY api ${API}
+# Be careful given that both the whole django project and the main module are called `rbxz_bend`. (hence not using the $DJANGO here)
 COPY ribctl ${RIBCTL}
+RUN pip3 install -r ${API}/reqs.txt
 # start server
-WORKDIR ${DJANGO}
+WORKDIR ${API}
 ENTRYPOINT ["gunicorn", "--bind", ":8000", "--workers", "3", "rbxz_bend.wsgi:application","--reload"]

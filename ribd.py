@@ -8,23 +8,6 @@ from ribctl.ribosome_assets import Assetlist, obtain_assets, obtain_assets_threa
 
 
 
-
-
-
-# arg.add_argument('-getall', '--obtain_all_structures', action='store_true')
-# arg.add_argument('-syncall', '--sync_all_structures_with_pdb',   action='store_true')
-# arg.add_argument('-o', '--obtain', type=str)
-# arg.add_argument('-ls', '--list_structs', action='store_true')
-
-# struct_filter_arggroup = arg.add_argument_group("Structure filtering options")
-# struct_filter_arggroup.add_argument('-tax', '--taxid', type=int)
-
-# arg.add_argument('-ttt', '--test', action='store_true')
-
-
-
-
-
 parser     = argparse.ArgumentParser(description="Command line interface for the `ribctl` package.")
 subparsers = parser.add_subparsers(title='Subcommands', dest='command')
 
