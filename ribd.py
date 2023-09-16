@@ -17,7 +17,7 @@ subparsers = parser.add_subparsers(title='Subcommands', dest='command')
 
 parser_cmd_etl = subparsers.add_parser('etl', help='Acquisition and processing of ribosomal structures and assets.')
 parser_cmd_etl.add_argument('-getall', '--obtain_all_structures', action='store_true')
-parser_cmd_etl.add_argument('-get', '--obtain_structure')
+parser_cmd_etl.add_argument('-get', '--obtain_structure',dest='rcsb_id', help="Get a particular structure by its RCSB_ID")
 
 def cmd_etl(args):
     print("")
