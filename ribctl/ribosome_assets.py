@@ -20,12 +20,14 @@ from concurrent.futures import ALL_COMPLETED, Future, ProcessPoolExecutor, Threa
 import os
 
 class Assetlist(BaseModel):
-    profile: Optional[bool]
-    structure_modified: Optional[bool]
+
+    profile                : Optional[bool]
+    ptc_coords             : Optional[bool]
+    structure_modified     : Optional[bool]
     chains_and_modified_cif: Optional[bool]
-    factors_and_ligands: Optional[bool]
-    png_thumbnail: Optional[bool]
-    structure: Optional[bool]
+    factors_and_ligands    : Optional[bool]
+    png_thumbnail          : Optional[bool]
+    structure              : Optional[bool]
 
 class RibosomeAssets():
     rcsb_id: str
@@ -51,8 +53,7 @@ class RibosomeAssets():
         return f"{self._dir_path()}/{self.rcsb_id}_modified.cif"
 
     def _ptc_residues(self) -> dict[str, dict[str, list[float]]]:
-        PTC_RESIDUES_PATH = os.path.join(
-            RIBETL_DATA, self.rcsb_id, "{}_PTC_COORDINATES.json".format(self.rcsb_id))
+        PTC_RESIDUES_PATH = os.path.join(RIBETL_DATA, self.rcsb_id, "{}_PTC_COORDINATES.json".format(self.rcsb_id))
         with open(PTC_RESIDUES_PATH, 'r') as infile:
             return json.load(infile)
 
