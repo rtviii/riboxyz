@@ -5,14 +5,20 @@ from typing import Literal
 
 RIBETL_DATA = os.environ.get("RIBETL_DATA")
 
+
 # This amounts to "_assets folder is expected to exist in the root of `ribctl`(next to top-level __init__.py)"
 _ASSETS_PATH  = os.path.join(pathlib.Path(__file__).parent, '_assets')
+
+#TODO: make msas bona-fide assets
+RP_MSAS_PATH        = os.path.join(_ASSETS_PATH, 'rp_class_msas')
+RP_MSAS_PRUNED_PATH = os.path.join(_ASSETS_PATH, 'rp_class_msas_pruned')
+
 asset_type =  Literal[
                     "landmark_sites",
                     "hmm_ribosomal_proteins",
                     "hmm_factors",
                     "hmm_ribosomal_rna",
-                    "hmm_trna"
+                    "hmm_trna",
                     ]
 
 if os.environ.get("RIBETL_DATA") == "" or not os.path.exists(_ASSETS_PATH):

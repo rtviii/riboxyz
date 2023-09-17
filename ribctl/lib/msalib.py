@@ -17,13 +17,12 @@ import os
 from ribctl.lib.types.types_ribosome import RNA, PolymericFactor, Protein, ProteinClass
 from ribctl.lib.types.types_poly_nonpoly_ligand import list_LSUProteinClass, list_SSUProteinClass
 from ribctl.lib.types.types_ribosome import ProteinClass
-from ete3 import NCBITaxa
 # prd.confProDy(verbosity='none')
 RIBETL_DATA = os.environ.get('RIBETL_DATA')
 
 
-# RP_MSAS_PATH            = '/home/rxz/dev/docker_ribxz/api/ribctl/assets/rp_class_msas/'
-# RP_MSAS_PRUNED_PATH     = "/home/rxz/dev/docker_ribxz/api/ribctl/assets/rp_class_msas_pruned/"
+RP_MSAS_PATH            = '/home/rxz/dev/docker_ribxz/api/ribctl/assets/rp_class_msas/'
+RP_MSAS_PRUNED_PATH     = "/home/rxz/dev/docker_ribxz/api/ribctl/assets/rp_class_msas_pruned/"
 
 #! util
 def util__backwards_match(aligned_target:str, resid:int):
@@ -239,33 +238,7 @@ def infer_subunit(protein_class: ProteinClass):
 #     return [get_taxid_fastalabel(p.getLabel()) for p in msa]
 
 
-def get_taxid_fastalabel(label: str):
-    """This assumes a given fasta label has '|' as a delimiter between the taxid and the rest of the label.(As returned by InterPRO and curated by me)"""
-    return label.split('|')[-1]
 
 
-
-def phylogenetic_neighborhood(taxids_base: list[str], taxid_target: str, n_neighbors: int = 10) -> list[str]:
-    """Given a set of taxids and a target taxid, return a list of the [n_neighbors] phylogenetically closest to the target."""
-
-    tree = NCBITaxa().get_topology(list(set([*taxids_base, str(taxid_target)])))
-    target_node = tree.search_nodes(name=str(taxid_target))[0]
-    phylo_all_nodes = [
-        (node.name, tree.get_distance(target_node, node))
-        for node in tree.traverse()]
-
-    phylo_extant_nodes = filter(
-        lambda taxid: taxid[0] in taxids_base, phylo_all_nodes)
-
-    phylo_sorted_nodes = sorted(phylo_extant_nodes, key=lambda x: x[1])
-
-    nbr_taxids = list(
-        map(lambda tax_phydist: tax_phydist[0], phylo_sorted_nodes))
-
-    # the first element is the target node
-    if len(nbr_taxids) < n_neighbors:
-        return nbr_taxids[1:]
-    else:
-        return nbr_taxids[1:n_neighbors+1]
 
 

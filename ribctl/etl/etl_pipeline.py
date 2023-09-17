@@ -428,9 +428,9 @@ class ReannotationPipeline:
             )
 
         else:
-            pfam_comments = []
+            pfam_comments     = []
             pfam_descriptions = []
-            pfam_accessions = []
+            pfam_accessions   = []
 
         host_organisms: list[Any] | None = rpotein_polymer_obj["rcsb_entity_host_organism"]
         source_organisms: list[Any] | None = rpotein_polymer_obj["rcsb_entity_source_organism"]
@@ -455,10 +455,10 @@ class ReannotationPipeline:
                 if so["scientific_name"] != None:
                     src_organism_names.append(so["scientific_name"])
 
-        host_organism_ids = list(map(int, set(host_organism_ids)))
+        host_organism_ids   = list(map(int, set(host_organism_ids)))
         host_organism_names = list(map(str, set(host_organism_names)))
-        src_organism_ids = list(map(int, set(src_organism_ids)))
-        src_organism_names = list(map(str, set(src_organism_names)))
+        src_organism_ids    = list(map(int, set(src_organism_ids)))
+        src_organism_names  = list(map(str, set(src_organism_names)))
 
         # ? Compare prot sequence against all HMMs (returns a dict), pick the class with the lowest e-value
         hmm_resulsts = seq_prot_against_protclasses(
