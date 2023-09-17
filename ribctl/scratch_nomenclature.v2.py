@@ -19,8 +19,7 @@ def seq_H_fit_class(base_class: ProteinClass, base_class_msa: MSA, target_fasta:
                      omitgaps: bool = True, vvv: bool = False) -> dict[ProteinClass, float]:
     """Calculate entropy difference for a given protein class MSA without and with a new sequence. Used as a measure of fit."""
 
-    extended_class = msaclass_extend_temp(
-        base_class, base_class_msa, target_fasta, target_auth_asym_id, parent_rcsb_id)
+    extended_class = msaclass_extend_temp(base_class, base_class_msa, target_fasta, target_auth_asym_id, parent_rcsb_id)
 
     if vvv:
         for seq in base_class_msa:
