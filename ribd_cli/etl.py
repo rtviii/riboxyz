@@ -5,16 +5,18 @@ from ribctl.ribosome_assets import Assetlist, RibosomeAssets, obtain_assets, obt
 
 def cmd_etl(args):
 
-    ASL = Assetlist(profile=True)
+    ASL = Assetlist()
+    if args.profile:
+        ASL.profile=True
 
     if args.ptc_coords:
         ASL.ptc_coords=True
 
-    if args.cif_and_chains:
-        ASL.cif_and_chains=True
+    if args.cif:
+        ASL.cif=True
 
-    if args.cif_updated:
-        ASL.cif_updated=True
+    if args.cif_modified_and_chains:
+        ASL.cif_modified_and_chains=True
 
     if args.factors_and_ligands:
         ASL.factors_and_ligands=True
@@ -24,13 +26,12 @@ def cmd_etl(args):
 
     #All structures
     if args.obtain_all_structures:
-
         obtain_assets_threadpool(
             [],
             ASL,
             workers=16,
             get_all=True,
-            overwrite=args.overwrte or False
+            overwrite=args.overwrite or False
         )
 
     #Single structure
