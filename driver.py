@@ -1,5 +1,5 @@
 """this is just a place to experiment with things and not pollute the cli."""
-from ribctl.lib.util_taxonomy import tax_list_filterby_taxid
+from ribctl.lib.util_taxonomy import  get_descendants_of
 from ribctl.ribosome_assets import RibosomeAssets
 from ete3 import NCBITaxa
 

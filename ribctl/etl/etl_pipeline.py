@@ -320,8 +320,6 @@ class ReannotationPipeline:
         poly_entities = self.rcsb_data_dict["polymer_entities"]
         rnas          = []
 
-        print("Processing polypeptides :")
-        print(len(poly_entities))
 
         def is_rna(poly):
             #* According to RCSB schema, polymer_entites include Proteins, RNA but also DNA, NA-Hybrids and "Other". 
@@ -331,8 +329,6 @@ class ReannotationPipeline:
         for poly in poly_entities:
             rnas.append(poly) if is_rna(poly) else ...
 
-        print("Got rnas:", rnas)
-        print("Got rnas:", len(rnas))
         print("==================================================================================================")
 
         reshaped_rnas             : list[RNA]             = []
