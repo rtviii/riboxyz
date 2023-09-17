@@ -1,27 +1,10 @@
 import argparse
-import asyncio
-import os
-from driver import test
-from ribctl import RIBETL_DATA
-from ribctl.ribosome_assets import Assetlist, obtain_assets, obtain_assets_threadpool
+from ribd_cli.etl import cmd_etl
+from ribd_cli.ls import cmd_ls
+from ribd_cli.sync import cmd_sync
 
-
-
-
-
-
-
-# arg.add_argument('-getall', '--obtain_all_structures', action='store_true')
-# arg.add_argument('-syncall', '--sync_all_structures_with_pdb',   action='store_true')
-# arg.add_argument('-o', '--obtain', type=str)
-# arg.add_argument('-ls', '--list_structs', action='store_true')
-
-# struct_filter_arggroup = arg.add_argument_group("Structure filtering options")
-# struct_filter_arggroup.add_argument('-tax', '--taxid', type=int)
-
-# arg.add_argument('-ttt', '--test', action='store_true')
-
-
+def parse_comma_separated_list(value):
+    return value.split(',')
 
 
 
@@ -33,32 +16,17 @@ subparsers = parser.add_subparsers(title='Subcommands', dest='command')
 #! -------------------------- --- -------------------------- #
 
 parser_cmd_etl = subparsers.add_parser('etl', help='Acquisition and processing of ribosomal structures and assets.')
-parser_cmd_etl.add_argument('-getall', '--obtain_all_structures', action='store_true')
-parser_cmd_etl.add_argument('-get', '--obtain_structure')
 
-def cmd_etl(args):
-    print("")
-    if args.obtain_all_structures:
-        ASL = Assetlist(profile=True)
-        obtain_assets_threadpool(
-            [],
-            ASL,
-            workers=16,
-            get_all=True,
-            overwrite=True
-        )
+parser_cmd_etl.add_argument('-getall'      , '--obtain_all_structures', action='store_true')
+parser_cmd_etl.add_argument('-struct'               , dest   ='rcsb_id'    )
 
-    if args.obtain_structure:
-        RCSB_ID = str(args.obtain_structure)
-        loop    = asyncio.get_event_loop()
-        loop.run_until_complete(
-            obtain_assets(
-                RCSB_ID,
-                Assetlist(profile=True),
-                overwrite=True
-            )
-        )
-
+parser_cmd_etl.add_argument('--profile'                 , action ='store_true' )
+parser_cmd_etl.add_argument('--ptc_coords'              , action ='store_true' )
+parser_cmd_etl.add_argument('--cif'                     , action ='store_true' )
+parser_cmd_etl.add_argument('--cif_modified_and_chains' , action ='store_true' )
+parser_cmd_etl.add_argument('--factors_and_ligands'     , action ='store_true' )
+parser_cmd_etl.add_argument('--png_thumbnail'           , action ='store_true' )
+parser_cmd_etl.add_argument('--overwrite'               , action ='store_true' )
 parser_cmd_etl.set_defaults(func=cmd_etl)
 
 
@@ -68,10 +36,6 @@ parser_cmd_etl.set_defaults(func=cmd_etl)
 parser_sync = subparsers.add_parser('sync_db', help='Syncronization with the PDB, updates and database uploads')
 # parser_cmd2sub = parser_sync.add_subparsers(title='Subcommands', dest='subcommand2')
 # parser_cmd2sub.add_parser('db', help='Upload local structures to the neo4j database')
-
-def cmd_sync(args):
-    print("Uploading structures to Neo4j")
-
 parser_sync.set_defaults(func=cmd_sync)
 
 
@@ -79,29 +43,12 @@ parser_sync.set_defaults(func=cmd_sync)
 # #! -------------------------- ls       -------------------------- #
 # #! -------------------------- -------- -------------------------- #
 parser_cmd_ls = subparsers.add_parser('ls', help='List information')
-
 parser_cmd_ls.add_argument('-struct', help="Structure ID")
 parser_cmd_ls.add_argument('-spec', '--species', help="Species ID")
 parser_cmd_ls.add_argument('-elem', '--subelement', help="Subelement type (rna,protein,ligand)")
-
-def cmd_ls(args):
-
-    all_structs = os.listdir(RIBETL_DATA)
-
-    if args.struct != None:
-        print("Listing structure information for", args.struct)
-    elif args.species != None:
-        print("Listing species information for", args.species)
-    elif args.subelement != None:
-        print("Listing subelement information for", args.subelement)
-    else:
-        print("Listing all information")
-
 parser_cmd_ls.set_defaults(func=cmd_ls)
 
 
-def parse_comma_separated_list(value):
-    return value.split(',')
 
 #! -------------------------- Filerts and options -------------------------- #
 parser.add_argument('--has_protein', type=parse_comma_separated_list, help="Global option description")
@@ -119,7 +66,8 @@ parser.add_argument('--t', action='store_true')
 
 args = parser.parse_args()
 if args.t:
-    test()
+    ...
+    # test()
 else:
     if hasattr(args, 'func'):
         args.func(args)
