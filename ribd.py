@@ -19,14 +19,14 @@ subparsers = parser.add_subparsers(title='Subcommands', dest='command')
 parser_cmd_etl = subparsers.add_parser('etl', help='Acquisition and processing of ribosomal structures and assets.')
 
 parser_cmd_etl.add_argument('-getall'      , '--obtain_all_structures', action='store_true')
-parser_cmd_etl.add_argument('-struct'  , dest='rcsb_id')
-parser_cmd_etl.add_argument('--tunnel'      , action='store_true')
-parser_cmd_etl.add_argument('--updated_cif' , action='store_true')
-parser_cmd_etl.add_argument('--cif'         , action='store_true')
-parser_cmd_etl.add_argument('--chains'      , action='store_true')
-parser_cmd_etl.add_argument('--factors'     , action='store_true')
-parser_cmd_etl.add_argument('--ligands'     , action='store_true')
-parser_cmd_etl.add_argument('--thumbnail'   , action='store_true')
+parser_cmd_etl.add_argument('-struct'               , dest   ='rcsb_id'    )
+
+parser_cmd_etl.add_argument('--ptc_coords'          , action ='store_true' )
+parser_cmd_etl.add_argument('--cif_updated'         , action ='store_true' )
+parser_cmd_etl.add_argument('--cif_and_chains'      , action ='store_true' )
+parser_cmd_etl.add_argument('--factors_and_ligands' , action ='store_true' )
+parser_cmd_etl.add_argument('--png_thumbnail'       , action ='store_true' )
+parser_cmd_etl.add_argument('--overwrite'       , action ='store_true' )
 
 parser_cmd_etl.set_defaults(func=cmd_etl)
 

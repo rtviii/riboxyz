@@ -20,14 +20,12 @@ from concurrent.futures import ALL_COMPLETED, Future, ProcessPoolExecutor, Threa
 import os
 
 class Assetlist(BaseModel):
-
-    profile                : Optional[bool]
-    ptc_coords             : Optional[bool]
-    structure_modified     : Optional[bool]
-    chains_and_modified_cif: Optional[bool]
-    factors_and_ligands    : Optional[bool]
-    png_thumbnail          : Optional[bool]
-    structure              : Optional[bool]
+    profile            : Optional[bool]
+    ptc_coords         : Optional[bool]
+    cif_updated        : Optional[bool]
+    cif_and_chains     : Optional[bool]
+    factors_and_ligands: Optional[bool]
+    png_thumbnail      : Optional[bool]
 
 class RibosomeAssets():
     rcsb_id: str
@@ -42,7 +40,7 @@ class RibosomeAssets():
 
     def _dir_path(self):
         self._envcheck()
-        return f"{RIBETL_DATA}/{self.rcsb_id}"
+        return os.path.join(RIBETL_DATA, self.rcsb_id)
 
     def _cif_filepath(self):
         self._envcheck()
@@ -63,7 +61,7 @@ class RibosomeAssets():
 
     def _json_profile_filepath(self):
         self._envcheck()
-        return f"{self._dir_path()}/{self.rcsb_id}.json"
+        return os.path.join(self._dir_path(),f"{self.rcsb_id}.json")
 
     def profile(self) -> RibosomeStructure:
         with open(self._json_profile_filepath(), "r") as f:
@@ -334,13 +332,13 @@ async def obtain_assets(rcsb_id: str, assetlist: Assetlist, overwrite: bool = Fa
     if assetlist.profile:
         coroutines.append(assets._verify_json_profile(overwrite))
 
-    if assetlist.structure:
-        coroutines.append(assets._verify_cif(overwrite))
+    # if assetlist.cif_and_chains:
+    #     coroutines.append(assets._verify_cif(overwrite))
 
     if assetlist.factors_and_ligands:
         coroutines.append(assets._verify_ligads_and_ligandlike_polys(overwrite))
 
-    if assetlist.chains_and_modified_cif:
+    if assetlist.cif_and_chains:
         coroutines.append(assets._verify_cif_modified_and_chains(overwrite))
 
     await asyncio.gather(*coroutines)
