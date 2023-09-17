@@ -11,7 +11,7 @@ from Bio.Seq import Seq
 from Bio import SeqIO
 from Bio import SeqRecord
 from prody import MSA, MSAFile, parseMSA
-import prody 
+# import prody 
 import requests
 import os
 from ribctl.lib.types.types_ribosome import RNA, PolymericFactor, Protein, ProteinClass

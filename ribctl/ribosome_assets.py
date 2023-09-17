@@ -19,19 +19,25 @@ from pydantic import BaseModel, parse_obj_as
 from concurrent.futures import ALL_COMPLETED, Future, ProcessPoolExecutor, ThreadPoolExecutor, wait
 import os
 
-class Assetlist(BaseModel):
-    profile            : Optional[bool]
-    ptc_coords         : Optional[bool]
-    cif_updated        : Optional[bool]
-    cif_and_chains     : Optional[bool]
-    factors_and_ligands: Optional[bool]
-    png_thumbnail      : Optional[bool]
+from ribctl.tunnel.tunnel import ptc_resdiues_get, ptc_residues_calculate_midpoint
+
+class Assetlist(BaseModel)   : 
+      profile                : Optional[bool]
+      ptc_coords             : Optional[bool]
+      cif                    : Optional[bool]
+      cif_modified_and_chains: Optional[bool]
+      factors_and_ligands    : Optional[bool]
+      png_thumbnail          : Optional[bool]
 
 class RibosomeAssets():
     rcsb_id: str
 
     def __init__(self, rcsb_id: str) -> None:
         self.rcsb_id = rcsb_id.upper()
+
+
+
+
 
     def _envcheck(self):
         if not RIBETL_DATA:
@@ -67,6 +73,22 @@ class RibosomeAssets():
         with open(self._json_profile_filepath(), "r") as f:
             return RibosomeStructure.parse_obj(json.load(f))
 
+    def nomenclature_table(self) -> dict[str, ProteinClass]:
+        prof = self.profile()
+        m    = {}
+
+        for prot in prof.proteins:
+            m[prot.auth_asym_id] = prot.nomenclature
+
+        if prof.rnas!=None:
+            for rna in prof.rnas:
+                m[rna.auth_asym_id] = rna.nomenclature
+        return m
+                
+
+        
+
+
     def biopython_structure(self):
         return open_structure(self.rcsb_id, 'cif')
 
@@ -85,8 +107,6 @@ class RibosomeAssets():
     @staticmethod
     def list_all_structs():
         return os.listdir(RIBETL_DATA)
-
-
 
     # ※ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-= Getters =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
@@ -332,13 +352,31 @@ async def obtain_assets(rcsb_id: str, assetlist: Assetlist, overwrite: bool = Fa
     if assetlist.profile:
         coroutines.append(assets._verify_json_profile(overwrite))
 
-    # if assetlist.cif_and_chains:
-    #     coroutines.append(assets._verify_cif(overwrite))
+    if assetlist.cif:
+        coroutines.append(assets._verify_cif(overwrite))
 
     if assetlist.factors_and_ligands:
         coroutines.append(assets._verify_ligads_and_ligandlike_polys(overwrite))
 
-    if assetlist.cif_and_chains:
+    if assetlist.ptc_coords:
+            ress, auth_asym_id = ptc_resdiues_get(RCSB_ID)
+            midpoint_coords = ptc_residues_calculate_midpoint(ress, auth_asym_id)
+
+            residue_labels = [(res.get_resname(), res.id[1]) for res in ress]
+            print(residue_labels)
+
+            writeout = {
+                "site_9_residues"      : [(res.get_resname(), res.get_segid()) for res in ress],
+                "LSU_rRNA_auth_asym_id": auth_asym_id,
+                "midpoint_coordinates" : midpoint_coords,
+                'nomenclature_table'   : assets.nomenclature_table()
+            }
+
+            with open(os.path.join(assets._dir_path(),f'{assets.rcsb_id}_PTC_COORDINATES.json'), 'w') as f:
+                json.dump(writeout, f)
+
+
+    if assetlist.cif_modified_and_chains:
         coroutines.append(assets._verify_cif_modified_and_chains(overwrite))
 
     await asyncio.gather(*coroutines)
@@ -359,13 +397,12 @@ def obtain_assets_threadpool(targets: list[str], assetlist: Assetlist, workers: 
             if not None == f.exception():
                 logger.error(rcsb_id + ":" + f.exception().__str__())
             else:
-                logger.info(rcsb_id + ": processed profile successfully.")
+                logger.info(rcsb_id + ": processed successfully.")
         return _
 
     with ThreadPoolExecutor(max_workers=workers) as executor:
         for rcsb_id in unsynced:
-            fut = executor.submit(asyncio.run, obtain_assets(
-                rcsb_id, assetlist, overwrite))
+            fut = executor.submit(asyncio.run, obtain_assets(rcsb_id, assetlist, overwrite))
             fut.add_done_callback(log_commit_result(rcsb_id))
             futures.append(fut)
 

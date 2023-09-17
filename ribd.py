@@ -1,5 +1,4 @@
 import argparse
-from driver import test
 from ribd_cli.etl import cmd_etl
 from ribd_cli.ls import cmd_ls
 from ribd_cli.sync import cmd_sync
@@ -21,13 +20,13 @@ parser_cmd_etl = subparsers.add_parser('etl', help='Acquisition and processing o
 parser_cmd_etl.add_argument('-getall'      , '--obtain_all_structures', action='store_true')
 parser_cmd_etl.add_argument('-struct'               , dest   ='rcsb_id'    )
 
-parser_cmd_etl.add_argument('--ptc_coords'          , action ='store_true' )
-parser_cmd_etl.add_argument('--cif_updated'         , action ='store_true' )
-parser_cmd_etl.add_argument('--cif_and_chains'      , action ='store_true' )
-parser_cmd_etl.add_argument('--factors_and_ligands' , action ='store_true' )
-parser_cmd_etl.add_argument('--png_thumbnail'       , action ='store_true' )
-parser_cmd_etl.add_argument('--overwrite'       , action ='store_true' )
-
+parser_cmd_etl.add_argument('--profile'                 , action ='store_true' )
+parser_cmd_etl.add_argument('--ptc_coords'              , action ='store_true' )
+parser_cmd_etl.add_argument('--cif'                     , action ='store_true' )
+parser_cmd_etl.add_argument('--cif_modified_and_chains' , action ='store_true' )
+parser_cmd_etl.add_argument('--factors_and_ligands'     , action ='store_true' )
+parser_cmd_etl.add_argument('--png_thumbnail'           , action ='store_true' )
+parser_cmd_etl.add_argument('--overwrite'               , action ='store_true' )
 parser_cmd_etl.set_defaults(func=cmd_etl)
 
 
@@ -67,7 +66,8 @@ parser.add_argument('--t', action='store_true')
 
 args = parser.parse_args()
 if args.t:
-    test()
+    ...
+    # test()
 else:
     if hasattr(args, 'func'):
         args.func(args)
