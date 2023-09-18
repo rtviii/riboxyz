@@ -8,7 +8,7 @@ from ete3 import NCBITaxa
 from Bio import SeqRecord
 import os
 import pickle
-from ribctl import RP_MSAS_PATH, RP_MSAS_PRUNED_PATH
+# from ribctl import RP_MSAS_PATH, RP_MSAS_PRUNED_PATH
 from ribctl.lib.types.types_ribosome import RNA, PolymericFactor, Protein, ProteinClass
 
 MSA = str

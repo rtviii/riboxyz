@@ -7,12 +7,9 @@ RIBETL_DATA = os.environ.get("RIBETL_DATA")
 
 
 # This amounts to "_assets folder is expected to exist in the root of `ribctl`(next to top-level __init__.py)"
-ASSETS_PATH  = os.path.join(pathlib.Path(__file__).parent, 'assets')
+ASSETS_PATH = os.path.join(pathlib.Path(__file__).parent, 'assets')
 
-#TODO: make msas bona-fide assets
-RP_MSAS_PATH        = os.path.join(ASSETS_PATH, 'rp_class_msas')
-RP_MSAS_PRUNED_PATH = os.path.join(ASSETS_PATH, 'rp_class_msas_pruned')
-
+MUSCLE_BIN  = os.path.join(ASSETS_PATH,'muscle3.8.1')
 asset_type =  Literal[
                     "subunit_map_lsu",
                     "subunit_map_ssu",
