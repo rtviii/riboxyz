@@ -7,4 +7,16 @@ For each established polypeptide nomenclature class (i.e. uL2/23SrRNA/eF-Tu/eIF-
 
 ### Details
 
-In practice, the HMMs are constructed on the fly from the corresponding seed alignments.
+Tools involved:
+- Biopython SeqIO
+- HMMER3
+- pyhmmer
+
+So far we had hmm's built from Ribovision's per-class MSAs. Ideally, the HMMs are constructed on the fly:
+
+- for each candidate polypeptide class:
+    - from a repo of sequences of the given class we pick **N**==10 that are phylogenetically closest to the organism being classified. 
+    - we construct an HMM based on these N sequences 
+    
+
+

@@ -95,16 +95,6 @@ for rcsb_id in ['7QV3']:
 #             if result is not None:
 #                 print("Identified {} as {} with evalue {}".format(prot.entity_poly_strand_id, prot_class, result))
 #                 assigned = prot_class
-        
-
-     
-    
-
-
-
-
-
-
 
     # sss   = "MSITKDQIIEAVAAMSVMDVVELISAMEEKFGVSAAAAVAVAAGPVEAAEEKTEFDVILKAAGANKVAVIKAVRGATGLGLKEAKDLVESAPAALKEGVSKDDAEALKKALEEAGAEVEVK"
     # seq   = pyhmmer.easel.TextSequence(name=str("template").encode(), sequence=sss)

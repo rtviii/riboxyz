@@ -1,1 +1,0 @@
-from ribctl.ribosome_assets import RibosomeAssets
