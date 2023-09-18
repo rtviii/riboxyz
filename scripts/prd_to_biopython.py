@@ -23,7 +23,6 @@ def fasta_from_chain(chain: RNA | Protein | PolymericFactor) -> str:
 
 def phylogenetic_neighborhood(taxids_base: list[str], taxid_target: str, n_neighbors: int = 10) -> list[str]:
     """Given a set of taxids and a target taxid, return a list of the [n_neighbors] phylogenetically closest to the target."""
-
     tree = NCBITaxa().get_topology(list(set([*taxids_base, str(taxid_target)])))
     target_node = tree.search_nodes(name=str(taxid_target))[0]
     phylo_all_nodes = [
@@ -51,6 +50,7 @@ def msa_yield_taxa_only(msa: MSA) -> list[str]:
     return [p.getLabel().split('|')[-1] for p in msa]
 
 def msa_dict_get_meta_info(msa: dict[ProteinClass, MSA]) -> dict[ProteinClass, dict]:
+
     """given a dict of protclass<->msa mapping, yield number of sequeces and organisms contained in each class msa."""
     meta = {
     }
@@ -71,6 +71,7 @@ def msa_pick_taxa(msa: MSA, taxids: list[str]) -> MSA:
     seqlabel_tups = iter((s, s.getLabel()) for s in msa if s.getLabel().split('|')[-1] in taxids)
     seqs, labels = zip(*seqlabel_tups)
     return MSA(seqs, labels=labels)
+
 # TODO: RMPRD
 def msa_phylo_nbhd(msa: MSA, phylo_target_taxid: int, n_neighbors: int = 10) -> MSA:
     """
@@ -147,8 +148,6 @@ def fasta_from_string(seq: str, _id: str, description=""):
     seq_record.id = _id
     seq_record.description = description
     return seq_record.format('fasta')
-
-
 
 
 # TODO: RMPRD
