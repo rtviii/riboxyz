@@ -1,24 +1,11 @@
 import math
 from pprint import pprint
-
-
-from ribctl.lib.msalib import (
-    util__backwards_match,
-    util__forwards_match,
-)
-from ribctl.lib.types.types_ribosome import PolymericFactor, Protein, ProteinClass
 from ribctl.lib.types.types_binding_site import AMINO_ACIDS, NUCLEOTIDES, ResidueSummary
-from ribctl.lib.mod_transpose_bsites import SeqMatch
-
 from Bio.PDB.Atom import Atom
-from Bio.PDB.NeighborSearch import NeighborSearch
 from Bio.PDB.Residue import Residue
 from Bio.PDB.Chain import Chain
 from functools import reduce
-import numpy as np
-import os
 
-from scripts.prd_to_biopython import msa_dict, msaclass_extend_temp
 
 
 
@@ -221,180 +208,176 @@ def ptc_residues_calculate_midpoint(
     return midpoint
 
 
-def tunnel_obstructions(
-    rcsb_id: str, ptc_midpoint: tuple[float, float, float], radius: int = 30
-) -> tuple[list[PolymericFactor], list[ResidueSummary]]:
-    R = RibosomeAssets(rcsb_id)
-    structure, profile = R.get_struct_and_profile()
+# def tunnel_obstructions(
+#     rcsb_id: str, ptc_midpoint: tuple[float, float, float], radius: int = 30
+# ) -> tuple[list[PolymericFactor], list[ResidueSummary]]:
+#     R = RibosomeAssets(rcsb_id)
+#     structure, profile = R.get_struct_and_profile()
 
-    neigbor_search = NeighborSearch(list(structure.get_atoms()))
-    nbr_residues = []
+#     neigbor_search = NeighborSearch(list(structure.get_atoms()))
+#     nbr_residues = []
 
-    nbr_residues.extend(neigbor_search.search(ptc_midpoint, radius, level="R"))
-    nbr_residues = list(
-        set([*map(ResidueSummary.from_biopython_residue, nbr_residues)])
-    )
+#     nbr_residues.extend(neigbor_search.search(ptc_midpoint, radius, level="R"))
+#     nbr_residues = list(
+#         set([*map(ResidueSummary.from_biopython_residue, nbr_residues)])
+#     )
 
-    foreign_nonpolys = []
-    foregin_polymers = []
+#     foreign_nonpolys = []
+#     foregin_polymers = []
 
-    for N in nbr_residues:
-        if not residue_labels(N):
-            foreign_nonpolys.append(N)
-        parent_chain, chain_type = R.get_chain_by_auth_asym_id(N.parent_auth_asym_id)
-        if (parent_chain, chain_type) != (None, None):
-            if chain_type == "PolymericFactor":
-                foregin_polymers.append(parent_chain)
-        else:
-            raise LookupError(
-                "Parent chain must exist in structure. Something went wrong (with the data, probably)"
-            )
+#     for N in nbr_residues:
+#         if not residue_labels(N):
+#             foreign_nonpolys.append(N)
+#         parent_chain, chain_type = R.get_chain_by_auth_asym_id(N.parent_auth_asym_id)
+#         if (parent_chain, chain_type) != (None, None):
+#             if chain_type == "PolymericFactor":
+#                 foregin_polymers.append(parent_chain)
+#         else:
+#             raise LookupError(
+#                 "Parent chain must exist in structure. Something went wrong (with the data, probably)"
+#             )
 
-    print("Inspected midpoint ", ptc_midpoint, " with radius", radius)
-    return list(set(foregin_polymers)), list(set(foreign_nonpolys))
+#     print("Inspected midpoint ", ptc_midpoint, " with radius", radius)
+#     return list(set(foregin_polymers)), list(set(foreign_nonpolys))
 
-
-def msa_class_fit_chain(chain: Protein, prot_class: ProteinClass, custom_seq=None):
-    prot_class_msa = msa_dict(
-        phylogenetic_correction_taxid=chain.src_organism_ids[0],
-        include_only_classes=[prot_class],
-    )[prot_class]
-    extended_msa = msaclass_extend_temp(
-        prot_class,
-        prot_class_msa,
-        chain.entity_poly_seq_one_letter_code_can if custom_seq == None else custom_seq,
-        chain.auth_asym_id,
-        chain.parent_rcsb_id,
-    )
-    for seq in extended_msa:
-        if prot_class in seq.getLabel():
-            return str(seq)
-    raise AssertionError(
-        "Could not find sequence in for {} in aligned class. Likely label error {}".format(
-            prot_class
-        )
-    )
+# def msa_class_fit_chain(chain: Protein, prot_class: ProteinClass, custom_seq=None):
+#     prot_class_msa = msa_dict(phylogenetic_correction_taxid=chain.src_organism_ids[0],include_only_classes=[prot_class],)[prot_class]
+#     extended_msa = msaclass_extend_temp(
+#         prot_class,
+#         prot_class_msa,
+#         chain.entity_poly_seq_one_letter_code_can if custom_seq == None else custom_seq,
+#         chain.auth_asym_id,
+#         chain.parent_rcsb_id,
+#     )
+#     for seq in extended_msa:
+#         if prot_class in seq.getLabel():
+#             return str(seq)
+#     raise AssertionError(
+#         "Could not find sequence in for {} in aligned class. Likely label error {}".format(
+#             prot_class
+#         )
+#     )
 
 
-def exit_port_posn(rcsb_id: str) -> list[float]:
-    def __ul23():
-        aln_conserved = [340, 351]
-        return aln_conserved
-        rcsb_id = "5aka"
-        prot_class = "uL23"
+# def exit_port_posn(rcsb_id: str) -> list[float]:
+#     def __ul23():
+#         aln_conserved = [340, 351]
+#         return aln_conserved
+#         rcsb_id = "5aka"
+#         prot_class = "uL23"
 
-        RA = RibosomeAssets(rcsb_id)
-        chain = RA.get_prot_by_nomclass(prot_class)
+#         RA = RibosomeAssets(rcsb_id)
+#         chain = RA.get_prot_by_nomclass(prot_class)
 
-        chainseq_ = RA.biopython_chain_get_seq(
-            RA.biopython_structure(), chain.auth_asym_id, "protein"
-        )
-        print(chainseq_)
+#         chainseq_ = RA.biopython_chain_get_seq(
+#             RA.biopython_structure(), chain.auth_asym_id, "protein"
+#         )
+#         print(chainseq_)
 
-        prot_class_msa = msa_dict(
-            phylogenetic_correction_taxid=chain.src_organism_ids[0],
-            include_only_classes=[prot_class],
-        )[prot_class]
-        extended_msa = msaclass_extend_temp(
-            prot_class,
-            prot_class_msa,
-            chainseq_,
-            chain.auth_asym_id,
-            chain.parent_rcsb_id,
-        )
+#         prot_class_msa = msa_dict(
+#             phylogenetic_correction_taxid=chain.src_organism_ids[0],
+#             include_only_classes=[prot_class],
+#         )[prot_class]
+#         extended_msa = msaclass_extend_temp(
+#             prot_class,
+#             prot_class_msa,
+#             chainseq_,
+#             chain.auth_asym_id,
+#             chain.parent_rcsb_id,
+#         )
 
-        for seq in extended_msa:
-            if prot_class in seq.getLabel():
-                print(seq.getLabel())
-                subseq_ids = [74, 79]
-                fwd_resids = [
-                    util__forwards_match(str(seq), aligned_id)
-                    for aligned_id in subseq_ids
-                ]
-                print(fwd_resids)
-                print(SeqMatch.hl_ixs(str(seq), fwd_resids))
-            else:
-                print(seq.getLabel())
-                # print(str(seq))
-                print(SeqMatch.hl_ixs(str(seq), aln_conserved, color=92))
-        return aln_conserved
+#         for seq in extended_msa:
+#             if prot_class in seq.getLabel():
+#                 print(seq.getLabel())
+#                 subseq_ids = [74, 79]
+#                 fwd_resids = [
+#                     util__forwards_match(str(seq), aligned_id)
+#                     for aligned_id in subseq_ids
+#                 ]
+#                 print(fwd_resids)
+#                 print(SeqMatch.hl_ixs(str(seq), fwd_resids))
+#             else:
+#                 print(seq.getLabel())
+#                 # print(str(seq))
+#                 print(SeqMatch.hl_ixs(str(seq), aln_conserved, color=92))
+#         return aln_conserved
 
-    def __ul24():
-        aln_conserved = [123, 124, 125]
-        return aln_conserved
-        rcsb_id = "5AKA"
-        prot_class = "uL24"
+#     def __ul24():
+#         aln_conserved = [123, 124, 125]
+#         return aln_conserved
+#         rcsb_id = "5AKA"
+#         prot_class = "uL24"
 
-        RA = RibosomeAssets(rcsb_id)
-        chain = RA.get_prot_by_nomclass(prot_class)
+#         RA = RibosomeAssets(rcsb_id)
+#         chain = RA.get_prot_by_nomclass(prot_class)
 
-        chainseq_ = RA.biopython_chain_get_seq(
-            RA.biopython_structure(), chain.auth_asym_id, "protein"
-        )
-        print(chainseq_)
+#         chainseq_ = RA.biopython_chain_get_seq(
+#             RA.biopython_structure(), chain.auth_asym_id, "protein"
+#         )
+#         print(chainseq_)
 
-        prot_class_msa = msa_dict(
-            phylogenetic_correction_taxid=chain.src_organism_ids[0],
-            include_only_classes=[prot_class],
-        )[prot_class]
-        extended_msa = msaclass_extend_temp(
-            prot_class,
-            prot_class_msa,
-            chainseq_,
-            chain.auth_asym_id,
-            chain.parent_rcsb_id,
-        )
+#         prot_class_msa = msa_dict(
+#             phylogenetic_correction_taxid=chain.src_organism_ids[0],
+#             include_only_classes=[prot_class],
+#         )[prot_class]
+#         extended_msa = msaclass_extend_temp(
+#             prot_class,
+#             prot_class_msa,
+#             chainseq_,
+#             chain.auth_asym_id,
+#             chain.parent_rcsb_id,
+#         )
 
-        for seq in extended_msa:
-            if prot_class in seq.getLabel():
-                print(seq.getLabel())
-                subseq_ids = [46, 47, 48]
-                fwd_resids = [
-                    util__forwards_match(str(seq), aligned_id)
-                    for aligned_id in subseq_ids
-                ]
-                print(SeqMatch.hl_ixs(str(seq), fwd_resids))
-            else:
-                print(seq.getLabel())
-                print(SeqMatch.hl_ixs(str(seq), aln_conserved, color=92))
+#         for seq in extended_msa:
+#             if prot_class in seq.getLabel():
+#                 print(seq.getLabel())
+#                 subseq_ids = [46, 47, 48]
+#                 fwd_resids = [
+#                     util__forwards_match(str(seq), aligned_id)
+#                     for aligned_id in subseq_ids
+#                 ]
+#                 print(SeqMatch.hl_ixs(str(seq), fwd_resids))
+#             else:
+#                 print(seq.getLabel())
+#                 print(SeqMatch.hl_ixs(str(seq), aln_conserved, color=92))
 
-        return aln_conserved
+#         return aln_conserved
 
-    ra = RibosomeAssets(rcsb_id)
-    bp_struct = ra.biopython_structure()
+#     ra = RibosomeAssets(rcsb_id)
+#     bp_struct = ra.biopython_structure()
 
-    ul23 = ra.get_prot_by_nomclass("uL23")
-    ul24 = ra.get_prot_by_nomclass("uL24")
+#     ul23 = ra.get_prot_by_nomclass("uL23")
+#     ul24 = ra.get_prot_by_nomclass("uL24")
 
-    if ul23 == None or ul24 == None:
-        raise LookupError("Could not find uL23 or uL24 in {}".format(rcsb_id))
+#     if ul23 == None or ul24 == None:
+#         raise LookupError("Could not find uL23 or uL24 in {}".format(rcsb_id))
 
-    print(ul23.auth_asym_id)
-    print(ul24.auth_asym_id)
+#     print(ul23.auth_asym_id)
+#     print(ul24.auth_asym_id)
 
-    bp_ul23_seq = ra.biopython_chain_get_seq(bp_struct, ul23.auth_asym_id, "protein")
-    bp_ul24_seq = ra.biopython_chain_get_seq(bp_struct, ul24.auth_asym_id, "protein")
+#     bp_ul23_seq = ra.biopython_chain_get_seq(bp_struct, ul23.auth_asym_id, "protein")
+#     bp_ul24_seq = ra.biopython_chain_get_seq(bp_struct, ul24.auth_asym_id, "protein")
 
-    bp_ul23 = ra.biopython_get_chain(ul23.auth_asym_id)
-    bp_ul24 = ra.biopython_get_chain(ul24.auth_asym_id)
+#     bp_ul23 = ra.biopython_get_chain(ul23.auth_asym_id)
+#     bp_ul24 = ra.biopython_get_chain(ul24.auth_asym_id)
 
-    aligned_ul23 = msa_class_fit_chain(ul23, "uL23", custom_seq=bp_ul23_seq)
-    aligned_ul24 = msa_class_fit_chain(ul24, "uL24", custom_seq=bp_ul24_seq)
+#     aligned_ul23 = msa_class_fit_chain(ul23, "uL23", custom_seq=bp_ul23_seq)
+#     aligned_ul24 = msa_class_fit_chain(ul24, "uL24", custom_seq=bp_ul24_seq)
 
-    backwards_mapped_ul24 = [
-        util__backwards_match(aligned_ul24, residue) for residue in __ul24()
-    ]
-    backwards_mapped_ul23 = [
-        util__backwards_match(aligned_ul23, residue) for residue in __ul23()
-    ]
+#     backwards_mapped_ul24 = [
+#         util__backwards_match(aligned_ul24, residue) for residue in __ul24()
+#     ]
+#     backwards_mapped_ul23 = [
+#         util__backwards_match(aligned_ul23, residue) for residue in __ul23()
+#     ]
 
-    residues_ul23 = [bp_ul24[i] for i in backwards_mapped_ul24]
-    residues_ul24 = [bp_ul23[i] for i in backwards_mapped_ul23]
+#     residues_ul23 = [bp_ul24[i] for i in backwards_mapped_ul24]
+#     residues_ul24 = [bp_ul23[i] for i in backwards_mapped_ul23]
 
-    ul23_M = np.average([*map(lambda res: res.center_of_mass(), residues_ul23)], axis=0)
-    ul24_M = np.average([*map(lambda res: res.center_of_mass(), residues_ul24)], axis=0)
+#     ul23_M = np.average([*map(lambda res: res.center_of_mass(), residues_ul23)], axis=0)
+#     ul24_M = np.average([*map(lambda res: res.center_of_mass(), residues_ul24)], axis=0)
 
-    return np.average([ul23_M, ul24_M], axis=0).tolist()
+#     return np.average([ul23_M, ul24_M], axis=0).tolist()
 
 
 def make_cylinder(p1: list[float], p2: list[float], R: float):

@@ -1,7 +1,7 @@
 import asyncio
 import os
 from ribctl import RIBETL_DATA
-from ribctl.ribosome_assets import Assetlist, RibosomeAssets, obtain_assets, obtain_assets_threadpool
+from ribctl.etl.ribosome_assets import Assetlist, RibosomeAssets, obtain_assets, obtain_assets_threadpool
 
 def cmd_etl(args):
 
