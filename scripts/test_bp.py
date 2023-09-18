@@ -1,19 +1,22 @@
+from io import StringIO
 import os
 from pprint import pprint
+import subprocess
+from tempfile import NamedTemporaryFile
 from typing import Iterator
 from Bio.Align import MultipleSeqAlignment,Seq, SeqRecord
-from Bio import SeqIO
+from Bio.Align.Applications import MuscleCommandline
+from Bio import SeqIO, AlignIO, pairwise2
 import re
-
 from ete3 import NCBITaxa
 from ribctl import ASSETS
 from ribctl.lib.types.types_poly_nonpoly_ligand import list_ProteinClass
+from ribctl.lib.types.types_ribosome import ProteinClass
 from ribctl.ribosome_assets import RibosomeAssets
 
 
 class Fasta:
     records = list[SeqRecord]
-
     def __init__(self, path:str) -> None:
         try:
             with open(path, "r") as fasta_in:
@@ -24,6 +27,7 @@ class Fasta:
             print(f"An error occurred: {str(e)}")
     def pick_taxids(self, taxids: list[str]) -> list[SeqRecord]:
         return list(filter(lambda record: record.id in taxids, self.records))
+
     def all_taxids(self) ->list[int]:
         taxids = []
         for record in self.records:
@@ -84,7 +88,15 @@ def phylogenetic_neighborhood(taxids_base: list[str], taxid_target: str, n_neigh
     else:
         return nbr_taxids[1:n_neighbors+1]
 
+
+
+
+
 #!% ------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
 
 def fasta_get_taxids(infile:str)->list[int]:
     """Given a fasta file, return all the taxids present in it
@@ -102,43 +114,61 @@ def fasta_get_taxids(infile:str)->list[int]:
     return taxids
 
 
+
+# TODO: RMPRD
+def muscle_align_N_seq(prot_class_base: ProteinClass, seq_records: Iterator[SeqRecord]) -> Iterator[ SeqRecord ]:
+    """Given a MSA of a protein class, and a fasta string of a chain, return a new MSA with the chain added to the class MSA."""
+    import tempfile
+    with tempfile.NamedTemporaryFile(delete=False, mode='w') as temp_file:
+        temp_filename = temp_file.name
+        SeqIO.write([*seq_records], temp_filename, "fasta")
+        MUSCLE_BIN = '/home/rtviii/dev/riboxyz/muscle3.8.1',
+        muscle_cmd = [
+            MUSCLE_BIN,
+            '-in',
+            temp_filename,
+            '-quiet']
+        try:
+            process = subprocess.run(muscle_cmd, stdout=subprocess.PIPE, text=True)
+            if  process.returncode == 0:
+                muscle_out = process.stdout
+                muscle_output_handle = StringIO(muscle_out)
+                seq_record = SeqIO.read(muscle_output_handle, "fasta")
+                return seq_record
+            else:
+                print("{} failed with code {}".format(" ".join(muscle_cmd)), process.returncode)
+                raise Exception("`{}` did not succeed.".format(" ".join(muscle_cmd)))
+        except:
+            raise Exception("Error running muscle.")
+
+
+#! -------
+
+#! -------
 rib      = RibosomeAssets('3J7Z').profile()
 organism = rib.src_organism_ids[0]
 prots    = RibosomeAssets('3J7Z').profile().proteins
-
 i = 0
 for protclass in list_ProteinClass:
     fasta_path = os.path.join(ASSETS["fasta_ribosomal_proteins"], f"{protclass}.fasta")
-    ids = fasta_get_taxids(fasta_path)
-    phylo_nbhd=  phylogenetic_neighborhood(list(map(lambda x: str(x),ids)), str(organism), n_neighbors=10)
-    Fasta(fasta_path).pick_taxids(phylo_nbhd)
+    records    = Fasta(fasta_path)
+    ids        = records.all_taxids()
+    phylo_nbhd = phylogenetic_neighborhood(list(map(lambda x: str(x),ids)), str(organism), n_neighbors=10)
+    seqs       = records.pick_taxids(phylo_nbhd)
+
+    print("got seqs ", seqs)
+    list(muscle_align_N_seq("bL9", iter(seqs)))
 
     i+=1
-    if i > 5:
+    if i > 1:
         exit()
 
-
-
-fasta_path = os.path.join(ASSETS["fasta_ribosomal_proteins"], f"bL9.fasta")
-record = [*SeqIO.parse(fasta_path, "fasta")]
-
+# fasta_path = os.path.join(ASSETS["fasta_ribosomal_proteins"], f"bL9.fasta")
+# record = [*SeqIO.parse(fasta_path, "fasta")]
 
 
 
-# for prot in prots:
-
-
-    
-
-
-
-
-
-
-
-
-
-# extract sequences 
-# store (create an asset class in __init__), possibly compress
-# create method to pick phyl. nbhd, create an MSA, create an HMM
-# ->evaluate as before
+#? extract sequences 
+#? store (create an asset class in __init__), possibly compress
+#? create method to pick phyl. nbhd, create an MSA, create an HMM
+#? ->evaluate as before
