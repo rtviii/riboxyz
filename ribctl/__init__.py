@@ -21,7 +21,7 @@ asset_type =  Literal[
                     "fasta_factors",
                     "fasta_trna",
                     
-                    "hmm_cache",
+                    "__hmm_cache",
                     "hmm_ribosomal_proteins",
                     "hmm_factors",
                     "hmm_ribosomal_rna",
@@ -32,11 +32,12 @@ if os.environ.get("RIBETL_DATA") == "" or not os.path.exists(ASSETS_PATH):
     raise KeyError("Repostiry of static PDB files should be defined as $RIBETL_DATA environment variable.")
 
 ASSETS:dict[asset_type, pathlib.Path] = {
+"__hmm_cache": pathlib.Path(os.path.join(ASSETS_PATH, "__hmm_cache")),
  
-"subunit_map_lsu":  pathlib.Path(os.path.join(ASSETS_PATH, "subunit_map_LSU.json")),
-"subunit_map_ssu":  pathlib.Path(os.path.join(ASSETS_PATH, "subunit_map_SSU.json")),
-"old_names_lsu":  pathlib.Path(os.path.join(ASSETS_PATH, "old_names_LSU.json")),
-"old_names_ssu":  pathlib.Path(os.path.join(ASSETS_PATH, "old_names_SSU.json")),
+"subunit_map_lsu": pathlib.Path(os.path.join(ASSETS_PATH, "subunit_map_LSU.json")),
+"subunit_map_ssu": pathlib.Path(os.path.join(ASSETS_PATH, "subunit_map_SSU.json")),
+"old_names_lsu"  : pathlib.Path(os.path.join(ASSETS_PATH, "old_names_LSU.json")),
+"old_names_ssu"  : pathlib.Path(os.path.join(ASSETS_PATH, "old_names_SSU.json")),
 
 
 'fasta_ribosomal_proteins': pathlib.Path(os.path.join(ASSETS_PATH, "fasta_ribosomal_proteins")),
