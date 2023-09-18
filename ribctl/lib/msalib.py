@@ -1,30 +1,22 @@
 from io import StringIO
-import pickle
 import os
-import random
-import typing
-import requests
-from Bio import AlignIO
 import subprocess
-import numpy as np
-from Bio.Seq import Seq
 from Bio import SeqIO
 from Bio import SeqRecord
-# from prody import MSA, MSAFile, parseMSA
-# import prody 
-import requests
+from functools import reduce
+from io import StringIO
 import os
+import subprocess
+from typing import Iterator
+from Bio.Align import  SeqRecord
+import os
+from ribctl import MUSCLE_BIN
 from ribctl.lib.types.types_ribosome import RNA, PolymericFactor, Protein, ProteinClass
 from ribctl.lib.types.types_poly_nonpoly_ligand import list_LSUProteinClass, list_SSUProteinClass
 from ribctl.lib.types.types_ribosome import ProteinClass
-# prd.confProDy(verbosity='none')
-RIBETL_DATA = os.environ.get('RIBETL_DATA')
+from ete3 import NCBITaxa
 
 
-RP_MSAS_PATH            = '/home/rxz/dev/docker_ribxz/api/ribctl/assets/rp_class_msas/'
-RP_MSAS_PRUNED_PATH     = "/home/rxz/dev/docker_ribxz/api/ribctl/assets/rp_class_msas_pruned/"
-
-#! util
 def util__backwards_match(aligned_target:str, resid:int):
 	"""Returns the target-sequence index of a residue in the (aligned) target sequence
 	Basically, "count back ignoring gaps" until you arrive at @resid
@@ -58,27 +50,106 @@ def util__forwards_match(aligned_seq:str, resid:int):
 def barr2str(bArr):
     return ''.join([x.decode("utf-8") for x in bArr])
 
-#! util
-
-
 def seq_to_fasta(rcsb_id: str, _seq: str, outfile: str):
     from Bio.Seq import Seq
     _seq = _seq.replace("\n", "")
     seq_record = SeqRecord.SeqRecord(Seq(_seq).upper())
     seq_record.id = seq_record.description = rcsb_id
     SeqIO.write(seq_record, outfile, 'fasta')
-#! util
 
 def infer_subunit(protein_class: ProteinClass):
     if protein_class in list_LSUProteinClass:
         return "LSU"
-
     elif protein_class in list_SSUProteinClass:
         return "SSU"
-
     else:
         raise ValueError("Unknown protein class: {}".format(protein_class))
 
+
+
+class Fasta:
+    records = list[SeqRecord]
+    def __init__(self, path:str) -> None:
+        try:
+            with open(path, "r") as fasta_in:
+                self.records = [*SeqIO.parse(fasta_in, "fasta")]
+        except FileNotFoundError:
+            print(f"File not found: {path}")
+        except Exception as e:
+            print(f"An error occurred: {str(e)}")
+    def pick_taxids(self, taxids: list[str]) -> list[SeqRecord]:
+        
+        for taxid in set(taxids): 
+            if taxid not in self.all_taxids():
+                raise Exception(f"Taxid {taxid} not found in records. Violated assumption. Did you alter the fast archives recently?")
+
+        #? ------ Filter duplicates. I discovered some duplicate sequences(and taxids) which breaks the HMM pipeline later on.
+        #? A cleaner solution would be to remove the duplicates from the fasta archives. Later.
+        # TODO
+        def filter_duplicates(acc, record):
+            if record.id not in acc['seen']:
+                acc['seen'].add(record.id)
+                acc['result'].append(record)
+            return acc
+
+        initial_accumulator = {'seen': set(), 'result': []}
+        filtered_records = reduce(filter_duplicates, filter(lambda record: record.id in taxids, self.records), initial_accumulator)
+        #? -------------------------------------------------------------------------------
+
+        return list(filtered_records['result'])
+
+    def all_taxids(self) ->list[int]:
+        """Given a fasta file, return all the taxids present in it
+        With the assumption that the tax id is the id of each seq record."""
+        taxids = []
+        for record in self.records:
+            taxids =[*taxids, record.id]
+        return taxids
+
+def phylogenetic_neighborhood(taxids_base: list[str], taxid_target: str, n_neighbors: int = 10) -> list[str]:
+    """Given a set of taxids and a target taxid, return a list of the [n_neighbors] phylogenetically closest to the target."""
+    tree = NCBITaxa().get_topology(list(set([*taxids_base, str(taxid_target)])))
+    target_node = tree.search_nodes(name=str(taxid_target))[0]
+    phylo_all_nodes = [(node.name, tree.get_distance(target_node, node)) for node in tree.traverse()]
+
+    phylo_extant_nodes = filter(lambda taxid: taxid[0] in taxids_base, phylo_all_nodes)
+
+    phylo_sorted_nodes = sorted(phylo_extant_nodes, key=lambda x: x[1])
+
+    nbr_taxids = list(
+        map(lambda tax_phydist: tax_phydist[0], phylo_sorted_nodes))
+
+    # the first element is the target node
+    if len(nbr_taxids) < n_neighbors:
+        return nbr_taxids[1:]
+    else:
+        return nbr_taxids[1:n_neighbors+1]
+
+
+def muscle_align_N_seq(seq_records: Iterator[SeqRecord]) -> Iterator[ SeqRecord ]:
+    """Given a MSA of a protein class, and a fasta string of a chain, return a new MSA with the chain added to the class MSA."""
+    import tempfile
+    with tempfile.NamedTemporaryFile(delete=False, mode='w') as temp_file:
+        temp_filename = temp_file.name
+        SeqIO.write([*seq_records], temp_filename, "fasta")
+        muscle_cmd = [MUSCLE_BIN,'-in',temp_filename,'-quiet']
+
+        try:
+            process = subprocess.run(muscle_cmd, stdout=subprocess.PIPE, text=True)
+            if  process.returncode == 0:
+                muscle_out = process.stdout
+                muscle_output_handle = StringIO(muscle_out)
+                seq_records = SeqIO.parse(muscle_output_handle, "fasta")
+                temp_file.close()
+                os.remove(temp_filename)
+                return seq_records
+            else:
+                print("{} failed with code {}".format(" ".join(muscle_cmd)), process.returncode)
+                raise Exception("`{}` did not succeed.".format(" ".join(muscle_cmd)))
+        except:
+            temp_file.close()
+            os.remove(temp_filename)
+            raise Exception("Error running muscle.")
 
 # # RMPRD
 # def msa_dict_get_meta_info(msa: dict[ProteinClass, MSA]) -> dict[ProteinClass, dict]:
