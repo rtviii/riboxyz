@@ -1,4 +1,6 @@
+from functools import reduce
 from io import StringIO
+from itertools import tee
 import os
 from pprint import pprint
 import subprocess
@@ -29,7 +31,25 @@ class Fasta:
         except Exception as e:
             print(f"An error occurred: {str(e)}")
     def pick_taxids(self, taxids: list[str]) -> list[SeqRecord]:
-        return list(filter(lambda record: record.id in taxids, self.records))
+        
+        for taxid in set(taxids): 
+            if taxid not in self.all_taxids():
+                raise Exception(f"Taxid {taxid} not found in records. Violated assumption. Did you alter the fast archives recently?")
+
+        #? ------ Filter duplicates. I discovered some duplicate sequences(and taxids) which breaks the HMM pipeline later on.
+        #? A cleaner solution would be to remove the duplicates from the fasta archives. Later.
+        # TODO
+        def filter_duplicates(acc, record):
+            if record.id not in acc['seen']:
+                acc['seen'].add(record.id)
+                acc['result'].append(record)
+            return acc
+
+        initial_accumulator = {'seen': set(), 'result': []}
+        filtered_records = reduce(filter_duplicates, filter(lambda record: record.id in taxids, self.records), initial_accumulator)
+        #? -------------------------------------------------------------------------------
+
+        return list(filtered_records['result'])
 
     def all_taxids(self) ->list[int]:
         taxids = []
@@ -73,12 +93,9 @@ def phylogenetic_neighborhood(taxids_base: list[str], taxid_target: str, n_neigh
     """Given a set of taxids and a target taxid, return a list of the [n_neighbors] phylogenetically closest to the target."""
     tree = NCBITaxa().get_topology(list(set([*taxids_base, str(taxid_target)])))
     target_node = tree.search_nodes(name=str(taxid_target))[0]
-    phylo_all_nodes = [
-        (node.name, tree.get_distance(target_node, node))
-        for node in tree.traverse()]
+    phylo_all_nodes = [(node.name, tree.get_distance(target_node, node)) for node in tree.traverse()]
 
-    phylo_extant_nodes = filter(
-        lambda taxid: taxid[0] in taxids_base, phylo_all_nodes)
+    phylo_extant_nodes = filter(lambda taxid: taxid[0] in taxids_base, phylo_all_nodes)
 
     phylo_sorted_nodes = sorted(phylo_extant_nodes, key=lambda x: x[1])
 
@@ -108,7 +125,7 @@ def fasta_get_taxids(infile:str)->list[int]:
     try:
         with open(infile, "r") as fasta_in:
             for seq_record in SeqIO.parse(fasta_in, "fasta"):
-                taxids =[*taxids, seq_record.id]
+                taxids = [*taxids, seq_record.id]
                 # Extract the taxonomic ID from the description using regular expressions
     except FileNotFoundError:
         print(f"File not found: {infile}")
@@ -116,20 +133,14 @@ def fasta_get_taxids(infile:str)->list[int]:
         print(f"An error occurred: {str(e)}")
     return taxids
 
-
-
-# TODO: RMPRD
 def muscle_align_N_seq(seq_records: Iterator[SeqRecord]) -> Iterator[ SeqRecord ]:
     """Given a MSA of a protein class, and a fasta string of a chain, return a new MSA with the chain added to the class MSA."""
     import tempfile
     with tempfile.NamedTemporaryFile(delete=False, mode='w') as temp_file:
         temp_filename = temp_file.name
         SeqIO.write([*seq_records], temp_filename, "fasta")
-        muscle_cmd = [
-            MUSCLE_BIN,
-            '-in',
-            temp_filename,
-            '-quiet']
+        muscle_cmd = [MUSCLE_BIN,'-in',temp_filename,'-quiet']
+
         try:
             process = subprocess.run(muscle_cmd, stdout=subprocess.PIPE, text=True)
             if  process.returncode == 0:
@@ -152,31 +163,47 @@ def muscle_align_N_seq(seq_records: Iterator[SeqRecord]) -> Iterator[ SeqRecord 
 
 #! -------
 rib      = RibosomeAssets('3J7Z').profile()
-organism = rib.src_organism_ids[0]
+organism_taxid = rib.src_organism_ids[0]
 prots    = RibosomeAssets('3J7Z').profile().proteins
-i = 0
-for protclass in list_ProteinClass:
-    fasta_path   = os.path.join(ASSETS["fasta_ribosomal_proteins"], f"{protclass}.fasta")
+
+hmm_cachedir = ASSETS['__hmm_cache']
+
+for candidate_class in list_ProteinClass:
+    fasta_path   = os.path.join(ASSETS["fasta_ribosomal_proteins"], f"{candidate_class}.fasta")
     records      = Fasta(fasta_path)
     ids          = records.all_taxids()
-    phylo_nbhd   = phylogenetic_neighborhood(list(map(lambda x: str(x),ids)), str(organism), n_neighbors=10)
+    phylo_nbhd   = phylogenetic_neighborhood(list(map(lambda x: str(x),ids)), str(organism_taxid), n_neighbors=10)
     seqs         = records.pick_taxids(phylo_nbhd)
+    print("Picked seqnences,")
+    print(seqs)
     seqs_aligned = muscle_align_N_seq( iter(seqs))
+    seqs_aligned1, seqs_aligned2 = tee(seqs_aligned)    
+    print("\n")
+    print("Processing class {}".format(candidate_class))
+    pprint([*seqs_aligned2])
 
-    seq_tuples =  [TextSequence(name=bytes(seq.id, 'utf-8'), sequence=str(seq.seq)) for seq in seqs_aligned]
+
+    seq_tuples =  [TextSequence(name=bytes(seq.id, 'utf-8'), sequence=str(seq.seq)) for seq in seqs_aligned1]
 
 
-    alphabet      = pyhmmer.easel.Alphabet.amino()
+
+    cached_name = "class_{}_taxid_{}.hmm".format(candidate_class, organism_taxid)
+
+    alphabet      = pyhmmer.easel.Alphabet.amino() #* <---- AA?
+    # alphabet      = pyhmmer.easel.Alphabet.rna() #* <---- NC?
     builder       = pyhmmer.plan7.Builder(alphabet)
-    background    = pyhmmer.plan7.Background(alphabet)
-    anonymous_msa = pyhmmer.easel.TextMSA(b"msa_Template",sequences=seq_tuples)
+    background    = pyhmmer.plan7.Background(alphabet) #? The null(background) model can be later augmented.
+    anonymous_msa = pyhmmer.easel.TextMSA(bytes(cached_name, 'utf-8'),sequences=seq_tuples)
 
-    hmm, _, _ = builder.build_msa(anonymous_msa.digitize(alphabet), background)
-
-
-    i+=1
-    if i > 1:
-        exit()
+    hmm, _profile, _optmized_profile = builder.build_msa(anonymous_msa.digitize(alphabet), background)
+    
+    if not os.path.isfile(os.path.join(hmm_cachedir, cached_name)):
+        with open(os.path.join(hmm_cachedir, cached_name), "wb") as hmm_file:
+            hmm.write(hmm_file)
+            print("Wrote `{}` to `{}`".format(cached_name, hmm_cachedir))
+    else:
+        print(os.path.join(hmm_cachedir, cached_name) + " exists. ")
+    
 
 # fasta_path = os.path.join(ASSETS["fasta_ribosomal_proteins"], f"bL9.fasta")
 # record = [*SeqIO.parse(fasta_path, "fasta")]
