@@ -6,6 +6,7 @@ from Bio.PDB.Chain import Chain
 from typing import Optional
 from api.logs.loggers import get_updates_logger
 from ribctl import AMINO_ACIDS_3_TO_1_CODE
+from ribctl.lib.tunnel.tunnel import ptc_resdiues_get, ptc_residues_calculate_midpoint
 from ribctl.lib.types.types_binding_site import BindingSite
 from ribctl.lib.types.types_poly_nonpoly_ligand import PolymericFactorClass, RNAClass
 from ribctl.lib.mod_extract_bsites import bsite_nonpolymeric_ligand, struct_ligand_ids, struct_polymeric_factor_ids, bsite_polymeric_factor, bsite_polymeric_factor
@@ -18,8 +19,6 @@ from ribctl import RIBETL_DATA
 from pydantic import BaseModel, parse_obj_as
 from concurrent.futures import ALL_COMPLETED, Future, ProcessPoolExecutor, ThreadPoolExecutor, wait
 import os
-
-from ribctl.tunnel.tunnel import ptc_resdiues_get, ptc_residues_calculate_midpoint
 
 class Assetlist(BaseModel)   : 
       profile                : Optional[bool]

@@ -78,13 +78,9 @@ def seq_prot_against_protclasses(seq:str, hmm_dict:dict)->dict[ProteinClass, lis
 #             print(CRED + "Found hits for protein {} in multiple classes: {}".format(prot.entity_poly_strand_id, nonzero_hits)  + CEND)
 
 
-# Old hacky shit
-p = pathlib.Path(__file__).parents[1]
-lsu_path = os.path.join(p, '_assets', 'subunit_map_LSU.json')
-ssu_path = os.path.join(p, '_assets', 'subunit_map_SSU.json')
 
-LSU_map = {k: v for k, v in json.load(open(lsu_path, 'r')).items()}
-SSU_map = {k: v for k, v in json.load(open(ssu_path, 'r')).items()}
+LSU_map = {k: v for k, v in json.load(open(ASSETS["subunit_map_lsu"], 'r')).items()}
+SSU_map = {k: v for k, v in json.load(open(ASSETS["subunit_map_ssu"], 'r')).items()}
 
 #! Classification / "Type-coercion"
 
