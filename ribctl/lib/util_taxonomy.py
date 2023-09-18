@@ -1,5 +1,5 @@
 import os
-from ribctl.ribosome_assets import RibosomeAssets
+from ribctl.etl.ribosome_assets import RibosomeAssets
 from ete3 import NCBITaxa
 from ribctl.lib.types.types_ribosome import RibosomeStructure
 from ribctl import RIBETL_DATA

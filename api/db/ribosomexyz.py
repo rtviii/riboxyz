@@ -10,7 +10,7 @@ from api.db.inits.proteins import add_protein, node__protein_class
 from api.db.inits.rna import add_rna, node__rna_class
 from api.db.inits.structure import add_ligand, node__structure
 from ribctl.lib.types.types_ribosome import RibosomeStructure
-from ribctl.ribosome_assets import RibosomeAssets
+from ribctl.etl.ribosome_assets import RibosomeAssets
 from ribctl.lib.types.types_poly_nonpoly_ligand import list_LSUProteinClass, list_SSUProteinClass, list_RNAClass
 from neo4j import GraphDatabase, Driver, ManagedTransaction, Transaction
 from ribctl.lib.types.types_ribosome import  NonpolymericLigand,  ProteinClass, RibosomeStructure

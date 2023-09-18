@@ -15,18 +15,14 @@ from ribctl import ASSETS, MUSCLE_BIN
 from ribctl.lib.msalib import Fasta, muscle_align_N_seq, phylogenetic_neighborhood
 from ribctl.lib.types.types_poly_nonpoly_ligand import list_ProteinClass
 from ribctl.lib.types.types_ribosome import ProteinClass
-from ribctl.ribosome_assets import RibosomeAssets
+from ribctl.etl.ribosome_assets import RibosomeAssets
 from pyhmmer.easel import Alphabet, DigitalSequenceBlock, TextSequence, SequenceFile, SequenceBlock, TextSequenceBlock
 from pyhmmer.plan7 import Pipeline, HMM
-
-
+hmm_cachedir = ASSETS['__hmm_cache']
 
 rib            = RibosomeAssets('3J7Z').profile()
 organism_taxid = rib.src_organism_ids[0]
 prots          = RibosomeAssets('3J7Z').profile().proteins
-
-hmm_cachedir = ASSETS['__hmm_cache']
-
 for candidate_class in list_ProteinClass:
     fasta_path   = os.path.join(ASSETS["fasta_ribosomal_proteins"], f"{candidate_class}.fasta")
     records      = Fasta(fasta_path)
