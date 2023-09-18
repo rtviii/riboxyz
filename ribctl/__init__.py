@@ -7,11 +7,11 @@ RIBETL_DATA = os.environ.get("RIBETL_DATA")
 
 
 # This amounts to "_assets folder is expected to exist in the root of `ribctl`(next to top-level __init__.py)"
-_ASSETS_PATH  = os.path.join(pathlib.Path(__file__).parent, '_assets')
+ASSETS_PATH  = os.path.join(pathlib.Path(__file__).parent, 'assets')
 
 #TODO: make msas bona-fide assets
-RP_MSAS_PATH        = os.path.join(_ASSETS_PATH, 'rp_class_msas')
-RP_MSAS_PRUNED_PATH = os.path.join(_ASSETS_PATH, 'rp_class_msas_pruned')
+RP_MSAS_PATH        = os.path.join(ASSETS_PATH, 'rp_class_msas')
+RP_MSAS_PRUNED_PATH = os.path.join(ASSETS_PATH, 'rp_class_msas_pruned')
 
 asset_type =  Literal[
                     "landmark_sites",
@@ -21,15 +21,14 @@ asset_type =  Literal[
                     "hmm_trna",
                     ]
 
-if os.environ.get("RIBETL_DATA") == "" or not os.path.exists(_ASSETS_PATH):
+if os.environ.get("RIBETL_DATA") == "" or not os.path.exists(ASSETS_PATH):
     raise KeyError("Repostiry of static PDB files should be defined as $RIBETL_DATA environment variable.")
 
 ASSETS:dict[asset_type, pathlib.Path] = {
-'landmark_sites'        : pathlib.Path(os.path.join(_ASSETS_PATH, 'landmark_sites')),
-'hmm_ribosomal_proteins': pathlib.Path(os.path.join(_ASSETS_PATH, 'hmm_ribosomal_proteins')),
-'hmm_factors'           : pathlib.Path(os.path.join(_ASSETS_PATH, 'hmm_factors')),
-'hmm_ribosomal_rna'     : pathlib.Path(os.path.join(_ASSETS_PATH, 'hmm_ribosomal_rna')),
-'hmm_trna'              : pathlib.Path(os.path.join(_ASSETS_PATH, 'hmm_trna'))
+'hmm_ribosomal_proteins': pathlib.Path(os.path.join(ASSETS_PATH, 'hmm_ribosomal_proteins')),
+'hmm_factors'           : pathlib.Path(os.path.join(ASSETS_PATH, 'hmm_factors')),
+'hmm_ribosomal_rna'     : pathlib.Path(os.path.join(ASSETS_PATH, 'hmm_ribosomal_rna')),
+'hmm_trna'              : pathlib.Path(os.path.join(ASSETS_PATH, 'hmm_trna'))
 }
 
 TAXID_BACTERIA          = 2
