@@ -183,8 +183,7 @@ def infer_subunit(protein_class: ProteinClass):
 # def msaclass_extend_temp(prot_class_base: ProteinClass, prot_class_msa: MSA, target_fasta: str, target_auth_asym_id: str, target_parent_rcsb_id: str) -> MSA:
 
 #     class_str = fasta_from_msa(prot_class_msa).strip("\n").encode('utf-8')
-#     target_str = fasta_from_string(target_fasta, prot_class_base, "{}.{}".format(
-#         target_parent_rcsb_id, target_auth_asym_id)).strip("\n").encode('utf-8')
+#     target_str = fasta_from_string(target_fasta, prot_class_base, "{}.{}".format(target_parent_rcsb_id, target_auth_asym_id)).strip("\n").encode('utf-8')
 
 #     tmp_msaclass_extended = f'msa_ext_{prot_class_base + "_" if len(prot_class_base) == 3 else ""}_with_{target_parent_rcsb_id}.{target_auth_asym_id}_{abs(hash(random.randbytes(10)))}.fasta.tmp'
 #     with open(tmp_msaclass_extended, 'wb') as f:
