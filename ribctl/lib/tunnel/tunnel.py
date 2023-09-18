@@ -2,21 +2,12 @@ import math
 from pprint import pprint
 
 
-from ribctl.lib.msalib import *
 from ribctl.lib.msalib import (
-    msa_dict,
-    msaclass_extend_temp,
     util__backwards_match,
     util__forwards_match,
 )
 from ribctl.lib.types.types_ribosome import PolymericFactor, Protein, ProteinClass
 from ribctl.lib.types.types_binding_site import AMINO_ACIDS, NUCLEOTIDES, ResidueSummary
-from ribctl.etl.ribosome_assets import (
-    Assetlist,
-    RibosomeAssets,
-    obtain_assets,
-    obtain_assets_threadpool,
-)
 from ribctl.lib.mod_transpose_bsites import SeqMatch
 
 from Bio.PDB.Atom import Atom
@@ -27,7 +18,9 @@ from functools import reduce
 import numpy as np
 import os
 
-RIBETL_DATA = os.environ.get("RIBETL_DATA")
+from scripts.prd_to_biopython import msa_dict, msaclass_extend_temp
+
+
 
 # https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4574749/pdf/1719.pdf
 DORIS_ET_AL = {
@@ -129,10 +122,6 @@ def ptc_resdiues_get(rcsb_id: str, assembly_id: int = 0) -> tuple[list[Residue],
                     print(e)
                     ...
 
-
-
-            
-        
 
 
     auth_asym_id = rna.auth_asym_id

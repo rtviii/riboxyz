@@ -11,6 +11,7 @@ import pickle
 from ribctl import RP_MSAS_PATH, RP_MSAS_PRUNED_PATH
 from ribctl.lib.types.types_ribosome import RNA, PolymericFactor, Protein, ProteinClass
 
+MSA = str
 
 def fasta_from_chain(chain: RNA | Protein | PolymericFactor) -> str:
     fasta_description = "[{}.{}] {} |{}| {}".format(chain.parent_rcsb_id, chain.auth_asym_id, chain.src_organism_names[0], "",  chain.src_organism_ids[0])
@@ -43,8 +44,7 @@ def phylogenetic_neighborhood(taxids_base: list[str], taxid_target: str, n_neigh
     else:
         return nbr_taxids[1:n_neighbors+1]
 
-
-# RMPRD
+# * DONE
 def msa_yield_taxa_only(msa: MSA) -> list[str]:
     """collect all organism taxids present in a given prody.msa"""
 
@@ -53,7 +53,6 @@ def msa_yield_taxa_only(msa: MSA) -> list[str]:
 def msa_dict_get_meta_info(msa: dict[ProteinClass, MSA]) -> dict[ProteinClass, dict]:
     """given a dict of protclass<->msa mapping, yield number of sequeces and organisms contained in each class msa."""
     meta = {
-
     }
 
     for k, v in msa.items():
@@ -65,14 +64,14 @@ def msa_dict_get_meta_info(msa: dict[ProteinClass, MSA]) -> dict[ProteinClass, d
     return meta
 
 
-# RMPRD
+# TODO: RMPRD
 def msa_pick_taxa(msa: MSA, taxids: list[str]) -> MSA:
     """Given a MSA and a list of taxids, return a new MSA with only the sequences that match the taxids. 
        Assumes '|' as a delimiter between the taxid and the rest of the label."""
     seqlabel_tups = iter((s, s.getLabel()) for s in msa if s.getLabel().split('|')[-1] in taxids)
     seqs, labels = zip(*seqlabel_tups)
     return MSA(seqs, labels=labels)
-# RMPRD
+# TODO: RMPRD
 def msa_phylo_nbhd(msa: MSA, phylo_target_taxid: int, n_neighbors: int = 10) -> MSA:
     """
     - get all tax ids from a given msa
@@ -86,7 +85,7 @@ def msa_phylo_nbhd(msa: MSA, phylo_target_taxid: int, n_neighbors: int = 10) -> 
     return msa_pick_taxa(msa, phylo_nbhd)
 
 
-# RMPRD
+# TODO: RMPRD
 def msa_dict(
     phylogenetic_correction_taxid: int                = -1,
     include_only_classes         : list[ProteinClass] = []
@@ -152,7 +151,7 @@ def fasta_from_string(seq: str, _id: str, description=""):
 
 
 
-# RMPRD
+# TODO: RMPRD
 def fasta_from_msa(msa: MSA) -> str:
     fasta = ''
     for seq in msa:
@@ -160,7 +159,7 @@ def fasta_from_msa(msa: MSA) -> str:
     return fasta
 
 
-# RMPRD
+# TODO: RMPRD
 def msaclass_extend_temp(prot_class_base: ProteinClass, prot_class_msa: MSA, target_fasta: str, target_auth_asym_id: str, target_parent_rcsb_id: str) -> MSA:
     """Given a MSA of a protein class, and a fasta string of a chain, return a new MSA with the chain added to the class MSA."""
 

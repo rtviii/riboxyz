@@ -20,3 +20,10 @@ So far we had hmm's built from Ribovision's per-class MSAs. Ideally, the HMMs ar
     
 
 
+------------------
+
+## Prelim. progress:
+
+classifying a structure via hmms:
+- given the organism in Q, grab the taxid
+- for 
