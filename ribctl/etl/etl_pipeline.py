@@ -88,7 +88,6 @@ def current_rcsb_structs() -> list[str]:
     query = rcsb_search_api + "?json=" + json.dumps(params)
     return requests.get(query).json()["result_set"]
 
-
 def query_rcsb_api(gql_string: str) -> dict:
     """This defines a query in the RCSB search language that identifies the structures we view as 'current' i.e. 40+ proteins, smaller than 4A resolution etc."""
 
@@ -101,10 +100,8 @@ def query_rcsb_api(gql_string: str) -> dict:
     else:
         raise Exception("No data found for query: {}".format(gql_string))
 
-
 def rcsb_single_structure_graphql(rcsb_id):
     return single_structure_graphql_template.replace("$RCSB_ID", rcsb_id.upper())
-
 
 class ReannotationPipeline:
     """
