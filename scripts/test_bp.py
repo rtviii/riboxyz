@@ -9,10 +9,13 @@ from Bio.Align.Applications import MuscleCommandline
 from Bio import SeqIO, AlignIO, pairwise2
 import re
 from ete3 import NCBITaxa
-from ribctl import ASSETS
+import pyhmmer
+from ribctl import ASSETS, MUSCLE_BIN
 from ribctl.lib.types.types_poly_nonpoly_ligand import list_ProteinClass
 from ribctl.lib.types.types_ribosome import ProteinClass
 from ribctl.ribosome_assets import RibosomeAssets
+from pyhmmer.easel import Alphabet, DigitalSequenceBlock, TextSequence, SequenceFile, SequenceBlock, TextSequenceBlock
+from pyhmmer.plan7 import Pipeline, HMM
 
 
 class Fasta:
@@ -116,13 +119,12 @@ def fasta_get_taxids(infile:str)->list[int]:
 
 
 # TODO: RMPRD
-def muscle_align_N_seq(prot_class_base: ProteinClass, seq_records: Iterator[SeqRecord]) -> Iterator[ SeqRecord ]:
+def muscle_align_N_seq(seq_records: Iterator[SeqRecord]) -> Iterator[ SeqRecord ]:
     """Given a MSA of a protein class, and a fasta string of a chain, return a new MSA with the chain added to the class MSA."""
     import tempfile
     with tempfile.NamedTemporaryFile(delete=False, mode='w') as temp_file:
         temp_filename = temp_file.name
         SeqIO.write([*seq_records], temp_filename, "fasta")
-        MUSCLE_BIN = '/home/rtviii/dev/riboxyz/muscle3.8.1',
         muscle_cmd = [
             MUSCLE_BIN,
             '-in',
@@ -133,12 +135,16 @@ def muscle_align_N_seq(prot_class_base: ProteinClass, seq_records: Iterator[SeqR
             if  process.returncode == 0:
                 muscle_out = process.stdout
                 muscle_output_handle = StringIO(muscle_out)
-                seq_record = SeqIO.read(muscle_output_handle, "fasta")
-                return seq_record
+                seq_records = SeqIO.parse(muscle_output_handle, "fasta")
+                temp_file.close()
+                os.remove(temp_filename)
+                return seq_records
             else:
                 print("{} failed with code {}".format(" ".join(muscle_cmd)), process.returncode)
                 raise Exception("`{}` did not succeed.".format(" ".join(muscle_cmd)))
         except:
+            temp_file.close()
+            os.remove(temp_filename)
             raise Exception("Error running muscle.")
 
 
@@ -150,14 +156,23 @@ organism = rib.src_organism_ids[0]
 prots    = RibosomeAssets('3J7Z').profile().proteins
 i = 0
 for protclass in list_ProteinClass:
-    fasta_path = os.path.join(ASSETS["fasta_ribosomal_proteins"], f"{protclass}.fasta")
-    records    = Fasta(fasta_path)
-    ids        = records.all_taxids()
-    phylo_nbhd = phylogenetic_neighborhood(list(map(lambda x: str(x),ids)), str(organism), n_neighbors=10)
-    seqs       = records.pick_taxids(phylo_nbhd)
+    fasta_path   = os.path.join(ASSETS["fasta_ribosomal_proteins"], f"{protclass}.fasta")
+    records      = Fasta(fasta_path)
+    ids          = records.all_taxids()
+    phylo_nbhd   = phylogenetic_neighborhood(list(map(lambda x: str(x),ids)), str(organism), n_neighbors=10)
+    seqs         = records.pick_taxids(phylo_nbhd)
+    seqs_aligned = muscle_align_N_seq( iter(seqs))
 
-    print("got seqs ", seqs)
-    list(muscle_align_N_seq("bL9", iter(seqs)))
+    seq_tuples =  [TextSequence(name=bytes(seq.id, 'utf-8'), sequence=str(seq.seq)) for seq in seqs_aligned]
+
+
+    alphabet      = pyhmmer.easel.Alphabet.amino()
+    builder       = pyhmmer.plan7.Builder(alphabet)
+    background    = pyhmmer.plan7.Background(alphabet)
+    anonymous_msa = pyhmmer.easel.TextMSA(b"msa_Template",sequences=seq_tuples)
+
+    hmm, _, _ = builder.build_msa(anonymous_msa.digitize(alphabet), background)
+
 
     i+=1
     if i > 1:
