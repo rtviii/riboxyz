@@ -103,7 +103,9 @@ def pick_best_candidate(matches_dict:dict[PolymerClass_, list[float]])->PolymerC
         else:
             results.append((candidate_class, matches))
     if len(results) == 0 :
-        raise Exception("Did not detect any matches. Something went wrong.")
+        
+        # raise Exception("Did not detect any matches. Something went wrong.")
+        return []
 
     if len(results) > 1 :
         # if more than 1 match, pick the smallest and ring alarms if the next smallest is within an order of magnitude.
