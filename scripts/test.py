@@ -22,16 +22,34 @@ from pyhmmer.plan7 import Pipeline, HMM
 hmm_cachedir = ASSETS['__hmm_cache']
 
 
+import sys
+print ("Number of arguments:", len(sys.argv), "arguments")
+print ("Argument List:", str(sys.argv))
 
-for struct in RibosomeAssets.list_all_structs()[:10]:
-    print("Looking at ", struct)
-    rib            = RibosomeAssets(struct).profile()
+
+def process_struct(rcsb_id:str):
+    print("Looking at ", rcsb_id)
+    rib            = RibosomeAssets(rcsb_id).profile()
     organism_taxid = rib.src_organism_ids[0]
     prots          = rib.proteins
-    for rp in prots[45:]:
+
+    for rp in prots:
+
+        print("processing protein {} nomenclature {} | {}".format( rp.auth_asym_id,rp.nomenclature, rp.rcsb_pdbx_description,))
         seq = rp.entity_poly_seq_one_letter_code_can
         x   = classify_sequence(seq, organism_taxid, ProteinClassEnum)
-        print(rp.nomenclature," VS", x)
+
+        if x not in rp.nomenclature and len(rp.nomenclature) != 0:
+            print(">>>> Discovered incongruent nomenclature for protein {} nomenclature {} classification {}".format(rp.rcsb_pdbx_description, rp.nomenclature, x))
+        if len(rp.nomenclature) == 0:
+            print("{}".format(x))
+
+if sys.argv[1] =="s":
+    process_struct(sys.argv[2].upper())
+else:
+    for rcsb_id in RibosomeAssets.list_all_structs()[:10]:
+        process_struct(rcsb_id)
+
 
 # for candidate_class in list_ProteinClass:
 #     fasta_path   = os.path.join(ASSETS["fasta_ribosomal_proteins"], f"{candidate_class}.fasta")

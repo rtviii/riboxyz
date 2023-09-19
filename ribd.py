@@ -1,8 +1,8 @@
 import argparse
-from ribd_cli.etl import cmd_etl
-from ribd_cli.ls import cmd_ls
-from ribd_cli.sync import cmd_sync
 
+from ribctl.cli.etl import cmd_etl
+from ribctl.cli.ls import cmd_ls
+from ribctl.cli.sync import cmd_sync
 def parse_comma_separated_list(value):
     return value.split(',')
 
