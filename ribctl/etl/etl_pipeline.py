@@ -9,7 +9,7 @@ from ribctl.etl.etl_polypeptides import (
     protein_classify,
     rna_classify,
 )
-from ribctl.lib.classification import rp_hmm_dict_init, seq_prot_against_protclasses
+from ribctl.lib.classification import rp_hmm_dict_init, seq_evaluate_v_hmm_dict
 from ribctl.lib.ribosome_types.types_ribosome import (
     RNA,
     AssemblyInstancesMap,
@@ -457,7 +457,7 @@ class ReannotationPipeline:
         src_organism_names  = list(map(str, set(src_organism_names)))
 
         # ? Compare prot sequence against all HMMs (returns a dict), pick the class with the lowest e-value
-        hmm_resulsts = seq_prot_against_protclasses(
+        hmm_resulsts = seq_evaluate_v_hmm_dict(
             rpotein_polymer_obj["entity_poly"]["pdbx_seq_one_letter_code_can"],
             self.hmm_ribosomal_proteins,
         )
