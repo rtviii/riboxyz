@@ -2,6 +2,7 @@ from enum import Enum
 from io import StringIO
 from itertools import tee
 import os
+from pprint import pprint
 import subprocess
 from tempfile import NamedTemporaryFile
 from typing import Generic, Iterator, Literal, LiteralString, TypeVar
@@ -56,7 +57,6 @@ hmm_cachedir = ASSETS['__hmm_cache']
         # generate the given hmm
 
 
-#!------------------ Former
 def rp_hmm_dict_init(organim_taxid:int) ->dict[ProteinClass, HMM]: 
     "Retrieve dictionary of HMMs for each protein class (to compare an incoming seq against each hmm)"
     prot_hmms_dict = {}
@@ -67,22 +67,20 @@ def rp_hmm_dict_init(organim_taxid:int) ->dict[ProteinClass, HMM]:
             prot_hmms_dict[hmm_class] = hmm
     return prot_hmms_dict
 
-def seq_prot_hmm_evalue(seq:str, hmm:HMM):
+#!------------------ Former
+def seq_evaluate_v_hmm(seq:str,alphabet:Alphabet, hmm:HMM):
     """Fit a sequence to a given HMM"""
-    AMINO = Alphabet.amino()
     seq_  = pyhmmer.easel.TextSequence(name=b"template", sequence=seq)
-    dsb   = DigitalSequenceBlock(AMINO, [seq_.digitize(AMINO)])
-    return pyhmmer.plan7.Pipeline(alphabet=AMINO).search_hmm(hmm,dsb)
+    dsb   = DigitalSequenceBlock(alphabet, [seq_.digitize(alphabet)])
+    return pyhmmer.plan7.Pipeline(alphabet=alphabet).search_hmm(hmm,dsb)
 
-def seq_prot_against_protclasses(seq:str, hmm_dict:dict)->dict[ProteinClass, list[float]]:
+def seq_evaluate_v_hmm_dict(seq:str,alphabet:Alphabet, hmm_dict:dict)->dict[PolymerClass_, list[float]]:
     """Fit a sequence against all protein classes simultaneously"""
     _ = {}
-    for (prot_class, hmm) in hmm_dict.items():
-        result = seq_prot_hmm_evalue(seq, hmm)
-        _.update({prot_class: [] if len(result) == 0 else list(map(lambda x: x.evalue, result))})
+    for (candidate_class, hmm) in hmm_dict.items():
+        result = seq_evaluate_v_hmm(seq,alphabet, hmm)
+        _.update({candidate_class: [] if len(result) == 0 else list(map(lambda x: x.evalue, result))})
     return _
-
-
 
 def hmm_dict_init__candidates_per_organism(candidate_category:PolymerClass_,organism_taxid:int)->dict[PolymerClass_, HMM]:
     _ ={}
@@ -97,15 +95,21 @@ def hmm_dict_init__candidates_per_organism(candidate_category:PolymerClass_,orga
     
     return _
 
-#!------------------
-
 def classify_sequence(seq:str, organism:int, candidate_category:typing.Union[RNAClassEnum, ProteinClassEnum]):
+
     if candidate_category == ProteinClassEnum:
+
         candidates_dict = hmm_dict_init__candidates_per_organism(candidate_category, organism)
+        # print("got dict", candidates_dict)
+        pprint(candidates_dict)
+        return seq_evaluate_v_hmm_dict(seq, pyhmmer.easel.Alphabet.amino(), candidates_dict)
 
     if candidate_category == RNAClassEnum:
-        print("classifying an rrna")
+        #TODO
 
+        raise Exception("Not implemented yet")
+        candidates_dict = hmm_dict_init__candidates_per_organism(candidate_category, organism)
+        seq_evaluate_v_hmm_dict(seq, pyhmmer.easel.Alphabet.rna(), candidates_dict)
 
 def hmm_create(name:str, seqs:Iterator[SeqRecord], alphabet:Alphabet)->HMM:
     """Create an HMM from a list of sequences"""
@@ -145,7 +149,8 @@ def hmm_cache(hmm:HMM):
 
 def hmm_produce(candidate_class: ProteinClassEnum | RNAClassEnum, organism_taxid:int)->HMM:  # type: ignore
     """Produce an organism-specific HMM. Retrieve from cache if exists, otherwise generate and cache."""
-    hmm_path = "class_{}_taxid_{}.hmm".format(candidate_class, organism_taxid)
+    hmm_path = "class_{}_taxid_{}.hmm".format(candidate_class.value, organism_taxid)
+
     if os.path.isfile(os.path.join(hmm_cachedir, hmm_path)):
         hmm_path = os.path.join(hmm_cachedir, hmm_path)
         with pyhmmer.plan7.HMMFile(hmm_path) as hmm_file:
@@ -184,5 +189,3 @@ def hmm_produce(candidate_class: ProteinClassEnum | RNAClassEnum, organism_taxid
             raise Exception("Not implemented yet")
             ...
 
-
-classify_sequence("DASDA", 123, ProteinClassEnum)
