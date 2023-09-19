@@ -84,15 +84,25 @@ def seq_prot_against_protclasses(seq:str, hmm_dict:dict)->dict[ProteinClass, lis
 
 
 
-def hmm_candidates_dict_init(candidate_category:PolymerClass_,organim_taxid:int)->dict[PolymerClass_, HMM]:
+def hmm_dict_init__candidates_per_organism(candidate_category:PolymerClass_,organism_taxid:int)->dict[PolymerClass_, HMM]:
+    _ ={}
+    if candidate_category == ProteinClassEnum:
+        for pc in ProteinClassEnum:
+            _.update({ pc.value: hmm_produce(pc, organism_taxid) })
+
+    elif candidate_category == RNAClassEnum:
+        raise Exception("Not implemented yet")
+        for rc in RNAClassEnum:
+            _.update({ rc.value: hmm_produce(rc, organism_taxid) })
     
-    return {ProteinClassEnum.bL12 : hmm_produce(candidate_category, organim_taxid)}
+    return _
 
 #!------------------
 
 def classify_sequence(seq:str, organism:int, candidate_category:typing.Union[RNAClassEnum, ProteinClassEnum]):
     if candidate_category == ProteinClassEnum:
-        print("classifying an rprotein")
+        candidates_dict = hmm_dict_init__candidates_per_organism(candidate_category, organism)
+
     if candidate_category == RNAClassEnum:
         print("classifying an rrna")
 
