@@ -42,7 +42,6 @@ for candidate_class in list_ProteinClass:
     builder       = pyhmmer.plan7.Builder(alphabet)
     background    = pyhmmer.plan7.Background(alphabet) #? The null(background) model can be later augmented.
     anonymous_msa = pyhmmer.easel.TextMSA(bytes(cached_name, 'utf-8'),sequences=seq_tuples)
-
     hmm, _profile, _optmized_profile = builder.build_msa(anonymous_msa.digitize(alphabet), background)
     
     if not os.path.isfile(os.path.join(hmm_cachedir, cached_name)):
