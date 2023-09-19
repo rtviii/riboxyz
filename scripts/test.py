@@ -21,18 +21,19 @@ from pyhmmer.easel import Alphabet, DigitalSequenceBlock, TextSequence, Sequence
 from pyhmmer.plan7 import Pipeline, HMM 
 hmm_cachedir = ASSETS['__hmm_cache']
 
-rib            = RibosomeAssets('3J7Z').profile()
-organism_taxid = rib.src_organism_ids[0]
-prots          = RibosomeAssets('3J7Z').profile().proteins
-rp             = prots[14]
 
-print(rp)
-print(rp.nomenclature)
-seq = rp.entity_poly_seq_one_letter_code_can
-x   = classify_sequence(seq, organism_taxid, ProteinClassEnum)
-pprint(x)
+
+for struct in RibosomeAssets.list_all_structs()[:10]:
+    print("Looking at ", struct)
+    rib            = RibosomeAssets(struct).profile()
+    organism_taxid = rib.src_organism_ids[0]
+    prots          = rib.proteins
+    for rp in prots:
+        seq = rp.entity_poly_seq_one_letter_code_can
+        x   = classify_sequence(seq, organism_taxid, ProteinClassEnum)
+        print(rp.nomenclature," VS", x)
+
 # for candidate_class in list_ProteinClass:
-
 #     fasta_path   = os.path.join(ASSETS["fasta_ribosomal_proteins"], f"{candidate_class}.fasta")
 #     records      = Fasta(fasta_path)
 #     ids          = records.all_taxids()

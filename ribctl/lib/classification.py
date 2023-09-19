@@ -95,15 +95,29 @@ def hmm_dict_init__candidates_per_organism(candidate_category:PolymerClass_,orga
     
     return _
 
-def classify_sequence(seq:str, organism:int, candidate_category:typing.Union[RNAClassEnum, ProteinClassEnum]):
+
+def pick_best_candidate(matches_dict:dict[PolymerClass_, list[float]])->PolymerClass_:
+    """Given a dictionary of matches, pick the best candidate class"""
+    results = []
+    for (candidate_class, matches) in matches_dict.items():
+        if len(matches) == 0:
+            continue
+        else:
+            results.append((candidate_class, matches))
+    if len(results) != 1:
+        raise Exception("More than one candidate class: {}".format(results))
+    else:
+        return results[0][0]
+
+
+
+def classify_sequence(seq:str, organism:int, candidate_category:typing.Union[RNAClassEnum, ProteinClassEnum])->PolymerClass_:
 
     if candidate_category == ProteinClassEnum:
 
         candidates_dict = hmm_dict_init__candidates_per_organism(candidate_category, organism)
-        # print("got dict", candidates_dict)
-        pprint(candidates_dict)
-        return seq_evaluate_v_hmm_dict(seq, pyhmmer.easel.Alphabet.amino(), candidates_dict)
-
+        results = seq_evaluate_v_hmm_dict(seq, pyhmmer.easel.Alphabet.amino(), candidates_dict)
+        return pick_best_candidate(results)
     if candidate_category == RNAClassEnum:
         #TODO
 
@@ -123,9 +137,9 @@ def hmm_create(name:str, seqs:Iterator[SeqRecord], alphabet:Alphabet)->HMM:
 def fasta_phylogenetic_correction(candidate_class:ProteinClassEnum|RNAClassEnum, organism_taxid:int, n_neighbors=10)->Iterator[SeqRecord]:
     """Given a candidate class and an organism taxid, retrieve the corresponding fasta file, and perform phylogenetic correction on it."""
     if candidate_class in ProteinClassEnum:
-        fasta_path = os.path.join(ASSETS["fasta_ribosomal_proteins"], f"{candidate_class}.fasta")
+        fasta_path = os.path.join(ASSETS["fasta_ribosomal_proteins"], f"{candidate_class.value}.fasta")
     elif candidate_class in RNAClassEnum:
-        fasta_path = os.path.join(ASSETS["fasta_ribosomal_rna"], f"{candidate_class}.fasta")
+        fasta_path = os.path.join(ASSETS["fasta_ribosomal_rna"], f"{candidate_class.value}.fasta")
     else:
         raise Exception("Invalid candidate class")
 
