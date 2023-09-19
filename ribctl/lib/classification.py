@@ -48,8 +48,6 @@ hmm_cachedir = ASSETS['__hmm_cache']
 
     # seq_tuples =  [TextSequence(name=bytes(seq.id, 'utf-8'), sequence=str(seq.seq)) for seq in seqs_aligned1]
 
-
-
 # def load_hmm_from_cache(path:str)->HMM:
 #     if os.path.isfile(path):
 #         with pyhmmer.plan7.HMMFile(path) as hmm_file:
