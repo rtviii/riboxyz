@@ -1,6 +1,7 @@
 from enum import Enum
 from io import StringIO
 from itertools import tee
+import math
 import os
 from pprint import pprint
 import subprocess
@@ -104,10 +105,16 @@ def pick_best_candidate(matches_dict:dict[PolymerClass_, list[float]])->PolymerC
             continue
         else:
             results.append((candidate_class, matches))
-    if len(results) != 1:
-        raise Exception("More than one candidate class: {}".format(results))
-    else:
-        return results[0][0]
+    if len(results) == 0 :
+        raise Exception("Did not detect any matches. Something went wrong.")
+    if len(results) > 1 :
+        # if more than 1 match, pick the smallest and ring alarms if the next smallest is within an order of magnitude.
+        results = sorted(results, key=lambda match_kv: match_kv[1])
+        if abs(math.log10(results[0][1]/results[1][0])) < 2:
+            raise Exception("Multiple sensible matches detected. Something went wrong. \n {}".format(results))
+          
+
+    return results[0][0]
 
 
 
