@@ -8,9 +8,8 @@ from ribctl.etl.etl_polypeptides import (
     factor_classify,
     protein_classify,
     rna_classify,
-    rp_hmm_dict_init,
-    seq_prot_against_protclasses,
 )
+from ribctl.lib.classification import rp_hmm_dict_init, seq_prot_against_protclasses
 from ribctl.lib.ribosome_types.types_ribosome import (
     RNA,
     AssemblyInstancesMap,
