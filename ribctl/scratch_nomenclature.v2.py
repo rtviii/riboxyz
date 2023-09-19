@@ -6,8 +6,8 @@ from concurrent.futures import ALL_COMPLETED, ProcessPoolExecutor, ThreadPoolExe
 import os
 from prody import MSA, calcShannonEntropy
 from api.rbxz_bend.settings import RIBETL_DATA
-from ribctl.ribosome_assets import RibosomeAssets
-from ribctl.lib.types.types_ribosome import Protein, ProteinClass, RibosomeStructure
+from ribctl.etl.ribosome_assets import RibosomeAssets
+from ribctl.lib.ribosome_types.types_ribosome import Protein, ProteinClass, RibosomeStructure
 from ribctl.lib.msalib import msa_dict_get_meta_info, msa_dict, msaclass_extend_temp
 
 CRED      = '\033[91m'
@@ -19,8 +19,7 @@ def seq_H_fit_class(base_class: ProteinClass, base_class_msa: MSA, target_fasta:
                      omitgaps: bool = True, vvv: bool = False) -> dict[ProteinClass, float]:
     """Calculate entropy difference for a given protein class MSA without and with a new sequence. Used as a measure of fit."""
 
-    extended_class = msaclass_extend_temp(
-        base_class, base_class_msa, target_fasta, target_auth_asym_id, parent_rcsb_id)
+    extended_class = msaclass_extend_temp(base_class, base_class_msa, target_fasta, target_auth_asym_id, parent_rcsb_id)
 
     if vvv:
         for seq in base_class_msa:
@@ -39,6 +38,7 @@ def seq_H_fit_class(base_class: ProteinClass, base_class_msa: MSA, target_fasta:
     return {base_class: H_delta}
 
 async def seq_H_fit_class_multi(chain: Protein, msa_profiles_dict: dict[ProteinClass, MSA], workers=None, omitgaps: bool = False, vvv: bool = False) -> tuple[ProteinClass, Protein]:
+
     with ThreadPoolExecutor(max_workers=min(multiprocessing.cpu_count(), len(msa_profiles_dict)) if workers is None else workers) as executor:
         futures = []
         for class_name, base_msa in msa_profiles_dict.items():
