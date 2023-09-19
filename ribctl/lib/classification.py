@@ -14,7 +14,7 @@ import pyhmmer
 from ribctl import ASSETS, MUSCLE_BIN
 from ribctl.lib.msalib import Fasta, muscle_align_N_seq, phylogenetic_neighborhood
 from ribctl.lib.ribosome_types.types_poly_nonpoly_ligand import RNAClass, list_ProteinClass
-from ribctl.lib.ribosome_types.types_ribosome import RNA, PolymerClass, Protein, ProteinClass, ProteinClassEnum, RNAClassEnum
+from ribctl.lib.ribosome_types.types_ribosome import RNA, PolymerClass, PolymerClass_, Protein, ProteinClass, ProteinClassEnum, RNAClassEnum
 # from ribctl.etl.ribosome_assets import RibosomeAssets
 from pyhmmer.easel import Alphabet, DigitalSequenceBlock, TextSequence, SequenceFile, SequenceBlock, TextSequenceBlock
 from pyhmmer.plan7 import Pipeline, HMM 
@@ -56,6 +56,7 @@ hmm_cachedir = ASSETS['__hmm_cache']
         # generate the given hmm
 
 
+#!------------------ Former
 def rp_hmm_dict_init(organim_taxid:int) ->dict[ProteinClass, HMM]: 
     "Retrieve dictionary of HMMs for each protein class (to compare an incoming seq against each hmm)"
     prot_hmms_dict = {}
@@ -83,17 +84,18 @@ def seq_prot_against_protclasses(seq:str, hmm_dict:dict)->dict[ProteinClass, lis
 
 
 
+def hmm_candidates_dict_init(candidate_category:PolymerClass_,organim_taxid:int)->dict[PolymerClass_, HMM]:
+    
+    return {ProteinClassEnum.bL12 : hmm_produce(candidate_category, organim_taxid)}
 
-# rib            = RibosomeAssets('3J7Z').profile()
-# organism_taxid = rib.src_organism_ids[0]
-# prots          = RibosomeAssets('3J7Z').profile().proteins
+#!------------------
 
+def classify_sequence(seq:str, organism:int, candidate_category:typing.Union[RNAClassEnum, ProteinClassEnum]):
+    if candidate_category == ProteinClassEnum:
+        print("classifying an rprotein")
+    if candidate_category == RNAClassEnum:
+        print("classifying an rrna")
 
-# print(prots[14])
-
-def classify_sequence(seq:str, organism:int, candidate_category: ProteinClassEnum | RNAClassEnum  ):
-    if candidate_category == "ribosomal_protein":
-        ...
 
 def hmm_create(name:str, seqs:Iterator[SeqRecord], alphabet:Alphabet)->HMM:
     """Create an HMM from a list of sequences"""
@@ -131,7 +133,7 @@ def hmm_cache(hmm:HMM):
         ...
         # print(filename + " exists.")
 
-def hmm_produce(candidate_class: ProteinClassEnum | RNAClassEnum, organism_taxid:int)->HMM:
+def hmm_produce(candidate_class: ProteinClassEnum | RNAClassEnum, organism_taxid:int)->HMM:  # type: ignore
     """Produce an organism-specific HMM. Retrieve from cache if exists, otherwise generate and cache."""
     hmm_path = "class_{}_taxid_{}.hmm".format(candidate_class, organism_taxid)
     if os.path.isfile(os.path.join(hmm_cachedir, hmm_path)):
@@ -168,10 +170,9 @@ def hmm_produce(candidate_class: ProteinClassEnum | RNAClassEnum, organism_taxid
             #TODO: Cache it
             return HMM
 
-
-
         if candidate_class in RNAClassEnum:
+            raise Exception("Not implemented yet")
             ...
 
 
-# classify_sequence("CASFFASF", organism_taxid, "ribosomal_protein")
+classify_sequence("DASDA", 123, ProteinClassEnum)
