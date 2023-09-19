@@ -110,7 +110,7 @@ def pick_best_candidate(matches_dict:dict[PolymerClass_, list[float]])->PolymerC
     if len(results) > 1 :
         # if more than 1 match, pick the smallest and ring alarms if the next smallest is within an order of magnitude.
         results = sorted(results, key=lambda match_kv: match_kv[1])
-        if abs(math.log10(results[0][1]/results[1][0])) < 2:
+        if abs(math.log10(results[0][1][0]/results[1][1][0])) < 2:
             raise Exception("Multiple sensible matches detected. Something went wrong. \n {}".format(results))
           
 
@@ -197,7 +197,7 @@ def hmm_produce(candidate_class: ProteinClassEnum | RNAClassEnum, organism_taxid
             seqs = fasta_phylogenetic_correction(candidate_class, organism_taxid, n_neighbors=10)
             seqs_a = muscle_align_N_seq(iter(seqs))
 
-            cached_name = "class_{}_taxid_{}.hmm".format(candidate_class, organism_taxid)
+            cached_name = "class_{}_taxid_{}.hmm".format(candidate_class.value, organism_taxid)
             alphabet    = pyhmmer.easel.Alphabet.amino()
             HMM         = hmm_create(cached_name, seqs_a, alphabet)
 

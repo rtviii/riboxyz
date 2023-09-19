@@ -28,7 +28,7 @@ for struct in RibosomeAssets.list_all_structs()[:10]:
     rib            = RibosomeAssets(struct).profile()
     organism_taxid = rib.src_organism_ids[0]
     prots          = rib.proteins
-    for rp in prots:
+    for rp in prots[45:]:
         seq = rp.entity_poly_seq_one_letter_code_can
         x   = classify_sequence(seq, organism_taxid, ProteinClassEnum)
         print(rp.nomenclature," VS", x)
