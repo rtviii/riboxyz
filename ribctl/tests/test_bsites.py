@@ -1,8 +1,8 @@
 import os
 from pprint import pprint
-from ribctl.lib.types.types_binding_site import BindingSite, LigandPrediction
+from ribctl.lib.ribosome_types.types_binding_site import BindingSite, LigandPrediction
 from ribctl.lib.mod_transpose_bsites import init_transpose_ligand, open_bsite
-from ribctl.lib.types.types_ribosome import RibosomeStructure
+from ribctl.lib.ribosome_types.types_ribosome import RibosomeStructure
 from ribctl.lib import utils
 from ribctl.lib.mod_extract_bsites import bsite_nonpolymeric_ligand, bsite_polymeric_factor, bsite_polymeric_factor, struct_ligand_ids, struct_polymeric_factor_ids
 from ribctl.lib.mod_superimpose import pymol_super, ranged_align_by_polyclass

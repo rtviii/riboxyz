@@ -13,17 +13,19 @@ import re
 import pyhmmer
 from ribctl import ASSETS, MUSCLE_BIN
 from ribctl.lib.msalib import Fasta, muscle_align_N_seq, phylogenetic_neighborhood
-from ribctl.lib.types.types_poly_nonpoly_ligand import list_ProteinClass
-from ribctl.lib.types.types_ribosome import ProteinClass
+from ribctl.lib.ribosome_types.types_poly_nonpoly_ligand import list_ProteinClass
+from ribctl.lib.ribosome_types.types_ribosome import ProteinClass
 from ribctl.etl.ribosome_assets import RibosomeAssets
 from pyhmmer.easel import Alphabet, DigitalSequenceBlock, TextSequence, SequenceFile, SequenceBlock, TextSequenceBlock
-from pyhmmer.plan7 import Pipeline, HMM
+from pyhmmer.plan7 import Pipeline, HMM 
 hmm_cachedir = ASSETS['__hmm_cache']
 
 rib            = RibosomeAssets('3J7Z').profile()
 organism_taxid = rib.src_organism_ids[0]
 prots          = RibosomeAssets('3J7Z').profile().proteins
+
 for candidate_class in list_ProteinClass:
+
     fasta_path   = os.path.join(ASSETS["fasta_ribosomal_proteins"], f"{candidate_class}.fasta")
     records      = Fasta(fasta_path)
     ids          = records.all_taxids()
@@ -35,8 +37,8 @@ for candidate_class in list_ProteinClass:
     seq_tuples =  [TextSequence(name=bytes(seq.id, 'utf-8'), sequence=str(seq.seq)) for seq in seqs_aligned1]
 
     cached_name = "class_{}_taxid_{}.hmm".format(candidate_class, organism_taxid)
-    alphabet      = pyhmmer.easel.Alphabet.amino() #* <---- AA?
-    # alphabet      = pyhmmer.easel.Alphabet.rna() #* <---- NC?
+    alphabet      = pyhmmer.easel.Alphabet.amino() 
+    # alphabet      = pyhmmer.easel.Alphabet.rna() 
     builder       = pyhmmer.plan7.Builder(alphabet)
     background    = pyhmmer.plan7.Background(alphabet) #? The null(background) model can be later augmented.
     anonymous_msa = pyhmmer.easel.TextMSA(bytes(cached_name, 'utf-8'),sequences=seq_tuples)

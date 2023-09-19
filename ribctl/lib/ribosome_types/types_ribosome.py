@@ -2,7 +2,7 @@ from typing import Any, Optional
 import typing
 from typing import NewType
 from pydantic import BaseModel
-from ribctl.lib.types.types_poly_nonpoly_ligand import LSUProteinClass, NonpolymericLigandClass, PolymericFactorClass, RNAClass, SSUProteinClass
+from ribctl.lib.ribosome_types.types_poly_nonpoly_ligand import LSUProteinClass, NonpolymericLigandClass, PolymericFactorClass, RNAClass, SSUProteinClass
 
 RCSB_ID = NewType('RCSB_ID', str)
 
@@ -54,7 +54,6 @@ class Protein(Polymer):
 class RNA(Polymer):
     def __hash__(self):
         return hash(self.auth_asym_id + self.parent_rcsb_id)
-
     pass
 
 class NonpolymericLigand(BaseModel)  : 

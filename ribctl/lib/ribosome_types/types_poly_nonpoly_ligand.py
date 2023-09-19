@@ -1,19 +1,6 @@
 # After https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4358319/
 from typing import Literal
 
-list_PolymericFactorClass = [
-    "Initiation Factor",
-    "Translation Factor",
-    "Biogenesis Factor",
-    "Release Factor",
-    "Elongation Factor",
-    "Termination Factor",
-    "Nascent Chain",
-    "Ribozyme",
-    "Riboswitch",
-    "RNP","mRNA","tRNA",
-    "snoRNA", "lncRNA", "Other"
-]
 
 #TODO: This is a goddamn mess. tRNAs should be partioned into their own categories, likewise with factors.
     # Ribosome Assembly Factors
@@ -100,8 +87,6 @@ NonpolymericLigandClass = Literal[
     "Analog",
     "Other"
 ]
-list_NonpolymericLigandClass = [
-    "Antibiotic", "Ion", "Cofactor", "Analog", "Other"]
 
 
 RNAClass = Literal[
@@ -130,6 +115,22 @@ LSUProteinClass = Literal["uL1", "uL2", "uL3", "uL4", "uL5", "uL6", "eL6", "eL8"
                           "bL33", "eL33", "bL34", "eL34", "bL35", "bL36", "eL36", "eL37", "eL38",
                           "eL39", "eL40", "eL41", "eL42", "eL43", "P1P2"]
 
+ProteinClass = Literal[LSUProteinClass | SSUProteinClass]
+
+
+list_PolymericFactorClass = [
+    "Initiation Factor",
+    "Translation Factor",
+    "Biogenesis Factor",
+    "Release Factor",
+    "Elongation Factor",
+    "Termination Factor",
+    "Nascent Chain",
+    "Ribozyme",
+    "Riboswitch",
+    "RNP","mRNA","tRNA",
+    "snoRNA", "lncRNA", "Other"
+]
 # ----------------------------------------------------------------------------------------------
 # These list_ constructs are just a hack for purposes of iteration (given that typing.Literal behaves poorly in some useful contexts)
 list_LSUProteinClass = ["uL1", "uL2", "uL3", "uL4", "uL5", "uL6", "eL6", "eL8", "bL9", "uL10", "uL11", "bL12", "uL13", "eL13", "uL14", "eL14", "uL15", "eL15", "uL16", "bL17", "uL18", "eL18", "bL19", "eL19", "bL20", "eL20", "bL21", "eL21", "uL22", "eL22",
@@ -139,3 +140,5 @@ list_SSUProteinClass = ["bS1", "eS1", "uS2", "uS3", "uS4", "eS4", "uS5", "bS6", 
 list_ProteinClass = [*list_LSUProteinClass, *list_SSUProteinClass]
 list_RNAClass = ["5SrRNA", "5.8SrRNA", "12SrRNA", "16SrRNA", "21SrRNA",
                  "23SrRNA", "25SrRNA", "28SrRNA", "35SrRNA", "mRNA", "tRNA"]
+list_NonpolymericLigandClass = [
+    "Antibiotic", "Ion", "Cofactor", "Analog", "Other"]

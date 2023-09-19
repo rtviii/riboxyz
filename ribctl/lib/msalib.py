@@ -11,9 +11,9 @@ from typing import Iterator
 from Bio.Align import  SeqRecord
 import os
 from ribctl import MUSCLE_BIN
-from ribctl.lib.types.types_ribosome import RNA, PolymericFactor, Protein, ProteinClass
-from ribctl.lib.types.types_poly_nonpoly_ligand import list_LSUProteinClass, list_SSUProteinClass
-from ribctl.lib.types.types_ribosome import ProteinClass
+from ribctl.lib.ribosome_types.types_ribosome import RNA, PolymericFactor, Protein, ProteinClass
+from ribctl.lib.ribosome_types.types_poly_nonpoly_ligand import list_LSUProteinClass, list_SSUProteinClass
+from ribctl.lib.ribosome_types.types_ribosome import ProteinClass
 from ete3 import NCBITaxa
 
 

@@ -1,6 +1,6 @@
 import math
 from pprint import pprint
-from ribctl.lib.types.types_binding_site import AMINO_ACIDS, NUCLEOTIDES, ResidueSummary
+from ribctl.lib.ribosome_types.types_binding_site import AMINO_ACIDS, NUCLEOTIDES, ResidueSummary
 from Bio.PDB.Atom import Atom
 from Bio.PDB.Residue import Residue
 from Bio.PDB.Chain import Chain
