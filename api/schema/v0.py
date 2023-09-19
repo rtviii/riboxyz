@@ -2,8 +2,8 @@ from typing import NewType, TypedDict
 import typing
 from ninja import Schema
 from pydantic import BaseModel, create_model
-from ribctl.lib.types.types_poly_nonpoly_ligand import RNAClass
-from ribctl.lib.types.types_ribosome import NonpolymericLigand, Protein, ProteinClass, RibosomeStructure
+from ribctl.lib.ribosome_types.types_poly_nonpoly_ligand import RNAClass
+from ribctl.lib.ribosome_types.types_ribosome import NonpolymericLigand, Protein, ProteinClass, RibosomeStructure
 """This file documents the possible requests that the API can receive."""
 
 

@@ -11,7 +11,7 @@ from ribctl.etl.etl_polypeptides import (
     rp_hmm_dict_init,
     seq_prot_against_protclasses,
 )
-from ribctl.lib.types.types_ribosome import (
+from ribctl.lib.ribosome_types.types_ribosome import (
     RNA,
     AssemblyInstancesMap,
     NonpolymericLigand,
