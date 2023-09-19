@@ -80,6 +80,8 @@ PolymericFactorClass = Literal[
 ]
 
 
+
+
 NonpolymericLigandClass = Literal[
     "Antibiotic",
     "Ion",
