@@ -335,3 +335,4 @@ class RNAClassEnum(Enum):
     rRNA_35S   = "35SrRNA"
 
 
+PolymerClass_ = typing.Union[RNAClassEnum, ProteinClassEnum]
