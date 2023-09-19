@@ -96,7 +96,6 @@ def hmm_dict_init__candidates_per_organism(candidate_category:PolymerClass_,orga
     
     return _
 
-
 def pick_best_candidate(matches_dict:dict[PolymerClass_, list[float]])->PolymerClass_:
     """Given a dictionary of matches, pick the best candidate class"""
     results = []
@@ -107,6 +106,7 @@ def pick_best_candidate(matches_dict:dict[PolymerClass_, list[float]])->PolymerC
             results.append((candidate_class, matches))
     if len(results) == 0 :
         raise Exception("Did not detect any matches. Something went wrong.")
+
     if len(results) > 1 :
         # if more than 1 match, pick the smallest and ring alarms if the next smallest is within an order of magnitude.
         results = sorted(results, key=lambda match_kv: match_kv[1])
@@ -115,8 +115,6 @@ def pick_best_candidate(matches_dict:dict[PolymerClass_, list[float]])->PolymerC
           
 
     return results[0][0]
-
-
 
 def classify_sequence(seq:str, organism:int, candidate_category:typing.Union[RNAClassEnum, ProteinClassEnum])->PolymerClass_:
 
