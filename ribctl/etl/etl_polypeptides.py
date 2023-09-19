@@ -6,37 +6,13 @@ import pyhmmer
 from pyhmmer import hmmsearch,utils
 from pyhmmer.plan7 import HMM
 from pyhmmer.easel import  Alphabet,DigitalSequenceBlock
-from ribctl.lib.types.types_poly_nonpoly_ligand import PolymericFactorClass, list_ProteinClass
-from ribctl.lib.types.types_ribosome import ProteinClass
+from ribctl.lib.ribosome_types.types_poly_nonpoly_ligand import PolymericFactorClass, list_ProteinClass
+from ribctl.lib.ribosome_types.types_ribosome import ProteinClass
 from ribctl import ASSETS
-from ribctl.lib.types.types_poly_nonpoly_ligand import PolymericFactorClass, list_PolymericFactorClass, list_NonpolymericLigandClass
+from ribctl.lib.ribosome_types.types_poly_nonpoly_ligand import PolymericFactorClass, list_PolymericFactorClass, list_NonpolymericLigandClass
 from fuzzywuzzy import process, fuzz
 
 #! HMM Ribosomal Proteins
-def rp_hmm_dict_init() ->dict[ProteinClass, HMM]: 
-    "Retrieve dictionary of HMMs for each protein class (to compare an incoming seq against each hmm)"
-    prot_hmms_dict = {}
-    for hmm_class in list_ProteinClass:
-        class_hmm = os.path.join(ASSETS["hmm_ribosomal_proteins"], f"{hmm_class}.hmm")
-        with pyhmmer.plan7.HMMFile(class_hmm) as hmm_file:
-            hmm                       = hmm_file.read()
-            prot_hmms_dict[hmm_class] = hmm
-    return prot_hmms_dict
-
-def seq_prot_hmm_evalue(seq:str, hmm:HMM):
-    """Fit a sequence to a given HMM"""
-    AMINO = Alphabet.amino()
-    seq_  = pyhmmer.easel.TextSequence(name=b"template", sequence=seq)
-    dsb   = DigitalSequenceBlock(AMINO, [seq_.digitize(AMINO)])
-    return pyhmmer.plan7.Pipeline(alphabet=AMINO).search_hmm(hmm,dsb)
-
-def seq_prot_against_protclasses(seq:str, hmm_dict:dict)->dict[ProteinClass, list[float]]:
-    """Fit a sequence against all protein classes simultaneously"""
-    _ = {}
-    for (prot_class, hmm) in hmm_dict.items():
-        result = seq_prot_hmm_evalue(seq, hmm)
-        _.update({prot_class: [] if len(result) == 0 else list(map(lambda x: x.evalue, result))})
-    return _
 
 # # --------------
 # def __hmmer_process_struct(rcsb_id:str):
@@ -78,13 +54,9 @@ def seq_prot_against_protclasses(seq:str, hmm_dict:dict)->dict[ProteinClass, lis
 #             print(CRED + "Found hits for protein {} in multiple classes: {}".format(prot.entity_poly_strand_id, nonzero_hits)  + CEND)
 
 
-# Old hacky shit
-p = pathlib.Path(__file__).parents[1]
-lsu_path = os.path.join(p, '_assets', 'subunit_map_LSU.json')
-ssu_path = os.path.join(p, '_assets', 'subunit_map_SSU.json')
 
-LSU_map = {k: v for k, v in json.load(open(lsu_path, 'r')).items()}
-SSU_map = {k: v for k, v in json.load(open(ssu_path, 'r')).items()}
+LSU_map = {k: v for k, v in json.load(open(ASSETS["subunit_map_lsu"], 'r')).items()}
+SSU_map = {k: v for k, v in json.load(open(ASSETS["subunit_map_ssu"], 'r')).items()}
 
 #! Classification / "Type-coercion"
 

@@ -8,10 +8,9 @@ from ribctl.etl.etl_polypeptides import (
     factor_classify,
     protein_classify,
     rna_classify,
-    rp_hmm_dict_init,
-    seq_prot_against_protclasses,
 )
-from ribctl.lib.types.types_ribosome import (
+from ribctl.lib.classification import rp_hmm_dict_init, seq_evaluate_v_hmm_dict
+from ribctl.lib.ribosome_types.types_ribosome import (
     RNA,
     AssemblyInstancesMap,
     NonpolymericLigand,
@@ -88,7 +87,6 @@ def current_rcsb_structs() -> list[str]:
     query = rcsb_search_api + "?json=" + json.dumps(params)
     return requests.get(query).json()["result_set"]
 
-
 def query_rcsb_api(gql_string: str) -> dict:
     """This defines a query in the RCSB search language that identifies the structures we view as 'current' i.e. 40+ proteins, smaller than 4A resolution etc."""
 
@@ -101,10 +99,8 @@ def query_rcsb_api(gql_string: str) -> dict:
     else:
         raise Exception("No data found for query: {}".format(gql_string))
 
-
 def rcsb_single_structure_graphql(rcsb_id):
     return single_structure_graphql_template.replace("$RCSB_ID", rcsb_id.upper())
-
 
 class ReannotationPipeline:
     """
@@ -428,9 +424,9 @@ class ReannotationPipeline:
             )
 
         else:
-            pfam_comments = []
+            pfam_comments     = []
             pfam_descriptions = []
-            pfam_accessions = []
+            pfam_accessions   = []
 
         host_organisms: list[Any] | None = rpotein_polymer_obj["rcsb_entity_host_organism"]
         source_organisms: list[Any] | None = rpotein_polymer_obj["rcsb_entity_source_organism"]
@@ -455,13 +451,13 @@ class ReannotationPipeline:
                 if so["scientific_name"] != None:
                     src_organism_names.append(so["scientific_name"])
 
-        host_organism_ids = list(map(int, set(host_organism_ids)))
+        host_organism_ids   = list(map(int, set(host_organism_ids)))
         host_organism_names = list(map(str, set(host_organism_names)))
-        src_organism_ids = list(map(int, set(src_organism_ids)))
-        src_organism_names = list(map(str, set(src_organism_names)))
+        src_organism_ids    = list(map(int, set(src_organism_ids)))
+        src_organism_names  = list(map(str, set(src_organism_names)))
 
         # ? Compare prot sequence against all HMMs (returns a dict), pick the class with the lowest e-value
-        hmm_resulsts = seq_prot_against_protclasses(
+        hmm_resulsts = seq_evaluate_v_hmm_dict(
             rpotein_polymer_obj["entity_poly"]["pdbx_seq_one_letter_code_can"],
             self.hmm_ribosomal_proteins,
         )

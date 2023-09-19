@@ -2,6 +2,9 @@ volume/**
 volume/
 **/volume/
 
+**/*.hmm
+*.hmm
+
 *.cif
 **/*.cif
 **/volume
