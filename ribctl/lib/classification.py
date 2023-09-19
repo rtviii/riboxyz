@@ -14,20 +14,13 @@ import pyhmmer
 from ribctl import ASSETS, MUSCLE_BIN
 from ribctl.lib.msalib import Fasta, muscle_align_N_seq, phylogenetic_neighborhood
 from ribctl.lib.ribosome_types.types_poly_nonpoly_ligand import RNAClass, list_ProteinClass
-from ribctl.lib.ribosome_types.types_ribosome import RNA, PolymerClass, Protein, ProteinClass
+from ribctl.lib.ribosome_types.types_ribosome import RNA, PolymerClass, Protein, ProteinClass, ProteinClassEnum, RNAClassEnum
 # from ribctl.etl.ribosome_assets import RibosomeAssets
 from pyhmmer.easel import Alphabet, DigitalSequenceBlock, TextSequence, SequenceFile, SequenceBlock, TextSequenceBlock
 from pyhmmer.plan7 import Pipeline, HMM 
 
 hmm_cachedir = ASSETS['__hmm_cache']
 
-
-class PolymerCategories(Enum):
-    "Enumerate polymer categories"
-    protein = ProteinClass
-    rna     = RNAClass
-    trna    = "trna"
-    factor  = "factor"
 
 
 # def rp_hmm_dict_init() ->dict[ProteinClass, HMM]: 
@@ -88,11 +81,6 @@ def seq_prot_against_protclasses(seq:str, hmm_dict:dict)->dict[ProteinClass, lis
         _.update({prot_class: [] if len(result) == 0 else list(map(lambda x: x.evalue, result))})
     return _
 
-def classify_sequence(seq:str, organism:int, candidate_category: Literal["ribosomal_protein", "ribosomal_rna", "factor","trna"] ):
-    # assemble a dictinoary of hmms
-
-    if candidate_category == "ribosomal_protein":
-        ...
 
 
 
@@ -103,10 +91,17 @@ def classify_sequence(seq:str, organism:int, candidate_category: Literal["riboso
 
 # print(prots[14])
 
-def hmm_generate(candidate_class: PolymerClass, organism:int):
-    print(typing.get_args(ProteinClass))
-    assert candidate_class in typing.get_args(ProteinClass)
+def classify_sequence(seq:str, organism:int, candidate_category: ProteinClassEnum | RNAClassEnum  ):
 
-hmm_generate(LiteralString['uL11'], 123)
+    if candidate_category == "ribosomal_protein":
+        ...
+
+def hmm_generate(candidate_class: ProteinClassEnum | RNAClassEnum, organism:int):
+    if candidate_class in ProteinClassEnum:
+        print("got protein class")
+    if candidate_class in RNAClassEnum:
+        print("got rna")
+
+
 
 # classify_sequence("CASFFASF", organism_taxid, "ribosomal_protein")
