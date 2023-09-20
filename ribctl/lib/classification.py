@@ -191,18 +191,19 @@ def hmm_produce(candidate_class: ProteinClassEnum | RNAClassEnum, organism_taxid
 def classify_subchain(chain: Protein | RNA , candidates_dict:dict[PolymerClass_, HMM]|None=None)->Tuple[str, PolymerClass_]:
     logging.debug("Task for chain {}.{} (Old nomenclature {}) | taxid {}".format( chain.parent_rcsb_id,chain.auth_asym_id, chain.nomenclature, chain.src_organism_ids[0]))
     if type(chain) == RNA:
-        assigned = classify_sequence(chain.entity_poly_seq_one_letter_code_can, chain.src_organism_ids[0], RNAClassEnum)
+        assigned = classify_sequence(chain.entity_poly_seq_one_letter_code_can, chain.src_organism_ids[0], RNAClassEnum, candidates_dict=candidates_dict)
     elif type(chain) == Protein:
-        assigned = classify_sequence(chain.entity_poly_seq_one_letter_code_can, chain.src_organism_ids[0], ProteinClassEnum)
+        assigned = classify_sequence(chain.entity_poly_seq_one_letter_code_can, chain.src_organism_ids[0], ProteinClassEnum, candidates_dict=candidates_dict)
     else:
         raise Exception("Invalid chain type")
 
     return (chain.auth_asym_id, assigned)
 
 def classify_subchains(targets:list[Protein]|list[RNA])->dict[str, PolymerClass_]:
+    # This is a dict of dicts (a "registry", sigh) to only do i/o once per organism.(Pass it down)
+    # It's a dictionary because some chains within a structure might originate in different organisms. 
     organisms_registry: dict[int,dict[PolymerClass_, HMM]]= {}
-
-    with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=25) as executor:
         tasks   = []
         results = []
         for chain in targets:
