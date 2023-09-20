@@ -28,6 +28,7 @@ print ("Argument List:", str(sys.argv))
 
 
 def process_struct(rcsb_id:str):
+
     rib            = RibosomeAssets(rcsb_id).profile()
     organism_taxid = rib.src_organism_ids[0]
     prots          = rib.proteins

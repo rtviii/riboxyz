@@ -66,7 +66,6 @@ def rp_hmm_dict_init(organim_taxid:int) ->dict[ProteinClass, HMM]:
             prot_hmms_dict[hmm_class] = hmm
     return prot_hmms_dict
 
-#!------------------ Former
 def seq_evaluate_v_hmm(seq:str,alphabet:Alphabet, hmm:HMM):
     """Fit a sequence to a given HMM"""
     seq_  = pyhmmer.easel.TextSequence(name=b"template", sequence=seq)
@@ -201,7 +200,6 @@ def hmm_produce(candidate_class: ProteinClassEnum | RNAClassEnum, organism_taxid
 
             hmm_cache(HMM)
             
-            #TODO: Cache it
             return HMM
 
         if candidate_class in RNAClassEnum:
