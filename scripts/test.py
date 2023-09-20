@@ -12,7 +12,7 @@ from Bio import SeqIO, AlignIO, pairwise2
 import re
 import pyhmmer
 from ribctl import ASSETS, MUSCLE_BIN
-from ribctl.lib.classification import classify_sequence
+from ribctl.lib.classification import classify_sequence, classify_subchains
 from ribctl.lib.msalib import Fasta, muscle_align_N_seq, phylogenetic_neighborhood
 from ribctl.lib.ribosome_types.types_poly_nonpoly_ligand import list_ProteinClass
 from ribctl.lib.ribosome_types.types_ribosome import ProteinClass, ProteinClassEnum
@@ -23,8 +23,11 @@ hmm_cachedir = ASSETS['__hmm_cache']
 
 
 import sys
+
 print ("Number of arguments:", len(sys.argv), "arguments")
 print ("Argument List:", str(sys.argv))
+
+
 
 
 def process_struct(rcsb_id:str):
@@ -45,8 +48,14 @@ def process_struct(rcsb_id:str):
 if sys.argv[1] =="s":
     process_struct(sys.argv[2].upper())
 else:
-    for rcsb_id in RibosomeAssets.list_all_structs()[:10]:
-        process_struct(rcsb_id)
+    for rcsb_id in RibosomeAssets.list_all_structs():
+        print("Processing {}".format(rcsb_id))
+        rib            = RibosomeAssets(rcsb_id).profile()
+        organism_taxid = rib.src_organism_ids[0]
+        prots          = rib.proteins
+        classify_subchains(prots)
+        import time
+
 
 
 # for candidate_class in list_ProteinClass:

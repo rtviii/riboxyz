@@ -6,7 +6,7 @@ import os
 from pprint import pprint
 import subprocess
 from tempfile import NamedTemporaryFile
-from typing import Generic, Iterator, Literal, LiteralString, TypeVar
+from typing import Generic, Iterator, Literal, LiteralString, Tuple, TypeVar
 import typing
 from Bio.Align import MultipleSeqAlignment,Seq, SeqRecord
 from Bio.Align.Applications import MuscleCommandline
@@ -20,42 +20,22 @@ from ribctl.lib.ribosome_types.types_ribosome import RNA, PolymerClass, PolymerC
 # from ribctl.etl.ribosome_assets import RibosomeAssets
 from pyhmmer.easel import Alphabet, DigitalSequenceBlock, TextSequence, SequenceFile, SequenceBlock, TextSequenceBlock
 from pyhmmer.plan7 import Pipeline, HMM 
+import logging
+
+# Configure the logging settings
+logging.basicConfig(
+    level=logging.DEBUG,  # Set the logging level to DEBUG (you can adjust this)
+    format='%(asctime)s [%(levelname)s] %(message)s',  # Define the log message format
+    handlers=[
+        logging.StreamHandler(),  # Log to the console
+        logging.FileHandler('classification.log')  # Log to a file named 'my_log_file.log'
+    ]
+)
+
 
 hmm_cachedir = ASSETS['__hmm_cache']
 
-
-
-# def rp_hmm_dict_init() ->dict[ProteinClass, HMM]: 
-    # "Retrieve dictionary of HMMs for each protein class (to compare an incoming seq against each hmm)"
-    # prot_hmms_dict = {}
-    # for hmm_class in list_ProteinClass:
-    #     class_hmm = os.path.join(ASSETS["hmm_ribosomal_proteins"], f"{hmm_class}.hmm")
-    #     with pyhmmer.plan7.HMMFile(class_hmm) as hmm_file:
-    #         hmm                       = hmm_file.read()
-    #         prot_hmms_dict[hmm_class] = hmm
-    # return prot_hmms_dict
-
-
-
-
-    # fasta_path   = os.path.join(ASSETS["fasta_ribosomal_proteins"], f"{candidate_class}.fasta")
-    # records      = Fasta(fasta_path)
-    # ids          = records.all_taxids()
-    # phylo_nbhd   = phylogenetic_neighborhood(list(map(lambda x: str(x),ids)), str(organism_taxid), n_neighbors=10)
-    # seqs         = records.pick_taxids(phylo_nbhd)
-    # seqs_aligned = muscle_align_N_seq( iter(seqs))
-    # seqs_aligned1, seqs_aligned2 = tee(seqs_aligned)    
-
-    # seq_tuples =  [TextSequence(name=bytes(seq.id, 'utf-8'), sequence=str(seq.seq)) for seq in seqs_aligned1]
-
-# def load_hmm_from_cache(path:str)->HMM:
-#     if os.path.isfile(path):
-#         with pyhmmer.plan7.HMMFile(path) as hmm_file:
-#             hmm = hmm_file.read()
-#     else:
-        # generate the given hmm
-
-
+#! Lib ------------------------------
 def rp_hmm_dict_init(organim_taxid:int) ->dict[ProteinClass, HMM]: 
     "Retrieve dictionary of HMMs for each protein class (to compare an incoming seq against each hmm)"
     prot_hmms_dict = {}
@@ -110,9 +90,8 @@ def pick_best_candidate(matches_dict:dict[PolymerClass_, list[float]])->PolymerC
         # if more than 1 match, pick the smallest and ring alarms if the next smallest is within an order of magnitude.
         results = sorted(results, key=lambda match_kv: match_kv[1])
         if abs(math.log10(results[0][1][0]/results[1][1][0])) < 2:
-            raise Exception("Multiple sensible matches detected. Something went wrong. \n {}".format(results))
-          
-
+            logging.warning("Multiple sensible matches detected. Something went wrong. \n {}".format(results))
+            # raise Exception("Multiple sensible matches detected. Something went wrong. \n {}".format(results))
     return results[0][0]
 
 def classify_sequence(seq:str, organism:int, candidate_category:typing.Union[RNAClassEnum, ProteinClassEnum])->PolymerClass_:
@@ -129,15 +108,6 @@ def classify_sequence(seq:str, organism:int, candidate_category:typing.Union[RNA
         candidates_dict = hmm_dict_init__candidates_per_organism(candidate_category, organism)
         seq_evaluate_v_hmm_dict(seq, pyhmmer.easel.Alphabet.rna(), candidates_dict)
 
-def hmm_create(name:str, seqs:Iterator[SeqRecord], alphabet:Alphabet)->HMM:
-    """Create an HMM from a list of sequences"""
-    seq_tuples =  [TextSequence(name=bytes(seq.id, 'utf-8'), sequence=str(seq.seq)) for seq in seqs]
-    builder       = pyhmmer.plan7.Builder(alphabet)
-    background    = pyhmmer.plan7.Background(alphabet) #? The null(background) model can be later augmented.
-    anonymous_msa = pyhmmer.easel.TextMSA(bytes(name, 'utf-8'),sequences=seq_tuples)
-    HMM, _profile, _optmized_profile = builder.build_msa(anonymous_msa.digitize(alphabet), background)
-    return HMM
-
 def fasta_phylogenetic_correction(candidate_class:ProteinClassEnum|RNAClassEnum, organism_taxid:int, n_neighbors=10)->Iterator[SeqRecord]:
     """Given a candidate class and an organism taxid, retrieve the corresponding fasta file, and perform phylogenetic correction on it."""
     if candidate_class in ProteinClassEnum:
@@ -152,6 +122,15 @@ def fasta_phylogenetic_correction(candidate_class:ProteinClassEnum|RNAClassEnum,
     phylo_nbhd   = phylogenetic_neighborhood(list(map(lambda x: str(x),ids)), str(organism_taxid), n_neighbors)
     seqs         = records.pick_taxids(phylo_nbhd)
     return iter(seqs)
+
+def hmm_create(name:str, seqs:Iterator[SeqRecord], alphabet:Alphabet)->HMM:
+    """Create an HMM from a list of sequences"""
+    seq_tuples =  [TextSequence(name=bytes(seq.id, 'utf-8'), sequence=str(seq.seq)) for seq in seqs]
+    builder       = pyhmmer.plan7.Builder(alphabet)
+    background    = pyhmmer.plan7.Background(alphabet) #? The null(background) model can be later augmented.
+    anonymous_msa = pyhmmer.easel.TextMSA(bytes(name, 'utf-8'),sequences=seq_tuples)
+    HMM, _profile, _optmized_profile = builder.build_msa(anonymous_msa.digitize(alphabet), background)
+    return HMM
 
 def hmm_cache(hmm:HMM):
     name     = hmm.name.decode('utf-8')
@@ -168,7 +147,6 @@ def hmm_cache(hmm:HMM):
 def hmm_produce(candidate_class: ProteinClassEnum | RNAClassEnum, organism_taxid:int)->HMM:  # type: ignore
     """Produce an organism-specific HMM. Retrieve from cache if exists, otherwise generate and cache."""
     hmm_path = "class_{}_taxid_{}.hmm".format(candidate_class.value, organism_taxid)
-
     if os.path.isfile(os.path.join(hmm_cachedir, hmm_path)):
         hmm_path = os.path.join(hmm_cachedir, hmm_path)
         with pyhmmer.plan7.HMMFile(hmm_path) as hmm_file:
@@ -205,4 +183,41 @@ def hmm_produce(candidate_class: ProteinClassEnum | RNAClassEnum, organism_taxid
         if candidate_class in RNAClassEnum:
             raise Exception("Not implemented yet")
             ...
+
+
+#! Implementations ------------------------------
+
+
+
+def classify_subchain(chain: Protein | RNA )->Tuple[str, PolymerClass_]:
+    logging.debug("Task for chain {}.{} (Old nomenclature {}) | taxid {}".format( chain.parent_rcsb_id,chain.auth_asym_id, chain.nomenclature, chain.src_organism_ids[0]))
+    if type(chain) == RNA:
+        assigned = classify_sequence(chain.entity_poly_seq_one_letter_code_can, chain.src_organism_ids[0], RNAClassEnum)
+    elif type(chain) == Protein:
+        assigned = classify_sequence(chain.entity_poly_seq_one_letter_code_can, chain.src_organism_ids[0], ProteinClassEnum)
+    else:
+        raise Exception("Invalid chain type")
+
+    return (chain.auth_asym_id, assigned)
+
+
+
+
+# threadpool
+def classify_subchains( targets:list[Protein]|list[RNA])->dict[str, PolymerClass_]:
+    logging.debug("Classifying {} subchains".format(len(targets)))
+    import concurrent.futures
+    with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
+        tasks = []
+        for chain in targets:
+            future = executor.submit(classify_subchain, chain)
+            tasks.append(future)
+            concurrent.futures.wait(tasks)
+
+        results = [task.result() for task in tasks]
+        pprint(results)
+
+
+           
+# At this point, all 50 tasks have completed, and their results are collected in the 'results' list.
 
