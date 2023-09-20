@@ -12,48 +12,6 @@ from ribctl import ASSETS
 from ribctl.lib.ribosome_types.types_poly_nonpoly_ligand import PolymericFactorClass, list_PolymericFactorClass, list_NonpolymericLigandClass
 from fuzzywuzzy import process, fuzz
 
-#! HMM Ribosomal Proteins
-
-# # --------------
-# def __hmmer_process_struct(rcsb_id:str):
-#     HMM_CLASS_DICT = rp_hmm_dict_init()
-#     _, profile = RibosomeAssets(rcsb_id).get_struct_and_profile()
-
-#     if len(profile.polymeric_factors) != 0:
-#         for chain in profile.polymeric_factors:
-#             _seq     = chain.entity_poly_seq_one_letter_code_can
-#             res_dict = seq_prot_against_protclasses(_seq, HMM_CLASS_DICT)
-
-#             nonzero_hits = {}
-#             for (class_, hits) in res_dict.items():
-#                 if len(hits) > 0:
-#                     nonzero_hits.update({class_: hits})
-
-#             if len(list(nonzero_hits.items()))>0:
-#                 CRED = '\033[{}m'.format(94);CEND = '\033[0m'
-#                 print(CRED + "Found hits for polymeric factor {} : {}".format(prot.entity_poly_strand_id, nonzero_hits)  + CEND)
-
-#     for prot in profile.proteins:
-#         _seq     = prot.entity_poly_seq_one_letter_code_can
-#         res_dict = seq_prot_against_protclasses(_seq, HMM_CLASS_DICT)
-        
-
-#         nonzero_hits = {}
-#         for (class_, hits) in res_dict.items():
-#             if len(hits) > 0:
-#                 nonzero_hits.update({class_: hits})
-
-#         print("\nProtein {}.{} (old nomenclature {}) | {} :".format(prot.parent_rcsb_id,prot.entity_poly_strand_id, prot.nomenclature, prot.rcsb_pdbx_description))
-#         print(nonzero_hits)
-
-#         if len(list(nonzero_hits.items())) == 0:
-#             raise LookupError("No hits found for protein {}".format(prot.entity_poly_strand_id))
-
-#         if len(list(nonzero_hits.items()))>1:
-#             CRED = '\033[{}m'.format(91);CEND = '\033[0m'
-#             print(CRED + "Found hits for protein {} in multiple classes: {}".format(prot.entity_poly_strand_id, nonzero_hits)  + CEND)
-
-
 
 LSU_map = {k: v for k, v in json.load(open(ASSETS["subunit_map_lsu"], 'r')).items()}
 SSU_map = {k: v for k, v in json.load(open(ASSETS["subunit_map_ssu"], 'r')).items()}

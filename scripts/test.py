@@ -1,6 +1,7 @@
 from functools import reduce
 from io import StringIO
 from itertools import tee
+import logging
 import os
 from pprint import pprint
 import subprocess
@@ -20,30 +21,30 @@ from ribctl.etl.ribosome_assets import RibosomeAssets
 from pyhmmer.easel import Alphabet, DigitalSequenceBlock, TextSequence, SequenceFile, SequenceBlock, TextSequenceBlock
 from pyhmmer.plan7 import Pipeline, HMM 
 hmm_cachedir = ASSETS['__hmm_cache']
-
-
 import sys
 
-print ("Number of arguments:", len(sys.argv), "arguments")
-print ("Argument List:", str(sys.argv))
+logger       = logging.getLogger(__name__)
+file_handler = logging.FileHandler('classification.log')
+log_format   = logging.Formatter('%(asctime)s [%(levelname)s] [%(name)s] %(message)s')
+file_handler.setFormatter(log_format)
+logger.addHandler(file_handler)
 
 
 
+# def process_struct(rcsb_id:str):
 
-def process_struct(rcsb_id:str):
+#     rib            = RibosomeAssets(rcsb_id).profile()
+#     organism_taxid = rib.src_organism_ids[0]
+#     prots          = rib.proteins
 
-    rib            = RibosomeAssets(rcsb_id).profile()
-    organism_taxid = rib.src_organism_ids[0]
-    prots          = rib.proteins
-
-    for rp in prots:
-        print("processing protein {} nomenclature {} | {}".format( rp.auth_asym_id,rp.nomenclature, rp.rcsb_pdbx_description,))
-        seq = rp.entity_poly_seq_one_letter_code_can
-        x   = classify_sequence(seq, organism_taxid, ProteinClassEnum)
-        if x not in rp.nomenclature and len(rp.nomenclature) != 0:
-            print(">>>> Discovered incongruent nomenclature for protein {} nomenclature {} classification {}".format(rp.rcsb_pdbx_description, rp.nomenclature, x))
-        if len(rp.nomenclature) == 0:
-            print("{}".format(x))
+#     for rp in prots:
+#         print("processing protein {} nomenclature {} | {}".format( rp.auth_asym_id,rp.nomenclature, rp.rcsb_pdbx_description,))
+#         seq = rp.entity_poly_seq_one_letter_code_can
+#         x   = classify_sequence(seq, organism_taxid, ProteinClassEnum)
+#         if x not in rp.nomenclature and len(rp.nomenclature) != 0:
+#             print(">>>> Discovered incongruent nomenclature for protein {} nomenclature {} classification {}".format(rp.rcsb_pdbx_description, rp.nomenclature, x))
+#         if len(rp.nomenclature) == 0:
+#             print("{}".format(x))
 
 if sys.argv[1] =="s":
     rcsb_id = sys.argv[2].upper()
@@ -54,12 +55,11 @@ if sys.argv[1] =="s":
     print(result)
 else:
     for rcsb_id in RibosomeAssets.list_all_structs():
-        print("Processing {}".format(rcsb_id))
+        logger.debug("Processing {}".format(rcsb_id))
         rib            = RibosomeAssets(rcsb_id).profile()
         organism_taxid = rib.src_organism_ids[0]
         prots          = rib.proteins
         classify_subchains(prots)
-        import time
 
 
 

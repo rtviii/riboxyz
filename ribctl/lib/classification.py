@@ -16,7 +16,7 @@ import pyhmmer
 from ribctl import ASSETS, MUSCLE_BIN
 from ribctl.lib.msalib import Fasta, muscle_align_N_seq, phylogenetic_neighborhood
 from ribctl.lib.ribosome_types.types_poly_nonpoly_ligand import RNAClass, list_ProteinClass
-from ribctl.lib.ribosome_types.types_ribosome import RNA, PolymerClass, PolymerClass_, Protein, ProteinClass, ProteinClassEnum, RNAClassEnum
+from ribctl.lib.ribosome_types.types_ribosome import RNA, Polymer, PolymerClass, PolymerClass_, Protein, ProteinClass, ProteinClassEnum, RNAClassEnum
 # from ribctl.etl.ribosome_assets import RibosomeAssets
 from pyhmmer.easel import Alphabet, DigitalSequenceBlock, TextSequence, SequenceFile, SequenceBlock, TextSequenceBlock
 from pyhmmer.plan7 import Pipeline, HMM 
@@ -32,8 +32,6 @@ logging.basicConfig(
         logging.FileHandler('classification.log')  # Log to a file named 'my_log_file.log'
     ]
 )
-
-
 
 
 hmm_cachedir = ASSETS['__hmm_cache']
@@ -76,7 +74,7 @@ def hmm_dict_init__candidates_per_organism(candidate_category:PolymerClass_,orga
     
     return _
 
-def pick_best_class(matches_dict:dict[PolymerClass_, list[float]])->PolymerClass_:
+def pick_best_class(matches_dict:dict[PolymerClass_, list[float]], chain_info:Polymer)->PolymerClass_ | None:
     """Given a dictionary of sequence-HMMe e-values, pick the best candidate class"""
     results = []
     for (candidate_class, matches) in matches_dict.items():
@@ -85,24 +83,20 @@ def pick_best_class(matches_dict:dict[PolymerClass_, list[float]])->PolymerClass
         else:
             results.append((candidate_class, matches))
     if len(results) == 0 :
-        
-        # raise Exception("Did not detect any matches. Something went wrong.")
-        return []
-
+        logging.warning("{}.{} : Did not match any model.".format(chain_info.parent_rcsb_id, chain_info.auth_asym_id))
+        return None
     if len(results) > 1 :
         # if more than 1 match, pick the smallest and ring alarms if the next smallest is within an order of magnitude.
         results = sorted(results, key=lambda match_kv: match_kv[1])
         if abs(math.log10(results[0][1][0]/results[1][1][0])) < 2:
-            logging.warning("Multiple sensible matches detected. Something went wrong. \n {}".format(results))
-            # raise Exception("Multiple sensible matches detected. Something went wrong. \n {}".format(results))
+            logging.warning("{}.{} : Multiple sensible matches detected, picked {} (smallest e-value) : \n {}".format(chain_info.parent_rcsb_id, chain_info.auth_asym_id,results[0][0], results))
     return results[0][0]
 
-def classify_sequence(seq:str, organism:int, candidate_category:typing.Union[RNAClassEnum, ProteinClassEnum], candidates_dict:dict[PolymerClass_, HMM]|None=None)->PolymerClass_:
-
+def classify_sequence(seq:str, organism:int, candidate_category:typing.Union[RNAClassEnum, ProteinClassEnum], candidates_dict:dict[PolymerClass_, HMM]|None=None)->dict[PolymerClass_, list[float]]:
     if candidate_category == ProteinClassEnum:
         candidates_dict = candidates_dict if candidates_dict is not None else hmm_dict_init__candidates_per_organism(candidate_category, organism)
         results         = seq_evaluate_v_hmm_dict(seq, pyhmmer.easel.Alphabet.amino(), candidates_dict)
-        return pick_best_class(results)
+        return results
     if candidate_category == RNAClassEnum:
         #TODO
 
@@ -188,14 +182,16 @@ def hmm_produce(candidate_class: ProteinClassEnum | RNAClassEnum, organism_taxid
 
 #! Implementations ------------------------------
 
-def classify_subchain(chain: Protein | RNA , candidates_dict:dict[PolymerClass_, HMM]|None=None)->Tuple[str, PolymerClass_]:
-    logging.debug("Task for chain {}.{} (Old nomenclature {}) | taxid {}".format( chain.parent_rcsb_id,chain.auth_asym_id, chain.nomenclature, chain.src_organism_ids[0]))
+def classify_subchain(chain: Protein | RNA , candidates_dict:dict[PolymerClass_, HMM]|None=None)->Tuple[str, PolymerClass_|None]:
+    # logging.debug("Task for chain {}.{} (Old nomenclature {}) | taxid {}".format( chain.parent_rcsb_id,chain.auth_asym_id, chain.nomenclature, chain.src_organism_ids[0]))
     if type(chain) == RNA:
         assigned = classify_sequence(chain.entity_poly_seq_one_letter_code_can, chain.src_organism_ids[0], RNAClassEnum, candidates_dict=candidates_dict)
     elif type(chain) == Protein:
         assigned = classify_sequence(chain.entity_poly_seq_one_letter_code_can, chain.src_organism_ids[0], ProteinClassEnum, candidates_dict=candidates_dict)
     else:
         raise Exception("Invalid chain type")
+    
+    assigned = pick_best_class(assigned, chain)
 
     return (chain.auth_asym_id, assigned)
 
@@ -203,6 +199,7 @@ def classify_subchains(targets:list[Protein]|list[RNA])->dict[str, PolymerClass_
     # This is a dict of dicts (a "registry", sigh) to only do i/o once per organism.(Pass it down)
     # It's a dictionary because some chains within a structure might originate in different organisms. 
     organisms_registry: dict[int,dict[PolymerClass_, HMM]]= {}
+
     with concurrent.futures.ThreadPoolExecutor(max_workers=25) as executor:
         tasks   = []
         results = []
@@ -214,6 +211,8 @@ def classify_subchains(targets:list[Protein]|list[RNA])->dict[str, PolymerClass_
             tasks.append(future)
         for future in concurrent.futures.as_completed(tasks):
             results.append(future.result())
+
         return {k:v for (k,v) in results}
+
 
 
