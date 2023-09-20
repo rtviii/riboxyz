@@ -46,7 +46,12 @@ def process_struct(rcsb_id:str):
             print("{}".format(x))
 
 if sys.argv[1] =="s":
-    process_struct(sys.argv[2].upper())
+    rcsb_id = sys.argv[2].upper()
+    rib            = RibosomeAssets(rcsb_id).profile()
+    organism_taxid = rib.src_organism_ids[0]
+    prots          = rib.proteins
+    result         = classify_subchains(prots)
+    print(result)
 else:
     for rcsb_id in RibosomeAssets.list_all_structs():
         print("Processing {}".format(rcsb_id))
