@@ -21,6 +21,7 @@ from ribctl.lib.ribosome_types.types_ribosome import RNA, PolymerClass, PolymerC
 from pyhmmer.easel import Alphabet, DigitalSequenceBlock, TextSequence, SequenceFile, SequenceBlock, TextSequenceBlock
 from pyhmmer.plan7 import Pipeline, HMM 
 import logging
+import concurrent.futures
 
 # Configure the logging settings
 logging.basicConfig(
@@ -31,6 +32,8 @@ logging.basicConfig(
         logging.FileHandler('classification.log')  # Log to a file named 'my_log_file.log'
     ]
 )
+
+
 
 
 hmm_cachedir = ASSETS['__hmm_cache']
@@ -184,10 +187,7 @@ def hmm_produce(candidate_class: ProteinClassEnum | RNAClassEnum, organism_taxid
             raise Exception("Not implemented yet")
             ...
 
-
 #! Implementations ------------------------------
-
-
 
 def classify_subchain(chain: Protein | RNA )->Tuple[str, PolymerClass_]:
     logging.debug("Task for chain {}.{} (Old nomenclature {}) | taxid {}".format( chain.parent_rcsb_id,chain.auth_asym_id, chain.nomenclature, chain.src_organism_ids[0]))
@@ -200,24 +200,20 @@ def classify_subchain(chain: Protein | RNA )->Tuple[str, PolymerClass_]:
 
     return (chain.auth_asym_id, assigned)
 
-
-
-
-# threadpool
-def classify_subchains( targets:list[Protein]|list[RNA])->dict[str, PolymerClass_]:
+def classify_subchains(targets:list[Protein]|list[RNA])->dict[str, PolymerClass_]:
     logging.debug("Classifying {} subchains".format(len(targets)))
-    import concurrent.futures
     with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
-        tasks = []
+        tasks   = []
+        results = []
         for chain in targets:
             future = executor.submit(classify_subchain, chain)
             tasks.append(future)
-            concurrent.futures.wait(tasks)
+            print("queue:",executor._work_queue.qsize())
+        for future in concurrent.futures.as_completed(tasks):
+            results.append(future.result())
+        return {k:v for (k,v) in results}
 
-        results = [task.result() for task in tasks]
-        pprint(results)
-
-
+# def classify_structures
            
 # At this point, all 50 tasks have completed, and their results are collected in the 'results' list.
 
