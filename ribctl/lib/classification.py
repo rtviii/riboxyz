@@ -76,8 +76,8 @@ def hmm_dict_init__candidates_per_organism(candidate_category:PolymerClass_,orga
     
     return _
 
-def pick_best_candidate(matches_dict:dict[PolymerClass_, list[float]])->PolymerClass_:
-    """Given a dictionary of matches, pick the best candidate class"""
+def pick_best_class(matches_dict:dict[PolymerClass_, list[float]])->PolymerClass_:
+    """Given a dictionary of sequence-HMMe e-values, pick the best candidate class"""
     results = []
     for (candidate_class, matches) in matches_dict.items():
         if len(matches) == 0:
@@ -97,13 +97,12 @@ def pick_best_candidate(matches_dict:dict[PolymerClass_, list[float]])->PolymerC
             # raise Exception("Multiple sensible matches detected. Something went wrong. \n {}".format(results))
     return results[0][0]
 
-def classify_sequence(seq:str, organism:int, candidate_category:typing.Union[RNAClassEnum, ProteinClassEnum])->PolymerClass_:
+def classify_sequence(seq:str, organism:int, candidate_category:typing.Union[RNAClassEnum, ProteinClassEnum], candidates_dict:dict[PolymerClass_, HMM]|None=None)->PolymerClass_:
 
     if candidate_category == ProteinClassEnum:
-
-        candidates_dict = hmm_dict_init__candidates_per_organism(candidate_category, organism)
-        results = seq_evaluate_v_hmm_dict(seq, pyhmmer.easel.Alphabet.amino(), candidates_dict)
-        return pick_best_candidate(results)
+        candidates_dict = candidates_dict if candidates_dict is not None else hmm_dict_init__candidates_per_organism(candidate_category, organism)
+        results         = seq_evaluate_v_hmm_dict(seq, pyhmmer.easel.Alphabet.amino(), candidates_dict)
+        return pick_best_class(results)
     if candidate_category == RNAClassEnum:
         #TODO
 
@@ -189,7 +188,7 @@ def hmm_produce(candidate_class: ProteinClassEnum | RNAClassEnum, organism_taxid
 
 #! Implementations ------------------------------
 
-def classify_subchain(chain: Protein | RNA )->Tuple[str, PolymerClass_]:
+def classify_subchain(chain: Protein | RNA , candidates_dict:dict[PolymerClass_, HMM]|None=None)->Tuple[str, PolymerClass_]:
     logging.debug("Task for chain {}.{} (Old nomenclature {}) | taxid {}".format( chain.parent_rcsb_id,chain.auth_asym_id, chain.nomenclature, chain.src_organism_ids[0]))
     if type(chain) == RNA:
         assigned = classify_sequence(chain.entity_poly_seq_one_letter_code_can, chain.src_organism_ids[0], RNAClassEnum)
@@ -201,19 +200,19 @@ def classify_subchain(chain: Protein | RNA )->Tuple[str, PolymerClass_]:
     return (chain.auth_asym_id, assigned)
 
 def classify_subchains(targets:list[Protein]|list[RNA])->dict[str, PolymerClass_]:
-    logging.debug("Classifying {} subchains".format(len(targets)))
+    organisms_registry: dict[int,dict[PolymerClass_, HMM]]= {}
+
     with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
         tasks   = []
         results = []
         for chain in targets:
-            future = executor.submit(classify_subchain, chain)
+            if chain.src_organism_ids[0] not in [*organisms_registry.keys()]:
+                candidate_category = ProteinClassEnum if type(chain) == Protein else RNAClassEnum
+                organisms_registry[chain.src_organism_ids[0]] = hmm_dict_init__candidates_per_organism(candidate_category, chain.src_organism_ids[0])
+            future = executor.submit(classify_subchain, chain, organisms_registry[chain.src_organism_ids[0]])
             tasks.append(future)
-            print("queue:",executor._work_queue.qsize())
         for future in concurrent.futures.as_completed(tasks):
             results.append(future.result())
         return {k:v for (k,v) in results}
 
-# def classify_structures
-           
-# At this point, all 50 tasks have completed, and their results are collected in the 'results' list.
 
