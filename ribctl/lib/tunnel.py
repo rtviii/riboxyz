@@ -1,3 +1,4 @@
+import logging
 import math
 from pprint import pprint
 # from ribctl.etl.ribosome_assets import RibosomeAssets
@@ -7,8 +8,15 @@ from Bio.PDB.Residue import Residue
 from Bio.PDB.Chain import Chain
 from functools import reduce
 from Bio.PDB.Structure import Structure
-
 from ribctl.lib.ribosome_types.types_ribosome import RNA
+logging.basicConfig(
+    level=logging.DEBUG,  
+    format='%(asctime)s [%(levelname)s] [%(name)s] %(message)s',  
+    handlers=[
+        logging.StreamHandler(),  
+        logging.FileHandler('tunnel.log')  
+    ]
+)
 
 
 
@@ -87,7 +95,11 @@ def ptc_resdiues_get(biopython_structure:Structure,rnas:list[RNA], assembly_id: 
             matches = {**matches,auth_asym_id: [m6,m8,m9]}
 
     
-    auth_asym_id, rRNA_fragment_matches = list(filter(lambda match_kv: len(match_kv[1][2])>0 , list( matches.items() )))[0]
+    try:
+        auth_asym_id, rRNA_fragment_matches = list(filter(lambda match_kv: len(match_kv[1][2])>0 , list( matches.items() )))[0]
+    except:
+        logging.error("Could not identify PTC residues in {}".format(biopython_structure.id))
+        exit(1)
 
     chain3d       : Chain         = struct_profile.child_dict[assembly_id].child_dict[auth_asym_id]
     ress          : list[Residue] = chain3d.child_list
