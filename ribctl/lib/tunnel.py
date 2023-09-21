@@ -41,7 +41,7 @@ def residue_labels(res: Residue | ResidueSummary) -> bool:
     return res.resname in [*AMINO_ACIDS.keys(), *NUCLEOTIDES]
 
 
-def ptc_fuzzyfind_subseq_in_chain(biopython_struct, auth_asym_id:str, assembly_id:int=0):
+def ptc_fuzzyfind_subseq_in_chain(biopython_struct, auth_asym_id:str, assembly_id:int=0)->tuple[list[Residue],list[Residue],list[Residue],str]:
     chain3d: Chain = biopython_struct.child_dict[assembly_id].child_dict[auth_asym_id]
     ress: list[Residue] = chain3d.child_list
     ress_sanitized: list[Residue] = [
@@ -72,44 +72,25 @@ def ptc_fuzzyfind_subseq_in_chain(biopython_struct, auth_asym_id:str, assembly_i
 
 def ptc_resdiues_get(biopython_structure:Structure,rnas:list[RNA], assembly_id: int = 0) -> tuple[list[Residue], str]:
     """
-    @ rcsb_id - str
-    @ assembly_id - int
-    Given a bacterial structure (assertion unenforced):
+    Given a bacterial structure (assertion un_enforced):
      - obtain the LSU rRNA chain
      - sanitze the sequence (canonicalize non-canonical residues)
      - locate the conserved subsequence (due to Doris et al.)
      Returns the residue list for the ptc and the `auth_asym_id` of the rRNA chain
     """
-
     struct_profile = biopython_structure
-    potential_rnas = {}
-    for _potential_lsurna in rnas:
-        if len(_potential_lsurna.entity_poly_seq_one_letter_code_can) > 2500:
-            potential_rnas = {
-                _potential_lsurna.rcsb_pdbx_description: _potential_lsurna,
-                **potential_rnas,
-            }
     # TODO: This whole mess has to go. The LSU_rRNA will be much easier to identify once we have the rRNA HMHs in place.
     # For now just know that this is a hack. 
-    if len(potential_rnas.keys()) ==0:
-        raise Exception("No 28S-like eukaryotic rRNAs in this struct")
-    else:
-        matches={}
-        for p_rna in potential_rnas:
-            print("processing ", p_rna)
-            try:
-                m6,m8,m9, aaid = ptc_fuzzyfind_subseq_in_chain(struct_profile, potential_rnas[p_rna].auth_asym_id)
-                matches = {
-                    **matches,
-                    aaid: [m6,m8,m9]
-                    }
-                if m9 != None:
-                    rna = potential_rnas[p_rna]
-            except Exception as e :
-                print(e)
-                ...
 
-    auth_asym_id  :str            = rna.auth_asym_id
+    matches ={}
+    for p_rna in rnas:
+            m6,m8,m9, auth_asym_id = ptc_fuzzyfind_subseq_in_chain(struct_profile, p_rna.auth_asym_id)
+            matches = {**matches,auth_asym_id: [m6,m8,m9]}
+
+    
+    auth_asym_id, rRNA_fragment_matches = list(filter(lambda match_kv: len(match_kv[1][2])>0 , list( matches.items() )))[0]
+    print(auth_asym_id, rRNA_fragment_matches)
+
     chain3d       : Chain         = struct_profile.child_dict[assembly_id].child_dict[auth_asym_id]
     ress          : list[Residue] = chain3d.child_list
 

@@ -2,6 +2,7 @@
 import asyncio
 from concurrent import futures
 import json
+import logging
 import typing
 from Bio.PDB.Structure import Structure
 from Bio.PDB.Chain import Chain
@@ -21,7 +22,10 @@ from ribctl.lib.ribosome_types.types_ribosome import RNA, PolymerClass, Polymeri
 from ribctl import RIBETL_DATA
 from pydantic import BaseModel, parse_obj_as
 from concurrent.futures import ALL_COMPLETED, Future, ProcessPoolExecutor, ThreadPoolExecutor, wait
+logging.getLogger('asyncio').setLevel(logging.WARNING)
+
 import os
+
 async def obtain_assets(rcsb_id: str, assetlist: Assetlist, overwrite: bool = False):
     """Obtain all assets for a given RCSB ID"""
 
@@ -40,23 +44,19 @@ async def obtain_assets(rcsb_id: str, assetlist: Assetlist, overwrite: bool = Fa
         coroutines.append(assets._verify_ligads_and_ligandlike_polys(overwrite))
 
     if assetlist.ptc_coords:
-            
-            ress, auth_asym_id = ptc_resdiues_get(rcsb_id, RibosomeAssets(rcsb_id).profile().rnas)
+            ress, auth_asym_id = ptc_resdiues_get(assets.biopython_structure(),  assets.profile().rnas)
             midpoint_coords = ptc_residues_calculate_midpoint(ress, auth_asym_id)
-
-            residue_labels = [(res.get_resname(), res.id[1]) for res in ress]
-            print(residue_labels)
-
+            # residue_labels = [(res.get_resname(), res.id[1]) for res in ress]
             writeout = {
                 "site_9_residues"      : [(res.get_resname(), res.get_segid()) for res in ress],
                 "LSU_rRNA_auth_asym_id": auth_asym_id,
                 "midpoint_coordinates" : midpoint_coords,
                 'nomenclature_table'   : assets.nomenclature_table()
+                
             }
 
             with open(os.path.join(assets._dir_path(),f'{assets.rcsb_id}_PTC_COORDINATES.json'), 'w') as f:
                 json.dump(writeout, f)
-
 
     if assetlist.cif_modified_and_chains:
         coroutines.append(assets._verify_cif_modified_and_chains(overwrite))

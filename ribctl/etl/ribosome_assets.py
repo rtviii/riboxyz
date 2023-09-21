@@ -71,16 +71,32 @@ class RibosomeAssets():
         with open(self._json_profile_filepath(), "r") as f:
             return RibosomeStructure.parse_obj(json.load(f))
 
-    def nomenclature_table(self) -> dict[str, ProteinClass]:
+    def nomenclature_table(self) -> dict[str, dict]:
         prof = self.profile()
         m    = {}
+        if prof.polymeric_factors != None:
+            for p_factor in prof.polymeric_factors:
+                m[p_factor.auth_asym_id]=  {
+                   "nomenclature"         : p_factor.nomenclature,
+                   "entity_poly_strand_id": p_factor.entity_poly_strand_id,
+                   "rcsb_pdbx_description":p_factor.rcsb_pdbx_description
+                   }
 
         for prot in prof.proteins:
-            m[prot.auth_asym_id] = prot.nomenclature
+            m[prot.auth_asym_id] = {
+                   "nomenclature"         : prot.nomenclature,
+                   "entity_poly_strand_id": prot.entity_poly_strand_id,
 
+                   "rcsb_pdbx_description":prot.rcsb_pdbx_description
+                   }
         if prof.rnas!=None:
             for rna in prof.rnas:
-                m[rna.auth_asym_id] = rna.nomenclature
+                m[rna.auth_asym_id] = {
+                   "nomenclature"         : rna.nomenclature,
+                   "entity_poly_strand_id": rna.entity_poly_strand_id,
+                   "rcsb_pdbx_description": rna.rcsb_pdbx_description
+                   }
+
         return m
                 
 
