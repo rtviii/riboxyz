@@ -95,10 +95,13 @@ class RibosomeAssets():
         self._envcheck()
         return f"{self._dir_path()}/_ray_{self.rcsb_id}.png"
 
-    def write_own_json_profile(self, new_profile: dict):
+    def write_own_json_profile(self, new_profile: dict, overwrite: bool = False):
         """Update self, basically."""
-        with open(self._json_profile_filepath(), "w") as f:
-            json.dump(new_profile, f)
+        if overwrite:
+            with open(self._json_profile_filepath(), "w") as f:
+                json.dump(new_profile, f)
+        else:
+            raise Exception("You are about to overwrite {}. Specify `overwrite=True` explicitly.".format(self._json_profile_filepath()))
 
     @staticmethod
     def list_all_structs():
