@@ -5,6 +5,9 @@ volume/
 **/*.hmm
 *.hmm
 
+
+nomv2/**
+
 *.cif
 **/*.cif
 **/volume
