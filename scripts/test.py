@@ -77,8 +77,6 @@ elif sys.argv[1] =="tunnel":
                 EUK_STRUCTS = [*EUK_STRUCTS, *structs]
         return EUK_STRUCTS
 
-
-
     if __name__ == "__main__":
 
         EUK        = list_euk_structs()
