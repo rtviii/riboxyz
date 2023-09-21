@@ -216,7 +216,6 @@ class RibosomeStructure(BaseModel):
     def from_json_profile(d: Any):
         return RibosomeStructure(**d)
 
-
 from enum import Enum, auto
 import typing
 

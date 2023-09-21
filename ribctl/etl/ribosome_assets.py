@@ -36,8 +36,6 @@ class RibosomeAssets():
 
 
 
-
-
     def _envcheck(self):
         if not RIBETL_DATA:
             raise Exception(
@@ -85,8 +83,6 @@ class RibosomeAssets():
         return m
                 
 
-        
-
 
     def biopython_structure(self):
         return open_structure(self.rcsb_id, 'cif')
@@ -99,9 +95,10 @@ class RibosomeAssets():
         self._envcheck()
         return f"{self._dir_path()}/_ray_{self.rcsb_id}.png"
 
-    def save_json_profile(self, filepath: str, profile: dict):
-        with open(filepath, "w") as f:
-            json.dump(profile, f)
+    def write_own_json_profile(self, new_profile: dict):
+        """Update self, basically."""
+        with open(self._json_profile_filepath(), "w") as f:
+            json.dump(new_profile, f)
 
     @staticmethod
     def list_all_structs():
@@ -257,13 +254,12 @@ class RibosomeAssets():
 
     async def _verify_json_profile(self, overwrite: bool = False) -> bool:
         self._verify_dir_exists()
-
         if not os.path.exists(self._json_profile_filepath()):
             ribosome = ReannotationPipeline(query_rcsb_api(rcsb_single_structure_graphql(self.rcsb_id.upper()))).process_structure()
             if not parse_obj_as(RibosomeStructure, ribosome):
                 raise Exception("Invalid ribosome structure profile.")
 
-            self.save_json_profile(
+            self.write_own_json_profile(
                 self._json_profile_filepath(), ribosome.dict())
             print(f"Wrote structure profile:\t{self._json_profile_filepath()}")
             return True;
@@ -272,10 +268,8 @@ class RibosomeAssets():
                 ribosome = ReannotationPipeline(query_rcsb_api(rcsb_single_structure_graphql(self.rcsb_id.upper()))).process_structure()
                 if not parse_obj_as(RibosomeStructure, ribosome):
                     raise Exception("Invalid ribosome structure profile.")
-                self.save_json_profile(
-                    self._json_profile_filepath(), ribosome.dict())
-                print(
-                    f"Wrote structure profile:\t{self._json_profile_filepath()}")
+                self.write_own_json_profile(self._json_profile_filepath(), ribosome.dict())
+                print(f"Wrote structure profile:\t{self._json_profile_filepath()}")
                 return True
             else:
                 return False
