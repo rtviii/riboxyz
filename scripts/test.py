@@ -68,40 +68,17 @@ elif sys.argv[1] =="merge_nomenclature":
 
 
 elif sys.argv[1] =="tunnel":
-
     def list_euk_structs():
-        EUK_STRUCTS = []
-        with open("eukarya_03_07_2023.txt", "r") as data_file:
+        EUK_STRUCTS= []
+        with open("eukarya_2023.txt", "r") as data_file:
             for line in data_file:
                 structs = line.split(",")
                 EUK_STRUCTS = [*EUK_STRUCTS, *structs]
         return EUK_STRUCTS
 
     if __name__ == "__main__":
-
         EUK        = list_euk_structs()
-        PTC_COORDS = {}
-        for RCSB_ID in EUK :
-            try:
-                print("Processing {}".format(RCSB_ID))
-                r= RibosomeAssets(RCSB_ID).profile()
-                ress, auth_asym_id = ptc_resdiues_get(RCSB_ID, r.rnas)
-                midpoint_coords = ptc_residues_calculate_midpoint(ress, auth_asym_id)
-
-                residue_labels = [(res.get_resname(), res.id[1]) for res in ress]
-                print(residue_labels)
-
-                writeout = {
-                    "site_9_residues": [
-                        (res.get_resname(), res.get_segid()) for res in ress
-                    ],
-                    "LSU_rRNA_auth_asym_id": auth_asym_id,
-                    "midpoint_coordinates": midpoint_coords,
-                }
-
-                PTC_COORDS = {**PTC_COORDS, RCSB_ID: writeout}
-
-            except Exception as e:
-                print(e)
+        
+        
    
     print("tunnel")

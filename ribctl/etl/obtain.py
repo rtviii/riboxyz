@@ -17,9 +17,7 @@ from ribctl.lib.mod_extract_bsites import bsite_nonpolymeric_ligand, struct_liga
 from ribctl.lib.mod_split_rename import split_rename
 from ribctl.etl.etl_pipeline import current_rcsb_structs, ReannotationPipeline, rcsb_single_structure_graphql, query_rcsb_api
 from ribctl.lib.mod_render_thumbnail import render_thumbnail
-from ribctl.lib.ribosome_types.types_ribosome import RNA, PolymerClass, PolymericFactor, Protein, ProteinClass, RibosomeStructure
-from ribctl import RIBETL_DATA
-from concurrent.futures import ALL_COMPLETED, Future, ProcessPoolExecutor, ThreadPoolExecutor, wait
+from concurrent.futures import  Future, ThreadPoolExecutor
 logging.getLogger('asyncio').setLevel(logging.WARNING)
 
 logging.basicConfig(
@@ -37,8 +35,8 @@ async def obtain_assets(rcsb_id: str, assetlist: Assetlist, overwrite: bool = Fa
     """Obtain all assets for a given RCSB ID"""
 
     rcsb_id = rcsb_id.upper()
-    # Obtaining assets for 
     logging.debug("※\t\t\t{}".format(rcsb_id))
+
     assets = RibosomeAssets(rcsb_id)
     assets._verify_dir_exists()
 
