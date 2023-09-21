@@ -67,7 +67,6 @@ def ptc_fuzzyfind_subseq_in_chain(biopython_struct, auth_asym_id:str, assembly_i
     PTC_residues_8 = [ress_sanitized[i] for i in list(range(match8.start, match8.end))] if match8 else []
     PTC_residues_6 = [ress_sanitized[i] for i in list(range(match6.start, match6.end))] if match6 else []
 
-    print("Found {}, {}, {} in  ".format(match6,match8,match9), auth_asym_id, biopython_struct)
     return PTC_residues_6, PTC_residues_8, PTC_residues_9, auth_asym_id
 
 def ptc_resdiues_get(biopython_structure:Structure,rnas:list[RNA], assembly_id: int = 0) -> tuple[list[Residue], str]:
@@ -89,7 +88,6 @@ def ptc_resdiues_get(biopython_structure:Structure,rnas:list[RNA], assembly_id: 
 
     
     auth_asym_id, rRNA_fragment_matches = list(filter(lambda match_kv: len(match_kv[1][2])>0 , list( matches.items() )))[0]
-    print(auth_asym_id, rRNA_fragment_matches)
 
     chain3d       : Chain         = struct_profile.child_dict[assembly_id].child_dict[auth_asym_id]
     ress          : list[Residue] = chain3d.child_list
@@ -180,7 +178,6 @@ def ptc_residues_calculate_midpoint(
 
     return midpoint
 
-
 def make_cylinder(p1: list[float], p2: list[float], R: float):
     height = math.sqrt(
         (p2[0] - p1[0]) ** 2 + (p2[1] - p1[1]) ** 2 + (p2[2] - p1[2]) ** 2
@@ -188,7 +185,6 @@ def make_cylinder(p1: list[float], p2: list[float], R: float):
     center = ((p1[0] + p2[0]) / 2, (p1[1] + p2[1]) / 2, (p1[2] + p2[2]) / 2)
 
     return {"center": center, "height": height, "radius": R}
-
 
 def pt_is_inside_cylinder(cylinder, point):
     distance_xy = math.sqrt(
