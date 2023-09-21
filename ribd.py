@@ -28,6 +28,7 @@ parser_cmd_etl.add_argument('--factors_and_ligands'     , action ='store_true' )
 parser_cmd_etl.add_argument('--png_thumbnail'           , action ='store_true' )
 parser_cmd_etl.add_argument('--overwrite'               , action ='store_true' )
 parser_cmd_etl.set_defaults(func=cmd_etl)
+parser_cmd_etl.print_help()
 
 
 #! -------------------------- -------- -------------------------- #
