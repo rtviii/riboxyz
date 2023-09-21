@@ -21,6 +21,7 @@ from concurrent.futures import ALL_COMPLETED, Future, ProcessPoolExecutor, Threa
 import os
 
 class Assetlist(BaseModel)   : 
+
       profile                : Optional[bool]
       ptc_coords             : Optional[bool]
       cif                    : Optional[bool]
@@ -337,100 +338,3 @@ class RibosomeAssets():
         return all_verified_flag
 
 # ※ Mass process methods.
-
-async def obtain_assets(rcsb_id: str, assetlist: Assetlist, overwrite: bool = False):
-    """Obtain all assets for a given RCSB ID"""
-
-    assets = RibosomeAssets(rcsb_id)
-    assets._verify_dir_exists()
-
-    coroutines = []
-
-    if assetlist.profile:
-        coroutines.append(assets._verify_json_profile(overwrite))
-
-    if assetlist.cif:
-        coroutines.append(assets._verify_cif(overwrite))
-
-    if assetlist.factors_and_ligands:
-        coroutines.append(assets._verify_ligads_and_ligandlike_polys(overwrite))
-
-    if assetlist.ptc_coords:
-            ress, auth_asym_id = ptc_resdiues_get(RCSB_ID)
-            midpoint_coords = ptc_residues_calculate_midpoint(ress, auth_asym_id)
-
-            residue_labels = [(res.get_resname(), res.id[1]) for res in ress]
-            print(residue_labels)
-
-            writeout = {
-                "site_9_residues"      : [(res.get_resname(), res.get_segid()) for res in ress],
-                "LSU_rRNA_auth_asym_id": auth_asym_id,
-                "midpoint_coordinates" : midpoint_coords,
-                'nomenclature_table'   : assets.nomenclature_table()
-            }
-
-            with open(os.path.join(assets._dir_path(),f'{assets.rcsb_id}_PTC_COORDINATES.json'), 'w') as f:
-                json.dump(writeout, f)
-
-
-    if assetlist.cif_modified_and_chains:
-        coroutines.append(assets._verify_cif_modified_and_chains(overwrite))
-
-    await asyncio.gather(*coroutines)
-
-def obtain_assets_threadpool(targets: list[str], assetlist: Assetlist, workers: int = 5, get_all: bool = False, overwrite=False):
-    """Get all ribosome profiles from RCSB via a threadpool"""
-    logger = get_updates_logger()
-    if get_all:
-        unsynced = sorted(current_rcsb_structs())
-    else:
-        unsynced = list(map(lambda _: _.upper(), targets))
-
-    futures: list[Future] = []
-    logger.info("Begun downloading ribosome profiles via RCSB")
-
-    def log_commit_result(rcsb_id: str):
-        def _(f: Future):
-            if not None == f.exception():
-                logger.error(rcsb_id + ":" + f.exception().__str__())
-            else:
-                logger.info(rcsb_id + ": processed successfully.")
-        return _
-
-    with ThreadPoolExecutor(max_workers=workers) as executor:
-        for rcsb_id in unsynced:
-            fut = executor.submit(asyncio.run, obtain_assets(rcsb_id, assetlist, overwrite))
-            fut.add_done_callback(log_commit_result(rcsb_id))
-            futures.append(fut)
-
-    wait(futures, return_when=ALL_COMPLETED)
-    logger.info("Finished syncing with RCSB")
-
-def obtain_assets_processpool(targets: list[str], assetlist: Assetlist, workers: int = 5, get_all: bool = False, overwrite=False):
-    """Get all ribosome profiles from RCSB via a threadpool"""
-    logger = get_updates_logger()
-    if get_all:
-        unsynced = sorted(current_rcsb_structs())
-    else:
-        unsynced = list(map(lambda _: _.upper(), targets))
-
-    futures: list[Future] = []
-    logger.info("Begun downloading ribosome profiles via RCSB")
-
-    def log_commit_result(rcsb_id: str):
-        def _(f: Future):
-            if not None == f.exception():
-                logger.error(rcsb_id + ":" + f.exception().__str__())
-            else:
-                logger.info(rcsb_id + ": processed profile successfully.")
-        return _
-
-    with ProcessPoolExecutor(max_workers=workers) as executor:
-        for rcsb_id in unsynced:
-            fut = executor.submit(asyncio.run, obtain_assets(
-                rcsb_id, assetlist, overwrite))
-            fut.add_done_callback(log_commit_result(rcsb_id))
-            futures.append(fut)
-
-    wait(futures, return_when=ALL_COMPLETED)
-    logger.info("Finished syncing with RCSB")

@@ -1,11 +1,13 @@
 import asyncio
 import os
 from ribctl import RIBETL_DATA
-from ribctl.etl.ribosome_assets import Assetlist, RibosomeAssets, obtain_assets, obtain_assets_threadpool
+from ribctl.etl.obtain import obtain_assets, obtain_assets_threadpool
+from ribctl.etl.ribosome_assets import Assetlist
 
 def cmd_etl(args):
 
     ASL = Assetlist()
+
     if args.profile:
         ASL.profile=True
 
@@ -36,9 +38,11 @@ def cmd_etl(args):
 
     #Single structure
     if args.rcsb_id:
+
         RCSB_ID = str(args.rcsb_id)
         loop    = asyncio.get_event_loop()
         loop.run_until_complete(
+
             obtain_assets(
                 RCSB_ID,
                 ASL,

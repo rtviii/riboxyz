@@ -5,22 +5,14 @@ import json
 import logging
 import os
 from pprint import pprint
-import subprocess
 from tempfile import NamedTemporaryFile
 from typing import Iterator
 from Bio.Align import MultipleSeqAlignment,Seq, SeqRecord
 from Bio.Align.Applications import MuscleCommandline
-from Bio import SeqIO, AlignIO, pairwise2
-import re
-import pyhmmer
-from ribctl import ASSETS, MUSCLE_BIN
+from ribctl import ASSETS
 from ribctl.lib.classification import classify_sequence, classify_subchains
-from ribctl.lib.msalib import Fasta, muscle_align_N_seq, phylogenetic_neighborhood
-from ribctl.lib.ribosome_types.types_poly_nonpoly_ligand import list_ProteinClass
-from ribctl.lib.ribosome_types.types_ribosome import ProteinClass, ProteinClassEnum, RibosomeStructure
 from ribctl.etl.ribosome_assets import RibosomeAssets
-from pyhmmer.easel import Alphabet, DigitalSequenceBlock, TextSequence, SequenceFile, SequenceBlock, TextSequenceBlock
-from pyhmmer.plan7 import Pipeline, HMM 
+from ribctl.lib.tunnel import ptc_resdiues_get, ptc_residues_calculate_midpoint
 hmm_cachedir = ASSETS['__hmm_cache']
 import sys
 
@@ -72,10 +64,46 @@ elif sys.argv[1] =="merge_nomenclature":
                 elif nomv2[chain.auth_asym_id] == None and chain.nomenclature != []:
                     chain.nomenclature = []
 
-
-
-
-
         rib_asset.write_own_json_profile(new_profile=json.loads(profile.json()), overwrite=True)
+
+
 elif sys.argv[1] =="tunnel":
+
+    def list_euk_structs():
+        EUK_STRUCTS = []
+        with open("eukarya_03_07_2023.txt", "r") as data_file:
+            for line in data_file:
+                structs = line.split(",")
+                EUK_STRUCTS = [*EUK_STRUCTS, *structs]
+        return EUK_STRUCTS
+
+
+
+    if __name__ == "__main__":
+
+        EUK        = list_euk_structs()
+        PTC_COORDS = {}
+        for RCSB_ID in EUK :
+            try:
+                print("Processing {}".format(RCSB_ID))
+                r= RibosomeAssets(RCSB_ID).profile()
+                ress, auth_asym_id = ptc_resdiues_get(RCSB_ID, r.rnas)
+                midpoint_coords = ptc_residues_calculate_midpoint(ress, auth_asym_id)
+
+                residue_labels = [(res.get_resname(), res.id[1]) for res in ress]
+                print(residue_labels)
+
+                writeout = {
+                    "site_9_residues": [
+                        (res.get_resname(), res.get_segid()) for res in ress
+                    ],
+                    "LSU_rRNA_auth_asym_id": auth_asym_id,
+                    "midpoint_coordinates": midpoint_coords,
+                }
+
+                PTC_COORDS = {**PTC_COORDS, RCSB_ID: writeout}
+
+            except Exception as e:
+                print(e)
+   
     print("tunnel")
