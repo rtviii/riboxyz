@@ -64,10 +64,9 @@ elif sys.argv[1] =="merge_nomenclature":
         profile = rib_asset.profile().json()
 
 
-        print(profile)
 
 
-        rib_asset.write_own_json_profile()
+        # rib_asset.write_own_json_profile()
         # print(rib_assest.json())
 
         # with open(os.path.join(nomv2dict, f),'r') as infile:
