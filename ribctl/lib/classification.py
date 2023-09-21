@@ -26,7 +26,7 @@ import concurrent.futures
 # Configure the logging settings
 logging.basicConfig(
     level=logging.DEBUG,  # Set the logging level to DEBUG (you can adjust this)
-    format='%(asctime)s [%(levelname)s] %(message)s',  # Define the log message format
+    format='%(asctime)s [%(levelname)s] [%(name)s] %(message)s',  # Define the log message format
     handlers=[
         logging.StreamHandler(),  # Log to the console
         logging.FileHandler('classification.log')  # Log to a file named 'my_log_file.log'

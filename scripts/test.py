@@ -1,6 +1,7 @@
 from functools import reduce
 from io import StringIO
 from itertools import tee
+import json
 import logging
 import os
 from pprint import pprint
@@ -59,7 +60,9 @@ else:
         rib            = RibosomeAssets(rcsb_id).profile()
         organism_taxid = rib.src_organism_ids[0]
         prots          = rib.proteins
-        classify_subchains(prots)
+        results        = classify_subchains(prots)
+        with open('/home/rtviii/dev/riboxyz/nomv2/{}.json'.format(rcsb_id), 'w') as f:
+            json.dump(results, f)
 
 
 
