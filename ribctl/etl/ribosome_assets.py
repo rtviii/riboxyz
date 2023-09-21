@@ -100,6 +100,7 @@ class RibosomeAssets():
         if overwrite:
             with open(self._json_profile_filepath(), "w") as f:
                 json.dump(new_profile, f)
+                print("Wrote {}".format(self._json_profile_filepath()))
         else:
             raise Exception("You are about to overwrite {}. Specify `overwrite=True` explicitly.".format(self._json_profile_filepath()))
 

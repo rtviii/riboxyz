@@ -54,30 +54,28 @@ elif sys.argv[1] =="merge_nomenclature":
 
 
     for f in os.listdir(nomv2dict):
+        
+        print(f)
+        with open(os.path.join(nomv2dict, f),'r') as infile:
+            nomv2=json.load(infile)
         struct, _ = f.split(".")
-        # print(struct)
         rib_asset = RibosomeAssets(struct)
-        # print(json_repr)
 
 
-        filepath =rib_asset._json_profile_filepath()
-        profile = rib_asset.profile().json()
+        filepath = rib_asset._json_profile_filepath()
+        profile  = rib_asset.profile()
+        
+        for chain in profile.proteins:
+            if chain.auth_asym_id in nomv2:
+                if nomv2[chain.auth_asym_id] != None and nomv2[chain.auth_asym_id] not in chain.nomenclature:
+                    chain.nomenclature = [nomv2[chain.auth_asym_id]]
+                elif nomv2[chain.auth_asym_id] == None and chain.nomenclature != []:
+                    chain.nomenclature = []
 
 
 
 
-        # rib_asset.write_own_json_profile()
-        # print(rib_assest.json())
 
-        # with open(os.path.join(nomv2dict, f),'r') as infile:
-        #     nomcl = json.load(infile)
-        #     pprint(nomcl)
-
-        # with open(os.path.join(nomv2dict, f),'r') as infile:
-        #     nomcl = json.load(infile)
-        #     pprint(nomcl)
-        exit()
-
-    
+        rib_asset.write_own_json_profile(new_profile=json.loads(profile.json()), overwrite=True)
 elif sys.argv[1] =="tunnel":
     print("tunnel")
