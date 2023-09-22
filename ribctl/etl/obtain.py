@@ -31,6 +31,7 @@ logging.basicConfig(
 
 
 import os
+
 async def obtain_assets(rcsb_id: str, assetlist: Assetlist, overwrite: bool = False):
     """Obtain all assets for a given RCSB ID"""
 
@@ -52,6 +53,9 @@ async def obtain_assets(rcsb_id: str, assetlist: Assetlist, overwrite: bool = Fa
         coroutines.append(assets._verify_ligads_and_ligandlike_polys(overwrite))
 
     if assetlist.ptc_coords:
+            asset_ptc_coords_path = os.path.join(assets._dir_path(),f'{assets.rcsb_id}_PTC_COORDINATES.json')
+            if os.path.exists(asset_ptc_coords_path) and not overwrite:
+                raise Exception(f'PTC coordinates already exist for {assets.rcsb_id} and overwrite is set to False')
             ress, auth_asym_id = ptc_resdiues_get(assets.biopython_structure(),  assets.profile().rnas)
             midpoint_coords = ptc_residues_calculate_midpoint(ress, auth_asym_id)
             # residue_labels = [(res.get_resname(), res.id[1]) for res in ress]
@@ -63,7 +67,6 @@ async def obtain_assets(rcsb_id: str, assetlist: Assetlist, overwrite: bool = Fa
 
             }
 
-            asset_ptc_coords_path = os.path.join(assets._dir_path(),f'{assets.rcsb_id}_PTC_COORDINATES.json')
 
             with open(asset_ptc_coords_path, 'w') as f:
                 logging.debug(f'Writing PTC coordinates to {asset_ptc_coords_path}')

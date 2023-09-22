@@ -79,6 +79,27 @@ AMINO_ACIDS_3_TO_1_CODE = {
 "VAL":"V"};
 AMINO_ACIDS_1_TO_3_CODE = {v:k for k,v in AMINO_ACIDS_3_TO_1_CODE.items()}
 
+# bac,
+
+# L.lactis 
+# M.smegmatis
+# M.tuberculosis 
+# B.subtills 
+
+#  euk
+# L.Donovani 
+# T. cruzi
+# T. vaginalis.
+
+
+
+
+model_species = {
+    
+
+
+}
+
 
 
 __version__ = '0.1.0'
