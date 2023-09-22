@@ -1,4 +1,5 @@
 import os
+from typing import Tuple
 from ribctl.etl.ribosome_assets import RibosomeAssets
 from ete3 import NCBITaxa
 from ribctl.lib.ribosome_types.types_ribosome import RibosomeStructure
@@ -34,19 +35,21 @@ def get_descendants_of( parent:int, targets:list[int]):
 
 # ? Struct-specific functions
 
-def is_descendant_of(taxid: int, struct: str) -> bool:
+def taxid_is_descendant_of(parent_taxid: int, target_taxid) -> ( bool, list[int]|None ):
     ncbi = NCBITaxa()
-    src, hst = RibosomeAssets(struct).get_taxids()
-    lineage = ncbi.get_lineage(src[0])
+    lineage = ncbi.get_lineage(target_taxid)
     if lineage is None:
-        raise LookupError
-    return False if taxid not in lineage else True
+        raise LookupError("Lineage is None. Check if taxid is NCBI-valid.")
+    return ( False,lineage ) if parent_taxid not in lineage else (True, lineage)
 
+def descendants_of_taxid(struct_taxids:list[Tuple[ str,int ]],parent_taxid: int) -> list[Tuple[ str,int ]]:
+        descendants = []
+        for (rcsb_id, taxid) in struct_taxids:
+            descends,lin = taxid_is_descendant_of(parent_taxid, taxid)
+            if descends:
+                descendants.append((rcsb_id,taxid))
 
-def filter_by_parent_tax(taxid: int):
-    all_structs = os.listdir(RIBETL_DATA)
-    descendants = list(filter(lambda x: is_descendant_of(taxid, x), all_structs))
-    return descendants
+        return descendants
 
 
 def __node_lineage(node):
