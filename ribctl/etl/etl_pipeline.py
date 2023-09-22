@@ -1,5 +1,6 @@
 import functools
 import json
+import logging
 from pprint import pprint
 from typing import Any, Optional
 from pyhmmer.plan7 import HMM
@@ -9,25 +10,21 @@ from ribctl.etl.etl_polypeptides import (
     protein_classify,
     rna_classify,
 )
-from ribctl.lib.classification import rp_hmm_dict_init, seq_evaluate_v_hmm_dict
+from ribctl.lib.classification import  classify_subchains, seq_evaluate_v_hmm_dict, hmm_dict_init__candidates_per_organism
 from ribctl.lib.ribosome_types.types_ribosome import (
     RNA,
     AssemblyInstancesMap,
     NonpolymericLigand,
     Polymer,
+    PolymerClass_,
     PolymericFactor,
     Protein,
     ProteinClass,
+    ProteinClassEnum,
     RibosomeStructure,
 )
 from ribctl.etl.gql_querystrings import single_structure_graphql_template
-
-
-"""These methods take a single rcsb_id and observes that the corresponding structure is:\
-     - retrieved from RCSB
-     - processed according to the pipeline of methods 
-"""
-
+logging.getLogger('urllib3.connectionpool').setLevel(logging.CRITICAL)
 
 def current_rcsb_structs() -> list[str]:
     """Return all structures in the rcsb that contain the phrase RIBOSOME and have more than 25 protein entities"""
@@ -135,9 +132,9 @@ class ReannotationPipeline:
     # rRNA     : list[RNA] | None
 
     def __init__(self, response: dict):
-        self.rcsb_data_dict = response
-        self.hmm_ribosomal_proteins = rp_hmm_dict_init()
-        self.asm_maps = self.asm_parse(response["assemblies"])
+        self.rcsb_data_dict         = response
+        # self.hmm_ribosomal_proteins = hmm_dict_init__candidates_per_organism(ProteinClassEnum, response["rcsb_id"])
+        self.asm_maps               = self.asm_parse(response["assemblies"])
 
         self.rcsb_polymers = len(self.rcsb_data_dict["polymer_entities"])
         self.rcsb_nonpolymers = (
@@ -159,7 +156,6 @@ class ReannotationPipeline:
 
         # Given this state of affairs, if we want to be able to uniquely (coordinate-wise) identify each chain, we need to account for cases where PDB has provided two and sometimes four polymer collapsed into one representation.
         # We do this by counting assymetric_ids of each polymer and hold that as a
-
         self.flattened_polymers_target = functools.reduce(
             lambda count, poly: count
             + len(poly["rcsb_polymer_entity_container_identifiers"]["asym_ids"]),
@@ -325,7 +321,6 @@ class ReannotationPipeline:
         for poly in poly_entities:
             rnas.append(poly) if is_rna(poly) else ...
 
-        print("==================================================================================================")
 
         reshaped_rnas             : list[RNA]             = []
         reshaped_polymeric_factors: list[PolymericFactor] = []
@@ -457,24 +452,20 @@ class ReannotationPipeline:
         src_organism_names  = list(map(str, set(src_organism_names)))
 
         # ? Compare prot sequence against all HMMs (returns a dict), pick the class with the lowest e-value
-        hmm_resulsts = seq_evaluate_v_hmm_dict(
-            rpotein_polymer_obj["entity_poly"]["pdbx_seq_one_letter_code_can"],
-            self.hmm_ribosomal_proteins,
-        )
-        results_hmm = dict(
-            sorted(
-                {key: value for key, value in hmm_resulsts.items() if value}.items(),
-                key=lambda item: min(item[1]),
-            )
-        )
-        nomenclature = (
-            [list(results_hmm.keys())[0]] if len(list(results_hmm.keys())) > 0 else []
-        )
+        # results_hmm = dict(
+        #     sorted(
+        #         {key: value for key, value in hmm_resulsts.items() if value}.items(),
+        #         key=lambda item: min(item[1]),
+        #     )
+        # )
+        # nomenclature = (
+        #     [list(results_hmm.keys())[0]] if len(list(results_hmm.keys())) > 0 else []
+        # )
 
         return [
             Protein(
                 assembly_id=self.poly_assign_to_asm(auth_asym_id),
-                nomenclature=nomenclature,
+                nomenclature=[],
                 asym_ids=rpotein_polymer_obj["rcsb_polymer_entity_container_identifiers"]["asym_ids"],
                 parent_rcsb_id=rpotein_polymer_obj["entry"]["rcsb_id"],
                 auth_asym_id=auth_asym_id,
@@ -709,25 +700,16 @@ class ReannotationPipeline:
 
     def process_structure(self):
         [reshaped_proteins,reshaped_polymeric_factors_prot] = self.process_polypeptides()
-        [reshaped_rnas, reshaped_polymeric_factors_rna] = self.process_polynucleotides()
-        other_polymers = self.process_other_polymers()
+        [reshaped_rnas, reshaped_polymeric_factors_rna]     = self.process_polynucleotides()
+        other_polymers                                      = self.process_other_polymers()
 
-        # for i in reshaped_rnas:
-        #     pprint(i)
-        # for i in reshaped_proteins:
-        #     pprint(i)
-        # for i in reshaped_polymeric_factors_prot:
-        #     pprint(i)
-        # for i in reshaped_polymeric_factors_rna:
-        #     pprint(i)
-
-        # print("target falt poly", self.flattened_polymers_target)
-        # print(len(reshaped_proteins))
-        # print(len(reshaped_rnas))
-        # print(len(reshaped_polymeric_factors_rna))
-        # print(len(reshaped_polymeric_factors_prot))
-
-        # print("poly identifiers len: ",len( self.rcsb_data_dict["polymer_entities"] ), )
+        prot_noms: dict[str,PolymerClass_] =  classify_subchains([*reshaped_proteins, *reshaped_polymeric_factors_prot])
+        for (aaid, protname) in prot_noms.items():
+            for prot in reshaped_proteins:
+                if prot.auth_asym_id == aaid and protname != None:
+                    prot.nomenclature = [ protname ]
+                else:
+                    continue
 
         assert (
             len(reshaped_proteins)

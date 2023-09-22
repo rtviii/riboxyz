@@ -4,6 +4,7 @@ import os
 from pprint import pprint
 from ribctl import RIBETL_DATA
 from ribctl.etl.ribosome_assets import RibosomeAssets
+from ribctl.lib.util_taxonomy import filter_by_parent_tax
 
 
 def cmd_ls(args):
@@ -17,8 +18,14 @@ def cmd_ls(args):
             pprint(json.loads(chain.json()))
         else:
             pprint(json.loads(RibosomeAssets(args.struct).profile().json()))
-    elif args.species != None:
-        print("Listing species information for", args.species)
+
+
+    elif args.taxid != None:
+        print("Listing species information for", args.taxid)
+        filter_by_parent_tax(args.taxid)
+
+
+
     elif args.subelement != None:
         print("Listing subelement information for", args.subelement)
     else:

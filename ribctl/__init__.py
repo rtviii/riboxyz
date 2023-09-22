@@ -79,6 +79,22 @@ AMINO_ACIDS_3_TO_1_CODE = {
 "VAL":"V"};
 AMINO_ACIDS_1_TO_3_CODE = {v:k for k,v in AMINO_ACIDS_3_TO_1_CODE.items()}
 
+# bac,
+
+# L.lactis 
+# M.smegmatis
+# M.tuberculosis 
+# B.subtills 
+
+#  euk
+# L.Donovani 
+# T. cruzi
+# T. vaginalis.
+
+
+model_species = {'Lactococcus lactis': [1358], 'Mycobacterium smegmatis': [1772], 'Mycobacterium tuberculosis': [1773], 'Bacillus subtilis': [1423], 'Leishmania donovani': [5661], 'Trypanosoma cruzi': [5693], 'Trichomonas vaginalis': [5722]}
+
+
 
 
 __version__ = '0.1.0'
