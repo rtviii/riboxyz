@@ -69,11 +69,11 @@ def cmd_etl(args):
             get_all=True,
             overwrite=args.overwrite or False
         )
+
     if args.rcsb_id:
         RCSB_ID = str(args.rcsb_id)
         loop    = asyncio.get_event_loop()
         loop.run_until_complete(
-
             obtain_assets(
                 RCSB_ID,
                 ASL,
