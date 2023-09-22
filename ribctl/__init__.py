@@ -92,13 +92,8 @@ AMINO_ACIDS_1_TO_3_CODE = {v:k for k,v in AMINO_ACIDS_3_TO_1_CODE.items()}
 # T. vaginalis.
 
 
+model_species = {'Lactococcus lactis': [1358], 'Mycobacterium smegmatis': [1772], 'Mycobacterium tuberculosis': [1773], 'Bacillus subtilis': [1423], 'Leishmania donovani': [5661], 'Trypanosoma cruzi': [5693], 'Trichomonas vaginalis': [5722]}
 
-
-model_species = {
-    
-
-
-}
 
 
 

@@ -103,7 +103,7 @@ parser_sync.set_defaults(func=cmd_sync)
 # #! -------------------------- -------- -------------------------- #
 parser_cmd_ls = subparsers.add_parser('ls', help='List information')
 parser_cmd_ls.add_argument('-struct', help="Structure ID")
-parser_cmd_ls.add_argument('-spec', '--species', help="Species ID")
+parser_cmd_ls.add_argument('-taxid', '--taxid', help="Species ID")
 parser_cmd_ls.add_argument('-elem', '--subelement', help="Subelement type (rna,protein,ligand)")
 parser_cmd_ls.set_defaults(func=cmd_ls)
 

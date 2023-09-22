@@ -37,16 +37,6 @@ logging.basicConfig(
 hmm_cachedir = ASSETS['__hmm_cache']
 
 #! Lib ------------------------------
-def rp_hmm_dict_init(organim_taxid:int) ->dict[ProteinClass, HMM]: 
-    "Retrieve dictionary of HMMs for each protein class (to compare an incoming seq against each hmm)"
-    prot_hmms_dict = {}
-    for hmm_class in list_ProteinClass:
-        class_hmm = os.path.join(ASSETS["hmm_ribosomal_proteins"], f"{hmm_class}.hmm")
-        with pyhmmer.plan7.HMMFile(class_hmm) as hmm_file:
-            hmm                       = hmm_file.read()
-            prot_hmms_dict[hmm_class] = hmm
-    return prot_hmms_dict
-
 def seq_evaluate_v_hmm(seq:str,alphabet:Alphabet, hmm:HMM):
     """Fit a sequence to a given HMM"""
     seq_  = pyhmmer.easel.TextSequence(name=b"template", sequence=seq)
