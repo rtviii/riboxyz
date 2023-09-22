@@ -13,7 +13,10 @@ from ribctl import ASSETS
 from ribctl.lib.classification import classify_sequence, classify_subchains
 from ribctl.etl.ribosome_assets import RibosomeAssets
 from ribctl.lib.tunnel import ptc_resdiues_get, ptc_residues_calculate_midpoint
+from ribctl import model_species
 from ete3 import NCBITaxa
+
+from ribctl.lib.util_taxonomy import descendants_of_taxid
 hmm_cachedir = ASSETS['__hmm_cache']
 import sys
 
@@ -95,16 +98,17 @@ elif sys.argv[1] == "spec":
             return None
 
 
-    # L.Donovani 
-    # T. cruzi
-    # T. vaginalis.
     _ ={}
     for organism_name in ['Lactococcus lactis','Mycobacterium smegmatis', 'Mycobacterium tuberculosis', 'Bacillus subtilis'
-                          , 'Leishmania donovani', 'Trypanosoma cruzi', 'Trichomonas vaginalis']:
+                          , 'Leishmania donovani', 'Trypanosoma cruzi', 'Trichomonas vaginalis','Giardia duodenalis','Spraguea lophii' ]:
         taxonomic_id = get_taxonomic_id(organism_name)
         
         if taxonomic_id:
             _ = {**_, **{organism_name: taxonomic_id}}
             print(f"Taxonomic ID for {organism_name}: {taxonomic_id}")
     print(_)
+
+elif sys.argv[1] == "test":
+    for (name, taxid) in model_species.items():
+        print(descendants_of_taxid(taxid))
 

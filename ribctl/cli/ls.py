@@ -4,7 +4,8 @@ import os
 from pprint import pprint
 from ribctl import RIBETL_DATA
 from ribctl.etl.ribosome_assets import RibosomeAssets
-from ribctl.lib.util_taxonomy import filter_by_parent_tax
+from ribctl.lib.ribosome_types.types_ribosome import RibosomeStructure
+from ribctl.lib.util_taxonomy import  get_descendants_of, taxid_is_descendant_of,descendants_of_taxid
 
 
 def cmd_ls(args):
@@ -19,11 +20,14 @@ def cmd_ls(args):
         else:
             pprint(json.loads(RibosomeAssets(args.struct).profile().json()))
 
-
     elif args.taxid != None:
         print("Listing species information for", args.taxid)
-        filter_by_parent_tax(args.taxid)
-
+        all_structs = os.listdir(RIBETL_DATA)
+        struct_profiles:list[RibosomeStructure] = []    
+        for struct in all_structs:
+            rp = RibosomeAssets(struct)
+            struct_profiles.append(rp.profile())
+        print(descendants_of_taxid(int(args.taxid)))
 
 
     elif args.subelement != None:
