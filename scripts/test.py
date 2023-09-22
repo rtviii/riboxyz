@@ -13,6 +13,7 @@ from ribctl import ASSETS
 from ribctl.lib.classification import classify_sequence, classify_subchains
 from ribctl.etl.ribosome_assets import RibosomeAssets
 from ribctl.lib.tunnel import ptc_resdiues_get, ptc_residues_calculate_midpoint
+from ete3 import NCBITaxa
 hmm_cachedir = ASSETS['__hmm_cache']
 import sys
 
@@ -78,7 +79,32 @@ elif sys.argv[1] =="tunnel":
 
     if __name__ == "__main__":
         EUK        = list_euk_structs()
-        
-        
    
     print("tunnel")
+elif sys.argv[1] == "spec":
+    def get_taxonomic_id(organism_name):
+        ncbi = NCBITaxa()
+
+        try:
+            # Get the taxonomic ID for the given organism name
+            taxid = ncbi.get_name_translator([organism_name])[organism_name]
+            return taxid
+        except KeyError:
+            # Handle the case where the organism name is not found
+            print(f"Organism '{organism_name}' not found in the NCBI Taxonomy database.")
+            return None
+
+
+    # L.Donovani 
+    # T. cruzi
+    # T. vaginalis.
+    _ ={}
+    for organism_name in ['Lactococcus lactis','Mycobacterium smegmatis', 'Mycobacterium tuberculosis', 'Bacillus subtilis'
+                          , 'Leishmania donovani', 'Trypanosoma cruzi', 'Trichomonas vaginalis']:
+        taxonomic_id = get_taxonomic_id(organism_name)
+        
+        if taxonomic_id:
+            _ = {**_, **{organism_name: taxonomic_id}}
+            print(f"Taxonomic ID for {organism_name}: {taxonomic_id}")
+    print(_)
+
