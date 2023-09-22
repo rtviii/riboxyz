@@ -114,12 +114,12 @@ class RibosomeAssets():
 
     def write_own_json_profile(self, new_profile: dict, overwrite: bool = False):
         """Update self, basically."""
-        if overwrite:
+        if os.path.exists(self._json_profile_filepath()) and not overwrite:
+            print("You are about to overwrite {}. Specify `overwrite=True` explicitly.".format(self._json_profile_filepath()))
+        elif overwrite:
             with open(self._json_profile_filepath(), "w") as f:
                 json.dump(new_profile, f)
-                print("Wrote {}".format(self._json_profile_filepath()))
-        else:
-            raise Exception("You are about to overwrite {}. Specify `overwrite=True` explicitly.".format(self._json_profile_filepath()))
+             
 
     @staticmethod
     def list_all_structs():
@@ -275,26 +275,12 @@ class RibosomeAssets():
 
     async def _verify_json_profile(self, overwrite: bool = False) -> bool:
         self._verify_dir_exists()
-        if not os.path.exists(self._json_profile_filepath()):
-            ribosome = ReannotationPipeline(query_rcsb_api(rcsb_single_structure_graphql(self.rcsb_id.upper()))).process_structure()
-            if not parse_obj_as(RibosomeStructure, ribosome):
-                raise Exception("Invalid ribosome structure profile.")
-
-            self.write_own_json_profile(
-                self._json_profile_filepath(), ribosome.dict())
-            print(f"Wrote structure profile:\t{self._json_profile_filepath()}")
-            return True;
-        else:
-            if overwrite:
-                ribosome = ReannotationPipeline(query_rcsb_api(rcsb_single_structure_graphql(self.rcsb_id.upper()))).process_structure()
-                if not parse_obj_as(RibosomeStructure, ribosome):
-                    raise Exception("Invalid ribosome structure profile.")
-                self.write_own_json_profile(self._json_profile_filepath(), ribosome.dict())
-                print(f"Wrote structure profile:\t{self._json_profile_filepath()}")
-                return True
-            else:
-                return False
-
+        ribosome = ReannotationPipeline(query_rcsb_api(rcsb_single_structure_graphql(self.rcsb_id.upper()))).process_structure()
+        if not parse_obj_as(RibosomeStructure, ribosome):
+            raise Exception("Invalid ribosome structure profile.")
+        self.write_own_json_profile( ribosome.dict(), overwrite)
+        return True
+        
     def _verify_png_thumbnail(self, overwrite: bool = False) -> bool:
         if overwrite:
             print("Obtaning thumbnail...")

@@ -1,5 +1,6 @@
 import functools
 import json
+import logging
 from pprint import pprint
 from typing import Any, Optional
 from pyhmmer.plan7 import HMM
@@ -9,12 +10,13 @@ from ribctl.etl.etl_polypeptides import (
     protein_classify,
     rna_classify,
 )
-from ribctl.lib.classification import  seq_evaluate_v_hmm_dict, hmm_dict_init__candidates_per_organism
+from ribctl.lib.classification import  classify_subchains, seq_evaluate_v_hmm_dict, hmm_dict_init__candidates_per_organism
 from ribctl.lib.ribosome_types.types_ribosome import (
     RNA,
     AssemblyInstancesMap,
     NonpolymericLigand,
     Polymer,
+    PolymerClass_,
     PolymericFactor,
     Protein,
     ProteinClass,
@@ -22,12 +24,7 @@ from ribctl.lib.ribosome_types.types_ribosome import (
     RibosomeStructure,
 )
 from ribctl.etl.gql_querystrings import single_structure_graphql_template
-
-
-"""These methods take a single rcsb_id and observes that the corresponding structure is:\
-     - retrieved from RCSB
-     - processed according to the pipeline of methods 
-"""
+logging.getLogger('urllib3.connectionpool').setLevel(logging.CRITICAL)
 
 def current_rcsb_structs() -> list[str]:
     """Return all structures in the rcsb that contain the phrase RIBOSOME and have more than 25 protein entities"""
@@ -324,7 +321,6 @@ class ReannotationPipeline:
         for poly in poly_entities:
             rnas.append(poly) if is_rna(poly) else ...
 
-        print("==================================================================================================")
 
         reshaped_rnas             : list[RNA]             = []
         reshaped_polymeric_factors: list[PolymericFactor] = []
@@ -704,9 +700,16 @@ class ReannotationPipeline:
 
     def process_structure(self):
         [reshaped_proteins,reshaped_polymeric_factors_prot] = self.process_polypeptides()
-        [reshaped_rnas, reshaped_polymeric_factors_rna] = self.process_polynucleotides()
-        other_polymers = self.process_other_polymers()
+        [reshaped_rnas, reshaped_polymeric_factors_rna]     = self.process_polynucleotides()
+        other_polymers                                      = self.process_other_polymers()
 
+        prot_noms: dict[str,PolymerClass_] =  classify_subchains([*reshaped_proteins, *reshaped_polymeric_factors_prot])
+        for (aaid, protname) in prot_noms.items():
+            for prot in reshaped_proteins:
+                if prot.auth_asym_id == aaid and protname != None:
+                    prot.nomenclature = [ protname ]
+                else:
+                    continue
 
         assert (
             len(reshaped_proteins)
