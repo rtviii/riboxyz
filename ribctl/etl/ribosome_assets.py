@@ -21,6 +21,7 @@ from concurrent.futures import ALL_COMPLETED, Future, ProcessPoolExecutor, Threa
 import os
 
 class Assetlist(BaseModel)   : 
+
       profile                : Optional[bool]
       ptc_coords             : Optional[bool]
       cif                    : Optional[bool]
@@ -33,8 +34,6 @@ class RibosomeAssets():
 
     def __init__(self, rcsb_id: str) -> None:
         self.rcsb_id = rcsb_id.upper()
-
-
 
 
 
@@ -72,20 +71,34 @@ class RibosomeAssets():
         with open(self._json_profile_filepath(), "r") as f:
             return RibosomeStructure.parse_obj(json.load(f))
 
-    def nomenclature_table(self) -> dict[str, ProteinClass]:
+    def nomenclature_table(self) -> dict[str, dict]:
         prof = self.profile()
         m    = {}
+        if prof.polymeric_factors != None:
+            for p_factor in prof.polymeric_factors:
+                m[p_factor.auth_asym_id]=  {
+                   "nomenclature"         : p_factor.nomenclature,
+                   "entity_poly_strand_id": p_factor.entity_poly_strand_id,
+                   "rcsb_pdbx_description":p_factor.rcsb_pdbx_description
+                   }
 
         for prot in prof.proteins:
-            m[prot.auth_asym_id] = prot.nomenclature
+            m[prot.auth_asym_id] = {
+                   "nomenclature"         : prot.nomenclature,
+                   "entity_poly_strand_id": prot.entity_poly_strand_id,
 
+                   "rcsb_pdbx_description":prot.rcsb_pdbx_description
+                   }
         if prof.rnas!=None:
             for rna in prof.rnas:
-                m[rna.auth_asym_id] = rna.nomenclature
+                m[rna.auth_asym_id] = {
+                   "nomenclature"         : rna.nomenclature,
+                   "entity_poly_strand_id": rna.entity_poly_strand_id,
+                   "rcsb_pdbx_description": rna.rcsb_pdbx_description
+                   }
+
         return m
                 
-
-        
 
 
     def biopython_structure(self):
@@ -99,9 +112,14 @@ class RibosomeAssets():
         self._envcheck()
         return f"{self._dir_path()}/_ray_{self.rcsb_id}.png"
 
-    def save_json_profile(self, filepath: str, profile: dict):
-        with open(filepath, "w") as f:
-            json.dump(profile, f)
+    def write_own_json_profile(self, new_profile: dict, overwrite: bool = False):
+        """Update self, basically."""
+        if overwrite:
+            with open(self._json_profile_filepath(), "w") as f:
+                json.dump(new_profile, f)
+                print("Wrote {}".format(self._json_profile_filepath()))
+        else:
+            raise Exception("You are about to overwrite {}. Specify `overwrite=True` explicitly.".format(self._json_profile_filepath()))
 
     @staticmethod
     def list_all_structs():
@@ -257,13 +275,12 @@ class RibosomeAssets():
 
     async def _verify_json_profile(self, overwrite: bool = False) -> bool:
         self._verify_dir_exists()
-
         if not os.path.exists(self._json_profile_filepath()):
             ribosome = ReannotationPipeline(query_rcsb_api(rcsb_single_structure_graphql(self.rcsb_id.upper()))).process_structure()
             if not parse_obj_as(RibosomeStructure, ribosome):
                 raise Exception("Invalid ribosome structure profile.")
 
-            self.save_json_profile(
+            self.write_own_json_profile(
                 self._json_profile_filepath(), ribosome.dict())
             print(f"Wrote structure profile:\t{self._json_profile_filepath()}")
             return True;
@@ -272,10 +289,8 @@ class RibosomeAssets():
                 ribosome = ReannotationPipeline(query_rcsb_api(rcsb_single_structure_graphql(self.rcsb_id.upper()))).process_structure()
                 if not parse_obj_as(RibosomeStructure, ribosome):
                     raise Exception("Invalid ribosome structure profile.")
-                self.save_json_profile(
-                    self._json_profile_filepath(), ribosome.dict())
-                print(
-                    f"Wrote structure profile:\t{self._json_profile_filepath()}")
+                self.write_own_json_profile(self._json_profile_filepath(), ribosome.dict())
+                print(f"Wrote structure profile:\t{self._json_profile_filepath()}")
                 return True
             else:
                 return False
@@ -339,100 +354,3 @@ class RibosomeAssets():
         return all_verified_flag
 
 # ※ Mass process methods.
-
-async def obtain_assets(rcsb_id: str, assetlist: Assetlist, overwrite: bool = False):
-    """Obtain all assets for a given RCSB ID"""
-
-    assets = RibosomeAssets(rcsb_id)
-    assets._verify_dir_exists()
-
-    coroutines = []
-
-    if assetlist.profile:
-        coroutines.append(assets._verify_json_profile(overwrite))
-
-    if assetlist.cif:
-        coroutines.append(assets._verify_cif(overwrite))
-
-    if assetlist.factors_and_ligands:
-        coroutines.append(assets._verify_ligads_and_ligandlike_polys(overwrite))
-
-    if assetlist.ptc_coords:
-            ress, auth_asym_id = ptc_resdiues_get(RCSB_ID)
-            midpoint_coords = ptc_residues_calculate_midpoint(ress, auth_asym_id)
-
-            residue_labels = [(res.get_resname(), res.id[1]) for res in ress]
-            print(residue_labels)
-
-            writeout = {
-                "site_9_residues"      : [(res.get_resname(), res.get_segid()) for res in ress],
-                "LSU_rRNA_auth_asym_id": auth_asym_id,
-                "midpoint_coordinates" : midpoint_coords,
-                'nomenclature_table'   : assets.nomenclature_table()
-            }
-
-            with open(os.path.join(assets._dir_path(),f'{assets.rcsb_id}_PTC_COORDINATES.json'), 'w') as f:
-                json.dump(writeout, f)
-
-
-    if assetlist.cif_modified_and_chains:
-        coroutines.append(assets._verify_cif_modified_and_chains(overwrite))
-
-    await asyncio.gather(*coroutines)
-
-def obtain_assets_threadpool(targets: list[str], assetlist: Assetlist, workers: int = 5, get_all: bool = False, overwrite=False):
-    """Get all ribosome profiles from RCSB via a threadpool"""
-    logger = get_updates_logger()
-    if get_all:
-        unsynced = sorted(current_rcsb_structs())
-    else:
-        unsynced = list(map(lambda _: _.upper(), targets))
-
-    futures: list[Future] = []
-    logger.info("Begun downloading ribosome profiles via RCSB")
-
-    def log_commit_result(rcsb_id: str):
-        def _(f: Future):
-            if not None == f.exception():
-                logger.error(rcsb_id + ":" + f.exception().__str__())
-            else:
-                logger.info(rcsb_id + ": processed successfully.")
-        return _
-
-    with ThreadPoolExecutor(max_workers=workers) as executor:
-        for rcsb_id in unsynced:
-            fut = executor.submit(asyncio.run, obtain_assets(rcsb_id, assetlist, overwrite))
-            fut.add_done_callback(log_commit_result(rcsb_id))
-            futures.append(fut)
-
-    wait(futures, return_when=ALL_COMPLETED)
-    logger.info("Finished syncing with RCSB")
-
-def obtain_assets_processpool(targets: list[str], assetlist: Assetlist, workers: int = 5, get_all: bool = False, overwrite=False):
-    """Get all ribosome profiles from RCSB via a threadpool"""
-    logger = get_updates_logger()
-    if get_all:
-        unsynced = sorted(current_rcsb_structs())
-    else:
-        unsynced = list(map(lambda _: _.upper(), targets))
-
-    futures: list[Future] = []
-    logger.info("Begun downloading ribosome profiles via RCSB")
-
-    def log_commit_result(rcsb_id: str):
-        def _(f: Future):
-            if not None == f.exception():
-                logger.error(rcsb_id + ":" + f.exception().__str__())
-            else:
-                logger.info(rcsb_id + ": processed profile successfully.")
-        return _
-
-    with ProcessPoolExecutor(max_workers=workers) as executor:
-        for rcsb_id in unsynced:
-            fut = executor.submit(asyncio.run, obtain_assets(
-                rcsb_id, assetlist, overwrite))
-            fut.add_done_callback(log_commit_result(rcsb_id))
-            futures.append(fut)
-
-    wait(futures, return_when=ALL_COMPLETED)
-    logger.info("Finished syncing with RCSB")

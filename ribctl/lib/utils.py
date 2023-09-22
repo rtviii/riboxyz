@@ -1,12 +1,12 @@
+
+from Bio.PDB.Structure import Structure
+from Bio.PDB import FastMMCIFParser
+
 import gzip
 import json
 import os
 import typing
 import requests
-
-from Bio.PDB.Structure import Structure
-from Bio.PDB import FastMMCIFParser
-
 from ribctl import RIBETL_DATA
 
 
