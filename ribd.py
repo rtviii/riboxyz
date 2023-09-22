@@ -1,6 +1,6 @@
 import argparse
 
-from ribctl.cli.etl import cmd_etl
+# from ribctl.cli.etl import cmd_etl
 from ribctl.cli.ls import cmd_ls
 from ribctl.cli.sync import cmd_sync
 def parse_comma_separated_list(value):
@@ -10,6 +10,7 @@ def parse_comma_separated_list(value):
 
 parser     = argparse.ArgumentParser(description="Command line interface for the `ribctl` package.")
 subparsers = parser.add_subparsers(title='Subcommands', dest='command')
+
 
 #! -------------------------- --- -------------------------- #
 #! -------------------------- etl -------------------------- #
@@ -27,7 +28,65 @@ parser_cmd_etl.add_argument('--cif_modified_and_chains' , action ='store_true' )
 parser_cmd_etl.add_argument('--factors_and_ligands'     , action ='store_true' )
 parser_cmd_etl.add_argument('--png_thumbnail'           , action ='store_true' )
 parser_cmd_etl.add_argument('--overwrite'               , action ='store_true' )
+
+
+
+
+import asyncio
+import os
+from ribctl import RIBETL_DATA
+from ribctl.etl.obtain import obtain_assets, obtain_assets_threadpool
+from ribctl.etl.ribosome_assets import Assetlist
+
+def cmd_etl(args):
+
+    ASL = Assetlist()
+
+    if args.profile:
+        ASL.profile=True
+
+    if args.ptc_coords:
+        ASL.ptc_coords=True
+
+    if args.cif:
+        ASL.cif=True
+
+    if args.cif_modified_and_chains:
+        ASL.cif_modified_and_chains=True
+
+    if args.factors_and_ligands:
+        ASL.factors_and_ligands=True
+
+    if args.png_thumbnail:
+        ASL.png_thumbnail=True
+
+    #All structures
+    if args.obtain_all_structures:
+        obtain_assets_threadpool(
+            [],
+            ASL,
+            workers=16,
+            get_all=True,
+            overwrite=args.overwrite or False
+        )
+    if args.rcsb_id:
+        RCSB_ID = str(args.rcsb_id)
+        loop    = asyncio.get_event_loop()
+        loop.run_until_complete(
+
+            obtain_assets(
+                RCSB_ID,
+                ASL,
+                args.overwrite or False
+            )
+        )
+    else:
+        parser_cmd_etl.print_help()
+
+
+
 parser_cmd_etl.set_defaults(func=cmd_etl)
+# parser_cmd_etl.print_help()
 
 
 #! -------------------------- -------- -------------------------- #
@@ -71,6 +130,7 @@ if args.t:
 else:
     if hasattr(args, 'func'):
         args.func(args)
+
     else:
         parser.print_help()
 

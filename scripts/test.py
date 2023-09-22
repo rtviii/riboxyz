@@ -5,22 +5,14 @@ import json
 import logging
 import os
 from pprint import pprint
-import subprocess
 from tempfile import NamedTemporaryFile
 from typing import Iterator
 from Bio.Align import MultipleSeqAlignment,Seq, SeqRecord
 from Bio.Align.Applications import MuscleCommandline
-from Bio import SeqIO, AlignIO, pairwise2
-import re
-import pyhmmer
-from ribctl import ASSETS, MUSCLE_BIN
+from ribctl import ASSETS
 from ribctl.lib.classification import classify_sequence, classify_subchains
-from ribctl.lib.msalib import Fasta, muscle_align_N_seq, phylogenetic_neighborhood
-from ribctl.lib.ribosome_types.types_poly_nonpoly_ligand import list_ProteinClass
-from ribctl.lib.ribosome_types.types_ribosome import ProteinClass, ProteinClassEnum
 from ribctl.etl.ribosome_assets import RibosomeAssets
-from pyhmmer.easel import Alphabet, DigitalSequenceBlock, TextSequence, SequenceFile, SequenceBlock, TextSequenceBlock
-from pyhmmer.plan7 import Pipeline, HMM 
+from ribctl.lib.tunnel import ptc_resdiues_get, ptc_residues_calculate_midpoint
 hmm_cachedir = ASSETS['__hmm_cache']
 import sys
 
@@ -30,31 +22,16 @@ log_format   = logging.Formatter('%(asctime)s [%(levelname)s] [%(name)s] %(messa
 file_handler.setFormatter(log_format)
 logger.addHandler(file_handler)
 
+nomv2dict= '/home/rtviii/dev/riboxyz/nomv2'
 
-
-# def process_struct(rcsb_id:str):
-
-#     rib            = RibosomeAssets(rcsb_id).profile()
-#     organism_taxid = rib.src_organism_ids[0]
-#     prots          = rib.proteins
-
-#     for rp in prots:
-#         print("processing protein {} nomenclature {} | {}".format( rp.auth_asym_id,rp.nomenclature, rp.rcsb_pdbx_description,))
-#         seq = rp.entity_poly_seq_one_letter_code_can
-#         x   = classify_sequence(seq, organism_taxid, ProteinClassEnum)
-#         if x not in rp.nomenclature and len(rp.nomenclature) != 0:
-#             print(">>>> Discovered incongruent nomenclature for protein {} nomenclature {} classification {}".format(rp.rcsb_pdbx_description, rp.nomenclature, x))
-#         if len(rp.nomenclature) == 0:
-#             print("{}".format(x))
-
-if sys.argv[1] =="s":
-    rcsb_id = sys.argv[2].upper()
-    rib            = RibosomeAssets(rcsb_id).profile()
-    organism_taxid = rib.src_organism_ids[0]
-    prots          = rib.proteins
-    result         = classify_subchains(prots)
-    print(result)
-else:
+if sys.argv[1]    == "process_struct":
+   rcsb_id         = sys.argv[2].upper()
+   rib             = RibosomeAssets(rcsb_id).profile()
+   organism_taxid  = rib.src_organism_ids[0]
+   prots           = rib.proteins
+   result          = classify_subchains(prots)
+   print(result)
+elif sys.argv[1] == "process_all":
     for rcsb_id in RibosomeAssets.list_all_structs():
         logger.debug("Processing {}".format(rcsb_id))
         rib            = RibosomeAssets(rcsb_id).profile()
@@ -65,36 +42,43 @@ else:
             json.dump(results, f)
 
 
-
-# for candidate_class in list_ProteinClass:
-#     fasta_path   = os.path.join(ASSETS["fasta_ribosomal_proteins"], f"{candidate_class}.fasta")
-#     records      = Fasta(fasta_path)
-#     ids          = records.all_taxids()
-#     phylo_nbhd   = phylogenetic_neighborhood(list(map(lambda x: str(x),ids)), str(organism_taxid), n_neighbors=10)
-#     seqs         = records.pick_taxids(phylo_nbhd)
-#     seqs_aligned = muscle_align_N_seq( iter(seqs))
-#     seqs_aligned1, seqs_aligned2 = tee(seqs_aligned)    
-
-#     seq_tuples =  [TextSequence(name=bytes(seq.id, 'utf-8'), sequence=str(seq.seq)) for seq in seqs_aligned1]
-
-#     cached_name = "class_{}_taxid_{}.hmm".format(candidate_class, organism_taxid)
-#     alphabet      = pyhmmer.easel.Alphabet.amino() 
-#     # alphabet      = pyhmmer.easel.Alphabet.rna() 
-#     builder       = pyhmmer.plan7.Builder(alphabet)
-#     background    = pyhmmer.plan7.Background(alphabet) #? The null(background) model can be later augmented.
-#     anonymous_msa = pyhmmer.easel.TextMSA(bytes(cached_name, 'utf-8'),sequences=seq_tuples)
-#     hmm, _profile, _optmized_profile = builder.build_msa(anonymous_msa.digitize(alphabet), background)
-    
-#     if not os.path.isfile(os.path.join(hmm_cachedir, cached_name)):
-#         with open(os.path.join(hmm_cachedir, cached_name), "wb") as hmm_file:
-#             hmm.write(hmm_file)
-#             print("Wrote `{}` to `{}`".format(cached_name, hmm_cachedir))
-#     else:
-#         print(os.path.join(hmm_cachedir, cached_name) + " exists. ")
-    
+elif sys.argv[1] =="merge_nomenclature":
 
 
-#? extract sequences 
-#? store (create an asset class in __init__), possibly compress
-#? create method to pick phyl. nbhd, create an MSA, create an HMM
-#? ->evaluate as before
+    for f in os.listdir(nomv2dict):
+        
+        print(f)
+        with open(os.path.join(nomv2dict, f),'r') as infile:
+            nomv2=json.load(infile)
+        struct, _ = f.split(".")
+        rib_asset = RibosomeAssets(struct)
+
+
+        filepath = rib_asset._json_profile_filepath()
+        profile  = rib_asset.profile()
+        
+        for chain in profile.proteins:
+            if chain.auth_asym_id in nomv2:
+                if nomv2[chain.auth_asym_id] != None and nomv2[chain.auth_asym_id] not in chain.nomenclature:
+                    chain.nomenclature = [nomv2[chain.auth_asym_id]]
+                elif nomv2[chain.auth_asym_id] == None and chain.nomenclature != []:
+                    chain.nomenclature = []
+
+        rib_asset.write_own_json_profile(new_profile=json.loads(profile.json()), overwrite=True)
+
+
+elif sys.argv[1] =="tunnel":
+    def list_euk_structs():
+        EUK_STRUCTS= []
+        with open("eukarya_2023.txt", "r") as data_file:
+            for line in data_file:
+                structs = line.split(",")
+                EUK_STRUCTS = [*EUK_STRUCTS, *structs]
+        return EUK_STRUCTS
+
+    if __name__ == "__main__":
+        EUK        = list_euk_structs()
+        
+        
+   
+    print("tunnel")
