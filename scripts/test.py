@@ -9,11 +9,12 @@ from tempfile import NamedTemporaryFile
 from typing import Iterator
 from Bio.Align import MultipleSeqAlignment,Seq, SeqRecord
 from Bio.Align.Applications import MuscleCommandline
-from ribctl import ASSETS
+from ribctl import ASSETS, RIBETL_DATA
+from ribctl.etl.etl_pipeline import ReannotationPipeline, query_rcsb_api, rcsb_single_structure_graphql
 from ribctl.lib.classification import classify_sequence, classify_subchains
 from ribctl.etl.ribosome_assets import RibosomeAssets
 from ribctl.lib.tunnel import ptc_resdiues_get, ptc_residues_calculate_midpoint
-from ribctl import model_species
+from ribctl import model_species, model_subgenuses
 from ete3 import NCBITaxa
 
 from ribctl.lib.util_taxonomy import descendants_of_taxid
@@ -109,6 +110,28 @@ elif sys.argv[1] == "spec":
     print(_)
 
 elif sys.argv[1] == "test":
-    for (name, taxid) in model_species.items():
-        print(descendants_of_taxid(taxid))
 
+    # ncbi = NCBITaxa()
+    # rp = RibosomeAssets('5MYJ').profile()
+    # print(( rp.rcsb_id, rp.src_organism_ids, rp.host_organism_ids ))
+    # print(( rp.rcsb_id, rp.src_organism_names, rp.host_organism_names))
+    # print(NCBITaxa().get_lineage(rp.src_organism_ids[0]))
+    # names=  ncbi.translate_to_names(NCBITaxa().get_lineage(rp.src_organism_ids[0]))
+    # print(names)
+
+    # print(descendants_of_taxid( pdbid_taxid_tuples, int(taxid)))
+
+    all_structs = os.listdir(RIBETL_DATA)
+    pdbid_taxid_tuples:list = []    
+    for struct in all_structs:
+        rp = RibosomeAssets(struct).profile()
+        pdbid_taxid_tuples.append(( rp.rcsb_id, rp.src_organism_ids[0] ))
+
+    for (name, taxid) in model_subgenuses.items():
+        print("Descendants of", name, taxid)
+        print(descendants_of_taxid( pdbid_taxid_tuples, int(taxid)))
+
+
+elif sys.argv[1] == "processtax":
+    RCSB_ID = '5MYJ'
+    ReannotationPipeline(query_rcsb_api(rcsb_single_structure_graphql(RCSB_ID))).process_structure()
