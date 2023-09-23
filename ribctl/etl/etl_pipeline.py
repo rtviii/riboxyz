@@ -204,9 +204,12 @@ class ReannotationPipeline:
             else:
                 src_id_tally[src_id] += 1
 
-        for skey in src_id_tally:
-            src_id_tally[skey] = src_id_tally[skey] / len(src_organism_ids)
-        src_id = max(src_id_tally, key=lambda k: src_id_tally[k])
+        if len(src_id_tally.keys())==0:
+            src_id = []
+        else:
+            for skey in src_id_tally:
+                src_id_tally[skey] = src_id_tally[skey] / len(src_organism_ids)
+            src_id = [max(src_id_tally, key=lambda k: src_id_tally[k])]
 
         #---------------------------------
         host_id_tally = {}
@@ -215,17 +218,21 @@ class ReannotationPipeline:
                 host_id_tally[host_id] = 1
             else:
                 host_id_tally[host_id] += 1
-        for hkey in host_id_tally:
-            host_id_tally[hkey] = host_id_tally[hkey] / len(host_organism_ids)
-        host_id = max(host_id_tally, key=lambda k: host_id_tally[k])
+        if len(host_id_tally.keys())==0:
+            host_id = []
+        else:
+            print(host_id_tally)
+            for hkey in host_id_tally:
+                host_id_tally[hkey] = host_id_tally[hkey] / len(host_organism_ids)
+            host_id = [max(host_id_tally, key=lambda k: host_id_tally[k])]
 
 
 
 
         return {
-            "src_organism_ids"   : list(src_id),
+            "src_organism_ids"   :  src_id ,
             "src_organism_names" : list(map(str, set(src_organism_names))),
-            "host_organism_ids"  : list(host_id),
+            "host_organism_ids"  :  host_id ,
             "host_organism_names": list(map(str, set(host_organism_names))),
         }
 
