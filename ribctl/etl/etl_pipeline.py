@@ -36,56 +36,7 @@ def current_rcsb_structs() -> list[str]:
     """Return all structures in the rcsb that contain the phrase RIBOSOME and have more than 25 protein entities"""
 
     rcsb_search_api = "https://search.rcsb.org/rcsbsearch/v2/query"
-    # params = {
-    #     "query": {
-    #         "type": "group",
-    #         "logical_operator": "and",
-    #         "nodes": [
-    #             {
-    #                 "type": "group",
-    #                 "logical_operator": "and",
-    #                 "nodes": [
-    #                     {
-    #                         "type": "group",
-    #                         "logical_operator": "and",
-    #                         "nodes": [
-    #                             {
-    #                                 "type": "terminal",
-    #                                 "service": "text",
-    #                                 "parameters": {
-    #                                     "operator": "contains_phrase",
-    #                                     "negation": False,
-    #                                     "value": "RIBOSOME",
-    #                                     "attribute": "struct_keywords.pdbx_keywords",
-    #                                 },
-    #                             }
-    #                         ],
-    #                     },
-    #                     {
-    #                         "type": "group",
-    #                         "logical_operator": "and",
-    #                         "nodes": [
-    #                             {
-    #                                 "type": "terminal",
-    #                                 "service": "text",
-    #                                 "parameters": {
-    #                                     "operator": "greater",
-    #                                     "negation": False,
-    #                                     "value": 25,
-    #                                     "attribute": "rcsb_entry_info.polymer_entity_count_protein",
-    #                                 },
-    #                             }
-    #                         ],
-    #                     },
-    #                 ],
-    #                 "label": "text",
-    #             }
-    #         ],
-    #         "label": "query-builder",
-    #     },
-    #     "return_type": "entry",
-    #     "request_options": {"return_all_hits": True, "results_verbosity": "compact"},
-    # }
+    
     q2 = {
         "query": {
             "type": "group",
@@ -842,7 +793,8 @@ class ReannotationPipeline:
         other_polymers = self.process_other_polymers()
 
         prot_noms: dict[str, PolymerClass_] = classify_subchains(
-            [*reshaped_proteins, *reshaped_polymeric_factors_prot]
+            [*reshaped_proteins, *reshaped_polymeric_factors_prot],
+            ProteinClassEnum
         )
         for aaid, protname in prot_noms.items():
             for prot in reshaped_proteins:

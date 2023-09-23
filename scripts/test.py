@@ -18,6 +18,8 @@ from ribctl.lib.tunnel import ptc_resdiues_get, ptc_residues_calculate_midpoint
 from ribctl import model_species, model_subgenuses
 from ete3 import NCBITaxa
 
+logging.getLogger("urllib3.connectionpool").setLevel(logging.CRITICAL)
+logging.getLogger('asyncio').setLevel(logging.WARNING)
 from ribctl.lib.util_taxonomy import descendants_of_taxid
 hmm_cachedir = ASSETS['__hmm_cache']
 import sys
