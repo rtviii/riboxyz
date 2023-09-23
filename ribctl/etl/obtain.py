@@ -76,7 +76,7 @@ async def obtain_assets(rcsb_id: str, assetlist: Assetlist, overwrite: bool = Fa
 
     await asyncio.gather(*coroutines)
 
-def obtain_assets_threadpool(targets: list[str], assetlist: Assetlist, workers: int = 5, get_all: bool = False, overwrite=False):
+def obtain_assets_threadpool(targets: list[str], assetlist: Assetlist, workers: int = 15, get_all: bool = False, overwrite=False):
     """Get all ribosome profiles from RCSB via a threadpool"""
     logger = get_updates_logger()
     if get_all:
@@ -102,6 +102,9 @@ def obtain_assets_threadpool(targets: list[str], assetlist: Assetlist, workers: 
             fut.add_done_callback(log_commit_result(rcsb_id))
             tasks.append(fut)
         for future in futures.as_completed(tasks):
-            results.append(future.result())
+            try:
+                results.append(future.result())
+            except Exception as e:
+                logger.error(future.exception())
 
     logger.info("Finished syncing with RCSB")
