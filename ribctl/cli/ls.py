@@ -23,12 +23,13 @@ def cmd_ls(args):
     elif args.taxid != None:
         print("Listing species information for", args.taxid)
         all_structs = os.listdir(RIBETL_DATA)
-        struct_profiles:list[RibosomeStructure] = []    
-        for struct in all_structs:
-            rp = RibosomeAssets(struct)
-            struct_profiles.append(rp.profile())
-        print(descendants_of_taxid(int(args.taxid)))
+        pdbid_taxid_tuples:list = []    
 
+        for struct in all_structs:
+            rp = RibosomeAssets(struct).profile()
+            pdbid_taxid_tuples.append(( rp.rcsb_id, rp.src_organism_ids[0] ))
+
+        print(descendants_of_taxid( pdbid_taxid_tuples, int(args.taxid)))
 
     elif args.subelement != None:
         print("Listing subelement information for", args.subelement)

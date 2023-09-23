@@ -166,14 +166,26 @@ class ReannotationPipeline:
     #! Reshaping
 
     def infer_organisms_from_polymers(self, polymers: list[RNA | Protein]):
-        """Grabbing taxid from every polymer in the structure to see which taxid prevails proportionally. Only needed because rcsb does not provide unequivocal taxid for structures (sometimes it's host+source)"""
+        """Grabbing taxid from every polymer in the structure to see which taxid prevails proportionally.
+          Only needed because rcsb does not provide unequivocal taxid for structures (sometimes it's host+source)"""
 
-        host_organism_names: list[str] = []
         src_organism_names : list[str] = []
-        host_organism_ids  : list[int] = []
         src_organism_ids   : list[int] = []
+        host_organism_names: list[str] = []
+        host_organism_ids  : list[int] = []
 
         for polymer in polymers:
+
+            host_organism_names = (
+                [*host_organism_names, *polymer.host_organism_names]
+                if polymer.host_organism_names != None
+                else host_organism_names
+            )
+            host_organism_ids = (
+                [*host_organism_ids, *polymer.host_organism_ids]
+                if polymer.host_organism_ids != None
+                else host_organism_ids
+            )
             src_organism_names = (
                 [*src_organism_names, *polymer.src_organism_names]
                 if polymer.src_organism_names != None
@@ -184,21 +196,36 @@ class ReannotationPipeline:
                 if polymer.src_organism_ids != None
                 else src_organism_ids
             )
-            src_organism_names = (
-                [*src_organism_names, *polymer.host_organism_names]
-                if polymer.host_organism_names != None
-                else src_organism_names
-            )
-            src_organism_ids = (
-                [*src_organism_ids, *polymer.host_organism_ids]
-                if polymer.host_organism_ids != None
-                else src_organism_ids
-            )
+        
+        src_id_tally = {}
+        for src_id in src_organism_ids:
+            if src_id not in src_id_tally:
+                src_id_tally[src_id] = 1
+            else:
+                src_id_tally[src_id] += 1
+
+        for skey in src_id_tally:
+            src_id_tally[skey] = src_id_tally[skey] / len(src_organism_ids)
+        src_id = max(src_id_tally, key=lambda k: src_id_tally[k])
+
+        #---------------------------------
+        host_id_tally = {}
+        for host_id in host_organism_ids:
+            if host_id not in host_id_tally:
+                host_id_tally[host_id] = 1
+            else:
+                host_id_tally[host_id] += 1
+        for hkey in host_id_tally:
+            host_id_tally[hkey] = host_id_tally[hkey] / len(host_organism_ids)
+        host_id = max(host_id_tally, key=lambda k: host_id_tally[k])
+
+
+
 
         return {
-            "src_organism_ids"   : list(map(int, set(src_organism_ids))),
+            "src_organism_ids"   : list(src_id),
             "src_organism_names" : list(map(str, set(src_organism_names))),
-            "host_organism_ids"  : list(map(int, set(host_organism_ids))),
+            "host_organism_ids"  : list(host_id),
             "host_organism_names": list(map(str, set(host_organism_names))),
         }
 
