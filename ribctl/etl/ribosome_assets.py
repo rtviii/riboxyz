@@ -286,16 +286,18 @@ class RibosomeAssets():
                 return False
 
     async def _verify_json_profile(self, overwrite: bool = False) -> bool:
+
         self._verify_dir_exists()
-        if not os.path.exists(self._json_profile_filepath()):
+        if not os.path.isfile(self._json_profile_filepath()):
             ribosome = ReannotationPipeline(query_rcsb_api(rcsb_single_structure_graphql(self.rcsb_id.upper()))).process_structure()
             if not parse_obj_as(RibosomeStructure, ribosome):
                 raise Exception("Invalid ribosome structure profile.")
             self.write_own_json_profile( ribosome.dict(), overwrite=True)
         else:
-            ribosome = ReannotationPipeline(query_rcsb_api(rcsb_single_structure_graphql(self.rcsb_id.upper()))).process_structure()
-            self.write_own_json_profile(ribosome.dict(),overwrite)
+            print("STRUCT EXISTS ",self._json_profile_filepath())
             if overwrite:
+                ribosome = ReannotationPipeline(query_rcsb_api(rcsb_single_structure_graphql(self.rcsb_id.upper()))).process_structure()
+                self.write_own_json_profile(ribosome.dict(),overwrite)
                 print("Overwrote {}".format(self.rcsb_id))
             else:
                 print("Profile already exists for {}".format(self.rcsb_id))
