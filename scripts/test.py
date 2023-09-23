@@ -1,3 +1,4 @@
+import asyncio
 from functools import reduce
 from io import StringIO
 from itertools import tee
@@ -125,7 +126,10 @@ elif sys.argv[1] == "test":
     pdbid_taxid_tuples:list = []    
 
     for struct in all_structs:
-        rp = RibosomeAssets(struct).profile()
+        print(struct)
+        rp = RibosomeAssets(struct)
+        asyncio.run(rp._verify_json_profile())
+        rp = rp.profile()
         pdbid_taxid_tuples.append(( rp.rcsb_id, rp.src_organism_ids[0] ))
 
     for (name, subgenus_taxid) in ( model_subgenuses.items() ):
