@@ -111,7 +111,7 @@ elif sys.argv[1] == "spec":
 
 elif sys.argv[1] == "test":
 
-    # ncbi = NCBITaxa()
+    ncbi = NCBITaxa()
     # rp = RibosomeAssets('5MYJ').profile()
     # print(( rp.rcsb_id, rp.src_organism_ids, rp.host_organism_ids ))
     # print(( rp.rcsb_id, rp.src_organism_names, rp.host_organism_names))
@@ -123,13 +123,21 @@ elif sys.argv[1] == "test":
 
     all_structs = os.listdir(RIBETL_DATA)
     pdbid_taxid_tuples:list = []    
+
     for struct in all_structs:
         rp = RibosomeAssets(struct).profile()
         pdbid_taxid_tuples.append(( rp.rcsb_id, rp.src_organism_ids[0] ))
 
-    for (name, taxid) in model_subgenuses.items():
-        print("Descendants of", name, taxid)
-        print(descendants_of_taxid( pdbid_taxid_tuples, int(taxid)))
+    for (name, subgenus_taxid) in ( model_subgenuses.items() ):
+        print("\n\t###########      Descendants of {} ({})      ##########3".format(subgenus_taxid, ncbi.get_taxid_translator([subgenus_taxid])[subgenus_taxid]))
+        rcsb_id_taxid_tuples =  descendants_of_taxid( pdbid_taxid_tuples, subgenus_taxid )
+
+        for i,(rcsb_id, taxid) in enumerate( rcsb_id_taxid_tuples ):
+            print("{}.".format(i),rcsb_id, taxid, ncbi.get_taxid_translator([taxid])[taxid])
+
+        ids_in_this_branch = [*list(map(lambda x: x[1], rcsb_id_taxid_tuples)), subgenus_taxid]
+        tree =ncbi.get_topology(ids_in_this_branch)
+        print(tree.get_ascii(attributes=["taxid"]))
 
 
 elif sys.argv[1] == "processtax":
