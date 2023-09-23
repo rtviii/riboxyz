@@ -1,0 +1,88 @@
+. 5MYJ
+
+        ###########      Descendants of 1772 (Mycolicibacterium smegmatis)      ##########3
+0. 6DZI 246196 Mycolicibacterium smegmatis MC2 155
+1. 5XYM 246196 Mycolicibacterium smegmatis MC2 155
+2. 5ZEB 246196 Mycolicibacterium smegmatis MC2 155
+3. 7S0S 1772 Mycolicibacterium smegmatis
+4. 5O61 246196 Mycolicibacterium smegmatis MC2 155
+5. 5ZET 246196 Mycolicibacterium smegmatis MC2 155
+6. 7Y41 246196 Mycolicibacterium smegmatis MC2 155
+7. 5ZEP 246196 Mycolicibacterium smegmatis MC2 155
+8. 6DZK 246196 Mycolicibacterium smegmatis MC2 155
+9. 5ZEU 246196 Mycolicibacterium smegmatis MC2 155
+10. 5O60 246196 Mycolicibacterium smegmatis MC2 155
+11. 5O5J 246196 Mycolicibacterium smegmatis MC2 155
+12. 6DZP 246196 Mycolicibacterium smegmatis MC2 155
+13. 7XAM 246196 Mycolicibacterium smegmatis MC2 155
+14. 5XYU 246196 Mycolicibacterium smegmatis MC2 155
+
+        ###########      Descendants of 1773 (Mycobacterium tuberculosis)      ##########3
+0. 7MT2 83332 Mycobacterium tuberculosis H37Rv
+1. 5V7Q 1773 Mycobacterium tuberculosis
+2. 7MSM 83332 Mycobacterium tuberculosis H37Rv
+3. 7MT7 83332 Mycobacterium tuberculosis H37Rv
+4. 5V93 1773 Mycobacterium tuberculosis
+5. 7MSC 83332 Mycobacterium tuberculosis H37Rv
+6. 7KGB 83332 Mycobacterium tuberculosis H37Rv
+7. 7MSH 83332 Mycobacterium tuberculosis H37Rv
+8. 7F0D 419947 Mycobacterium tuberculosis H37Ra
+9. 7MSZ 83332 Mycobacterium tuberculosis H37Rv
+10. 7MT3 83332 Mycobacterium tuberculosis H37Rv
+11. 7SFR 1773 Mycobacterium tuberculosis
+        ###########      Descendants of 1423 (Bacillus subtilis)      ##########3
+0. 7AQC 224308 Bacillus subtilis subsp. subtilis str. 168
+1. 8BUU 224308 Bacillus subtilis subsp. subtilis str. 168
+2. 7SAE 1423 Bacillus subtilis
+3. 7S9U 1423 Bacillus subtilis
+4. 7QV2 224308 Bacillus subtilis subsp. subtilis str. 168
+5. 6PPK 1423 Bacillus subtilis
+6. 7O5B 224308 Bacillus subtilis subsp. subtilis str. 168
+7. 7QGU 1423 Bacillus subtilis
+8. 3J3W 224308 Bacillus subtilis subsp. subtilis str. 168
+9. 6HA1 224308 Bacillus subtilis subsp. subtilis str. 168
+10. 6HTQ 224308 Bacillus subtilis subsp. subtilis str. 168
+11. 6HA8 224308 Bacillus subtilis subsp. subtilis str. 168
+12. 7OPE 224308 Bacillus subtilis subsp. subtilis str. 168
+13. 3J3V 224308 Bacillus subtilis subsp. subtilis str. 168
+14. 3J9W 224308 Bacillus subtilis subsp. subtilis str. 168
+15. 7QV1 224308 Bacillus subtilis subsp. subtilis str. 168
+16. 7QV3 224308 Bacillus subtilis subsp. subtilis str. 168
+17. 7QH4 1423 Bacillus subtilis
+18. 6PPF 1423 Bacillus subtilis
+19. 7AQD 224308 Bacillus subtilis subsp. subtilis str. 168
+20. 6PVK 1423 Bacillus subtilis
+
+        ###########      Descendants of 38568 (Leishmania)      ##########3
+0. 6AZ3 5661 Leishmania donovani
+1. 7ANE 5664 Leishmania major
+2. 5T2A 5661 Leishmania donovani
+3. 3JCS 5661 Leishmania donovani
+4. 6AZ1 5661 Leishmania donovani
+5. 7AIH 5664 Leishmania major
+        ###########      Descendants of 47570 (Schizotrypanum)      ##########3
+0. 7AOR 353153 Trypanosoma cruzi strain CL Brener
+1. 5OPT 353153 Trypanosoma cruzi strain CL Brener
+2. 5T5H 5693 Trypanosoma cruzi
+
+        ###########      Descendants of 181550 (Trichomonadidae)      ##########3
+0. 5XY3 5722 Trichomonas vaginalis
+1. 5XYI 5722 Trichomonas vaginalis
+
+        ###########      Descendants of 5741 (Giardia intestinalis)      ##########3
+0. 8BTR 184922 Giardia lamblia ATCC 50803
+1. 7PWO 184922 Giardia lamblia ATCC 50803
+2. 8BR8 184922 Giardia lamblia ATCC 50803
+3. 7PWG 184922 Giardia lamblia ATCC 50803
+4. 8BSJ 5741 Giardia intestinalis
+5. 8BSI 5741 Giardia intestinalis
+6. 7PWF 184922 Giardia lamblia ATCC 50803
+7. 8BTD 184922 Giardia lamblia ATCC 50803
+8. 8BRM 184922 Giardia lamblia ATCC 50803
+
+        ###########      Descendants of 51540 (Spraguea)      ##########3
+0. 7QCA 1358809 Spraguea lophii 42_110
+1. 8P60 1358809 Spraguea lophii 42_110
+2. 8P5D 1358809 Spraguea lophii 42_110
+
+

@@ -12,8 +12,9 @@ from Bio.Align import MultipleSeqAlignment,Seq, SeqRecord
 from Bio.Align.Applications import MuscleCommandline
 from ribctl import ASSETS, RIBETL_DATA
 from ribctl.etl.etl_pipeline import ReannotationPipeline, query_rcsb_api, rcsb_single_structure_graphql
+from ribctl.etl.obtain import obtain_assets_threadpool
 from ribctl.lib.classification import classify_sequence, classify_subchains
-from ribctl.etl.ribosome_assets import RibosomeAssets
+from ribctl.etl.ribosome_assets import Assetlist, RibosomeAssets
 from ribctl.lib.tunnel import ptc_resdiues_get, ptc_residues_calculate_midpoint
 from ribctl import model_species, model_subgenuses
 from ete3 import NCBITaxa
@@ -115,37 +116,74 @@ elif sys.argv[1] == "spec":
 elif sys.argv[1] == "test":
 
     ncbi = NCBITaxa()
-    # rp = RibosomeAssets('5MYJ').profile()
-    # print(( rp.rcsb_id, rp.src_organism_ids, rp.host_organism_ids ))
-    # print(( rp.rcsb_id, rp.src_organism_names, rp.host_organism_names))
-    # print(NCBITaxa().get_lineage(rp.src_organism_ids[0]))
-    # names=  ncbi.translate_to_names(NCBITaxa().get_lineage(rp.src_organism_ids[0]))
-    # print(names)
-
-    # print(descendants_of_taxid( pdbid_taxid_tuples, int(taxid)))
-
     all_structs = os.listdir(RIBETL_DATA)
     pdbid_taxid_tuples:list = []    
+    __structs = []
 
-    for struct in all_structs:
-        print(struct)
-        rp = RibosomeAssets(struct)
-        asyncio.run(rp._verify_json_profile())
-        rp = rp.profile()
-        pdbid_taxid_tuples.append(( rp.rcsb_id, rp.src_organism_ids[0] ))
 
+    for i,struct in enumerate(all_structs):
+        try:
+            print(struct, i)
+            rp = RibosomeAssets(struct)
+            rp = rp.profile()
+            pdbid_taxid_tuples.append(( rp.rcsb_id, rp.src_organism_ids[0] ))
+        except:
+            ...
     for (name, subgenus_taxid) in ( model_subgenuses.items() ):
         print("\n\t###########      Descendants of {} ({})      ##########3".format(subgenus_taxid, ncbi.get_taxid_translator([subgenus_taxid])[subgenus_taxid]))
         rcsb_id_taxid_tuples =  descendants_of_taxid( pdbid_taxid_tuples, subgenus_taxid )
 
         for i,(rcsb_id, taxid) in enumerate( rcsb_id_taxid_tuples ):
+            __structs.append(rcsb_id)
             print("{}.".format(i),rcsb_id, taxid, ncbi.get_taxid_translator([taxid])[taxid])
 
-        ids_in_this_branch = [*list(map(lambda x: x[1], rcsb_id_taxid_tuples)), subgenus_taxid]
-        tree =ncbi.get_topology(ids_in_this_branch)
-        print(tree.get_ascii(attributes=["taxid"]))
+
+    print(__structs)
+        
+        # ids_in_this_branch = [*list(map(lambda x: x[1], rcsb_id_taxid_tuples)), subgenus_taxid]
+        # tree =ncbi.get_topology(ids_in_this_branch)
+        # print(tree.get_ascii(attributes=["taxid"]))
+
+        # obtain_assets_threadpool([rcsb_id for (rcsb_id, taxid) in rcsb_id_taxid_tuples], Assetlist(ptc_coords=True), overwrite=True)
+
 
 
 elif sys.argv[1] == "processtax":
     RCSB_ID = '5MYJ'
     ReannotationPipeline(query_rcsb_api(rcsb_single_structure_graphql(RCSB_ID))).process_structure()
+elif sys.argv[1] == 'll':
+    import shutil
+
+    structs = ['5MYJ', '6DZI', '5XYM', '5ZEB', '7S0S', '5O61', '5ZET', '7Y41', '5ZEP', '6DZK', '5ZEU', '5O60', '5O5J', '6DZP', '7XAM', '5XYU', '7MT2', '5V7Q', '7MSM', '7MT7', '5V93', '7MSC', '7KGB', '7MSH', '7F0D', '7MSZ', '7MT3', '7SFR', '7AQC', '8BUU', '7SAE', '7S9U', '7QV2', '6PPK', '7O5B', '7QGU', '3J3W', '6HA1', '6HTQ', '6HA8', '7OPE', '3J3V', '3J9W', '7QV1', '7QV3', '7QH4', '6PPF', '7AQD', '6PVK', '6AZ3', '7ANE', '5T2A', '3JCS', '6AZ1', '7AIH', '7AOR', '5OPT', '5T5H', '5XY3', '5XYI', '8BTR', '7PWO', '8BR8', '7PWG', '8BSJ', '8BSI', '7PWF', '8BTD', '8BRM', '7QCA', '8P60', '8P5D']
+
+    ncbi = NCBITaxa()
+    all_structs = os.listdir(RIBETL_DATA)
+    pdbid_taxid_tuples:list = []    
+    __structs = []
+
+
+    for i,struct in enumerate(all_structs):
+        try:
+            print(struct, i)
+            rp = RibosomeAssets(struct)
+            rp = rp.profile()
+            pdbid_taxid_tuples.append(( rp.rcsb_id, rp.src_organism_ids[0] ))
+        except:
+            ...
+
+    for (name, subgenus_taxid) in ( model_subgenuses.items() ):
+        print("\n\t###########      Descendants of {} ({})      ##########3".format(subgenus_taxid, ncbi.get_taxid_translator([subgenus_taxid])[subgenus_taxid]))
+        rcsb_id_taxid_tuples =  descendants_of_taxid( pdbid_taxid_tuples, subgenus_taxid )
+
+        if not os.path.exists('/home/rtviii/dev/riboxyz/by_spec/{}'.format(subgenus_taxid)):
+            os.mkdir('/home/rtviii/dev/riboxyz/by_spec/{}'.format(subgenus_taxid))
+        for i,(rcsb_id, taxid) in enumerate( rcsb_id_taxid_tuples ):
+                try:
+                    shutil.copyfile('/home/rtviii/dev/RIBETL_DATA/{}/{}_PTC_COORDINATES.json'.format(rcsb_id, rcsb_id), '/home/rtviii/dev/riboxyz/by_spec/{}/{}_PTC_COORDINATES.json'.format(subgenus_taxid, rcsb_id))
+                except Exception as e:
+                    print(e)
+
+        # for i,(rcsb_id, taxid) in enumerate( rcsb_id_taxid_tuples ):
+        #     __structs.append(rcsb_id)
+        #     print("{}.".format(i),rcsb_id, taxid, ncbi.get_taxid_translator([taxid])[taxid])
+           
