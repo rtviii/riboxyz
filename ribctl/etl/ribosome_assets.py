@@ -1,5 +1,6 @@
 import asyncio
 import json
+import logging
 import typing
 from Bio.PDB.Structure import Structure
 from Bio.PDB.Chain import Chain
@@ -18,6 +19,17 @@ from ribctl.lib.ribosome_types.types_ribosome import RNA, PolymerClass, Polymeri
 from ribctl import RIBETL_DATA
 from pydantic import BaseModel, parse_obj_as
 from concurrent.futures import ALL_COMPLETED, Future, ProcessPoolExecutor, ThreadPoolExecutor, wait
+
+# Configure the logging settings
+logging.basicConfig(
+    level=logging.DEBUG,  # Set the logging level to DEBUG (you can adjust this)
+    format='%(asctime)s [%(levelname)s] [%(name)s] %(message)s',  # Define the log message format
+    handlers=[
+        logging.StreamHandler(),  # Log to the console
+        logging.FileHandler('etl.log')  # Log to a file named 'my_log_file.log'
+    ]
+)
+
 import os
 
 class Assetlist(BaseModel)   : 
@@ -275,10 +287,18 @@ class RibosomeAssets():
 
     async def _verify_json_profile(self, overwrite: bool = False) -> bool:
         self._verify_dir_exists()
-        ribosome = ReannotationPipeline(query_rcsb_api(rcsb_single_structure_graphql(self.rcsb_id.upper()))).process_structure()
-        if not parse_obj_as(RibosomeStructure, ribosome):
-            raise Exception("Invalid ribosome structure profile.")
-        self.write_own_json_profile( ribosome.dict(), overwrite)
+        if not os.path.exists(self._json_profile_filepath()):
+            ribosome = ReannotationPipeline(query_rcsb_api(rcsb_single_structure_graphql(self.rcsb_id.upper()))).process_structure()
+            if not parse_obj_as(RibosomeStructure, ribosome):
+                raise Exception("Invalid ribosome structure profile.")
+            self.write_own_json_profile( ribosome.dict(), overwrite=True)
+        else:
+            ribosome = ReannotationPipeline(query_rcsb_api(rcsb_single_structure_graphql(self.rcsb_id.upper()))).process_structure()
+            self.write_own_json_profile(ribosome.dict(),overwrite)
+            if overwrite:
+                print("Overwrote {}".format(self.rcsb_id))
+            else:
+                print("Profile already exists for {}".format(self.rcsb_id))
         return True
         
     def _verify_png_thumbnail(self, overwrite: bool = False) -> bool:
