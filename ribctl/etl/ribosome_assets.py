@@ -361,4 +361,3 @@ class RibosomeAssets():
 
         return all_verified_flag
 
-# ※ Mass process methods.

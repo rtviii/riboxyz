@@ -19,7 +19,6 @@ from ribctl.etl.etl_pipeline import current_rcsb_structs, ReannotationPipeline, 
 from ribctl.lib.mod_render_thumbnail import render_thumbnail
 from concurrent.futures import  Future, ThreadPoolExecutor
 logging.getLogger('asyncio').setLevel(logging.WARNING)
-
 logging.basicConfig(
     level=logging.DEBUG,  
     format='%(asctime)s [%(levelname)s] [%(name)s] %(message)s',  
