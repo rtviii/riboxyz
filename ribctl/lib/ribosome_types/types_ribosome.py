@@ -322,16 +322,41 @@ class ProteinClassEnum(Enum):
     eL43  = "eL43"
     P1P2  = "P1P2"
 
+# Bacterial RNA:
+# 5s 16s 23s
+
+# Euk rna:
+# 5s 5.8s 18s 25s(plants) 28s 
+
+# Mitochondrial rna:
+# 12s 16s
+
+# RNA Central 28S: 
+# RNA Central 25S: https://rnacentral.org/search?q=25S%20rRNA%20AND%20so_rna_type_name:%22Cytosolic_rRNA%22%20AND%20length:%5B2746%20TO%204735%5D
+# RNA Central 23S: 
+# RNA Central 18s: 
+# RNA Central 16s(b): 
+# RNA Central 16s(m): 
+# RNA Central 12s: 
+# RNA Central 5.8s(e): 
+# RNA Central 5(b): 
+# RNA Central 5(e): 
+
 class RNAClassEnum(Enum):
+    # 16S 23S 5S
+    # 18S  28S  5.8S  5S
+
+    rRNA_12S   = "12SrRNA"
+    rRNA_21S   = "21SrRNA"
+    rRNA_25S   = "25SrRNA"
+    rRNA_35S   = "35SrRNA"
+
+
     rRNA_5S    = "5SrRNA"
     rRNA_5_8S  = "5.8SrRNA"
-    rRNA_12S   = "12SrRNA"
     rRNA_16S   = "16SrRNA"
-    rRNA_21S   = "21SrRNA"
     rRNA_23S   = "23SrRNA"
-    rRNA_25S   = "25SrRNA"
     rRNA_28S   = "28SrRNA"
-    rRNA_35S   = "35SrRNA"
 
 
 PolymerClass_ = typing.Union[RNAClassEnum, ProteinClassEnum]
