@@ -50,7 +50,6 @@ elif sys.argv[1] == "process_all":
         with open('/home/rtviii/dev/riboxyz/nomv2/{}.json'.format(rcsb_id), 'w') as f:
             json.dump(results, f)
 
-
 elif sys.argv[1] =="merge_nomenclature":
 
 
@@ -75,7 +74,6 @@ elif sys.argv[1] =="merge_nomenclature":
 
         rib_asset.write_own_json_profile(new_profile=json.loads(profile.json()), overwrite=True)
 
-
 elif sys.argv[1] =="tunnel":
     def list_euk_structs():
         EUK_STRUCTS= []
@@ -92,7 +90,6 @@ elif sys.argv[1] =="tunnel":
 elif sys.argv[1] == "spec":
     def get_taxonomic_id(organism_name):
         ncbi = NCBITaxa()
-
         try:
             # Get the taxonomic ID for the given organism name
             taxid = ncbi.get_name_translator([organism_name])[organism_name]
@@ -101,13 +98,10 @@ elif sys.argv[1] == "spec":
             # Handle the case where the organism name is not found
             print(f"Organism '{organism_name}' not found in the NCBI Taxonomy database.")
             return None
-
-
     _ ={}
     for organism_name in ['Lactococcus lactis','Mycobacterium smegmatis', 'Mycobacterium tuberculosis', 'Bacillus subtilis'
                           , 'Leishmania donovani', 'Trypanosoma cruzi', 'Trichomonas vaginalis','Giardia duodenalis','Spraguea lophii' ]:
         taxonomic_id = get_taxonomic_id(organism_name)
-        
         if taxonomic_id:
             _ = {**_, **{organism_name: taxonomic_id}}
             print(f"Taxonomic ID for {organism_name}: {taxonomic_id}")
@@ -146,8 +140,6 @@ elif sys.argv[1] == "test":
 
         # obtain_assets_threadpool([rcsb_id for (rcsb_id, taxid) in rcsb_id_taxid_tuples], Assetlist(ptc_coords=True), overwrite=True)
 
-
-
 elif sys.argv[1] == "processtax":
     RCSB_ID = '5MYJ'
     ReannotationPipeline(query_rcsb_api(rcsb_single_structure_graphql(RCSB_ID))).process_structure()
@@ -160,7 +152,6 @@ elif sys.argv[1] == 'll':
     all_structs = os.listdir(RIBETL_DATA)
     pdbid_taxid_tuples:list = []    
     __structs = []
-
 
     for i,struct in enumerate(all_structs):
         try:
