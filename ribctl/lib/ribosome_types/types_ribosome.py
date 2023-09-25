@@ -345,18 +345,24 @@ class ProteinClassEnum(Enum):
 class RNAClassEnum(Enum):
     # 16S 23S 5S
     # 18S  28S  5.8S  5S
+    # rRNA_12S   = "12SrRNA"
+    # rRNA_21S   = "21SrRNA"
+    # rRNA_25S   = "25SrRNA"
+    # rRNA_35S   = "35SrRNA"
 
-    rRNA_12S   = "12SrRNA"
-    rRNA_21S   = "21SrRNA"
-    rRNA_25S   = "25SrRNA"
-    rRNA_35S   = "35SrRNA"
 
+    # Assembly rna missing
+    mt_rRNA_12S = "mt12SrRNA"
+    mt_rRNA_16S = "mt16SrRNA"
 
-    rRNA_5S    = "5SrRNA"
-    rRNA_5_8S  = "5.8SrRNA"
-    rRNA_16S   = "16SrRNA"
-    rRNA_23S   = "23SrRNA"
-    rRNA_28S   = "28SrRNA"
+    b_rRNA_5S   = "b5SrRNA"
+    b_rRNA_16S  = "e16SrRNA"
+    b_rRNA_23S  = "b23SrRNA"
+
+    e_rRNA_5S   = "e5SrRNA"
+    e_rRNA_5_8S = "e5.8SrRNA"
+    b_rRNA_18S  = "e18SrRNA"
+    e_rRNA_28S  = "e28SrRNA"
 
 
 PolymerClass_ = typing.Union[RNAClassEnum, ProteinClassEnum]

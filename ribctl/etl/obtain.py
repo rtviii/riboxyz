@@ -78,7 +78,9 @@ async def obtain_assets(rcsb_id: str, assetlist: Assetlist, overwrite: bool = Fa
 
 def obtain_assets_threadpool(targets: list[str], assetlist: Assetlist, workers: int = 15, get_all: bool = False, overwrite=False):
     """Get all ribosome profiles from RCSB via a threadpool"""
-    logger = get_updates_logger()       unsynced = sorted(current_rcsb_structs())
+    logger = get_updates_logger()
+    if get_all:
+        unsynced = sorted(current_rcsb_structs())
     else:
         unsynced = list(map(lambda _: _.upper(), targets))
 
