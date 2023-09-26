@@ -15,7 +15,7 @@ import re
 import pyhmmer
 from ribctl import ASSETS, MUSCLE_BIN
 from ribctl.lib.msalib import Fasta, muscle_align_N_seq, phylogenetic_neighborhood
-from ribctl.lib.ribosome_types.types_poly_nonpoly_ligand import RNAClass, list_ProteinClass
+from ribctl.lib.ribosome_types.types_poly_nonpoly_ligand import PolymericFactorClass, RNAClass, list_ProteinClass
 from ribctl.lib.ribosome_types.types_ribosome import RNA, Polymer, PolymerClass, PolymerClass_, PolymericFactor, Protein, ProteinClass, ProteinClassEnum, RNAClassEnum
 # from ribctl.etl.ribosome_assets import RibosomeAssets
 from pyhmmer.easel import Alphabet, DigitalSequenceBlock, TextSequence, SequenceFile, SequenceBlock, TextSequenceBlock
@@ -59,9 +59,11 @@ def hmm_dict_init__candidates_per_organism(candidate_category:PolymerClass_,orga
             _.update({ pc.value: hmm_produce(pc, organism_taxid) })
 
     elif candidate_category == RNAClassEnum:
-        raise Exception("Not implemented yet")
         for rc in RNAClassEnum:
             _.update({ rc.value: hmm_produce(rc, organism_taxid) })
+
+    elif candidate_category == PolymericFactorClass:
+        raise Exception("Not implemented yet: PolymericFactorClass hmmdictinit")
     else:
         return {}
     
@@ -143,20 +145,6 @@ def hmm_produce(candidate_class: ProteinClassEnum | RNAClassEnum, organism_taxid
     else:
         if candidate_class in ProteinClassEnum:
 
-            # fasta_path   = os.path.join(ASSETS["fasta_ribosomal_proteins"], f"{candidate_class}.fasta")
-            # records      = Fasta(fasta_path)
-            # ids          = records.all_taxids()
-            # phylo_nbhd   = phylogenetic_neighborhood(list(map(lambda x: str(x),ids)), str(organism_taxid), n_neighbors=10)
-            # seqs         = records.pick_taxids(phylo_nbhd)
-            # seqs_aligned = muscle_align_N_seq( iter(seqs))
-
-            
-            # seq_tuples =  [TextSequence(name=bytes(seq.id, 'utf-8'), sequence=str(seq.seq)) for seq in seqs_aligned]
-            # builder       = pyhmmer.plan7.Builder(alphabet)
-            # background    = pyhmmer.plan7.Background(alphabet) #? The null(background) model can be later augmented.
-            # anonymous_msa = pyhmmer.easel.TextMSA(bytes(cached_name, 'utf-8'),sequences=seq_tuples)
-            # HMM, _profile, _optmized_profile = builder.build_msa(anonymous_msa.digitize(alphabet), background)
-
             seqs = fasta_phylogenetic_correction(candidate_class, organism_taxid, n_neighbors=10)
             seqs_a = muscle_align_N_seq(iter(seqs))
 
@@ -175,7 +163,7 @@ def hmm_produce(candidate_class: ProteinClassEnum | RNAClassEnum, organism_taxid
 #! Implementations ------------------------------
 
 def classify_subchain(chain: typing.Union[Protein, RNA, PolymericFactor] , candidates_dict:dict[PolymerClass_, HMM]|None=None)->Tuple[str, PolymerClass_|None]:
-    # logging.debug("Task for chain {}.{} (Old nomenclature {}) | taxid {}".format( chain.parent_rcsb_id,chain.auth_asym_id, chain.nomenclature, chain.src_organism_ids[0]))
+    logging.debug("Task for chain {}.{} (Old nomenclature {}) | taxid {}".format( chain.parent_rcsb_id,chain.auth_asym_id, chain.nomenclature, chain.src_organism_ids[0]))
     if type(chain) == RNA:
         assigned = classify_sequence(chain.entity_poly_seq_one_letter_code_can, chain.src_organism_ids[0], RNAClassEnum, candidates_dict=candidates_dict)
 
@@ -195,6 +183,7 @@ def classify_subchains(targets:list[typing.Union[Protein,RNA,PolymericFactor]],c
     # This is a dict of dicts (a "registry", sigh) to only do i/o once per organism.(Pass it down)
     # It's a dictionary because some chains within a structure might originate in different organisms. 
     organisms_registry: dict[int,dict[PolymerClass_, HMM]]= {}
+
     with concurrent.futures.ThreadPoolExecutor(max_workers=25) as executor:
         tasks   = []
         results = []
@@ -204,6 +193,7 @@ def classify_subchains(targets:list[typing.Union[Protein,RNA,PolymericFactor]],c
 
             future = executor.submit(classify_subchain, chain, organisms_registry[chain.src_organism_ids[0]])
             tasks.append(future)
+
         for future in concurrent.futures.as_completed(tasks):
             results.append(future.result())
 

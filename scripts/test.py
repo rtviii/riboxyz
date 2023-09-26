@@ -15,6 +15,7 @@ from ribctl.etl.etl_pipeline import ReannotationPipeline, query_rcsb_api, rcsb_s
 from ribctl.etl.obtain import obtain_assets_threadpool
 from ribctl.lib.classification import classify_sequence, classify_subchains
 from ribctl.etl.ribosome_assets import Assetlist, RibosomeAssets
+from ribctl.lib.ribosome_types.types_ribosome import RNAClassEnum
 from ribctl.lib.tunnel import ptc_resdiues_get, ptc_residues_calculate_midpoint
 from ribctl import model_species, model_subgenuses
 from ete3 import NCBITaxa
@@ -37,16 +38,17 @@ if sys.argv[1]    == "process_struct":
    rcsb_id         = sys.argv[2].upper()
    rib             = RibosomeAssets(rcsb_id).profile()
    organism_taxid  = rib.src_organism_ids[0]
-   prots           = rib.proteins
-   result          = classify_subchains(prots)
+   rnas           = rib.rnas
+   result          = classify_subchains(rnas, RNAClassEnum)
    print(result)
 elif sys.argv[1] == "process_all":
     for rcsb_id in RibosomeAssets.list_all_structs():
         logger.debug("Processing {}".format(rcsb_id))
         rib            = RibosomeAssets(rcsb_id).profile()
         organism_taxid = rib.src_organism_ids[0]
-        prots          = rib.proteins
+        rnas          = rib.rnas
         results        = classify_subchains(prots)
+        print(results)
         with open('/home/rtviii/dev/riboxyz/nomv2/{}.json'.format(rcsb_id), 'w') as f:
             json.dump(results, f)
 
