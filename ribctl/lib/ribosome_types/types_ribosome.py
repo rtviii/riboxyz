@@ -351,7 +351,6 @@ class RNAClassEnum(Enum):
     # rRNA_25S   = "25SrRNA"
     # rRNA_35S   = "35SrRNA"
 
-
     # Assembly rna missing
     mt_rRNA_12S = "mt12SrRNA" # TODO : Cleanup rnacentral
     mt_rRNA_16S = "mt16SrRNA" # TODO : Cleanup rnacentrl

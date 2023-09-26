@@ -9,8 +9,8 @@ ncbi = NCBITaxa()
 # Define the taxonomic name you want to translate
 
 # Replace 'your_fasta_file.fasta' with the path to your FASTA file
-fasta_file = "./12S_mitochondrial_rRNA_AND_entry_typeSequence.fasta"
-dest       = "./m_12SrRNA.fasta"
+fasta_file = "./16S_mitochondrial_rRNA_AND_so_rna_type_nameMt_rRNA_AND_entry_typeSequence.fasta"
+dest       = "./m_16SrRNA.fasta"
 
 to_keep    = []
 
@@ -24,7 +24,7 @@ specs = {}
 
 with open(fasta_file, "r") as handle:
     for record in SeqIO.parse(handle, "fasta"):
-        if "12S" in record.description and ( len(record.seq) < 1200 and len(record.seq) > 600 ):
+        # if "16S" in record.description and ( len(record.seq) < 1200 and len(record.seq) > 600 ):
             try:
                 taxname_huh = " ".join(record.description.split(" ")[1:3])
                 taxid       = str(ncbi.get_name_translator([taxname_huh])[taxname_huh][0])
@@ -35,9 +35,9 @@ with open(fasta_file, "r") as handle:
                 else:
                     specs[taxid] += 1
 
-
                 record.description = "rnacentral_id:{}|{}".format(record.id, record.description)
-                if specs[taxid] < 5:
+
+                if specs[taxid] < 3:
                     to_keep.append(record)
             except:
                 ...
