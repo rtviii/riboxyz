@@ -343,6 +343,7 @@ class ProteinClassEnum(Enum):
 # RNA Central 5(e): 
 
 class RNAClassEnum(Enum):
+
     # 16S 23S 5S
     # 18S  28S  5.8S  5S
     # rRNA_12S   = "12SrRNA"
@@ -352,8 +353,8 @@ class RNAClassEnum(Enum):
 
 
     # Assembly rna missing
-    mt_rRNA_12S = "mt12SrRNA"
-    mt_rRNA_16S = "mt16SrRNA"
+    mt_rRNA_12S = "mt12SrRNA" # TODO : Cleanup rnacentral
+    mt_rRNA_16S = "mt16SrRNA" # TODO : Cleanup rnacentrl
 
     b_rRNA_5S   = "b5SrRNA"
     b_rRNA_16S  = "e16SrRNA"
