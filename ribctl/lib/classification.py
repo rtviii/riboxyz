@@ -137,6 +137,7 @@ def hmm_cache(hmm:HMM):
 def hmm_produce(candidate_class: ProteinClassEnum | RNAClassEnum, organism_taxid:int)->HMM:  # type: ignore
     """Produce an organism-specific HMM. Retrieve from cache if exists, otherwise generate and cache."""
     hmm_path = "class_{}_taxid_{}.hmm".format(candidate_class.value, organism_taxid)
+
     if os.path.isfile(os.path.join(hmm_cachedir, hmm_path)):
         hmm_path = os.path.join(hmm_cachedir, hmm_path)
         with pyhmmer.plan7.HMMFile(hmm_path) as hmm_file:
@@ -151,14 +152,18 @@ def hmm_produce(candidate_class: ProteinClassEnum | RNAClassEnum, organism_taxid
             cached_name = "class_{}_taxid_{}.hmm".format(candidate_class.value, organism_taxid)
             alphabet    = pyhmmer.easel.Alphabet.amino()
             HMM         = hmm_create(cached_name, seqs_a, alphabet)
-
             hmm_cache(HMM)
-            
             return HMM
 
         if candidate_class in RNAClassEnum:
-            raise Exception("Not implemented yet")
-            ...
+            seqs = fasta_phylogenetic_correction(candidate_class, organism_taxid, n_neighbors=10)
+            seqs_a = muscle_align_N_seq(iter(seqs))
+
+            cached_name = "class_{}_taxid_{}.hmm".format(candidate_class.value, organism_taxid)
+            alphabet    = pyhmmer.easel.Alphabet.rna()
+            HMM         = hmm_create(cached_name, seqs_a, alphabet)
+            hmm_cache(HMM)
+            return HMM
 
 #! Implementations ------------------------------
 
