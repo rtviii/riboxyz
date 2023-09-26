@@ -1,1 +1,0 @@
-# TODO : Getting seed mrna seqs from RNACENTRAL: will have to clean  
