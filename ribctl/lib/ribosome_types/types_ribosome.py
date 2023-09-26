@@ -355,14 +355,14 @@ class RNAClassEnum(Enum):
     mt_rRNA_12S = "mt12SrRNA" # TODO : Cleanup rnacentral
     mt_rRNA_16S = "mt16SrRNA" # TODO : Cleanup rnacentrl
 
-    b_rRNA_5S   = "b5SrRNA"
-    b_rRNA_16S  = "e16SrRNA"
-    b_rRNA_23S  = "b23SrRNA"
+    rRNA_5S   = "5SrRNA"
+    rRNA_16S  = "16SrRNA"
+    rRNA_23S  = "23SrRNA"
+    rRNA_25S  = "25SrRNA" # plants
 
-    e_rRNA_5S   = "e5SrRNA"
-    e_rRNA_5_8S = "e5.8SrRNA"
-    b_rRNA_18S  = "e18SrRNA"
-    e_rRNA_28S  = "e28SrRNA"
+    rRNA_5_8S = "5.8SrRNA"
+    rRNA_18S  = "18SrRNA"
+    rRNA_28S  = "28SrRNA"
 
 
 PolymerClass_ = typing.Union[RNAClassEnum, ProteinClassEnum]

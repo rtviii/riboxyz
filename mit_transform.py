@@ -1,26 +1,47 @@
 from Bio import SeqIO
 from ete3 import NCBITaxa
-
-# Initialize the NCBI Taxonomy database
-ncbi = NCBITaxa()
-
-
-# Translate the taxonomic name to a taxonomic ID
-# Define the taxonomic name you want to translate
-
-# Replace 'your_fasta_file.fasta' with the path to your FASTA file
-fasta_file = "./12S_mitochondrial_rRNA_AND_entry_typeSequence.fasta"
-dest       = "./m_12SrRNA.fasta"
-
-to_keep    = []
+from Bio.SeqRecord import SeqRecord
+from Bio.Seq import Seq
 
 
-# Use SeqIO to read the input FASTA file and store records in the list
-# Save the records in a new FASTA file
 
-# Use SeqIO to open and iterate through the FASTA file
-i = 0
-specs = {}
+from ribctl.etl.ribosome_assets import RibosomeAssets
+structs = RibosomeAssets.list_all_structs()
+
+
+to_keep =[]
+for struct in structs:
+    print(struct)
+    try:
+        profile   = RibosomeAssets(struct).profile()
+        org_taxid = profile.src_organism_ids[0]
+        if profile.rnas !=None:
+            for rna in profile.rnas:
+                if "28SrRNA" in rna.nomenclature:
+                    sequence    = rna.entity_poly_seq_one_letter_code_can
+                    record_id   = str( org_taxid )
+                    description = "{}.{}|{}".format(profile.rcsb_id, rna.auth_asym_id, rna.rcsb_pdbx_description)
+
+                    sequence_obj = Seq(sequence)
+                    record = SeqRecord(sequence_obj, id=record_id, description=description)
+                    to_keep.append(record)
+
+            
+    except Exception as e:
+        print(e)
+
+dest = "28SrRNA.fasta"
+
+with open(dest, "w") as output_handle:
+    SeqIO.write(to_keep, output_handle, "fasta")
+
+exit()
+
+ncbi    = NCBITaxa()
+dest    = "./m_12SrRNA.fasta"
+to_keep = []
+i       = 0
+specs   = {}
 
 with open(fasta_file, "r") as handle:
     for record in SeqIO.parse(handle, "fasta"):
