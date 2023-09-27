@@ -185,10 +185,11 @@ elif sys.argv[1] == 'll':
         #     print("{}.".format(i),rcsb_id, taxid, ncbi.get_taxid_translator([taxid])[taxid])
            
 elif sys.argv[1] == "classify_rna":
-    prof = RibosomeAssets('3J7Z').profile()
-    # p= prof.rnas
-    [ rna23s, rna5s ]=prof.rnas
-    seq = rna23s.entity_poly_seq_one_letter_code_can
+    prof = RibosomeAssets('3J9m').profile()
+    p= prof.rnas
+    [rna16s,rna12s ] = p
+    # exit()
+    seq = rna12s.entity_poly_seq_one_letter_code_can
 
 
 
