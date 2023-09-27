@@ -110,15 +110,14 @@ def phylogenetic_neighborhood(taxids_base: list[str], taxid_target: str, n_neigh
     """Given a set of taxids and a target taxid, return a list of the [n_neighbors] phylogenetically closest to the target."""
 
     tree = NCBITaxa().get_topology(list(set([*taxids_base, str(taxid_target)])))
-    target_node = tree.search_nodes(name=str(taxid_target))[0]
-    phylo_all_nodes = [(node.name, tree.get_distance(target_node, node)) for node in tree.traverse()]
+
+    target_node        = tree.search_nodes(name=str(taxid_target))[0]
+    phylo_all_nodes    = [(node.name, tree.get_distance(target_node, node)) for node in tree.traverse()]
     phylo_extant_nodes = filter(lambda taxid: taxid[0] in taxids_base, phylo_all_nodes)
     phylo_sorted_nodes = sorted(phylo_extant_nodes, key=lambda x: x[1])
 
-    nbr_taxids = list(
-        map(lambda tax_phydist: tax_phydist[0], phylo_sorted_nodes))
+    nbr_taxids = list( map(lambda tax_phydist: tax_phydist[0], phylo_sorted_nodes))
 
-    # the first element is the target node
     if len(nbr_taxids) < n_neighbors:
         return nbr_taxids[1:]
     else:

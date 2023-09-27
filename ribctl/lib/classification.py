@@ -22,6 +22,8 @@ from pyhmmer.easel import Alphabet, DigitalSequenceBlock, TextSequence, Sequence
 from pyhmmer.plan7 import Pipeline, HMM 
 import logging
 import concurrent.futures
+import inspect
+
 
 # Configure the logging settings
 logging.basicConfig(
@@ -52,16 +54,13 @@ def seq_evaluate_v_hmm_dict(seq:str,alphabet:Alphabet, hmm_dict:dict)->dict[Poly
     return _
 
 def hmm_dict_init__candidates_per_organism(candidate_category:PolymerClass_,organism_taxid:int)->dict[PolymerClass_, HMM]:
-
     _ ={}
     if candidate_category == ProteinClassEnum:
         for pc in ProteinClassEnum:
             _.update({ pc.value: hmm_produce(pc, organism_taxid) })
-
     elif candidate_category == RNAClassEnum:
         for rc in RNAClassEnum:
             _.update({ rc.value: hmm_produce(rc, organism_taxid) })
-
     elif candidate_category == PolymericFactorClass:
         raise Exception("Not implemented yet: PolymericFactorClass hmmdictinit")
     else:
@@ -69,10 +68,12 @@ def hmm_dict_init__candidates_per_organism(candidate_category:PolymerClass_,orga
     
     return _
 
-def pick_best_class(matches_dict:dict[PolymerClass_, list[float]], chain_info:Polymer)->PolymerClass_ | None:
+def pick_best_hmm_hit(matches_dict:dict[PolymerClass_, list[float]], chain_info:Polymer)->PolymerClass_ | None:
     """Given a dictionary of sequence-HMMe e-values, pick the best candidate class"""
     results = []
-    print("Got results:",results)
+    this_function_name = inspect.currentframe().f_code.co_name
+    print("{}:".format(this_function_name,))
+    pprint(matches_dict)
     for (candidate_class, matches) in matches_dict.items():
         if len(matches) == 0:
             continue
@@ -90,17 +91,15 @@ def pick_best_class(matches_dict:dict[PolymerClass_, list[float]], chain_info:Po
 
 def classify_sequence(seq:str, organism:int, candidate_category:typing.Union[RNAClassEnum, ProteinClassEnum], candidates_dict:dict[PolymerClass_, HMM]|None=None)->dict[PolymerClass_, list[float]]:
 
-
     if candidate_category == ProteinClassEnum:
         candidates_dict = candidates_dict if candidates_dict is not None else hmm_dict_init__candidates_per_organism(candidate_category, organism)
         results         = seq_evaluate_v_hmm_dict(seq, pyhmmer.easel.Alphabet.amino(), candidates_dict)
         return results
 
     if candidate_category == RNAClassEnum:
-        print("landed in rna enums")
         candidates_dict = candidates_dict if candidates_dict is not None else hmm_dict_init__candidates_per_organism(candidate_category, organism)
-        print("Received candidates dict:", candidates_dict)
         results         = seq_evaluate_v_hmm_dict(seq, pyhmmer.easel.Alphabet.rna(), candidates_dict)
+        print("Evaluated RNA sequence against HMMs, got results:", results)
         return results
 
 def fasta_phylogenetic_correction(candidate_class:ProteinClassEnum|RNAClassEnum, organism_taxid:int, max_n_neighbors=10)->Iterator[SeqRecord]:
@@ -183,14 +182,16 @@ def classify_subchain(chain: typing.Union[Protein, RNA, PolymericFactor] , candi
         assigned = classify_sequence(chain.entity_poly_seq_one_letter_code_can, chain.src_organism_ids[0], RNAClassEnum, candidates_dict=candidates_dict)
 
     elif type(chain) == Protein:
+        print("################### LANDED IN PROT")
         assigned = classify_sequence(chain.entity_poly_seq_one_letter_code_can, chain.src_organism_ids[0], ProteinClassEnum, candidates_dict=candidates_dict)
 
     elif type(chain)== PolymericFactor:
+        print("################### LANDED IN FACTOR")
         return (chain.auth_asym_id, None)
     else:
         raise Exception("Invalid chain type")
     
-    assigned = pick_best_class(assigned, chain)
+    assigned = pick_best_hmm_hit(assigned, chain)
     return (chain.auth_asym_id, assigned)
 
 # def classify_subchains(targets:list[Protein]|list[RNA]|list[PolymericFactor])->dict[str, PolymerClass_]:
@@ -198,15 +199,20 @@ def classify_subchains(targets:list[typing.Union[Protein,RNA,PolymericFactor]],c
     # This is a dict of dicts (a "registry", sigh) to only do i/o once per organism.(Pass it down)
     # It's a dictionary because some chains within a structure might originate in different organisms. 
     hmm_organisms_registry: dict[int,dict[PolymerClass_, HMM]]= {}
+
     with concurrent.futures.ThreadPoolExecutor(max_workers=25) as executor:
         tasks   = []
         results = []
         for chain in targets:
-            if chain.src_organism_ids[0] not in [*hmm_organisms_registry.keys()]:
-                hmm_organisms_registry[chain.src_organism_ids[0]] = hmm_dict_init__candidates_per_organism(candidate_category, chain.src_organism_ids[0])
-                print("Assembled hm m registry", hmm_organisms_registry)
+            
+            chain_organism_taxid  = chain.src_organism_ids[0]
+            if chain_organism_taxid not in [*hmm_organisms_registry.keys()]:
 
-            future = executor.submit(classify_subchain, chain, hmm_organisms_registry[chain.src_organism_ids[0]])
+                hmm_organisms_registry[chain_organism_taxid] = hmm_dict_init__candidates_per_organism(candidate_category, chain_organism_taxid)
+                print("Assembled hmm registry:")
+                pprint(hmm_organisms_registry)
+
+            future = executor.submit(classify_subchain, chain, hmm_organisms_registry[chain_organism_taxid])
             tasks.append(future)
 
         for future in concurrent.futures.as_completed(tasks):
