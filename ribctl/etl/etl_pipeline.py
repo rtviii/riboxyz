@@ -25,6 +25,7 @@ from ribctl.lib.ribosome_types.types_ribosome import (
     Protein,
     ProteinClass,
     ProteinClassEnum,
+    RNAClassEnum,
     RibosomeStructure,
 )
 from ribctl.etl.gql_querystrings import single_structure_graphql_template
@@ -350,14 +351,9 @@ class ReannotationPipeline:
         reshaped_polymeric_factors: list[PolymericFactor] = []
 
         for j, poly_rna in enumerate(rnas):
-            if (
-                factor_classify(poly_rna["rcsb_polymer_entity"]["pdbx_description"])
-                != None
-            ):
+            if (factor_classify(poly_rna["rcsb_polymer_entity"]["pdbx_description"])!= None ):
                 # TODO: HMM WORKFLOW
-                reshaped_polymeric_factors.extend(
-                    self.poly_reshape_to_rFactor(poly_rna)
-                )
+                reshaped_polymeric_factors.extend( self.poly_reshape_to_rFactor(poly_rna) )
             else:
                 # TODO: DIFFERENTIATE BETWEEN MRNA (regex) AND TRNA (HMM workflow )
                 reshaped_rnas.extend(self.poly_reshape_to_rRNA(poly_rna))
@@ -593,9 +589,10 @@ class ReannotationPipeline:
         # src_organism_ids   = list(map(int, set([org['ncbi_taxonomy_id'] for org in plm['rcsb_entity_source_organism']]))) if plm['rcsb_entity_source_organism'] != None else []
         # src_organism_names = list(map(str, set([org['scientific_name'] for org in plm['rcsb_entity_source_organism']]))) if plm['rcsb_entity_source_organism']  != None else []
 
-        nomenclature = rna_classify(
-            rrna_polymer_obj["rcsb_polymer_entity"]["pdbx_description"]
-        )
+        nomenclature = []
+        # nomenclature = rna_classify(
+        #     rrna_polymer_obj["rcsb_polymer_entity"]["pdbx_description"]
+        # )
 
         return [
             RNA(
@@ -785,21 +782,24 @@ class ReannotationPipeline:
         ]
 
     def process_structure(self):
-        [
-            reshaped_proteins,
-            reshaped_polymeric_factors_prot,
-        ] = self.process_polypeptides()
-        [reshaped_rnas, reshaped_polymeric_factors_rna] = self.process_polynucleotides()
+        [ reshaped_proteins, reshaped_polymeric_factors_prot, ] = self.process_polypeptides()
+        [reshaped_rnas, reshaped_polymeric_factors_rna]         = self.process_polynucleotides()
+
         other_polymers = self.process_other_polymers()
 
-        prot_noms: dict[str, PolymerClass_] = classify_subchains(
-            [*reshaped_proteins, *reshaped_polymeric_factors_prot],
-            ProteinClassEnum
-        )
+        prot_noms: dict[str, PolymerClass_] = classify_subchains( [*reshaped_proteins, *reshaped_polymeric_factors_prot], ProteinClassEnum )
         for aaid, protname in prot_noms.items():
             for prot in reshaped_proteins:
                 if prot.auth_asym_id == aaid and protname != None:
                     prot.nomenclature = [protname]
+                else:
+                    continue
+
+        rna_noms: dict[str, PolymerClass_] = classify_subchains( [*reshaped_rnas, *reshaped_polymeric_factors_prot], RNAClassEnum )
+        for aaid, rnaname in rna_noms.items():
+            for rna in reshaped_rnas:
+                if rna.auth_asym_id == aaid and rna != None:
+                    rna.nomenclature = [rnaname]
                 else:
                     continue
 

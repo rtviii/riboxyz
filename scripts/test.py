@@ -188,12 +188,7 @@ elif sys.argv[1] == "classify_rna":
     prof = RibosomeAssets('3J9m').profile()
     p= prof.rnas
     [rna16s,rna12s ] = p
-    # exit()
     seq = rna12s.entity_poly_seq_one_letter_code_can
-
-
-
-
     hmms = []
     alphabet    = pyhmmer.easel.Alphabet.rna()
 
@@ -207,9 +202,6 @@ elif sys.argv[1] == "classify_rna":
             hmm = hmm_produce(val, prof.src_organism_ids[0])
         hmms.append(hmm)
         
-    
-    # k = hmm_dict_init__candidates_per_organism(RNAClassEnum, prof.src_organism_ids[0])
-
     seq_  = pyhmmer.easel.TextSequence(name=b"template", sequence=seq)
     dsb   = DigitalSequenceBlock(alphabet, [seq_.digitize(alphabet)])
     for hmm in hmms:
@@ -217,3 +209,16 @@ elif sys.argv[1] == "classify_rna":
         hits =  pyhmmer.plan7.Pipeline(alphabet=alphabet).search_hmm(hmm,dsb)
         for hit in hits:
             print(hit.evalue)
+            print(hit.score)
+            print(hit.bias)
+            print(hit.description)
+            print(hit.sum_score)
+
+
+elif sys.argv[1] == "struct_rnas":
+    print("ss")
+    for struct in RibosomeAssets.list_all_structs()[10:20]:
+        print("========================Processing {}=====================".format(struct))
+        prof = RibosomeAssets(struct).profile()
+        p    = prof.rnas
+        k    = classify_subchains(p,RNAClassEnum)
