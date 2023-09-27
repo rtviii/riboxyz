@@ -37,18 +37,19 @@ ASSETS: dict[asset_type, pathlib.Path] = {
     "old_names_lsu"           : pathlib.Path(os.path.join(ASSETS_PATH, "old_names_LSU.json")),
     "old_names_ssu"           : pathlib.Path(os.path.join(ASSETS_PATH, "old_names_SSU.json")),
 
-    "fasta_proteins_cytosolic": pathlib.Path(os.path.join(ASSETS_PATH, "fasta_ribosomal_proteins") ),
+    "fasta_proteins_cytosolic"    : pathlib.Path(os.path.join(ASSETS_PATH, "fasta_ribosomal_proteins") ),
     "fasta_proteins_mitochondrial": pathlib.Path(os.path.join(ASSETS_PATH, "fasta_ribosomal_proteins") ),
-    "fasta_ribosomal_rna"     : pathlib.Path( os.path.join(ASSETS_PATH, "fasta_ribosomal_rna") ),
-    "fasta_factors"           : pathlib.Path(os.path.join(ASSETS_PATH, "fasta_factors")),
-    "fasta_trna"              : pathlib.Path(os.path.join(ASSETS_PATH, "fasta_trna")),
+    "fasta_ribosomal_rna"         : pathlib.Path(os.path.join(ASSETS_PATH, "fasta_ribosomal_rna") ),
+    "fasta_factors"               : pathlib.Path(os.path.join(ASSETS_PATH, "fasta_factors")),
+    "fasta_trna"                  : pathlib.Path(os.path.join(ASSETS_PATH, "fasta_trna")),
 
     "__hmm_cache"             : pathlib.Path(os.path.join(ASSETS_PATH, "__hmm_cache")),
 }
 
-TAXID_BACTERIA = 2
-TAXID_EUKARYA = 2759
-TAXID_ARCHEA = 2157
+TAXID_BACTERIA          = 2
+TAXID_EUKARYA           = 2759
+TAXID_ARCHEA            = 2157
+
 AMINO_ACIDS_3_TO_1_CODE = {
     "ALA": "A",
     "ARG": "R",

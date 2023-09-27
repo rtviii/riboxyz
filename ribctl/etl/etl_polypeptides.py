@@ -42,7 +42,7 @@ def protein_classify(protein:dict)->list[ProteinClass]:
              ['pfamDomainAccession'] else ... for kv in SSU_map.items()]
         return list(set(nomenclature))
 
-def rna_classify(poly_pdbx_description:str):
+def rna_classify(poly_pdbx_description:str|None):
     rna_reg = {
         "5SrRNA"  : r"\b(5s)",
         "5.8SrRNA": r"\b(5\.8s)",
@@ -57,7 +57,7 @@ def rna_classify(poly_pdbx_description:str):
 
     rnatypes = rna_reg.items()
     for i in rnatypes:
-        matches = re.search(i[1], poly_pdbx_description, flags=re.IGNORECASE | re.MULTILINE)
+        matches = re.search(i[1], poly_pdbx_description if poly_pdbx_description !=None else '', flags=re.IGNORECASE | re.MULTILINE)
         if matches != None:
             return [i[0]]
     return []
