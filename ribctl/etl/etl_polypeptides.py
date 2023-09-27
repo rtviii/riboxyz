@@ -44,15 +44,15 @@ def protein_classify(protein:dict)->list[ProteinClass]:
 
 def rna_classify(poly_pdbx_description:str|None):
     rna_reg = {
-        "5SrRNA"  : r"\b(5s)",
-        "5.8SrRNA": r"\b(5\.8s)",
-        "12SrRNA" : r"\b(12s)",
-        "16SrRNA" : r"\b(16s)",
-        "21SrRNA" : r"\b(21s)",
-        "23SrRNA" : r"\b(23s)",
-        "25SrRNA" : r"\b(25s)",
-        "28SrRNA" : r"\b(28s)",
-        "35SrRNA" : r"\b(35s)",
+        "5SrRNA"  : r"\b(?<!\.)(5s)\b",
+        "5.8SrRNA": r"\b(?<!\.)(5\.8s)\b",
+        "12SrRNA" : r"\b(?<!\.)(12s)\b",
+        "16SrRNA" : r"\b(?<!\.)(16s)\b",
+        "21SrRNA" : r"\b(?<!\.)(21s)\b",
+        "23SrRNA" : r"\b(?<!\.)(23s)\b",
+        "25SrRNA" : r"\b(?<!\.)(25s)\b",
+        "28SrRNA" : r"\b(?<!\.)(28s)\b",
+        "35SrRNA" : r"\b(?<!\.)(35s)\b",
     }
 
     rnatypes = rna_reg.items()
