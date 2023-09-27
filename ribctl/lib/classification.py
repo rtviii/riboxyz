@@ -71,23 +71,27 @@ def hmm_dict_init__candidates_per_organism(candidate_category:PolymerClass_,orga
 def pick_best_hmm_hit(matches_dict:dict[PolymerClass_, list[float]], chain_info:Polymer)->PolymerClass_ | None:
     """Given a dictionary of sequence-HMMe e-values, pick the best candidate class"""
     results = []
-    this_function_name = inspect.currentframe().f_code.co_name
-    print("{}:".format(this_function_name,))
-    pprint(matches_dict)
-    for (candidate_class, matches) in matches_dict.items():
-        if len(matches) == 0:
+    for (candidate_class, match) in matches_dict.items():
+        if len(match) == 0:
             continue
         else:
-            results.append((candidate_class, matches))
+            results.append({"candidate_class":candidate_class,"match": match})
+
     if len(results) == 0 :
         logging.warning("Chain {}.{} : Did not match any of the candidate HMM models.".format(chain_info.parent_rcsb_id, chain_info.auth_asym_id))
         return None
+
     if len(results) > 1 :
         # if more than 1 match, pick the smallest and ring alarms if the next smallest is within an order of magnitude.
-        results = sorted(results, key=lambda match_kv: match_kv[1])
-        if abs(math.log10(results[0][1][0]/results[1][1][0])) < 2:
+        results = sorted(results, key=lambda match_kv: match_kv['match'][0])
+
+        best_match        = results[0]['match'][0]
+        second_best_match = results[1]['match'][0]
+        
+        if best_match == 0 and second_best_match == 0:
             logging.warning("{}.{} : Multiple sensible matches detected, picked {} (smallest e-value) : \n {}".format(chain_info.parent_rcsb_id, chain_info.auth_asym_id,results[0][0], results))
-    return results[0][0]
+
+    return results[0]['candidate_class']
 
 def classify_sequence(seq:str, organism:int, candidate_category:typing.Union[RNAClassEnum, ProteinClassEnum], candidates_dict:dict[PolymerClass_, HMM]|None=None)->dict[PolymerClass_, list[float]]:
 
@@ -99,7 +103,6 @@ def classify_sequence(seq:str, organism:int, candidate_category:typing.Union[RNA
     if candidate_category == RNAClassEnum:
         candidates_dict = candidates_dict if candidates_dict is not None else hmm_dict_init__candidates_per_organism(candidate_category, organism)
         results         = seq_evaluate_v_hmm_dict(seq, pyhmmer.easel.Alphabet.rna(), candidates_dict)
-        print("Evaluated RNA sequence against HMMs, got results:", results)
         return results
 
 def fasta_phylogenetic_correction(candidate_class:ProteinClassEnum|RNAClassEnum, organism_taxid:int, max_n_neighbors=10)->Iterator[SeqRecord]:
@@ -123,7 +126,6 @@ def hmm_create(name:str, seqs:Iterator[SeqRecord], alphabet:Alphabet)->HMM:
     """Create an HMM from a list of sequences"""
 
     seq_tuples =  [TextSequence(name=bytes(seq.id, 'utf-8'), sequence=str(seq.seq)) for seq in seqs]
-    pprint(seq_evaluate_v_hmm_dict)
 
     builder       = pyhmmer.plan7.Builder(alphabet)
     background    = pyhmmer.plan7.Background(alphabet) #? The null(background) model can be later augmented.
@@ -178,15 +180,12 @@ def hmm_produce(candidate_class: ProteinClassEnum | RNAClassEnum, organism_taxid
 def classify_subchain(chain: typing.Union[Protein, RNA, PolymericFactor] , candidates_dict:dict[PolymerClass_, HMM]|None=None)->Tuple[str, PolymerClass_|None]:
     logging.debug("Task for chain {}.{} (Old nomenclature {}) | taxid {}".format( chain.parent_rcsb_id,chain.auth_asym_id, chain.nomenclature, chain.src_organism_ids[0]))
     if type(chain) == RNA:
-        print("Landed in class RNA")
         assigned = classify_sequence(chain.entity_poly_seq_one_letter_code_can, chain.src_organism_ids[0], RNAClassEnum, candidates_dict=candidates_dict)
 
     elif type(chain) == Protein:
-        print("################### LANDED IN PROT")
         assigned = classify_sequence(chain.entity_poly_seq_one_letter_code_can, chain.src_organism_ids[0], ProteinClassEnum, candidates_dict=candidates_dict)
 
     elif type(chain)== PolymericFactor:
-        print("################### LANDED IN FACTOR")
         return (chain.auth_asym_id, None)
     else:
         raise Exception("Invalid chain type")
@@ -209,8 +208,6 @@ def classify_subchains(targets:list[typing.Union[Protein,RNA,PolymericFactor]],c
             if chain_organism_taxid not in [*hmm_organisms_registry.keys()]:
 
                 hmm_organisms_registry[chain_organism_taxid] = hmm_dict_init__candidates_per_organism(candidate_category, chain_organism_taxid)
-                print("Assembled hmm registry:")
-                pprint(hmm_organisms_registry)
 
             future = executor.submit(classify_subchain, chain, hmm_organisms_registry[chain_organism_taxid])
             tasks.append(future)
