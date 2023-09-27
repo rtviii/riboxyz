@@ -50,7 +50,7 @@ def seq_evaluate_v_hmm_dict(seq:str,alphabet:Alphabet, hmm_dict:dict)->dict[Poly
     _ = {}
     for (candidate_class, hmm) in hmm_dict.items():
         result = seq_evaluate_v_hmm(seq,alphabet, hmm)
-        _.update({candidate_class: [] if len(result) == 0 else list(map(lambda x: x.evalue, result))})
+        _.update({candidate_class: [] if len(result) == 0 else list(map(lambda x: { "evalue":x.evalue, "score":x.score }, result))})
     return _
 
 def hmm_dict_init__candidates_per_organism(candidate_category:PolymerClass_,organism_taxid:int)->dict[PolymerClass_, HMM]:
@@ -83,7 +83,7 @@ def pick_best_hmm_hit(matches_dict:dict[PolymerClass_, list[float]], chain_info:
 
     if len(results) > 1 :
         # if more than 1 match, pick the smallest and ring alarms if the next smallest is within an order of magnitude.
-        results = sorted(results, key=lambda match_kv: match_kv['match'][0])
+        results = sorted(results, key=lambda match_kv: match_kv['match'][0]['score'], reverse=True)
 
         best_match        = results[0]['match'][0]
         second_best_match = results[1]['match'][0]
