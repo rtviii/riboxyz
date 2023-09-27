@@ -217,7 +217,8 @@ elif sys.argv[1] == "classify_rna":
 
 elif sys.argv[1] == "struct_rnas":
     print("ss")
-    for struct in RibosomeAssets.list_all_structs()[:10]:
+    for struct in RibosomeAssets.list_all_structs()[10:20]:
+        print("========================Processing {}=====================".format(struct))
         prof = RibosomeAssets(struct).profile()
         p    = prof.rnas
         k    = classify_subchains(p,RNAClassEnum)
