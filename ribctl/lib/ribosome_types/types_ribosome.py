@@ -1,4 +1,6 @@
 from typing import Any, Optional
+from enum import Enum, auto
+import typing
 import typing
 from typing import NewType
 from pydantic import BaseModel
@@ -216,8 +218,6 @@ class RibosomeStructure(BaseModel):
     def from_json_profile(d: Any):
         return RibosomeStructure(**d)
 
-from enum import Enum, auto
-import typing
 
 class ProteinClassEnum(Enum):
     bS1   = "bS1"

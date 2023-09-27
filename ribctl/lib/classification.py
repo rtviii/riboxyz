@@ -103,7 +103,7 @@ def classify_sequence(seq:str, organism:int, candidate_category:typing.Union[RNA
         results         = seq_evaluate_v_hmm_dict(seq, pyhmmer.easel.Alphabet.rna(), candidates_dict)
         return results
 
-def fasta_phylogenetic_correction(candidate_class:ProteinClassEnum|RNAClassEnum, organism_taxid:int, n_neighbors=10)->Iterator[SeqRecord]:
+def fasta_phylogenetic_correction(candidate_class:ProteinClassEnum|RNAClassEnum, organism_taxid:int, max_n_neighbors=10)->Iterator[SeqRecord]:
     """Given a candidate class and an organism taxid, retrieve the corresponding fasta file, and perform phylogenetic correction on it."""
 
     if candidate_class in ProteinClassEnum:
@@ -116,14 +116,12 @@ def fasta_phylogenetic_correction(candidate_class:ProteinClassEnum|RNAClassEnum,
 
     records      = Fasta(fasta_path)
     ids          = records.all_taxids()
-    phylo_nbhd   = phylogenetic_neighborhood(list(map(lambda x: str(x),ids)), str(organism_taxid), n_neighbors)
+    phylo_nbhd   = phylogenetic_neighborhood(list(map(lambda x: str(x),ids)), str(organism_taxid), max_n_neighbors)
     seqs         = records.pick_taxids(phylo_nbhd)
     return iter(seqs)
 
 def hmm_create(name:str, seqs:Iterator[SeqRecord], alphabet:Alphabet)->HMM:
     """Create an HMM from a list of sequences"""
-    print("building hmm")
-    print(name)
 
     seq_tuples =  [TextSequence(name=bytes(seq.id, 'utf-8'), sequence=str(seq.seq)) for seq in seqs]
     pprint(seq_evaluate_v_hmm_dict)
@@ -145,7 +143,6 @@ def hmm_cache(hmm:HMM):
             print("Wrote `{}` to `{}`".format(filename, hmm_cachedir))
     else:
         ...
-        # print(filename + " exists.")
 
 def hmm_produce(candidate_class: ProteinClassEnum | RNAClassEnum, organism_taxid:int)->HMM:  # type: ignore
     """Produce an organism-specific HMM. Retrieve from cache if exists, otherwise generate and cache."""
@@ -158,8 +155,7 @@ def hmm_produce(candidate_class: ProteinClassEnum | RNAClassEnum, organism_taxid
             return HMM
     else:
         if candidate_class in ProteinClassEnum:
-
-            seqs = fasta_phylogenetic_correction(candidate_class, organism_taxid, n_neighbors=10)
+            seqs = fasta_phylogenetic_correction(candidate_class, organism_taxid, max_n_neighbors=10)
             seqs_a = muscle_align_N_seq(iter(seqs))
 
             cached_name = "class_{}_taxid_{}.hmm".format(candidate_class.value, organism_taxid)
@@ -169,7 +165,7 @@ def hmm_produce(candidate_class: ProteinClassEnum | RNAClassEnum, organism_taxid
             return HMM
 
         if candidate_class in RNAClassEnum:
-            seqs        = fasta_phylogenetic_correction(candidate_class, organism_taxid, n_neighbors=3)
+            seqs        = fasta_phylogenetic_correction(candidate_class, organism_taxid, max_n_neighbors=10)
             seqs_a      = muscle_align_N_seq(iter(seqs))
 
             cached_name = "class_{}_taxid_{}.hmm".format(candidate_class.value, organism_taxid)

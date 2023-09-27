@@ -17,6 +17,7 @@ def rna_classify(poly_pdbx_description:str|None):
         "5.8SrRNA": r"\b(?<!\.)(5\.8s)\b",
         "12SrRNA" : r"\b(?<!\.)(12s)\b",
         "16SrRNA" : r"\b(?<!\.)(16s)\b",
+        "18SrRNA" : r"\b(?<!\.)(18s)\b",
         "21SrRNA" : r"\b(?<!\.)(21s)\b",
         "23SrRNA" : r"\b(?<!\.)(23s)\b",
         "25SrRNA" : r"\b(?<!\.)(25s)\b",
@@ -35,35 +36,42 @@ to_keep =[]
 lens = []
 descs = []
 
+classname = "28SrRNA"
 for struct in structs:
     print(struct)
     try:
         profile   = RibosomeAssets(struct).profile()
+        # print(profile.citation_title)
+       
+        if "mito" in profile.citation_title.lower():
+            print("Skipped mitochondrial structure")
+            continue
+
         org_taxid = profile.src_organism_ids[0]
-        if profile.rnas !=None:
+        if profile.rnas != None:
             for rna in profile.rnas:
-                if rna_classify(rna.rcsb_pdbx_description) == ["5SrRNA"] and 300 > len(rna.entity_poly_seq_one_letter_code_can) > 80:
-                # if "5SrRNA" in rna.nomenclature :
+                if rna_classify(rna.rcsb_pdbx_description) == [classname] and 6000 > len(rna.entity_poly_seq_one_letter_code_can) > 4500:
                     print("matched: ", rna.rcsb_pdbx_description)
                     sequence    = rna.entity_poly_seq_one_letter_code_can
                     record_id   = str( org_taxid )
                     description = "{}.{}|{}".format(profile.rcsb_id, rna.auth_asym_id, rna.rcsb_pdbx_description)
-                    lens.append(len(sequence))
-                    descs.append(rna.rcsb_pdbx_description)
 
                     sequence_obj = Seq(sequence)
                     record = SeqRecord(sequence_obj, id=record_id, description=description)
+
+                    lens.append(len(sequence))
+                    descs.append(rna.rcsb_pdbx_description)
                     to_keep.append(record)
 
-            
     except Exception as e:
         print(e)
+
 pprint(set(sorted(lens)))
 pprint(set(sorted(descs)))
 
-# dest = "5.8SrRNA.fasta"
-# with open(dest, "w") as output_handle:
-#     SeqIO.write(to_keep, output_handle, "fasta")
+dest = "{}.fasta".format(classname)
+with open(dest, "w") as output_handle:
+    SeqIO.write(to_keep, output_handle, "fasta")
 
 
 

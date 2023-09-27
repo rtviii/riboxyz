@@ -17,7 +17,7 @@ import pyhmmer
 from ribctl import ASSETS, RIBETL_DATA
 from ribctl.etl.etl_pipeline import ReannotationPipeline, query_rcsb_api, rcsb_single_structure_graphql
 from ribctl.etl.obtain import obtain_assets_threadpool
-from ribctl.lib.classification import classify_sequence, classify_subchains, hmm_dict_init__candidates_per_organism
+from ribctl.lib.classification import classify_sequence, classify_subchains, hmm_create, hmm_dict_init__candidates_per_organism, hmm_produce
 from ribctl.etl.ribosome_assets import Assetlist, RibosomeAssets
 from ribctl.lib.ribosome_types.types_ribosome import RNAClassEnum
 from ribctl.lib.tunnel import ptc_resdiues_get, ptc_residues_calculate_midpoint
@@ -188,31 +188,31 @@ elif sys.argv[1] == "classify_rna":
     prof = RibosomeAssets('3J7Z').profile()
     # p= prof.rnas
     [ rna23s, rna5s ]=prof.rnas
-    pprint(rna5s)
-
-    # classify_subchains([rna5s], RNAClassEnum)
-    
-    seq = rna5s.entity_poly_seq_one_letter_code_can
+    seq = rna23s.entity_poly_seq_one_letter_code_can
 
 
-    class_5s = RNAClassEnum("5SrRNA")
 
-    hmm_path = "class_{}_taxid_{}.hmm".format(class_5s.value, prof.src_organism_ids[0])
+
+    hmms = []
     alphabet    = pyhmmer.easel.Alphabet.rna()
 
-    if os.path.isfile(os.path.join(hmm_cachedir, hmm_path)):
-        hmm_path = os.path.join(hmm_cachedir, hmm_path)
-        with pyhmmer.plan7.HMMFile(hmm_path) as hmm_file:
-            hmm = hmm_file.read()
-    print("Got hmm")
-    print(hmm)
+    for val in RNAClassEnum:
+        hmm_path = "class_{}_taxid_{}.hmm".format(val.value, prof.src_organism_ids[0])
+        if os.path.isfile(os.path.join(hmm_cachedir, hmm_path)):
+            hmm_path = os.path.join(hmm_cachedir, hmm_path)
+            with pyhmmer.plan7.HMMFile(hmm_path) as hmm_file:
+                hmm = hmm_file.read()   
+        else:
+            hmm = hmm_produce(val, prof.src_organism_ids[0])
+        hmms.append(hmm)
+        
     
-    k = hmm_dict_init__candidates_per_organism(RNAClassEnum, prof.src_organism_ids[0])
+    # k = hmm_dict_init__candidates_per_organism(RNAClassEnum, prof.src_organism_ids[0])
 
     seq_  = pyhmmer.easel.TextSequence(name=b"template", sequence=seq)
     dsb   = DigitalSequenceBlock(alphabet, [seq_.digitize(alphabet)])
-    hits =  pyhmmer.plan7.Pipeline(alphabet=alphabet).search_hmm(hmm,dsb)
-    # [print(hit.hits, hit.accession, hit.best_domain, hit.pvalue, hit.evalue) for hit in hits]
-
-    # print(r.mode)
-    # print(r.)
+    for hmm in hmms:
+        print("\t>>>>>>>>>>>> ", hmm)
+        hits =  pyhmmer.plan7.Pipeline(alphabet=alphabet).search_hmm(hmm,dsb)
+        for hit in hits:
+            print(hit.evalue)
