@@ -1,3 +1,4 @@
+from pprint import pprint
 import re
 from Bio import SeqIO
 from ete3 import NCBITaxa
@@ -10,18 +11,17 @@ from ribctl.etl.ribosome_assets import RibosomeAssets
 structs = RibosomeAssets.list_all_structs()
 
 
-
 def rna_classify(poly_pdbx_description:str|None):
     rna_reg = {
-        "5SrRNA"  : r"\b(5s)",
-        "5.8SrRNA": r"\b(5\.8s)",
-        "12SrRNA" : r"\b(12s)",
-        "16SrRNA" : r"\b(16s)",
-        "21SrRNA" : r"\b(21s)",
-        "23SrRNA" : r"\b(23s)",
-        "25SrRNA" : r"\b(25s)",
-        "28SrRNA" : r"\b(28s)",
-        "35SrRNA" : r"\b(35s)",
+        "5SrRNA"  : r"\b(?<!\.)(5s)\b",
+        "5.8SrRNA": r"\b(?<!\.)(5\.8s)\b",
+        "12SrRNA" : r"\b(?<!\.)(12s)\b",
+        "16SrRNA" : r"\b(?<!\.)(16s)\b",
+        "21SrRNA" : r"\b(?<!\.)(21s)\b",
+        "23SrRNA" : r"\b(?<!\.)(23s)\b",
+        "25SrRNA" : r"\b(?<!\.)(25s)\b",
+        "28SrRNA" : r"\b(?<!\.)(28s)\b",
+        "35SrRNA" : r"\b(?<!\.)(35s)\b",
     }
 
     rnatypes = rna_reg.items()
@@ -32,7 +32,9 @@ def rna_classify(poly_pdbx_description:str|None):
     return []
 
 to_keep =[]
-stats ={}
+lens = []
+descs = []
+
 for struct in structs:
     print(struct)
     try:
@@ -40,10 +42,14 @@ for struct in structs:
         org_taxid = profile.src_organism_ids[0]
         if profile.rnas !=None:
             for rna in profile.rnas:
-                if "5.8SrRNA" in rna.nomenclature and rna_classify(rna.rcsb_pdbx_description) == ["5.8SrRNA"]:
+                if rna_classify(rna.rcsb_pdbx_description) == ["5SrRNA"] and 300 > len(rna.entity_poly_seq_one_letter_code_can) > 80:
+                # if "5SrRNA" in rna.nomenclature :
+                    print("matched: ", rna.rcsb_pdbx_description)
                     sequence    = rna.entity_poly_seq_one_letter_code_can
                     record_id   = str( org_taxid )
                     description = "{}.{}|{}".format(profile.rcsb_id, rna.auth_asym_id, rna.rcsb_pdbx_description)
+                    lens.append(len(sequence))
+                    descs.append(rna.rcsb_pdbx_description)
 
                     sequence_obj = Seq(sequence)
                     record = SeqRecord(sequence_obj, id=record_id, description=description)
@@ -52,11 +58,12 @@ for struct in structs:
             
     except Exception as e:
         print(e)
+pprint(set(sorted(lens)))
+pprint(set(sorted(descs)))
 
-dest = "5.8SrRNA.fasta"
-
-with open(dest, "w") as output_handle:
-    SeqIO.write(to_keep, output_handle, "fasta")
+# dest = "5.8SrRNA.fasta"
+# with open(dest, "w") as output_handle:
+#     SeqIO.write(to_keep, output_handle, "fasta")
 
 
 
