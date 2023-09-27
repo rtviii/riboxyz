@@ -325,17 +325,17 @@ class ProteinClassEnum(Enum):
 class RNAClassEnum(Enum):
     #TODO: Assembly missing
 
-    mt_rRNA_12S = "mt12SrRNA" 
-    mt_rRNA_16S = "mt16SrRNA"
+    mt_rRNA_12S = "mt12SrRNA" # mitochondrial
+    mt_rRNA_16S = "mt16SrRNA" # mitochondrial
 
-    rRNA_5S   = "5SrRNA"
-    rRNA_16S  = "16SrRNA"
-    rRNA_23S  = "23SrRNA"
+    rRNA_5S   = "5SrRNA"  #  bacterial or eykaryotic
+    rRNA_16S  = "16SrRNA" #  c-bacterial or mitochondrial
+    rRNA_23S  = "23SrRNA" # bacterial
     rRNA_25S  = "25SrRNA" # plants
 
-    rRNA_5_8S = "5.8SrRNA"
-    rRNA_18S  = "18SrRNA"
-    rRNA_28S  = "28SrRNA"
+    rRNA_5_8S = "5.8SrRNA" # eukaryotic
+    rRNA_18S  = "18SrRNA" # eukaryotic
+    rRNA_28S  = "28SrRNA" # eukaryotic
 
 class PolymericFactorClassEnum(Enum):
     eIF1 = "eIF1"
