@@ -90,7 +90,6 @@ def query_rcsb_api(gql_string: str) -> dict:
 def rcsb_single_structure_graphql(rcsb_id):
     return single_structure_graphql_template.replace("$RCSB_ID", rcsb_id.upper())
 
-
 class ReannotationPipeline:
     """
     ETL Pipeline as it currently stands takes care of injesting a graphql profile from RCSB and reshaping it into a RibosomeStructure.
@@ -340,8 +339,8 @@ class ReannotationPipeline:
         rnas = []
 
         def is_rna(poly):
-            # * According to RCSB schema, polymer_entites include Proteins, RNA but also DNA, NA-Hybrids and "Other".
-            # * We only make the distinction between Proteins and RNA and Other for purposes of simplicity
+            # ! According to RCSB schema, polymer_entites include Proteins, RNA but also DNA, NA-Hybrids and "Other".
+            # ! We only make the distinction between Proteins and RNA and Other for purposes of simplicity
             return poly["entity_poly"]["rcsb_entity_polymer_type"] == "RNA"
 
         for poly in poly_entities:
@@ -582,17 +581,8 @@ class ReannotationPipeline:
         src_organism_ids = list(map(int, set(src_organism_ids)))
         src_organism_names = list(map(str, set(src_organism_names)))
 
-        # # ------------
-        # host_organism_ids   = list(map(int, set([org['ncbi_taxonomy_id'] for org in plm['rcsb_entity_host_organism'  ]]))) if plm['rcsb_entity_host_organism'  ] != None else []
-        # host_organism_names = list(map(str, set([org['scientific_name'] for org in plm['rcsb_entity_host_organism'  ]]))) if plm['rcsb_entity_host_organism'  ] != None else []
-
-        # src_organism_ids   = list(map(int, set([org['ncbi_taxonomy_id'] for org in plm['rcsb_entity_source_organism']]))) if plm['rcsb_entity_source_organism'] != None else []
-        # src_organism_names = list(map(str, set([org['scientific_name'] for org in plm['rcsb_entity_source_organism']]))) if plm['rcsb_entity_source_organism']  != None else []
 
         nomenclature = []
-        # nomenclature = rna_classify(
-        #     rrna_polymer_obj["rcsb_polymer_entity"]["pdbx_description"]
-        # )
 
         return [
             RNA(
