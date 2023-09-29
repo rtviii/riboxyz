@@ -218,7 +218,6 @@ class RibosomeStructure(BaseModel):
     def from_json_profile(d: Any):
         return RibosomeStructure(**d)
 
-
 class ProteinClassEnum(Enum):
     bS1   = "bS1"
     eS1   = "eS1"
@@ -337,7 +336,29 @@ class RNAClassEnum(Enum):
     rRNA_18S  = "18SrRNA" # eukaryotic
     rRNA_28S  = "28SrRNA" # eukaryotic
 
-class PolymericFactorClassEnum(Enum):
-    eIF1 = "eIF1"
+class ElongationFactor(Enum):
+    # Eukaryotic
+    eEF1A = "eEF1A"
+    eEF1B = "eEF1B"
+    EFsec = "EFsec"
+    eEF2  = "eEF2"
+    mtEF4 = "mtEF4"
+    eIF5A = "eIF5A"
+    eEF3  = "eEF3"
+    # Bacterial
+    EF_Tu = "EF-Tu "
+    EF_Ts = "EF-Ts"
+    SelB  = "SelB"
+    EF_G  = "EF-G"
+    EF4   = "EF4"
+    EF_P  = "EF-P"
+    Tet_O = "Tet(O)"
+    Tet_M = "Tet(M)"
+    RelA  = "RelA"
+    BipA  = "BipA"
+    # Archaeal
+    aEF1A = "aEF1A"
+    aEF2  = "aEF2"
+    aIF5A = "aIF5A"
 
 PolymerClass_ = typing.Union[RNAClassEnum, ProteinClassEnum, PolymericFactorClassEnum]
