@@ -4,12 +4,9 @@ import typing
 import typing
 from typing import NewType
 from pydantic import BaseModel
-from ribctl.lib.ribosome_types.types_poly_nonpoly_ligand import LSUProteinClass, NonpolymericLigandClass, PolymericFactorClass, RNAClass, SSUProteinClass
+from ribctl.lib.ribosome_types.types_poly_nonpoly_ligand import LSUProteinClass, NonpolymericLigandClass, LifecycleFactorClass, RNAClass, SSUProteinClass
 
 RCSB_ID = NewType('RCSB_ID', str)
-
-ProteinClass = typing.Union[LSUProteinClass , SSUProteinClass]
-PolymerClass = typing.Union[ProteinClass, RNAClass]
 
 class Polymer(BaseModel):
     def __hash__(self):
@@ -122,11 +119,11 @@ class NonpolymericLigand(BaseModel)  :
         #     "reference_database_name": "UniProt",
         # },
 
-class PolymericFactor(Polymer): 
+class LifecycleFactor(Polymer): 
     def __hash__(self) -> int:
         return hash(self.auth_asym_id + self.parent_rcsb_id)
 
-    nomenclature: list[PolymericFactorClass] 
+    nomenclature: list[LifecycleFactorClass] 
     
 class AssemblyInstancesMap(BaseModel):
     """
@@ -210,7 +207,7 @@ class RibosomeStructure(BaseModel):
     proteins            : list[Protein]
     rnas                : Optional[list[RNA] ]
     nonpolymeric_ligands: Optional[list[NonpolymericLigand] ]
-    polymeric_factors   : Optional[list[PolymericFactor] ]
+    polymeric_factors   : Optional[list[LifecycleFactor] ]
     # This includes DNA-RNA hybrid strands, DNA and all other polymers
     other_polymers   : Optional[list[Polymer]]
     
@@ -218,7 +215,8 @@ class RibosomeStructure(BaseModel):
     def from_json_profile(d: Any):
         return RibosomeStructure(**d)
 
-class ProteinClassEnum(Enum):
+class ProteinClass(Enum):
+    #TODO :Mitochondrial
     bS1   = "bS1"
     eS1   = "eS1"
     uS2   = "uS2"
@@ -321,7 +319,7 @@ class ProteinClassEnum(Enum):
     eL43  = "eL43"
     P1P2  = "P1P2"
 
-class RNAClassEnum(Enum):
+class RNAClass(Enum):
     #TODO: Assembly missing
 
     mt_rRNA_12S = "mt12SrRNA" # mitochondrial
@@ -336,7 +334,7 @@ class RNAClassEnum(Enum):
     rRNA_18S  = "18SrRNA" # eukaryotic
     rRNA_28S  = "28SrRNA" # eukaryotic
 
-class ElongationFactor(Enum):
+class ElongationFactorClass(Enum):
     # Eukaryotic
     eEF1A = "eEF1A"
     eEF1B = "eEF1B"
@@ -361,4 +359,44 @@ class ElongationFactor(Enum):
     aEF2  = "aEF2"
     aIF5A = "aIF5A"
 
-PolymerClass_ = typing.Union[RNAClassEnum, ProteinClassEnum, PolymericFactorClassEnum]
+class InitiationFactorClass(Enum):
+
+    #Eukaryotic
+    eIF2_alpha    = "eIF2_alpha"
+    eIF2_beta     = "eIF2_beta"
+    eIF2_gamma    = "eIF2_gamma"
+    eIF1          = "eIF1"
+    eIF1A         = "eIF1A"
+    eIF5B         = "eIF5B"
+    eIF5          = "eIF5"
+    eIF2B_alpha   = "eIF2B_alpha"
+    eIF2B_beta    = "eIF2B_beta"
+    eIF2B_gamma   = "eIF2B_gamma"
+    eIF2B_delta   = "eIF2B_delta"
+    eIF2B_epsilon = "eIF2B_epsilon"
+    eIF3_subA     = "eIF3_subA"
+    eIF3_subB     = "eIF3_subB"
+    eIF3_subC     = "eIF3_subC"
+    eIF3_subD     = "eIF3_subD"
+    eIF3_subE     = "eIF3_subE"
+    eIF3_subF     = "eIF3_subF"
+    eIF3_subG     = "eIF3_subG"
+    eIF3_subH     = "eIF3_subH"
+    eIF3_subI     = "eIF3_subI"
+    eIF3_subJ     = "eIF3_subJ"
+    eIF3_subK     = "eIF3_subK"
+    eIF3_subL     = "eIF3_subL"
+    eIF3_subM     = "eIF3_subM"
+    eIF4F_4A      = "eIF4F_4A"
+    eIF4F_4G      = "eIF4F_4G"
+    eIF4F_4E      = "eIF4F_4E"
+    eIF4B         = "eIF4B"
+
+    # Bacterial
+    IF1           = "IF1"
+    IF2           = "IF2"
+    IF3           = "IF3"
+
+LifecycleFactorClass = typing.Union[ElongationFactorClass, InitiationFactorClass]
+
+PolymerClass = typing.Union[RNAClass, ProteinClass, LifecycleFactorClass]

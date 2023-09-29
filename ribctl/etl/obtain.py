@@ -12,7 +12,7 @@ from ribctl import AMINO_ACIDS_3_TO_1_CODE
 from ribctl.etl.ribosome_assets import Assetlist, RibosomeAssets
 from ribctl.lib.tunnel import ptc_resdiues_get, ptc_residues_calculate_midpoint
 from ribctl.lib.ribosome_types.types_binding_site import BindingSite
-from ribctl.lib.ribosome_types.types_poly_nonpoly_ligand import PolymericFactorClass, RNAClass
+from ribctl.lib.ribosome_types.types_poly_nonpoly_ligand import LifecycleFactorClass, RNAClass
 from ribctl.lib.mod_extract_bsites import bsite_nonpolymeric_ligand, struct_ligand_ids, struct_polymeric_factor_ids, bsite_polymeric_factor, bsite_polymeric_factor
 from ribctl.lib.mod_split_rename import split_rename
 from ribctl.etl.etl_pipeline import current_rcsb_structs, ReannotationPipeline, rcsb_single_structure_graphql, query_rcsb_api

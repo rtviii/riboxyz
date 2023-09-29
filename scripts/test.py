@@ -19,7 +19,7 @@ from ribctl.etl.etl_pipeline import ReannotationPipeline, query_rcsb_api, rcsb_s
 from ribctl.etl.obtain import obtain_assets_threadpool
 from ribctl.lib.classification import classify_sequence, classify_subchains, hmm_create, hmm_dict_init__candidates_per_organism, hmm_produce
 from ribctl.etl.ribosome_assets import Assetlist, RibosomeAssets
-from ribctl.lib.ribosome_types.types_ribosome import RNAClassEnum
+from ribctl.lib.ribosome_types.types_ribosome import RNAClass
 from ribctl.lib.tunnel import ptc_resdiues_get, ptc_residues_calculate_midpoint
 from ribctl import model_species, model_subgenuses
 from ete3 import NCBITaxa
@@ -43,7 +43,7 @@ if sys.argv[1]    == "process_struct":
    rib             = RibosomeAssets(rcsb_id).profile()
    organism_taxid  = rib.src_organism_ids[0]
    rnas            = rib.rnas
-   result          = classify_subchains(rnas, RNAClassEnum)
+   result          = classify_subchains(rnas, RNAClass)
    print(result)
 elif sys.argv[1] == "process_all":
     for rcsb_id in RibosomeAssets.list_all_structs():
@@ -192,7 +192,7 @@ elif sys.argv[1] == "classify_rna":
     hmms = []
     alphabet    = pyhmmer.easel.Alphabet.rna()
 
-    for val in RNAClassEnum:
+    for val in RNAClass:
         hmm_path = "class_{}_taxid_{}.hmm".format(val.value, prof.src_organism_ids[0])
         if os.path.isfile(os.path.join(hmm_cachedir, hmm_path)):
             hmm_path = os.path.join(hmm_cachedir, hmm_path)
@@ -221,4 +221,4 @@ elif sys.argv[1] == "struct_rnas":
         print("========================Processing {}=====================".format(struct))
         prof = RibosomeAssets(struct).profile()
         p    = prof.rnas
-        k    = classify_subchains(p,RNAClassEnum)
+        k    = classify_subchains(p,RNAClass)

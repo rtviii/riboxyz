@@ -6,10 +6,10 @@ import pyhmmer
 from pyhmmer import hmmsearch,utils
 from pyhmmer.plan7 import HMM
 from pyhmmer.easel import  Alphabet,DigitalSequenceBlock
-from ribctl.lib.ribosome_types.types_poly_nonpoly_ligand import PolymericFactorClass, list_ProteinClass
+from ribctl.lib.ribosome_types.types_poly_nonpoly_ligand import LifecycleFactorClass, list_ProteinClass
 from ribctl.lib.ribosome_types.types_ribosome import ProteinClass
 from ribctl import ASSETS
-from ribctl.lib.ribosome_types.types_poly_nonpoly_ligand import PolymericFactorClass, list_PolymericFactorClass, list_NonpolymericLigandClass
+from ribctl.lib.ribosome_types.types_poly_nonpoly_ligand import LifecycleFactorClass, list_PolymericFactorClass, list_NonpolymericLigandClass
 from fuzzywuzzy import process, fuzz
 
 
@@ -62,7 +62,7 @@ def rna_classify(poly_pdbx_description:str|None):
             return [i[0]]
     return []
 
-def factor_classify(description: str) -> PolymericFactorClass | None:
+def factor_classify(description: str) -> LifecycleFactorClass | None:
     """@description: usually polymer['rcsb_polymer_entity']['pdbx_description'] in PDB"""
     (match, score) = process.extractOne(description,list_PolymericFactorClass, scorer=fuzz.partial_ratio)
     return None if score != 100 else match
