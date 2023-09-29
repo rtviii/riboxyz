@@ -214,7 +214,6 @@ elif sys.argv[1] == "classify_rna":
             print(hit.description)
             print(hit.sum_score)
 
-
 elif sys.argv[1] == "struct_rnas":
     print("ss")
     for struct in RibosomeAssets.list_all_structs()[10:20]:
@@ -222,3 +221,8 @@ elif sys.argv[1] == "struct_rnas":
         prof = RibosomeAssets(struct).profile()
         p    = prof.rnas
         k    = classify_subchains(p,RNAClass)
+
+elif sys.argv[1] == "factors":
+
+    Fasta()
+
