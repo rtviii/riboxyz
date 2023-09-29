@@ -60,6 +60,7 @@ def seq_to_fasta(rcsb_id: str, _seq: str, outfile: str):
 
 class Fasta:
     records = list[SeqRecord]
+
     def __init__(self, path:str) -> None:
         try:
             with open(path, "r") as fasta_in:
@@ -68,6 +69,7 @@ class Fasta:
             print(f"File not found: {path}")
         except Exception as e:
             print(f"An error occurred: {str(e)}")
+
     def pick_taxids(self, taxids: list[str]) -> list[SeqRecord]:
         
         for taxid in set(taxids): 

@@ -10,6 +10,7 @@ import os
 from pprint import pprint
 from tempfile import NamedTemporaryFile
 from typing import Iterator
+from Bio import SeqIO
 from Bio.Align import MultipleSeqAlignment,Seq, SeqRecord
 from Bio.Align.Applications import MuscleCommandline
 from pyhmmer import phmmer
@@ -20,14 +21,14 @@ from ribctl.etl.obtain import obtain_assets_threadpool
 from ribctl.lib.classification import classify_sequence, classify_subchains, hmm_create, hmm_dict_init__candidates_per_organism, hmm_produce
 from ribctl.etl.ribosome_assets import Assetlist, RibosomeAssets
 from ribctl.lib.ribosome_types.types_ribosome import RNAClass
-from ribctl.lib.tunnel import ptc_resdiues_get, ptc_residues_calculate_midpoint
-from ribctl import model_species, model_subgenuses
+from ribctl import  model_subgenuses
 from ete3 import NCBITaxa
 
 logging.getLogger("urllib3.connectionpool").setLevel(logging.CRITICAL)
 logging.getLogger('asyncio').setLevel(logging.WARNING)
 from ribctl.lib.util_taxonomy import descendants_of_taxid
 hmm_cachedir = ASSETS['__hmm_cache']
+
 import sys
 
 logger       = logging.getLogger(__name__)
@@ -222,7 +223,43 @@ elif sys.argv[1] == "struct_rnas":
         p    = prof.rnas
         k    = classify_subchains(p,RNAClass)
 
-elif sys.argv[1] == "factors":
+elif sys.argv[1] == "tsv_to_fasta":
+    import csv
+    factor_type = ASSETS['fasta_factors_initiation_e']
+    for tsv_path in os.listdir(factor_type):
+        # Initialize an empty list to store the records
+        full_path = os.path.join(factor_type, tsv_path)
+        records   = []
+        with open(full_path, 'r', newline='', encoding='utf-8') as tsvfile:
+            tsvreader = csv.reader(tsvfile, delimiter='\t')
+            next(tsvreader, None)
+            for row in tsvreader:
+                entry, orgid, sequence = row
+                records.append((entry, orgid, sequence))
 
-    Fasta()
+        seqrecords = []
+        for record in records:
+            (entry, taxid, sequence) = record
+            seqrecords.append(SeqRecord(Seq(sequence), id=taxid, description="uniprot_{}".format(entry)))
 
+        dest = os.path.join(factor_type,"{}.fasta".format(tsv_path.split(".")[0]))
+        with open(dest, "w") as output_handle:
+            SeqIO.write(seqrecords, output_handle, "fasta")
+            print("Wrote {} seqs to  to {}".format(len(seqrecords),dest))
+
+
+
+    # for fasta_path in os.listdir( ASSETS['fasta_factors_elongation_e'] ):
+    #     print(fasta_path)
+    # for fasta_path in os.listdir( ASSETS['fasta_factors_elongation_b'] ):
+    #     print(fasta_path)
+
+
+    # for fasta_path in os.listdir( ASSETS['fasta_factors_initiation_b'] ):
+    #     print(fasta_path)
+      
+    # for fasta_path in os.listdir( ASSETS['fasta_factors_initiation_e'] ):
+    #     print(fasta_path)
+
+    # for fasta_path in os.listdir( ASSETS['fasta_factors_initiation_a'] ):
+    #     print(fasta_path)
