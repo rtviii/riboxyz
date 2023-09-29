@@ -15,8 +15,8 @@ import re
 import pyhmmer
 from ribctl import ASSETS, MUSCLE_BIN
 from ribctl.lib.msalib import Fasta, muscle_align_N_seq, phylogenetic_neighborhood
-from ribctl.lib.ribosome_types.types_poly_nonpoly_ligand import PolymericFactorClass, RNAClass, list_ProteinClass
-from ribctl.lib.ribosome_types.types_ribosome import RNA, Polymer, PolymerClass, PolymerClass_, PolymericFactor, Protein, ProteinClass, ProteinClassEnum, RNAClassEnum
+from ribctl.lib.ribosome_types.types_poly_nonpoly_ligand import LifecycleFactorClass, RNAClass, list_ProteinClass
+from ribctl.lib.ribosome_types.types_ribosome import RNA, Polymer, PolymerClass, PolymerClass_, LifecycleFactor, Protein, ProteinClass, ProteinClass, RNAClass
 # from ribctl.etl.ribosome_assets import RibosomeAssets
 from pyhmmer.easel import Alphabet, DigitalSequenceBlock, TextSequence, SequenceFile, SequenceBlock, TextSequenceBlock
 from pyhmmer.plan7 import Pipeline, HMM 
@@ -55,13 +55,13 @@ def seq_evaluate_v_hmm_dict(seq:str,alphabet:Alphabet, hmm_dict:dict)->dict[Poly
 
 def hmm_dict_init__candidates_per_organism(candidate_category:PolymerClass_,organism_taxid:int)->dict[PolymerClass_, HMM]:
     _ ={}
-    if candidate_category == ProteinClassEnum:
-        for pc in ProteinClassEnum:
+    if candidate_category == ProteinClass:
+        for pc in ProteinClass:
             _.update({ pc.value: hmm_produce(pc, organism_taxid) })
-    elif candidate_category == RNAClassEnum:
-        for rc in RNAClassEnum:
+    elif candidate_category == RNAClass:
+        for rc in RNAClass:
             _.update({ rc.value: hmm_produce(rc, organism_taxid) })
-    elif candidate_category == PolymericFactorClass:
+    elif candidate_category == LifecycleFactorClass:
         raise Exception("Not implemented yet: PolymericFactorClass hmmdictinit")
     else:
         return {}
@@ -93,25 +93,25 @@ def pick_best_hmm_hit(matches_dict:dict[PolymerClass_, list[float]], chain_info:
 
     return results[0]['candidate_class']
 
-def classify_sequence(seq:str, organism:int, candidate_category:typing.Union[RNAClassEnum, ProteinClassEnum], candidates_dict:dict[PolymerClass_, HMM]|None=None)->dict[PolymerClass_, list[float]]:
+def classify_sequence(seq:str, organism:int, candidate_category:typing.Union[RNAClass, ProteinClass], candidates_dict:dict[PolymerClass_, HMM]|None=None)->dict[PolymerClass_, list[float]]:
 
-    if candidate_category == ProteinClassEnum:
+    if candidate_category == ProteinClass:
         candidates_dict = candidates_dict if candidates_dict is not None else hmm_dict_init__candidates_per_organism(candidate_category, organism)
         results         = seq_evaluate_v_hmm_dict(seq, pyhmmer.easel.Alphabet.amino(), candidates_dict)
         return results
 
-    if candidate_category == RNAClassEnum:
+    if candidate_category == RNAClass:
         candidates_dict = candidates_dict if candidates_dict is not None else hmm_dict_init__candidates_per_organism(candidate_category, organism)
         results         = seq_evaluate_v_hmm_dict(seq, pyhmmer.easel.Alphabet.rna(), candidates_dict)
         return results
 
-def fasta_phylogenetic_correction(candidate_class:ProteinClassEnum|RNAClassEnum, organism_taxid:int, max_n_neighbors=10)->Iterator[SeqRecord]:
+def fasta_phylogenetic_correction(candidate_class:ProteinClass|RNAClass, organism_taxid:int, max_n_neighbors=10)->Iterator[SeqRecord]:
     """Given a candidate class and an organism taxid, retrieve the corresponding fasta file, and perform phylogenetic correction on it."""
 
-    if candidate_class in ProteinClassEnum:
+    if candidate_class in ProteinClass:
         fasta_path = os.path.join(ASSETS["fasta_proteins_cytosolic"], f"{candidate_class.value}.fasta")
 
-    elif candidate_class in RNAClassEnum:
+    elif candidate_class in RNAClass:
         fasta_path = os.path.join(ASSETS["fasta_ribosomal_rna"], f"{candidate_class.value}.fasta")
     else:
         raise Exception("Invalid candidate class")
@@ -145,7 +145,7 @@ def hmm_cache(hmm:HMM):
     else:
         ...
 
-def hmm_produce(candidate_class: ProteinClassEnum | RNAClassEnum, organism_taxid:int)->HMM:  # type: ignore
+def hmm_produce(candidate_class: ProteinClass | RNAClass, organism_taxid:int)->HMM:  # type: ignore
     """Produce an organism-specific HMM. Retrieve from cache if exists, otherwise generate and cache."""
     hmm_path = "class_{}_taxid_{}.hmm".format(candidate_class.value, organism_taxid)
 
@@ -155,7 +155,7 @@ def hmm_produce(candidate_class: ProteinClassEnum | RNAClassEnum, organism_taxid
             HMM = hmm_file.read()
             return HMM
     else:
-        if candidate_class in ProteinClassEnum:
+        if candidate_class in ProteinClass:
             seqs = fasta_phylogenetic_correction(candidate_class, organism_taxid, max_n_neighbors=10)
             seqs_a = muscle_align_N_seq(iter(seqs))
 
@@ -165,7 +165,7 @@ def hmm_produce(candidate_class: ProteinClassEnum | RNAClassEnum, organism_taxid
             hmm_cache(HMM)
             return HMM
 
-        if candidate_class in RNAClassEnum:
+        if candidate_class in RNAClass:
             seqs        = fasta_phylogenetic_correction(candidate_class, organism_taxid, max_n_neighbors=10)
             seqs_a      = muscle_align_N_seq(iter(seqs))
 
@@ -177,15 +177,15 @@ def hmm_produce(candidate_class: ProteinClassEnum | RNAClassEnum, organism_taxid
 
 #! Implementations ------------------------------
 
-def classify_subchain(chain: typing.Union[Protein, RNA, PolymericFactor] , candidates_dict:dict[PolymerClass_, HMM]|None=None)->Tuple[str, PolymerClass_|None]:
+def classify_subchain(chain: typing.Union[Protein, RNA, LifecycleFactor] , candidates_dict:dict[PolymerClass_, HMM]|None=None)->Tuple[str, PolymerClass_|None]:
     logging.debug("Task for chain {}.{} (Old nomenclature {}) | taxid {}".format( chain.parent_rcsb_id,chain.auth_asym_id, chain.nomenclature, chain.src_organism_ids[0]))
     if type(chain) == RNA:
-        assigned = classify_sequence(chain.entity_poly_seq_one_letter_code_can, chain.src_organism_ids[0], RNAClassEnum, candidates_dict=candidates_dict)
+        assigned = classify_sequence(chain.entity_poly_seq_one_letter_code_can, chain.src_organism_ids[0], RNAClass, candidates_dict=candidates_dict)
 
     elif type(chain) == Protein:
-        assigned = classify_sequence(chain.entity_poly_seq_one_letter_code_can, chain.src_organism_ids[0], ProteinClassEnum, candidates_dict=candidates_dict)
+        assigned = classify_sequence(chain.entity_poly_seq_one_letter_code_can, chain.src_organism_ids[0], ProteinClass, candidates_dict=candidates_dict)
 
-    elif type(chain)== PolymericFactor:
+    elif type(chain)== LifecycleFactor:
         return (chain.auth_asym_id, None)
     else:
         raise Exception("Invalid chain type")
@@ -194,7 +194,7 @@ def classify_subchain(chain: typing.Union[Protein, RNA, PolymericFactor] , candi
     return (chain.auth_asym_id, assigned)
 
 # def classify_subchains(targets:list[Protein]|list[RNA]|list[PolymericFactor])->dict[str, PolymerClass_]:
-def classify_subchains(targets:list[typing.Union[Protein,RNA,PolymericFactor]],candidate_category:PolymerClass_)->dict[str, PolymerClass_]:
+def classify_subchains(targets:list[typing.Union[Protein,RNA,LifecycleFactor]],candidate_category:PolymerClass_)->dict[str, PolymerClass_]:
     # This is a dict of dicts (a "registry", sigh) to only do i/o once per organism.(Pass it down)
     # It's a dictionary because some chains within a structure might originate in different organisms. 
     hmm_organisms_registry: dict[int,dict[PolymerClass_, HMM]]= {}
