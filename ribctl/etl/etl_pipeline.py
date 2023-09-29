@@ -100,9 +100,6 @@ class ReannotationPipeline:
     - rProtein classification
     - factors annotation
     - ligand annotation
-
-
-
     """
 
     # ? Input data:
