@@ -12,7 +12,6 @@ from Bio.Align import  SeqRecord
 import os
 from ribctl import MUSCLE_BIN
 from ribctl.lib.ribosome_types.types_ribosome import RNA, LifecycleFactor, Protein, ProteinClass
-from ribctl.lib.ribosome_types.types_poly_nonpoly_ligand import list_LSUProteinClass, list_SSUProteinClass
 from ribctl.lib.ribosome_types.types_ribosome import ProteinClass
 from ete3 import NCBITaxa
 
@@ -56,14 +55,6 @@ def seq_to_fasta(rcsb_id: str, _seq: str, outfile: str):
     seq_record = SeqRecord.SeqRecord(Seq(_seq).upper())
     seq_record.id = seq_record.description = rcsb_id
     SeqIO.write(seq_record, outfile, 'fasta')
-
-def infer_subunit(protein_class: ProteinClass):
-    if protein_class in list_LSUProteinClass:
-        return "LSU"
-    elif protein_class in list_SSUProteinClass:
-        return "SSU"
-    else:
-        raise ValueError("Unknown protein class: {}".format(protein_class))
 
 
 
