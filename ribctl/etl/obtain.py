@@ -62,7 +62,6 @@ async def obtain_assets(rcsb_id: str, assetlist: Assetlist, overwrite: bool = Fa
                 "LSU_rRNA_auth_asym_id": auth_asym_id,
                 "midpoint_coordinates" : midpoint_coords,
                 'nomenclature_table'   : assets.nomenclature_table()
-
             }
 
 
