@@ -6,7 +6,6 @@ from typing import Any, Optional
 from pyhmmer.plan7 import HMM
 import requests
 from ribctl.etl.etl_polypeptides import (
-    factor_classify,
     protein_classify,
     rna_classify,
 )
@@ -20,7 +19,7 @@ from ribctl.lib.ribosome_types.types_ribosome import (
     AssemblyInstancesMap,
     NonpolymericLigand,
     Polymer,
-    PolymerClass_,
+    PolymerClass,
     LifecycleFactor,
     Protein,
     ProteinClass,
@@ -72,7 +71,6 @@ def current_rcsb_structs() -> list[str]:
 
     query = rcsb_search_api + "?json=" + json.dumps(q2)
     return requests.get(query).json()["result_set"]
-
 
 def query_rcsb_api(gql_string: str) -> dict:
     """This defines a query in the RCSB search language that identifies the structures we view as 'current' i.e. 40+ proteins, smaller than 4A resolution etc."""
@@ -312,8 +310,10 @@ class ReannotationPipeline:
             # A polymer can be either rna or protein
             if is_protein(poly):
                 # a protein can be either a ribosomal protein, a factor or a nascent chain
+                #TODO
                 if (
-                    factor_classify(poly["rcsb_polymer_entity"]["pdbx_description"])
+                    # factor_classify(poly["rcsb_polymer_entity"]["pdbx_description"])
+                    True
                     != None
                 ):
                     # TODO: MOVE TO HMM BASED CLASSIFICATION METHOD
@@ -347,7 +347,7 @@ class ReannotationPipeline:
         reshaped_polymeric_factors: list[LifecycleFactor] = []
 
         for j, poly_rna in enumerate(rnas):
-            if (factor_classify(poly_rna["rcsb_polymer_entity"]["pdbx_description"])!= None ):
+            if (True!= None ):
                 # TODO: HMM WORKFLOW
                 reshaped_polymeric_factors.extend( self.poly_reshape_to_rFactor(poly_rna) )
             else:
@@ -653,9 +653,9 @@ class ReannotationPipeline:
             *filter(
                 lambda x: x is not None,
                 [
-                    factor_classify(
-                        factor_polymer_obj["rcsb_polymer_entity"]["pdbx_description"]
-                    )
+                        ""
+                        #TODO HMM WFLOW
+                    # factor_classify(factor_polymer_obj["rcsb_polymer_entity"]["pdbx_description"])
                 ],
             )
         ]
@@ -774,7 +774,7 @@ class ReannotationPipeline:
 
         other_polymers = self.process_other_polymers()
 
-        prot_noms: dict[str, PolymerClass_] = classify_subchains( [*reshaped_proteins, *reshaped_polymeric_factors_prot], ProteinClass )
+        prot_noms: dict[str, PolymerClass] = classify_subchains( [*reshaped_proteins, *reshaped_polymeric_factors_prot], ProteinClass )
         for aaid, protname in prot_noms.items():
             for prot in reshaped_proteins:
                 if prot.auth_asym_id == aaid and protname != None:
@@ -782,7 +782,7 @@ class ReannotationPipeline:
                 else:
                     continue
 
-        rna_noms: dict[str, PolymerClass_] = classify_subchains( [*reshaped_rnas, *reshaped_polymeric_factors_prot], RNAClass )
+        rna_noms: dict[str, PolymerClass] = classify_subchains( [*reshaped_rnas, *reshaped_polymeric_factors_prot], RNAClass )
         for aaid, rnaname in rna_noms.items():
             for rna in reshaped_rnas:
                 if rna.auth_asym_id == aaid and rna != None:

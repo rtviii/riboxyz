@@ -4,10 +4,197 @@ import typing
 import typing
 from typing import NewType
 from pydantic import BaseModel
-from ribctl.lib.ribosome_types.types_poly_nonpoly_ligand import LSUProteinClass, NonpolymericLigandClass, LifecycleFactorClass, RNAClass, SSUProteinClass
 
 RCSB_ID = NewType('RCSB_ID', str)
+# Nomenclature
 
+class ProteinClass(Enum):
+    #TODO :Mitochondrial
+    bS1   = "bS1"
+    eS1   = "eS1"
+    uS2   = "uS2"
+    uS3   = "uS3"
+    uS4   = "uS4"
+    eS4   = "eS4"
+    uS5   = "uS5"
+    bS6   = "bS6"
+    eS6   = "eS6"
+    uS7   = "uS7"
+    eS7   = "eS7"
+    uS8   = "uS8"
+    eS8   = "eS8"
+    uS9   = "uS9"
+    uS10  = "uS10"
+    eS10  = "eS10"
+    uS11  = "uS11"
+    uS12  = "uS12"
+    eS12  = "eS12"
+    uS13  = "uS13"
+    uS14  = "uS14"
+    uS15  = "uS15"
+    bS16  = "bS16"
+    uS17  = "uS17"
+    eS17  = "eS17"
+    bS18  = "bS18"
+    uS19  = "uS19"
+    eS19  = "eS19"
+    bS20  = "bS20"
+    bS21  = "bS21"
+    bTHX  = "bTHX"
+    eS21  = "eS21"
+    eS24  = "eS24"
+    eS25  = "eS25"
+    eS26  = "eS26"
+    eS27  = "eS27"
+    eS28  = "eS28"
+    eS30  = "eS30"
+    eS31  = "eS31"
+    RACK1 = "RACK1"
+    uL1   = "uL1"
+    uL2   = "uL2"
+    uL3   = "uL3"
+    uL4   = "uL4"
+    uL5   = "uL5"
+    uL6   = "uL6"
+    eL6   = "eL6"
+    eL8   = "eL8"
+    bL9   = "bL9"
+    uL10  = "uL10"
+    uL11  = "uL11"
+    bL12  = "bL12"
+    uL13  = "uL13"
+    eL13  = "eL13"
+    uL14  = "uL14"
+    eL14  = "eL14"
+    uL15  = "uL15"
+    eL15  = "eL15"
+    uL16  = "uL16"
+    bL17  = "bL17"
+    uL18  = "uL18"
+    eL18  = "eL18"
+    bL19  = "bL19"
+    eL19  = "eL19"
+    bL20  = "bL20"
+    eL20  = "eL20"
+    bL21  = "bL21"
+    eL21  = "eL21"
+    uL22  = "uL22"
+    eL22  = "eL22"
+    uL23  = "uL23"
+    uL24  = "uL24"
+    eL24  = "eL24"
+    bL25  = "bL25"
+    bL27  = "bL27"
+    eL27  = "eL27"
+    bL28  = "bL28"
+    eL28  = "eL28"
+    uL29  = "uL29"
+    eL29  = "eL29"
+    uL30  = "uL30"
+    eL30  = "eL30"
+    bL31  = "bL31"
+    eL31  = "eL31"
+    bL32  = "bL32"
+    eL32  = "eL32"
+    bL33  = "bL33"
+    eL33  = "eL33"
+    bL34  = "bL34"
+    eL34  = "eL34"
+    bL35  = "bL35"
+    bL36  = "bL36"
+    eL36  = "eL36"
+    eL37  = "eL37"
+    eL38  = "eL38"
+    eL39  = "eL39"
+    eL40  = "eL40"
+    eL41  = "eL41"
+    eL42  = "eL42"
+    eL43  = "eL43"
+    P1P2  = "P1P2"
+
+class RNAClass(Enum):
+    #TODO: Assembly missing
+
+    mt_rRNA_12S = "mt12SrRNA" # mitochondrial
+    mt_rRNA_16S = "mt16SrRNA" # mitochondrial
+
+    rRNA_5S   = "5SrRNA"  #  bacterial or eykaryotic
+    rRNA_16S  = "16SrRNA" #  c-bacterial or mitochondrial
+    rRNA_23S  = "23SrRNA" # bacterial
+    rRNA_25S  = "25SrRNA" # plants
+
+    rRNA_5_8S = "5.8SrRNA" # eukaryotic
+    rRNA_18S  = "18SrRNA" # eukaryotic
+    rRNA_28S  = "28SrRNA" # eukaryotic
+
+class ElongationFactorClass(Enum):
+    # Eukaryotic
+    eEF1A = "eEF1A"
+    eEF1B = "eEF1B"
+    EFsec = "EFsec"
+    eEF2  = "eEF2"
+    mtEF4 = "mtEF4"
+    eIF5A = "eIF5A"
+    eEF3  = "eEF3"
+    # Bacterial
+    EF_Tu = "EF-Tu "
+    EF_Ts = "EF-Ts"
+    SelB  = "SelB"
+    EF_G  = "EF-G"
+    EF4   = "EF4"
+    EF_P  = "EF-P"
+    Tet_O = "Tet(O)"
+    Tet_M = "Tet(M)"
+    RelA  = "RelA"
+    BipA  = "BipA"
+    # Archaeal
+    aEF1A = "aEF1A"
+    aEF2  = "aEF2"
+    aIF5A = "aIF5A"
+
+class InitiationFactorClass(Enum):
+
+    #Eukaryotic
+    eIF2_alpha    = "eIF2_alpha"
+    eIF2_beta     = "eIF2_beta"
+    eIF2_gamma    = "eIF2_gamma"
+    eIF1          = "eIF1"
+    eIF1A         = "eIF1A"
+    eIF5B         = "eIF5B"
+    eIF5          = "eIF5"
+    eIF2B_alpha   = "eIF2B_alpha"
+    eIF2B_beta    = "eIF2B_beta"
+    eIF2B_gamma   = "eIF2B_gamma"
+    eIF2B_delta   = "eIF2B_delta"
+    eIF2B_epsilon = "eIF2B_epsilon"
+    eIF3_subA     = "eIF3_subA"
+    eIF3_subB     = "eIF3_subB"
+    eIF3_subC     = "eIF3_subC"
+    eIF3_subD     = "eIF3_subD"
+    eIF3_subE     = "eIF3_subE"
+    eIF3_subF     = "eIF3_subF"
+    eIF3_subG     = "eIF3_subG"
+    eIF3_subH     = "eIF3_subH"
+    eIF3_subI     = "eIF3_subI"
+    eIF3_subJ     = "eIF3_subJ"
+    eIF3_subK     = "eIF3_subK"
+    eIF3_subL     = "eIF3_subL"
+    eIF3_subM     = "eIF3_subM"
+    eIF4F_4A      = "eIF4F_4A"
+    eIF4F_4G      = "eIF4F_4G"
+    eIF4F_4E      = "eIF4F_4E"
+    eIF4B         = "eIF4B"
+
+    # Bacterial
+    IF1           = "IF1"
+    IF2           = "IF2"
+    IF3           = "IF3"
+
+LifecycleFactorClass = typing.Union[ElongationFactorClass, InitiationFactorClass]
+
+PolymerClass = typing.Union[RNAClass, ProteinClass, LifecycleFactorClass]
+
+# Object Types
 class Polymer(BaseModel):
     def __hash__(self):
         return hash(self.auth_asym_id + self.parent_rcsb_id)
@@ -214,189 +401,3 @@ class RibosomeStructure(BaseModel):
     @staticmethod
     def from_json_profile(d: Any):
         return RibosomeStructure(**d)
-
-class ProteinClass(Enum):
-    #TODO :Mitochondrial
-    bS1   = "bS1"
-    eS1   = "eS1"
-    uS2   = "uS2"
-    uS3   = "uS3"
-    uS4   = "uS4"
-    eS4   = "eS4"
-    uS5   = "uS5"
-    bS6   = "bS6"
-    eS6   = "eS6"
-    uS7   = "uS7"
-    eS7   = "eS7"
-    uS8   = "uS8"
-    eS8   = "eS8"
-    uS9   = "uS9"
-    uS10  = "uS10"
-    eS10  = "eS10"
-    uS11  = "uS11"
-    uS12  = "uS12"
-    eS12  = "eS12"
-    uS13  = "uS13"
-    uS14  = "uS14"
-    uS15  = "uS15"
-    bS16  = "bS16"
-    uS17  = "uS17"
-    eS17  = "eS17"
-    bS18  = "bS18"
-    uS19  = "uS19"
-    eS19  = "eS19"
-    bS20  = "bS20"
-    bS21  = "bS21"
-    bTHX  = "bTHX"
-    eS21  = "eS21"
-    eS24  = "eS24"
-    eS25  = "eS25"
-    eS26  = "eS26"
-    eS27  = "eS27"
-    eS28  = "eS28"
-    eS30  = "eS30"
-    eS31  = "eS31"
-    RACK1 = "RACK1"
-    uL1   = "uL1"
-    uL2   = "uL2"
-    uL3   = "uL3"
-    uL4   = "uL4"
-    uL5   = "uL5"
-    uL6   = "uL6"
-    eL6   = "eL6"
-    eL8   = "eL8"
-    bL9   = "bL9"
-    uL10  = "uL10"
-    uL11  = "uL11"
-    bL12  = "bL12"
-    uL13  = "uL13"
-    eL13  = "eL13"
-    uL14  = "uL14"
-    eL14  = "eL14"
-    uL15  = "uL15"
-    eL15  = "eL15"
-    uL16  = "uL16"
-    bL17  = "bL17"
-    uL18  = "uL18"
-    eL18  = "eL18"
-    bL19  = "bL19"
-    eL19  = "eL19"
-    bL20  = "bL20"
-    eL20  = "eL20"
-    bL21  = "bL21"
-    eL21  = "eL21"
-    uL22  = "uL22"
-    eL22  = "eL22"
-    uL23  = "uL23"
-    uL24  = "uL24"
-    eL24  = "eL24"
-    bL25  = "bL25"
-    bL27  = "bL27"
-    eL27  = "eL27"
-    bL28  = "bL28"
-    eL28  = "eL28"
-    uL29  = "uL29"
-    eL29  = "eL29"
-    uL30  = "uL30"
-    eL30  = "eL30"
-    bL31  = "bL31"
-    eL31  = "eL31"
-    bL32  = "bL32"
-    eL32  = "eL32"
-    bL33  = "bL33"
-    eL33  = "eL33"
-    bL34  = "bL34"
-    eL34  = "eL34"
-    bL35  = "bL35"
-    bL36  = "bL36"
-    eL36  = "eL36"
-    eL37  = "eL37"
-    eL38  = "eL38"
-    eL39  = "eL39"
-    eL40  = "eL40"
-    eL41  = "eL41"
-    eL42  = "eL42"
-    eL43  = "eL43"
-    P1P2  = "P1P2"
-
-class RNAClass(Enum):
-    #TODO: Assembly missing
-
-    mt_rRNA_12S = "mt12SrRNA" # mitochondrial
-    mt_rRNA_16S = "mt16SrRNA" # mitochondrial
-
-    rRNA_5S   = "5SrRNA"  #  bacterial or eykaryotic
-    rRNA_16S  = "16SrRNA" #  c-bacterial or mitochondrial
-    rRNA_23S  = "23SrRNA" # bacterial
-    rRNA_25S  = "25SrRNA" # plants
-
-    rRNA_5_8S = "5.8SrRNA" # eukaryotic
-    rRNA_18S  = "18SrRNA" # eukaryotic
-    rRNA_28S  = "28SrRNA" # eukaryotic
-
-class ElongationFactorClass(Enum):
-    # Eukaryotic
-    eEF1A = "eEF1A"
-    eEF1B = "eEF1B"
-    EFsec = "EFsec"
-    eEF2  = "eEF2"
-    mtEF4 = "mtEF4"
-    eIF5A = "eIF5A"
-    eEF3  = "eEF3"
-    # Bacterial
-    EF_Tu = "EF-Tu "
-    EF_Ts = "EF-Ts"
-    SelB  = "SelB"
-    EF_G  = "EF-G"
-    EF4   = "EF4"
-    EF_P  = "EF-P"
-    Tet_O = "Tet(O)"
-    Tet_M = "Tet(M)"
-    RelA  = "RelA"
-    BipA  = "BipA"
-    # Archaeal
-    aEF1A = "aEF1A"
-    aEF2  = "aEF2"
-    aIF5A = "aIF5A"
-
-class InitiationFactorClass(Enum):
-
-    #Eukaryotic
-    eIF2_alpha    = "eIF2_alpha"
-    eIF2_beta     = "eIF2_beta"
-    eIF2_gamma    = "eIF2_gamma"
-    eIF1          = "eIF1"
-    eIF1A         = "eIF1A"
-    eIF5B         = "eIF5B"
-    eIF5          = "eIF5"
-    eIF2B_alpha   = "eIF2B_alpha"
-    eIF2B_beta    = "eIF2B_beta"
-    eIF2B_gamma   = "eIF2B_gamma"
-    eIF2B_delta   = "eIF2B_delta"
-    eIF2B_epsilon = "eIF2B_epsilon"
-    eIF3_subA     = "eIF3_subA"
-    eIF3_subB     = "eIF3_subB"
-    eIF3_subC     = "eIF3_subC"
-    eIF3_subD     = "eIF3_subD"
-    eIF3_subE     = "eIF3_subE"
-    eIF3_subF     = "eIF3_subF"
-    eIF3_subG     = "eIF3_subG"
-    eIF3_subH     = "eIF3_subH"
-    eIF3_subI     = "eIF3_subI"
-    eIF3_subJ     = "eIF3_subJ"
-    eIF3_subK     = "eIF3_subK"
-    eIF3_subL     = "eIF3_subL"
-    eIF3_subM     = "eIF3_subM"
-    eIF4F_4A      = "eIF4F_4A"
-    eIF4F_4G      = "eIF4F_4G"
-    eIF4F_4E      = "eIF4F_4E"
-    eIF4B         = "eIF4B"
-
-    # Bacterial
-    IF1           = "IF1"
-    IF2           = "IF2"
-    IF3           = "IF3"
-
-LifecycleFactorClass = typing.Union[ElongationFactorClass, InitiationFactorClass]
-
-PolymerClass = typing.Union[RNAClass, ProteinClass, LifecycleFactorClass]

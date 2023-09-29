@@ -15,8 +15,7 @@ import re
 import pyhmmer
 from ribctl import ASSETS, MUSCLE_BIN
 from ribctl.lib.msalib import Fasta, muscle_align_N_seq, phylogenetic_neighborhood
-from ribctl.lib.ribosome_types.types_poly_nonpoly_ligand import LifecycleFactorClass, RNAClass, list_ProteinClass
-from ribctl.lib.ribosome_types.types_ribosome import RNA, Polymer, PolymerClass, PolymerClass_, LifecycleFactor, Protein, ProteinClass, ProteinClass, RNAClass
+from ribctl.lib.ribosome_types.types_ribosome import RNA, LifecycleFactorClass, Polymer, PolymerClass, LifecycleFactor, Protein, ProteinClass, ProteinClass, RNAClass
 # from ribctl.etl.ribosome_assets import RibosomeAssets
 from pyhmmer.easel import Alphabet, DigitalSequenceBlock, TextSequence, SequenceFile, SequenceBlock, TextSequenceBlock
 from pyhmmer.plan7 import Pipeline, HMM 
@@ -45,7 +44,7 @@ def seq_evaluate_v_hmm(seq:str,alphabet:Alphabet, hmm:HMM):
     dsb   = DigitalSequenceBlock(alphabet, [seq_.digitize(alphabet)])
     return pyhmmer.plan7.Pipeline(alphabet=alphabet).search_hmm(hmm,dsb)
 
-def seq_evaluate_v_hmm_dict(seq:str,alphabet:Alphabet, hmm_dict:dict)->dict[PolymerClass_, list[float]]:
+def seq_evaluate_v_hmm_dict(seq:str,alphabet:Alphabet, hmm_dict:dict)->dict[PolymerClass, list[float]]:
     """Fit a sequence against all protein classes simultaneously"""
     _ = {}
     for (candidate_class, hmm) in hmm_dict.items():
@@ -53,7 +52,7 @@ def seq_evaluate_v_hmm_dict(seq:str,alphabet:Alphabet, hmm_dict:dict)->dict[Poly
         _.update({candidate_class: [] if len(result) == 0 else list(map(lambda x: { "evalue":x.evalue, "score":x.score }, result))})
     return _
 
-def hmm_dict_init__candidates_per_organism(candidate_category:PolymerClass_,organism_taxid:int)->dict[PolymerClass_, HMM]:
+def hmm_dict_init__candidates_per_organism(candidate_category:PolymerClass,organism_taxid:int)->dict[PolymerClass, HMM]:
     _ ={}
     if candidate_category == ProteinClass:
         for pc in ProteinClass:
@@ -68,7 +67,7 @@ def hmm_dict_init__candidates_per_organism(candidate_category:PolymerClass_,orga
     
     return _
 
-def pick_best_hmm_hit(matches_dict:dict[PolymerClass_, list[float]], chain_info:Polymer)->PolymerClass_ | None:
+def pick_best_hmm_hit(matches_dict:dict[PolymerClass, list[float]], chain_info:Polymer)->PolymerClass | None:
     """Given a dictionary of sequence-HMMe e-values, pick the best candidate class"""
     results = []
     for (candidate_class, match) in matches_dict.items():
@@ -93,7 +92,7 @@ def pick_best_hmm_hit(matches_dict:dict[PolymerClass_, list[float]], chain_info:
 
     return results[0]['candidate_class']
 
-def classify_sequence(seq:str, organism:int, candidate_category:typing.Union[RNAClass, ProteinClass], candidates_dict:dict[PolymerClass_, HMM]|None=None)->dict[PolymerClass_, list[float]]:
+def classify_sequence(seq:str, organism:int, candidate_category:typing.Union[RNAClass, ProteinClass], candidates_dict:dict[PolymerClass, HMM]|None=None)->dict[PolymerClass, list[float]]:
 
     if candidate_category == ProteinClass:
         candidates_dict = candidates_dict if candidates_dict is not None else hmm_dict_init__candidates_per_organism(candidate_category, organism)
@@ -177,7 +176,7 @@ def hmm_produce(candidate_class: ProteinClass | RNAClass, organism_taxid:int)->H
 
 #! Implementations ------------------------------
 
-def classify_subchain(chain: typing.Union[Protein, RNA, LifecycleFactor] , candidates_dict:dict[PolymerClass_, HMM]|None=None)->Tuple[str, PolymerClass_|None]:
+def classify_subchain(chain: typing.Union[Protein, RNA, LifecycleFactor] , candidates_dict:dict[PolymerClass, HMM]|None=None)->Tuple[str, PolymerClass|None]:
     logging.debug("Task for chain {}.{} (Old nomenclature {}) | taxid {}".format( chain.parent_rcsb_id,chain.auth_asym_id, chain.nomenclature, chain.src_organism_ids[0]))
     if type(chain) == RNA:
         assigned = classify_sequence(chain.entity_poly_seq_one_letter_code_can, chain.src_organism_ids[0], RNAClass, candidates_dict=candidates_dict)
@@ -194,10 +193,10 @@ def classify_subchain(chain: typing.Union[Protein, RNA, LifecycleFactor] , candi
     return (chain.auth_asym_id, assigned)
 
 # def classify_subchains(targets:list[Protein]|list[RNA]|list[PolymericFactor])->dict[str, PolymerClass_]:
-def classify_subchains(targets:list[typing.Union[Protein,RNA,LifecycleFactor]],candidate_category:PolymerClass_)->dict[str, PolymerClass_]:
+def classify_subchains(targets:list[typing.Union[Protein,RNA,LifecycleFactor]],candidate_category:PolymerClass)->dict[str, PolymerClass]:
     # This is a dict of dicts (a "registry", sigh) to only do i/o once per organism.(Pass it down)
     # It's a dictionary because some chains within a structure might originate in different organisms. 
-    hmm_organisms_registry: dict[int,dict[PolymerClass_, HMM]]= {}
+    hmm_organisms_registry: dict[int,dict[PolymerClass, HMM]]= {}
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=25) as executor:
         tasks   = []
