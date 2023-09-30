@@ -143,8 +143,8 @@ class ElongationFactorClass(Enum):
     EF_G  = "EF-G"
     EF4   = "EF4"
     EF_P  = "EF-P"
-    Tet_O = "Tet(O)"
-    Tet_M = "Tet(M)"
+    Tet_O = "Tet_O"
+    Tet_M = "Tet_M"
     RelA  = "RelA"
     BipA  = "BipA"
     # Archaeal
@@ -155,35 +155,41 @@ class ElongationFactorClass(Enum):
 class InitiationFactorClass(Enum):
 
     #Eukaryotic
+
+    eIF1          = "eIF1"
+    eIF1A         = "eIF1A"
+
     eIF2_alpha    = "eIF2_alpha"
     eIF2_beta     = "eIF2_beta"
     eIF2_gamma    = "eIF2_gamma"
-    eIF1          = "eIF1"
-    eIF1A         = "eIF1A"
-    eIF5B         = "eIF5B"
-    eIF5          = "eIF5"
+
     eIF2B_alpha   = "eIF2B_alpha"
     eIF2B_beta    = "eIF2B_beta"
     eIF2B_gamma   = "eIF2B_gamma"
     eIF2B_delta   = "eIF2B_delta"
     eIF2B_epsilon = "eIF2B_epsilon"
-    eIF3_subA     = "eIF3_subA"
-    eIF3_subB     = "eIF3_subB"
-    eIF3_subC     = "eIF3_subC"
-    eIF3_subD     = "eIF3_subD"
-    eIF3_subE     = "eIF3_subE"
-    eIF3_subF     = "eIF3_subF"
-    eIF3_subG     = "eIF3_subG"
-    eIF3_subH     = "eIF3_subH"
-    eIF3_subI     = "eIF3_subI"
-    eIF3_subJ     = "eIF3_subJ"
-    eIF3_subK     = "eIF3_subK"
-    eIF3_subL     = "eIF3_subL"
-    eIF3_subM     = "eIF3_subM"
+
+    eIF3_subunitA     = "eIF3_subunitA"
+    eIF3_subunitB     = "eIF3_subunitB"
+    eIF3_subunitC     = "eIF3_subunitC"
+    eIF3_subunitD     = "eIF3_subunitD"
+    eIF3_subunitE     = "eIF3_subunitE"
+    eIF3_subunitF     = "eIF3_subunitF"
+    eIF3_subunitG     = "eIF3_subunitG"
+    eIF3_subunitH     = "eIF3_subunitH"
+    eIF3_subunitI     = "eIF3_subunitI"
+    eIF3_subunitJ     = "eIF3_subunitJ"
+    eIF3_subunitK     = "eIF3_subunitK"
+    eIF3_subunitL     = "eIF3_subunitL"
+    eIF3_subunitM     = "eIF3_subunitM"
+
     eIF4F_4A      = "eIF4F_4A"
     eIF4F_4G      = "eIF4F_4G"
     eIF4F_4E      = "eIF4F_4E"
+
     eIF4B         = "eIF4B"
+    eIF5B         = "eIF5B"
+    eIF5          = "eIF5"
 
     # Bacterial
     IF1           = "IF1"

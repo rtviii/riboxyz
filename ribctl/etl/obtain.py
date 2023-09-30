@@ -64,7 +64,6 @@ async def obtain_assets(rcsb_id: str, assetlist: Assetlist, overwrite: bool = Fa
                 'nomenclature_table'   : assets.nomenclature_table()
             }
 
-
             with open(asset_ptc_coords_path, 'w') as f:
                 logging.debug(f'Writing PTC coordinates to {asset_ptc_coords_path}')
                 json.dump(writeout, f)

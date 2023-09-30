@@ -23,10 +23,9 @@ from ribctl.etl.ribosome_assets import Assetlist, RibosomeAssets
 from ribctl.lib.ribosome_types.types_ribosome import RNAClass
 from ribctl import  model_subgenuses
 from ete3 import NCBITaxa
-
 logging.getLogger("urllib3.connectionpool").setLevel(logging.CRITICAL)
 logging.getLogger('asyncio').setLevel(logging.WARNING)
-from ribctl.lib.util_taxonomy import descendants_of_taxid
+from ribctl.lib.util_taxonomy import descendants_of_taxid, taxid_domain, taxid_is_descendant_of
 hmm_cachedir = ASSETS['__hmm_cache']
 
 import sys
@@ -263,3 +262,16 @@ elif sys.argv[1] == "tsv_to_fasta":
 
     # for fasta_path in os.listdir( ASSETS['fasta_factors_initiation_a'] ):
     #     print(fasta_path)
+
+elif sys.argv[1] == "struct_factors":
+    # for struct in RibosomeAssets.list_all_structs()[10:20]:
+        # print("========================Processing {}=====================".format(struct))
+    prof = RibosomeAssets("3j7z").profile()
+    p    = prof.proteins
+    k    = classify_subchains(p,RNAClass)
+
+elif sys.argv[1] == "domain":
+    # for struct in RibosomeAssets.list_all_structs()[10:20]:
+        # print("========================Processing {}=====================".format(struct))
+    
+    print(taxid_domain(9606))
