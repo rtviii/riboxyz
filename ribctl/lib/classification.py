@@ -15,13 +15,15 @@ import re
 import pyhmmer
 from ribctl import ASSETS, MUSCLE_BIN
 from ribctl.lib.msalib import Fasta, muscle_align_N_seq, phylogenetic_neighborhood
-from ribctl.lib.ribosome_types.types_ribosome import RNA, LifecycleFactorClass, Polymer, PolymerClass, LifecycleFactor, Protein, ProteinClass, ProteinClass, RNAClass
+from ribctl.lib.ribosome_types.types_ribosome import RNA, ElongationFactorClass, InitiationFactorClass, LifecycleFactorClass, Polymer, PolymerClass, LifecycleFactor, Protein, ProteinClass, ProteinClass, RNAClass
 # from ribctl.etl.ribosome_assets import RibosomeAssets
 from pyhmmer.easel import Alphabet, DigitalSequenceBlock, TextSequence, SequenceFile, SequenceBlock, TextSequenceBlock
 from pyhmmer.plan7 import Pipeline, HMM 
 import logging
 import concurrent.futures
 import inspect
+
+from ribctl.lib.util_taxonomy import taxid_domain
 
 
 # Configure the logging settings
@@ -118,7 +120,20 @@ def fasta_phylogenetic_correction(candidate_class:ProteinClass|RNAClass|Lifecycl
         fasta_path = os.path.join(ASSETS["fasta_ribosomal_rna"], f"{candidate_class.value}.fasta")
 
     elif candidate_class in LifecycleFactorClass:
-        fasta_path = os.path.join(ASSETS["fasta_ribosomal_rna"], f"{candidate_class.value}.fasta")
+        if LifecycleFactorClass in ElongationFactorClass:
+            factor_class_path = ASSETS["fasta_factors_elongation"]
+        elif LifecycleFactorClass in InitiationFactorClass:
+            factor_class_path = ASSETS["fasta_factors_initiation"]
+        else:
+            raise Exception("Phylogenetic correction: Unimplemented factor class")
+
+        match taxid_domain(organism_taxid):
+            case "archaea":
+                fasta_path = os.path.join(factor_class_path, f"{candidate_class.value}.fasta")
+            case "bacteria":
+                fasta_path = os.path.join(factor_class_path, f"{candidate_class.value}.fasta")
+            case "eukaryota":
+                fasta_path = os.path.join(factor_class_path, f"{candidate_class.value}.fasta")
 
     else:
         raise Exception("Invalid candidate class")
@@ -163,7 +178,7 @@ def hmm_produce(candidate_class: ProteinClass | RNAClass | LifecycleFactorClass,
             return HMM
     else:
         if candidate_class in ProteinClass:
-            seqs = fasta_phylogenetic_correction(candidate_class, organism_taxid, max_n_neighbors=10)
+            seqs   = fasta_phylogenetic_correction(candidate_class, organism_taxid, max_n_neighbors=10)
             seqs_a = muscle_align_N_seq(iter(seqs))
 
             cached_name = "class_{}_taxid_{}.hmm".format(candidate_class.value, organism_taxid)
@@ -186,7 +201,7 @@ def hmm_produce(candidate_class: ProteinClass | RNAClass | LifecycleFactorClass,
             seqs        = fasta_phylogenetic_correction(candidate_class, organism_taxid, max_n_neighbors=10)
             seqs_a      = muscle_align_N_seq(iter(seqs))
             cached_name = "class_{}_taxid_{}.hmm".format(candidate_class.value, organism_taxid)
-            alphabet    = pyhmmer.easel.Alphabet.rna()
+            alphabet    = pyhmmer.easel.Alphabet.amino()
             HMM         = hmm_create(cached_name, seqs_a, alphabet)
             hmm_cache(HMM)
             return HMM
