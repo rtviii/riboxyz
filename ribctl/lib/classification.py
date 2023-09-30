@@ -177,36 +177,23 @@ def hmm_produce(candidate_class: ProteinClass | RNAClass | LifecycleFactorClass,
             HMM = hmm_file.read()
             return HMM
     else:
-        if candidate_class in ProteinClass:
-            seqs   = fasta_phylogenetic_correction(candidate_class, organism_taxid, max_n_neighbors=10)
-            seqs_a = muscle_align_N_seq(iter(seqs))
+       
 
-            cached_name = "class_{}_taxid_{}.hmm".format(candidate_class.value, organism_taxid)
-            alphabet    = pyhmmer.easel.Alphabet.amino()
-            HMM         = hmm_create(cached_name, seqs_a, alphabet)
-            hmm_cache(HMM)
-            return HMM
-
-        elif candidate_class in RNAClass:
-            seqs        = fasta_phylogenetic_correction(candidate_class, organism_taxid, max_n_neighbors=10)
-            seqs_a      = muscle_align_N_seq(iter(seqs))
-
-            cached_name = "class_{}_taxid_{}.hmm".format(candidate_class.value, organism_taxid)
-            alphabet    = pyhmmer.easel.Alphabet.rna()
-            HMM         = hmm_create(cached_name, seqs_a, alphabet)
-            hmm_cache(HMM)
-            return HMM
-
-        elif candidate_class in LifecycleFactorClass:
-            seqs        = fasta_phylogenetic_correction(candidate_class, organism_taxid, max_n_neighbors=10)
-            seqs_a      = muscle_align_N_seq(iter(seqs))
-            cached_name = "class_{}_taxid_{}.hmm".format(candidate_class.value, organism_taxid)
-            alphabet    = pyhmmer.easel.Alphabet.amino()
-            HMM         = hmm_create(cached_name, seqs_a, alphabet)
-            hmm_cache(HMM)
-            return HMM
+        if candidate_class in ProteinClass or candidate_class in LifecycleFactorClass:
+            alphabet = pyhmmer.easel.Alphabet.amino()
+        elif candidate_class in LifecycleFactorClass: 
+            alphabet = pyhmmer.easel.Alphabet.rna()
         else:
             raise Exception("hmm_produce: Unimplemented candidate class")
+                
+        seqs        = fasta_phylogenetic_correction(candidate_class, organism_taxid, max_n_neighbors=10)
+        seqs_a      = muscle_align_N_seq(iter(seqs))
+        cached_name = "class_{}_taxid_{}.hmm".format(candidate_class.value, organism_taxid)
+
+        HMM         = hmm_create(cached_name, seqs_a, alphabet)
+        if not no_cache:
+            hmm_cache(HMM)
+        return HMM
 
 #! Implementations ------------------------------
 
