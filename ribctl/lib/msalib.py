@@ -11,8 +11,6 @@ from typing import Iterator
 from Bio.Align import  SeqRecord
 import os
 from ribctl import MUSCLE_BIN
-from ribctl.lib.ribosome_types.types_ribosome import RNA, LifecycleFactor, Protein, ProteinClass
-from ribctl.lib.ribosome_types.types_ribosome import ProteinClass
 from ete3 import NCBITaxa
 
 
@@ -57,10 +55,8 @@ def seq_to_fasta(rcsb_id: str, _seq: str, outfile: str):
     SeqIO.write(seq_record, outfile, 'fasta')
 
 
-
 class Fasta:
     records = list[SeqRecord]
-
     def __init__(self, path:str) -> None:
         try:
             with open(path, "r") as fasta_in:

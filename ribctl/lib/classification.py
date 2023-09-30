@@ -57,10 +57,14 @@ def hmm_dict_init__candidates_per_organism(candidate_category:PolymerClass,organ
     if candidate_category == ProteinClass:
         for pc in ProteinClass:
             _.update({ pc.value: hmm_produce(pc, organism_taxid) })
+
     elif candidate_category == RNAClass:
         for rc in RNAClass:
             _.update({ rc.value: hmm_produce(rc, organism_taxid) })
+
     elif candidate_category == LifecycleFactorClass:
+        for rc in LifecycleFactorClass:
+            _.update({ rc.value: hmm_produce(rc, organism_taxid) })
         raise Exception("Not implemented yet: PolymericFactorClass hmmdictinit")
     else:
         return {}
@@ -104,7 +108,7 @@ def classify_sequence(seq:str, organism:int, candidate_category:typing.Union[RNA
         results         = seq_evaluate_v_hmm_dict(seq, pyhmmer.easel.Alphabet.rna(), candidates_dict)
         return results
 
-def fasta_phylogenetic_correction(candidate_class:ProteinClass|RNAClass, organism_taxid:int, max_n_neighbors=10)->Iterator[SeqRecord]:
+def fasta_phylogenetic_correction(candidate_class:ProteinClass|RNAClass|LifecycleFactorClass, organism_taxid:int, max_n_neighbors=10)->Iterator[SeqRecord]:
     """Given a candidate class and an organism taxid, retrieve the corresponding fasta file, and perform phylogenetic correction on it."""
 
     if candidate_class in ProteinClass:
@@ -112,6 +116,10 @@ def fasta_phylogenetic_correction(candidate_class:ProteinClass|RNAClass, organis
 
     elif candidate_class in RNAClass:
         fasta_path = os.path.join(ASSETS["fasta_ribosomal_rna"], f"{candidate_class.value}.fasta")
+
+    elif candidate_class in LifecycleFactorClass:
+        fasta_path = os.path.join(ASSETS["fasta_ribosomal_rna"], f"{candidate_class.value}.fasta")
+
     else:
         raise Exception("Invalid candidate class")
 
@@ -144,7 +152,7 @@ def hmm_cache(hmm:HMM):
     else:
         ...
 
-def hmm_produce(candidate_class: ProteinClass | RNAClass, organism_taxid:int)->HMM:  # type: ignore
+def hmm_produce(candidate_class: ProteinClass | RNAClass | LifecycleFactorClass, organism_taxid:int, no_cache:bool=False)->HMM:  # type: ignore
     """Produce an organism-specific HMM. Retrieve from cache if exists, otherwise generate and cache."""
     hmm_path = "class_{}_taxid_{}.hmm".format(candidate_class.value, organism_taxid)
 
@@ -164,7 +172,7 @@ def hmm_produce(candidate_class: ProteinClass | RNAClass, organism_taxid:int)->H
             hmm_cache(HMM)
             return HMM
 
-        if candidate_class in RNAClass:
+        elif candidate_class in RNAClass:
             seqs        = fasta_phylogenetic_correction(candidate_class, organism_taxid, max_n_neighbors=10)
             seqs_a      = muscle_align_N_seq(iter(seqs))
 
@@ -173,6 +181,17 @@ def hmm_produce(candidate_class: ProteinClass | RNAClass, organism_taxid:int)->H
             HMM         = hmm_create(cached_name, seqs_a, alphabet)
             hmm_cache(HMM)
             return HMM
+
+        elif candidate_class in LifecycleFactorClass:
+            seqs        = fasta_phylogenetic_correction(candidate_class, organism_taxid, max_n_neighbors=10)
+            seqs_a      = muscle_align_N_seq(iter(seqs))
+            cached_name = "class_{}_taxid_{}.hmm".format(candidate_class.value, organism_taxid)
+            alphabet    = pyhmmer.easel.Alphabet.rna()
+            HMM         = hmm_create(cached_name, seqs_a, alphabet)
+            hmm_cache(HMM)
+            return HMM
+        else:
+            raise Exception("hmm_produce: Unimplemented candidate class")
 
 #! Implementations ------------------------------
 

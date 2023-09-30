@@ -1,9 +1,10 @@
 import os
 from typing import Tuple
+import typing
 from ribctl.etl.ribosome_assets import RibosomeAssets
 from ete3 import NCBITaxa
 from ribctl.lib.ribosome_types.types_ribosome import RibosomeStructure
-from ribctl import RIBETL_DATA
+from ribctl import RIBETL_DATA, TAXID_ARCHEA, TAXID_BACTERIA, TAXID_EUKARYA
 
 
 """
@@ -13,6 +14,18 @@ Primary operations should be in terms of integer tax. ids not objects.
 Separately implement the source/host thing for structs.
 """
 
+
+def taxid_domain(taxid:int)->typing.Literal["bacteria","eukaryota","archaea"]:
+
+    match ( taxid_is_descendant_of(TAXID_EUKARYA, taxid)[0], taxid_is_descendant_of(TAXID_BACTERIA, taxid)[0], taxid_is_descendant_of(TAXID_ARCHEA, taxid)[0] ):
+        case (False,False,True):
+            return "archaea"
+        case (False,True,False):
+            return "bacteria"
+        case (True,False,False):
+            return "eukaryota"
+        case _:
+            raise Exception("Taxid is not a descendant of any domain.")
 
 
 
@@ -35,7 +48,7 @@ def get_descendants_of( parent:int, targets:list[int]):
 
 # ? Struct-specific functions
 
-def taxid_is_descendant_of(parent_taxid: int, target_taxid) -> ( bool, list[int]|None ):
+def taxid_is_descendant_of(parent_taxid: int, target_taxid:int) -> ( bool, list[int]|None ):
     ncbi = NCBITaxa()
     lineage = ncbi.get_lineage(target_taxid)
     if lineage is None:
