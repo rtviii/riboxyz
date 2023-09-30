@@ -104,10 +104,17 @@ def classify_sequence(seq:str, organism:int, candidate_category:typing.Union[RNA
         results         = seq_evaluate_v_hmm_dict(seq, pyhmmer.easel.Alphabet.amino(), candidates_dict)
         return results
 
-    if candidate_category == RNAClass:
+    elif candidate_category == RNAClass:
         candidates_dict = candidates_dict if candidates_dict is not None else hmm_dict_init__candidates_per_organism(candidate_category, organism)
         results         = seq_evaluate_v_hmm_dict(seq, pyhmmer.easel.Alphabet.rna(), candidates_dict)
         return results
+
+    elif candidate_category == LifecycleFactorClass:
+        candidates_dict = candidates_dict if candidates_dict is not None else hmm_dict_init__candidates_per_organism(candidate_category, organism)
+        results         = seq_evaluate_v_hmm_dict(seq, pyhmmer.easel.Alphabet.amino(), candidates_dict)
+        return results
+    else:
+        raise Exception("Classify sequence: Unimplemented candidate category")
 
 def fasta_phylogenetic_correction(candidate_class:ProteinClass|RNAClass|LifecycleFactorClass, organism_taxid:int, max_n_neighbors=10)->Iterator[SeqRecord]:
     """Given a candidate class and an organism taxid, retrieve the corresponding fasta file, and perform phylogenetic correction on it."""
