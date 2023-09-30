@@ -196,11 +196,18 @@ class InitiationFactorClass(Enum):
     IF3           = "IF3"
 
     # Archaeal
-    aIF_1A       = "aIF-1A"
-    aIF_2B_alpha = "aIF-2B_alpha"
-    aIF_2B_beta  = "aIF-2B_beta"
-    aIF_2B_delta = "aIF-2B_delta"
-    aIF_5B = "aIF-5B"
+
+    aIF_1A       = "aIF1A"
+
+    aIF_2_alpha = "aIF2_alpha"
+    aIF_2_beta  = "aIF2_beta"
+    aIF_2_gamma = "aIF2_gamma"
+
+    aIF_2B_alpha = "aIF2B_alpha"
+    aIF_2B_beta  = "aIF2B_beta"
+    aIF_2B_delta = "aIF2B_delta"
+
+    aIF_5B       = "aIF5B"
 
 
 
