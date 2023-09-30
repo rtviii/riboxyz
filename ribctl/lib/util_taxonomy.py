@@ -1,9 +1,6 @@
-import os
 from typing import Tuple
 import typing
-from ribctl.etl.ribosome_assets import RibosomeAssets
 from ete3 import NCBITaxa
-from ribctl.lib.ribosome_types.types_ribosome import RibosomeStructure
 from ribctl import RIBETL_DATA, TAXID_ARCHAEA, TAXID_BACTERIA, TAXID_EUKARYOTA
 
 
@@ -26,8 +23,6 @@ def taxid_domain(taxid:int)->typing.Literal["bacteria","eukaryota","archaea"]:
             return "eukaryota"
         case _:
             raise Exception("Taxid is not a descendant of any domain.")
-
-
 
 def get_descendants_of( parent:int, targets:list[int]):
     ncbi = NCBITaxa()
@@ -64,10 +59,8 @@ def descendants_of_taxid(struct_taxids:list[Tuple[ str,int ]],parent_taxid: int)
 
         return descendants
 
-
 def __node_lineage(node):
     return NCBITaxa().get_lineage(node.taxid)
-
 
 def __lift_rank_to_species(taxid: int) -> int:
     """Given a taxid, make sure that it's a SPECIES (as opposed to strain, subspecies, isolate, norank etc.)"""
@@ -83,17 +76,3 @@ def __lift_rank_to_species(taxid: int) -> int:
         return node
 
 
-def classify_struct_by_proportions(ribosome: RibosomeStructure) -> int:
-    ids = []
-    if ribosome.rnas is not None:
-        for rna in ribosome.rnas:
-            ids = [*rna.src_organism_ids, *ids]
-
-    for protein in ribosome.proteins:
-        ids = [*protein.src_organism_ids, *ids]
-
-    proportions = {}
-    for i in set(ids):
-        proportions[i] = ids.count(i) / len(ids)
-
-    return max(proportions, key=proportions.get)

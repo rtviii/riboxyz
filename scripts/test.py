@@ -20,7 +20,7 @@ from ribctl.etl.etl_pipeline import ReannotationPipeline, query_rcsb_api, rcsb_s
 from ribctl.etl.obtain import obtain_assets_threadpool
 from ribctl.lib.classification import classify_sequence, classify_subchains, hmm_create, hmm_dict_init__candidates_per_organism, hmm_produce
 from ribctl.etl.ribosome_assets import Assetlist, RibosomeAssets
-from ribctl.lib.ribosome_types.types_ribosome import RNAClass
+from ribctl.lib.ribosome_types.types_ribosome import LifecycleFactorClass, ProteinClass, RNAClass
 from ribctl import  model_subgenuses
 from ete3 import NCBITaxa
 logging.getLogger("urllib3.connectionpool").setLevel(logging.CRITICAL)
@@ -268,10 +268,12 @@ elif sys.argv[1] == "struct_factors":
         # print("========================Processing {}=====================".format(struct))
     prof = RibosomeAssets("3j7z").profile()
     p    = prof.proteins
-    k    = classify_subchains(p,RNAClass)
+    # k    = classify_subchains(p,ProteinClass)
+    k    = classify_subchains(p,LifecycleFactorClass)
+    print(k)
 
-elif sys.argv[1] == "domain":
-    # for struct in RibosomeAssets.list_all_structs()[10:20]:
-        # print("========================Processing {}=====================".format(struct))
+# elif sys.argv[1] == "domain":
+#     # for struct in RibosomeAssets.list_all_structs()[10:20]:
+#         # print("========================Processing {}=====================".format(struct))
     
-    print(taxid_domain(9606))
+#     print(taxid_domain(9606))

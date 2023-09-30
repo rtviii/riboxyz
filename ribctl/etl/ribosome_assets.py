@@ -360,3 +360,18 @@ class RibosomeAssets():
 
         return all_verified_flag
 
+
+def classify_struct_by_proportions(ribosome: RibosomeStructure) -> int:
+    ids = []
+    if ribosome.rnas is not None:
+        for rna in ribosome.rnas:
+            ids = [*rna.src_organism_ids, *ids]
+
+    for protein in ribosome.proteins:
+        ids = [*protein.src_organism_ids, *ids]
+
+    proportions = {}
+    for i in set(ids):
+        proportions[i] = ids.count(i) / len(ids)
+
+    return max(proportions, key=proportions.get)

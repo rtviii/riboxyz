@@ -5,10 +5,6 @@ from pprint import pprint
 from typing import Any, Optional
 from pyhmmer.plan7 import HMM
 import requests
-from ribctl.etl.etl_polypeptides import (
-    protein_classify,
-    rna_classify,
-)
 from ribctl.lib.classification import (
     classify_subchains,
     seq_evaluate_v_hmm_dict,

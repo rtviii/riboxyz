@@ -147,15 +147,14 @@ class ElongationFactorClass(Enum):
     Tet_M = "Tet_M"
     RelA  = "RelA"
     BipA  = "BipA"
+
     # Archaeal
     aEF1A = "aEF1A"
     aEF2  = "aEF2"
     aIF5A = "aIF5A"
 
 class InitiationFactorClass(Enum):
-
-    #Eukaryotic
-
+    # Eukaryotic
     eIF1          = "eIF1"
     eIF1A         = "eIF1A"
 
@@ -197,8 +196,7 @@ class InitiationFactorClass(Enum):
     IF3           = "IF3"
 
 LifecycleFactorClass = typing.Union[ElongationFactorClass, InitiationFactorClass]
-
-PolymerClass = typing.Union[RNAClass, ProteinClass, LifecycleFactorClass]
+PolymerClass         = typing.Union[RNAClass, ProteinClass, LifecycleFactorClass]
 
 # Object Types
 class Polymer(BaseModel):
@@ -316,7 +314,8 @@ class LifecycleFactor(Polymer):
     def __hash__(self) -> int:
         return hash(self.auth_asym_id + self.parent_rcsb_id)
 
-    nomenclature: list[LifecycleFactorClass] 
+    # nomenclature: list
+    nomenclature: list[Any] 
     
 class AssemblyInstancesMap(BaseModel):
     """
