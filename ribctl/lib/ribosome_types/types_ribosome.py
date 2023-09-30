@@ -4,6 +4,7 @@ import typing
 import typing
 from typing import NewType
 from pydantic import BaseModel
+from ribctl.lib.enumunion import enum_union
 
 RCSB_ID = NewType('RCSB_ID', str)
 # Nomenclature
@@ -147,7 +148,6 @@ class ElongationFactorClass(Enum):
     Tet_M = "Tet_M"
     RelA  = "RelA"
     BipA  = "BipA"
-
     # Archaeal
     aEF1A = "aEF1A"
     aEF2  = "aEF2"
@@ -195,8 +195,9 @@ class InitiationFactorClass(Enum):
     IF2           = "IF2"
     IF3           = "IF3"
 
-LifecycleFactorClass = typing.Union[ElongationFactorClass, InitiationFactorClass]
-PolymerClass         = typing.Union[RNAClass, ProteinClass, LifecycleFactorClass]
+# LifecycleFactorClass = typing.Union[ElongationFactorClass, InitiationFactorClass]
+LifecycleFactorClass = enum_union(ElongationFactorClass, InitiationFactorClass)
+PolymerClass         = enum_union(RNAClass, ProteinClass, LifecycleFactorClass)
 
 # Object Types
 class Polymer(BaseModel):

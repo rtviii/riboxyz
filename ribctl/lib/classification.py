@@ -67,8 +67,6 @@ def hmm_dict_init__candidates_per_organism(candidate_category:PolymerClass,organ
     elif candidate_category == LifecycleFactorClass:
         for rc in LifecycleFactorClass:
             _.update({ rc.value: hmm_produce(rc, organism_taxid) })
-        # raise Exception("Not implemented yet: PolymericFactorClass hmmdictinit")
-
     else:
         return {}
     
@@ -121,23 +119,18 @@ def fasta_phylogenetic_correction(candidate_class:ProteinClass|RNAClass|Lifecycl
         fasta_path = os.path.join(ASSETS["fasta_ribosomal_rna"], f"{candidate_class.value}.fasta")
 
     elif candidate_class in LifecycleFactorClass:
-        if LifecycleFactorClass in ElongationFactorClass:
+        if candidate_class in ElongationFactorClass:
             factor_class_path = ASSETS["fasta_factors_elongation"]
-        elif LifecycleFactorClass in InitiationFactorClass:
+        elif candidate_class in InitiationFactorClass:
             factor_class_path = ASSETS["fasta_factors_initiation"]
         else:
             raise Exception("Phylogenetic correction: Unimplemented factor class")
 
-        match taxid_domain(organism_taxid):
-            case "archaea":
-                fasta_path = os.path.join(factor_class_path, f"{candidate_class.value}.fasta")
-            case "bacteria":
-                fasta_path = os.path.join(factor_class_path, f"{candidate_class.value}.fasta")
-            case "eukaryota":
-                fasta_path = os.path.join(factor_class_path, f"{candidate_class.value}.fasta")
-
+        domain     = taxid_domain(organism_taxid)
+        fasta_path = os.path.join(factor_class_path, domain, f"{candidate_class.value}.fasta")
     else:
-        raise Exception("Invalid candidate class")
+        raise Exception("Phylogenetic correction: Unimplemented candidate class")
+
 
     records      = Fasta(fasta_path)
     ids          = records.all_taxids()
