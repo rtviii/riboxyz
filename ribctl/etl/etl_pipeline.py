@@ -27,7 +27,6 @@ from ribctl.etl.gql_querystrings import single_structure_graphql_template
 
 logging.getLogger("urllib3.connectionpool").setLevel(logging.CRITICAL)
 
-
 def current_rcsb_structs() -> list[str]:
     """Return all structures in the rcsb that contain the phrase RIBOSOME and have more than 25 protein entities"""
 
@@ -79,7 +78,6 @@ def query_rcsb_api(gql_string: str) -> dict:
         return resp["data"]["entry"]
     else:
         raise Exception("No data found for query: {}".format(gql_string))
-
 
 def rcsb_single_structure_graphql(rcsb_id):
     return single_structure_graphql_template.replace("$RCSB_ID", rcsb_id.upper())

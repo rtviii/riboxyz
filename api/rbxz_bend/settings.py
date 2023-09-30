@@ -24,7 +24,7 @@ vars          = ["NEO4J_URI", "NEO4J_USER", "NEO4J_PASSWORD","NEO4J_CURRENTDB", 
 for var in vars:
     if var not in os.environ:
         print("Environment variable {} not set".format(var))
-        exit(1)
+        # exit(1)
 
 NEO4J_URI       :str= os.getenv("NEO4J_URI")
 NEO4J_PASSWORD  :str= os.getenv("NEO4J_PASSWORD")

@@ -15,6 +15,7 @@ from Bio.Align import MultipleSeqAlignment,Seq, SeqRecord
 from Bio.Align.Applications import MuscleCommandline
 from pyhmmer import phmmer
 import pyhmmer
+from api.rbxz_bend.settings import ASSETS_PATH
 from ribctl import ASSETS, RIBETL_DATA
 from ribctl.etl.etl_pipeline import ReannotationPipeline, query_rcsb_api, rcsb_single_structure_graphql
 from ribctl.etl.obtain import obtain_assets_threadpool
@@ -224,25 +225,25 @@ elif sys.argv[1] == "struct_rnas":
 
 elif sys.argv[1] == "tsv_to_fasta":
     import csv
-    factor_type = ASSETS['fasta_factors_initiation_e']
-    for tsv_path in os.listdir(factor_type):
-        # Initialize an empty list to store the records
-        full_path = os.path.join(factor_type, tsv_path)
-        records   = []
-        with open(full_path, 'r', newline='', encoding='utf-8') as tsvfile:
-            tsvreader = csv.reader(tsvfile, delimiter='\t')
-            next(tsvreader, None)
-            for row in tsvreader:
-                entry, orgid, sequence = row
-                records.append((entry, orgid, sequence))
+    # Initialize an empty list to store the records
+    tsv_path = os.path.join('./ribctl/assets/aIF-5B.tsv')
+    fasta_path = os.path.join('./ribctl/assets/aIF-5B.fasta')
+    records   = []
+    with open(tsv_path, 'r', newline='', encoding='utf-8') as tsvfile:
+        tsvreader = csv.reader(tsvfile, delimiter='\t')
+        next(tsvreader, None)
+        for row in tsvreader:
+            entry, orgid, sequence = row
+            records.append((entry, orgid, sequence))
 
-        seqrecords = []
-        for record in records:
-            (entry, taxid, sequence) = record
-            seqrecords.append(SeqRecord(Seq(sequence), id=taxid, description="uniprot_{}".format(entry)))
+    seqrecords = []
 
-        dest = os.path.join(factor_type,"{}.fasta".format(tsv_path.split(".")[0]))
-        with open(dest, "w") as output_handle:
+    for record in records:
+        (entry, taxid, sequence) = record
+        seqrecords.append(SeqRecord(Seq(sequence), id=taxid, description="uniprot_{}".format(entry)))
+
+    dest = os.path.join(fasta_path)
+    with open(dest, "w") as output_handle:
             SeqIO.write(seqrecords, output_handle, "fasta")
             print("Wrote {} seqs to  to {}".format(len(seqrecords),dest))
 
