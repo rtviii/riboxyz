@@ -67,7 +67,8 @@ def hmm_dict_init__candidates_per_organism(candidate_category:PolymerClass,organ
     elif candidate_category == LifecycleFactorClass:
         for rc in LifecycleFactorClass:
             _.update({ rc.value: hmm_produce(rc, organism_taxid) })
-        raise Exception("Not implemented yet: PolymericFactorClass hmmdictinit")
+        # raise Exception("Not implemented yet: PolymericFactorClass hmmdictinit")
+
     else:
         return {}
     
@@ -177,8 +178,6 @@ def hmm_produce(candidate_class: ProteinClass | RNAClass | LifecycleFactorClass,
             HMM = hmm_file.read()
             return HMM
     else:
-       
-
         if candidate_class in ProteinClass or candidate_class in LifecycleFactorClass:
             alphabet = pyhmmer.easel.Alphabet.amino()
         elif candidate_class in LifecycleFactorClass: 
