@@ -20,13 +20,13 @@ asset_type = Literal[
     "fasta_proteins_mitochondrial",
     "fasta_ribosomal_rna",
     "fasta_factors_elongation",
-    "fasta_factors_elongation_a",
-    "fasta_factors_elongation_b",
-    "fasta_factors_elongation_e",
+    "fasta_factors_elongation_archaea",
+    "fasta_factors_elongation_bacteria",
+    "fasta_factors_elongation_eukaryota",
     "fasta_factors_initiation",
-    "fasta_factors_initiation_a",
-    "fasta_factors_initiation_b",
-    "fasta_factors_initiation_e",
+    "fasta_factors_initiation_archaea",
+    "fasta_factors_initiation_bacteria",
+    "fasta_factors_initiation_eukaryota",
     "fasta_trna",
 
     "__hmm_cache",
@@ -49,22 +49,22 @@ ASSETS: dict[asset_type, pathlib.Path] = {
     "fasta_ribosomal_rna"         : pathlib.Path(os.path.join(ASSETS_PATH, "fasta_ribosomal_rna") ),
     "fasta_factors_initiation"    : pathlib.Path(os.path.join(ASSETS_PATH, "fasta_factors_initiation")),
 
-    "fasta_factors_initiation_a"    : pathlib.Path(os.path.join(ASSETS_PATH, "fasta_factors_initiation","a")),
-    "fasta_factors_initiation_b"    : pathlib.Path(os.path.join(ASSETS_PATH, "fasta_factors_initiation","b")),
-    "fasta_factors_initiation_e"    : pathlib.Path(os.path.join(ASSETS_PATH, "fasta_factors_initiation","e")),
+    "fasta_factors_initiation_archaea"  : pathlib.Path(os.path.join(ASSETS_PATH, "fasta_factors_initiation","archaea")),
+    "fasta_factors_initiation_bacteria" : pathlib.Path(os.path.join(ASSETS_PATH, "fasta_factors_initiation","bacteria")),
+    "fasta_factors_initiation_eukaryota": pathlib.Path(os.path.join(ASSETS_PATH, "fasta_factors_initiation","eukaryota")),
 
-    "fasta_factors_elongation"    : pathlib.Path(os.path.join(ASSETS_PATH, "fasta_factors_elongation")),
-    "fasta_factors_elongation_b"  : pathlib.Path(os.path.join(ASSETS_PATH, "fasta_factors_elongation","b")),
-    "fasta_factors_elongation_e"  : pathlib.Path(os.path.join(ASSETS_PATH, "fasta_factors_elongation","e")),
-    "fasta_factors_elongation_a"  : pathlib.Path(os.path.join(ASSETS_PATH, "fasta_factors_elongation","a")),
-    "fasta_trna"                  : pathlib.Path(os.path.join(ASSETS_PATH, "fasta_trna")),
+    "fasta_factors_elongation"          : pathlib.Path(os.path.join(ASSETS_PATH, "fasta_factors_elongation")),
+    "fasta_factors_elongation_bacteria" : pathlib.Path(os.path.join(ASSETS_PATH, "fasta_factors_elongation","bacteria")),
+    "fasta_factors_elongation_eukaryota": pathlib.Path(os.path.join(ASSETS_PATH, "fasta_factors_elongation","eukaryota")),
+    "fasta_factors_elongation_archaea"  : pathlib.Path(os.path.join(ASSETS_PATH, "fasta_factors_elongation","archaea")),
+    "fasta_trna"                        : pathlib.Path(os.path.join(ASSETS_PATH, "fasta_trna")),
 
     "__hmm_cache"             : pathlib.Path(os.path.join(ASSETS_PATH, "__hmm_cache")),
 }
 
-TAXID_BACTERIA          = 2
-TAXID_EUKARYA           = 2759
-TAXID_ARCHEA            = 2157
+TAXID_BACTERIA  = 2
+TAXID_EUKARYOTA = 2759
+TAXID_ARCHAEA   = 2157
 
 AMINO_ACIDS_3_TO_1_CODE = {
     "ALA": "A",

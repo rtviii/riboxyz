@@ -4,7 +4,7 @@ import typing
 from ribctl.etl.ribosome_assets import RibosomeAssets
 from ete3 import NCBITaxa
 from ribctl.lib.ribosome_types.types_ribosome import RibosomeStructure
-from ribctl import RIBETL_DATA, TAXID_ARCHEA, TAXID_BACTERIA, TAXID_EUKARYA
+from ribctl import RIBETL_DATA, TAXID_ARCHAEA, TAXID_BACTERIA, TAXID_EUKARYOTA
 
 
 """
@@ -17,7 +17,7 @@ Separately implement the source/host thing for structs.
 
 def taxid_domain(taxid:int)->typing.Literal["bacteria","eukaryota","archaea"]:
 
-    match ( taxid_is_descendant_of(TAXID_EUKARYA, taxid)[0], taxid_is_descendant_of(TAXID_BACTERIA, taxid)[0], taxid_is_descendant_of(TAXID_ARCHEA, taxid)[0] ):
+    match ( taxid_is_descendant_of(TAXID_EUKARYOTA, taxid)[0], taxid_is_descendant_of(TAXID_BACTERIA, taxid)[0], taxid_is_descendant_of(TAXID_ARCHAEA, taxid)[0] ):
         case (False,False,True):
             return "archaea"
         case (False,True,False):
