@@ -226,8 +226,8 @@ elif sys.argv[1] == "struct_rnas":
 elif sys.argv[1] == "tsv_to_fasta":
     import csv
     # Initialize an empty list to store the records
-    tsv_path = os.path.join('./ribctl/assets/aIF-5B.tsv')
-    fasta_path = os.path.join('./ribctl/assets/aIF-5B.fasta')
+    tsv_path = os.path.join('/home/rtviii/dev/riboxyz/ribctl/assets/fasta_factors_initiation/archaea/','aIF-5B.tsv')
+    fasta_path = os.path.join('/home/rtviii/dev/riboxyz/ribctl/assets/fasta_factors_initiation/archaea/','aIF-5B.fasta')
     records   = []
     with open(tsv_path, 'r', newline='', encoding='utf-8') as tsvfile:
         tsvreader = csv.reader(tsvfile, delimiter='\t')

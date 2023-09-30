@@ -195,6 +195,15 @@ class InitiationFactorClass(Enum):
     IF2           = "IF2"
     IF3           = "IF3"
 
+    # Archaeal
+    aIF_1A       = "aIF-1A"
+    aIF_2B_alpha = "aIF-2B_alpha"
+    aIF_2B_beta  = "aIF-2B_beta"
+    aIF_2B_delta = "aIF-2B_delta"
+    aIF_5B = "aIF-5B"
+
+
+
 # LifecycleFactorClass = typing.Union[ElongationFactorClass, InitiationFactorClass]
 LifecycleFactorClass = enum_union(ElongationFactorClass, InitiationFactorClass)
 PolymerClass         = enum_union(RNAClass, ProteinClass, LifecycleFactorClass)
