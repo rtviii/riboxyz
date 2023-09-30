@@ -127,7 +127,7 @@ def fasta_phylogenetic_correction(candidate_class:ProteinClass|RNAClass|Lifecycl
             raise Exception("Phylogenetic correction: Unimplemented factor class")
 
         domain     = taxid_domain(organism_taxid)
-        fasta_path = os.path.join(factor_class_path, domain, f"{candidate_class.value}.fasta")
+        fasta_path = os.path.join(factor_class_path, f"{candidate_class.value}.fasta")
     else:
         raise Exception("Phylogenetic correction: Unimplemented candidate class")
 
