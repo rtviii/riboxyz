@@ -225,10 +225,10 @@ elif sys.argv[1] == "struct_rnas":
 
 elif sys.argv[1] == "tsv_to_fasta":
     import csv
-    # Initialize an empty list to store the records
-    tsv_path = os.path.join('/home/rtviii/dev/riboxyz/ribctl/assets','eIF2_gamma.tsv')
-    fasta_path = os.path.join('/home/rtviii/dev/riboxyz/ribctl/assets','eIF2_gamma.fasta')
-    records   = []
+    tsv_path   = os.path.join('/home/rtviii/dev/riboxyz/ribctl/assets','eIF3_subunitI.tsv')
+    fasta_path = os.path.join('/home/rtviii/dev/riboxyz/ribctl/assets','eIF3_subunitI.fasta')
+    records    = []
+
     with open(tsv_path, 'r', newline='', encoding='utf-8') as tsvfile:
         tsvreader = csv.reader(tsvfile, delimiter='\t')
         next(tsvreader, None)
@@ -248,28 +248,11 @@ elif sys.argv[1] == "tsv_to_fasta":
             print("Wrote {} seqs to  to {}".format(len(seqrecords),dest))
 
 
-
-    # for fasta_path in os.listdir( ASSETS['fasta_factors_elongation_e'] ):
-    #     print(fasta_path)
-    # for fasta_path in os.listdir( ASSETS['fasta_factors_elongation_b'] ):
-    #     print(fasta_path)
-
-
-    # for fasta_path in os.listdir( ASSETS['fasta_factors_initiation_b'] ):
-    #     print(fasta_path)
-      
-    # for fasta_path in os.listdir( ASSETS['fasta_factors_initiation_e'] ):
-    #     print(fasta_path)
-
-    # for fasta_path in os.listdir( ASSETS['fasta_factors_initiation_a'] ):
-    #     print(fasta_path)
-
 elif sys.argv[1] == "struct_factors":
     # for struct in RibosomeAssets.list_all_structs()[10:20]:
         # print("========================Processing {}=====================".format(struct))
     prof = RibosomeAssets("3j7z").profile()
     p    = prof.proteins
-    # k    = classify_subchains(p,ProteinClass)
     k    = classify_subchains(p,LifecycleFactorClass)
     print(k)
 

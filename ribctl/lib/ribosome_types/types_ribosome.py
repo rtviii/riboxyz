@@ -132,13 +132,13 @@ class ElongationFactorClass(Enum):
     # Eukaryotic
     eEF1A = "eEF1A"
     eEF1B = "eEF1B"
-    EFsec = "EFsec"
+    eFSec = "eFSec"
     eEF2  = "eEF2"
     mtEF4 = "mtEF4"
     eIF5A = "eIF5A"
     eEF3  = "eEF3"
     # Bacterial
-    EF_Tu = "EF-Tu "
+    EF_Tu = "EF-Tu"
     EF_Ts = "EF-Ts"
     SelB  = "SelB"
     EF_G  = "EF-G"
@@ -208,8 +208,6 @@ class InitiationFactorClass(Enum):
     aIF_2B_delta = "aIF2B_delta"
 
     aIF_5B       = "aIF5B"
-
-
 
 # LifecycleFactorClass = typing.Union[ElongationFactorClass, InitiationFactorClass]
 LifecycleFactorClass = enum_union(ElongationFactorClass, InitiationFactorClass)
