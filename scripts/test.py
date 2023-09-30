@@ -18,7 +18,7 @@ import pyhmmer
 from ribctl import ASSETS, RIBETL_DATA
 from ribctl.etl.etl_pipeline import ReannotationPipeline, query_rcsb_api, rcsb_single_structure_graphql
 from ribctl.etl.obtain import obtain_assets_threadpool
-from ribctl.lib.classification import classify_sequence, classify_subchains, hmm_create, hmm_dict_init__candidates_per_organism, hmm_produce
+from ribctl.lib.classification import classify_sequence, classify_subchain, classify_subchains, hmm_create, hmm_dict_init__candidates_per_organism, hmm_produce
 from ribctl.etl.ribosome_assets import Assetlist, RibosomeAssets
 from ribctl.lib.ribosome_types.types_ribosome import LifecycleFactorClass, ProteinClass, RNAClass
 from ribctl import  model_subgenuses
@@ -35,8 +35,6 @@ file_handler = logging.FileHandler('classification.log')
 log_format   = logging.Formatter('%(asctime)s [%(levelname)s] [%(name)s] %(message)s')
 file_handler.setFormatter(log_format)
 logger.addHandler(file_handler)
-
-nomv2dict= '/home/rtviii/dev/riboxyz/nomv2'
 
 if sys.argv[1]    == "process_struct":
    rcsb_id         = sys.argv[2].upper()
@@ -252,9 +250,17 @@ elif sys.argv[1] == "struct_factors":
         # print("========================Processing {}=====================".format(struct))
     prof = RibosomeAssets("4w29").profile()
     p    = prof.polymeric_factors
-    # pprint(p)
-    k    = classify_subchains(p,LifecycleFactorClass)
-    pprint(k)
+
+
+    candidate_category = LifecycleFactorClass
+    hmm_organisms_registry={}
+
+    for chain in p:
+        chain_organism_taxid  = chain.src_organism_ids[0]
+        if chain_organism_taxid not in [*hmm_organisms_registry.keys()]:
+            hmm_organisms_registry[chain_organism_taxid] = hmm_dict_init__candidates_per_organism(candidate_category, chain_organism_taxid)
+        k    = classify_subchain(chain, hmm_organisms_registry[chain_organism_taxid])
+        pprint(k)
 
 # elif sys.argv[1] == "domain":
 #     # for struct in RibosomeAssets.list_all_structs()[10:20]:
