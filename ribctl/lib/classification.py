@@ -191,6 +191,7 @@ def hmm_produce(candidate_class: ProteinClass | RNAClass | LifecycleFactorClass,
 
 def classify_subchain(chain: typing.Union[Protein, RNA, LifecycleFactor] , candidates_dict:dict[PolymerClass, HMM]|None=None)->Tuple[str, PolymerClass|None]:
     logging.debug("Task for chain {}.{} (Old nomenclature {}) | taxid {}".format( chain.parent_rcsb_id,chain.auth_asym_id, chain.nomenclature, chain.src_organism_ids[0]))
+    print("Classifying chain ", chain.auth_asym_id, chain.src_organism_ids[0])
     if type(chain) == RNA:
         assigned = classify_sequence(chain.entity_poly_seq_one_letter_code_can, chain.src_organism_ids[0], RNAClass, candidates_dict=candidates_dict)
 
@@ -198,7 +199,7 @@ def classify_subchain(chain: typing.Union[Protein, RNA, LifecycleFactor] , candi
         assigned = classify_sequence(chain.entity_poly_seq_one_letter_code_can, chain.src_organism_ids[0], ProteinClass, candidates_dict=candidates_dict)
 
     elif type(chain)== LifecycleFactor:
-        return (chain.auth_asym_id, None)
+        assigned = classify_sequence(chain.entity_poly_seq_one_letter_code_can, chain.src_organism_ids[0], LifecycleFactorClass, candidates_dict=candidates_dict)
     else:
         raise Exception("Invalid chain type")
     
@@ -207,20 +208,17 @@ def classify_subchain(chain: typing.Union[Protein, RNA, LifecycleFactor] , candi
 
 # def classify_subchains(targets:list[Protein]|list[RNA]|list[PolymericFactor])->dict[str, PolymerClass_]:
 def classify_subchains(targets:list[typing.Union[Protein,RNA,LifecycleFactor]],candidate_category:PolymerClass)->dict[str, PolymerClass]:
-    # This is a dict of dicts (a "registry", sigh) to only do i/o once per organism.(Pass it down)
-    # It's a dictionary because some chains within a structure might originate in different organisms. 
+    # This is a dict of dicts to only do IO once(on average) per organism assuming 90%+ of chains in a structure are of the same taxid.(Pass it down)
+    # It's a dictionary because some chains within a structure might originate in different organisms (host system).
     hmm_organisms_registry: dict[int,dict[PolymerClass, HMM]]= {}
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=25) as executor:
         tasks   = []
         results = []
         for chain in targets:
-            
             chain_organism_taxid  = chain.src_organism_ids[0]
             if chain_organism_taxid not in [*hmm_organisms_registry.keys()]:
-
                 hmm_organisms_registry[chain_organism_taxid] = hmm_dict_init__candidates_per_organism(candidate_category, chain_organism_taxid)
-
             future = executor.submit(classify_subchain, chain, hmm_organisms_registry[chain_organism_taxid])
             tasks.append(future)
 

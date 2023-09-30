@@ -15,7 +15,6 @@ from Bio.Align import MultipleSeqAlignment,Seq, SeqRecord
 from Bio.Align.Applications import MuscleCommandline
 from pyhmmer import phmmer
 import pyhmmer
-from api.rbxz_bend.settings import ASSETS_PATH
 from ribctl import ASSETS, RIBETL_DATA
 from ribctl.etl.etl_pipeline import ReannotationPipeline, query_rcsb_api, rcsb_single_structure_graphql
 from ribctl.etl.obtain import obtain_assets_threadpool
@@ -251,10 +250,11 @@ elif sys.argv[1] == "tsv_to_fasta":
 elif sys.argv[1] == "struct_factors":
     # for struct in RibosomeAssets.list_all_structs()[10:20]:
         # print("========================Processing {}=====================".format(struct))
-    prof = RibosomeAssets("3j7z").profile()
-    p    = prof.proteins
+    prof = RibosomeAssets("4w29").profile()
+    p    = prof.polymeric_factors
+    # pprint(p)
     k    = classify_subchains(p,LifecycleFactorClass)
-    print(k)
+    pprint(k)
 
 # elif sys.argv[1] == "domain":
 #     # for struct in RibosomeAssets.list_all_structs()[10:20]:
