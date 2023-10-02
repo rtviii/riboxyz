@@ -244,7 +244,6 @@ elif sys.argv[1] == "tsv_to_fasta":
             SeqIO.write(seqrecords, output_handle, "fasta")
             print("Wrote {} seqs to  to {}".format(len(seqrecords),dest))
 
-
 elif sys.argv[1] == "struct_factors":
     for struct in RibosomeAssets.list_all_structs()[:10]:
 
@@ -263,7 +262,6 @@ elif sys.argv[1] == "struct_factors":
             if k[1] !=None:
                 print("Classifying chain {}.{}".format( chain.parent_rcsb_id,chain.auth_asym_id))
                 pprint(k)
-
 
 elif sys.argv[1] == 'collect_factors':
 
