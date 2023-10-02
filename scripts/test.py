@@ -270,12 +270,9 @@ elif sys.argv[1] == 'collect_factors':
     factors = []
     for struct in RibosomeAssets.list_all_structs():
         prof                   = RibosomeAssets(struct).profile()
-        if prof.polymeric_factors != None:
-            for p in prof.polymeric_factors:
+        for p in prof.polymeric_factors:
+            if "Fac" p.nomenclature 
+            print(p)
 
-
-
-        
-      
 
 
