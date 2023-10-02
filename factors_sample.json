@@ -1,0 +1,972 @@
+{
+    "8FL4": {
+        "assembly_id": 0,
+        "asym_ids": [
+            "FB"
+        ],
+        "auth_asym_id": "SK",
+        "parent_rcsb_id": "8FL4",
+        "src_organism_names": [
+            "Homo sapiens"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            9606
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "Eukaryotic translation initiation factor 6",
+        "entity_poly_strand_id": "SK",
+        "entity_poly_seq_one_letter_code": "MAVRASFENNCEIGCFAKLTNTYCLVAIGGSENFYSVFEGELSDTIPVVHASIAGCRIIGRMCVGNRHGLLVPNNTTDQELQHIRNSLPDTVQIRRVEERLSALGNVTTCNDYVALVHPDLDRETEEILADVLKVEVFRQTVADQVLVGSYCVFSNQGGLVHPKTSIEDQDELSSLLQVPLVAGTVNRGSEVIAAGMVVNDWCAFCGLDTTSTELSVVESVFKLNEAQPSTIATSMRDSLIDSLT",
+        "entity_poly_seq_one_letter_code_can": "MAVRASFENNCEIGCFAKLTNTYCLVAIGGSENFYSVFEGELSDTIPVVHASIAGCRIIGRMCVGNRHGLLVPNNTTDQELQHIRNSLPDTVQIRRVEERLSALGNVTTCNDYVALVHPDLDRETEEILADVLKVEVFRQTVADQVLVGSYCVFSNQGGLVHPKTSIEDQDELSSLLQVPLVAGTVNRGSEVIAAGMVVNDWCAFCGLDTTSTELSVVESVFKLNEAQPSTIATSMRDSLIDSLT",
+        "entity_poly_seq_length": 245,
+        "entity_poly_polymer_type": "Protein",
+        "entity_poly_entity_type": "polypeptide(L)",
+        "nomenclature": [
+            "Initiation Factor"
+        ]
+    },
+    "8FL6": {
+        "assembly_id": 0,
+        "asym_ids": [
+            "YA"
+        ],
+        "auth_asym_id": "SK",
+        "parent_rcsb_id": "8FL6",
+        "src_organism_names": [
+            "Homo sapiens"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            9606
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "Eukaryotic translation initiation factor 6",
+        "entity_poly_strand_id": "SK",
+        "entity_poly_seq_one_letter_code": "MAVRASFENNCEIGCFAKLTNTYCLVAIGGSENFYSVFEGELSDTIPVVHASIAGCRIIGRMCVGNRHGLLVPNNTTDQELQHIRNSLPDTVQIRRVEERLSALGNVTTCNDYVALVHPDLDRETEEILADVLKVEVFRQTVADQVLVGSYCVFSNQGGLVHPKTSIEDQDELSSLLQVPLVAGTVNRGSEVIAAGMVVNDWCAFCGLDTTSTELSVVESVFKLNEAQPSTIATSMRDSLIDSLT",
+        "entity_poly_seq_one_letter_code_can": "MAVRASFENNCEIGCFAKLTNTYCLVAIGGSENFYSVFEGELSDTIPVVHASIAGCRIIGRMCVGNRHGLLVPNNTTDQELQHIRNSLPDTVQIRRVEERLSALGNVTTCNDYVALVHPDLDRETEEILADVLKVEVFRQTVADQVLVGSYCVFSNQGGLVHPKTSIEDQDELSSLLQVPLVAGTVNRGSEVIAAGMVVNDWCAFCGLDTTSTELSVVESVFKLNEAQPSTIATSMRDSLIDSLT",
+        "entity_poly_seq_length": 245,
+        "entity_poly_polymer_type": "Protein",
+        "entity_poly_entity_type": "polypeptide(L)",
+        "nomenclature": [
+            "Initiation Factor"
+        ]
+    },
+    "8FL7": {
+        "assembly_id": 0,
+        "asym_ids": [
+            "XA"
+        ],
+        "auth_asym_id": "SK",
+        "parent_rcsb_id": "8FL7",
+        "src_organism_names": [
+            "Homo sapiens"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            9606
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "Eukaryotic translation initiation factor 6",
+        "entity_poly_strand_id": "SK",
+        "entity_poly_seq_one_letter_code": "MAVRASFENNCEIGCFAKLTNTYCLVAIGGSENFYSVFEGELSDTIPVVHASIAGCRIIGRMCVGNRHGLLVPNNTTDQELQHIRNSLPDTVQIRRVEERLSALGNVTTCNDYVALVHPDLDRETEEILADVLKVEVFRQTVADQVLVGSYCVFSNQGGLVHPKTSIEDQDELSSLLQVPLVAGTVNRGSEVIAAGMVVNDWCAFCGLDTTSTELSVVESVFKLNEAQPSTIATSMRDSLIDSLT",
+        "entity_poly_seq_one_letter_code_can": "MAVRASFENNCEIGCFAKLTNTYCLVAIGGSENFYSVFEGELSDTIPVVHASIAGCRIIGRMCVGNRHGLLVPNNTTDQELQHIRNSLPDTVQIRRVEERLSALGNVTTCNDYVALVHPDLDRETEEILADVLKVEVFRQTVADQVLVGSYCVFSNQGGLVHPKTSIEDQDELSSLLQVPLVAGTVNRGSEVIAAGMVVNDWCAFCGLDTTSTELSVVESVFKLNEAQPSTIATSMRDSLIDSLT",
+        "entity_poly_seq_length": 245,
+        "entity_poly_polymer_type": "Protein",
+        "entity_poly_entity_type": "polypeptide(L)",
+        "nomenclature": [
+            "Initiation Factor"
+        ]
+    },
+    "8FL9": {
+        "assembly_id": 0,
+        "asym_ids": [
+            "UA"
+        ],
+        "auth_asym_id": "SK",
+        "parent_rcsb_id": "8FL9",
+        "src_organism_names": [
+            "Homo sapiens"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            9606
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "Eukaryotic translation initiation factor 6",
+        "entity_poly_strand_id": "SK",
+        "entity_poly_seq_one_letter_code": "MAVRASFENNCEIGCFAKLTNTYCLVAIGGSENFYSVFEGELSDTIPVVHASIAGCRIIGRMCVGNRHGLLVPNNTTDQELQHIRNSLPDTVQIRRVEERLSALGNVTTCNDYVALVHPDLDRETEEILADVLKVEVFRQTVADQVLVGSYCVFSNQGGLVHPKTSIEDQDELSSLLQVPLVAGTVNRGSEVIAAGMVVNDWCAFCGLDTTSTELSVVESVFKLNEAQPSTIATSMRDSLIDSLT",
+        "entity_poly_seq_one_letter_code_can": "MAVRASFENNCEIGCFAKLTNTYCLVAIGGSENFYSVFEGELSDTIPVVHASIAGCRIIGRMCVGNRHGLLVPNNTTDQELQHIRNSLPDTVQIRRVEERLSALGNVTTCNDYVALVHPDLDRETEEILADVLKVEVFRQTVADQVLVGSYCVFSNQGGLVHPKTSIEDQDELSSLLQVPLVAGTVNRGSEVIAAGMVVNDWCAFCGLDTTSTELSVVESVFKLNEAQPSTIATSMRDSLIDSLT",
+        "entity_poly_seq_length": 245,
+        "entity_poly_polymer_type": "Protein",
+        "entity_poly_entity_type": "polypeptide(L)",
+        "nomenclature": [
+            "Initiation Factor"
+        ]
+    },
+    "8FLA": {
+        "assembly_id": 0,
+        "asym_ids": [
+            "XA"
+        ],
+        "auth_asym_id": "SK",
+        "parent_rcsb_id": "8FLA",
+        "src_organism_names": [
+            "Homo sapiens"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            9606
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "Eukaryotic translation initiation factor 6",
+        "entity_poly_strand_id": "SK",
+        "entity_poly_seq_one_letter_code": "MAVRASFENNCEIGCFAKLTNTYCLVAIGGSENFYSVFEGELSDTIPVVHASIAGCRIIGRMCVGNRHGLLVPNNTTDQELQHIRNSLPDTVQIRRVEERLSALGNVTTCNDYVALVHPDLDRETEEILADVLKVEVFRQTVADQVLVGSYCVFSNQGGLVHPKTSIEDQDELSSLLQVPLVAGTVNRGSEVIAAGMVVNDWCAFCGLDTTSTELSVVESVFKLNEAQPSTIATSMRDSLIDSLT",
+        "entity_poly_seq_one_letter_code_can": "MAVRASFENNCEIGCFAKLTNTYCLVAIGGSENFYSVFEGELSDTIPVVHASIAGCRIIGRMCVGNRHGLLVPNNTTDQELQHIRNSLPDTVQIRRVEERLSALGNVTTCNDYVALVHPDLDRETEEILADVLKVEVFRQTVADQVLVGSYCVFSNQGGLVHPKTSIEDQDELSSLLQVPLVAGTVNRGSEVIAAGMVVNDWCAFCGLDTTSTELSVVESVFKLNEAQPSTIATSMRDSLIDSLT",
+        "entity_poly_seq_length": 245,
+        "entity_poly_polymer_type": "Protein",
+        "entity_poly_entity_type": "polypeptide(L)",
+        "nomenclature": [
+            "Initiation Factor"
+        ]
+    },
+    "8FLB": {
+        "assembly_id": 0,
+        "asym_ids": [
+            "WA"
+        ],
+        "auth_asym_id": "SK",
+        "parent_rcsb_id": "8FLB",
+        "src_organism_names": [
+            "Homo sapiens"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            9606
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "Eukaryotic translation initiation factor 6",
+        "entity_poly_strand_id": "SK",
+        "entity_poly_seq_one_letter_code": "MAVRASFENNCEIGCFAKLTNTYCLVAIGGSENFYSVFEGELSDTIPVVHASIAGCRIIGRMCVGNRHGLLVPNNTTDQELQHIRNSLPDTVQIRRVEERLSALGNVTTCNDYVALVHPDLDRETEEILADVLKVEVFRQTVADQVLVGSYCVFSNQGGLVHPKTSIEDQDELSSLLQVPLVAGTVNRGSEVIAAGMVVNDWCAFCGLDTTSTELSVVESVFKLNEAQPSTIATSMRDSLIDSLT",
+        "entity_poly_seq_one_letter_code_can": "MAVRASFENNCEIGCFAKLTNTYCLVAIGGSENFYSVFEGELSDTIPVVHASIAGCRIIGRMCVGNRHGLLVPNNTTDQELQHIRNSLPDTVQIRRVEERLSALGNVTTCNDYVALVHPDLDRETEEILADVLKVEVFRQTVADQVLVGSYCVFSNQGGLVHPKTSIEDQDELSSLLQVPLVAGTVNRGSEVIAAGMVVNDWCAFCGLDTTSTELSVVESVFKLNEAQPSTIATSMRDSLIDSLT",
+        "entity_poly_seq_length": 245,
+        "entity_poly_polymer_type": "Protein",
+        "entity_poly_entity_type": "polypeptide(L)",
+        "nomenclature": [
+            "Initiation Factor"
+        ]
+    },
+    "8FLC": {
+        "assembly_id": 0,
+        "asym_ids": [
+            "TA"
+        ],
+        "auth_asym_id": "SK",
+        "parent_rcsb_id": "8FLC",
+        "src_organism_names": [
+            "Homo sapiens"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            9606
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "Eukaryotic translation initiation factor 6",
+        "entity_poly_strand_id": "SK",
+        "entity_poly_seq_one_letter_code": "MAVRASFENNCEIGCFAKLTNTYCLVAIGGSENFYSVFEGELSDTIPVVHASIAGCRIIGRMCVGNRHGLLVPNNTTDQELQHIRNSLPDTVQIRRVEERLSALGNVTTCNDYVALVHPDLDRETEEILADVLKVEVFRQTVADQVLVGSYCVFSNQGGLVHPKTSIEDQDELSSLLQVPLVAGTVNRGSEVIAAGMVVNDWCAFCGLDTTSTELSVVESVFKLNEAQPSTIATSMRDSLIDSLT",
+        "entity_poly_seq_one_letter_code_can": "MAVRASFENNCEIGCFAKLTNTYCLVAIGGSENFYSVFEGELSDTIPVVHASIAGCRIIGRMCVGNRHGLLVPNNTTDQELQHIRNSLPDTVQIRRVEERLSALGNVTTCNDYVALVHPDLDRETEEILADVLKVEVFRQTVADQVLVGSYCVFSNQGGLVHPKTSIEDQDELSSLLQVPLVAGTVNRGSEVIAAGMVVNDWCAFCGLDTTSTELSVVESVFKLNEAQPSTIATSMRDSLIDSLT",
+        "entity_poly_seq_length": 245,
+        "entity_poly_polymer_type": "Protein",
+        "entity_poly_entity_type": "polypeptide(L)",
+        "nomenclature": [
+            "Initiation Factor"
+        ]
+    },
+    "8FLD": {
+        "assembly_id": 0,
+        "asym_ids": [
+            "WA"
+        ],
+        "auth_asym_id": "SK",
+        "parent_rcsb_id": "8FLD",
+        "src_organism_names": [
+            "Homo sapiens"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            9606
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "Eukaryotic translation initiation factor 6",
+        "entity_poly_strand_id": "SK",
+        "entity_poly_seq_one_letter_code": "MAVRASFENNCEIGCFAKLTNTYCLVAIGGSENFYSVFEGELSDTIPVVHASIAGCRIIGRMCVGNRHGLLVPNNTTDQELQHIRNSLPDTVQIRRVEERLSALGNVTTCNDYVALVHPDLDRETEEILADVLKVEVFRQTVADQVLVGSYCVFSNQGGLVHPKTSIEDQDELSSLLQVPLVAGTVNRGSEVIAAGMVVNDWCAFCGLDTTSTELSVVESVFKLNEAQPSTIATSMRDSLIDSLT",
+        "entity_poly_seq_one_letter_code_can": "MAVRASFENNCEIGCFAKLTNTYCLVAIGGSENFYSVFEGELSDTIPVVHASIAGCRIIGRMCVGNRHGLLVPNNTTDQELQHIRNSLPDTVQIRRVEERLSALGNVTTCNDYVALVHPDLDRETEEILADVLKVEVFRQTVADQVLVGSYCVFSNQGGLVHPKTSIEDQDELSSLLQVPLVAGTVNRGSEVIAAGMVVNDWCAFCGLDTTSTELSVVESVFKLNEAQPSTIATSMRDSLIDSLT",
+        "entity_poly_seq_length": 245,
+        "entity_poly_polymer_type": "Protein",
+        "entity_poly_entity_type": "polypeptide(L)",
+        "nomenclature": [
+            "Initiation Factor"
+        ]
+    },
+    "8FLE": {
+        "assembly_id": 0,
+        "asym_ids": [
+            "VA"
+        ],
+        "auth_asym_id": "SK",
+        "parent_rcsb_id": "8FLE",
+        "src_organism_names": [
+            "Homo sapiens"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            9606
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "Eukaryotic translation initiation factor 6",
+        "entity_poly_strand_id": "SK",
+        "entity_poly_seq_one_letter_code": "MAVRASFENNCEIGCFAKLTNTYCLVAIGGSENFYSVFEGELSDTIPVVHASIAGCRIIGRMCVGNRHGLLVPNNTTDQELQHIRNSLPDTVQIRRVEERLSALGNVTTCNDYVALVHPDLDRETEEILADVLKVEVFRQTVADQVLVGSYCVFSNQGGLVHPKTSIEDQDELSSLLQVPLVAGTVNRGSEVIAAGMVVNDWCAFCGLDTTSTELSVVESVFKLNEAQPSTIATSMRDSLIDSLT",
+        "entity_poly_seq_one_letter_code_can": "MAVRASFENNCEIGCFAKLTNTYCLVAIGGSENFYSVFEGELSDTIPVVHASIAGCRIIGRMCVGNRHGLLVPNNTTDQELQHIRNSLPDTVQIRRVEERLSALGNVTTCNDYVALVHPDLDRETEEILADVLKVEVFRQTVADQVLVGSYCVFSNQGGLVHPKTSIEDQDELSSLLQVPLVAGTVNRGSEVIAAGMVVNDWCAFCGLDTTSTELSVVESVFKLNEAQPSTIATSMRDSLIDSLT",
+        "entity_poly_seq_length": 245,
+        "entity_poly_polymer_type": "Protein",
+        "entity_poly_entity_type": "polypeptide(L)",
+        "nomenclature": [
+            "Initiation Factor"
+        ]
+    },
+    "8FLF": {
+        "assembly_id": 0,
+        "asym_ids": [
+            "SA"
+        ],
+        "auth_asym_id": "SK",
+        "parent_rcsb_id": "8FLF",
+        "src_organism_names": [
+            "Homo sapiens"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            9606
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "Eukaryotic translation initiation factor 6",
+        "entity_poly_strand_id": "SK",
+        "entity_poly_seq_one_letter_code": "MAVRASFENNCEIGCFAKLTNTYCLVAIGGSENFYSVFEGELSDTIPVVHASIAGCRIIGRMCVGNRHGLLVPNNTTDQELQHIRNSLPDTVQIRRVEERLSALGNVTTCNDYVALVHPDLDRETEEILADVLKVEVFRQTVADQVLVGSYCVFSNQGGLVHPKTSIEDQDELSSLLQVPLVAGTVNRGSEVIAAGMVVNDWCAFCGLDTTSTELSVVESVFKLNEAQPSTIATSMRDSLIDSLT",
+        "entity_poly_seq_one_letter_code_can": "MAVRASFENNCEIGCFAKLTNTYCLVAIGGSENFYSVFEGELSDTIPVVHASIAGCRIIGRMCVGNRHGLLVPNNTTDQELQHIRNSLPDTVQIRRVEERLSALGNVTTCNDYVALVHPDLDRETEEILADVLKVEVFRQTVADQVLVGSYCVFSNQGGLVHPKTSIEDQDELSSLLQVPLVAGTVNRGSEVIAAGMVVNDWCAFCGLDTTSTELSVVESVFKLNEAQPSTIATSMRDSLIDSLT",
+        "entity_poly_seq_length": 245,
+        "entity_poly_polymer_type": "Protein",
+        "entity_poly_entity_type": "polypeptide(L)",
+        "nomenclature": [
+            "Initiation Factor"
+        ]
+    },
+    "8G5Z": {
+        "assembly_id": 0,
+        "asym_ids": [
+            "IC"
+        ],
+        "auth_asym_id": "EF",
+        "parent_rcsb_id": "8G5Z",
+        "src_organism_names": [
+            "Homo sapiens"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            9606
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "Elongation factor 1-alpha 1",
+        "entity_poly_strand_id": "EF",
+        "entity_poly_seq_one_letter_code": "EKTHINIVVIGHVDSGKSTTTGHLIYKCGGID(M3L)RTIEKFEKEAAEMGKGSF(MLY)YAWVLDKLKAERERGITIDISLW(M3L)FETSKYYVTIIDAPGHRDFIKNMITGTSQADCAVLIVAAGVGEFEAGISKNGQTREHALLAYTLGVKQLIVGVNKMDSTEPPYSQKRYEEIVKEVSTYIKKIGYNPDTVAFVPISGWNGDNMLEPSANMPWFKGWKVTRKDGNASGTTLLEALDCILPPTRPTDKPLRLPLQDVYKIGGIGTVPVGRVETGVLKPGMVVTFAPVNVTTEVKSVEMHHEALSEALPGDNVGFNVKNVSV(M3L)DVRRGNVAGDSKNDPPMEAAGFTAQVIILNHPGQISAGYAPVLDCHTAHIACKFAELKEKIDRRSGKKLEDGPKFLKSGDAAIVDMVPGKPMCVESFSDYPPLGRFAVRDMRQTVAVGVIKAVDKKAAG",
+        "entity_poly_seq_one_letter_code_can": "EKTHINIVVIGHVDSGKSTTTGHLIYKCGGIDKRTIEKFEKEAAEMGKGSFKYAWVLDKLKAERERGITIDISLWKFETSKYYVTIIDAPGHRDFIKNMITGTSQADCAVLIVAAGVGEFEAGISKNGQTREHALLAYTLGVKQLIVGVNKMDSTEPPYSQKRYEEIVKEVSTYIKKIGYNPDTVAFVPISGWNGDNMLEPSANMPWFKGWKVTRKDGNASGTTLLEALDCILPPTRPTDKPLRLPLQDVYKIGGIGTVPVGRVETGVLKPGMVVTFAPVNVTTEVKSVEMHHEALSEALPGDNVGFNVKNVSVKDVRRGNVAGDSKNDPPMEAAGFTAQVIILNHPGQISAGYAPVLDCHTAHIACKFAELKEKIDRRSGKKLEDGPKFLKSGDAAIVDMVPGKPMCVESFSDYPPLGRFAVRDMRQTVAVGVIKAVDKKAAG",
+        "entity_poly_seq_length": 444,
+        "entity_poly_polymer_type": "Protein",
+        "entity_poly_entity_type": "polypeptide(L)",
+        "nomenclature": [
+            "Elongation Factor"
+        ]
+    },
+    "8G6J": {
+        "assembly_id": 0,
+        "asym_ids": [
+            "HC"
+        ],
+        "auth_asym_id": "EF",
+        "parent_rcsb_id": "8G6J",
+        "src_organism_names": [
+            "Homo sapiens"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            9606
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "Elongation factor 1-alpha 1",
+        "entity_poly_strand_id": "EF",
+        "entity_poly_seq_one_letter_code": "MGKEKTHINIVVIGHVDSGKSTTTGHLIYKCGGID(M3L)RTIEKFEKEAAEMGKGSF(MLY)YAWVLDKLKAERERGITIDISLW(M3L)FETSKYYVTIIDAPGHRDFIKNMITGTSQADCAVLIVAAGVGEFEAGISKNGQTREHALLAYTLGVKQLIVGVNKMDSTEPPYSQKRYEEIVKEVSTYIKKIGYNPDTVAFVPISGWNGDNMLEPSANMPWFKGWKVTRKDGNASGTTLLEALDCILPPTRPTDKPLRLPLQDVYKIGGIGTVPVGRVETGVLKPGMVVTFAPVNVTTEVKSVEMHHEALSEALPGDNVGFNVKNVSV(M3L)DVRRGNVAGDSKNDPPMEAAGFTAQVIILNHPGQISAGYAPVLDCHTAHIACKFAELKEKIDRRSGKKLEDGPKFLKSGDAAIVDMVPGKPMCVESFSDYPPLGRFAVRDMRQTVAVGVIKAVDKKAAGAGKVTKSAQKAQKAK",
+        "entity_poly_seq_one_letter_code_can": "MGKEKTHINIVVIGHVDSGKSTTTGHLIYKCGGIDKRTIEKFEKEAAEMGKGSFKYAWVLDKLKAERERGITIDISLWKFETSKYYVTIIDAPGHRDFIKNMITGTSQADCAVLIVAAGVGEFEAGISKNGQTREHALLAYTLGVKQLIVGVNKMDSTEPPYSQKRYEEIVKEVSTYIKKIGYNPDTVAFVPISGWNGDNMLEPSANMPWFKGWKVTRKDGNASGTTLLEALDCILPPTRPTDKPLRLPLQDVYKIGGIGTVPVGRVETGVLKPGMVVTFAPVNVTTEVKSVEMHHEALSEALPGDNVGFNVKNVSVKDVRRGNVAGDSKNDPPMEAAGFTAQVIILNHPGQISAGYAPVLDCHTAHIACKFAELKEKIDRRSGKKLEDGPKFLKSGDAAIVDMVPGKPMCVESFSDYPPLGRFAVRDMRQTVAVGVIKAVDKKAAGAGKVTKSAQKAQKAK",
+        "entity_poly_seq_length": 462,
+        "entity_poly_polymer_type": "Protein",
+        "entity_poly_entity_type": "polypeptide(L)",
+        "nomenclature": [
+            "Elongation Factor"
+        ]
+    },
+    "8HFR": {
+        "assembly_id": 0,
+        "asym_ids": [
+            "N"
+        ],
+        "auth_asym_id": "yE",
+        "parent_rcsb_id": "8HFR",
+        "src_organism_names": [
+            "Saccharomyces cerevisiae S288C"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            559292
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "Eukaryotic translation initiation factor 6",
+        "entity_poly_strand_id": "yE",
+        "entity_poly_seq_one_letter_code": "MATRTQFENSNEIGVFSKLTNTYCLVAVGGSENFYSAFEAELGDAIPIVHTTIAGTRIIGRMTAGNRRGLLVPTQTTDQELQHLRNSLPDSVKIQRVEERLSALGNVICCNDYVALVHPDIDRETEELISDVLGVEVFRQTISGNILVGSYCSLSNQGGLVHPQTSVQDQEELSSLLQVPLVAGTVNRGSSVVGAGMVVNDYLAVTGLDTTAPELSVIESIFRLQDAQPESISGNLRDTLIETYS",
+        "entity_poly_seq_one_letter_code_can": "MATRTQFENSNEIGVFSKLTNTYCLVAVGGSENFYSAFEAELGDAIPIVHTTIAGTRIIGRMTAGNRRGLLVPTQTTDQELQHLRNSLPDSVKIQRVEERLSALGNVICCNDYVALVHPDIDRETEELISDVLGVEVFRQTISGNILVGSYCSLSNQGGLVHPQTSVQDQEELSSLLQVPLVAGTVNRGSSVVGAGMVVNDYLAVTGLDTTAPELSVIESIFRLQDAQPESISGNLRDTLIETYS",
+        "entity_poly_seq_length": 245,
+        "entity_poly_polymer_type": "Protein",
+        "entity_poly_entity_type": "polypeptide(L)",
+        "nomenclature": [
+            "Initiation Factor"
+        ]
+    },
+    "8HKU": {
+        "assembly_id": 0,
+        "asym_ids": [
+            "LA"
+        ],
+        "auth_asym_id": "ARF1",
+        "parent_rcsb_id": "8HKU",
+        "src_organism_names": [
+            "Sulfolobus acidocaldarius DSM 639"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            330779
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "Peptide chain release factor subunit 1",
+        "entity_poly_strand_id": "ARF1",
+        "entity_poly_seq_one_letter_code": "EVFGLVIVERDYATIGVLKGTKVEVLDEFEGFVPGKHMMGGQSQRRIERIIEEMYHNFLKEVGEKVNQYFLPYIEMKKMKGILIGGPGFAKKDLYESDLLDYRVKKLVLQPLFDIPDQGEPGLKELIMKAQDILKNQKYIEVENLMEEIKYHLAKDDGMVVYGLEEIRKALQLGAIDALIVYEEPGSELEKLSQEAENYGTKVYVIGDELPDGEWVKKTFGGAIGKLRFKIY",
+        "entity_poly_seq_one_letter_code_can": "EVFGLVIVERDYATIGVLKGTKVEVLDEFEGFVPGKHMMGGQSQRRIERIIEEMYHNFLKEVGEKVNQYFLPYIEMKKMKGILIGGPGFAKKDLYESDLLDYRVKKLVLQPLFDIPDQGEPGLKELIMKAQDILKNQKYIEVENLMEEIKYHLAKDDGMVVYGLEEIRKALQLGAIDALIVYEEPGSELEKLSQEAENYGTKVYVIGDELPDGEWVKKTFGGAIGKLRFKIY",
+        "entity_poly_seq_length": 232,
+        "entity_poly_polymer_type": "Protein",
+        "entity_poly_entity_type": "polypeptide(L)",
+        "nomenclature": [
+            "Release Factor"
+        ]
+    },
+    "8HL2": {
+        "assembly_id": 0,
+        "asym_ids": [
+            "C"
+        ],
+        "auth_asym_id": "AEFG",
+        "parent_rcsb_id": "8HL2",
+        "src_organism_names": [
+            "Sulfolobus acidocaldarius DSM 639"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            330779
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "Elongation factor 2",
+        "entity_poly_strand_id": "AEFG",
+        "entity_poly_seq_one_letter_code": "VEQVLSLMKDVTRVRNIGIIAHVDHGKTTTSDTLLAASGIISQKVAGEALALDYLSVEQQRGITVKAANISLYHEIDGKGYVINLIDTPGHVDFSGRVTRSLRVLDGSIVVIDAVEGIMTQTETVLRQSLEERVRPILFINKVDRLIKELKLSSQEIQKRLIDLIIEVNNLIETYGEPEFKDQWKIKPELGNVVFGSAKDKWGFSVPMAGKRGVKFSDVVNAYTSGDKAKIEELASKVPIHEALLDAVIKFVPNPRDSQKYRIPKIWKGDLDSEIAKAMINADPNGPIVMMINDMKVDPHAGLVATGRVFSGTLRAGEEVWLVNAKRQQRILQVSLYMGAIRELAEEIPVGNIAAALGMDAARSGETGVDIRFKDSVLGSFEKLHYISEPVVTISVEPRNPKDLTKMIDALRKLSIEDSNLVVKINEETGEYLLSGMGFLHLEVSLQLLKENYGLDVVTTPPIVVYRESIRNKSQVFEGKSPNKHNKLYISVEPLNNQTIDLIANGTIKEDMDNKEMAKILRDQAEWDYDEAKKIVAIDENINVFIDATSGVQHLREIMDTLLQGFRLAMKEGPLAFEPVRGVKVVLHDAVVHEDPAHRGPAQLYPAVRNAIFAGILTSKPTLLEPLQKLDIRIPMEYLGNVTAVITRKRGKVINVVQTGNVARVYAEIPVGESFELASELRASSAGRAFWGTEFSRWAPVPDSILVDLIMKIRERKGKPKQLPKVEDF",
+        "entity_poly_seq_one_letter_code_can": "VEQVLSLMKDVTRVRNIGIIAHVDHGKTTTSDTLLAASGIISQKVAGEALALDYLSVEQQRGITVKAANISLYHEIDGKGYVINLIDTPGHVDFSGRVTRSLRVLDGSIVVIDAVEGIMTQTETVLRQSLEERVRPILFINKVDRLIKELKLSSQEIQKRLIDLIIEVNNLIETYGEPEFKDQWKIKPELGNVVFGSAKDKWGFSVPMAGKRGVKFSDVVNAYTSGDKAKIEELASKVPIHEALLDAVIKFVPNPRDSQKYRIPKIWKGDLDSEIAKAMINADPNGPIVMMINDMKVDPHAGLVATGRVFSGTLRAGEEVWLVNAKRQQRILQVSLYMGAIRELAEEIPVGNIAAALGMDAARSGETGVDIRFKDSVLGSFEKLHYISEPVVTISVEPRNPKDLTKMIDALRKLSIEDSNLVVKINEETGEYLLSGMGFLHLEVSLQLLKENYGLDVVTTPPIVVYRESIRNKSQVFEGKSPNKHNKLYISVEPLNNQTIDLIANGTIKEDMDNKEMAKILRDQAEWDYDEAKKIVAIDENINVFIDATSGVQHLREIMDTLLQGFRLAMKEGPLAFEPVRGVKVVLHDAVVHEDPAHRGPAQLYPAVRNAIFAGILTSKPTLLEPLQKLDIRIPMEYLGNVTAVITRKRGKVINVVQTGNVARVYAEIPVGESFELASELRASSAGRAFWGTEFSRWAPVPDSILVDLIMKIRERKGKPKQLPKVEDF",
+        "entity_poly_seq_length": 729,
+        "entity_poly_polymer_type": "Protein",
+        "entity_poly_entity_type": "polypeptide(L)",
+        "nomenclature": [
+            "Elongation Factor"
+        ]
+    },
+    "8HL3": {
+        "assembly_id": 0,
+        "asym_ids": [
+            "C"
+        ],
+        "auth_asym_id": "AEFG",
+        "parent_rcsb_id": "8HL3",
+        "src_organism_names": [
+            "Sulfolobus acidocaldarius DSM 639"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            330779
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "Elongation factor 2",
+        "entity_poly_strand_id": "AEFG",
+        "entity_poly_seq_one_letter_code": "VEQVLSLMKDVTRVRNIGIIAHVDHGKTTTSDTLLAASGIISQKVAGEALALDYLSVEQQRGITVKAANISLYHEIDGKGYVINLIDTPGHVDFSGRVTRSLRVLDGSIVVIDAVEGIMTQTETVLRQSLEERVRPILFINKVDRLIKELKLSSQEIQKRLIDLIIEVNNLIETYGEPEFKDQWKIKPELGNVVFGSAKDKWGFSVPMAGKRGVKFSDVVNAYTSGDKAKIEELASKVPIHEALLDAVIKFVPNPRDSQKYRIPKIWKGDLDSEIAKAMINADPNGPIVMMINDMKVDPHAGLVATGRVFSGTLRAGEEVWLVNAKRQQRILQVSLYMGAIRELAEEIPVGNIAAALGMDAARSGETGVDIRFKDSVLGSFEKLHYISEPVVTISVEPRNPKDLTKMIDALRKLSIEDSNLVVKINEETGEYLLSGMGFLHLEVSLQLLKENYGLDVVTTPPIVVYRESIRNKSQVFEGKSPNKHNKLYISVEPLNNQTIDLIANGTIKEDMDNKEMAKILRDQAEWDYDEAKKIVAIDENINVFIDATSGVQHLREIMDTLLQGFRLAMKEGPLAFEPVRGVKVVLHDAVVHEDPAHRGPAQLYPAVRNAIFAGILTSKPTLLEPLQKLDIRIPMEYLGNVTAVITRKRGKVINVVQTGNVARVYAEIPVGESFELASELRASSAGRAFWGTEFSRWAPVPDSILVDLIMKIRERKGKPKQLPKVEDF",
+        "entity_poly_seq_one_letter_code_can": "VEQVLSLMKDVTRVRNIGIIAHVDHGKTTTSDTLLAASGIISQKVAGEALALDYLSVEQQRGITVKAANISLYHEIDGKGYVINLIDTPGHVDFSGRVTRSLRVLDGSIVVIDAVEGIMTQTETVLRQSLEERVRPILFINKVDRLIKELKLSSQEIQKRLIDLIIEVNNLIETYGEPEFKDQWKIKPELGNVVFGSAKDKWGFSVPMAGKRGVKFSDVVNAYTSGDKAKIEELASKVPIHEALLDAVIKFVPNPRDSQKYRIPKIWKGDLDSEIAKAMINADPNGPIVMMINDMKVDPHAGLVATGRVFSGTLRAGEEVWLVNAKRQQRILQVSLYMGAIRELAEEIPVGNIAAALGMDAARSGETGVDIRFKDSVLGSFEKLHYISEPVVTISVEPRNPKDLTKMIDALRKLSIEDSNLVVKINEETGEYLLSGMGFLHLEVSLQLLKENYGLDVVTTPPIVVYRESIRNKSQVFEGKSPNKHNKLYISVEPLNNQTIDLIANGTIKEDMDNKEMAKILRDQAEWDYDEAKKIVAIDENINVFIDATSGVQHLREIMDTLLQGFRLAMKEGPLAFEPVRGVKVVLHDAVVHEDPAHRGPAQLYPAVRNAIFAGILTSKPTLLEPLQKLDIRIPMEYLGNVTAVITRKRGKVINVVQTGNVARVYAEIPVGESFELASELRASSAGRAFWGTEFSRWAPVPDSILVDLIMKIRERKGKPKQLPKVEDF",
+        "entity_poly_seq_length": 729,
+        "entity_poly_polymer_type": "Protein",
+        "entity_poly_entity_type": "polypeptide(L)",
+        "nomenclature": [
+            "Elongation Factor"
+        ]
+    },
+    "8I9R": {
+        "assembly_id": 0,
+        "asym_ids": [
+            "K"
+        ],
+        "auth_asym_id": "CN",
+        "parent_rcsb_id": "8I9R",
+        "src_organism_names": [
+            "Chaetomium thermophilum"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            759272
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "Eukaryotic translation initiation factor 6",
+        "entity_poly_strand_id": "CN",
+        "entity_poly_seq_one_letter_code": "MAVRAQFENSNEVGVFATLTNSYCLVALGASENFYSVFEAELQDVIPICRTTIAGTRIIGRLTAGNRKGLLVPTTTTDQELQHLRNSLPDDIRIQRIEERLSALGNVIVCNDHTALIHPDLERETEEIIADVLGVEVFRQTIADHVLVGSYMALSNQGGLVHPKTSIQDQDELSSLLGVPLVAGSVNRGSNVIGGGMVVNDWLAVTGLDTTAPELSVIESVFRLGEGAGPGAINTSMKNTIVESFY",
+        "entity_poly_seq_one_letter_code_can": "MAVRAQFENSNEVGVFATLTNSYCLVALGASENFYSVFEAELQDVIPICRTTIAGTRIIGRLTAGNRKGLLVPTTTTDQELQHLRNSLPDDIRIQRIEERLSALGNVIVCNDHTALIHPDLERETEEIIADVLGVEVFRQTIADHVLVGSYMALSNQGGLVHPKTSIQDQDELSSLLGVPLVAGSVNRGSNVIGGGMVVNDWLAVTGLDTTAPELSVIESVFRLGEGAGPGAINTSMKNTIVESFY",
+        "entity_poly_seq_length": 246,
+        "entity_poly_polymer_type": "Protein",
+        "entity_poly_entity_type": "polypeptide(L)",
+        "nomenclature": [
+            "Initiation Factor"
+        ]
+    },
+    "8I9T": {
+        "assembly_id": 0,
+        "asym_ids": [
+            "P"
+        ],
+        "auth_asym_id": "CN",
+        "parent_rcsb_id": "8I9T",
+        "src_organism_names": [
+            "Chaetomium thermophilum"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            759272
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "Eukaryotic translation initiation factor 6",
+        "entity_poly_strand_id": "CN",
+        "entity_poly_seq_one_letter_code": "MAVRAQFENSNEVGVFATLTNSYCLVALGASENFYSVFEAELQDVIPICRTTIAGTRIIGRLTAGNRKGLLVPTTTTDQELQHLRNSLPDDIRIQRIEERLSALGNVIVCNDHTALIHPDLERETEEIIADVLGVEVFRQTIADHVLVGSYMALSNQGGLVHPKTSIQDQDELSSLLGVPLVAGSVNRGSNVIGGGMVVNDWLAVTGLDTTAPELSVIESVFRLGEGAGPGAINTSMKNTIVESFY",
+        "entity_poly_seq_one_letter_code_can": "MAVRAQFENSNEVGVFATLTNSYCLVALGASENFYSVFEAELQDVIPICRTTIAGTRIIGRLTAGNRKGLLVPTTTTDQELQHLRNSLPDDIRIQRIEERLSALGNVIVCNDHTALIHPDLERETEEIIADVLGVEVFRQTIADHVLVGSYMALSNQGGLVHPKTSIQDQDELSSLLGVPLVAGSVNRGSNVIGGGMVVNDWLAVTGLDTTAPELSVIESVFRLGEGAGPGAINTSMKNTIVESFY",
+        "entity_poly_seq_length": 246,
+        "entity_poly_polymer_type": "Protein",
+        "entity_poly_entity_type": "polypeptide(L)",
+        "nomenclature": [
+            "Initiation Factor"
+        ]
+    },
+    "8I9V": {
+        "assembly_id": 0,
+        "asym_ids": [
+            "P"
+        ],
+        "auth_asym_id": "CN",
+        "parent_rcsb_id": "8I9V",
+        "src_organism_names": [
+            "Chaetomium thermophilum"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            759272
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "Eukaryotic translation initiation factor 6",
+        "entity_poly_strand_id": "CN",
+        "entity_poly_seq_one_letter_code": "MAVRAQFENSNEVGVFATLTNSYCLVALGASENFYSVFEAELQDVIPICRTTIAGTRIIGRLTAGNRKGLLVPTTTTDQELQHLRNSLPDDIRIQRIEERLSALGNVIVCNDHTALIHPDLERETEEIIADVLGVEVFRQTIADHVLVGSYMALSNQGGLVHPKTSIQDQDELSSLLGVPLVAGSVNRGSNVIGGGMVVNDWLAVTGLDTTAPELSVIESVFRLGEGAGPGAINTSMKNTIVESFY",
+        "entity_poly_seq_one_letter_code_can": "MAVRAQFENSNEVGVFATLTNSYCLVALGASENFYSVFEAELQDVIPICRTTIAGTRIIGRLTAGNRKGLLVPTTTTDQELQHLRNSLPDDIRIQRIEERLSALGNVIVCNDHTALIHPDLERETEEIIADVLGVEVFRQTIADHVLVGSYMALSNQGGLVHPKTSIQDQDELSSLLGVPLVAGSVNRGSNVIGGGMVVNDWLAVTGLDTTAPELSVIESVFRLGEGAGPGAINTSMKNTIVESFY",
+        "entity_poly_seq_length": 246,
+        "entity_poly_polymer_type": "Protein",
+        "entity_poly_entity_type": "polypeptide(L)",
+        "nomenclature": [
+            "Initiation Factor"
+        ]
+    },
+    "8I9W": {
+        "assembly_id": 0,
+        "asym_ids": [
+            "O"
+        ],
+        "auth_asym_id": "CN",
+        "parent_rcsb_id": "8I9W",
+        "src_organism_names": [
+            "Chaetomium thermophilum"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            759272
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "Eukaryotic translation initiation factor 6",
+        "entity_poly_strand_id": "CN",
+        "entity_poly_seq_one_letter_code": "MAVRAQFENSNEVGVFATLTNSYCLVALGASENFYSVFEAELQDVIPICRTTIAGTRIIGRLTAGNRKGLLVPTTTTDQELQHLRNSLPDDIRIQRIEERLSALGNVIVCNDHTALIHPDLERETEEIIADVLGVEVFRQTIADHVLVGSYMALSNQGGLVHPKTSIQDQDELSSLLGVPLVAGSVNRGSNVIGGGMVVNDWLAVTGLDTTAPELSVIESVFRLGEGAGPGAINTSMKNTIVESFY",
+        "entity_poly_seq_one_letter_code_can": "MAVRAQFENSNEVGVFATLTNSYCLVALGASENFYSVFEAELQDVIPICRTTIAGTRIIGRLTAGNRKGLLVPTTTTDQELQHLRNSLPDDIRIQRIEERLSALGNVIVCNDHTALIHPDLERETEEIIADVLGVEVFRQTIADHVLVGSYMALSNQGGLVHPKTSIQDQDELSSLLGVPLVAGSVNRGSNVIGGGMVVNDWLAVTGLDTTAPELSVIESVFRLGEGAGPGAINTSMKNTIVESFY",
+        "entity_poly_seq_length": 246,
+        "entity_poly_polymer_type": "Protein",
+        "entity_poly_entity_type": "polypeptide(L)",
+        "nomenclature": [
+            "Initiation Factor"
+        ]
+    },
+    "8I9X": {
+        "assembly_id": 0,
+        "asym_ids": [
+            "P"
+        ],
+        "auth_asym_id": "CN",
+        "parent_rcsb_id": "8I9X",
+        "src_organism_names": [
+            "Chaetomium thermophilum"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            759272
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "Eukaryotic translation initiation factor 6",
+        "entity_poly_strand_id": "CN",
+        "entity_poly_seq_one_letter_code": "MAVRAQFENSNEVGVFATLTNSYCLVALGASENFYSVFEAELQDVIPICRTTIAGTRIIGRLTAGNRKGLLVPTTTTDQELQHLRNSLPDDIRIQRIEERLSALGNVIVCNDHTALIHPDLERETEEIIADVLGVEVFRQTIADHVLVGSYMALSNQGGLVHPKTSIQDQDELSSLLGVPLVAGSVNRGSNVIGGGMVVNDWLAVTGLDTTAPELSVIESVFRLGEGAGPGAINTSMKNTIVESFY",
+        "entity_poly_seq_one_letter_code_can": "MAVRAQFENSNEVGVFATLTNSYCLVALGASENFYSVFEAELQDVIPICRTTIAGTRIIGRLTAGNRKGLLVPTTTTDQELQHLRNSLPDDIRIQRIEERLSALGNVIVCNDHTALIHPDLERETEEIIADVLGVEVFRQTIADHVLVGSYMALSNQGGLVHPKTSIQDQDELSSLLGVPLVAGSVNRGSNVIGGGMVVNDWLAVTGLDTTAPELSVIESVFRLGEGAGPGAINTSMKNTIVESFY",
+        "entity_poly_seq_length": 246,
+        "entity_poly_polymer_type": "Protein",
+        "entity_poly_entity_type": "polypeptide(L)",
+        "nomenclature": [
+            "Initiation Factor"
+        ]
+    },
+    "8I9Y": {
+        "assembly_id": 0,
+        "asym_ids": [
+            "P"
+        ],
+        "auth_asym_id": "CN",
+        "parent_rcsb_id": "8I9Y",
+        "src_organism_names": [
+            "Chaetomium thermophilum"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            759272
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "Eukaryotic translation initiation factor 6",
+        "entity_poly_strand_id": "CN",
+        "entity_poly_seq_one_letter_code": "MAVRAQFENSNEVGVFATLTNSYCLVALGASENFYSVFEAELQDVIPICRTTIAGTRIIGRLTAGNRKGLLVPTTTTDQELQHLRNSLPDDIRIQRIEERLSALGNVIVCNDHTALIHPDLERETEEIIADVLGVEVFRQTIADHVLVGSYMALSNQGGLVHPKTSIQDQDELSSLLGVPLVAGSVNRGSNVIGGGMVVNDWLAVTGLDTTAPELSVIESVFRLGEGAGPGAINTSMKNTIVESFY",
+        "entity_poly_seq_one_letter_code_can": "MAVRAQFENSNEVGVFATLTNSYCLVALGASENFYSVFEAELQDVIPICRTTIAGTRIIGRLTAGNRKGLLVPTTTTDQELQHLRNSLPDDIRIQRIEERLSALGNVIVCNDHTALIHPDLERETEEIIADVLGVEVFRQTIADHVLVGSYMALSNQGGLVHPKTSIQDQDELSSLLGVPLVAGSVNRGSNVIGGGMVVNDWLAVTGLDTTAPELSVIESVFRLGEGAGPGAINTSMKNTIVESFY",
+        "entity_poly_seq_length": 246,
+        "entity_poly_polymer_type": "Protein",
+        "entity_poly_entity_type": "polypeptide(L)",
+        "nomenclature": [
+            "Initiation Factor"
+        ]
+    },
+    "8I9Z": {
+        "assembly_id": 0,
+        "asym_ids": [
+            "P"
+        ],
+        "auth_asym_id": "CN",
+        "parent_rcsb_id": "8I9Z",
+        "src_organism_names": [
+            "Chaetomium thermophilum"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            759272
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "Eukaryotic translation initiation factor 6",
+        "entity_poly_strand_id": "CN",
+        "entity_poly_seq_one_letter_code": "MAVRAQFENSNEVGVFATLTNSYCLVALGASENFYSVFEAELQDVIPICRTTIAGTRIIGRLTAGNRKGLLVPTTTTDQELQHLRNSLPDDIRIQRIEERLSALGNVIVCNDHTALIHPDLERETEEIIADVLGVEVFRQTIADHVLVGSYMALSNQGGLVHPKTSIQDQDELSSLLGVPLVAGSVNRGSNVIGGGMVVNDWLAVTGLDTTAPELSVIESVFRLGEGAGPGAINTSMKNTIVESFY",
+        "entity_poly_seq_one_letter_code_can": "MAVRAQFENSNEVGVFATLTNSYCLVALGASENFYSVFEAELQDVIPICRTTIAGTRIIGRLTAGNRKGLLVPTTTTDQELQHLRNSLPDDIRIQRIEERLSALGNVIVCNDHTALIHPDLERETEEIIADVLGVEVFRQTIADHVLVGSYMALSNQGGLVHPKTSIQDQDELSSLLGVPLVAGSVNRGSNVIGGGMVVNDWLAVTGLDTTAPELSVIESVFRLGEGAGPGAINTSMKNTIVESFY",
+        "entity_poly_seq_length": 246,
+        "entity_poly_polymer_type": "Protein",
+        "entity_poly_entity_type": "polypeptide(L)",
+        "nomenclature": [
+            "Initiation Factor"
+        ]
+    },
+    "8IA0": {
+        "assembly_id": 0,
+        "asym_ids": [
+            "P"
+        ],
+        "auth_asym_id": "CN",
+        "parent_rcsb_id": "8IA0",
+        "src_organism_names": [
+            "Chaetomium thermophilum"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            759272
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "Eukaryotic translation initiation factor 6",
+        "entity_poly_strand_id": "CN",
+        "entity_poly_seq_one_letter_code": "MAVRAQFENSNEVGVFATLTNSYCLVALGASENFYSVFEAELQDVIPICRTTIAGTRIIGRLTAGNRKGLLVPTTTTDQELQHLRNSLPDDIRIQRIEERLSALGNVIVCNDHTALIHPDLERETEEIIADVLGVEVFRQTIADHVLVGSYMALSNQGGLVHPKTSIQDQDELSSLLGVPLVAGSVNRGSNVIGGGMVVNDWLAVTGLDTTAPELSVIESVFRLGEGAGPGAINTSMKNTIVESFY",
+        "entity_poly_seq_one_letter_code_can": "MAVRAQFENSNEVGVFATLTNSYCLVALGASENFYSVFEAELQDVIPICRTTIAGTRIIGRLTAGNRKGLLVPTTTTDQELQHLRNSLPDDIRIQRIEERLSALGNVIVCNDHTALIHPDLERETEEIIADVLGVEVFRQTIADHVLVGSYMALSNQGGLVHPKTSIQDQDELSSLLGVPLVAGSVNRGSNVIGGGMVVNDWLAVTGLDTTAPELSVIESVFRLGEGAGPGAINTSMKNTIVESFY",
+        "entity_poly_seq_length": 246,
+        "entity_poly_polymer_type": "Protein",
+        "entity_poly_entity_type": "polypeptide(L)",
+        "nomenclature": [
+            "Initiation Factor"
+        ]
+    },
+    "8IDT": {
+        "assembly_id": 0,
+        "asym_ids": [
+            "B"
+        ],
+        "auth_asym_id": "6",
+        "parent_rcsb_id": "8IDT",
+        "src_organism_names": [
+            "Homo sapiens"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            9606
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "Eukaryotic translation initiation factor 6",
+        "entity_poly_strand_id": "6",
+        "entity_poly_seq_one_letter_code": "MAVRASFENNCEIGCFAKLTNTYCLVAIGGSENFYSVFEGELSDTIPVVHASIAGCRIIGRMCVGNRHGLLVPNNTTDQELQHIRNSLPDTVQIRRVEERLSALGNVTTCNDYVALVHPDLDRETEEILADVLKVEVFRQTVADQVLVGSYCVFSNQGGLVHPKTSIEDQDELSSLLQVPLVAGTVNRGSEVIAAGMVVNDWCAFCGLDTTSTELSVVESVFKLNEAQPSTIATSMRDSLIDSLT",
+        "entity_poly_seq_one_letter_code_can": "MAVRASFENNCEIGCFAKLTNTYCLVAIGGSENFYSVFEGELSDTIPVVHASIAGCRIIGRMCVGNRHGLLVPNNTTDQELQHIRNSLPDTVQIRRVEERLSALGNVTTCNDYVALVHPDLDRETEEILADVLKVEVFRQTVADQVLVGSYCVFSNQGGLVHPKTSIEDQDELSSLLQVPLVAGTVNRGSEVIAAGMVVNDWCAFCGLDTTSTELSVVESVFKLNEAQPSTIATSMRDSLIDSLT",
+        "entity_poly_seq_length": 245,
+        "entity_poly_polymer_type": "Protein",
+        "entity_poly_entity_type": "polypeptide(L)",
+        "nomenclature": [
+            "Initiation Factor"
+        ]
+    },
+    "8IDY": {
+        "assembly_id": 0,
+        "asym_ids": [
+            "B"
+        ],
+        "auth_asym_id": "6",
+        "parent_rcsb_id": "8IDY",
+        "src_organism_names": [
+            "Homo sapiens"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            9606
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "Eukaryotic translation initiation factor 6",
+        "entity_poly_strand_id": "6",
+        "entity_poly_seq_one_letter_code": "MAVRASFENNCEIGCFAKLTNTYCLVAIGGSENFYSVFEGELSDTIPVVHASIAGCRIIGRMCVGNRHGLLVPNNTTDQELQHIRNSLPDTVQIRRVEERLSALGNVTTCNDYVALVHPDLDRETEEILADVLKVEVFRQTVADQVLVGSYCVFSNQGGLVHPKTSIEDQDELSSLLQVPLVAGTVNRGSEVIAAGMVVNDWCAFCGLDTTSTELSVVESVFKLNEAQPSTIATSMRDSLIDSLT",
+        "entity_poly_seq_one_letter_code_can": "MAVRASFENNCEIGCFAKLTNTYCLVAIGGSENFYSVFEGELSDTIPVVHASIAGCRIIGRMCVGNRHGLLVPNNTTDQELQHIRNSLPDTVQIRRVEERLSALGNVTTCNDYVALVHPDLDRETEEILADVLKVEVFRQTVADQVLVGSYCVFSNQGGLVHPKTSIEDQDELSSLLQVPLVAGTVNRGSEVIAAGMVVNDWCAFCGLDTTSTELSVVESVFKLNEAQPSTIATSMRDSLIDSLT",
+        "entity_poly_seq_length": 245,
+        "entity_poly_polymer_type": "Protein",
+        "entity_poly_entity_type": "polypeptide(L)",
+        "nomenclature": [
+            "Initiation Factor"
+        ]
+    },
+    "8IE3": {
+        "assembly_id": 0,
+        "asym_ids": [
+            "B"
+        ],
+        "auth_asym_id": "6",
+        "parent_rcsb_id": "8IE3",
+        "src_organism_names": [
+            "Homo sapiens"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            9606
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "Eukaryotic translation initiation factor 6",
+        "entity_poly_strand_id": "6",
+        "entity_poly_seq_one_letter_code": "MAVRASFENNCEIGCFAKLTNTYCLVAIGGSENFYSVFEGELSDTIPVVHASIAGCRIIGRMCVGNRHGLLVPNNTTDQELQHIRNSLPDTVQIRRVEERLSALGNVTTCNDYVALVHPDLDRETEEILADVLKVEVFRQTVADQVLVGSYCVFSNQGGLVHPKTSIEDQDELSSLLQVPLVAGTVNRGSEVIAAGMVVNDWCAFCGLDTTSTELSVVESVFKLNEAQPSTIATSMRDSLIDSLT",
+        "entity_poly_seq_one_letter_code_can": "MAVRASFENNCEIGCFAKLTNTYCLVAIGGSENFYSVFEGELSDTIPVVHASIAGCRIIGRMCVGNRHGLLVPNNTTDQELQHIRNSLPDTVQIRRVEERLSALGNVTTCNDYVALVHPDLDRETEEILADVLKVEVFRQTVADQVLVGSYCVFSNQGGLVHPKTSIEDQDELSSLLQVPLVAGTVNRGSEVIAAGMVVNDWCAFCGLDTTSTELSVVESVFKLNEAQPSTIATSMRDSLIDSLT",
+        "entity_poly_seq_length": 245,
+        "entity_poly_polymer_type": "Protein",
+        "entity_poly_entity_type": "polypeptide(L)",
+        "nomenclature": [
+            "Initiation Factor"
+        ]
+    },
+    "8INE": {
+        "assembly_id": 0,
+        "asym_ids": [
+            "G"
+        ],
+        "auth_asym_id": "6",
+        "parent_rcsb_id": "8INE",
+        "src_organism_names": [
+            "Homo sapiens"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            9606
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "Eukaryotic translation initiation factor 6",
+        "entity_poly_strand_id": "6",
+        "entity_poly_seq_one_letter_code": "MAVRASFENNCEIGCFAKLTNTYCLVAIGGSENFYSVFEGELSDTIPVVHASIAGCRIIGRMCVGNRHGLLVPNNTTDQELQHIRNSLPDTVQIRRVEERLSALGNVTTCNDYVALVHPDLDRETEEILADVLKVEVFRQTVADQVLVGSYCVFSNQGGLVHPKTSIEDQDELSSLLQVPLVAGTVNRGSEVIAAGMVVNDWCAFCGLDTTSTELSVVESVFKLNEAQPSTIATSMRDSLIDSLT",
+        "entity_poly_seq_one_letter_code_can": "MAVRASFENNCEIGCFAKLTNTYCLVAIGGSENFYSVFEGELSDTIPVVHASIAGCRIIGRMCVGNRHGLLVPNNTTDQELQHIRNSLPDTVQIRRVEERLSALGNVTTCNDYVALVHPDLDRETEEILADVLKVEVFRQTVADQVLVGSYCVFSNQGGLVHPKTSIEDQDELSSLLQVPLVAGTVNRGSEVIAAGMVVNDWCAFCGLDTTSTELSVVESVFKLNEAQPSTIATSMRDSLIDSLT",
+        "entity_poly_seq_length": 245,
+        "entity_poly_polymer_type": "Protein",
+        "entity_poly_entity_type": "polypeptide(L)",
+        "nomenclature": [
+            "Initiation Factor"
+        ]
+    },
+    "8INF": {
+        "assembly_id": 0,
+        "asym_ids": [
+            "I"
+        ],
+        "auth_asym_id": "6",
+        "parent_rcsb_id": "8INF",
+        "src_organism_names": [
+            "Homo sapiens"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            9606
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "Eukaryotic translation initiation factor 6",
+        "entity_poly_strand_id": "6",
+        "entity_poly_seq_one_letter_code": "MAVRASFENNCEIGCFAKLTNTYCLVAIGGSENFYSVFEGELSDTIPVVHASIAGCRIIGRMCVGNRHGLLVPNNTTDQELQHIRNSLPDTVQIRRVEERLSALGNVTTCNDYVALVHPDLDRETEEILADVLKVEVFRQTVADQVLVGSYCVFSNQGGLVHPKTSIEDQDELSSLLQVPLVAGTVNRGSEVIAAGMVVNDWCAFCGLDTTSTELSVVESVFKLNEAQPSTIATSMRDSLIDSLT",
+        "entity_poly_seq_one_letter_code_can": "MAVRASFENNCEIGCFAKLTNTYCLVAIGGSENFYSVFEGELSDTIPVVHASIAGCRIIGRMCVGNRHGLLVPNNTTDQELQHIRNSLPDTVQIRRVEERLSALGNVTTCNDYVALVHPDLDRETEEILADVLKVEVFRQTVADQVLVGSYCVFSNQGGLVHPKTSIEDQDELSSLLQVPLVAGTVNRGSEVIAAGMVVNDWCAFCGLDTTSTELSVVESVFKLNEAQPSTIATSMRDSLIDSLT",
+        "entity_poly_seq_length": 245,
+        "entity_poly_polymer_type": "Protein",
+        "entity_poly_entity_type": "polypeptide(L)",
+        "nomenclature": [
+            "Initiation Factor"
+        ]
+    },
+    "8INK": {
+        "assembly_id": 0,
+        "asym_ids": [
+            "B"
+        ],
+        "auth_asym_id": "6",
+        "parent_rcsb_id": "8INK",
+        "src_organism_names": [
+            "Homo sapiens"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            9606
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "Eukaryotic translation initiation factor 6",
+        "entity_poly_strand_id": "6",
+        "entity_poly_seq_one_letter_code": "MAVRASFENNCEIGCFAKLTNTYCLVAIGGSENFYSVFEGELSDTIPVVHASIAGCRIIGRMCVGNRHGLLVPNNTTDQELQHIRNSLPDTVQIRRVEERLSALGNVTTCNDYVALVHPDLDRETEEILADVLKVEVFRQTVADQVLVGSYCVFSNQGGLVHPKTSIEDQDELSSLLQVPLVAGTVNRGSEVIAAGMVVNDWCAFCGLDTTSTELSVVESVFKLNEAQPSTIATSMRDSLIDSLT",
+        "entity_poly_seq_one_letter_code_can": "MAVRASFENNCEIGCFAKLTNTYCLVAIGGSENFYSVFEGELSDTIPVVHASIAGCRIIGRMCVGNRHGLLVPNNTTDQELQHIRNSLPDTVQIRRVEERLSALGNVTTCNDYVALVHPDLDRETEEILADVLKVEVFRQTVADQVLVGSYCVFSNQGGLVHPKTSIEDQDELSSLLQVPLVAGTVNRGSEVIAAGMVVNDWCAFCGLDTTSTELSVVESVFKLNEAQPSTIATSMRDSLIDSLT",
+        "entity_poly_seq_length": 245,
+        "entity_poly_polymer_type": "Protein",
+        "entity_poly_entity_type": "polypeptide(L)",
+        "nomenclature": [
+            "Initiation Factor"
+        ]
+    },
+    "8IPD": {
+        "assembly_id": 0,
+        "asym_ids": [
+            "A"
+        ],
+        "auth_asym_id": "6",
+        "parent_rcsb_id": "8IPD",
+        "src_organism_names": [
+            "Homo sapiens"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            9606
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "Eukaryotic translation initiation factor 6",
+        "entity_poly_strand_id": "6",
+        "entity_poly_seq_one_letter_code": "MAVRASFENNCEIGCFAKLTNTYCLVAIGGSENFYSVFEGELSDTIPVVHASIAGCRIIGRMCVGNRHGLLVPNNTTDQELQHIRNSLPDTVQIRRVEERLSALGNVTTCNDYVALVHPDLDRETEEILADVLKVEVFRQTVADQVLVGSYCVFSNQGGLVHPKTSIEDQDELSSLLQVPLVAGTVNRGSEVIAAGMVVNDWCAFCGLDTTSTELSVVESVFKLNEAQPSTIATSMRDSLIDSLT",
+        "entity_poly_seq_one_letter_code_can": "MAVRASFENNCEIGCFAKLTNTYCLVAIGGSENFYSVFEGELSDTIPVVHASIAGCRIIGRMCVGNRHGLLVPNNTTDQELQHIRNSLPDTVQIRRVEERLSALGNVTTCNDYVALVHPDLDRETEEILADVLKVEVFRQTVADQVLVGSYCVFSNQGGLVHPKTSIEDQDELSSLLQVPLVAGTVNRGSEVIAAGMVVNDWCAFCGLDTTSTELSVVESVFKLNEAQPSTIATSMRDSLIDSLT",
+        "entity_poly_seq_length": 245,
+        "entity_poly_polymer_type": "Protein",
+        "entity_poly_entity_type": "polypeptide(L)",
+        "nomenclature": [
+            "Initiation Factor"
+        ]
+    },
+    "8IPX": {
+        "assembly_id": 0,
+        "asym_ids": [
+            "B"
+        ],
+        "auth_asym_id": "6",
+        "parent_rcsb_id": "8IPX",
+        "src_organism_names": [
+            "Homo sapiens"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            9606
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "Eukaryotic translation initiation factor 6",
+        "entity_poly_strand_id": "6",
+        "entity_poly_seq_one_letter_code": "MAVRASFENNCEIGCFAKLTNTYCLVAIGGSENFYSVFEGELSDTIPVVHASIAGCRIIGRMCVGNRHGLLVPNNTTDQELQHIRNSLPDTVQIRRVEERLSALGNVTTCNDYVALVHPDLDRETEEILADVLKVEVFRQTVADQVLVGSYCVFSNQGGLVHPKTSIEDQDELSSLLQVPLVAGTVNRGSEVIAAGMVVNDWCAFCGLDTTSTELSVVESVFKLNEAQPSTIATSMRDSLIDSLT",
+        "entity_poly_seq_one_letter_code_can": "MAVRASFENNCEIGCFAKLTNTYCLVAIGGSENFYSVFEGELSDTIPVVHASIAGCRIIGRMCVGNRHGLLVPNNTTDQELQHIRNSLPDTVQIRRVEERLSALGNVTTCNDYVALVHPDLDRETEEILADVLKVEVFRQTVADQVLVGSYCVFSNQGGLVHPKTSIEDQDELSSLLQVPLVAGTVNRGSEVIAAGMVVNDWCAFCGLDTTSTELSVVESVFKLNEAQPSTIATSMRDSLIDSLT",
+        "entity_poly_seq_length": 245,
+        "entity_poly_polymer_type": "Protein",
+        "entity_poly_entity_type": "polypeptide(L)",
+        "nomenclature": [
+            "Initiation Factor"
+        ]
+    },
+    "8IPY": {
+        "assembly_id": 0,
+        "asym_ids": [
+            "C"
+        ],
+        "auth_asym_id": "6",
+        "parent_rcsb_id": "8IPY",
+        "src_organism_names": [
+            "Homo sapiens"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            9606
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "Eukaryotic translation initiation factor 6",
+        "entity_poly_strand_id": "6",
+        "entity_poly_seq_one_letter_code": "MAVRASFENNCEIGCFAKLTNTYCLVAIGGSENFYSVFEGELSDTIPVVHASIAGCRIIGRMCVGNRHGLLVPNNTTDQELQHIRNSLPDTVQIRRVEERLSALGNVTTCNDYVALVHPDLDRETEEILADVLKVEVFRQTVADQVLVGSYCVFSNQGGLVHPKTSIEDQDELSSLLQVPLVAGTVNRGSEVIAAGMVVNDWCAFCGLDTTSTELSVVESVFKLNEAQPSTIATSMRDSLIDSLT",
+        "entity_poly_seq_one_letter_code_can": "MAVRASFENNCEIGCFAKLTNTYCLVAIGGSENFYSVFEGELSDTIPVVHASIAGCRIIGRMCVGNRHGLLVPNNTTDQELQHIRNSLPDTVQIRRVEERLSALGNVTTCNDYVALVHPDLDRETEEILADVLKVEVFRQTVADQVLVGSYCVFSNQGGLVHPKTSIEDQDELSSLLQVPLVAGTVNRGSEVIAAGMVVNDWCAFCGLDTTSTELSVVESVFKLNEAQPSTIATSMRDSLIDSLT",
+        "entity_poly_seq_length": 245,
+        "entity_poly_polymer_type": "Protein",
+        "entity_poly_entity_type": "polypeptide(L)",
+        "nomenclature": [
+            "Initiation Factor"
+        ]
+    },
+    "8IR1": {
+        "assembly_id": 0,
+        "asym_ids": [
+            "C"
+        ],
+        "auth_asym_id": "6",
+        "parent_rcsb_id": "8IR1",
+        "src_organism_names": [
+            "Homo sapiens"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            9606
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "Eukaryotic translation initiation factor 6",
+        "entity_poly_strand_id": "6",
+        "entity_poly_seq_one_letter_code": "MAVRASFENNCEIGCFAKLTNTYCLVAIGGSENFYSVFEGELSDTIPVVHASIAGCRIIGRMCVGNRHGLLVPNNTTDQELQHIRNSLPDTVQIRRVEERLSALGNVTTCNDYVALVHPDLDRETEEILADVLKVEVFRQTVADQVLVGSYCVFSNQGGLVHPKTSIEDQDELSSLLQVPLVAGTVNRGSEVIAAGMVVNDWCAFCGLDTTSTELSVVESVFKLNEAQPSTIATSMRDSLIDSLT",
+        "entity_poly_seq_one_letter_code_can": "MAVRASFENNCEIGCFAKLTNTYCLVAIGGSENFYSVFEGELSDTIPVVHASIAGCRIIGRMCVGNRHGLLVPNNTTDQELQHIRNSLPDTVQIRRVEERLSALGNVTTCNDYVALVHPDLDRETEEILADVLKVEVFRQTVADQVLVGSYCVFSNQGGLVHPKTSIEDQDELSSLLQVPLVAGTVNRGSEVIAAGMVVNDWCAFCGLDTTSTELSVVESVFKLNEAQPSTIATSMRDSLIDSLT",
+        "entity_poly_seq_length": 245,
+        "entity_poly_polymer_type": "Protein",
+        "entity_poly_entity_type": "polypeptide(L)",
+        "nomenclature": [
+            "Initiation Factor"
+        ]
+    },
+    "8IR3": {
+        "assembly_id": 0,
+        "asym_ids": [
+            "C"
+        ],
+        "auth_asym_id": "6",
+        "parent_rcsb_id": "8IR3",
+        "src_organism_names": [
+            "Homo sapiens"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            9606
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "Eukaryotic translation initiation factor 6",
+        "entity_poly_strand_id": "6",
+        "entity_poly_seq_one_letter_code": "MAVRASFENNCEIGCFAKLTNTYCLVAIGGSENFYSVFEGELSDTIPVVHASIAGCRIIGRMCVGNRHGLLVPNNTTDQELQHIRNSLPDTVQIRRVEERLSALGNVTTCNDYVALVHPDLDRETEEILADVLKVEVFRQTVADQVLVGSYCVFSNQGGLVHPKTSIEDQDELSSLLQVPLVAGTVNRGSEVIAAGMVVNDWCAFCGLDTTSTELSVVESVFKLNEAQPSTIATSMRDSLIDSLT",
+        "entity_poly_seq_one_letter_code_can": "MAVRASFENNCEIGCFAKLTNTYCLVAIGGSENFYSVFEGELSDTIPVVHASIAGCRIIGRMCVGNRHGLLVPNNTTDQELQHIRNSLPDTVQIRRVEERLSALGNVTTCNDYVALVHPDLDRETEEILADVLKVEVFRQTVADQVLVGSYCVFSNQGGLVHPKTSIEDQDELSSLLQVPLVAGTVNRGSEVIAAGMVVNDWCAFCGLDTTSTELSVVESVFKLNEAQPSTIATSMRDSLIDSLT",
+        "entity_poly_seq_length": 245,
+        "entity_poly_polymer_type": "Protein",
+        "entity_poly_entity_type": "polypeptide(L)",
+        "nomenclature": [
+            "Initiation Factor"
+        ]
+    },
+    "8OIQ": {
+        "assembly_id": 0,
+        "asym_ids": [
+            "JB"
+        ],
+        "auth_asym_id": "Aa",
+        "parent_rcsb_id": "8OIQ",
+        "src_organism_names": [
+            "Homo sapiens"
+        ],
+        "host_organism_names": [
+            "Homo sapiens"
+        ],
+        "src_organism_ids": [
+            9606
+        ],
+        "host_organism_ids": [
+            9606
+        ],
+        "rcsb_pdbx_description": "Peptide chain release factor 1, mitochondrial",
+        "entity_poly_strand_id": "Aa",
+        "entity_poly_seq_one_letter_code": "MNRHLCVWLFRHPSLNGYLQCHIQLHSHQFRQIHLDTRLQVFRQNRNCILHLLSKNWSRRYCHQDTKMLWKHKALQKYMENLSKEYQTLEQCLQHIPVNEENRRSLNRRHAELAPLAAIYQEIQETEQAIEELESMCKSLNKQDEKQLQELALEERQTIDQKINMLYNELFQSLVPKEKYDKNDVILEVTAGRTTGGDICQQFTREIFDMYQNYSCYKHWQFELLNYTPADYGGLHHAAARISGDGVYKHLKYEGGIHRVQRIPEVGLSSRMQRIHTGTMSVIVLPQPDEVDVKLDPKDLRIDTFRAKGAGGQHVNKTDSAVRLVHIPTGLVVECQQERSQIKNKEIAFRVLRARLYQQIIEKDKRQQQSARKLQVGTRAQSERIRTYNFTQDRVSDHRIAYEVRDIKEFLCGGKGLDQLIQRLLQSADEEAIAELLDEHLKSAKGGSGGSGDYKDHDGDYKDHDIDYKDDDDK",
+        "entity_poly_seq_one_letter_code_can": "MNRHLCVWLFRHPSLNGYLQCHIQLHSHQFRQIHLDTRLQVFRQNRNCILHLLSKNWSRRYCHQDTKMLWKHKALQKYMENLSKEYQTLEQCLQHIPVNEENRRSLNRRHAELAPLAAIYQEIQETEQAIEELESMCKSLNKQDEKQLQELALEERQTIDQKINMLYNELFQSLVPKEKYDKNDVILEVTAGRTTGGDICQQFTREIFDMYQNYSCYKHWQFELLNYTPADYGGLHHAAARISGDGVYKHLKYEGGIHRVQRIPEVGLSSRMQRIHTGTMSVIVLPQPDEVDVKLDPKDLRIDTFRAKGAGGQHVNKTDSAVRLVHIPTGLVVECQQERSQIKNKEIAFRVLRARLYQQIIEKDKRQQQSARKLQVGTRAQSERIRTYNFTQDRVSDHRIAYEVRDIKEFLCGGKGLDQLIQRLLQSADEEAIAELLDEHLKSAKGGSGGSGDYKDHDGDYKDHDIDYKDDDDK",
+        "entity_poly_seq_length": 474,
+        "entity_poly_polymer_type": "Protein",
+        "entity_poly_entity_type": "polypeptide(L)",
+        "nomenclature": [
+            "Release Factor"
+        ]
+    },
+    "8OIT": {
+        "assembly_id": 0,
+        "asym_ids": [
+            "JB"
+        ],
+        "auth_asym_id": "Aa",
+        "parent_rcsb_id": "8OIT",
+        "src_organism_names": [
+            "Homo sapiens"
+        ],
+        "host_organism_names": [
+            "Homo sapiens"
+        ],
+        "src_organism_ids": [
+            9606
+        ],
+        "host_organism_ids": [
+            9606
+        ],
+        "rcsb_pdbx_description": "Peptide chain release factor 1, mitochondrial",
+        "entity_poly_strand_id": "Aa",
+        "entity_poly_seq_one_letter_code": "MNRHLCVWLFRHPSLNGYLQCHIQLHSHQFRQIHLDTRLQVFRQNRNCILHLLSKNWSRRYCHQDTKMLWKHKALQKYMENLSKEYQTLEQCLQHIPVNEENRRSLNRRHAELAPLAAIYQEIQETEQAIEELESMCKSLNKQDEKQLQELALEERQTIDQKINMLYNELFQSLVPKEKYDKNDVILEVTAGRTTGGDICQQFTREIFDMYQNYSCYKHWQFELLNYTPADYGGLHHAAARISGDGVYKHLKYEGGIHRVQRIPEVGLSSRMQRIHTGTMSVIVLPQPDEVDVKLDPKDLRIDTFRAKGAAAQHVNKTDSAVRLVHIPTGLVVECQQERSQIKNKEIAFRVLRARLYQQIIEKDKRQQQSARKLQVGTRAQSERIRTYNFTQDRVSDHRIAYEVRDIKEFLCGGKGLDQLIQRLLQSADEEAIAELLDEHLKSAKGGSGGSGGSGGSGGSGGDYKDHDGDYKDHDIDYKDDDDK",
+        "entity_poly_seq_one_letter_code_can": "MNRHLCVWLFRHPSLNGYLQCHIQLHSHQFRQIHLDTRLQVFRQNRNCILHLLSKNWSRRYCHQDTKMLWKHKALQKYMENLSKEYQTLEQCLQHIPVNEENRRSLNRRHAELAPLAAIYQEIQETEQAIEELESMCKSLNKQDEKQLQELALEERQTIDQKINMLYNELFQSLVPKEKYDKNDVILEVTAGRTTGGDICQQFTREIFDMYQNYSCYKHWQFELLNYTPADYGGLHHAAARISGDGVYKHLKYEGGIHRVQRIPEVGLSSRMQRIHTGTMSVIVLPQPDEVDVKLDPKDLRIDTFRAKGAAAQHVNKTDSAVRLVHIPTGLVVECQQERSQIKNKEIAFRVLRARLYQQIIEKDKRQQQSARKLQVGTRAQSERIRTYNFTQDRVSDHRIAYEVRDIKEFLCGGKGLDQLIQRLLQSADEEAIAELLDEHLKSAKGGSGGSGGSGGSGGSGGDYKDHDGDYKDHDIDYKDDDDK",
+        "entity_poly_seq_length": 484,
+        "entity_poly_polymer_type": "Protein",
+        "entity_poly_entity_type": "polypeptide(L)",
+        "nomenclature": [
+            "Release Factor"
+        ]
+    }
+}
