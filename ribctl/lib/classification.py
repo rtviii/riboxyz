@@ -1,7 +1,3 @@
-from enum import Enum
-from io import StringIO
-from itertools import tee
-import math
 import os
 from pprint import pprint
 import subprocess
@@ -36,7 +32,6 @@ logging.basicConfig(
     ]
 )
 
-
 hmm_cachedir = ASSETS['__hmm_cache']
 
 #! Lib ------------------------------
@@ -44,8 +39,7 @@ def seq_evaluate_v_hmm(seq:str,alphabet:Alphabet, hmm:HMM):
     """Fit a sequence to a given HMM"""
     seq_  = pyhmmer.easel.TextSequence(name=b"template", sequence=seq)
     dsb   = DigitalSequenceBlock(alphabet, [seq_.digitize(alphabet)])
-
-    return pyhmmer.plan7.Pipeline(alphabet=alphabet).search_hmm(hmm,dsb)
+    return pyhmmer.plan7.Pipeline(alphabet=alphabet, T=100).search_hmm(hmm,dsb)
 
 def seq_evaluate_v_hmm_dict(seq:str,alphabet:Alphabet, hmm_dict:dict)->dict[PolymerClass, list[float]]:
     """Fit a sequence against all protein classes simultaneously"""
