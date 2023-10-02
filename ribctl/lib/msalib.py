@@ -58,7 +58,6 @@ def seq_to_fasta(rcsb_id: str, _seq: str, outfile: str):
 class Fasta:
     records = list[SeqRecord]
     def __init__(self, path:str) -> None:
-        print("opening ", path)
         try:
             with open(path, "r") as fasta_in:
                 self.records = [*SeqIO.parse(fasta_in, "fasta")]

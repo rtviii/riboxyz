@@ -47,7 +47,6 @@ class RibosomeAssets():
         self.rcsb_id = rcsb_id.upper()
 
 
-
     def _envcheck(self):
         if not RIBETL_DATA:
             raise Exception(
@@ -110,8 +109,6 @@ class RibosomeAssets():
 
         return m
                 
-
-
     def biopython_structure(self):
         return open_structure(self.rcsb_id, 'cif')
 

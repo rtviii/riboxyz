@@ -44,6 +44,7 @@ def seq_evaluate_v_hmm(seq:str,alphabet:Alphabet, hmm:HMM):
     """Fit a sequence to a given HMM"""
     seq_  = pyhmmer.easel.TextSequence(name=b"template", sequence=seq)
     dsb   = DigitalSequenceBlock(alphabet, [seq_.digitize(alphabet)])
+
     return pyhmmer.plan7.Pipeline(alphabet=alphabet).search_hmm(hmm,dsb)
 
 def seq_evaluate_v_hmm_dict(seq:str,alphabet:Alphabet, hmm_dict:dict)->dict[PolymerClass, list[float]]:
@@ -75,6 +76,8 @@ def hmm_dict_init__candidates_per_organism(candidate_category:PolymerClass,organ
 def pick_best_hmm_hit(matches_dict:dict[PolymerClass, list[float]], chain_info:Polymer)->PolymerClass | None:
     """Given a dictionary of sequence-HMMe e-values, pick the best candidate class"""
     results = []
+    if len([ item for x in list(matches_dict.values()) for item in x ]) > 0:
+        pprint(matches_dict)
     for (candidate_class, match) in matches_dict.items():
         if len(match) == 0:
             continue
@@ -82,7 +85,7 @@ def pick_best_hmm_hit(matches_dict:dict[PolymerClass, list[float]], chain_info:P
             results.append({"candidate_class":candidate_class,"match": match})
 
     if len(results) == 0 :
-        logging.warning("Chain {}.{} : Did not match any of the candidate HMM models.".format(chain_info.parent_rcsb_id, chain_info.auth_asym_id))
+        # logging.warning("Chain {}.{} : Did not match any of the candidate HMM models.".format(chain_info.parent_rcsb_id, chain_info.auth_asym_id))
         return None
 
     if len(results) > 1 :
@@ -197,8 +200,7 @@ def hmm_produce(candidate_class: ProteinClass | RNAClass | LifecycleFactorClass,
 #! Implementations ------------------------------
 
 def classify_subchain(chain: typing.Union[Protein, RNA, LifecycleFactor] , candidates_dict:dict[PolymerClass, HMM]|None=None)->Tuple[str, PolymerClass|None]:
-    logging.debug("Task for chain {}.{} (Old nomenclature {}) | taxid {}".format( chain.parent_rcsb_id,chain.auth_asym_id, chain.nomenclature, chain.src_organism_ids[0]))
-    print("Classifying chain ", chain.auth_asym_id, chain.src_organism_ids[0])
+    # logging.debug("Task for chain {}.{} (Old nomenclature {}) | taxid {}".format( chain.parent_rcsb_id,chain.auth_asym_id, chain.nomenclature, chain.src_organism_ids[0]))
     if type(chain) == RNA:
         assigned = classify_sequence(chain.entity_poly_seq_one_letter_code_can, chain.src_organism_ids[0], RNAClass, candidates_dict=candidates_dict)
 
