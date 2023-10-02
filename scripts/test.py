@@ -247,11 +247,10 @@ elif sys.argv[1] == "tsv_to_fasta":
 
 elif sys.argv[1] == "struct_factors":
     for struct in RibosomeAssets.list_all_structs()[:10]:
+
         print("========================Processing {}=====================".format(struct))
-
         prof                   = RibosomeAssets(struct).profile()
-        prots                  = prof.proteins + prof.polymeric_factors if prof.polymeric_factors  != None else prof.proteins
-
+        prots                  = prof.proteins + prof.polymeric_factors if prof.polymeric_factors != None else prof.proteins
         candidate_category     = LifecycleFactorClass
         hmm_organisms_registry = {}
 
@@ -267,12 +266,21 @@ elif sys.argv[1] == "struct_factors":
 
 
 elif sys.argv[1] == 'collect_factors':
-    factors = []
-    for struct in RibosomeAssets.list_all_structs():
-        prof                   = RibosomeAssets(struct).profile()
-        for p in prof.polymeric_factors:
-            if "Fac" p.nomenclature 
-            print(p)
 
+    factor_structs = ["8FL4", "8FL6", "8FL7", "8FL9", "8FLA", "8FLB", "8FLC", "8FLD", "8FLE", "8FLF", "8G5Z", "8G6J", "8HFR", "8HKU", "8HL2", "8HL3", "8I9R", "8I9T", "8I9V", "8I9W", "8I9X", "8I9Y", "8I9Z", "8IA0", "8IDT", "8IDY", "8IE3", "8INE", "8INF", "8INK", "8IPD", "8IPX", "8IPY", "8IR1", "8IR3", "8OIN", "8OIP", "8OIQ", "8OIR", "8OIS", "8OIT"]
+    factors = {}
+
+
+    for struct in factor_structs:
+        try:
+            prof = RibosomeAssets(struct).profile()
+            for p in prof.polymeric_factors:
+                if "Factor" in p.nomenclature[0]:
+                    factors[struct] = json.loads(p.json())
+        except:
+            ...
+
+    with open('factors_sample.json','w') as outfile:
+        json.dump(factors, outfile)
 
 
