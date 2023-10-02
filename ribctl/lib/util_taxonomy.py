@@ -12,7 +12,7 @@ Separately implement the source/host thing for structs.
 """
 
 
-def taxid_domain(taxid:int)->typing.Literal["bacteria","eukaryota","archaea"]:
+def taxid_domain(taxid:int)->typing.Literal["bacteria","eukaryota","archaea", "virus"]:
 
     match ( taxid_is_descendant_of(TAXID_EUKARYOTA, taxid)[0], taxid_is_descendant_of(TAXID_BACTERIA, taxid)[0], taxid_is_descendant_of(TAXID_ARCHAEA, taxid)[0] ):
         case (False,False,True):
@@ -21,8 +21,11 @@ def taxid_domain(taxid:int)->typing.Literal["bacteria","eukaryota","archaea"]:
             return "bacteria"
         case (True,False,False):
             return "eukaryota"
+        case (False,False,False):
+            print("Probably a virus")
+            return "virus"
         case _:
-            raise Exception("Taxid is not a descendant of any domain.")
+            raise ValueError("Taxid {} is not a descendant of any of the three domains".format(taxid))
 
 def get_descendants_of( parent:int, targets:list[int]):
     ncbi = NCBITaxa()

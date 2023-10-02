@@ -246,24 +246,36 @@ elif sys.argv[1] == "tsv_to_fasta":
 
 
 elif sys.argv[1] == "struct_factors":
-    # for struct in RibosomeAssets.list_all_structs()[10:20]:
-        # print("========================Processing {}=====================".format(struct))
-    prof = RibosomeAssets("4w29").profile()
-    p    = prof.polymeric_factors
+    for struct in RibosomeAssets.list_all_structs()[:10]:
+        print("========================Processing {}=====================".format(struct))
+
+        prof                   = RibosomeAssets(struct).profile()
+        prots                  = prof.proteins + prof.polymeric_factors if prof.polymeric_factors  != None else prof.proteins
+
+        candidate_category     = LifecycleFactorClass
+        hmm_organisms_registry = {}
+
+        for chain in prots:
+            chain_organism_taxid  = chain.src_organism_ids[0]
+            if chain_organism_taxid not in [*hmm_organisms_registry.keys()]:
+                hmm_organisms_registry[chain_organism_taxid] = hmm_dict_init__candidates_per_organism(candidate_category, chain_organism_taxid)
+
+            k = classify_subchain(chain, hmm_organisms_registry[chain_organism_taxid])
+            if k[1] !=None:
+                print("Classifying chain {}.{}".format( chain.parent_rcsb_id,chain.auth_asym_id))
+                pprint(k)
 
 
-    candidate_category = LifecycleFactorClass
-    hmm_organisms_registry={}
+elif sys.argv[1] == 'collect_factors':
+    factors = []
+    for struct in RibosomeAssets.list_all_structs():
+        prof                   = RibosomeAssets(struct).profile()
+        if prof.polymeric_factors != None:
+            for p in prof.polymeric_factors:
 
-    for chain in p:
-        chain_organism_taxid  = chain.src_organism_ids[0]
-        if chain_organism_taxid not in [*hmm_organisms_registry.keys()]:
-            hmm_organisms_registry[chain_organism_taxid] = hmm_dict_init__candidates_per_organism(candidate_category, chain_organism_taxid)
-        k    = classify_subchain(chain, hmm_organisms_registry[chain_organism_taxid])
-        pprint(k)
 
-# elif sys.argv[1] == "domain":
-#     # for struct in RibosomeAssets.list_all_structs()[10:20]:
-#         # print("========================Processing {}=====================".format(struct))
-    
-#     print(taxid_domain(9606))
+
+        
+      
+
+
