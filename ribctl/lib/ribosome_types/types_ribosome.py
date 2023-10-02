@@ -327,8 +327,8 @@ class NonpolymericLigand(BaseModel)  :
 
 class LifecycleFactor(Polymer): 
     def __hash__(self) -> int:
-        return hash(self.auth_asym_id + self.parent_rcsb_id)
 
+        return hash(self.auth_asym_id + self.parent_rcsb_id)
     # nomenclature: list
     nomenclature: list[Any] 
     
@@ -391,8 +391,8 @@ class RibosomeStructure(BaseModel):
     expMethod : str
     resolution: float
 
-    pdbx_keywords:      Optional[str]
-    pdbx_keywords_text: Optional[str]
+    pdbx_keywords         : Optional[str]
+    pdbx_keywords_text    : Optional[str]
 
     rcsb_external_ref_id  : list[str]
     rcsb_external_ref_type: list[str]
