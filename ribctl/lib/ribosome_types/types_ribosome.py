@@ -11,6 +11,7 @@ RCSB_ID = NewType('RCSB_ID', str)
 
 class ProteinClass(Enum):
     #TODO :Mitochondrial
+    # SSU
     bS1   = "bS1"
     eS1   = "eS1"
     uS2   = "uS2"
@@ -51,6 +52,7 @@ class ProteinClass(Enum):
     eS30  = "eS30"
     eS31  = "eS31"
     RACK1 = "RACK1"
+    # LSU
     uL1   = "uL1"
     uL2   = "uL2"
     uL3   = "uL3"
@@ -415,9 +417,8 @@ class RibosomeStructure(BaseModel):
     rnas                : list[RNA]
     nonpolymeric_ligands: list[NonpolymericLigand]
     polymeric_factors   : list[LifecycleFactor]
-
     # This includes DNA-RNA hybrid strands, DNA and all other polymers
-    other_polymers   : Optional[list[Polymer]]
+    other_polymers   : list[Polymer]
     
     @staticmethod
     def from_json_profile(d: Any):
