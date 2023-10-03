@@ -55,6 +55,7 @@ def fasta_phylogenetic_correction(candidate_class:ProteinClass|RNAClass|Lifecycl
     else:
         raise Exception("Phylogenetic correction: Unimplemented candidate class")
 
+    print("Attempting to open {}".format(fasta_path))
 
     records      = Fasta(fasta_path)
     ids          = records.all_taxids()
@@ -233,6 +234,16 @@ class HMMClassifier:
     pipeline       : pyhmmer.plan7.Pipeline
     organism_tax_id: int
 
+
+
+    def __init__(self, tax_id:int, candidate_classes:list[PolymerClass]) -> None:
+        for candidate in candidate_classes:
+            seqs        = fasta_phylogenetic_correction(candidate, tax_id, max_n_neighbors=10)
+            pprint(seqs)
+            self.hmm_produce(candidate, tax_id)
+
+        pass
+
     @staticmethod
     def hmm_create(name:str, seqs:Iterator[SeqRecord], alphabet:Alphabet)->HMM:
         """Create an HMM from a list of sequences"""
@@ -291,7 +302,7 @@ class HMMClassifier:
     @staticmethod
     def hmm_produce(candidate_class: ProteinClass | RNAClass | LifecycleFactorClass, organism_taxid:int, no_cache:bool=False)->HMM:  # type: ignore
         """Produce an organism-specific HMM. Retrieve from cache if exists, otherwise generate and cache."""
-        if hmm := HMMClassifier.hmm_check_cache(candidate_class, organism_taxid) != None:
+        if ( hmm := HMMClassifier.hmm_check_cache(candidate_class, organism_taxid) ) != None and not no_cache:
             return hmm
         else:
             if candidate_class in ProteinClass or candidate_class in LifecycleFactorClass:
@@ -310,9 +321,6 @@ class HMMClassifier:
                 HMMClassifier.hmm_cache(HMM)
             return HMM
 
-    def __init__(self, tax_id:int, candidate_classes:list[PolymerClass]) -> None:
-        print(self.hmm_dict_init__candidates_per_organism(candidate_classes[0], tax_id))
-        pass
 
     def seq_eval(self,seq:str):
         ...
