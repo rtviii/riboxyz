@@ -1,3 +1,4 @@
+import json
 import os
 from pprint import pprint
 import subprocess
@@ -41,7 +42,7 @@ def fasta_phylogenetic_correction(candidate_class:ProteinClass|RNAClass|Lifecycl
         fasta_path = os.path.join(ASSETS["fasta_proteins_cytosolic"], f"{candidate_class.value}.fasta")
 
     elif candidate_class in RNAClass:
-        fasta_path = os.path.join(ASSETS["fasta_ribosomal_rna"], f"{candidate_class.value}.fasta")
+        fasta_path = os.path.join(ASSETS["fasta_rna"], f"{candidate_class.value}.fasta")
 
     elif candidate_class in LifecycleFactorClass:
         if candidate_class in ElongationFactorClass:
@@ -54,8 +55,6 @@ def fasta_phylogenetic_correction(candidate_class:ProteinClass|RNAClass|Lifecycl
         fasta_path = os.path.join(factor_class_path, f"{candidate_class.value}.fasta")
     else:
         raise Exception("Phylogenetic correction: Unimplemented candidate class")
-
-    print("Attempting to open {}".format(fasta_path))
 
     records      = Fasta(fasta_path)
     ids          = records.all_taxids()
@@ -196,7 +195,7 @@ def hmm_create(name:str, seqs:Iterator[SeqRecord], alphabet:Alphabet)->HMM:
 
 def hmm_produce(candidate_class: ProteinClass | RNAClass | LifecycleFactorClass, organism_taxid:int, no_cache:bool=False)->HMM:  # type: ignore
     """Produce an organism-specific HMM. Retrieve from cache if exists, otherwise generate and cache."""
-    if hmm := HMMClassifier.hmm_check_cache(candidate_class, organism_taxid) != None:
+    if ( hmm := HMMClassifier.hmm_check_cache(candidate_class, organism_taxid) ) != None and not no_cache:
         return hmm
     else:
         if candidate_class in ProteinClass or candidate_class in LifecycleFactorClass:
@@ -222,6 +221,7 @@ class HMMRegistry:
         pass
 
 class HMMClassifier:
+    # https://pyhmmer.readthedocs.io/en/stable/api/plan7.html#pyhmmer.plan7.HMM
     """
     STEPS (bottom-up):
     - given a taxonomic id, produce a set of HMMs 
@@ -229,20 +229,25 @@ class HMMClassifier:
     - a sequence is searched against all HMMs in the registry
     """
 
-    seed_sequences : dict[PolymerClass, list[SeqRecord]]
-    hmms_registry  : dict[PolymerClass, HMM]
+    name:str
+
+    seed_sequences : dict[PolymerClass, list[SeqRecord]] = {}
+    hmms_registry  : dict[PolymerClass, HMM] = {}
     pipeline       : pyhmmer.plan7.Pipeline
     organism_tax_id: int
 
 
 
     def __init__(self, tax_id:int, candidate_classes:list[PolymerClass]) -> None:
-        for candidate in candidate_classes:
-            seqs        = fasta_phylogenetic_correction(candidate, tax_id, max_n_neighbors=10)
-            pprint(seqs)
-            self.hmm_produce(candidate, tax_id)
 
-        pass
+        self.organism_tax_id = tax_id
+        self.name            = "classifier_{}.hmmx".format(tax_id)
+
+        for candidate in candidate_classes:
+
+            seqs = [*fasta_phylogenetic_correction(candidate, tax_id, max_n_neighbors=10)]
+            self.seed_sequences[candidate] = seqs
+            self.hmms_registry[candidate]  = hmm_produce(candidate, tax_id, no_cache=True)
 
     @staticmethod
     def hmm_create(name:str, seqs:Iterator[SeqRecord], alphabet:Alphabet)->HMM:
@@ -327,5 +332,17 @@ class HMMClassifier:
 
     def info(self):
         """Get info for the constituent HMMs in the current classifier"""
-        pass
+        _ = {
+             "seed_seqs": {
+                str(k.value): [{"seq":str(seqrecord.seq), "tax_id":seqrecord.id} for seqrecord in v] for (k, v) in self.seed_sequences.items()
+             },
+             "hmms_registry": {
+                    str( k.value ): {"name": v.name.decode(),  "M":v.M, "nseq":v.nseq, "nseq_effective":v.nseq_effective}
+                    for (k, v) in self.hmms_registry.items()
+                },
+             }
+
+        with open(self.name, 'w') as outfile:
+            json.dump(_, outfile, indent=4)
+
 
