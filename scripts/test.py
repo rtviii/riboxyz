@@ -20,7 +20,7 @@ from ribctl.etl.etl_pipeline import ReannotationPipeline, query_rcsb_api, rcsb_s
 from ribctl.etl.obtain import obtain_assets_threadpool
 from ribctl.lib.classification import HMMClassifier, classify_sequence, classify_subchain, classify_subchains, hmm_create, hmm_dict_init__candidates_per_organism, hmm_produce
 from ribctl.etl.ribosome_assets import Assetlist, RibosomeAssets
-from ribctl.lib.ribosome_types.types_ribosome import LifecycleFactorClass, ProteinClass, RNAClass
+from ribctl.lib.ribosome_types.types_ribosome import LifecycleFactorClass, Polymer, ProteinClass, RNAClass
 from ribctl import  model_subgenuses
 from ete3 import NCBITaxa
 logging.getLogger("urllib3.connectionpool").setLevel(logging.CRITICAL)
@@ -283,12 +283,28 @@ elif sys.argv[1] == 'collect_factors':
 
 
 elif sys.argv[1] == 'hmmt':
+
     hmmx = HMMClassifier(83333, [ pc for pc in list( ProteinClass ) ])
     prof = RibosomeAssets('3j7z').profile()
-    [SeqRecord(seq=Seq(p.entity_poly_seq_one_letter_code_can), id=str( p.src_organism_ids[0] ), description= ) for p in  prof.proteins]
+    prots:list[Polymer] = prof.proteins
 
+    pseqs        = [p.to_SeqRecord() for p in prof.proteins]
+    scan_results = hmmx.scan(Alphabet.amino(), pseqs)
 
-    hmmx.construct_scan()
+    for scan in scan_results:
+        print(scan.query_accession)
+        print(scan.query_name)
+        print(scan.searched_sequences)
+        print(scan.Z)
+        hits =[*scan]
+        print("HITS : ", hits)
+        for hit in hits:
+            print("hit.name:\t",hit.name)
+            print("hit.evalue:\t",hit.evalue)
+            print("hit.score:\t",hit.score)
+            print("hit.description:\t",hit.description)
+            print("hit.domains:\t",hit.domains)
+
     hmmx.info()
 
 

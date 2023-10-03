@@ -262,8 +262,6 @@ class Protein(Polymer):
     def to_poly(self)->Polymer:
         return Polymer(**self.dict())
 
-
-
 class RNA(Polymer):
     def __hash__(self):
         return hash(self.auth_asym_id + self.parent_rcsb_id)

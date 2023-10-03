@@ -1,5 +1,6 @@
 import json
 import os
+import pickle
 from pprint import pprint
 import subprocess
 from tempfile import NamedTemporaryFile
@@ -14,7 +15,7 @@ from ribctl import ASSETS, MUSCLE_BIN
 from ribctl.lib.msalib import Fasta, muscle_align_N_seq, phylogenetic_neighborhood
 from ribctl.lib.ribosome_types.types_ribosome import RNA, ElongationFactorClass, InitiationFactorClass, LifecycleFactorClass, Polymer, PolymerClass, LifecycleFactor, Protein, ProteinClass, ProteinClass, RNAClass
 # from ribctl.etl.ribosome_assets import RibosomeAssets
-from pyhmmer.easel import Alphabet, DigitalSequenceBlock, TextSequence, SequenceFile, SequenceBlock, TextSequenceBlock
+from pyhmmer.easel import Alphabet, DigitalSequenceBlock, TextSequence, SequenceFile, SequenceBlock, TextSequenceBlock, DigitalSequence
 from pyhmmer.plan7 import Pipeline, HMM 
 import logging
 import concurrent.futures
@@ -163,7 +164,6 @@ def classify_subchains(targets:list[typing.Union[Protein,RNA,LifecycleFactor]],c
 
         return {k:v for (k,v) in results}
 
-
 def hmm_dict_init__candidates_per_organism(candidate_classes: list[ PolymerClass ] ,organism_taxid:int)->dict[PolymerClass, HMM]:
 
     _ ={}
@@ -191,7 +191,6 @@ def hmm_create(name:str, seqs:Iterator[SeqRecord], alphabet:Alphabet)->HMM:
 
     HMM, _profile, _optmized_profile = builder.build_msa(anonymous_msa.digitize(alphabet), background)
     return HMM
-
 
 def hmm_produce(candidate_class: ProteinClass | RNAClass | LifecycleFactorClass, organism_taxid:int, no_cache:bool=False)->HMM:  # type: ignore
     """Produce an organism-specific HMM. Retrieve from cache if exists, otherwise generate and cache."""
@@ -240,23 +239,28 @@ class HMMClassifier:
     def __init__(self, tax_id:int, candidate_classes:list[PolymerClass]) -> None:
 
         self.organism_tax_id = tax_id
-        self.name            = "classifier_{}.hmmx".format(tax_id)
+        self.name            = "classifier_{}".format(tax_id)
 
         for candidate in candidate_classes:
-
             seqs = [*fasta_phylogenetic_correction(candidate, tax_id, max_n_neighbors=10)]
             self.seed_sequences[candidate] = seqs
             self.hmms_registry[candidate]  = hmm_produce(candidate, tax_id, no_cache=True)
 
 
-    def construct_scan(self,target_seqs:list[SeqRecord]):
+    def scan(self, alphabet:pyhmmer.easel.Alphabet, target_seqs:list[SeqRecord],):
         """Construct a scan pipeline for the current classifier"""
         # convert seq records to a list of pyhmmer.DigitalSequences
-        seqs = [pyhmmer.easel.TextSequence(name=bytes(seq.id, 'utf-8'), sequence=str(seq.seq)) for seq in target_seqs]
+        query_seqs = []
+        for seq_record in target_seqs:
+            query_seq  = pyhmmer.easel.TextSequence(name=bytes(seq_record.id,'utf-8'), sequence=seq_record.seq)
+            query_seqs.append(query_seq.digitize(alphabet))
 
-        scans = pyhmmer.hmmscan(seqs,[*self.hmms_registry.values()] )
-        print(scans)
+        scans = list(pyhmmer.hmmscan(query_seqs,[*self.hmms_registry.values()] ))
+        return scans
 
+    def restore_from_pickle(self):
+        with open(self.name +".pickle", 'rb') as file:
+            self = pickle.load(file)
 
     @staticmethod
     def hmm_create(name:str, seqs:Iterator[SeqRecord], alphabet:Alphabet)->HMM:
@@ -353,5 +357,3 @@ class HMMClassifier:
 
         with open(self.name, 'w') as outfile:
             json.dump(_, outfile, indent=4)
-
-
