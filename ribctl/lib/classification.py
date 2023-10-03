@@ -231,7 +231,6 @@ class HMMClassifier:
 
     seed_sequences : dict[PolymerClass, list[SeqRecord]] = {}
     hmms_registry  : dict[PolymerClass, HMM] = {}
-    pipeline       : pyhmmer.plan7.Pipeline
     organism_tax_id: int
 
 
@@ -241,6 +240,7 @@ class HMMClassifier:
         self.organism_tax_id = tax_id
         self.name            = "classifier_{}".format(tax_id)
 
+        print(f"Building {len(candidate_classes)} HMM profiles for {tax_id}.")
         for candidate in candidate_classes:
             seqs = [*fasta_phylogenetic_correction(candidate, tax_id, max_n_neighbors=10)]
             self.seed_sequences[candidate] = seqs

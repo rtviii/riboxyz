@@ -284,27 +284,29 @@ elif sys.argv[1] == 'collect_factors':
 
 elif sys.argv[1] == 'hmmt':
 
-    hmmx = HMMClassifier(83333, [ pc for pc in list( ProteinClass ) ])
-    prof = RibosomeAssets('3j7z').profile()
-    prots:list[Polymer] = prof.proteins
+    prof = RibosomeAssets('5imq').profile()
+    hmmx = HMMClassifier(prof.src_organism_ids[0], [ pc for pc in [*list( ProteinClass ), *list(LifecycleFactorClass)] ])
 
-    pseqs        = [p.to_SeqRecord() for p in prof.proteins]
-    scan_results = hmmx.scan(Alphabet.amino(), pseqs)
+    # prots          :list[Polymer] = prof.proteins
+    # factor_polymers:list[Polymer] = prof.polymeric_factors
+    # other_polymers :list[Polymer] = prof.other_polymers
 
-    for scan in scan_results:
-        print(scan.query_accession)
-        print(scan.query_name)
-        print(scan.searched_sequences)
-        print(scan.Z)
-        hits =[*scan]
-        print("HITS : ", hits)
-        for hit in hits:
-            print("hit.name:\t",hit.name)
-            print("hit.evalue:\t",hit.evalue)
-            print("hit.score:\t",hit.score)
-            print("hit.description:\t",hit.description)
-            print("hit.domains:\t",hit.domains)
+    # pseqs        = [p.to_SeqRecord() for p in [ *prots, *factor_polymers, *other_polymers ]]
 
-    hmmx.info()
+    # for seq_record in pseqs:
+    #     query_seq  = pyhmmer.easel.TextSequence(name=bytes(seq_record.id,'utf-8'), sequence=seq_record.seq)
+    #     query_seqs =  [query_seq.digitize(pyhmmer.easel.Alphabet.amino())]
+    #     for scan in list(pyhmmer.hmmscan(query_seqs,[*hmmx.hmms_registry.values()] )):
+    #         hits = [*scan]
+    #         for hit in hits:
+    #             print("hit.name:\t",hit.name)
+    #             print("hit.evalue:\t",hit.evalue)
+    #             print("hit.score:\t",hit.score)
+    #             print("hit.description:\t",hit.description)
+    #             print("hit.domains:\t",hit.domains)
+
+    # hmmx.info()
 
 
+#? Many-to-many scan time: python3 scripts/test.py hmmt  33.92s user 3.87s system 110% cpu 34.338 total
+#? Many-to-one scan time : python3 scripts/test.py hmmt  37.04s user 4.05s system 108% cpu 37.708 total
