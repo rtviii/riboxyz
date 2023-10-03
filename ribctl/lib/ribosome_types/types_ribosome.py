@@ -1,5 +1,6 @@
 from typing import Any, Optional
 from enum import Enum, auto
+from Bio.SeqRecord import SeqRecord
 import typing
 import typing
 from typing import NewType
@@ -219,6 +220,9 @@ PolymerClass         = enum_union(RNAClass, ProteinClass, LifecycleFactorClass)
 class Polymer(BaseModel):
     def __hash__(self):
         return hash(self.auth_asym_id + self.parent_rcsb_id)
+    def to_SeqRecord(self)->SeqRecord:
+        return SeqRecord(self.entity_poly_seq_one_letter_code_can, id=f"{self.parent_rcsb_id}.{self.auth_asym_id}", 
+                         description="{}|{}".format(self.src_organism_ids[0],self.rcsb_pdbx_description))
 
     assembly_id: int
 
@@ -257,6 +261,8 @@ class Protein(Polymer):
 
     def to_poly(self)->Polymer:
         return Polymer(**self.dict())
+
+
 
 class RNA(Polymer):
     def __hash__(self):
