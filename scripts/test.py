@@ -18,7 +18,7 @@ import pyhmmer
 from ribctl import ASSETS, RIBETL_DATA
 from ribctl.etl.etl_pipeline import ReannotationPipeline, query_rcsb_api, rcsb_single_structure_graphql
 from ribctl.etl.obtain import obtain_assets_threadpool
-from ribctl.lib.classification import classify_sequence, classify_subchain, classify_subchains, hmm_create, hmm_dict_init__candidates_per_organism, hmm_produce
+from ribctl.lib.classification import HMMClassifier, classify_sequence, classify_subchain, classify_subchains, hmm_create, hmm_dict_init__candidates_per_organism, hmm_produce
 from ribctl.etl.ribosome_assets import Assetlist, RibosomeAssets
 from ribctl.lib.ribosome_types.types_ribosome import LifecycleFactorClass, ProteinClass, RNAClass
 from ribctl import  model_subgenuses
@@ -281,4 +281,7 @@ elif sys.argv[1] == 'collect_factors':
     with open('factors_sample.json','w') as outfile:
         json.dump(factors, outfile)
 
+
+elif sys.argv[1] == 'hmmt':
+    print(HMMClassifier(83333, [ ProteinClass ]))
 
