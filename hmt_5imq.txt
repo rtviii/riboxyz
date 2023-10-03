@@ -1,0 +1,326 @@
+Building 161 HMM profiles for 300852.
+hit.name:	 b'class_bS6_taxid_300852.hmm'
+hit.evalue:	 4.380089682357854e-22
+hit.score:	 72.17918395996094
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a563e0>
+hit.name:	 b'class_uS9_taxid_300852.hmm'
+hit.evalue:	 6.2374703634122296e-58
+hit.score:	 188.23609924316406
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a563b0>
+hit.name:	 b'class_uS10_taxid_300852.hmm'
+hit.evalue:	 5.377873348735851e-49
+hit.score:	 158.02586364746094
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a563e0>
+hit.name:	 b'class_uS11_taxid_300852.hmm'
+hit.evalue:	 4.7425983680320686e-61
+hit.score:	 198.23208618164062
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a563b0>
+hit.name:	 b'class_bS16_taxid_300852.hmm'
+hit.evalue:	 1.5859261190515746e-37
+hit.score:	 120.71112823486328
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a563e0>
+hit.name:	 b'class_uL6_taxid_300852.hmm'
+hit.evalue:	 4.070545876223582e-74
+hit.score:	 241.4475555419922
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a563b0>
+hit.name:	 b'class_uL13_taxid_300852.hmm'
+hit.evalue:	 2.300736049053322e-64
+hit.score:	 208.8129119873047
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a563e0>
+hit.name:	 b'class_uL14_taxid_300852.hmm'
+hit.evalue:	 6.586572754709823e-66
+hit.score:	 213.3739013671875
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a563b0>
+hit.name:	 b'class_uL15_taxid_300852.hmm'
+hit.evalue:	 2.9919015705211833e-40
+hit.score:	 130.68954467773438
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a563e0>
+hit.name:	 b'class_bL19_taxid_300852.hmm'
+hit.evalue:	 2.1887978181952075e-48
+hit.score:	 156.47439575195312
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a563b0>
+hit.name:	 b'class_bL21_taxid_300852.hmm'
+hit.evalue:	 2.0537892325333624e-39
+hit.score:	 127.51766967773438
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a563e0>
+hit.name:	 b'class_uL24_taxid_300852.hmm'
+hit.evalue:	 3.786934446452722e-40
+hit.score:	 129.9307861328125
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a563b0>
+hit.name:	 b'class_bL25_taxid_300852.hmm'
+hit.evalue:	 3.123207710477854e-49
+hit.score:	 160.3609619140625
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a563e0>
+hit.name:	 b'class_uL29_taxid_300852.hmm'
+hit.evalue:	 2.3752901809494414e-32
+hit.score:	 104.07621002197266
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a563b0>
+hit.name:	 b'class_bL33_taxid_300852.hmm'
+hit.evalue:	 9.843211770484863e-29
+hit.score:	 92.43003845214844
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a563e0>
+hit.name:	 b'class_eL42_taxid_300852.hmm'
+hit.evalue:	 0.002378533598080009
+hit.score:	 11.939327239990234
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a563e0>
+hit.name:	 b'class_bL36_taxid_300852.hmm'
+hit.evalue:	 3.4001886848865416e-27
+hit.score:	 87.69414520263672
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a56440>
+hit.name:	 b'class_uS3_taxid_300852.hmm'
+hit.evalue:	 9.498696563822597e-99
+hit.score:	 322.8283996582031
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a563e0>
+hit.name:	 b'class_uS4_taxid_300852.hmm'
+hit.evalue:	 4.608346555117986e-98
+hit.score:	 320.3899230957031
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a56440>
+hit.name:	 b'class_uS5_taxid_300852.hmm'
+hit.evalue:	 9.94709669675142e-69
+hit.score:	 223.29702758789062
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a563e0>
+hit.name:	 b'class_uS7_taxid_300852.hmm'
+hit.evalue:	 2.4033746705417423e-76
+hit.score:	 248.1895294189453
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a56440>
+hit.name:	 b'class_uS8_taxid_300852.hmm'
+hit.evalue:	 8.230105906782211e-57
+hit.score:	 183.89129638671875
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a563e0>
+hit.name:	 b'class_uS12_taxid_300852.hmm'
+hit.evalue:	 7.403742079792094e-71
+hit.score:	 229.3339385986328
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a56440>
+hit.name:	 b'class_uL10_taxid_300852.hmm'
+hit.evalue:	 1.6174410568881745e-43
+hit.score:	 141.71817016601562
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a563e0>
+hit.name:	 b'class_uS13_taxid_300852.hmm'
+hit.evalue:	 2.7001555117357055e-64
+hit.score:	 208.30245971679688
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a56440>
+hit.name:	 b'class_uS14_taxid_300852.hmm'
+hit.evalue:	 3.605376098373611e-33
+hit.score:	 106.8702621459961
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a563e0>
+hit.name:	 b'class_uS15_taxid_300852.hmm'
+hit.evalue:	 5.241390531412529e-42
+hit.score:	 135.400390625
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a56440>
+hit.name:	 b'class_uS17_taxid_300852.hmm'
+hit.evalue:	 5.3054799101632404e-37
+hit.score:	 118.96992492675781
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a563e0>
+hit.name:	 b'class_bS18_taxid_300852.hmm'
+hit.evalue:	 2.8778371180990473e-27
+hit.score:	 88.09815216064453
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a56440>
+hit.name:	 b'class_uS19_taxid_300852.hmm'
+hit.evalue:	 4.5725257014533565e-49
+hit.score:	 157.9368896484375
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a563e0>
+hit.name:	 b'class_bS20_taxid_300852.hmm'
+hit.evalue:	 6.4065792871053e-28
+hit.score:	 90.92715454101562
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a56440>
+hit.name:	 b'class_bTHX_taxid_300852.hmm'
+hit.evalue:	 6.2958573917573656e-21
+hit.score:	 67.38629913330078
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a563e0>
+hit.name:	 b'class_uL1_taxid_300852.hmm'
+hit.evalue:	 1.375738980603794e-126
+hit.score:	 414.0841064453125
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a56440>
+hit.name:	 b'class_uL11_taxid_300852.hmm'
+hit.evalue:	 5.483383044043393e-71
+hit.score:	 230.3910675048828
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a563e0>
+hit.name:	 b'class_uL2_taxid_300852.hmm'
+hit.evalue:	 7.578359053990912e-145
+hit.score:	 474.89617919921875
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a56440>
+hit.name:	 b'class_uL3_taxid_300852.hmm'
+hit.evalue:	 1.714865386427627e-92
+hit.score:	 301.982666015625
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a563e0>
+hit.name:	 b'class_uL4_taxid_300852.hmm'
+hit.evalue:	 1.1912245160924679e-67
+hit.score:	 220.45240783691406
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a56440>
+hit.name:	 b'class_uL5_taxid_300852.hmm'
+hit.evalue:	 2.533474957374102e-89
+hit.score:	 291.02911376953125
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a563e0>
+hit.name:	 b'class_uL16_taxid_300852.hmm'
+hit.evalue:	 4.1484755350954885e-72
+hit.score:	 233.98985290527344
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a56440>
+hit.name:	 b'class_bL17_taxid_300852.hmm'
+hit.evalue:	 2.01465131994621e-49
+hit.score:	 159.89132690429688
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a563e0>
+hit.name:	 b'class_uL18_taxid_300852.hmm'
+hit.evalue:	 9.410599931060751e-46
+hit.score:	 148.37286376953125
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a56440>
+hit.name:	 b'class_bL20_taxid_300852.hmm'
+hit.evalue:	 1.3873998482759906e-52
+hit.score:	 170.23416137695312
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a563e0>
+hit.name:	 b'class_uL22_taxid_300852.hmm'
+hit.evalue:	 2.1151729501200245e-52
+hit.score:	 169.81825256347656
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a56440>
+hit.name:	 b'class_uL23_taxid_300852.hmm'
+hit.evalue:	 1.4417873426581668e-37
+hit.score:	 121.4042739868164
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a563e0>
+hit.name:	 b'class_bL27_taxid_300852.hmm'
+hit.evalue:	 6.982775249922555e-43
+hit.score:	 138.05441284179688
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a56440>
+hit.name:	 b'class_uL30_taxid_300852.hmm'
+hit.evalue:	 8.915911681687363e-26
+hit.score:	 82.89327239990234
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a563e0>
+hit.name:	 b'class_bL31_taxid_300852.hmm'
+hit.evalue:	 1.4397712655845124e-37
+hit.score:	 120.78372192382812
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a56440>
+hit.name:	 b'class_bL32_taxid_300852.hmm'
+hit.evalue:	 1.201820816027156e-28
+hit.score:	 92.37944793701172
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a563e0>
+hit.name:	 b'class_bL34_taxid_300852.hmm'
+hit.evalue:	 1.9317882668668098e-25
+hit.score:	 82.07676696777344
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a56440>
+hit.name:	 b'class_bL35_taxid_300852.hmm'
+hit.evalue:	 2.278060696202863e-24
+hit.score:	 79.21381378173828
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a563e0>
+hit.name:	 b'class_uS2_taxid_300852.hmm'
+hit.evalue:	 4.559311116094285e-113
+hit.score:	 369.76678466796875
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a56440>
+hit.name:	 b'class_EF4_taxid_300852.hmm'
+hit.evalue:	 4.885938614832971e-242
+hit.score:	 797.7091674804688
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a563e0>
+hit.name:	 b'class_BipA_taxid_300852.hmm'
+hit.evalue:	 2.8517027230197014e-45
+hit.score:	 147.73451232910156
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a563e0>
+hit.name:	 b'class_aEF2_taxid_300852.hmm'
+hit.evalue:	 3.347405299862485e-42
+hit.score:	 137.57470703125
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a563e0>
+hit.name:	 b'class_EF-G_taxid_300852.hmm'
+hit.evalue:	 6.7178372714061716e-34
+hit.score:	 110.3563003540039
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a563e0>
+hit.name:	 b'class_eEF2_taxid_300852.hmm'
+hit.evalue:	 3.6064448153053176e-26
+hit.score:	 84.29837036132812
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a563e0>
+hit.name:	 b'class_aEF1A_taxid_300852.hmm'
+hit.evalue:	 5.1166814474144325e-15
+hit.score:	 48.2106819152832
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a563e0>
+hit.name:	 b'class_EF-Tu_taxid_300852.hmm'
+hit.evalue:	 1.2555356970048315e-14
+hit.score:	 47.153526306152344
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a563e0>
+hit.name:	 b'class_IF2_taxid_300852.hmm'
+hit.evalue:	 1.4510041259074884e-13
+hit.score:	 42.60112380981445
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a563e0>
+hit.name:	 b'class_eFSec_taxid_300852.hmm'
+hit.evalue:	 4.4719554278075406e-10
+hit.score:	 32.14923858642578
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a563e0>
+hit.name:	 b'class_aIF2_gamma_taxid_300852.hmm'
+hit.evalue:	 7.772634736213917e-10
+hit.score:	 31.438491821289062
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a563e0>
+hit.name:	 b'class_SelB_taxid_300852.hmm'
+hit.evalue:	 1.7798536953302072e-08
+hit.score:	 26.389375686645508
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a563e0>
+hit.name:	 b'class_eEF1A_taxid_300852.hmm'
+hit.evalue:	 1.839923800669436e-08
+hit.score:	 26.798377990722656
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a563e0>
+hit.name:	 b'class_Tet_M_taxid_300852.hmm'
+hit.evalue:	 0.0003797276492482656
+hit.score:	 12.848514556884766
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a563e0>
+hit.name:	 b'class_eIF5B_taxid_300852.hmm'
+hit.evalue:	 0.000406795448204785
+hit.score:	 11.292028427124023
+hit.description:	 None
+hit.domains:	 <pyhmmer.plan7.Domains object at 0x7f2433a563e0>
