@@ -214,7 +214,6 @@ def hmm_produce(candidate_class: ProteinClass | RNAClass | LifecycleFactorClass,
             HMMClassifier.hmm_cache(HMM)
         return HMM
 
-
 class HMMRegistry:
 
     def __init__(self) -> None:
@@ -248,6 +247,16 @@ class HMMClassifier:
             seqs = [*fasta_phylogenetic_correction(candidate, tax_id, max_n_neighbors=10)]
             self.seed_sequences[candidate] = seqs
             self.hmms_registry[candidate]  = hmm_produce(candidate, tax_id, no_cache=True)
+
+
+    def construct_scan(self,target_seqs:list[SeqRecord]):
+        """Construct a scan pipeline for the current classifier"""
+        # convert seq records to a list of pyhmmer.DigitalSequences
+        seqs = [pyhmmer.easel.TextSequence(name=bytes(seq.id, 'utf-8'), sequence=str(seq.seq)) for seq in target_seqs]
+
+        scans = pyhmmer.hmmscan(seqs,[*self.hmms_registry.values()] )
+        print(scans)
+
 
     @staticmethod
     def hmm_create(name:str, seqs:Iterator[SeqRecord], alphabet:Alphabet)->HMM:

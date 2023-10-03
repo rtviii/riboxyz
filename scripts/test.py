@@ -284,6 +284,11 @@ elif sys.argv[1] == 'collect_factors':
 
 elif sys.argv[1] == 'hmmt':
     hmmx = HMMClassifier(83333, [ pc for pc in list( ProteinClass ) ])
+    prof = RibosomeAssets('3j7z').profile()
+    [SeqRecord(seq=Seq(p.entity_poly_seq_one_letter_code_can), id=str( p.src_organism_ids[0] ), description= ) for p in  prof.proteins]
+
+
+    hmmx.construct_scan()
     hmmx.info()
 
 
