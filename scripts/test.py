@@ -283,5 +283,6 @@ elif sys.argv[1] == 'collect_factors':
 
 
 elif sys.argv[1] == 'hmmt':
-    print(HMMClassifier(83333, [ ProteinClass ]))
+    # print([ pc for pc in list( ProteinClass ) ])
+    print(HMMClassifier(83333, [ pc for pc in list( ProteinClass ) ]))
 
