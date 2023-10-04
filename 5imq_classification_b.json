@@ -1,0 +1,431 @@
+{
+    "J": [
+        {
+            "hit.name:": "class_bS6_taxid_300852.hmm",
+            "hit.evalue:": 4.379491199063247e-22,
+            "hit.score:": 72.17986297607422
+        }
+    ],
+    "M": [
+        {
+            "hit.name:": "class_uS9_taxid_300852.hmm",
+            "hit.evalue:": 6.236858122526687e-58,
+            "hit.score:": 188.23582458496094
+        }
+    ],
+    "N": [
+        {
+            "hit.name:": "class_uS10_taxid_300852.hmm",
+            "hit.evalue:": 5.375550238192115e-49,
+            "hit.score:": 158.02603149414062
+        }
+    ],
+    "O": [
+        {
+            "hit.name:": "class_uS11_taxid_300852.hmm",
+            "hit.evalue:": 4.7447647909636154e-61,
+            "hit.score:": 198.2323455810547
+        }
+    ],
+    "T": [
+        {
+            "hit.name:": "class_bS16_taxid_300852.hmm",
+            "hit.evalue:": 1.5857631305422319e-37,
+            "hit.score:": 120.71153259277344
+        }
+    ],
+    "e": [
+        {
+            "hit.name:": "class_uL6_taxid_300852.hmm",
+            "hit.evalue:": 4.071708417993736e-74,
+            "hit.score:": 241.4478302001953
+        }
+    ],
+    "f": [
+        {
+            "hit.name:": "class_uL13_taxid_300852.hmm",
+            "hit.evalue:": 2.2985842448557327e-64,
+            "hit.score:": 208.81326293945312
+        }
+    ],
+    "g": [
+        {
+            "hit.name:": "class_uL14_taxid_300852.hmm",
+            "hit.evalue:": 6.589299244789283e-66,
+            "hit.score:": 213.37326049804688
+        }
+    ],
+    "h": [
+        {
+            "hit.name:": "class_uL15_taxid_300852.hmm",
+            "hit.evalue:": 2.991018542269896e-40,
+            "hit.score:": 130.689453125
+        }
+    ],
+    "l": [
+        {
+            "hit.name:": "class_bL19_taxid_300852.hmm",
+            "hit.evalue:": 2.190380636996869e-48,
+            "hit.score:": 156.4737548828125
+        }
+    ],
+    "n": [
+        {
+            "hit.name:": "class_bL21_taxid_300852.hmm",
+            "hit.evalue:": 2.054042785619687e-39,
+            "hit.score:": 127.51737976074219
+        }
+    ],
+    "q": [
+        {
+            "hit.name:": "class_uL24_taxid_300852.hmm",
+            "hit.evalue:": 3.7876014468426875e-40,
+            "hit.score:": 129.93093872070312
+        }
+    ],
+    "r": [
+        {
+            "hit.name:": "class_bL25_taxid_300852.hmm",
+            "hit.evalue:": 3.1252565339945462e-49,
+            "hit.score:": 160.35940551757812
+        }
+    ],
+    "t": [
+        {
+            "hit.name:": "class_uL29_taxid_300852.hmm",
+            "hit.evalue:": 1.8207487218102323e-31,
+            "hit.score:": 101.34969329833984
+        }
+    ],
+    "x": [
+        {
+            "hit.name:": "class_bL33_taxid_300852.hmm",
+            "hit.evalue:": 9.840121002071223e-29,
+            "hit.score:": 92.42989349365234
+        },
+        {
+            "hit.name:": "class_eL42_taxid_300852.hmm",
+            "hit.evalue:": 0.002378293815781268,
+            "hit.score:": 11.939330101013184
+        }
+    ],
+    "1": [
+        {
+            "hit.name:": "class_bL36_taxid_300852.hmm",
+            "hit.evalue:": 3.399721858052665e-27,
+            "hit.score:": 87.69409942626953
+        }
+    ],
+    "G": [
+        {
+            "hit.name:": "class_uS3_taxid_300852.hmm",
+            "hit.evalue:": 9.492036528339216e-99,
+            "hit.score:": 322.8282775878906
+        }
+    ],
+    "H": [
+        {
+            "hit.name:": "class_uS4_taxid_300852.hmm",
+            "hit.evalue:": 4.613512884180621e-98,
+            "hit.score:": 320.3893737792969
+        }
+    ],
+    "I": [
+        {
+            "hit.name:": "class_uS5_taxid_300852.hmm",
+            "hit.evalue:": 9.94635469452581e-69,
+            "hit.score:": 223.29620361328125
+        }
+    ],
+    "K": [
+        {
+            "hit.name:": "class_uS7_taxid_300852.hmm",
+            "hit.evalue:": 2.401734380400286e-76,
+            "hit.score:": 248.18983459472656
+        }
+    ],
+    "L": [
+        {
+            "hit.name:": "class_uS8_taxid_300852.hmm",
+            "hit.evalue:": 8.235792117121172e-57,
+            "hit.score:": 183.89097595214844
+        }
+    ],
+    "P": [
+        {
+            "hit.name:": "class_uS12_taxid_300852.hmm",
+            "hit.evalue:": 7.405432150141962e-71,
+            "hit.score:": 229.3343505859375
+        }
+    ],
+    "2": [
+        {
+            "hit.name:": "class_uL10_taxid_300852.hmm",
+            "hit.evalue:": 1.6182809157030093e-43,
+            "hit.score:": 141.71839904785156
+        }
+    ],
+    "Q": [
+        {
+            "hit.name:": "class_uS13_taxid_300852.hmm",
+            "hit.evalue:": 2.7003594415841455e-64,
+            "hit.score:": 208.3018035888672
+        }
+    ],
+    "R": [
+        {
+            "hit.name:": "class_uS14_taxid_300852.hmm",
+            "hit.evalue:": 3.605541168765295e-33,
+            "hit.score:": 106.86994171142578
+        }
+    ],
+    "S": [
+        {
+            "hit.name:": "class_uS15_taxid_300852.hmm",
+            "hit.evalue:": 5.244293442285126e-42,
+            "hit.score:": 135.40000915527344
+        }
+    ],
+    "U": [
+        {
+            "hit.name:": "class_uS17_taxid_300852.hmm",
+            "hit.evalue:": 5.303365699291452e-37,
+            "hit.score:": 118.96965026855469
+        }
+    ],
+    "V": [
+        {
+            "hit.name:": "class_bS18_taxid_300852.hmm",
+            "hit.evalue:": 2.8790534462085265e-27,
+            "hit.score:": 88.0981674194336
+        }
+    ],
+    "W": [
+        {
+            "hit.name:": "class_uS19_taxid_300852.hmm",
+            "hit.evalue:": 4.575493790217408e-49,
+            "hit.score:": 157.9371337890625
+        }
+    ],
+    "X": [
+        {
+            "hit.name:": "class_bS20_taxid_300852.hmm",
+            "hit.evalue:": 6.409297608669979e-28,
+            "hit.score:": 90.92660522460938
+        }
+    ],
+    "Y": [
+        {
+            "hit.name:": "class_bTHX_taxid_300852.hmm",
+            "hit.evalue:": 6.295220936104198e-21,
+            "hit.score:": 67.38646697998047
+        }
+    ],
+    "Z": [
+        {
+            "hit.name:": "class_uL1_taxid_300852.hmm",
+            "hit.evalue:": 1.3733342445966424e-126,
+            "hit.score:": 414.0845947265625
+        }
+    ],
+    "3": [
+        {
+            "hit.name:": "class_uL11_taxid_300852.hmm",
+            "hit.evalue:": 5.480989035899076e-71,
+            "hit.score:": 230.3909912109375
+        }
+    ],
+    "a": [
+        {
+            "hit.name:": "class_uL2_taxid_300852.hmm",
+            "hit.evalue:": 7.573238770350725e-145,
+            "hit.score:": 474.89666748046875
+        }
+    ],
+    "b": [
+        {
+            "hit.name:": "class_uL3_taxid_300852.hmm",
+            "hit.evalue:": 1.7131965045628137e-92,
+            "hit.score:": 301.983154296875
+        }
+    ],
+    "c": [
+        {
+            "hit.name:": "class_uL4_taxid_300852.hmm",
+            "hit.evalue:": 1.1905431297032266e-67,
+            "hit.score:": 220.45347595214844
+        }
+    ],
+    "d": [
+        {
+            "hit.name:": "class_uL5_taxid_300852.hmm",
+            "hit.evalue:": 2.5338346176223752e-89,
+            "hit.score:": 291.02960205078125
+        }
+    ],
+    "i": [
+        {
+            "hit.name:": "class_uL16_taxid_300852.hmm",
+            "hit.evalue:": 4.145170539972402e-72,
+            "hit.score:": 233.9901123046875
+        }
+    ],
+    "j": [
+        {
+            "hit.name:": "class_bL17_taxid_300852.hmm",
+            "hit.evalue:": 2.014346473507297e-49,
+            "hit.score:": 159.8909454345703
+        }
+    ],
+    "k": [
+        {
+            "hit.name:": "class_uL18_taxid_300852.hmm",
+            "hit.evalue:": 9.41480862470283e-46,
+            "hit.score:": 148.37326049804688
+        }
+    ],
+    "m": [
+        {
+            "hit.name:": "class_bL20_taxid_300852.hmm",
+            "hit.evalue:": 1.3868432402420146e-52,
+            "hit.score:": 170.23374938964844
+        }
+    ],
+    "o": [
+        {
+            "hit.name:": "class_uL22_taxid_300852.hmm",
+            "hit.evalue:": 2.115638655427077e-52,
+            "hit.score:": 169.8179931640625
+        }
+    ],
+    "p": [
+        {
+            "hit.name:": "class_uL23_taxid_300852.hmm",
+            "hit.evalue:": 1.4427239928182798e-37,
+            "hit.score:": 121.40377807617188
+        }
+    ],
+    "s": [
+        {
+            "hit.name:": "class_bL27_taxid_300852.hmm",
+            "hit.evalue:": 6.984416061211994e-43,
+            "hit.score:": 138.05398559570312
+        }
+    ],
+    "u": [
+        {
+            "hit.name:": "class_uL30_taxid_300852.hmm",
+            "hit.evalue:": 8.918293665921004e-26,
+            "hit.score:": 82.8929672241211
+        }
+    ],
+    "v": [
+        {
+            "hit.name:": "class_bL31_taxid_300852.hmm",
+            "hit.evalue:": 1.4399795525910885e-37,
+            "hit.score:": 120.78360748291016
+        }
+    ],
+    "w": [
+        {
+            "hit.name:": "class_bL32_taxid_300852.hmm",
+            "hit.evalue:": 1.201761029768304e-28,
+            "hit.score:": 92.3797607421875
+        }
+    ],
+    "y": [
+        {
+            "hit.name:": "class_bL34_taxid_300852.hmm",
+            "hit.evalue:": 1.9316045608220613e-25,
+            "hit.score:": 82.07698059082031
+        }
+    ],
+    "z": [
+        {
+            "hit.name:": "class_bL35_taxid_300852.hmm",
+            "hit.evalue:": 2.277592397558897e-24,
+            "hit.score:": 79.21366882324219
+        }
+    ],
+    "F": [
+        {
+            "hit.name:": "class_uS2_taxid_300852.hmm",
+            "hit.evalue:": 4.5554698956278684e-113,
+            "hit.score:": 369.767333984375
+        }
+    ],
+    "B": [
+        {
+            "hit.name:": "class_EF4_taxid_300852.hmm",
+            "hit.evalue:": 4.91019688979603e-242,
+            "hit.score:": 797.705810546875
+        },
+        {
+            "hit.name:": "class_BipA_taxid_300852.hmm",
+            "hit.evalue:": 2.848550009085816e-45,
+            "hit.score:": 147.73509216308594
+        },
+        {
+            "hit.name:": "class_aEF2_taxid_300852.hmm",
+            "hit.evalue:": 3.354339364299716e-42,
+            "hit.score:": 137.57247924804688
+        },
+        {
+            "hit.name:": "class_EF-G_taxid_300852.hmm",
+            "hit.evalue:": 6.716099435795969e-34,
+            "hit.score:": 110.35655975341797
+        },
+        {
+            "hit.name:": "class_eEF2_taxid_300852.hmm",
+            "hit.evalue:": 3.6056610556800194e-26,
+            "hit.score:": 84.29822540283203
+        },
+        {
+            "hit.name:": "class_aEF1A_taxid_300852.hmm",
+            "hit.evalue:": 5.116819459786798e-15,
+            "hit.score:": 48.210914611816406
+        },
+        {
+            "hit.name:": "class_EF-Tu_taxid_300852.hmm",
+            "hit.evalue:": 1.2555163341098854e-14,
+            "hit.score:": 47.15395736694336
+        },
+        {
+            "hit.name:": "class_IF2_taxid_300852.hmm",
+            "hit.evalue:": 1.4511810888279213e-13,
+            "hit.score:": 42.60118103027344
+        },
+        {
+            "hit.name:": "class_eFSec_taxid_300852.hmm",
+            "hit.evalue:": 4.4703711468264767e-10,
+            "hit.score:": 32.149662017822266
+        },
+        {
+            "hit.name:": "class_aIF2_gamma_taxid_300852.hmm",
+            "hit.evalue:": 7.774145493262645e-10,
+            "hit.score:": 31.43812370300293
+        },
+        {
+            "hit.name:": "class_SelB_taxid_300852.hmm",
+            "hit.evalue:": 1.7809730440428408e-08,
+            "hit.score:": 26.38853645324707
+        },
+        {
+            "hit.name:": "class_eEF1A_taxid_300852.hmm",
+            "hit.evalue:": 1.8404923829087516e-08,
+            "hit.score:": 26.797874450683594
+        },
+        {
+            "hit.name:": "class_Tet_M_taxid_300852.hmm",
+            "hit.evalue:": 0.0003797660476738214,
+            "hit.score:": 12.848499298095703
+        },
+        {
+            "hit.name:": "class_eIF5B_taxid_300852.hmm",
+            "hit.evalue:": 0.0004070041469444169,
+            "hit.score:": 11.2913818359375
+        }
+    ],
+    "5": [],
+    "4": []
+}
