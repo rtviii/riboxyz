@@ -5,11 +5,6 @@ from pprint import pprint
 from typing import Any, Optional
 from pyhmmer.plan7 import HMM
 import requests
-from ribctl.etl.etl_polypeptides import (
-    factor_classify,
-    protein_classify,
-    rna_classify,
-)
 from ribctl.lib.classification import (
     classify_subchains,
     seq_evaluate_v_hmm_dict,
@@ -20,18 +15,17 @@ from ribctl.lib.ribosome_types.types_ribosome import (
     AssemblyInstancesMap,
     NonpolymericLigand,
     Polymer,
-    PolymerClass_,
-    PolymericFactor,
+    PolymerClass,
+    LifecycleFactor,
     Protein,
     ProteinClass,
-    ProteinClassEnum,
-    RNAClassEnum,
+    ProteinClass,
+    RNAClass,
     RibosomeStructure,
 )
 from ribctl.etl.gql_querystrings import single_structure_graphql_template
 
 logging.getLogger("urllib3.connectionpool").setLevel(logging.CRITICAL)
-
 
 def current_rcsb_structs() -> list[str]:
     """Return all structures in the rcsb that contain the phrase RIBOSOME and have more than 25 protein entities"""
@@ -73,7 +67,6 @@ def current_rcsb_structs() -> list[str]:
     query = rcsb_search_api + "?json=" + json.dumps(q2)
     return requests.get(query).json()["result_set"]
 
-
 def query_rcsb_api(gql_string: str) -> dict:
     """This defines a query in the RCSB search language that identifies the structures we view as 'current' i.e. 40+ proteins, smaller than 4A resolution etc."""
 
@@ -85,7 +78,6 @@ def query_rcsb_api(gql_string: str) -> dict:
         return resp["data"]["entry"]
     else:
         raise Exception("No data found for query: {}".format(gql_string))
-
 
 def rcsb_single_structure_graphql(rcsb_id):
     return single_structure_graphql_template.replace("$RCSB_ID", rcsb_id.upper())
@@ -100,9 +92,6 @@ class ReannotationPipeline:
     - rProtein classification
     - factors annotation
     - ligand annotation
-
-
-
     """
 
     # ? Input data:
@@ -300,11 +289,11 @@ class ReannotationPipeline:
             else:
                 raise LookupError()
 
-    def process_polypeptides(self) -> tuple[list[Protein], list[PolymericFactor]]:
+    def process_polypeptides(self) -> tuple[list[Protein], list[LifecycleFactor]]:
         poly_entities = self.rcsb_data_dict["polymer_entities"]
 
         reshaped_proteins: list[Protein] = []
-        reshaped_polymeric_factors: list[PolymericFactor] = []
+        reshaped_polymeric_factors: list[LifecycleFactor] = []
 
         def is_protein(poly):
             # * According to RCSB schema, polymer_entites include Proteins, RNA but also DNA, NA-Hybrids and "Other".
@@ -315,8 +304,10 @@ class ReannotationPipeline:
             # A polymer can be either rna or protein
             if is_protein(poly):
                 # a protein can be either a ribosomal protein, a factor or a nascent chain
+                #TODO
                 if (
-                    factor_classify(poly["rcsb_polymer_entity"]["pdbx_description"])
+                    # factor_classify(poly["rcsb_polymer_entity"]["pdbx_description"])
+                    True
                     != None
                 ):
                     # TODO: MOVE TO HMM BASED CLASSIFICATION METHOD
@@ -334,7 +325,7 @@ class ReannotationPipeline:
         self.rProteins = reshaped_proteins
         return (reshaped_proteins, reshaped_polymeric_factors)
 
-    def process_polynucleotides(self) -> tuple[list[RNA], list[PolymericFactor]]:
+    def process_polynucleotides(self) -> tuple[list[RNA], list[LifecycleFactor]]:
         poly_entities = self.rcsb_data_dict["polymer_entities"]
         rnas = []
 
@@ -347,10 +338,10 @@ class ReannotationPipeline:
             rnas.append(poly) if is_rna(poly) else ...
 
         reshaped_rnas: list[RNA] = []
-        reshaped_polymeric_factors: list[PolymericFactor] = []
+        reshaped_polymeric_factors: list[LifecycleFactor] = []
 
         for j, poly_rna in enumerate(rnas):
-            if (factor_classify(poly_rna["rcsb_polymer_entity"]["pdbx_description"])!= None ):
+            if (True!= None ):
                 # TODO: HMM WORKFLOW
                 reshaped_polymeric_factors.extend( self.poly_reshape_to_rFactor(poly_rna) )
             else:
@@ -620,7 +611,7 @@ class ReannotationPipeline:
             ]["auth_asym_ids"]
         ]
 
-    def poly_reshape_to_rFactor(self, factor_polymer_obj) -> list[PolymericFactor]:
+    def poly_reshape_to_rFactor(self, factor_polymer_obj) -> list[LifecycleFactor]:
         host_organisms: list[Any] | None = factor_polymer_obj[
             "rcsb_entity_host_organism"
         ]
@@ -656,15 +647,15 @@ class ReannotationPipeline:
             *filter(
                 lambda x: x is not None,
                 [
-                    factor_classify(
-                        factor_polymer_obj["rcsb_polymer_entity"]["pdbx_description"]
-                    )
+                        ""
+                        #TODO HMM WFLOW
+                    # factor_classify(factor_polymer_obj["rcsb_polymer_entity"]["pdbx_description"])
                 ],
             )
         ]
 
         return [
-            PolymericFactor(
+            LifecycleFactor(
                 assembly_id=self.poly_assign_to_asm(auth_asym_id),
                 nomenclature=nomenclature,
                 asym_ids=factor_polymer_obj[
@@ -777,7 +768,7 @@ class ReannotationPipeline:
 
         other_polymers = self.process_other_polymers()
 
-        prot_noms: dict[str, PolymerClass_] = classify_subchains( [*reshaped_proteins, *reshaped_polymeric_factors_prot], ProteinClassEnum )
+        prot_noms: dict[str, PolymerClass] = classify_subchains( [*reshaped_proteins, *reshaped_polymeric_factors_prot], ProteinClass )
         for aaid, protname in prot_noms.items():
             for prot in reshaped_proteins:
                 if prot.auth_asym_id == aaid and protname != None:
@@ -785,7 +776,7 @@ class ReannotationPipeline:
                 else:
                     continue
 
-        rna_noms: dict[str, PolymerClass_] = classify_subchains( [*reshaped_rnas, *reshaped_polymeric_factors_prot], RNAClassEnum )
+        rna_noms: dict[str, PolymerClass] = classify_subchains( [*reshaped_rnas, *reshaped_polymeric_factors_prot], RNAClass )
         for aaid, rnaname in rna_noms.items():
             for rna in reshaped_rnas:
                 if rna.auth_asym_id == aaid and rna != None:

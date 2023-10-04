@@ -1,12 +1,10 @@
-from enum import Enum
-from io import StringIO
-from itertools import tee
-import math
+import json
 import os
+import pickle
 from pprint import pprint
 import subprocess
 from tempfile import NamedTemporaryFile
-from typing import Generic, Iterator, Literal, LiteralString, Tuple, TypeVar
+from typing import Generic, Iterator, Literal, LiteralString, Optional, Tuple, TypeVar
 import typing
 from Bio.Align import MultipleSeqAlignment,Seq, SeqRecord
 from Bio.Align.Applications import MuscleCommandline
@@ -15,15 +13,13 @@ import re
 import pyhmmer
 from ribctl import ASSETS, MUSCLE_BIN
 from ribctl.lib.msalib import Fasta, muscle_align_N_seq, phylogenetic_neighborhood
-from ribctl.lib.ribosome_types.types_poly_nonpoly_ligand import PolymericFactorClass, RNAClass, list_ProteinClass
-from ribctl.lib.ribosome_types.types_ribosome import RNA, Polymer, PolymerClass, PolymerClass_, PolymericFactor, Protein, ProteinClass, ProteinClassEnum, RNAClassEnum
+from ribctl.lib.ribosome_types.types_ribosome import RNA, ElongationFactorClass, InitiationFactorClass, LifecycleFactorClass, Polymer, PolymerClass, LifecycleFactor, Protein, ProteinClass, ProteinClass, RNAClass
 # from ribctl.etl.ribosome_assets import RibosomeAssets
-from pyhmmer.easel import Alphabet, DigitalSequenceBlock, TextSequence, SequenceFile, SequenceBlock, TextSequenceBlock
+from pyhmmer.easel import Alphabet, DigitalSequenceBlock, TextSequence, SequenceFile, SequenceBlock, TextSequenceBlock, DigitalSequence
 from pyhmmer.plan7 import Pipeline, HMM 
 import logging
 import concurrent.futures
-import inspect
-
+from ribctl.lib.util_taxonomy import taxid_domain
 
 # Configure the logging settings
 logging.basicConfig(
@@ -34,18 +30,46 @@ logging.basicConfig(
         logging.FileHandler('classification.log')  # Log to a file named 'my_log_file.log'
     ]
 )
-
-
 hmm_cachedir = ASSETS['__hmm_cache']
 
-#! Lib ------------------------------
+#? Constructon
+
+
+def fasta_phylogenetic_correction(candidate_class:ProteinClass|RNAClass|LifecycleFactorClass, organism_taxid:int, max_n_neighbors:int=10)->Iterator[SeqRecord]:
+
+    """Given a candidate class and an organism taxid, retrieve the corresponding fasta file, and perform phylogenetic correction on it."""
+
+    if candidate_class in ProteinClass:
+        fasta_path = os.path.join(ASSETS["fasta_proteins_cytosolic"], f"{candidate_class.value}.fasta")
+
+    elif candidate_class in RNAClass:
+        fasta_path = os.path.join(ASSETS["fasta_rna"], f"{candidate_class.value}.fasta")
+
+    elif candidate_class in LifecycleFactorClass:
+        if candidate_class in ElongationFactorClass:
+            factor_class_path = ASSETS["fasta_factors_elongation"]
+        elif candidate_class in InitiationFactorClass:
+            factor_class_path = ASSETS["fasta_factors_initiation"]
+        else:
+            raise Exception("Phylogenetic correction: Unimplemented factor class")
+
+        fasta_path = os.path.join(factor_class_path, f"{candidate_class.value}.fasta")
+    else:
+        raise Exception("Phylogenetic correction: Unimplemented candidate class")
+
+    records      = Fasta(fasta_path)
+    ids          = records.all_taxids()
+    phylo_nbhd   = phylogenetic_neighborhood(list(map(lambda x: str(x),ids)), str(organism_taxid), max_n_neighbors)
+    seqs         = records.pick_taxids(phylo_nbhd)
+    return iter(seqs)
+
 def seq_evaluate_v_hmm(seq:str,alphabet:Alphabet, hmm:HMM):
     """Fit a sequence to a given HMM"""
     seq_  = pyhmmer.easel.TextSequence(name=b"template", sequence=seq)
     dsb   = DigitalSequenceBlock(alphabet, [seq_.digitize(alphabet)])
-    return pyhmmer.plan7.Pipeline(alphabet=alphabet).search_hmm(hmm,dsb)
+    return pyhmmer.plan7.Pipeline(alphabet=alphabet, T=100).search_hmm(hmm,dsb)
 
-def seq_evaluate_v_hmm_dict(seq:str,alphabet:Alphabet, hmm_dict:dict)->dict[PolymerClass_, list[float]]:
+def seq_evaluate_v_hmm_dict(seq:str,alphabet:Alphabet, hmm_dict:dict)->dict[PolymerClass, list[float]]:
     """Fit a sequence against all protein classes simultaneously"""
     _ = {}
     for (candidate_class, hmm) in hmm_dict.items():
@@ -53,24 +77,12 @@ def seq_evaluate_v_hmm_dict(seq:str,alphabet:Alphabet, hmm_dict:dict)->dict[Poly
         _.update({candidate_class: [] if len(result) == 0 else list(map(lambda x: { "evalue":x.evalue, "score":x.score }, result))})
     return _
 
-def hmm_dict_init__candidates_per_organism(candidate_category:PolymerClass_,organism_taxid:int)->dict[PolymerClass_, HMM]:
-    _ ={}
-    if candidate_category == ProteinClassEnum:
-        for pc in ProteinClassEnum:
-            _.update({ pc.value: hmm_produce(pc, organism_taxid) })
-    elif candidate_category == RNAClassEnum:
-        for rc in RNAClassEnum:
-            _.update({ rc.value: hmm_produce(rc, organism_taxid) })
-    elif candidate_category == PolymericFactorClass:
-        raise Exception("Not implemented yet: PolymericFactorClass hmmdictinit")
-    else:
-        return {}
-    
-    return _
 
-def pick_best_hmm_hit(matches_dict:dict[PolymerClass_, list[float]], chain_info:Polymer)->PolymerClass_ | None:
+def pick_best_hmm_hit(matches_dict:dict[PolymerClass, list[float]], chain_info:Polymer)->PolymerClass | None:
     """Given a dictionary of sequence-HMMe e-values, pick the best candidate class"""
     results = []
+    if len([ item for x in list(matches_dict.values()) for item in x ]) > 0:
+        pprint(matches_dict)
     for (candidate_class, match) in matches_dict.items():
         if len(match) == 0:
             continue
@@ -78,7 +90,7 @@ def pick_best_hmm_hit(matches_dict:dict[PolymerClass_, list[float]], chain_info:
             results.append({"candidate_class":candidate_class,"match": match})
 
     if len(results) == 0 :
-        logging.warning("Chain {}.{} : Did not match any of the candidate HMM models.".format(chain_info.parent_rcsb_id, chain_info.auth_asym_id))
+        # logging.warning("Chain {}.{} : Did not match any of the candidate HMM models.".format(chain_info.parent_rcsb_id, chain_info.auth_asym_id))
         return None
 
     if len(results) > 1 :
@@ -93,46 +105,63 @@ def pick_best_hmm_hit(matches_dict:dict[PolymerClass_, list[float]], chain_info:
 
     return results[0]['candidate_class']
 
-def classify_sequence(seq:str, organism:int, candidate_category:typing.Union[RNAClassEnum, ProteinClassEnum], candidates_dict:dict[PolymerClass_, HMM]|None=None)->dict[PolymerClass_, list[float]]:
+def classify_sequence(seq:str, organism:int, candidate_category:typing.Union[RNAClass, ProteinClass], candidates_dict:dict[PolymerClass, HMM]|None=None)->dict[PolymerClass, list[float]]:
 
-    if candidate_category == ProteinClassEnum:
+    if candidate_category == ProteinClass:
         candidates_dict = candidates_dict if candidates_dict is not None else hmm_dict_init__candidates_per_organism(candidate_category, organism)
         results         = seq_evaluate_v_hmm_dict(seq, pyhmmer.easel.Alphabet.amino(), candidates_dict)
         return results
 
-    if candidate_category == RNAClassEnum:
+    elif candidate_category == RNAClass:
         candidates_dict = candidates_dict if candidates_dict is not None else hmm_dict_init__candidates_per_organism(candidate_category, organism)
         results         = seq_evaluate_v_hmm_dict(seq, pyhmmer.easel.Alphabet.rna(), candidates_dict)
         return results
 
-def fasta_phylogenetic_correction(candidate_class:ProteinClassEnum|RNAClassEnum, organism_taxid:int, max_n_neighbors=10)->Iterator[SeqRecord]:
-    """Given a candidate class and an organism taxid, retrieve the corresponding fasta file, and perform phylogenetic correction on it."""
-
-    if candidate_class in ProteinClassEnum:
-        fasta_path = os.path.join(ASSETS["fasta_proteins_cytosolic"], f"{candidate_class.value}.fasta")
-
-    elif candidate_class in RNAClassEnum:
-        fasta_path = os.path.join(ASSETS["fasta_ribosomal_rna"], f"{candidate_class.value}.fasta")
+    elif candidate_category == LifecycleFactorClass:
+        candidates_dict = candidates_dict if candidates_dict is not None else hmm_dict_init__candidates_per_organism(candidate_category, organism)
+        results         = seq_evaluate_v_hmm_dict(seq, pyhmmer.easel.Alphabet.amino(), candidates_dict)
+        return results
     else:
-        raise Exception("Invalid candidate class")
+        raise Exception("Classify sequence: Unimplemented candidate category")
 
-    records      = Fasta(fasta_path)
-    ids          = records.all_taxids()
-    phylo_nbhd   = phylogenetic_neighborhood(list(map(lambda x: str(x),ids)), str(organism_taxid), max_n_neighbors)
-    seqs         = records.pick_taxids(phylo_nbhd)
-    return iter(seqs)
+#! Implementations ------------------------------
 
-def hmm_create(name:str, seqs:Iterator[SeqRecord], alphabet:Alphabet)->HMM:
-    """Create an HMM from a list of sequences"""
+def classify_subchain(chain: typing.Union[Protein, RNA, LifecycleFactor] , candidates_dict:dict[PolymerClass, HMM]|None=None)->Tuple[str, PolymerClass|None]:
+    # logging.debug("Task for chain {}.{} (Old nomenclature {}) | taxid {}".format( chain.parent_rcsb_id,chain.auth_asym_id, chain.nomenclature, chain.src_organism_ids[0]))
+    if type(chain) == RNA:
+        assigned = classify_sequence(chain.entity_poly_seq_one_letter_code_can, chain.src_organism_ids[0], RNAClass, candidates_dict=candidates_dict)
 
-    seq_tuples =  [TextSequence(name=bytes(seq.id, 'utf-8'), sequence=str(seq.seq)) for seq in seqs]
+    elif type(chain) == Protein:
+        assigned = classify_sequence(chain.entity_poly_seq_one_letter_code_can, chain.src_organism_ids[0], ProteinClass, candidates_dict=candidates_dict)
 
-    builder       = pyhmmer.plan7.Builder(alphabet)
-    background    = pyhmmer.plan7.Background(alphabet) #? The null(background) model can be later augmented.
-    anonymous_msa = pyhmmer.easel.TextMSA(bytes(name, 'utf-8'),sequences=seq_tuples)
+    elif type(chain)== LifecycleFactor:
+        assigned = classify_sequence(chain.entity_poly_seq_one_letter_code_can, chain.src_organism_ids[0], LifecycleFactorClass, candidates_dict=candidates_dict)
+    else:
+        raise Exception("Invalid chain type")
+    
+    assigned = pick_best_hmm_hit(assigned, chain)
+    return (chain.auth_asym_id, assigned)
 
-    HMM, _profile, _optmized_profile = builder.build_msa(anonymous_msa.digitize(alphabet), background)
-    return HMM
+# def classify_subchains(targets:list[Protein]|list[RNA]|list[PolymericFactor])->dict[str, PolymerClass_]:
+def classify_subchains(targets:list[typing.Union[Protein,RNA,LifecycleFactor]],candidate_category:PolymerClass)->dict[str, PolymerClass]:
+    # This is a dict of dicts to only do IO once(on average) per organism assuming 90%+ of chains in a structure are of the same taxid.(Pass it down)
+    # It's a dictionary because some chains within a structure might originate in different organisms (host system).
+    hmm_organisms_registry: dict[int,dict[PolymerClass, HMM]]= {}
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=25) as executor:
+        tasks   = []
+        results = []
+        for chain in targets:
+            chain_organism_taxid  = chain.src_organism_ids[0]
+            if chain_organism_taxid not in [*hmm_organisms_registry.keys()]:
+                hmm_organisms_registry[chain_organism_taxid] = hmm_dict_init__candidates_per_organism(candidate_category, chain_organism_taxid)
+            future = executor.submit(classify_subchain, chain, hmm_organisms_registry[chain_organism_taxid])
+            tasks.append(future)
+
+        for future in concurrent.futures.as_completed(tasks):
+            results.append(future.result())
+
+        return {k:v for (k,v) in results}
 
 def hmm_cache(hmm:HMM):
     name     = hmm.name.decode('utf-8')
@@ -145,77 +174,200 @@ def hmm_cache(hmm:HMM):
     else:
         ...
 
-def hmm_produce(candidate_class: ProteinClassEnum | RNAClassEnum, organism_taxid:int)->HMM:  # type: ignore
-    """Produce an organism-specific HMM. Retrieve from cache if exists, otherwise generate and cache."""
+def hmm_check_cache(candidate_class: ProteinClass | RNAClass | LifecycleFactorClass, organism_taxid:int)->HMM | None:
     hmm_path = "class_{}_taxid_{}.hmm".format(candidate_class.value, organism_taxid)
-
     if os.path.isfile(os.path.join(hmm_cachedir, hmm_path)):
         hmm_path = os.path.join(hmm_cachedir, hmm_path)
         with pyhmmer.plan7.HMMFile(hmm_path) as hmm_file:
             HMM = hmm_file.read()
             return HMM
     else:
-        if candidate_class in ProteinClassEnum:
-            seqs = fasta_phylogenetic_correction(candidate_class, organism_taxid, max_n_neighbors=10)
-            seqs_a = muscle_align_N_seq(iter(seqs))
+        return None
 
-            cached_name = "class_{}_taxid_{}.hmm".format(candidate_class.value, organism_taxid)
-            alphabet    = pyhmmer.easel.Alphabet.amino()
-            HMM         = hmm_create(cached_name, seqs_a, alphabet)
-            hmm_cache(HMM)
-            return HMM
 
-        if candidate_class in RNAClassEnum:
-            seqs        = fasta_phylogenetic_correction(candidate_class, organism_taxid, max_n_neighbors=10)
-            seqs_a      = muscle_align_N_seq(iter(seqs))
+def hmm_dict_init__candidates_per_organism(candidate_classes: list[ PolymerClass ] ,organism_taxid:int)->dict[PolymerClass, HMM]:
 
-            cached_name = "class_{}_taxid_{}.hmm".format(candidate_class.value, organism_taxid)
-            alphabet    = pyhmmer.easel.Alphabet.rna()
-            HMM         = hmm_create(cached_name, seqs_a, alphabet)
-            hmm_cache(HMM)
-            return HMM
+    _ ={}
+    for candidate_class in candidate_classes:
+        if candidate_class in ProteinClass:
+            _.update({ candidate_class.value: HMMClassifier.hmm_produce(candidate_class, organism_taxid) })
 
-#! Implementations ------------------------------
+        elif candidate_class in RNAClass:
+            _.update({ candidate_class.value: HMMClassifier.hmm_produce(candidate_class, organism_taxid) })
 
-def classify_subchain(chain: typing.Union[Protein, RNA, PolymericFactor] , candidates_dict:dict[PolymerClass_, HMM]|None=None)->Tuple[str, PolymerClass_|None]:
-    logging.debug("Task for chain {}.{} (Old nomenclature {}) | taxid {}".format( chain.parent_rcsb_id,chain.auth_asym_id, chain.nomenclature, chain.src_organism_ids[0]))
-    if type(chain) == RNA:
-        assigned = classify_sequence(chain.entity_poly_seq_one_letter_code_can, chain.src_organism_ids[0], RNAClassEnum, candidates_dict=candidates_dict)
+        elif candidate_class in LifecycleFactorClass:
+            _.update({ candidate_class.value: HMMClassifier.hmm_produce(candidate_class, organism_taxid) })
+        else:
+            raise Exception("hmm_dict_init__candidates_per_organism: Unexpected candidate class: {}".format(candidate_class))
+    return {}
 
-    elif type(chain) == Protein:
-        assigned = classify_sequence(chain.entity_poly_seq_one_letter_code_can, chain.src_organism_ids[0], ProteinClassEnum, candidates_dict=candidates_dict)
+def hmm_create(name:str, seqs:Iterator[SeqRecord], alphabet:Alphabet)->HMM:
+    """Create an HMM from a list of sequences"""
 
-    elif type(chain)== PolymericFactor:
-        return (chain.auth_asym_id, None)
+    seq_tuples =  [TextSequence(name=bytes(seq.id, 'utf-8'), sequence=str(seq.seq)) for seq in seqs]
+    builder       = pyhmmer.plan7.Builder(alphabet)
+    background    = pyhmmer.plan7.Background(alphabet) #? The null(background) model can be later augmented.
+    anonymous_msa = pyhmmer.easel.TextMSA(bytes(name, 'utf-8'),sequences=seq_tuples)
+    HMM, _profile, _optmized_profile = builder.build_msa(anonymous_msa.digitize(alphabet), background)
+
+    return HMM
+
+def hmm_produce(candidate_class: ProteinClass | RNAClass | LifecycleFactorClass, organism_taxid:int, no_cache:bool=False, max_seed_seq:int=10)->HMM:  # type: ignore
+    """Produce an organism-specific HMM. Retrieve from cache if exists, otherwise generate and cache."""
+    if ( hmm := hmm_check_cache(candidate_class, organism_taxid) ) != None and not no_cache:
+        return hmm
     else:
-        raise Exception("Invalid chain type")
-    
-    assigned = pick_best_hmm_hit(assigned, chain)
-    return (chain.auth_asym_id, assigned)
+        if candidate_class in ProteinClass or candidate_class in LifecycleFactorClass:
+            alphabet = pyhmmer.easel.Alphabet.amino()
+        elif candidate_class in LifecycleFactorClass: 
+            alphabet = pyhmmer.easel.Alphabet.rna()
+        else:
+            raise Exception("hmm_produce: Unimplemented candidate class")
+                
+        seqs        = fasta_phylogenetic_correction(candidate_class, organism_taxid, max_n_neighbors=max_seed_seq)
+        seqs_a      = muscle_align_N_seq(iter(seqs))
+        name = "{}".format(candidate_class.value)
+        HMM         = hmm_create(name, seqs_a, alphabet)
 
-# def classify_subchains(targets:list[Protein]|list[RNA]|list[PolymericFactor])->dict[str, PolymerClass_]:
-def classify_subchains(targets:list[typing.Union[Protein,RNA,PolymericFactor]],candidate_category:PolymerClass_)->dict[str, PolymerClass_]:
-    # This is a dict of dicts (a "registry", sigh) to only do i/o once per organism.(Pass it down)
-    # It's a dictionary because some chains within a structure might originate in different organisms. 
-    hmm_organisms_registry: dict[int,dict[PolymerClass_, HMM]]= {}
+        if not no_cache:
+            hmm_cache(HMM)
+        return HMM
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=25) as executor:
-        tasks   = []
-        results = []
-        for chain in targets:
-            
-            chain_organism_taxid  = chain.src_organism_ids[0]
-            if chain_organism_taxid not in [*hmm_organisms_registry.keys()]:
+class HMMClassifier(object):
+    # https://pyhmmer.readthedocs.io/en/stable/api/plan7.html#pyhmmer.plan7.HMM
+    """
+    STEPS (bottom-up):
+    - given a taxonomic id, produce a set of HMMs 
+    - each HMM is representative of a polymer class parametrized by a seed MSA 
+    - a sequence is searched against all HMMs in the registry
+    """
 
-                hmm_organisms_registry[chain_organism_taxid] = hmm_dict_init__candidates_per_organism(candidate_category, chain_organism_taxid)
+    name:str
 
-            future = executor.submit(classify_subchain, chain, hmm_organisms_registry[chain_organism_taxid])
-            tasks.append(future)
-
-        for future in concurrent.futures.as_completed(tasks):
-            results.append(future.result())
-
-        return {k:v for (k,v) in results}
+    seed_sequences : dict[PolymerClass, list[SeqRecord]] = {}
+    hmms_registry  : dict[PolymerClass, HMM] = {}
+    organism_tax_id: int
 
 
+    # def __getstate__(self) -> object:
+    #     pass
+    # def __setstate__(self, state: object) -> None:
+    #     pass
 
+    def __init__(self, tax_id:int, candidate_classes:list[PolymerClass], name:Optional[str]=None, no_cache:bool=False, max_seed_seq:int=10) -> None:
+
+        self.organism_tax_id = tax_id
+        self.name            = name if name != None else "classifier_{}".format(tax_id)
+        for candidate in candidate_classes:
+            seqs                           = [*fasta_phylogenetic_correction(candidate, tax_id, max_n_neighbors=max_seed_seq)]
+            self.seed_sequences[candidate] = seqs
+            self.hmms_registry[candidate]  = hmm_produce(candidate, tax_id, no_cache=no_cache, max_seed_seq=max_seed_seq)
+
+
+    def scan(self, alphabet:pyhmmer.easel.Alphabet, target_seqs:list[SeqRecord],):
+        """Construct a scan pipeline for the current classifier"""
+        # convert seq records to a list of pyhmmer.DigitalSequences
+        query_seqs = []
+        for seq_record in target_seqs:
+            query_seq  = pyhmmer.easel.TextSequence(name=bytes(seq_record.id,'utf-8'), sequence=seq_record.seq)
+            query_seqs.append(query_seq.digitize(alphabet))
+
+        scans = list(pyhmmer.hmmscan(query_seqs,[*self.hmms_registry.values()] ))
+        return scans
+
+
+    # @staticmethod
+    # def hmm_create(name:str, seqs:Iterator[SeqRecord], alphabet:Alphabet)->HMM:
+    #     """Create an HMM from a list of sequences"""
+
+    #     seq_tuples =  [TextSequence(name=bytes(seq.id, 'utf-8'), sequence=str(seq.seq)) for seq in seqs]
+
+    #     builder       = pyhmmer.plan7.Builder(alphabet)
+    #     background    = pyhmmer.plan7.Background(alphabet) #? The null(background) model can be later augmented.
+    #     anonymous_msa = pyhmmer.easel.TextMSA(bytes(name, 'utf-8'),sequences=seq_tuples)
+
+    #     HMM, _profile, _optmized_profile = builder.build_msa(anonymous_msa.digitize(alphabet), background)
+    #     return HMM
+
+    # @staticmethod
+    # def hmm_dict_init__candidates_per_organism(candidate_classes: list[ PolymerClass ] ,organism_taxid:int)->dict[PolymerClass, HMM]:
+
+    #     _ ={}
+    #     for candidate_class in candidate_classes:
+    #         if candidate_class in ProteinClass:
+    #             _.update({ candidate_class.value: HMMClassifier.hmm_produce(candidate_class, organism_taxid) })
+
+    #         elif candidate_class in RNAClass:
+    #             _.update({ candidate_class.value: HMMClassifier.hmm_produce(candidate_class, organism_taxid) })
+
+    #         elif candidate_class in LifecycleFactorClass:
+    #             _.update({ candidate_class.value: HMMClassifier.hmm_produce(candidate_class, organism_taxid) })
+    #         else:
+    #             raise Exception("hmm_dict_init__candidates_per_organism: Unexpected candidate class: {}".format(candidate_class))
+    #     return {}
+        
+
+    # @staticmethod
+    # def hmm_cache(hmm:HMM):
+    #     name     = hmm.name.decode('utf-8')
+    #     filename = os.path.join(hmm_cachedir, name)
+
+    #     if not os.path.isfile(filename):
+    #         with open(filename, "wb") as hmm_file:
+    #             hmm.write(hmm_file)
+    #             print("Wrote `{}` to `{}`".format(filename, hmm_cachedir))
+    #     else:
+    #         ...
+
+    # @staticmethod
+    # def hmm_check_cache(candidate_class: ProteinClass | RNAClass | LifecycleFactorClass, organism_taxid:int)->HMM | None:
+    #     hmm_path = "class_{}_taxid_{}.hmm".format(candidate_class.value, organism_taxid)
+    #     if os.path.isfile(os.path.join(hmm_cachedir, hmm_path)):
+    #         hmm_path = os.path.join(hmm_cachedir, hmm_path)
+    #         with pyhmmer.plan7.HMMFile(hmm_path) as hmm_file:
+    #             HMM = hmm_file.read()
+    #             return HMM
+    #     else:
+    #         return None
+
+
+    # @staticmethod
+    # def hmm_produce(candidate_class: ProteinClass | RNAClass | LifecycleFactorClass, organism_taxid:int, no_cache:bool=False)->HMM:  # type: ignore
+    #     """Produce an organism-specific HMM. Retrieve from cache if exists, otherwise generate and cache."""
+    #     if ( hmm := HMMClassifier.hmm_check_cache(candidate_class, organism_taxid) ) != None and not no_cache:
+    #         return hmm
+    #     else:
+            # if candidate_class in ProteinClass or candidate_class in LifecycleFactorClass:
+            #     alphabet = pyhmmer.easel.Alphabet.amino()
+            # elif candidate_class in LifecycleFactorClass: 
+            #     alphabet = pyhmmer.easel.Alphabet.rna()
+            # else:
+            #     raise Exception("hmm_produce: Unimplemented candidate class")
+                    
+            # seqs        = fasta_phylogenetic_correction(candidate_class, organism_taxid, max_n_neighbors=10)
+            # seqs_a      = muscle_align_N_seq(iter(seqs))
+            # cached_name = "class_{}_taxid_{}.hmm".format(candidate_class.value, organism_taxid)
+            # HMM         = HMMClassifier.hmm_create(cached_name, seqs_a, alphabet)
+
+            # if not no_cache:
+            #     HMMClassifier.hmm_cache(HMM)
+            # return HMM
+
+
+    def seq_eval(self,seq:str):
+        ...
+
+    def info(self):
+        """Get info for the constituent HMMs in the current classifier"""
+        _ = {
+             "seed_seqs": {
+                str(k.value): [{"seq":str(seqrecord.seq), "tax_id":seqrecord.id} for seqrecord in v] for (k, v) in self.seed_sequences.items()
+             },
+             "hmms_registry": {
+                    str( k.value ): {"name": v.name.decode(),  "M":v.M, "nseq":v.nseq, "nseq_effective":v.nseq_effective}
+                    for (k, v) in self.hmms_registry.items()
+                },
+             }
+
+        with open(self.name, 'w') as outfile:
+            json.dump(_, outfile, indent=4)

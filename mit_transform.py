@@ -32,11 +32,10 @@ def rna_classify(poly_pdbx_description:str|None):
             return [i[0]]
     return []
 
-to_keep =[]
-lens = []
-descs = []
+to_keep = []
+lens    = []
+descs   = []
 
-classname = "28SrRNA"
 for struct in structs:
     print(struct)
     try:
