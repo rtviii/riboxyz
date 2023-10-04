@@ -11,9 +11,6 @@ from typing import Iterator
 from Bio.Align import  SeqRecord
 import os
 from ribctl import MUSCLE_BIN
-from ribctl.lib.ribosome_types.types_ribosome import RNA, PolymericFactor, Protein, ProteinClass
-from ribctl.lib.ribosome_types.types_poly_nonpoly_ligand import list_LSUProteinClass, list_SSUProteinClass
-from ribctl.lib.ribosome_types.types_ribosome import ProteinClass
 from ete3 import NCBITaxa
 
 
@@ -57,15 +54,6 @@ def seq_to_fasta(rcsb_id: str, _seq: str, outfile: str):
     seq_record.id = seq_record.description = rcsb_id
     SeqIO.write(seq_record, outfile, 'fasta')
 
-def infer_subunit(protein_class: ProteinClass):
-    if protein_class in list_LSUProteinClass:
-        return "LSU"
-    elif protein_class in list_SSUProteinClass:
-        return "SSU"
-    else:
-        raise ValueError("Unknown protein class: {}".format(protein_class))
-
-
 
 class Fasta:
     records = list[SeqRecord]
@@ -77,6 +65,7 @@ class Fasta:
             print(f"File not found: {path}")
         except Exception as e:
             print(f"An error occurred: {str(e)}")
+
     def pick_taxids(self, taxids: list[str]) -> list[SeqRecord]:
         
         for taxid in set(taxids): 
@@ -108,8 +97,7 @@ class Fasta:
 
 def phylogenetic_neighborhood(taxids_base: list[str], taxid_target: str, n_neighbors: int = 10) -> list[str]:
     """Given a set of taxids and a target taxid, return a list of the [n_neighbors] phylogenetically closest to the target."""
-
-    tree = NCBITaxa().get_topology(list(set([*taxids_base, str(taxid_target)])))
+    tree               = NCBITaxa().get_topology(list(set([*taxids_base, str(taxid_target)])))
 
     target_node        = tree.search_nodes(name=str(taxid_target))[0]
     phylo_all_nodes    = [(node.name, tree.get_distance(target_node, node)) for node in tree.traverse()]

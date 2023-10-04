@@ -8,7 +8,7 @@ from Bio.PDB.Residue import Residue
 from Bio.PDB.Structure import Structure
 from Bio.PDB.Chain import Chain
 from ribctl import RIBETL_DATA
-from ribctl.lib.ribosome_types.types_ribosome import Polymer, PolymericFactor, RibosomeStructure
+from ribctl.lib.ribosome_types.types_ribosome import Polymer, LifecycleFactor, RibosomeStructure
 from ribctl.lib.ribosome_types.types_binding_site import AMINO_ACIDS, NUCLEOTIDES, BindingSite, BindingSiteChain, ResidueSummary 
 from ribctl.lib import utils
 
@@ -98,7 +98,7 @@ def get_ligand_residue_ids(ligchemid: str, struct: Structure) -> list[Residue]:
     ligandResidues: list[Residue] = list(filter(lambda x: x.get_resname() == ligchemid, list(struct.get_residues())))
     return ligandResidues
 
-def struct_polymeric_factor_ids(struct_profile:RibosomeStructure) -> list[PolymericFactor]|None:
+def struct_polymeric_factor_ids(struct_profile:RibosomeStructure) -> list[LifecycleFactor]|None:
     """Given an rcsb id, open the profile for the corresponding structure
     and return references to all polymers marked ligand-like"""
     # polymers =  itertools.chain(struct_profile.rnas if struct_profile.rnas != None else [] , struct_profile.proteins)

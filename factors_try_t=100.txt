@@ -1,0 +1,72 @@
+========================Processing 5IMQ=====================
+{'BipA': [{'evalue': 1.7692857199290782e-47, 'score': 147.73509216308594}],
+ 'EF-G': [{'evalue': 4.171490332792528e-36, 'score': 110.35655975341797}],
+ 'EF-P': [],
+ 'EF-Ts': [],
+ 'EF-Tu': [],
+ 'EF4': [{'evalue': 3.049811732792565e-244, 'score': 797.705810546875}],
+ 'IF1': [],
+ 'IF2': [],
+ 'IF3': [],
+ 'RelA': [],
+ 'SelB': [],
+ 'Tet_M': [],
+ 'Tet_O': [],
+ 'aEF1A': [],
+ 'aEF2': [{'evalue': 2.083440598943923e-44, 'score': 137.57247924804688}],
+ 'aIF1A': [],
+ 'aIF2B_alpha': [],
+ 'aIF2B_beta': [],
+ 'aIF2B_delta': [],
+ 'aIF2_alpha': [],
+ 'aIF2_beta': [],
+ 'aIF2_gamma': [],
+ 'aIF5A': [],
+ 'aIF5B': [],
+ 'eEF1A': [],
+ 'eEF1B': [],
+ 'eEF2': [],
+ 'eEF3': [],
+ 'eFSec': [],
+ 'eIF1': [],
+ 'eIF1A': [],
+ 'eIF2B_alpha': [],
+ 'eIF2B_beta': [],
+ 'eIF2B_delta': [],
+ 'eIF2B_epsilon': [],
+ 'eIF2B_gamma': [],
+ 'eIF2_alpha': [],
+ 'eIF2_beta': [],
+ 'eIF2_gamma': [],
+ 'eIF3_subunitA': [],
+ 'eIF3_subunitB': [],
+ 'eIF3_subunitC': [],
+ 'eIF3_subunitD': [],
+ 'eIF3_subunitE': [],
+ 'eIF3_subunitF': [],
+ 'eIF3_subunitG': [],
+ 'eIF3_subunitH': [],
+ 'eIF3_subunitI': [],
+ 'eIF3_subunitJ': [],
+ 'eIF3_subunitK': [],
+ 'eIF3_subunitL': [],
+ 'eIF3_subunitM': [],
+ 'eIF4B': [],
+ 'eIF4F_4A': [],
+ 'eIF4F_4E': [],
+ 'eIF4F_4G': [],
+ 'eIF5': [],
+ 'eIF5A': [],
+ 'eIF5B': [],
+ 'mtEF4': []}
+Classifying chain 5IMQ.B
+('B', 'EF4')
+========================Processing 7QCA=====================
+========================Processing 2FTC=====================
+========================Processing 6OLE=====================
+========================Processing 1S72=====================
+========================Processing 7O7Z=====================
+========================Processing 8BHF=====================
+========================Processing 8A3L=====================
+========================Processing 4U4Q=====================
+========================Processing 6XZ7=====================

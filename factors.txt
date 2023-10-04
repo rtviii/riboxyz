@@ -1,0 +1,1142 @@
+        "Initiation Factor"
+1HR0
+        "Initiation Factor"
+1I96
+        "Release Factor"
+1ML5
+  "citation_title": "Trigger Factor in Complex with the Ribosome Forms a Molecular Cradle for Nascent Proteins",
+        "In the E. coli cytosol, a fraction of the newly synthesised proteins requires the activity of molecular chaperones for folding to the native state. The major chaperones implicated in this folding process are the ribosome-associated Trigger Factor (TF), and the DnaK and GroEL chaperones with their respective co-chaperones. Trigger Factor is an ATP-independent chaperone and displays chaperone and peptidyl-prolyl-cis-trans-isomerase (PPIase) activities in vitro. It is composed of at least three domains, an N-terminal domain which mediates association with the large ribosomal subunit, a central substrate binding and PPIase domain with homology to FKBP proteins, and a C-terminal domain of unknown function. The positioning of TF at the peptide exit channel, together with its ability to interact with nascent chains as short as 57 residues renders TF a prime candidate for being the first chaperone that binds to the nascent polypeptide chains [1]. This family represents the N-terminal region of the protein."
+1W2B
+        "Elongation Factor"
+2RDO
+        "Elongation Factor"
+3J7P
+        "This domain is found in Elongation Factor G. It shares a similar structure with domain V (Pfam:PF00679). Structural studies in drosophila indicate this is domain 3 [1].",
+        "Elongation Factor G, domain III",
+3J9Y
+        "Elongation Factor"
+3J9Z
+        "Elongation Factor"
+3JA1
+        "Elongation Factor"
+3JCD
+        "Elongation Factor"
+3JCE
+        "Initiation Factor"
+3JCJ
+        "Initiation Factor"
+3JCN
+        "Initiation Factor"
+3JCT
+  "citation_title": "Cryo-Electron Microscopy Structure of the 30S Subunit in Complex with the Yjeq Biogenesis Factor.",
+4A2I
+  "citation_title": "Cryo-Em Structure of the Archaeal 50S Ribosomal Subunit in Complex with Initiation Factor 6 and Implications for Ribosome Evolution",
+4ADX
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+4BTS
+  "citation_title": "Cryo-Em of Ribosomal 80S Complexes with Termination Factors Reveals the Translocated Cricket Paralysis Virus Ires.",
+4D5L
+  "citation_title": "Cryo-Em Structures of Ribosomal 80S Complexes with Termination Factors and Cricket Paralysis Virus Ires Reveal the Ires in the Translocated State",
+4D5Y
+  "citation_title": "Cryo-Em of Ribosomal 80S Complexes with Termination Factors Reveals the Translocated Cricket Paralysis Virus Ires.",
+        "Release Factor"
+        "Release Factor"
+4D61
+  "citation_title": "Cryo-Em Structures of Ribosomal 80S Complexes with Termination Factors and Cricket Paralysis Virus Ires Reveal the Ires in the Translocated State",
+4D67
+        "Initiation Factor"
+4KZX
+        "Initiation Factor"
+        "Initiation Factor"
+4KZY
+        "Initiation Factor"
+4KZZ
+  "citation_title": "Structure of the Mammalian 80S Initiation Complex with Initiation Factor 5B on Hcv-Ires RNA.",
+4UJC
+        "Elongation Factor"
+4V4B
+  "citation_title": "Crystal Structures of the Ribosome in Complex with Release Factors RF1 and RF2 Bound to a Cognate Stop Codon.",
+        "Release Factor"
+4V4R
+  "citation_title": "Crystal Structures of the Ribosome in Complex with Release Factors RF1 and RF2 Bound to a Cognate Stop Codon.",
+        "Release Factor"
+4V4S
+  "citation_title": "Crystal Structures of the Ribosome in Complex with Release Factors RF1 and RF2 Bound to a Cognate Stop Codon.",
+4V4T
+        "Release Factor"
+        "Release Factor"
+4V5E
+        "Elongation Factor"
+        "Elongation Factor"
+4V5F
+        "Elongation Factor"
+        "Elongation Factor"
+4V5G
+        "Release Factor"
+        "Release Factor"
+4V5J
+        "Elongation Factor"
+4V5L
+        "Elongation Factor"
+4V5M
+        "Elongation Factor"
+4V5N
+  "citation_title": "Crystal Structure of the Eukaryotic 40S Ribosomal Subunit in Complex with Initiation Factor 1.",
+4V5O
+        "Elongation Factor"
+        "Elongation Factor"
+4V5P
+        "Elongation Factor"
+        "Elongation Factor"
+4V5Q
+        "Elongation Factor"
+        "Elongation Factor"
+4V5R
+        "Elongation Factor"
+        "Elongation Factor"
+4V5S
+        "Release Factor"
+        "Release Factor"
+4V63
+        "Release Factor"
+        "Release Factor"
+4V67
+        "Elongation Factor"
+4V68
+        "Elongation Factor"
+4V69
+        "Elongation Factor"
+        "Elongation Factor"
+4V6A
+        "Elongation Factor"
+4V6K
+        "Elongation Factor"
+4V6L
+        "Elongation Factor"
+4V6T
+        "This domain is found in Elongation Factor G. It shares a similar structure with domain V (Pfam:PF00679). Structural studies in drosophila indicate this is domain 3 [1].",
+        "Elongation Factor G, domain III",
+4V6V
+        "Elongation Factor"
+4V6W
+        "Elongation Factor"
+4V6X
+      "rcsb_pdbx_description": "Elongation Factor G",
+        "Elongation Factor"
+4V7B
+        "Initiation Factor"
+4V7F
+        "Release Factor"
+        "Release Factor"
+4V7P
+        "Release Factor"
+4V85
+        "Release Factor"
+4V89
+  "citation_title": "How Hibernation Factors RMF, HPF, and YfiA Turn Off Protein Synthesis.",
+4V8H
+  "citation_title": "Crystal Structure of the Hybrid State of Ribosome in Complex with the Guanosine Triphosphatase Release Factor 3.",
+        "Release Factor"
+4V8O
+  "citation_title": "Crystal Structure of the Eukaryotic 60S Ribosomal Subunit in Complex with Initiation Factor 6.",
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+4V8P
+        "Elongation Factor"
+4V8Q
+  "citation_title": "Cryo-Em Structures of Arx1 and Maturation Factors Rei1 and Jjj1 Bound to the 60S Ribosomal Subunit",
+4V8T
+        "Elongation Factor"
+        "Elongation Factor"
+4V8U
+        "Initiation Factor"
+4V8Y
+        "Initiation Factor"
+4V8Z
+        "Elongation Factor"
+4V90
+  "pdbx_keywords_text": "Ribosome, YaeJ, Ribosome Stalling, Ribosome Rescue, Rescue Factor, Alternative Rescue Factor, ArfB, Release Factor, Rescue of Stalled Ribosomes",
+4V95
+  "pdbx_keywords_text": "Bacterial Proteins, Catalysis, Models, Molecular, Peptide Elongation Factor G, Protein Biosynthesis, Protein Conformation, Protein Structure, Tertiary, RNA, Bacterial, Messenger, Transfer, Ribosomes, Thermus thermophilus, Ribosome, Hybrid state, Guanosine triphosphate, Guanosine triphosphatase",
+        "Elongation Factor"
+4V9H
+        "Elongation Factor"
+        "Elongation Factor"
+4V9J
+        "Elongation Factor"
+        "Elongation Factor"
+4V9K
+        "Elongation Factor"
+        "Elongation Factor"
+4V9L
+        "Elongation Factor"
+        "Elongation Factor"
+4V9M
+  "citation_title": "Crystal Structure of the 70S Ribosome Bound with the Q253P Mutant Form of Release Factor RF2.",
+        "Release Factor"
+        "Release Factor"
+4V9N
+        "Elongation Factor"
+        "Elongation Factor"
+        "Elongation Factor"
+        "Elongation Factor"
+4V9O
+        "Elongation Factor"
+        "Elongation Factor"
+        "Elongation Factor"
+        "Elongation Factor"
+4V9P
+        "Elongation Factor"
+        "Elongation Factor"
+4W29
+        "Elongation Factor"
+4W2E
+  "citation_title": "Conformational Changes of Elongation Factor G on the Ribosome during tRNA Translocation.",
+        "Elongation Factor"
+        "Elongation Factor"
+4WPO
+  "citation_title": "Conformational Changes of Elongation Factor G on the Ribosome during tRNA Translocation.",
+        "Elongation Factor"
+        "Elongation Factor"
+4WQF
+  "citation_title": "Conformational Changes of Elongation Factor G on the Ribosome during tRNA Translocation.",
+        "Elongation Factor"
+        "Elongation Factor"
+4WQU
+  "citation_title": "Conformational Changes of Elongation Factor G on the Ribosome during tRNA Translocation.",
+        "Elongation Factor"
+        "Elongation Factor"
+4WQY
+  "citation_title": "Hflx is a Ribosome Splitting Factor Rescuing Stalled Ribosomes Under Stress Conditions",
+5ADY
+        "Elongation Factor"
+5AFI
+  "citation_title": "Insertion of the Biogenesis Factor Rei1 Probes the Ribosomal Tunnel during 60S Maturation.",
+        "Biogenesis Factor"
+5APN
+  "citation_title": "Insertion of the Biogenesis Factor Rei1 Probes the Ribosomal Tunnel during 60S Maturation.",
+        "Biogenesis Factor"
+5APO
+  "citation_title": "Uniformity of Peptide Release Is Maintained by Methylation of Release Factors.",
+        "Release Factor"
+        "Release Factor"
+5CZP
+        "Initiation Factor"
+5DAT
+  "citation_title": "Crystal Structure of Hypusine-Containing Translation Factor eIF5A Bound to a Rotated Eukaryotic Ribosome.",
+        "Initiation Factor"
+5DC3
+  "citation_title": "Uniformity of Peptide Release Is Maintained by Methylation of Release Factors.",
+        "Release Factor"
+        "Release Factor"
+5DFE
+        "Initiation Factor"
+5DGE
+        "Initiation Factor"
+5DGF
+        "Initiation Factor"
+5GAK
+        "Initiation Factor"
+        "Biogenesis Factor"
+5H4P
+        "Release Factor"
+5H5U
+        "Elongation Factor"
+        "Elongation Factor"
+5HAU
+  "citation_title": "Structure of the GTP Form of Elongation Factor 4 (EF4) Bound to the Ribosome",
+        "Elongation Factor"
+5IMQ
+  "citation_title": "Structure of the GTP Form of Elongation Factor 4 (EF4) Bound to the Ribosome",
+        "Elongation Factor"
+5IMR
+  "citation_title": "Uniformity of Peptide Release Is Maintained by Methylation of Release Factors.",
+        "Release Factor"
+        "Release Factor"
+5J30
+  "citation_title": "Uniformity of Peptide Release Is Maintained by Methylation of Release Factors.",
+        "Release Factor"
+        "Release Factor"
+5J3C
+        "Release Factor"
+        "Release Factor"
+5J4D
+        "Elongation Factor"
+5J8B
+        "Initiation Factor"
+5JCS
+        "This domain is found in Elongation Factor G. It shares a similar structure with domain V (Pfam:PF00679). Structural studies in drosophila indicate this is domain 3 [1].",
+        "Elongation Factor G, domain III",
+5JUO
+        "This domain is found in Elongation Factor G. It shares a similar structure with domain V (Pfam:PF00679). Structural studies in drosophila indicate this is domain 3 [1].",
+        "Elongation Factor G, domain III",
+5JUP
+        "This domain is found in Elongation Factor G. It shares a similar structure with domain V (Pfam:PF00679). Structural studies in drosophila indicate this is domain 3 [1].",
+        "Elongation Factor G, domain III",
+5JUS
+        "This domain is found in Elongation Factor G. It shares a similar structure with domain V (Pfam:PF00679). Structural studies in drosophila indicate this is domain 3 [1].",
+        "Elongation Factor G, domain III",
+5JUT
+        "This domain is found in Elongation Factor G. It shares a similar structure with domain V (Pfam:PF00679). Structural studies in drosophila indicate this is domain 3 [1].",
+        "Elongation Factor G, domain III",
+5JUU
+        "This domain is found in Elongation Factor G. It shares a similar structure with domain V (Pfam:PF00679). Structural studies in drosophila indicate this is domain 3 [1].",
+        "Elongation Factor G, domain III",
+5KCS
+        "Initiation Factor"
+5LL6
+        "Initiation Factor"
+        "Initiation Factor"
+5LMN
+        "Initiation Factor"
+        "Initiation Factor"
+5LMO
+        "Initiation Factor"
+        "Initiation Factor"
+5LMP
+        "Initiation Factor"
+        "Initiation Factor"
+5LMQ
+        "Initiation Factor"
+        "Initiation Factor"
+5LMR
+        "Initiation Factor"
+        "Initiation Factor"
+5LMS
+        "Initiation Factor"
+        "Initiation Factor"
+5LMT
+        "Initiation Factor"
+5LMU
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+5LMV
+        "Elongation Factor"
+5LZB
+        "Elongation Factor"
+5LZC
+        "Elongation Factor"
+5LZD
+        "Elongation Factor"
+5LZS
+        "Release Factor"
+5LZU
+        "Initiation Factor"
+5MC6
+        "Release Factor"
+5MDV
+        "Release Factor"
+5MDW
+        "Release Factor"
+5MDY
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+5ME0
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+5ME1
+        "Release Factor"
+5MGP
+        "Release Factor"
+5O2R
+        "Elongation Factor"
+5OT7
+        "Initiation Factor"
+5T62
+        "Release Factor"
+5U4I
+        "Release Factor"
+5U9F
+        "Release Factor"
+5U9G
+        "Elongation Factor"
+5UYK
+        "Elongation Factor"
+5UYL
+        "Elongation Factor"
+5UYM
+        "Elongation Factor"
+5UYN
+        "Elongation Factor"
+5UYP
+        "Elongation Factor"
+5UYQ
+        "Elongation Factor"
+5WDT
+        "Elongation Factor"
+5WE4
+        "Elongation Factor"
+5WE6
+        "Elongation Factor"
+5WF0
+        "Elongation Factor"
+5WFK
+        "Elongation Factor"
+5WFS
+        "Initiation Factor"
+5Z3G
+        "Release Factor"
+        "Release Factor"
+6B4V
+        "Release Factor"
+        "Release Factor"
+        "Release Factor"
+        "Release Factor"
+6BOH
+        "Release Factor"
+        "Release Factor"
+6BOK
+        "Initiation Factor"
+6C0F
+        "Release Factor"
+6C4I
+        "Release Factor"
+        "Release Factor"
+6C5L
+        "This domain is found in Elongation Factor G. It shares a similar structure with domain V (Pfam:PF00679). Structural studies in drosophila indicate this is domain 3 [1].",
+        "Elongation Factor G, domain III",
+6D9J
+        "Release Factor"
+6DNC
+        "Initiation Factor"
+6ELZ
+        "Initiation Factor"
+6EM1
+        "Initiation Factor"
+6EM4
+        "Initiation Factor"
+6EM5
+  "citation_title": "Structural Basis for Polyproline-Mediated Ribosome Stalling and Rescue by the Translation Elongation Factor EF-P.",
+6ENF
+  "citation_title": "Structural Basis for Polyproline-Mediated Ribosome Stalling and Rescue by the Translation Elongation Factor EF-P.",
+        "Elongation Factor"
+6ENJ
+  "citation_title": "Structural Basis for Polyproline-Mediated Ribosome Stalling and Rescue by the Translation Elongation Factor EF-P.",
+        "Elongation Factor"
+6ENU
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+6FEC
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+6FYX
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+6FYY
+        "Initiation Factor"
+6GAW
+        "Initiation Factor"
+6GAZ
+        "Initiation Factor"
+6GB2
+  "citation_title": "Structural Insights into the Role of Diphthamide on Elongation Factor 2 in mRNA Reading-Frame Maintenance.",
+        "Elongation Factor"
+6GQ1
+  "citation_title": "Structural Insights into the Role of Diphthamide on Elongation Factor 2 in mRNA Reading-Frame Maintenance.",
+        "Elongation Factor"
+6GQB
+  "citation_title": "Structural Insights into the Role of Diphthamide on Elongation Factor 2 in mRNA Reading-Frame Maintenance.",
+        "Elongation Factor"
+6GQV
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+6GSM
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+6GSN
+        "Release Factor"
+        "Release Factor"
+6GWT
+        "Release Factor"
+        "Release Factor"
+6GXM
+        "Release Factor"
+        "Release Factor"
+6GXN
+        "Release Factor"
+        "Release Factor"
+6GXO
+        "Release Factor"
+6GXP
+        "Elongation Factor"
+6GZ3
+        "Elongation Factor"
+6GZ4
+        "Elongation Factor"
+6GZ5
+        "Release Factor"
+6IP8
+        "Initiation Factor"
+6LQM
+        "Initiation Factor"
+6LSR
+        "Initiation Factor"
+6LSS
+        "Initiation Factor"
+6LU8
+        "Initiation Factor"
+6M62
+        "Initiation Factor"
+6N8J
+        "Initiation Factor"
+6N8K
+        "Initiation Factor"
+6N8L
+        "Initiation Factor"
+6N8M
+        "Initiation Factor"
+6N8N
+        "Initiation Factor"
+6N8O
+  "pdbx_keywords_text": "mitochondrial ribosome recycling Factor, mtRRF, 55S, RIBOSOME",
+6NU2
+  "pdbx_keywords_text": "mitochondrial ribosome recycling Factor, mtRRF, 55S, RIBOSOME",
+6NU3
+        "Initiation Factor"
+        "Initiation Factor"
+6O7K
+        "Initiation Factor"
+6O9K
+        "Release Factor"
+6OG7
+        "Release Factor"
+6OGF
+        "Release Factor"
+6OGG
+        "Release Factor"
+6ORL
+        "Release Factor"
+6OSK
+        "Release Factor"
+6OSQ
+        "Release Factor"
+6OST
+        "Release Factor"
+6OT3
+        "Release Factor"
+6OUO
+        "Release Factor"
+6P5N
+        "Initiation Factor"
+        "Biogenesis Factor"
+6QIK
+        "Initiation Factor"
+        "Biogenesis Factor"
+6QT0
+        "Initiation Factor"
+        "Biogenesis Factor"
+6QTZ
+        "Initiation Factor"
+6R84
+        "Initiation Factor"
+6R86
+        "Initiation Factor"
+6R87
+        "Biogenesis Factor"
+        "Initiation Factor"
+6RI5
+        "Initiation Factor"
+6RW4
+        "Initiation Factor"
+        "Initiation Factor"
+6RW5
+        "Biogenesis Factor"
+        "Initiation Factor"
+6RZZ
+        "Initiation Factor"
+        "Biogenesis Factor"
+6S05
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+6SW9
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+6SWC
+        "Initiation Factor"
+6SWD
+        "Initiation Factor"
+6SWE
+        "Release Factor"
+6SZS
+        "Elongation Factor"
+        "Elongation Factor"
+6UCQ
+        "Elongation Factor"
+6VLZ
+        "Elongation Factor"
+6VMI
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+6W2S
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+6W2T
+        "Elongation Factor"
+6WD2
+        "Elongation Factor"
+6WD3
+        "Elongation Factor"
+6WD4
+        "Elongation Factor"
+6WD5
+        "Elongation Factor"
+6WD6
+        "Elongation Factor"
+6WD7
+        "Elongation Factor"
+6WD8
+        "Elongation Factor"
+6WD9
+        "Elongation Factor"
+6WDA
+        "Release Factor"
+6XA1
+        "Elongation Factor"
+6XYW
+        "Initiation Factor"
+6YLG
+        "Initiation Factor"
+6YLH
+        "Initiation Factor"
+6YLX
+        "Initiation Factor"
+6YLY
+        "Elongation Factor"
+6Z6M
+        "Elongation Factor"
+6Z6N
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+6ZCE
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+6ZU9
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+6ZVJ
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+7A09
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+7A1G
+        "Elongation Factor"
+7A5G
+        "Release Factor"
+7A5H
+        "Elongation Factor"
+7A5K
+        "Initiation Factor"
+7BT6
+        "Initiation Factor"
+7BTB
+        "In the E. coli cytosol, a fraction of the newly synthesised proteins requires the activity of molecular chaperones for folding to the native state. The major chaperones implicated in this folding process are the ribosome-associated Trigger Factor (TF), and the DnaK and GroEL chaperones with their respective co-chaperones. Trigger Factor is an ATP-independent chaperone and displays chaperone and peptidyl-prolyl-cis-trans-isomerase (PPIase) activities in vitro. It is composed of at least three domains, an N-terminal domain which mediates association with the large ribosomal subunit, a central substrate binding and PPIase domain with homology to FKBP proteins, and a C-terminal domain of unknown function. The positioning of TF at the peptide exit channel, together with its ability to interact with nascent chains as short as 57 residues renders TF a prime candidate for being the first chaperone that binds to the nascent polypeptide chains [1]. This family represents the N-terminal region of the protein."
+7D6Z
+        "In the E. coli cytosol, a fraction of the newly synthesised proteins requires the activity of molecular chaperones for folding to the native state. The major chaperones implicated in this folding process are the ribosome-associated Trigger Factor (TF), and the DnaK and GroEL chaperones with their respective co-chaperones. Trigger Factor is an ATP-independent chaperone and displays chaperone and peptidyl-prolyl-cis-trans-isomerase (PPIase) activities in vitro. It is composed of at least three domains, an N-terminal domain which mediates association with the large ribosomal subunit, a central substrate binding and PPIase domain with homology to FKBP proteins, and a C-terminal domain of unknown function. The positioning of TF at the peptide exit channel, together with its ability to interact with nascent chains as short as 57 residues renders TF a prime candidate for being the first chaperone that binds to the nascent polypeptide chains [1]. This family represents the N-terminal region of the protein.",
+        "In the E. coli cytosol, a fraction of the newly synthesised proteins requires the activity of molecular chaperones for folding to the native state. The major chaperones implicated in this folding process are the ribosome-associated Trigger Factor (TF), and the DnaK and GroEL chaperones with their respective co-chaperones. Trigger Factor is an ATP-independent chaperone and displays chaperone and peptidyl-prolyl-cis-trans-isomerase (PPIase) activities in vitro. It is composed of three domains, an N-terminal domain which mediates association with the large ribosomal subunit (ribosome-binding domain, RBD), a central PPIase domain with homology to FKBP proteins, and a C-terminal substrate-binding domain (SBD) which forms the central body of the protein and has two helical arms that create a cavity [1,2]. The association between its N-terminal domain with the ribosomal protein L23 located next to the peptide tunnel exit is essential for the interaction with nascent polypeptides and its in vivo function [1]. This entry represents the C-terminal region of TF which has a multi-helical structure consisting of an irregular array of long and short helices structurally similar to the peptide-binding domain of the bacterial porin chaperone SurA [3]."
+7D80
+  "citation_title": "Nonstructural Protein 1 of SARS-CoV-2 Is a Potent Pathogenicity Factor Redirecting Host Protein Synthesis Machinery toward Viral RNA.",
+7JQB
+  "citation_title": "Nonstructural Protein 1 of SARS-CoV-2 Is a Potent Pathogenicity Factor Redirecting Host Protein Synthesis Machinery toward Viral RNA.",
+7JQC
+        "Elongation Factor"
+7K51
+        "Elongation Factor"
+7K52
+        "Elongation Factor"
+7K54
+        "Elongation Factor"
+7K55
+        "This domain is found in Elongation Factor G. It shares a similar structure with domain V (Pfam:PF00679). Structural studies in drosophila indicate this is domain 3 [1].",
+        "Elongation Factor G, domain III",
+7L20
+        "Elongation Factor"
+7LS1
+        "Elongation Factor"
+7LS2
+        "Release Factor"
+        "Release Factor"
+7M5D
+        "Elongation Factor"
+7N2C
+        "Elongation Factor"
+7N2V
+        "Initiation Factor"
+7NAC
+        "Initiation Factor"
+        "Biogenesis Factor"
+7NAF
+        "Release Factor"
+7NWH
+        "Release Factor"
+7O80
+        "Termination Factor"
+        "Elongation Factor"
+7O9K
+        "Termination Factor"
+7O9M
+        "Termination Factor"
+7ODR
+        "Termination Factor"
+7ODS
+        "Termination Factor"
+7ODT
+        "Termination Factor"
+7OF0
+        "Initiation Factor"
+7OF1
+        "Termination Factor"
+7OF3
+        "Termination Factor"
+7OF5
+        "Termination Factor"
+7OF7
+        "Initiation Factor"
+7OH3
+        "Initiation Factor"
+7OHP
+        "Initiation Factor"
+7OHQ
+        "Initiation Factor"
+7OHR
+        "Initiation Factor"
+7OHS
+        "Initiation Factor"
+7OHT
+        "Initiation Factor"
+7OHU
+        "Initiation Factor"
+7OHV
+        "Initiation Factor"
+7OHW
+        "Initiation Factor"
+7OHX
+        "Initiation Factor"
+7OHY
+        "Termination Factor"
+7OIC
+        "Release Factor"
+7OJ0
+        "Elongation Factor"
+7OLD
+        "Elongation Factor"
+7OSA
+        "Elongation Factor"
+7OSM
+        "Elongation Factor"
+7OTC
+        "Elongation Factor"
+        "Initiation Factor"
+7OYA
+        "Initiation Factor"
+7OYC
+        "Initiation Factor"
+        "Elongation Factor"
+7OYD
+        "Initiation Factor"
+7P2E
+        "Termination Factor"
+7PD3
+        "Elongation Factor"
+7PJV
+        "Elongation Factor"
+7PJW
+        "Elongation Factor"
+7PJX
+        "Elongation Factor"
+7PJY
+        "Elongation Factor"
+7PJZ
+        "Initiation Factor"
+7PO0
+        "Initiation Factor"
+7PO1
+        "Initiation Factor"
+7PO2
+        "Initiation Factor"
+7PUA
+        "Initiation Factor"
+7PUB
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+7QP6
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+7QP7
+        "Biogenesis Factor"
+7R6Q
+        "Initiation Factor"
+7R7A
+        "Initiation Factor"
+7RR5
+        "Release Factor"
+7SA4
+        "Elongation Factor"
+7SS9
+        "Elongation Factor"
+7SSD
+        "Elongation Factor"
+7SSL
+        "Elongation Factor"
+7ST7
+        "Initiation Factor"
+7SYQ
+        "Initiation Factor"
+        "Initiation Factor"
+7SYR
+        "Initiation Factor"
+        "Initiation Factor"
+7SYS
+        "Initiation Factor"
+        "Initiation Factor"
+7SYV
+        "Initiation Factor"
+        "Initiation Factor"
+7SYW
+        "Initiation Factor"
+        "Initiation Factor"
+7SYX
+        "Initiation Factor"
+        "Initiation Factor"
+7TQL
+        "Initiation Factor"
+7U0H
+        "Initiation Factor"
+7UG6
+        "Elongation Factor"
+7UG7
+  "pdbx_keywords_text": "Initiation Factor 2, 70S ribosome, cryo-EM, translation initiation, initiator tRNA, conformational changes, RIBOSOME",
+        "Initiation Factor"
+7UNR
+  "pdbx_keywords_text": "Initiation Factor 2, 70S ribosome, cryo-EM, translation initiation, initiator tRNA, conformational changes, RIBOSOME",
+        "Initiation Factor"
+7UNU
+  "pdbx_keywords_text": "Initiation Factor 2, 70S ribosome, cryo-EM, translation initiation, initiator tRNA, conformational changes, RIBOSOME",
+        "Initiation Factor"
+7UNV
+  "pdbx_keywords_text": "Initiation Factor 2, 70S ribosome, cryo-EM, translation initiation, initiator tRNA, conformational changes, RIBOSOME",
+        "Initiation Factor"
+7UNW
+        "Initiation Factor"
+7UOO
+        "Initiation Factor"
+7UQB
+        "Initiation Factor"
+7UQZ
+        "Initiation Factor"
+7V08
+        "Initiation Factor"
+7Z34
+        "Initiation Factor"
+7ZS5
+        "Release Factor"
+8AKN
+        "Elongation Factor"
+8BSI
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+8CAH
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+        "Initiation Factor"
+8CAS
+        "Elongation Factor"
+8CDR
+        "Elongation Factor"
+8CEH
+        "Elongation Factor"
+8CF5
+        "Elongation Factor"
+8CG8
+        "Elongation Factor"
+8CIV
+        "Elongation Factor"
+8CKU
+        "Elongation Factor"
+8CMJ
+        "Initiation Factor"
+8ESQ
+        "Initiation Factor"
+8ESR
+        "Initiation Factor"
+8ETC
+        "Initiation Factor"
+8ETG
+        "Initiation Factor"
+8ETH
+        "Initiation Factor"
+8ETI
+        "Initiation Factor"
+8ETJ
+        "Elongation Factor"
+8EUB
+        "Initiation Factor"
+8EUP
+        "Initiation Factor"
+8EUY
+        "Initiation Factor"
+8EV3
+        "Elongation Factor"
+8EVQ
+        "Elongation Factor"
+8EVR
+        "Elongation Factor"
+8EVS
+        "Elongation Factor"
+8EWB
+        "Initiation Factor"
+8FKP
+        "Initiation Factor"
+8FKQ
+        "Initiation Factor"
+8FKR
+        "Initiation Factor"
+8FKS
+        "Initiation Factor"
+8FKT
+        "Initiation Factor"
+8FKU
+        "Initiation Factor"
+8FKV
+        "Initiation Factor"
+8FKW
+        "Initiation Factor"
+8FKX
+        "Initiation Factor"
+8FKY
+        "Initiation Factor"
+8FKZ
+        "Initiation Factor"
+8FL0
+        "Initiation Factor"
+8FL2
+        "Initiation Factor"
+8FL3
+        "Initiation Factor"
+8FL4
+        "Initiation Factor"
+8FL6
+        "Initiation Factor"
+8FL7
+        "Initiation Factor"
+8FL9
+        "Initiation Factor"
+8FLA
+        "Initiation Factor"
+8FLB
+        "Initiation Factor"
+8FLC
+        "Initiation Factor"
+8FLD
+        "Initiation Factor"
+8FLE
+        "Initiation Factor"
+8FLF
+        "Elongation Factor"
+8G5Z
+        "Elongation Factor"
+8G6J
+        "Initiation Factor"
+8HFR
+        "Release Factor"
+8HKU
+        "Elongation Factor"
+8HL2
+        "Elongation Factor"
+8HL3
+        "Initiation Factor"
+8I9R
+        "Initiation Factor"
+8I9T
+        "Initiation Factor"
+8I9V
+        "Initiation Factor"
+8I9W
+        "Initiation Factor"
+8I9X
+        "Initiation Factor"
+8I9Y
+        "Initiation Factor"
+8I9Z
+        "Initiation Factor"
+8IA0
+        "Initiation Factor"
+8IDT
+        "Initiation Factor"
+8IDY
+        "Initiation Factor"
+8IE3
+        "Initiation Factor"
+8INE
+        "Initiation Factor"
+8INF
+        "Initiation Factor"
+8INK
+        "Initiation Factor"
+8IPD
+        "Initiation Factor"
+8IPX
+        "Initiation Factor"
+8IPY
+        "Initiation Factor"
+8IR1
+        "Initiation Factor"
+8IR3
+        "Release Factor"
+8OIN
+        "Release Factor"
+8OIP
+        "Release Factor"
+8OIQ
+        "Release Factor"
+8OIR
+        "Release Factor"
+8OIS
+        "Release Factor"
+8OIT

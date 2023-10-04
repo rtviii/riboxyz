@@ -4,9 +4,6 @@ import sys
 SECRET_KEY = 'ju=n4om3z00jd1+y2(ufn)g^@w-dj*&-45&4yd1_aiun50b6by'
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-ASSETS_PATH = ...
-MUSCLE38_PATH = ...
-
 sys.path.append(os.path.abspath(os.path.join(BASE_DIR,'ribctl')))       #! hack until ribctl is a separate pypi project
 sys.path.append(os.path.abspath(os.path.join(BASE_DIR,'ribctl','lib'))) #! hack until ribctl is a separate pypi project
 
@@ -24,7 +21,7 @@ vars          = ["NEO4J_URI", "NEO4J_USER", "NEO4J_PASSWORD","NEO4J_CURRENTDB", 
 for var in vars:
     if var not in os.environ:
         print("Environment variable {} not set".format(var))
-        exit(1)
+        # exit(1)
 
 NEO4J_URI       :str= os.getenv("NEO4J_URI")
 NEO4J_PASSWORD  :str= os.getenv("NEO4J_PASSWORD")
