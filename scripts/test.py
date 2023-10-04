@@ -487,43 +487,47 @@ elif sys.argv[1] == "collect_factors":
         json.dump(factors, outfile)
 
 
+
 elif sys.argv[1] == "hmmt":
-    # prof = RibosomeAssets("5imq").profile()
+    rcsb_id = sys.argv[2]
+    prof = RibosomeAssets(rcsb_id).profile()
 
-
-
+    report_name = "{}_max_seed_seq_5".format(rcsb_id)
     hmmx = HMMClassifier(
-        300852,
+        prof.src_organism_ids[0],
         [pc for pc in [*list(ProteinClass), *list(LifecycleFactorClass)]],
-        name="test_hmx",
+        name         = "max_seed_seq_5",
+        no_cache     = True,
+        max_seed_seq = 5
     )
 
-    with open(hmmx.name, 'wb') as outfile:
-        dill.dump(hmmx, outfile)
+    prots          :list[Polymer] = prof.proteins
+    factor_polymers:list[Polymer] = prof.polymeric_factors
+    other_polymers :list[Polymer] = prof.other_polymers
 
-    # with open("test_hmx", 'rb') as infile:
-    #     thishere:HMMClassifier = pickle.load(infile)
-    #     pprint(thishere.hmms_registry)
+    alphabet = pyhmmer.easel.Alphabet.amino()
+    state    = {}
+    
+    for chain in  [ *prots, *factor_polymers, *other_polymers ]:
+        print(chain.auth_asym_id,chain.nomenclature,chain.src_organism_ids[0],chain.rcsb_pdbx_description)
+        state[chain.auth_asym_id] = []
 
-    # prots          :list[Polymer] = prof.proteins
-    # factor_polymers:list[Polymer] = prof.polymeric_factors
-    # other_polymers :list[Polymer] = prof.other_polymers
+        seq_record = chain.to_SeqRecord()
+        query_seq  = pyhmmer.easel.TextSequence(name=bytes(seq_record.id,'utf-8'), sequence=seq_record.seq)
+        query_seqs = [query_seq.digitize(alphabet)]
 
-    # pseqs        = [p.to_SeqRecord() for p in [ *prots, *factor_polymers, *other_polymers ]]
+        for scan in list(pyhmmer.hmmscan(query_seqs,[*hmmx.hmms_registry.values()] )):
+            for hit in [*scan]:
+               hit_dict = {
+                "hit.name:"       :hit.name.decode()       ,
+                "hit.evalue:"     :hit.evalue     ,
+                "hit.score:"      :hit.score      ,
+                # "hit.domains:"    :hit.domains    
+                }
+               state[chain.auth_asym_id].append(hit_dict)
 
-    # for seq_record in pseqs:
-    #     query_seq  = pyhmmer.easel.TextSequence(name=bytes(seq_record.id,'utf-8'), sequence=seq_record.seq)
-    #     query_seqs =  [query_seq.digitize(pyhmmer.easel.Alphabet.amino())]
-    #     for scan in list(pyhmmer.hmmscan(query_seqs,[*hmmx.hmms_registry.values()] )):
-    #         hits = [*scan]
-    #         for hit in hits:
-    #             print("hit.name:\t",hit.name)
-    #             print("hit.evalue:\t",hit.evalue)
-    #             print("hit.score:\t",hit.score)
-    #             print("hit.description:\t",hit.description)
-    #             print("hit.domains:\t",hit.domains)
-
-    # hmmx.info()
+    with open("{}.json".format(report_name), "w") as outfile:
+        json.dump(state, outfile)
 
 
 # ? Many-to-many scan time: python3 scripts/test.py hmmt  33.92s user 3.87s system 110% cpu 34.338 total

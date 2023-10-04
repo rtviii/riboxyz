@@ -35,7 +35,7 @@ hmm_cachedir = ASSETS['__hmm_cache']
 #? Constructon
 
 
-def fasta_phylogenetic_correction(candidate_class:ProteinClass|RNAClass|LifecycleFactorClass, organism_taxid:int, max_n_neighbors=10)->Iterator[SeqRecord]:
+def fasta_phylogenetic_correction(candidate_class:ProteinClass|RNAClass|LifecycleFactorClass, organism_taxid:int, max_n_neighbors:int=10)->Iterator[SeqRecord]:
 
     """Given a candidate class and an organism taxid, retrieve the corresponding fasta file, and perform phylogenetic correction on it."""
 
@@ -62,7 +62,6 @@ def fasta_phylogenetic_correction(candidate_class:ProteinClass|RNAClass|Lifecycl
     phylo_nbhd   = phylogenetic_neighborhood(list(map(lambda x: str(x),ids)), str(organism_taxid), max_n_neighbors)
     seqs         = records.pick_taxids(phylo_nbhd)
     return iter(seqs)
-
 
 def seq_evaluate_v_hmm(seq:str,alphabet:Alphabet, hmm:HMM):
     """Fit a sequence to a given HMM"""
@@ -164,6 +163,28 @@ def classify_subchains(targets:list[typing.Union[Protein,RNA,LifecycleFactor]],c
 
         return {k:v for (k,v) in results}
 
+def hmm_cache(hmm:HMM):
+    name     = hmm.name.decode('utf-8')
+    filename = os.path.join(hmm_cachedir, name)
+
+    if not os.path.isfile(filename):
+        with open(filename, "wb") as hmm_file:
+            hmm.write(hmm_file)
+            print("Wrote `{}` to `{}`".format(filename, hmm_cachedir))
+    else:
+        ...
+
+def hmm_check_cache(candidate_class: ProteinClass | RNAClass | LifecycleFactorClass, organism_taxid:int)->HMM | None:
+    hmm_path = "class_{}_taxid_{}.hmm".format(candidate_class.value, organism_taxid)
+    if os.path.isfile(os.path.join(hmm_cachedir, hmm_path)):
+        hmm_path = os.path.join(hmm_cachedir, hmm_path)
+        with pyhmmer.plan7.HMMFile(hmm_path) as hmm_file:
+            HMM = hmm_file.read()
+            return HMM
+    else:
+        return None
+
+
 def hmm_dict_init__candidates_per_organism(candidate_classes: list[ PolymerClass ] ,organism_taxid:int)->dict[PolymerClass, HMM]:
 
     _ ={}
@@ -184,17 +205,16 @@ def hmm_create(name:str, seqs:Iterator[SeqRecord], alphabet:Alphabet)->HMM:
     """Create an HMM from a list of sequences"""
 
     seq_tuples =  [TextSequence(name=bytes(seq.id, 'utf-8'), sequence=str(seq.seq)) for seq in seqs]
-
     builder       = pyhmmer.plan7.Builder(alphabet)
     background    = pyhmmer.plan7.Background(alphabet) #? The null(background) model can be later augmented.
     anonymous_msa = pyhmmer.easel.TextMSA(bytes(name, 'utf-8'),sequences=seq_tuples)
-
     HMM, _profile, _optmized_profile = builder.build_msa(anonymous_msa.digitize(alphabet), background)
+
     return HMM
 
-def hmm_produce(candidate_class: ProteinClass | RNAClass | LifecycleFactorClass, organism_taxid:int, no_cache:bool=False)->HMM:  # type: ignore
+def hmm_produce(candidate_class: ProteinClass | RNAClass | LifecycleFactorClass, organism_taxid:int, no_cache:bool=False, max_seed_seq:int=10)->HMM:  # type: ignore
     """Produce an organism-specific HMM. Retrieve from cache if exists, otherwise generate and cache."""
-    if ( hmm := HMMClassifier.hmm_check_cache(candidate_class, organism_taxid) ) != None and not no_cache:
+    if ( hmm := hmm_check_cache(candidate_class, organism_taxid) ) != None and not no_cache:
         return hmm
     else:
         if candidate_class in ProteinClass or candidate_class in LifecycleFactorClass:
@@ -204,13 +224,13 @@ def hmm_produce(candidate_class: ProteinClass | RNAClass | LifecycleFactorClass,
         else:
             raise Exception("hmm_produce: Unimplemented candidate class")
                 
-        seqs        = fasta_phylogenetic_correction(candidate_class, organism_taxid, max_n_neighbors=10)
+        seqs        = fasta_phylogenetic_correction(candidate_class, organism_taxid, max_n_neighbors=max_seed_seq)
         seqs_a      = muscle_align_N_seq(iter(seqs))
-        cached_name = "class_{}_taxid_{}.hmm".format(candidate_class.value, organism_taxid)
-        HMM         = HMMClassifier.hmm_create(cached_name, seqs_a, alphabet)
+        name = "{}".format(candidate_class.value)
+        HMM         = hmm_create(name, seqs_a, alphabet)
 
         if not no_cache:
-            HMMClassifier.hmm_cache(HMM)
+            hmm_cache(HMM)
         return HMM
 
 class HMMClassifier(object):
@@ -234,15 +254,14 @@ class HMMClassifier(object):
     # def __setstate__(self, state: object) -> None:
     #     pass
 
-    def __init__(self, tax_id:int, candidate_classes:list[PolymerClass], name:Optional[str]=None) -> None:
+    def __init__(self, tax_id:int, candidate_classes:list[PolymerClass], name:Optional[str]=None, no_cache:bool=False, max_seed_seq:int=10) -> None:
 
         self.organism_tax_id = tax_id
         self.name            = name if name != None else "classifier_{}".format(tax_id)
-
         for candidate in candidate_classes:
-            seqs                           = [*fasta_phylogenetic_correction(candidate, tax_id, max_n_neighbors=10)]
+            seqs                           = [*fasta_phylogenetic_correction(candidate, tax_id, max_n_neighbors=max_seed_seq)]
             self.seed_sequences[candidate] = seqs
-            self.hmms_registry[candidate]  = hmm_produce(candidate, tax_id)
+            self.hmms_registry[candidate]  = hmm_produce(candidate, tax_id, no_cache=no_cache, max_seed_seq=max_seed_seq)
 
 
     def scan(self, alphabet:pyhmmer.easel.Alphabet, target_seqs:list[SeqRecord],):
@@ -318,21 +337,21 @@ class HMMClassifier(object):
     #     if ( hmm := HMMClassifier.hmm_check_cache(candidate_class, organism_taxid) ) != None and not no_cache:
     #         return hmm
     #     else:
-            if candidate_class in ProteinClass or candidate_class in LifecycleFactorClass:
-                alphabet = pyhmmer.easel.Alphabet.amino()
-            elif candidate_class in LifecycleFactorClass: 
-                alphabet = pyhmmer.easel.Alphabet.rna()
-            else:
-                raise Exception("hmm_produce: Unimplemented candidate class")
+            # if candidate_class in ProteinClass or candidate_class in LifecycleFactorClass:
+            #     alphabet = pyhmmer.easel.Alphabet.amino()
+            # elif candidate_class in LifecycleFactorClass: 
+            #     alphabet = pyhmmer.easel.Alphabet.rna()
+            # else:
+            #     raise Exception("hmm_produce: Unimplemented candidate class")
                     
-            seqs        = fasta_phylogenetic_correction(candidate_class, organism_taxid, max_n_neighbors=10)
-            seqs_a      = muscle_align_N_seq(iter(seqs))
-            cached_name = "class_{}_taxid_{}.hmm".format(candidate_class.value, organism_taxid)
-            HMM         = HMMClassifier.hmm_create(cached_name, seqs_a, alphabet)
+            # seqs        = fasta_phylogenetic_correction(candidate_class, organism_taxid, max_n_neighbors=10)
+            # seqs_a      = muscle_align_N_seq(iter(seqs))
+            # cached_name = "class_{}_taxid_{}.hmm".format(candidate_class.value, organism_taxid)
+            # HMM         = HMMClassifier.hmm_create(cached_name, seqs_a, alphabet)
 
-            if not no_cache:
-                HMMClassifier.hmm_cache(HMM)
-            return HMM
+            # if not no_cache:
+            #     HMMClassifier.hmm_cache(HMM)
+            # return HMM
 
 
     def seq_eval(self,seq:str):
