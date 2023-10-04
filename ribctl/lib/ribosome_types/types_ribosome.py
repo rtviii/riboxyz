@@ -1,5 +1,6 @@
 from typing import Any, Optional
 from enum import Enum, auto
+from Bio.SeqRecord import SeqRecord
 import typing
 import typing
 from typing import NewType
@@ -11,6 +12,7 @@ RCSB_ID = NewType('RCSB_ID', str)
 
 class ProteinClass(Enum):
     #TODO :Mitochondrial
+    # SSU
     bS1   = "bS1"
     eS1   = "eS1"
     uS2   = "uS2"
@@ -51,6 +53,7 @@ class ProteinClass(Enum):
     eS30  = "eS30"
     eS31  = "eS31"
     RACK1 = "RACK1"
+    # LSU
     uL1   = "uL1"
     uL2   = "uL2"
     uL3   = "uL3"
@@ -217,6 +220,9 @@ PolymerClass         = enum_union(RNAClass, ProteinClass, LifecycleFactorClass)
 class Polymer(BaseModel):
     def __hash__(self):
         return hash(self.auth_asym_id + self.parent_rcsb_id)
+    def to_SeqRecord(self)->SeqRecord:
+        return SeqRecord(self.entity_poly_seq_one_letter_code_can, id=f"{self.parent_rcsb_id}.{self.auth_asym_id}", 
+                         description="{}|{}".format(self.src_organism_ids[0],self.rcsb_pdbx_description))
 
     assembly_id: int
 
@@ -415,9 +421,8 @@ class RibosomeStructure(BaseModel):
     rnas                : list[RNA]
     nonpolymeric_ligands: list[NonpolymericLigand]
     polymeric_factors   : list[LifecycleFactor]
-
     # This includes DNA-RNA hybrid strands, DNA and all other polymers
-    other_polymers   : Optional[list[Polymer]]
+    other_polymers   : list[Polymer]
     
     @staticmethod
     def from_json_profile(d: Any):

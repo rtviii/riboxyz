@@ -218,7 +218,7 @@ def extend_enum(base_enum: enum.EnumMeta):
                   'B': <ExtendedEnum.B: 2>})
     """
 
-    def decorator(extension_enum: enum.EnumMeta):
+    def decorator(extension_enum: enumEnumMeta):
         return enum_union(base_enum, extension_enum)
 
     return decorator
