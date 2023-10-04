@@ -6,6 +6,7 @@ from typing import Any, Optional
 from pyhmmer.plan7 import HMM
 import requests
 from ribctl.lib.classification import (
+    HMMScanner,
     classify_subchains,
     seq_evaluate_v_hmm_dict,
     hmm_dict_init__candidates_per_organism,
@@ -312,12 +313,12 @@ class ReannotationPipeline:
                 ):
                     # TODO: MOVE TO HMM BASED CLASSIFICATION METHOD
                     reshaped_polymeric_factors.extend(
-                        self.poly_reshape_to_rFactor(poly)
+                        self.poly_reshape_to_factor(poly)
                     )
 
                 else:
                     # TODO: MOVE TO HMM BASED CLASSIFICATION METHOD
-                    reshaped_proteins.extend(self.poly_reshape_to_rProtein(poly))
+                    reshaped_proteins.extend(self.poly_reshape_to_rprotein(poly))
             else:
                 # print("Filtered out a protein")
                 ...
@@ -343,10 +344,10 @@ class ReannotationPipeline:
         for j, poly_rna in enumerate(rnas):
             if (True!= None ):
                 # TODO: HMM WORKFLOW
-                reshaped_polymeric_factors.extend( self.poly_reshape_to_rFactor(poly_rna) )
+                reshaped_polymeric_factors.extend( self.poly_reshape_to_factor(poly_rna) )
             else:
                 # TODO: DIFFERENTIATE BETWEEN MRNA (regex) AND TRNA (HMM workflow )
-                reshaped_rnas.extend(self.poly_reshape_to_rRNA(poly_rna))
+                reshaped_rnas.extend(self.poly_reshape_to_rrna(poly_rna))
 
         self.rRNA = reshaped_rnas
         return (reshaped_rnas, reshaped_polymeric_factors)
@@ -371,7 +372,7 @@ class ReannotationPipeline:
 
         flat_other = []
         for poly in other:
-            flat_other = [*flat_other, *self.poly_reshape_to_Other(poly)]
+            flat_other = [*flat_other, *self.poly_reshape_to_other(poly)]
 
         return flat_other
 
@@ -418,7 +419,7 @@ class ReannotationPipeline:
 
         return [organisms, externalRefs, pub, kwords_text, kwords]
 
-    def poly_reshape_to_rProtein(self, rpotein_polymer_obj) -> list[Protein]:
+    def poly_reshape_to_rprotein(self, rpotein_polymer_obj) -> list[Protein]:
         if (
             rpotein_polymer_obj["pfams"] != None
             and len(rpotein_polymer_obj["pfams"]) > 0
@@ -540,7 +541,7 @@ class ReannotationPipeline:
             ]["auth_asym_ids"]
         ]
 
-    def poly_reshape_to_rRNA(self, rrna_polymer_obj) -> list[RNA]:
+    def poly_reshape_to_rrna(self, rrna_polymer_obj) -> list[RNA]:
         """this returns a list because certain polymers accounts for multiple RNA molecules"""
 
         host_organisms: list[Any] | None = rrna_polymer_obj["rcsb_entity_host_organism"]
@@ -611,7 +612,7 @@ class ReannotationPipeline:
             ]["auth_asym_ids"]
         ]
 
-    def poly_reshape_to_rFactor(self, factor_polymer_obj) -> list[LifecycleFactor]:
+    def poly_reshape_to_factor(self, factor_polymer_obj) -> list[LifecycleFactor]:
         host_organisms: list[Any] | None = factor_polymer_obj[
             "rcsb_entity_host_organism"
         ]
@@ -692,7 +693,7 @@ class ReannotationPipeline:
             ]["auth_asym_ids"]
         ]
 
-    def poly_reshape_to_Other(self, other_polymer_obj) -> list[Polymer]:
+    def poly_reshape_to_other(self, other_polymer_obj) -> list[Polymer]:
         host_organisms: Optional[list[Any]] = other_polymer_obj[
             "rcsb_entity_host_organism"
         ]
@@ -763,8 +764,10 @@ class ReannotationPipeline:
         ]
 
     def process_structure(self):
-        [ reshaped_proteins, reshaped_polymeric_factors_prot, ] = self.process_polypeptides()
-        [reshaped_rnas, reshaped_polymeric_factors_rna]         = self.process_polynucleotides()
+
+        [reshaped_proteins, reshaped_polymeric_factors_prot] = self.process_polypeptides()
+        [reshaped_rnas, reshaped_polymeric_factors_rna]      = self.process_polynucleotides()
+
 
         other_polymers = self.process_other_polymers()
 
@@ -794,7 +797,6 @@ class ReannotationPipeline:
 
         reshaped_nonpolymers = self.process_nonpolymers()
         [organisms, externalRefs, pub, kwords_text, kwords] = self.process_metadata()
-
         reshaped = RibosomeStructure(
             rcsb_id=self.rcsb_data_dict["rcsb_id"],
             expMethod=self.rcsb_data_dict["exptl"][0]["method"],

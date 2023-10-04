@@ -32,7 +32,7 @@ from ribctl.etl.etl_pipeline import (
 )
 from ribctl.etl.obtain import obtain_assets_threadpool
 from ribctl.lib.classification import (
-    HMMClassifier,
+    HMMScanner,
     classify_sequence,
     classify_subchain,
     classify_subchains,
@@ -44,6 +44,7 @@ from ribctl.etl.ribosome_assets import Assetlist, RibosomeAssets
 from ribctl.lib.ribosome_types.types_ribosome import (
     LifecycleFactorClass,
     Polymer,
+    PolymerClass,
     ProteinClass,
     RNAClass,
 )
@@ -487,48 +488,113 @@ elif sys.argv[1] == "collect_factors":
         json.dump(factors, outfile)
 
 
+class HMMClassifier():
 
-elif sys.argv[1] == "hmmt":
-    rcsb_id = sys.argv[2]
-    prof = RibosomeAssets(rcsb_id).profile()
+    organism_scanners: dict[int, HMMScanner] = {}
+    chains           : list[Polymer] = []
+    alphabet         : pyhmmer.easel.Alphabet
+    candidate_classes: list[PolymerClass]
 
-    report_name = "{}_max_seed_seq_5".format(rcsb_id)
-    hmmx = HMMClassifier(
-        prof.src_organism_ids[0],
-        [pc for pc in [*list(ProteinClass), *list(LifecycleFactorClass)]],
-        name         = "max_seed_seq_5",
-        no_cache     = True,
-        max_seed_seq = 5
-    )
 
-    prots          :list[Polymer] = prof.proteins
-    factor_polymers:list[Polymer] = prof.polymeric_factors
-    other_polymers :list[Polymer] = prof.other_polymers
+    report_name      : str
+    report      : dict
 
-    alphabet = pyhmmer.easel.Alphabet.amino()
-    state    = {}
+    def __init__(self, report_name:str, chains: list[Polymer], alphabet:pyhmmer.easel.Alphabet) -> None:
+        self.report_name = report_name
+        self.chains = chains
+        self.alphabet = alphabet
+        if alphabet == Alphabet.amino():
+            self.candidate_classes  = [pc for pc in [*list(ProteinClass), *list(LifecycleFactorClass)]]
+        elif alphabet == Alphabet.rna():
+            self.candidate_classes  = [pc for pc in [*list(RNAClass)]]
+
+    def scan_chains(self, chains:list[Polymer]):
+        for chain in self.chains:
+            organism_taxid = chain.src_organism_ids[0]
+
+            # -- pick scanner'|
+            if organism_taxid not in self.organism_scanners:
+                    hmmscanner        = HMMScanner(
+                        organism_taxid,
+                        self.candidate_classes,
+                        no_cache     = True,
+                        max_seed_seq = 5)
+                    self.organism_scanners[organism_taxid] = hmmscanner
+
+            else:
+                hmmscanner = self.organism_scanners[organism_taxid]
+            # -- pick scanner.|
+ 
+
+            self.report[chain.auth_asym_id] = {
+                hits:[],
+            }
+
+            # -- convert seq to easel format
+            seq_record = chain.to_SeqRecord()
+            query_seq  = pyhmmer.easel.TextSequence(name=bytes(seq_record.id,'utf-8'), sequence=seq_record.seq)
+            query_seqs = [query_seq.digitize(alphabet)]
+            # -- convert seq to easel format
+            
+            for scan in list(pyhmmer.hmmscan(query_seqs,[*hmmscanner.hmms_registry.values()])):
+
+                for hit in [*scan]:
+                   d_hit = {
+                    "hit.name:"  : hit.name.decode(),
+                    "hit.evalue:": hit.evalue,
+                    "hit.score:" : hit.score,
+                    "fasta_seed" : hmmscanner.seed_sequences[hit.name.decode()],
+                    }
+
+                   self.report[chain.auth_asym_id]["hits"].append(d_hit)
+
+
+
+
+# elif sys.argv[1] == "hmmt":
+
+#     rcsb_id     = sys.argv[2]
+#     prof        = RibosomeAssets(rcsb_id).profile()
+#     report_name = "{}_max_seed_seq_5".format(rcsb_id)
+
+#     hmmx        = HMMScanner(
+#         prof.src_organism_ids[0],
+#         [pc for pc in [*list(ProteinClass), *list(LifecycleFactorClass)]],
+#         name         = "max_seed_seq_5",
+#         no_cache     = True,
+#         max_seed_seq = 5
+#     )
+
+#     prots          :list[Polymer] = prof.proteins
+#     factor_polymers:list[Polymer] = prof.polymeric_factors
+#     other_polymers :list[Polymer] = prof.other_polymers
+
+#     alphabet     = pyhmmer.easel.Alphabet.amino()
+#     report_state = {}
     
-    for chain in  [ *prots, *factor_polymers, *other_polymers ]:
-        print(chain.auth_asym_id,chain.nomenclature,chain.src_organism_ids[0],chain.rcsb_pdbx_description)
-        state[chain.auth_asym_id] = []
+#     for chain in  [ *prots, *factor_polymers, *other_polymers ]:
 
-        seq_record = chain.to_SeqRecord()
-        query_seq  = pyhmmer.easel.TextSequence(name=bytes(seq_record.id,'utf-8'), sequence=seq_record.seq)
-        query_seqs = [query_seq.digitize(alphabet)]
+#         report_state[chain.auth_asym_id] = []
+#         seq_record = chain.to_SeqRecord()
+#         query_seq  = pyhmmer.easel.TextSequence(name=bytes(seq_record.id,'utf-8'), sequence=seq_record.seq)
+#         query_seqs = [query_seq.digitize(alphabet)]
 
-        for scan in list(pyhmmer.hmmscan(query_seqs,[*hmmx.hmms_registry.values()] )):
-            for hit in [*scan]:
-               hit_dict = {
-                "hit.name:"       :hit.name.decode()       ,
-                "hit.evalue:"     :hit.evalue     ,
-                "hit.score:"      :hit.score      ,
-                # "hit.domains:"    :hit.domains    
-                }
-               state[chain.auth_asym_id].append(hit_dict)
+#         for scan in list(pyhmmer.hmmscan(query_seqs,[*hmmx.hmms_registry.values()])):
 
-    with open("{}.json".format(report_name), "w") as outfile:
-        json.dump(state, outfile)
+#             for hit in [*scan]:
+#                hit_dict = {
+#                 "hit.name:"  : hit.name.decode(),
+#                 "hit.evalue:": hit.evalue,
+#                 "hit.score:" : hit.score,
+#                 }
+
+#                report_state[chain.auth_asym_id].append(hit_dict)
+
+#     with open("{}.json".format(report_name), "w") as outfile:
+#         json.dump(report_state, outfile)
 
 
-# ? Many-to-many scan time: python3 scripts/test.py hmmt  33.92s user 3.87s system 110% cpu 34.338 total
-# ? Many-to-one scan time : python3 scripts/test.py hmmt  37.04s user 4.05s system 108% cpu 37.708 total
+
+# # TODO: deliberate on each chain's taxid
+# # TODO: pick best hit
+# # TODO: save report

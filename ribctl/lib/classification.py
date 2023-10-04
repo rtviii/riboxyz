@@ -190,13 +190,13 @@ def hmm_dict_init__candidates_per_organism(candidate_classes: list[ PolymerClass
     _ ={}
     for candidate_class in candidate_classes:
         if candidate_class in ProteinClass:
-            _.update({ candidate_class.value: HMMClassifier.hmm_produce(candidate_class, organism_taxid) })
+            _.update({ candidate_class.value: HMMScanner.hmm_produce(candidate_class, organism_taxid) })
 
         elif candidate_class in RNAClass:
-            _.update({ candidate_class.value: HMMClassifier.hmm_produce(candidate_class, organism_taxid) })
+            _.update({ candidate_class.value: HMMScanner.hmm_produce(candidate_class, organism_taxid) })
 
         elif candidate_class in LifecycleFactorClass:
-            _.update({ candidate_class.value: HMMClassifier.hmm_produce(candidate_class, organism_taxid) })
+            _.update({ candidate_class.value: HMMScanner.hmm_produce(candidate_class, organism_taxid) })
         else:
             raise Exception("hmm_dict_init__candidates_per_organism: Unexpected candidate class: {}".format(candidate_class))
     return {}
@@ -233,7 +233,7 @@ def hmm_produce(candidate_class: ProteinClass | RNAClass | LifecycleFactorClass,
             hmm_cache(HMM)
         return HMM
 
-class HMMClassifier(object):
+class HMMScanner():
     # https://pyhmmer.readthedocs.io/en/stable/api/plan7.html#pyhmmer.plan7.HMM
     """
     STEPS (bottom-up):
@@ -246,13 +246,7 @@ class HMMClassifier(object):
 
     seed_sequences : dict[PolymerClass, list[SeqRecord]] = {}
     hmms_registry  : dict[PolymerClass, HMM] = {}
-    organism_tax_id: int
 
-
-    # def __getstate__(self) -> object:
-    #     pass
-    # def __setstate__(self, state: object) -> None:
-    #     pass
 
     def __init__(self, tax_id:int, candidate_classes:list[PolymerClass], name:Optional[str]=None, no_cache:bool=False, max_seed_seq:int=10) -> None:
 
@@ -264,8 +258,11 @@ class HMMClassifier(object):
             self.hmms_registry[candidate]  = hmm_produce(candidate, tax_id, no_cache=no_cache, max_seed_seq=max_seed_seq)
 
 
-    def scan(self, alphabet:pyhmmer.easel.Alphabet, target_seqs:list[SeqRecord],):
+
+
+    def scan(self, alphabet:pyhmmer.easel.Alphabet, target_seqs:list[SeqRecord]):
         """Construct a scan pipeline for the current classifier"""
+
         # convert seq records to a list of pyhmmer.DigitalSequences
         query_seqs = []
         for seq_record in target_seqs:
@@ -275,7 +272,20 @@ class HMMClassifier(object):
         scans = list(pyhmmer.hmmscan(query_seqs,[*self.hmms_registry.values()] ))
         return scans
 
+    def info(self):
+        """Get info for the constituent HMMs in the current classifier"""
+        _ = {
+             "seed_seqs": {
+                str(k.value): [{"seq":str(seqrecord.seq), "tax_id":seqrecord.id} for seqrecord in v] for (k, v) in self.seed_sequences.items()
+             },
+             "hmms_registry": {
+                    str( k.value ): {"name": v.name.decode(),  "M":v.M, "nseq":v.nseq, "nseq_effective":v.nseq_effective}
+                    for (k, v) in self.hmms_registry.items()
+                },
+             }
 
+        with open(self.name, 'w') as outfile:
+            json.dump(_, outfile, indent=4)
     # @staticmethod
     # def hmm_create(name:str, seqs:Iterator[SeqRecord], alphabet:Alphabet)->HMM:
     #     """Create an HMM from a list of sequences"""
@@ -353,21 +363,3 @@ class HMMClassifier(object):
             #     HMMClassifier.hmm_cache(HMM)
             # return HMM
 
-
-    def seq_eval(self,seq:str):
-        ...
-
-    def info(self):
-        """Get info for the constituent HMMs in the current classifier"""
-        _ = {
-             "seed_seqs": {
-                str(k.value): [{"seq":str(seqrecord.seq), "tax_id":seqrecord.id} for seqrecord in v] for (k, v) in self.seed_sequences.items()
-             },
-             "hmms_registry": {
-                    str( k.value ): {"name": v.name.decode(),  "M":v.M, "nseq":v.nseq, "nseq_effective":v.nseq_effective}
-                    for (k, v) in self.hmms_registry.items()
-                },
-             }
-
-        with open(self.name, 'w') as outfile:
-            json.dump(_, outfile, indent=4)
