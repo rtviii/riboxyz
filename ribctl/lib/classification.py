@@ -184,7 +184,6 @@ def hmm_check_cache(candidate_class: ProteinClass | RNAClass | LifecycleFactorCl
     else:
         return None
 
-
 def hmm_dict_init__candidates_per_organism(candidate_classes: list[ PolymerClass ] ,organism_taxid:int)->dict[PolymerClass, HMM]:
 
     _ ={}
@@ -366,7 +365,7 @@ class HMMClassifier():
     alphabet          : pyhmmer.easel.Alphabet
     candidate_classes : list[PolymerClass]
 
-    bitscore_threshold: int = 50 # TODO: unused as of now
+    bitscore_threshold: int = 35 # TODO: unused as of now
     report      : dict
 
     def __init__(self, chains: list[Polymer], alphabet:pyhmmer.easel.Alphabet) -> None:
@@ -386,7 +385,7 @@ class HMMClassifier():
             return []
 
         sorted_by_biscore = sorted(hits, key=lambda x: x["bitscore"], reverse=True)
-        return sorted_by_biscore[0]['class_name']
+        return sorted_by_biscore[0]['class_name'] if sorted_by_biscore[0]['bitscore'] > self.bitscore_threshold else []
 
 
         # return [ sorted(hits, key=lambda x: x["hit.score"])[0]["hit.name"].decode() ] if len(hits) >0 else []
@@ -408,7 +407,6 @@ class HMMClassifier():
  
 
             self.report[chain.auth_asym_id] = []
-
             # -- convert seq to easel format
             seq_record = chain.to_SeqRecord()
             query_seq  = pyhmmer.easel.TextSequence(name=bytes(seq_record.id,'utf-8'), sequence=seq_record.seq)
