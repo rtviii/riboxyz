@@ -24,7 +24,7 @@ from Bio.Align import MultipleSeqAlignment, Seq, SeqRecord
 from Bio.Align.Applications import MuscleCommandline
 from pyhmmer import phmmer
 import pyhmmer
-from ribctl import ASSETS, RIBETL_DATA
+from ribctl import ASSETS, LOGS_PATH, RIBETL_DATA
 from ribctl.etl.etl_pipeline import (
     ReannotationPipeline,
     query_rcsb_api,
@@ -499,7 +499,9 @@ elif sys.argv[1] == "hmmt":
     pipeline = HMMClassifier( proteins, Alphabet.amino())
     pipeline.scan_chains()
     pipeline.produce_classification()
-    pipeline.write_classification_report('5IMQ_classification_report.json')
+
+    report_path = os.path.join(LOGS_PATH,'{}_classification_report.json'.format(rcsb_id))
+    pipeline.write_classification_report(report_path)
 
     pprint(pipeline.organism_scanners)
 
