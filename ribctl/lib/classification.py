@@ -250,7 +250,7 @@ class HMMScanner():
 
         def __load_seed_sequences(candidate_class:PolymerClass,tax_id:int, max_seed_seqs:int)->Tuple[PolymerClass, list[SeqRecord]]:
             """This is just for housekeeping. Keeping sequences with which the HMMs were seeded as state on the classifier."""
-            return (PolymerClass, [*fasta_phylogenetic_correction(candidate_class, tax_id, max_n_neighbors=max_seed_seqs)] )
+            return (candidate_class, [*fasta_phylogenetic_correction(candidate_class, tax_id, max_n_neighbors=max_seed_seqs)] )
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=25) as executor:
             loading_futures = []
@@ -259,44 +259,35 @@ class HMMScanner():
             for candidate_class in candidate_classes:
                 future = executor.submit(__load_seed_sequences, candidate_class, tax_id, max_seed_seqs)
                 loading_futures.append(future)
-
-            for future in concurrent.futures.as_completed(loading_futures):
+            for future in concurrent.futures.as_completed(loading_futures): 
                 loaded_results.append(future.result())
 
             # ! populate seqs records
-            map(lambda class_seedseqs: self.seed_sequences.update({class_seedseqs[0].value:class_seedseqs[1]}), loaded_results)
+            for (cls, seedseqs) in loaded_results:
+                 self.seed_sequences.update({str( cls.value ):seedseqs})
             # ! clean containers
             loaded_results, loading_futures = [],[]
+
+
             # ! build hmms
             for candidate_class in candidate_classes:
-                future = executor.submit(hmm_produce,candidate_class, tax_id, self.seed_sequences[candidate_class], no_cache=no_cache)
+                future = executor.submit(hmm_produce,candidate_class, tax_id, self.seed_sequences[candidate_class.value], no_cache=no_cache)
                 loading_futures.append(future)
+            for future in concurrent.futures.as_completed(loading_futures):
+                loaded_results.append(future.result())
 
-            map(lambda class_hmm: self.hmms_registry.update({class_hmm[0].value:class_hmm[1]}), loaded_results)
-
-        # with concurrent.futures.ThreadPoolExecutor(max_workers=25) as executor:
-
-        #     tasks   = []
-        #     results = []
-        #     for chain in targets:
-        #         chain_organism_taxid  = chain.src_organism_ids[0]
-        #         if chain_organism_taxid not in [*hmm_organisms_registry.keys()]:
-        #             hmm_organisms_registry[chain_organism_taxid] = hmm_dict_init__candidates_per_organism(candidate_category, chain_organism_taxid)
-        #         future = executor.submit(classify_subchain, chain, hmm_organisms_registry[chain_organism_taxid])
-        #         tasks.append(future)
-        #     for future in concurrent.futures.as_completed(tasks):
-        #         results.append(future.result())
-        # for candidate in candidate_classes:
+            # ! populate hmms
+            for (cls, hmm) in loaded_results:
+                 self.hmms_registry.update({cls.value:hmm})
 
 
-
-# !-
-        for candidate_class in candidate_classes:
-            seqs                                       = [*fasta_phylogenetic_correction(candidate_class, tax_id, max_n_neighbors=max_seed_seqs)]
-            self.seed_sequences[candidate_class.value] = seqs
-            self.hmms_registry[candidate_class.value]  = hmm_produce(candidate_class, tax_id, no_cache=no_cache, max_seed_seq=max_seed_seqs)
-            print("Loded HMM: {}".format(candidate_class))
-# !-
+# # !-
+#         for candidate_class in candidate_classes:
+#             seqs                                       = [*fasta_phylogenetic_correction(candidate_class, tax_id, max_n_neighbors=max_seed_seqs)]
+#             self.seed_sequences[candidate_class.value] = seqs
+#             self.hmms_registry[candidate_class.value]  = hmm_produce(candidate_class, tax_id, no_cache=no_cache, max_seed_seq=max_seed_seqs)
+#             print("Loded HMM: {}".format(candidate_class))
+# # !-
 
     def scan(self, alphabet:pyhmmer.easel.Alphabet, target_seqs:list[SeqRecord]):
         """Construct a scan pipeline for the current classifier"""
@@ -362,7 +353,7 @@ class HMMClassifier():
 
             # -- pick scanner'|
             if organism_taxid not in self.organism_scanners:
-                    hmmscanner = HMMScanner( organism_taxid, self.candidate_classes, no_cache     = True, max_seed_seq = 5)
+                    hmmscanner = HMMScanner( organism_taxid, self.candidate_classes, no_cache = True, max_seed_seqs = 5)
                     print("Added scanner {} for organism {}".format( hmmscanner.__str__(), organism_taxid ))
                     self.organism_scanners[organism_taxid] = hmmscanner
 
