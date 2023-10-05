@@ -365,7 +365,8 @@ class HMMClassifier():
     chains            : list[Polymer] = []
     alphabet          : pyhmmer.easel.Alphabet
     candidate_classes : list[PolymerClass]
-    bitscore_threshold: int = 50
+
+    bitscore_threshold: int = 50 # TODO: unused as of now
     report      : dict
 
     def __init__(self, chains: list[Polymer], alphabet:pyhmmer.easel.Alphabet) -> None:
@@ -381,10 +382,14 @@ class HMMClassifier():
 
     def pick_best_hit(self, hits:list[dict]) -> list[PolymerClass]:
         # TODO: look at filtering allunder self.bitscore threshold (while scaling the scores by the [average of the lowest half * 1.5]/[average of the lowest half])
-        # For now just pick the highest score hit
-        for hit in hits
+        if len(hits) == 0:
+            return []
 
-        return [ sorted(hits, key=lambda x: x["hit.score"])[0]["hit.name"].decode() ] if len(hits) >0 else []
+        sorted_by_biscore = sorted(hits, key=lambda x: x["bitscore"], reverse=True)
+        return sorted_by_biscore[0]['class_name']
+
+
+        # return [ sorted(hits, key=lambda x: x["hit.score"])[0]["hit.name"].decode() ] if len(hits) >0 else []
 
     def scan_chains(self)->None:
 
@@ -393,11 +398,7 @@ class HMMClassifier():
 
             # -- pick scanner'|
             if organism_taxid not in self.organism_scanners:
-                    hmmscanner        = HMMScanner(
-                        organism_taxid,
-                        self.candidate_classes,
-                        no_cache     = True,
-                        max_seed_seq = 5)
+                    hmmscanner        = HMMScanner( organism_taxid, self.candidate_classes, no_cache     = True, max_seed_seq = 5)
                     print("Added scanner {} for organism {}".format( hmmscanner.__str__(), organism_taxid ))
                     self.organism_scanners[organism_taxid] = hmmscanner
 
@@ -417,13 +418,14 @@ class HMMClassifier():
             for scan in list(pyhmmer.hmmscan(query_seqs,[*hmmscanner.hmms_registry.values()])):
                 for hit in [*scan]:
                    d_hit = {
-                    "fasta_seed" : hmmscanner.seed_sequences[hit.name.decode()],
-                    "hit.name:"  : hit.name.decode(),
-                    "hit.evalue:": hit.evalue,
-                    "hit.score:" : hit.score,
-                    "organism_id": organism_taxid,
-                    "consensus"  : hmmscanner.hmms_registry[hit.name.decode()].consensus,
-                    "domains"    : [( d.score, d.env_from, d.env_to ) for d in hit.domains]
+                    "fasta_seed"        : [str(seqrecord.seq) for seqrecord in hmmscanner.seed_sequences[hit.name.decode()]],
+                    "seed_organism_ids" : [seqrecord.id for seqrecord in hmmscanner.seed_sequences[hit.name.decode()]],
+                    "class_name"        : hit.name.decode(),                                                             # <- comes from the emitting hmm
+                    "evalue"            : hit.evalue,
+                    "bitscore"          : hit.score,
+                    "target_organism_id": organism_taxid,
+                    "consensus"         : hmmscanner.hmms_registry[hit.name.decode()].consensus,
+                    "domains"           : [( d.score, d.c_evalue, d.env_from, d.env_to ) for d in hit.domains]
                     }
 
                    self.report[chain.auth_asym_id].append(d_hit)
