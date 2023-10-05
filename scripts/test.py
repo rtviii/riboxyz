@@ -496,8 +496,11 @@ elif sys.argv[1] == "hmmt":
     prof     = RibosomeAssets(rcsb_id).profile()
     proteins = [ *prof.proteins, *prof.other_polymers, *prof.polymeric_factors ]
 
-    pipeline = HMMClassifier("5IMQ_classification_report.json", proteins, Alphabet.amino())
+    pipeline = HMMClassifier( proteins, Alphabet.amino())
     pipeline.scan_chains()
+    pipeline.produce_classification()
+    pipeline.write_classification_report('5IMQ_classification_report.json')
+
     pprint(pipeline.organism_scanners)
 
 #     hmmx        = HMMScanner(

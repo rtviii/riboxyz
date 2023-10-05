@@ -224,10 +224,10 @@ def hmm_produce(candidate_class: ProteinClass | RNAClass | LifecycleFactorClass,
         else:
             raise Exception("hmm_produce: Unimplemented candidate class")
                 
-        seqs        = fasta_phylogenetic_correction(candidate_class, organism_taxid, max_n_neighbors=max_seed_seq)
-        seqs_a      = muscle_align_N_seq(iter(seqs))
-        name = "{}".format(candidate_class.value)
-        HMM         = hmm_create(name, seqs_a, alphabet)
+        seqs   = fasta_phylogenetic_correction(candidate_class, organism_taxid, max_n_neighbors=max_seed_seq)
+        seqs_a = muscle_align_N_seq(iter(seqs))
+        name   = "{}".format(candidate_class.value)
+        HMM    = hmm_create(name, seqs_a, alphabet)
 
         if not no_cache:
             hmm_cache(HMM)
@@ -242,23 +242,18 @@ class HMMScanner():
     - a sequence is searched against all HMMs in the registry
     """
 
-    name:str
-
     seed_sequences : dict[PolymerClass, list[SeqRecord]] = {}
-    hmms_registry  : dict[PolymerClass, HMM] = {}
+    hmms_registry  : dict[PolymerClass, HMM]             = {}
 
 
-    def __init__(self, tax_id:int, candidate_classes:list[PolymerClass], name:Optional[str]=None, no_cache:bool=False, max_seed_seq:int=10) -> None:
+    def __init__(self, tax_id:int, candidate_classes:list[PolymerClass],  no_cache:bool=False, max_seed_seq:int=10) -> None:
 
         self.organism_tax_id = tax_id
-        self.name            = name if name != None else "classifier_{}".format(tax_id)
-        for candidate in candidate_classes:
-            seqs                           = [*fasta_phylogenetic_correction(candidate, tax_id, max_n_neighbors=max_seed_seq)]
-            self.seed_sequences[candidate] = seqs
-            self.hmms_registry[candidate]  = hmm_produce(candidate, tax_id, no_cache=no_cache, max_seed_seq=max_seed_seq)
-
-
-
+        for candidate_class in candidate_classes:
+            seqs                           = [*fasta_phylogenetic_correction(candidate_class, tax_id, max_n_neighbors=max_seed_seq)]
+            self.seed_sequences[candidate_class.value] = seqs
+            self.hmms_registry[candidate_class.value]  = hmm_produce(candidate_class, tax_id, no_cache=no_cache, max_seed_seq=max_seed_seq)
+            print("Loded HMM: {}".format(candidate_class))
 
     def scan(self, alphabet:pyhmmer.easel.Alphabet, target_seqs:list[SeqRecord]):
         """Construct a scan pipeline for the current classifier"""
@@ -286,6 +281,7 @@ class HMMScanner():
 
         with open(self.name, 'w') as outfile:
             json.dump(_, outfile, indent=4)
+
     # @staticmethod
     # def hmm_create(name:str, seqs:Iterator[SeqRecord], alphabet:Alphabet)->HMM:
     #     """Create an HMM from a list of sequences"""
@@ -370,12 +366,9 @@ class HMMClassifier():
     alphabet          : pyhmmer.easel.Alphabet
     candidate_classes : list[PolymerClass]
     bitscore_threshold: int = 50
-
-    save_path_name      : str
     report      : dict
 
-    def __init__(self, report_name:str, chains: list[Polymer], alphabet:pyhmmer.easel.Alphabet) -> None:
-        self.save_path_name = report_name
+    def __init__(self, chains: list[Polymer], alphabet:pyhmmer.easel.Alphabet) -> None:
         self.chains         = chains
         self.alphabet       = alphabet
         self.report         = {}
@@ -389,6 +382,8 @@ class HMMClassifier():
     def pick_best_hit(self, hits:list[dict]) -> list[PolymerClass]:
         # TODO: look at filtering allunder self.bitscore threshold (while scaling the scores by the [average of the lowest half * 1.5]/[average of the lowest half])
         # For now just pick the highest score hit
+        for hit in hits
+
         return [ sorted(hits, key=lambda x: x["hit.score"])[0]["hit.name"].decode() ] if len(hits) >0 else []
 
     def scan_chains(self)->None:
@@ -403,7 +398,7 @@ class HMMClassifier():
                         self.candidate_classes,
                         no_cache     = True,
                         max_seed_seq = 5)
-                    print("Added scanner {}", hmmscanner.__str__())
+                    print("Added scanner {} for organism {}".format( hmmscanner.__str__(), organism_taxid ))
                     self.organism_scanners[organism_taxid] = hmmscanner
 
             else:
@@ -431,7 +426,7 @@ class HMMClassifier():
                     "domains"    : [( d.score, d.env_from, d.env_to ) for d in hit.domains]
                     }
 
-                   self.report[chain.auth_asym_id]["hits"].append(d_hit)
+                   self.report[chain.auth_asym_id].append(d_hit)
 
     def produce_classification(self)->dict[str,list]:
         classes = {}
@@ -439,8 +434,8 @@ class HMMClassifier():
             classes[auth_asym_id] = self.pick_best_hit(hits)
         return classes
    
-    def write_classification_report(self,path:str)->None:
-        with open(self.save_path_name, "w") as outfile:
+    def write_classification_report(self,write_path:str)->None:
+        with open(write_path, "w") as outfile:
             json.dump(self.report, outfile)
 
 
