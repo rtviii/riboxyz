@@ -363,3 +363,84 @@ class HMMScanner():
             #     HMMClassifier.hmm_cache(HMM)
             # return HMM
 
+class HMMClassifier():
+
+    organism_scanners : dict[int, HMMScanner] = {}
+    chains            : list[Polymer] = []
+    alphabet          : pyhmmer.easel.Alphabet
+    candidate_classes : list[PolymerClass]
+    bitscore_threshold: int = 50
+
+    save_path_name      : str
+    report      : dict
+
+    def __init__(self, report_name:str, chains: list[Polymer], alphabet:pyhmmer.easel.Alphabet) -> None:
+        self.save_path_name = report_name
+        self.chains         = chains
+        self.alphabet       = alphabet
+        self.report         = {}
+
+        if alphabet == Alphabet.amino():
+            self.candidate_classes  = [pc for pc in [*list(ProteinClass), *list(LifecycleFactorClass)]]
+
+        elif alphabet == Alphabet.rna():
+            self.candidate_classes  = [pc for pc in [*list(RNAClass)]]
+
+    def pick_best_hit(self, hits:list[dict]) -> list[PolymerClass]:
+        # TODO: look at filtering allunder self.bitscore threshold (while scaling the scores by the [average of the lowest half * 1.5]/[average of the lowest half])
+        # For now just pick the highest score hit
+        return [ sorted(hits, key=lambda x: x["hit.score"])[0]["hit.name"].decode() ] if len(hits) >0 else []
+
+    def scan_chains(self)->None:
+
+        for chain in self.chains:
+            organism_taxid = chain.src_organism_ids[0]
+
+            # -- pick scanner'|
+            if organism_taxid not in self.organism_scanners:
+                    hmmscanner        = HMMScanner(
+                        organism_taxid,
+                        self.candidate_classes,
+                        no_cache     = True,
+                        max_seed_seq = 5)
+                    print("Added scanner {}", hmmscanner.__str__())
+                    self.organism_scanners[organism_taxid] = hmmscanner
+
+            else:
+                hmmscanner = self.organism_scanners[organism_taxid]
+            # -- pick scanner.|
+ 
+
+            self.report[chain.auth_asym_id] = []
+
+            # -- convert seq to easel format
+            seq_record = chain.to_SeqRecord()
+            query_seq  = pyhmmer.easel.TextSequence(name=bytes(seq_record.id,'utf-8'), sequence=seq_record.seq)
+            query_seqs = [query_seq.digitize(self.alphabet)]
+            # -- convert seq to easel format
+            
+            for scan in list(pyhmmer.hmmscan(query_seqs,[*hmmscanner.hmms_registry.values()])):
+                for hit in [*scan]:
+                   d_hit = {
+                    "fasta_seed" : hmmscanner.seed_sequences[hit.name.decode()],
+                    "hit.name:"  : hit.name.decode(),
+                    "hit.evalue:": hit.evalue,
+                    "hit.score:" : hit.score,
+                    "organism_id": organism_taxid,
+                    "consensus"  : hmmscanner.hmms_registry[hit.name.decode()].consensus,
+                    "domains"    : [( d.score, d.env_from, d.env_to ) for d in hit.domains]
+                    }
+
+                   self.report[chain.auth_asym_id]["hits"].append(d_hit)
+
+    def produce_classification(self)->dict[str,list]:
+        classes = {}
+        for (auth_asym_id,hits) in self.report.items():
+            classes[auth_asym_id] = self.pick_best_hit(hits)
+        return classes
+   
+    def write_classification_report(self,path:str)->None:
+        with open(self.save_path_name, "w") as outfile:
+            json.dump(self.report, outfile)
+
+

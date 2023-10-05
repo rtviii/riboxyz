@@ -32,6 +32,7 @@ from ribctl.etl.etl_pipeline import (
 )
 from ribctl.etl.obtain import obtain_assets_threadpool
 from ribctl.lib.classification import (
+    HMMClassifier,
     HMMScanner,
     classify_sequence,
     classify_subchain,
@@ -488,89 +489,16 @@ elif sys.argv[1] == "collect_factors":
         json.dump(factors, outfile)
 
 
-class HMMClassifier():
+elif sys.argv[1] == "hmmt":
 
-    organism_scanners : dict[int, HMMScanner] = {}
-    chains            : list[Polymer] = []
-    alphabet          : pyhmmer.easel.Alphabet
-    candidate_classes : list[PolymerClass]
-    bitscore_threshold: int = 50
+    rcsb_id  = sys.argv[2]
+    rcsb_id  = '5imq'
+    prof     = RibosomeAssets(rcsb_id).profile()
+    proteins = [ *prof.proteins, *prof.other_polymers, *prof.polymeric_factors ]
 
-
-    report_name      : str
-    report      : dict
-
-    def __init__(self, report_name:str, chains: list[Polymer], alphabet:pyhmmer.easel.Alphabet) -> None:
-        self.report_name = report_name
-        self.chains = chains
-        self.alphabet = alphabet
-        if alphabet == Alphabet.amino():
-            self.candidate_classes  = [pc for pc in [*list(ProteinClass), *list(LifecycleFactorClass)]]
-        elif alphabet == Alphabet.rna():
-            self.candidate_classes  = [pc for pc in [*list(RNAClass)]]
-
-    def pick_best_hit(self, hits:list[dict]) -> list[PolymerClass]:
-        # TODO: look at filtering allunder self.bitscore threshold (while scaling the scores by the [average of the lowest half * 1.5]/[average of the lowest half])
-        # For now just pick the highest score hit
-        return [ sorted(hits, key=lambda x: x["hit.score"])[0]["hit.name"].decode() ] if len(hits) >0 else []
-
-
-    def scan_chains(self)->None:
-
-        for chain in self.chains:
-            organism_taxid = chain.src_organism_ids[0]
-
-            # -- pick scanner'|
-            if organism_taxid not in self.organism_scanners:
-                    hmmscanner        = HMMScanner(
-                        organism_taxid,
-                        self.candidate_classes,
-                        no_cache     = True,
-                        max_seed_seq = 5)
-                    self.organism_scanners[organism_taxid] = hmmscanner
-
-            else:
-                hmmscanner = self.organism_scanners[organism_taxid]
-            # -- pick scanner.|
- 
-
-            self.report[chain.auth_asym_id] = []
-
-            # -- convert seq to easel format
-            seq_record = chain.to_SeqRecord()
-            query_seq  = pyhmmer.easel.TextSequence(name=bytes(seq_record.id,'utf-8'), sequence=seq_record.seq)
-            query_seqs = [query_seq.digitize(alphabet)]
-            # -- convert seq to easel format
-            
-            for scan in list(pyhmmer.hmmscan(query_seqs,[*hmmscanner.hmms_registry.values()])):
-                for hit in [*scan]:
-                   d_hit = {
-                    "fasta_seed" : hmmscanner.seed_sequences[hit.name.decode()],
-                    "hit.name:"  : hit.name.decode(),
-                    "hit.evalue:": hit.evalue,
-                    "hit.score:" : hit.score,
-                    "organism_id": organism_taxid,
-                    "consensus"  : hmmscanner.hmms_registry[hit.name.decode()].consensus,
-                    "domains"    : [( d.score, d.env_from, d.env_to ) for d in hit.domains]
-                    }
-
-                   self.report[chain.auth_asym_id]["hits"].append(d_hit)
-            
-
-    def produce_classification(self)->dict[str,list]:
-        classes = {}
-        for (auth_asym_id,hits) in self.report.items():
-            classes[auth_asym_id] = self.pick_best_hit(hits)
-
-        return classes
-
-
-
-# elif sys.argv[1] == "hmmt":
-
-#     rcsb_id     = sys.argv[2]
-#     prof        = RibosomeAssets(rcsb_id).profile()
-#     report_name = "{}_max_seed_seq_5".format(rcsb_id)
+    pipeline = HMMClassifier("5IMQ_classification_report.json", proteins, Alphabet.amino())
+    pipeline.scan_chains()
+    pprint(pipeline.organism_scanners)
 
 #     hmmx        = HMMScanner(
 #         prof.src_organism_ids[0],
