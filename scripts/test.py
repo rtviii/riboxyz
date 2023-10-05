@@ -491,19 +491,24 @@ elif sys.argv[1] == "collect_factors":
 
 elif sys.argv[1] == "hmmt":
 
-    rcsb_id  = sys.argv[2]
-    rcsb_id  = '5imq'
-    prof     = RibosomeAssets(rcsb_id).profile()
-    proteins = [ *prof.proteins, *prof.other_polymers, *prof.polymeric_factors ]
+    
+    for rcsb_id in RibosomeAssets.list_all_structs():
+        prof     = RibosomeAssets(rcsb_id).profile()
 
-    pipeline = HMMClassifier( proteins, Alphabet.amino())
-    pipeline.scan_chains()
-    pipeline.produce_classification()
+        proteins = [ *prof.proteins, *prof.other_polymers, *prof.polymeric_factors ]
+        rna      = [ *prof.rnas, *prof.other_polymers ]
 
-    report_path = os.path.join(LOGS_PATH,'{}_classification_report.json'.format(rcsb_id))
-    pipeline.write_classification_report(report_path)
+        pipeline_polypeptides    = HMMClassifier( proteins, Alphabet.amino())
+        pipeline_polypeptides.scan_chains()
+        prots_report = pipeline_polypeptides.produce_classification()
 
-    pprint(pipeline.organism_scanners)
+        pipeline_polynucleotides = HMMClassifier( proteins, Alphabet.rna())
+        pipeline_polynucleotides.scan_chains()
+        rna_report = pipeline_polynucleotides.produce_classification()
+
+        report_path = os.path.join(LOGS_PATH,'classification_reports','{}_classification_report.json'.format(rcsb_id))
+        pipeline.write_classification_report(report_path)
+
 
 #     hmmx        = HMMScanner(
 #         prof.src_organism_ids[0],

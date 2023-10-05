@@ -293,7 +293,7 @@ class ReannotationPipeline:
     def process_polypeptides(self) -> tuple[list[Protein], list[LifecycleFactor]]:
         poly_entities = self.rcsb_data_dict["polymer_entities"]
 
-        reshaped_proteins: list[Protein] = []
+        reshaped_proteins         : list[Protein]         = []
         reshaped_polymeric_factors: list[LifecycleFactor] = []
 
         def is_protein(poly):
@@ -767,6 +767,7 @@ class ReannotationPipeline:
 
         [reshaped_proteins, reshaped_polymeric_factors_prot] = self.process_polypeptides()
         [reshaped_rnas, reshaped_polymeric_factors_rna]      = self.process_polynucleotides()
+        
 
 
         other_polymers = self.process_other_polymers()
