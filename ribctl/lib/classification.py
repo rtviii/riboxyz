@@ -211,10 +211,10 @@ def hmm_create(name:str, seqs:Iterator[SeqRecord], alphabet:Alphabet)->HMM:
 
     return HMM
 
-def hmm_produce(candidate_class: ProteinClass | RNAClass | LifecycleFactorClass, organism_taxid:int, no_cache:bool=False, max_seed_seq:int=10)->HMM:  # type: ignore
+def hmm_produce(candidate_class: ProteinClass | RNAClass | LifecycleFactorClass, organism_taxid:int, seed_sequences:list[SeqRecord], no_cache:bool=False)->Tuple[PolymerClass,HMM]:  # type: ignore
     """Produce an organism-specific HMM. Retrieve from cache if exists, otherwise generate and cache."""
     if ( hmm := hmm_check_cache(candidate_class, organism_taxid) ) != None and not no_cache:
-        return hmm
+        return (candidate_class, hmm )
     else:
         if candidate_class in ProteinClass or candidate_class in LifecycleFactorClass:
             alphabet = pyhmmer.easel.Alphabet.amino()
@@ -223,14 +223,13 @@ def hmm_produce(candidate_class: ProteinClass | RNAClass | LifecycleFactorClass,
         else:
             raise Exception("hmm_produce: Unimplemented candidate class")
                 
-        seqs   = fasta_phylogenetic_correction(candidate_class, organism_taxid, max_n_neighbors=max_seed_seq)
-        seqs_a = muscle_align_N_seq(iter(seqs))
+        seqs_a = muscle_align_N_seq(iter(seed_sequences))
         name   = "{}".format(candidate_class.value)
         HMM    = hmm_create(name, seqs_a, alphabet)
 
         if not no_cache:
             hmm_cache(HMM)
-        return HMM
+        return (candidate_class, HMM )
 
 class HMMScanner():
     # https://pyhmmer.readthedocs.io/en/stable/api/plan7.html#pyhmmer.plan7.HMM
@@ -249,25 +248,45 @@ class HMMScanner():
 
         self.organism_tax_id = tax_id
 
-        def __load_seed_sequences(candidate_class:PolymerClass,tax_id:int, max_seed_seqs:int):
+        def __load_seed_sequences(candidate_class:PolymerClass,tax_id:int, max_seed_seqs:int)->Tuple[PolymerClass, list[SeqRecord]]:
             """This is just for housekeeping. Keeping sequences with which the HMMs were seeded as state on the classifier."""
-            return [*fasta_phylogenetic_correction(candidate_class, tax_id, max_n_neighbors=max_seed_seqs)]
+            return (PolymerClass, [*fasta_phylogenetic_correction(candidate_class, tax_id, max_n_neighbors=max_seed_seqs)] )
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=25) as executor:
+            loading_futures = []
+            loaded_results  = []
+            # ! load seqs
+            for candidate_class in candidate_classes:
+                future = executor.submit(__load_seed_sequences, candidate_class, tax_id, max_seed_seqs)
+                loading_futures.append(future)
 
-            tasks   = []
-            results = []
-            for chain in targets:
-                chain_organism_taxid  = chain.src_organism_ids[0]
-                if chain_organism_taxid not in [*hmm_organisms_registry.keys()]:
-                    hmm_organisms_registry[chain_organism_taxid] = hmm_dict_init__candidates_per_organism(candidate_category, chain_organism_taxid)
-                future = executor.submit(classify_subchain, chain, hmm_organisms_registry[chain_organism_taxid])
-                tasks.append(future)
+            for future in concurrent.futures.as_completed(loading_futures):
+                loaded_results.append(future.result())
 
-            for future in concurrent.futures.as_completed(tasks):
-                results.append(future.result())
+            # ! populate seqs records
+            map(lambda class_seedseqs: self.seed_sequences.update({class_seedseqs[0].value:class_seedseqs[1]}), loaded_results)
+            # ! clean containers
+            loaded_results, loading_futures = [],[]
+            # ! build hmms
+            for candidate_class in candidate_classes:
+                future = executor.submit(hmm_produce,candidate_class, tax_id, self.seed_sequences[candidate_class], no_cache=no_cache)
+                loading_futures.append(future)
 
-        for candidate in candidate_classes:
+            map(lambda class_hmm: self.hmms_registry.update({class_hmm[0].value:class_hmm[1]}), loaded_results)
+
+        # with concurrent.futures.ThreadPoolExecutor(max_workers=25) as executor:
+
+        #     tasks   = []
+        #     results = []
+        #     for chain in targets:
+        #         chain_organism_taxid  = chain.src_organism_ids[0]
+        #         if chain_organism_taxid not in [*hmm_organisms_registry.keys()]:
+        #             hmm_organisms_registry[chain_organism_taxid] = hmm_dict_init__candidates_per_organism(candidate_category, chain_organism_taxid)
+        #         future = executor.submit(classify_subchain, chain, hmm_organisms_registry[chain_organism_taxid])
+        #         tasks.append(future)
+        #     for future in concurrent.futures.as_completed(tasks):
+        #         results.append(future.result())
+        # for candidate in candidate_classes:
 
 
 
