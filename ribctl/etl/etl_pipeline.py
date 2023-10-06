@@ -11,9 +11,6 @@ import requests
 from ribctl.lib.classification import (
     HMMClassifier,
     HMMScanner,
-    classify_subchains,
-    seq_evaluate_v_hmm_dict,
-    hmm_dict_init__candidates_per_organism,
 )
 from ribctl.lib.ribosome_types.types_ribosome import (
     RNA,
@@ -736,6 +733,8 @@ class ReannotationPipeline:
         # polypeptides , polynucleotides,  other_polymers  = [], [], []
 
         for polymer in polymers:
+            if polymer.auth_asym_id == '7':
+                pprint(polymer)
             pprint(polymer.entity_poly_polymer_type)
             match polymer.entity_poly_polymer_type:
                 case "Protein":
@@ -745,16 +744,14 @@ class ReannotationPipeline:
                 case _:
                     _other_polymers.append(polymer)
 
-
-
+        # pprint(_polynucleotides)
         # proteins = [ *prof.proteins, *prof.other_polymers, *prof.polymeric_factors ]
         # rna      = [ *prof.rnas, *prof.other_polymers ]
 
-
-        pipeline_polypeptides    = HMMClassifier( _polypeptides, pyhmmer.easel.Alphabet.amino())
-        pipeline_polypeptides.scan_chains()
-        prots_report = pipeline_polypeptides.produce_classification()
-        print(prots_report)
+        # pipeline_polypeptides    = HMMClassifier( _polypeptides, pyhmmer.easel.Alphabet.amino())
+        # pipeline_polypeptides.scan_chains()
+        # prots_report = pipeline_polypeptides.produce_classification()
+        # print(prots_report)
 
         pipeline_polynucleotides = HMMClassifier( _polynucleotides, pyhmmer.easel.Alphabet.rna())
         pipeline_polynucleotides.scan_chains()
