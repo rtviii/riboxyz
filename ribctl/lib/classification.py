@@ -43,7 +43,7 @@ def fasta_phylogenetic_correction(candidate_class:ProteinClass|RNAClass|Lifecycl
         fasta_path = os.path.join(ASSETS["fasta_proteins_cytosolic"], f"{candidate_class.value}.fasta")
 
     elif candidate_class in RNAClass:
-        fasta_path = os.path.join(ASSETS["fasta_rna"], f"{candidate_class.value}.fasta")
+        fasta_path = os.path.join(ASSETS["fasta_rrna"], f"{candidate_class.value}.fasta")
 
     elif candidate_class in LifecycleFactorClass:
         if candidate_class in ElongationFactorClass:
@@ -105,63 +105,63 @@ def pick_best_hmm_hit(matches_dict:dict[PolymerClass, list[float]], chain_info:P
 
     return results[0]['candidate_class']
 
-def classify_sequence(seq:str, organism:int, candidate_category:typing.Union[RNAClass, ProteinClass], candidates_dict:dict[PolymerClass, HMM]|None=None)->dict[PolymerClass, list[float]]:
+# def classify_sequence(seq:str, organism:int, candidate_category:typing.Union[RNAClass, ProteinClass], candidates_dict:dict[PolymerClass, HMM]|None=None)->dict[PolymerClass, list[float]]:
 
-    if candidate_category == ProteinClass:
-        candidates_dict = candidates_dict if candidates_dict is not None else hmm_dict_init__candidates_per_organism(candidate_category, organism)
-        results         = seq_evaluate_v_hmm_dict(seq, pyhmmer.easel.Alphabet.amino(), candidates_dict)
-        return results
+#     if candidate_category == ProteinClass:
+#         candidates_dict = candidates_dict if candidates_dict is not None else hmm_dict_init__candidates_per_organism(candidate_category, organism)
+#         results         = seq_evaluate_v_hmm_dict(seq, pyhmmer.easel.Alphabet.amino(), candidates_dict)
+#         return results
 
-    elif candidate_category == RNAClass:
-        candidates_dict = candidates_dict if candidates_dict is not None else hmm_dict_init__candidates_per_organism(candidate_category, organism)
-        results         = seq_evaluate_v_hmm_dict(seq, pyhmmer.easel.Alphabet.rna(), candidates_dict)
-        return results
+#     elif candidate_category == RNAClass:
+#         candidates_dict = candidates_dict if candidates_dict is not None else hmm_dict_init__candidates_per_organism(candidate_category, organism)
+#         results         = seq_evaluate_v_hmm_dict(seq, pyhmmer.easel.Alphabet.rna(), candidates_dict)
+#         return results
 
-    elif candidate_category == LifecycleFactorClass:
-        candidates_dict = candidates_dict if candidates_dict is not None else hmm_dict_init__candidates_per_organism(candidate_category, organism)
-        results         = seq_evaluate_v_hmm_dict(seq, pyhmmer.easel.Alphabet.amino(), candidates_dict)
-        return results
-    else:
-        raise Exception("Classify sequence: Unimplemented candidate category")
+#     elif candidate_category == LifecycleFactorClass:
+#         candidates_dict = candidates_dict if candidates_dict is not None else hmm_dict_init__candidates_per_organism(candidate_category, organism)
+#         results         = seq_evaluate_v_hmm_dict(seq, pyhmmer.easel.Alphabet.amino(), candidates_dict)
+#         return results
+#     else:
+#         raise Exception("Classify sequence: Unimplemented candidate category")
 
 #! Implementations ------------------------------
 
-def classify_subchain(chain: typing.Union[Protein, RNA, LifecycleFactor] , candidates_dict:dict[PolymerClass, HMM]|None=None)->Tuple[str, PolymerClass|None]:
-    # logging.debug("Task for chain {}.{} (Old nomenclature {}) | taxid {}".format( chain.parent_rcsb_id,chain.auth_asym_id, chain.nomenclature, chain.src_organism_ids[0]))
-    if type(chain) == RNA:
-        assigned = classify_sequence(chain.entity_poly_seq_one_letter_code_can, chain.src_organism_ids[0], RNAClass, candidates_dict=candidates_dict)
+# def classify_subchain(chain: typing.Union[Protein, RNA, LifecycleFactor] , candidates_dict:dict[PolymerClass, HMM]|None=None)->Tuple[str, PolymerClass|None]:
+#     # logging.debug("Task for chain {}.{} (Old nomenclature {}) | taxid {}".format( chain.parent_rcsb_id,chain.auth_asym_id, chain.nomenclature, chain.src_organism_ids[0]))
+#     if type(chain) == RNA:
+#         assigned = classify_sequence(chain.entity_poly_seq_one_letter_code_can, chain.src_organism_ids[0], RNAClass, candidates_dict=candidates_dict)
 
-    elif type(chain) == Protein:
-        assigned = classify_sequence(chain.entity_poly_seq_one_letter_code_can, chain.src_organism_ids[0], ProteinClass, candidates_dict=candidates_dict)
+#     elif type(chain) == Protein:
+#         assigned = classify_sequence(chain.entity_poly_seq_one_letter_code_can, chain.src_organism_ids[0], ProteinClass, candidates_dict=candidates_dict)
 
-    elif type(chain)== LifecycleFactor:
-        assigned = classify_sequence(chain.entity_poly_seq_one_letter_code_can, chain.src_organism_ids[0], LifecycleFactorClass, candidates_dict=candidates_dict)
-    else:
-        raise Exception("Invalid chain type")
+#     elif type(chain)== LifecycleFactor:
+#         assigned = classify_sequence(chain.entity_poly_seq_one_letter_code_can, chain.src_organism_ids[0], LifecycleFactorClass, candidates_dict=candidates_dict)
+#     else:
+#         raise Exception("Invalid chain type")
     
-    assigned = pick_best_hmm_hit(assigned, chain)
-    return (chain.auth_asym_id, assigned)
+#     assigned = pick_best_hmm_hit(assigned, chain)
+#     return (chain.auth_asym_id, assigned)
 
 # def classify_subchains(targets:list[Protein]|list[RNA]|list[PolymericFactor])->dict[str, PolymerClass_]:
-def classify_subchains(targets:list[typing.Union[Protein,RNA,LifecycleFactor]],candidate_category:PolymerClass)->dict[str, PolymerClass]:
-    # This is a dict of dicts to only do IO once(on average) per organism assuming 90%+ of chains in a structure are of the same taxid.(Pass it down)
-    # It's a dictionary because some chains within a structure might originate in different organisms (host system).
-    hmm_organisms_registry: dict[int,dict[PolymerClass, HMM]]= {}
+# def classify_subchains(targets:list[typing.Union[Protein,RNA,LifecycleFactor]],candidate_category:PolymerClass)->dict[str, PolymerClass]:
+#     # This is a dict of dicts to only do IO once(on average) per organism assuming 90%+ of chains in a structure are of the same taxid.(Pass it down)
+#     # It's a dictionary because some chains within a structure might originate in different organisms (host system).
+#     hmm_organisms_registry: dict[int,dict[PolymerClass, HMM]]= {}
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=25) as executor:
-        tasks   = []
-        results = []
-        for chain in targets:
-            chain_organism_taxid  = chain.src_organism_ids[0]
-            if chain_organism_taxid not in [*hmm_organisms_registry.keys()]:
-                hmm_organisms_registry[chain_organism_taxid] = hmm_dict_init__candidates_per_organism(candidate_category, chain_organism_taxid)
-            future = executor.submit(classify_subchain, chain, hmm_organisms_registry[chain_organism_taxid])
-            tasks.append(future)
+#     with concurrent.futures.ThreadPoolExecutor(max_workers=25) as executor:
+#         tasks   = []
+#         results = []
+#         for chain in targets:
+#             chain_organism_taxid  = chain.src_organism_ids[0]
+#             if chain_organism_taxid not in [*hmm_organisms_registry.keys()]:
+#                 hmm_organisms_registry[chain_organism_taxid] = hmm_dict_init__candidates_per_organism(candidate_category, chain_organism_taxid)
+#             future = executor.submit(classify_subchain, chain, hmm_organisms_registry[chain_organism_taxid])
+#             tasks.append(future)
 
-        for future in concurrent.futures.as_completed(tasks):
-            results.append(future.result())
+#         for future in concurrent.futures.as_completed(tasks):
+#             results.append(future.result())
 
-        return {k:v for (k,v) in results}
+#         return {k:v for (k,v) in results}
 
 def hmm_cache(hmm:HMM):
     name     = hmm.name.decode('utf-8')
@@ -184,21 +184,21 @@ def hmm_check_cache(candidate_class: ProteinClass | RNAClass | LifecycleFactorCl
     else:
         return None
 
-def hmm_dict_init__candidates_per_organism(candidate_classes: list[ PolymerClass ] ,organism_taxid:int)->dict[PolymerClass, HMM]:
+# def hmm_dict_init__candidates_per_organism(candidate_classes: list[ PolymerClass ] ,organism_taxid:int)->dict[PolymerClass, HMM]:
 
-    _ ={}
-    for candidate_class in candidate_classes:
-        if candidate_class in ProteinClass:
-            _.update({ candidate_class.value: HMMScanner.hmm_produce(candidate_class, organism_taxid) })
+#     _ ={}
+#     for candidate_class in candidate_classes:
+#         if candidate_class in ProteinClass:
+#             _.update({ candidate_class.value: HMMScanner.hmm_produce(candidate_class, organism_taxid) })
 
-        elif candidate_class in RNAClass:
-            _.update({ candidate_class.value: HMMScanner.hmm_produce(candidate_class, organism_taxid) })
+#         elif candidate_class in RNAClass:
+#             _.update({ candidate_class.value: HMMScanner.hmm_produce(candidate_class, organism_taxid) })
 
-        elif candidate_class in LifecycleFactorClass:
-            _.update({ candidate_class.value: HMMScanner.hmm_produce(candidate_class, organism_taxid) })
-        else:
-            raise Exception("hmm_dict_init__candidates_per_organism: Unexpected candidate class: {}".format(candidate_class))
-    return {}
+#         elif candidate_class in LifecycleFactorClass:
+#             _.update({ candidate_class.value: HMMScanner.hmm_produce(candidate_class, organism_taxid) })
+#         else:
+#             raise Exception("hmm_dict_init__candidates_per_organism: Unexpected candidate class: {}".format(candidate_class))
+#     return {}
 
 def hmm_create(name:str, seqs:Iterator[SeqRecord], alphabet:Alphabet)->HMM:
     """Create an HMM from a list of sequences"""
@@ -218,7 +218,7 @@ def hmm_produce(candidate_class: ProteinClass | RNAClass | LifecycleFactorClass,
     else:
         if candidate_class in ProteinClass or candidate_class in LifecycleFactorClass:
             alphabet = pyhmmer.easel.Alphabet.amino()
-        elif candidate_class in LifecycleFactorClass: 
+        elif candidate_class in RNAClass: 
             alphabet = pyhmmer.easel.Alphabet.rna()
         else:
             raise Exception("hmm_produce: Unimplemented candidate class")
@@ -321,8 +321,8 @@ class HMMClassifier():
     alphabet          : pyhmmer.easel.Alphabet
     candidate_classes : list[PolymerClass]
 
-    bitscore_threshold: int = 35 # TODO: unused as of now
-    report      : dict
+    bitscore_threshold: int = 35
+    report            : dict
 
     def __init__(self, chains: list[Polymer], alphabet:pyhmmer.easel.Alphabet) -> None:
         self.chains         = chains
@@ -334,6 +334,9 @@ class HMMClassifier():
 
         elif alphabet == Alphabet.rna():
             self.candidate_classes  = [pc for pc in [*list(RNAClass)]]
+
+        else:
+            raise Exception("HMMClassifier: Unimplemented alphabet")
 
     def pick_best_hit(self, hits:list[dict]) -> list[PolymerClass]:
         # TODO: look at filtering allunder self.bitscore threshold (while scaling the scores by the [average of the lowest half * 1.5]/[average of the lowest half])
@@ -369,6 +372,8 @@ class HMMClassifier():
             query_seqs = [query_seq.digitize(self.alphabet)]
             # -- convert seq to easel format
             
+            print("Scanning chain {}.{} against {} HMMs".format(chain.parent_rcsb_id, chain.auth_asym_id, len(hmmscanner.hmms_registry)))
+            print("seq:", query_seq.sequence)
             for scan in list(pyhmmer.hmmscan(query_seqs,[*hmmscanner.hmms_registry.values()])):
                 for hit in [*scan]:
                    d_hit = {
