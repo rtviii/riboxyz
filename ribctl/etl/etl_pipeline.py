@@ -5,6 +5,7 @@ import logging
 from pprint import pprint
 from typing import Any, Optional
 from pyhmmer import phmmer
+import pyhmmer
 from pyhmmer.plan7 import HMM
 import requests
 from ribctl.lib.classification import (
@@ -728,13 +729,15 @@ class ReannotationPipeline:
 
 
         poly_entities = self.rcsb_data_dict["polymer_entities"]
-        polymers       = mitt.collapse([self.raw_to_polymer(_) for _ in poly_entities])
+        pprint(len(poly_entities))
+        polymers       = [*mitt.flatten([self.raw_to_polymer(_) for _ in poly_entities])]
 
         _polypeptides, _polynucleotides, _other_polymers = [], [], []
         # polypeptides , polynucleotides,  other_polymers  = [], [], []
 
         for polymer in polymers:
-            match polymer.entity_poly_entity_type:
+            pprint(polymer.entity_poly_polymer_type)
+            match polymer.entity_poly_polymer_type:
                 case "Protein":
                     _polypeptides.append(polymer)
                 case "RNA":
@@ -743,19 +746,20 @@ class ReannotationPipeline:
                     _other_polymers.append(polymer)
 
 
-        
 
         # proteins = [ *prof.proteins, *prof.other_polymers, *prof.polymeric_factors ]
         # rna      = [ *prof.rnas, *prof.other_polymers ]
 
 
-        pipeline_polypeptides    = HMMClassifier( _polypeptides, phmmer.easel.Alphabet.amino())
+        pipeline_polypeptides    = HMMClassifier( _polypeptides, pyhmmer.easel.Alphabet.amino())
         pipeline_polypeptides.scan_chains()
         prots_report = pipeline_polypeptides.produce_classification()
+        print(prots_report)
 
-        pipeline_polynucleotides = HMMClassifier( _polynucleotides, phmmer.easel.Alphabet.rna())
+        pipeline_polynucleotides = HMMClassifier( _polynucleotides, pyhmmer.easel.Alphabet.rna())
         pipeline_polynucleotides.scan_chains()
         rna_report = pipeline_polynucleotides.produce_classification()
+        pprint(rna_report)
 
         # [reshaped_proteins, reshaped_polymeric_factors_prot] = self.process_polypeptides()
         # [reshaped_rnas, reshaped_polymeric_factors_rna]      = self.process_polynucleotides()
@@ -791,8 +795,9 @@ class ReannotationPipeline:
         #     + len(reshaped_polymeric_factors_prot)
         #     + len(other_polymers)
         # ) == self.flattened_polymers_target
+        exit(1)
 
-        reshaped_nonpolymers = self.process_nonpolymers()
+        # reshaped_nonpolymers = self.process_nonpolymers()
         [organisms, externalRefs, pub, kwords_text, kwords] = self.process_metadata()
         reshaped = RibosomeStructure(
             rcsb_id=self.rcsb_data_dict["rcsb_id"],
