@@ -1,11 +1,14 @@
 import functools
+import more_itertools as mitt
 import json
 import logging
 from pprint import pprint
 from typing import Any, Optional
+from pyhmmer import phmmer
 from pyhmmer.plan7 import HMM
 import requests
 from ribctl.lib.classification import (
+    HMMClassifier,
     HMMScanner,
     classify_subchains,
     seq_evaluate_v_hmm_dict,
@@ -105,9 +108,11 @@ class ReannotationPipeline:
     # hmm_ribosomal_ligands:dict[NonpolymericLigandClass, HMM]
 
     # ? Housekeeping
-    asm_maps: list[AssemblyInstancesMap]
-    rcsb_polymers: int
-    rcsb_nonpolymers: int
+    asm_maps                 : list[AssemblyInstancesMap]
+    rcsb_polymers            : int
+    rcsb_nonpolymers         : int
+
+    polymers_target_count: int
 
     # rProteins: list[Protein] | None
     # rRNA     : list[RNA] | None
@@ -115,14 +120,10 @@ class ReannotationPipeline:
     def __init__(self, response: dict):
         self.rcsb_data_dict = response
         # self.hmm_ribosomal_proteins = hmm_dict_init__candidates_per_organism(ProteinClassEnum, response["rcsb_id"])
-        self.asm_maps = self.asm_parse(response["assemblies"])
 
-        self.rcsb_polymers = len(self.rcsb_data_dict["polymer_entities"])
-        self.rcsb_nonpolymers = (
-            len(self.rcsb_data_dict["nonpolymer_entities"])
-            if self.rcsb_data_dict["nonpolymer_entities"] != None
-            else 0
-        )
+        self.asm_maps         = self.asm_parse(response["assemblies"])
+        self.rcsb_polymers    = len(self.rcsb_data_dict["polymer_entities"])
+        self.rcsb_nonpolymers = (len(self.rcsb_data_dict["nonpolymer_entities"]) if self.rcsb_data_dict["nonpolymer_entities"] != None else 0)
 
         # What is this garbage, you ask? Let me tell you.
         # The rcsb_data_dict contains a list of polymer entities, each of which has 4 properties(hidden in ..._container_identifiers):
@@ -137,7 +138,7 @@ class ReannotationPipeline:
 
         # Given this state of affairs, if we want to be able to uniquely (coordinate-wise) identify each chain, we need to account for cases where PDB has provided two and sometimes four polymer collapsed into one representation.
         # We do this by counting assymetric_ids of each polymer and hold that as a
-        self.flattened_polymers_target = functools.reduce(
+        self.polymers_target_count = functools.reduce(
             lambda count, poly: count
             + len(poly["rcsb_polymer_entity_container_identifiers"]["asym_ids"]),
             self.rcsb_data_dict["polymer_entities"],
@@ -282,13 +283,9 @@ class ReannotationPipeline:
         else:
             for assembly_map in self.asm_maps:
                 for polymer_instance in assembly_map.polymer_entity_instances:
-                    if (
-                        polymer_instance.rcsb_polymer_entity_instance_container_identifiers.auth_asym_id
-                        == auth_asym_id
-                    ):
+                    if ( polymer_instance.rcsb_polymer_entity_instance_container_identifiers.auth_asym_id == auth_asym_id ):
                         return int(assembly_map.rcsb_id.split("-")[1]) - 1
-            else:
-                raise LookupError()
+            else: raise LookupError("Could not assign chain {} to any assembly".format(auth_asym_id))
 
     def process_polypeptides(self) -> tuple[list[Protein], list[LifecycleFactor]]:
         poly_entities = self.rcsb_data_dict["polymer_entities"]
@@ -297,8 +294,8 @@ class ReannotationPipeline:
         reshaped_polymeric_factors: list[LifecycleFactor] = []
 
         def is_protein(poly):
-            # * According to RCSB schema, polymer_entites include Proteins, RNA but also DNA, NA-Hybrids and "Other".
-            # * We only make the distinction between Proteins and RNA and Other for purposes of simplicity
+            # ! According to RCSB schema, polymer_entites include "Protein", "RNA" but also "DNA", N"A-Hybrids" and "Other".
+            # ! We only make the distinction between Proteins and RNA and Other for purposes of simplicity
             return poly["entity_poly"]["rcsb_entity_polymer_type"] == "Protein"
 
         for poly in poly_entities:
@@ -327,8 +324,9 @@ class ReannotationPipeline:
         return (reshaped_proteins, reshaped_polymeric_factors)
 
     def process_polynucleotides(self) -> tuple[list[RNA], list[LifecycleFactor]]:
+
         poly_entities = self.rcsb_data_dict["polymer_entities"]
-        rnas = []
+        rnas          = []
 
         def is_rna(poly):
             # ! According to RCSB schema, polymer_entites include Proteins, RNA but also DNA, NA-Hybrids and "Other".
@@ -338,11 +336,10 @@ class ReannotationPipeline:
         for poly in poly_entities:
             rnas.append(poly) if is_rna(poly) else ...
 
-        reshaped_rnas: list[RNA] = []
+        reshaped_rnas             : list[RNA]             = []
         reshaped_polymeric_factors: list[LifecycleFactor] = []
-
         for j, poly_rna in enumerate(rnas):
-            if (True!= None ):
+            if ( True!= None ):
                 # TODO: HMM WORKFLOW
                 reshaped_polymeric_factors.extend( self.poly_reshape_to_factor(poly_rna) )
             else:
@@ -419,11 +416,58 @@ class ReannotationPipeline:
 
         return [organisms, externalRefs, pub, kwords_text, kwords]
 
+    def raw_to_polymer(self,data_dict:dict)->list[Polymer]:
+
+        host_organisms: list[Any] | None = data_dict[ "rcsb_entity_host_organism" ]
+        source_organisms: list[Any] | None = data_dict[ "rcsb_entity_source_organism" ]
+
+        host_organism_ids   = []
+        host_organism_names = []
+        src_organism_ids    = []
+        src_organism_names  = []
+
+        if host_organisms != None:
+            for ho in host_organisms:
+                if ho["ncbi_taxonomy_id"] != None:
+                    host_organism_ids.append(ho["ncbi_taxonomy_id"])
+                if ho["scientific_name"] != None:
+                    host_organism_names.append(ho["scientific_name"])
+
+        if source_organisms != None:
+            for so in source_organisms:
+                if so["ncbi_taxonomy_id"] != None:
+                    src_organism_ids.append(so["ncbi_taxonomy_id"])
+                if so["scientific_name"] != None:
+                    src_organism_names.append(so["scientific_name"])
+
+        host_organism_ids   = list(map(int, set(host_organism_ids)))
+        host_organism_names = list(map(str, set(host_organism_names)))
+        src_organism_ids    = list(map(int, set(src_organism_ids)))
+        src_organism_names  = list(map(str, set(src_organism_names)))
+
+        return [Polymer(
+            assembly_id                         = self.poly_assign_to_asm(auth_asym_id) ,
+            nomenclature                        = [] ,                                                                   # Nomenclature does not exist for arbitrary polymers
+            asym_ids                            = data_dict["rcsb_polymer_entity_container_identifiers"][ "asym_ids" ] ,
+            auth_asym_id                        = auth_asym_id ,
+            parent_rcsb_id                      = data_dict["entry"]["rcsb_id"] ,
+            host_organism_ids                   = host_organism_ids ,
+            host_organism_names                 = host_organism_names ,
+            src_organism_ids                    = src_organism_ids ,
+            src_organism_names                  = src_organism_names ,
+            rcsb_pdbx_description               = "" if data_dict["rcsb_polymer_entity"]["pdbx_description"] == None else data_dict["rcsb_polymer_entity"]["pdbx_description"],
+            entity_poly_strand_id               = data_dict["entity_poly"]["pdbx_strand_id"] ,
+            entity_poly_seq_one_letter_code     = data_dict["entity_poly"]["pdbx_seq_one_letter_code"] ,
+            entity_poly_seq_one_letter_code_can = data_dict["entity_poly"]["pdbx_seq_one_letter_code_can" ],
+            entity_poly_seq_length              = data_dict["entity_poly"]["rcsb_sample_sequence_length" ],
+            entity_poly_entity_type             = data_dict["entity_poly"]["type"],
+            entity_poly_polymer_type            = data_dict["entity_poly"]["rcsb_entity_polymer_type"]
+        )
+        for auth_asym_id in data_dict[ "rcsb_polymer_entity_container_identifiers" ]["auth_asym_ids"]]
+
+
     def poly_reshape_to_rprotein(self, rpotein_polymer_obj) -> list[Protein]:
-        if (
-            rpotein_polymer_obj["pfams"] != None
-            and len(rpotein_polymer_obj["pfams"]) > 0
-        ):
+        if ( rpotein_polymer_obj["pfams"] != None and len(rpotein_polymer_obj["pfams"]) > 0 ):
             pfam_comments = list(
                 set(
                     [pfam["rcsb_pfam_comment"] for pfam in rpotein_polymer_obj["pfams"]]
@@ -447,22 +491,17 @@ class ReannotationPipeline:
             )
 
         else:
-            pfam_comments = []
+            pfam_comments     = []
             pfam_descriptions = []
-            pfam_accessions = []
+            pfam_accessions   = []
 
-        host_organisms: list[Any] | None = rpotein_polymer_obj[
-            "rcsb_entity_host_organism"
-        ]
-        source_organisms: list[Any] | None = rpotein_polymer_obj[
-            "rcsb_entity_source_organism"
-        ]
+        host_organisms: list[Any] | None = rpotein_polymer_obj[ "rcsb_entity_host_organism" ]
+        source_organisms: list[Any] | None = rpotein_polymer_obj[ "rcsb_entity_source_organism" ]
 
-        host_organism_ids = []
+        host_organism_ids   = []
         host_organism_names = []
-
-        src_organism_ids = []
-        src_organism_names = []
+        src_organism_ids    = []
+        src_organism_names  = []
 
         if host_organisms != None:
             for ho in host_organisms:
@@ -478,10 +517,10 @@ class ReannotationPipeline:
                 if so["scientific_name"] != None:
                     src_organism_names.append(so["scientific_name"])
 
-        host_organism_ids = list(map(int, set(host_organism_ids)))
+        host_organism_ids   = list(map(int, set(host_organism_ids)))
         host_organism_names = list(map(str, set(host_organism_names)))
-        src_organism_ids = list(map(int, set(src_organism_ids)))
-        src_organism_names = list(map(str, set(src_organism_names)))
+        src_organism_ids    = list(map(int, set(src_organism_ids)))
+        src_organism_names  = list(map(str, set(src_organism_names)))
 
         # ? Compare prot sequence against all HMMs (returns a dict), pick the class with the lowest e-value
         # results_hmm = dict(
@@ -496,45 +535,26 @@ class ReannotationPipeline:
 
         return [
             Protein(
-                assembly_id=self.poly_assign_to_asm(auth_asym_id),
-                nomenclature=[],
-                asym_ids=rpotein_polymer_obj[
-                    "rcsb_polymer_entity_container_identifiers"
-                ]["asym_ids"],
-                parent_rcsb_id=rpotein_polymer_obj["entry"]["rcsb_id"],
-                auth_asym_id=auth_asym_id,
-                pfam_accessions=pfam_accessions,
-                pfam_comments=pfam_comments,
-                pfam_descriptions=pfam_descriptions,
-                host_organism_ids=host_organism_ids,
-                host_organism_names=host_organism_names,
-                src_organism_ids=src_organism_ids,
-                src_organism_names=src_organism_names,
-                uniprot_accession=[
-                    entry["rcsb_id"] for entry in rpotein_polymer_obj["uniprots"]
-                ]
-                if rpotein_polymer_obj["uniprots"] != None
-                and len(rpotein_polymer_obj["uniprots"]) > 0
-                else [],
-                rcsb_pdbx_description=rpotein_polymer_obj["rcsb_polymer_entity"][
-                    "pdbx_description"
-                ],
-                entity_poly_strand_id=rpotein_polymer_obj["entity_poly"][
-                    "pdbx_strand_id"
-                ],
-                entity_poly_seq_one_letter_code=rpotein_polymer_obj["entity_poly"][
-                    "pdbx_seq_one_letter_code"
-                ],
-                entity_poly_seq_one_letter_code_can=rpotein_polymer_obj["entity_poly"][
-                    "pdbx_seq_one_letter_code_can"
-                ],
-                entity_poly_seq_length=rpotein_polymer_obj["entity_poly"][
-                    "rcsb_sample_sequence_length"
-                ],
-                entity_poly_entity_type=rpotein_polymer_obj["entity_poly"]["type"],
-                entity_poly_polymer_type=rpotein_polymer_obj["entity_poly"][
-                    "rcsb_entity_polymer_type"
-                ],
+                assembly_id                         = self.poly_assign_to_asm(auth_asym_id) ,
+                nomenclature                        = [] ,
+                asym_ids                            = rpotein_polymer_obj[ "rcsb_polymer_entity_container_identifiers" ]["asym_ids"] ,
+                parent_rcsb_id                      = rpotein_polymer_obj["entry"]["rcsb_id"] ,
+                auth_asym_id                        = auth_asym_id ,
+                pfam_accessions                     = pfam_accessions ,
+                pfam_comments                       = pfam_comments ,
+                pfam_descriptions                   = pfam_descriptions ,
+                host_organism_ids                   = host_organism_ids ,
+                host_organism_names                 = host_organism_names ,
+                src_organism_ids                    = src_organism_ids ,
+                src_organism_names                  = src_organism_names ,
+                uniprot_accession                   = [ entry["rcsb_id"] for entry in rpotein_polymer_obj["uniprots"] ] if rpotein_polymer_obj["uniprots"] != None and len(rpotein_polymer_obj["uniprots"]) > 0 else [],
+                rcsb_pdbx_description               = rpotein_polymer_obj["rcsb_polymer_entity"][ "pdbx_description" ] ,
+                entity_poly_strand_id               = rpotein_polymer_obj["entity_poly"][ "pdbx_strand_id" ] ,
+                entity_poly_seq_one_letter_code     = rpotein_polymer_obj["entity_poly"][ "pdbx_seq_one_letter_code" ] ,
+                entity_poly_seq_one_letter_code_can = rpotein_polymer_obj["entity_poly"][ "pdbx_seq_one_letter_code_can" ] ,
+                entity_poly_seq_length              = rpotein_polymer_obj["entity_poly"][ "rcsb_sample_sequence_length" ] ,
+                entity_poly_entity_type             = rpotein_polymer_obj["entity_poly"]["type"] ,
+                entity_poly_polymer_type            = rpotein_polymer_obj["entity_poly"][ "rcsb_entity_polymer_type" ]
             )
             for auth_asym_id in rpotein_polymer_obj[
                 "rcsb_polymer_entity_container_identifiers"
@@ -545,14 +565,12 @@ class ReannotationPipeline:
         """this returns a list because certain polymers accounts for multiple RNA molecules"""
 
         host_organisms: list[Any] | None = rrna_polymer_obj["rcsb_entity_host_organism"]
-        source_organisms: list[Any] | None = rrna_polymer_obj[
-            "rcsb_entity_source_organism"
-        ]
+        source_organisms: list[Any] | None = rrna_polymer_obj[ "rcsb_entity_source_organism" ]
 
-        host_organism_ids = []
+        host_organism_ids   = []
         host_organism_names = []
-        src_organism_ids = []
-        src_organism_names = []
+        src_organism_ids    = []
+        src_organism_names  = []
 
         if host_organisms != None:
             for ho in host_organisms:
@@ -568,62 +586,44 @@ class ReannotationPipeline:
                 if so["scientific_name"] != None:
                     src_organism_names.append(so["scientific_name"])
 
-        host_organism_ids = list(map(int, set(host_organism_ids)))
+        host_organism_ids   = list(map(int, set(host_organism_ids)))
         host_organism_names = list(map(str, set(host_organism_names)))
-        src_organism_ids = list(map(int, set(src_organism_ids)))
-        src_organism_names = list(map(str, set(src_organism_names)))
+        src_organism_ids    = list(map(int, set(src_organism_ids)))
+        src_organism_names  = list(map(str, set(src_organism_names)))
 
 
         nomenclature = []
 
         return [
             RNA(
-                assembly_id=self.poly_assign_to_asm(auth_asym_id),
-                nomenclature=nomenclature,
-                asym_ids=rrna_polymer_obj["rcsb_polymer_entity_container_identifiers"][
-                    "asym_ids"
-                ],
-                auth_asym_id=auth_asym_id,
-                parent_rcsb_id=rrna_polymer_obj["entry"]["rcsb_id"],
-                host_organism_ids=host_organism_ids,
-                host_organism_names=host_organism_names,
-                src_organism_ids=src_organism_ids,
-                src_organism_names=src_organism_names,
-                rcsb_pdbx_description=""
-                if rrna_polymer_obj["rcsb_polymer_entity"]["pdbx_description"] == None
-                else rrna_polymer_obj["rcsb_polymer_entity"]["pdbx_description"],
-                entity_poly_strand_id=rrna_polymer_obj["entity_poly"]["pdbx_strand_id"],
-                entity_poly_seq_one_letter_code=rrna_polymer_obj["entity_poly"][
-                    "pdbx_seq_one_letter_code"
-                ],
-                entity_poly_seq_one_letter_code_can=rrna_polymer_obj["entity_poly"][
-                    "pdbx_seq_one_letter_code_can"
-                ],
-                entity_poly_seq_length=rrna_polymer_obj["entity_poly"][
-                    "rcsb_sample_sequence_length"
-                ],
-                entity_poly_entity_type=rrna_polymer_obj["entity_poly"]["type"],
-                entity_poly_polymer_type=rrna_polymer_obj["entity_poly"][
-                    "rcsb_entity_polymer_type"
-                ],
+                assembly_id                         = self.poly_assign_to_asm(auth_asym_id) ,
+                nomenclature                        = nomenclature ,
+                asym_ids                            = rrna_polymer_obj["rcsb_polymer_entity_container_identifiers"][ "asym_ids" ] ,
+                auth_asym_id                        = auth_asym_id ,
+                parent_rcsb_id                      = rrna_polymer_obj["entry"]["rcsb_id"] ,
+                host_organism_ids                   = host_organism_ids ,
+                host_organism_names                 = host_organism_names ,
+                src_organism_ids                    = src_organism_ids ,
+                src_organism_names                  = src_organism_names ,
+                rcsb_pdbx_description               = "" if rrna_polymer_obj["rcsb_polymer_entity"]["pdbx_description"]           == None else rrna_polymer_obj["rcsb_polymer_entity"]["pdbx_description"],
+                entity_poly_strand_id               = rrna_polymer_obj["entity_poly"]["pdbx_strand_id"] ,
+                entity_poly_seq_one_letter_code     = rrna_polymer_obj["entity_poly"][ "pdbx_seq_one_letter_code" ] ,
+                entity_poly_seq_one_letter_code_can = rrna_polymer_obj["entity_poly"][ "pdbx_seq_one_letter_code_can" ] ,
+                entity_poly_seq_length              = rrna_polymer_obj["entity_poly"][ "rcsb_sample_sequence_length" ] ,
+                entity_poly_entity_type             = rrna_polymer_obj["entity_poly"]["type"] ,
+                entity_poly_polymer_type            = rrna_polymer_obj["entity_poly"][ "rcsb_entity_polymer_type" ] ,
             )
-            for auth_asym_id in rrna_polymer_obj[
-                "rcsb_polymer_entity_container_identifiers"
-            ]["auth_asym_ids"]
+            for auth_asym_id in rrna_polymer_obj[ "rcsb_polymer_entity_container_identifiers" ]["auth_asym_ids"]
         ]
 
     def poly_reshape_to_factor(self, factor_polymer_obj) -> list[LifecycleFactor]:
-        host_organisms: list[Any] | None = factor_polymer_obj[
-            "rcsb_entity_host_organism"
-        ]
-        source_organisms: list[Any] | None = factor_polymer_obj[
-            "rcsb_entity_source_organism"
-        ]
+        host_organisms: list[Any] | None = factor_polymer_obj[ "rcsb_entity_host_organism" ]
+        source_organisms: list[Any] | None = factor_polymer_obj[ "rcsb_entity_source_organism" ]
 
-        host_organism_ids = []
+        host_organism_ids   = []
         host_organism_names = []
-        src_organism_ids = []
-        src_organism_names = []
+        src_organism_ids    = []
+        src_organism_names  = []
 
         if host_organisms != None:
             for ho in host_organisms:
@@ -639,77 +639,47 @@ class ReannotationPipeline:
                 if so["scientific_name"] != None:
                     src_organism_names.append(so["scientific_name"])
 
-        host_organism_ids = list(map(int, set(host_organism_ids)))
+        host_organism_ids   = list(map(int, set(host_organism_ids)))
         host_organism_names = list(map(str, set(host_organism_names)))
-        src_organism_ids = list(map(int, set(src_organism_ids)))
-        src_organism_names = list(map(str, set(src_organism_names)))
+        src_organism_ids    = list(map(int, set(src_organism_ids)))
+        src_organism_names  = list(map(str, set(src_organism_names)))
 
-        nomenclature = [
-            *filter(
-                lambda x: x is not None,
-                [
-                        ""
-                        #TODO HMM WFLOW
-                    # factor_classify(factor_polymer_obj["rcsb_polymer_entity"]["pdbx_description"])
-                ],
-            )
-        ]
+        nomenclature = [ ]
 
         return [
             LifecycleFactor(
-                assembly_id=self.poly_assign_to_asm(auth_asym_id),
-                nomenclature=nomenclature,
-                asym_ids=factor_polymer_obj[
-                    "rcsb_polymer_entity_container_identifiers"
-                ]["asym_ids"],
-                auth_asym_id=auth_asym_id,
-                parent_rcsb_id=factor_polymer_obj["entry"]["rcsb_id"],
-                host_organism_ids=host_organism_ids,
-                host_organism_names=host_organism_names,
-                src_organism_ids=src_organism_ids,
-                src_organism_names=src_organism_names,
-                rcsb_pdbx_description=""
-                if factor_polymer_obj["rcsb_polymer_entity"]["pdbx_description"] == None
-                else factor_polymer_obj["rcsb_polymer_entity"]["pdbx_description"],
-                entity_poly_strand_id=factor_polymer_obj["entity_poly"][
-                    "pdbx_strand_id"
-                ],
-                entity_poly_seq_one_letter_code=factor_polymer_obj["entity_poly"][
-                    "pdbx_seq_one_letter_code"
-                ],
-                entity_poly_seq_one_letter_code_can=factor_polymer_obj["entity_poly"][
-                    "pdbx_seq_one_letter_code_can"
-                ],
-                entity_poly_seq_length=factor_polymer_obj["entity_poly"][
-                    "rcsb_sample_sequence_length"
-                ],
-                entity_poly_entity_type=factor_polymer_obj["entity_poly"]["type"],
-                entity_poly_polymer_type=factor_polymer_obj["entity_poly"][
-                    "rcsb_entity_polymer_type"
-                ],
-            )
-            for auth_asym_id in factor_polymer_obj[
-                "rcsb_polymer_entity_container_identifiers"
-            ]["auth_asym_ids"]
+                assembly_id                         = self.poly_assign_to_asm(auth_asym_id) ,
+                nomenclature                        = nomenclature ,
+                asym_ids                            = factor_polymer_obj[ "rcsb_polymer_entity_container_identifiers" ]["asym_ids"] ,
+                auth_asym_id                        = auth_asym_id ,
+                parent_rcsb_id                      = factor_polymer_obj["entry"]["rcsb_id"] ,
+                host_organism_ids                   = host_organism_ids ,
+                host_organism_names                 = host_organism_names ,
+                src_organism_ids                    = src_organism_ids ,
+                src_organism_names                  = src_organism_names ,
+                rcsb_pdbx_description               = "" if factor_polymer_obj["rcsb_polymer_entity"]["pdbx_description"] == None else factor_polymer_obj["rcsb_polymer_entity"]["pdbx_description"], entity_poly_strand_id = factor_polymer_obj["entity_poly"][ "pdbx_strand_id" ],
+                entity_poly_seq_one_letter_code     = factor_polymer_obj["entity_poly"][ "pdbx_seq_one_letter_code" ] ,
+                entity_poly_seq_one_letter_code_can = factor_polymer_obj["entity_poly"][ "pdbx_seq_one_letter_code_can" ] ,
+                entity_poly_seq_length              = factor_polymer_obj["entity_poly"][ "rcsb_sample_sequence_length" ] ,
+                entity_poly_entity_type             = factor_polymer_obj["entity_poly"]["type"] ,
+                entity_poly_polymer_type            = factor_polymer_obj["entity_poly"][ "rcsb_entity_polymer_type" ] ,
+            ) for auth_asym_id in factor_polymer_obj[ "rcsb_polymer_entity_container_identifiers" ]["auth_asym_ids"]
         ]
 
     def poly_reshape_to_other(self, other_polymer_obj) -> list[Polymer]:
-        host_organisms: Optional[list[Any]] = other_polymer_obj[
-            "rcsb_entity_host_organism"
-        ]
-        source_organisms: Optional[list[Any]] = other_polymer_obj[
-            "rcsb_entity_source_organism"
-        ]
+        host_organisms: Optional[list[Any]] = other_polymer_obj[ "rcsb_entity_host_organism" ]
+        source_organisms: Optional[list[Any]] = other_polymer_obj[ "rcsb_entity_source_organism" ]
 
-        host_organism_ids = []
+        host_organism_ids   = []
         host_organism_names = []
-        src_organism_ids = []
-        src_organism_names = []
+        src_organism_ids    = []
+        src_organism_names  = []
 
         if host_organisms != None:
             for ho in host_organisms:
                 if ho["ncbi_taxonomy_id"] != None:
                     host_organism_ids.append(ho["ncbi_taxonomy_id"])
+
                 if ho["scientific_name"] != None:
                     host_organism_names.append(ho["scientific_name"])
 
@@ -720,81 +690,107 @@ class ReannotationPipeline:
                 if so["scientific_name"] != None:
                     src_organism_names.append(so["scientific_name"])
 
-        host_organism_ids = list(map(int, set(host_organism_ids)))
+        host_organism_ids   = list(map(int, set(host_organism_ids)))
         host_organism_names = list(map(str, set(host_organism_names)))
-        src_organism_ids = list(map(int, set(src_organism_ids)))
-        src_organism_names = list(map(str, set(src_organism_names)))
+        src_organism_ids    = list(map(int, set(src_organism_ids)))
+        src_organism_names  = list(map(str, set(src_organism_names)))
 
         return [
             Polymer(
-                assembly_id=self.poly_assign_to_asm(auth_asym_id),
-                nomenclature=[],  # Nomenclature does not exist for arbitrary polymers
-                asym_ids=other_polymer_obj["rcsb_polymer_entity_container_identifiers"][
-                    "asym_ids"
-                ],
-                auth_asym_id=auth_asym_id,
-                parent_rcsb_id=other_polymer_obj["entry"]["rcsb_id"],
-                host_organism_ids=host_organism_ids,
-                host_organism_names=host_organism_names,
-                src_organism_ids=src_organism_ids,
-                src_organism_names=src_organism_names,
-                rcsb_pdbx_description=""
-                if other_polymer_obj["rcsb_polymer_entity"]["pdbx_description"] == None
-                else other_polymer_obj["rcsb_polymer_entity"]["pdbx_description"],
-                entity_poly_strand_id=other_polymer_obj["entity_poly"][
-                    "pdbx_strand_id"
-                ],
-                entity_poly_seq_one_letter_code=other_polymer_obj["entity_poly"][
-                    "pdbx_seq_one_letter_code"
-                ],
-                entity_poly_seq_one_letter_code_can=other_polymer_obj["entity_poly"][
-                    "pdbx_seq_one_letter_code_can"
-                ],
-                entity_poly_seq_length=other_polymer_obj["entity_poly"][
-                    "rcsb_sample_sequence_length"
-                ],
-                entity_poly_entity_type=other_polymer_obj["entity_poly"]["type"],
-                entity_poly_polymer_type=other_polymer_obj["entity_poly"][
-                    "rcsb_entity_polymer_type"
-                ],
+                assembly_id                         = self.poly_assign_to_asm(auth_asym_id) ,
+                nomenclature                        = [] ,                                                                           # Nomenclature does not exist for arbitrary polymers
+                asym_ids                            = other_polymer_obj["rcsb_polymer_entity_container_identifiers"][ "asym_ids" ] ,
+                auth_asym_id                        = auth_asym_id ,
+                parent_rcsb_id                      = other_polymer_obj["entry"]["rcsb_id"] ,
+                host_organism_ids                   = host_organism_ids ,
+                host_organism_names                 = host_organism_names ,
+                src_organism_ids                    = src_organism_ids ,
+                src_organism_names                  = src_organism_names ,
+                rcsb_pdbx_description               = "" if other_polymer_obj["rcsb_polymer_entity"]["pdbx_description"] == None else other_polymer_obj["rcsb_polymer_entity"]["pdbx_description"], entity_poly_strand_id = other_polymer_obj["entity_poly"][ "pdbx_strand_id" ],
+                entity_poly_seq_one_letter_code     = other_polymer_obj["entity_poly"][ "pdbx_seq_one_letter_code" ] ,
+                entity_poly_seq_one_letter_code_can = other_polymer_obj["entity_poly"][ "pdbx_seq_one_letter_code_can" ] ,
+                entity_poly_seq_length              = other_polymer_obj["entity_poly"][ "rcsb_sample_sequence_length" ] ,
+                entity_poly_entity_type             = other_polymer_obj["entity_poly"]["type"] ,
+                entity_poly_polymer_type            = other_polymer_obj["entity_poly"][ "rcsb_entity_polymer_type" ] ,
             )
-            for auth_asym_id in other_polymer_obj[
-                "rcsb_polymer_entity_container_identifiers"
-            ]["auth_asym_ids"]
+            for auth_asym_id in other_polymer_obj[ "rcsb_polymer_entity_container_identifiers" ]["auth_asym_ids"]
         ]
 
     def process_structure(self):
 
-        [reshaped_proteins, reshaped_polymeric_factors_prot] = self.process_polypeptides()
-        [reshaped_rnas, reshaped_polymeric_factors_rna]      = self.process_polynucleotides()
+        
+        # ! According to RCSB schema, polymer_entites include "Protein", "RNA" but also "DNA", N"A-Hybrids" and "Other".
+        # ! We only make the distinction between Proteins and RNA and Other for purposes of simplicity
+        def is_protein(poly:Polymer)->bool:
+            return poly.entity_poly_polymer_type == "Protein"
+        def is_rna(poly:Polymer)->bool:
+            return poly.entity_poly_entity_type == "RNA"
+
+
+        poly_entities = self.rcsb_data_dict["polymer_entities"]
+        polymers       = mitt.collapse([self.raw_to_polymer(_) for _ in poly_entities])
+
+        _polypeptides, _polynucleotides, _other_polymers = [], [], []
+        # polypeptides , polynucleotides,  other_polymers  = [], [], []
+
+        for polymer in polymers:
+            match polymer.entity_poly_entity_type:
+                case "Protein":
+                    _polypeptides.append(polymer)
+                case "RNA":
+                    _polynucleotides.append(polymer)
+                case _:
+                    _other_polymers.append(polymer)
+
+
         
 
+        # proteins = [ *prof.proteins, *prof.other_polymers, *prof.polymeric_factors ]
+        # rna      = [ *prof.rnas, *prof.other_polymers ]
 
-        other_polymers = self.process_other_polymers()
 
-        prot_noms: dict[str, PolymerClass] = classify_subchains( [*reshaped_proteins, *reshaped_polymeric_factors_prot], ProteinClass )
-        for aaid, protname in prot_noms.items():
-            for prot in reshaped_proteins:
-                if prot.auth_asym_id == aaid and protname != None:
-                    prot.nomenclature = [protname]
-                else:
-                    continue
+        pipeline_polypeptides    = HMMClassifier( _polypeptides, phmmer.easel.Alphabet.amino())
+        pipeline_polypeptides.scan_chains()
+        prots_report = pipeline_polypeptides.produce_classification()
 
-        rna_noms: dict[str, PolymerClass] = classify_subchains( [*reshaped_rnas, *reshaped_polymeric_factors_prot], RNAClass )
-        for aaid, rnaname in rna_noms.items():
-            for rna in reshaped_rnas:
-                if rna.auth_asym_id == aaid and rna != None:
-                    rna.nomenclature = [rnaname]
-                else:
-                    continue
+        pipeline_polynucleotides = HMMClassifier( _polynucleotides, phmmer.easel.Alphabet.rna())
+        pipeline_polynucleotides.scan_chains()
+        rna_report = pipeline_polynucleotides.produce_classification()
 
+        # [reshaped_proteins, reshaped_polymeric_factors_prot] = self.process_polypeptides()
+        # [reshaped_rnas, reshaped_polymeric_factors_rna]      = self.process_polynucleotides()
+        # other_polymers                                       = self.process_other_polymers()
+
+        # prot_noms: dict[str, PolymerClass] = classify_subchains( [*reshaped_proteins, *reshaped_polymeric_factors_prot], ProteinClass )
+        # for aaid, protname in prot_noms.items():
+        #     for prot in reshaped_proteins:
+        #         if prot.auth_asym_id == aaid and protname != None:
+        #             prot.nomenclature = [protname]
+        #         else:
+        #             continue
+
+        # rna_noms: dict[str, PolymerClass] = classify_subchains( [*reshaped_rnas, *reshaped_polymeric_factors_prot], RNAClass )
+        # for aaid, rnaname in rna_noms.items():
+        #     for rna in reshaped_rnas:
+        #         if rna.auth_asym_id == aaid and rna != None:
+        #             rna.nomenclature = [rnaname]
+        #         else:
+        #             continue
         assert (
-            len(reshaped_proteins)
-            + len(reshaped_rnas)
-            + len(reshaped_polymeric_factors_rna)
-            + len(reshaped_polymeric_factors_prot)
-            + len(other_polymers)
-        ) == self.flattened_polymers_target
+            len(_polynucleotides)
+            + len(_polypeptides)
+            + len(_other_polymers)
+            # + len(reshaped_polymeric_factors_prot)
+            # + len(other_polymers)
+        ) == self.polymers_target_count
+
+        # assert (
+        #     len(reshaped_proteins)
+        #     + len(reshaped_rnas)
+        #     + len(reshaped_polymeric_factors_rna)
+        #     + len(reshaped_polymeric_factors_prot)
+        #     + len(other_polymers)
+        # ) == self.flattened_polymers_target
 
         reshaped_nonpolymers = self.process_nonpolymers()
         [organisms, externalRefs, pub, kwords_text, kwords] = self.process_metadata()
