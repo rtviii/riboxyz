@@ -10,11 +10,12 @@ from pyhmmer.plan7 import HMM
 import requests
 from ribctl.lib.classification import (
     HMMClassifier,
-    HMMScanner,
+    HMMs,
 )
 from ribctl.lib.ribosome_types.types_ribosome import (
     RNA,
     AssemblyInstancesMap,
+    LifecycleFactorClass,
     NonpolymericLigand,
     Polymer,
     PolymerClass,
@@ -150,10 +151,10 @@ class ReannotationPipeline:
         Only needed because rcsb does not provide unequivocal taxid for structures (sometimes it's host+source)
         """
 
-        src_organism_names: list[str] = []
-        src_organism_ids: list[int] = []
+        src_organism_names : list[str] = []
+        src_organism_ids   : list[int] = []
         host_organism_names: list[str] = []
-        host_organism_ids: list[int] = []
+        host_organism_ids  : list[int] = []
 
         for polymer in polymers:
             host_organism_names = (
@@ -726,37 +727,35 @@ class ReannotationPipeline:
 
 
         poly_entities = self.rcsb_data_dict["polymer_entities"]
-        pprint(len(poly_entities))
-        polymers       = [*mitt.flatten([self.raw_to_polymer(_) for _ in poly_entities])]
+        polymers      = [*mitt.flatten([self.raw_to_polymer(_) for _ in poly_entities])]
+        _prot_polypeptides, _rna_polynucleotides, _other_polymers = [], [], []
 
-        _polypeptides, _polynucleotides, _other_polymers = [], [], []
-        # polypeptides , polynucleotides,  other_polymers  = [], [], []
+        for i,plm in enumerate( polymers ):
+            if len( plm.entity_poly_seq_one_letter_code_can ) < 15:
+                pprint(plm.entity_poly_polymer_type)
+                _other_polymers.append(polymers.pop(i))
+
 
         for polymer in polymers:
-            if polymer.auth_asym_id == '7':
-                pprint(polymer)
-            pprint(polymer.entity_poly_polymer_type)
             match polymer.entity_poly_polymer_type:
                 case "Protein":
-                    _polypeptides.append(polymer)
+                    _prot_polypeptides.append(polymer)
                 case "RNA":
-                    _polynucleotides.append(polymer)
+                    _rna_polynucleotides.append(polymer)
                 case _:
                     _other_polymers.append(polymer)
 
-        # pprint(_polynucleotides)
-        # proteins = [ *prof.proteins, *prof.other_polymers, *prof.polymeric_factors ]
-        # rna      = [ *prof.rnas, *prof.other_polymers ]
-
-        # pipeline_polypeptides    = HMMClassifier( _polypeptides, pyhmmer.easel.Alphabet.amino())
-        # pipeline_polypeptides.scan_chains()
-        # prots_report = pipeline_polypeptides.produce_classification()
-        # print(prots_report)
-
-        pipeline_polynucleotides = HMMClassifier( _polynucleotides, pyhmmer.easel.Alphabet.rna())
+        
+        pipeline_polynucleotides = HMMClassifier( _rna_polynucleotides, pyhmmer.easel.Alphabet.rna(), [p for p in list(RNAClass)])
         pipeline_polynucleotides.scan_chains()
-        rna_report = pipeline_polynucleotides.produce_classification()
-        pprint(rna_report)
+        rna_report              = pipeline_polynucleotides.produce_classification()
+        print("rna report", rna_report)
+
+        pipeline_polypeptides    = HMMClassifier( _prot_polypeptides, pyhmmer.easel.Alphabet.amino(), [p for p in [ *list(ProteinClass),*list(LifecycleFactorClass) ] ])
+        pipeline_polypeptides.scan_chains()
+        prots_report =            pipeline_polypeptides.produce_classification()
+        print("prots report", prots_report)
+
 
         # [reshaped_proteins, reshaped_polymeric_factors_prot] = self.process_polypeptides()
         # [reshaped_rnas, reshaped_polymeric_factors_rna]      = self.process_polynucleotides()
@@ -778,8 +777,8 @@ class ReannotationPipeline:
         #         else:
         #             continue
         assert (
-            len(_polynucleotides)
-            + len(_polypeptides)
+            len(_rna_polynucleotides)
+            + len(_prot_polypeptides)
             + len(_other_polymers)
             # + len(reshaped_polymeric_factors_prot)
             # + len(other_polymers)

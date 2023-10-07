@@ -217,6 +217,9 @@ def hmm_produce(candidate_class: ProteinClass | RNAClass | LifecycleFactorClass,
         return (candidate_class, hmm )
     else:
         if candidate_class in ProteinClass or candidate_class in LifecycleFactorClass:
+            
+
+            print("PICKED AMINO")
             alphabet = pyhmmer.easel.Alphabet.amino()
         elif candidate_class in RNAClass: 
             alphabet = pyhmmer.easel.Alphabet.rna()
@@ -231,7 +234,7 @@ def hmm_produce(candidate_class: ProteinClass | RNAClass | LifecycleFactorClass,
             hmm_cache(HMM)
         return (candidate_class, HMM )
 
-class HMMScanner():
+class HMMs():
     # https://pyhmmer.readthedocs.io/en/stable/api/plan7.html#pyhmmer.plan7.HMM
     """
     STEPS (bottom-up):
@@ -240,11 +243,11 @@ class HMMScanner():
     - a sequence is searched against all HMMs in the registry
     """
 
-    seed_sequences : dict[PolymerClass, list[SeqRecord]] = {}
-    hmms_registry  : dict[PolymerClass, HMM]             = {}
+    class_hmms_seed_sequences : dict[PolymerClass, list[SeqRecord]] = {}
+    class_hmms_registry       : dict[PolymerClass, HMM]             = {}
 
 
-    def __init__(self, tax_id:int, candidate_classes:list[PolymerClass],  no_cache:bool=False, max_seed_seqs:int=10) -> None:
+    def __init__(self, tax_id:int, candidate_classes:list[PolymerClass],  no_cache:bool=False, max_seed_seqs:int=5) -> None:
 
         self.organism_tax_id = tax_id
 
@@ -255,32 +258,34 @@ class HMMScanner():
         with concurrent.futures.ThreadPoolExecutor(max_workers=25) as executor:
             loading_futures = []
             loaded_results  = []
+
             # ! load seqs
             for candidate_class in candidate_classes:
                 future = executor.submit(__load_seed_sequences, candidate_class, tax_id, max_seed_seqs)
                 loading_futures.append(future)
             for future in concurrent.futures.as_completed(loading_futures): 
                 loaded_results.append(future.result())
-
             # ! populate seqs records
             for (cls, seedseqs) in loaded_results:
-                 self.seed_sequences.update({str( cls.value ):seedseqs})
+                 self.class_hmms_seed_sequences.update({str( cls.value ):seedseqs})
+            # pprint("ADDED SEQUENCES TO CLASSIFIER")
+            # pprint(self.class_hmms_seed_sequences)
+
             # ! clean containers
             loaded_results, loading_futures = [],[]
-
-
             # ! build hmms
             for candidate_class in candidate_classes:
-                future = executor.submit(hmm_produce,candidate_class, tax_id, self.seed_sequences[candidate_class.value], no_cache=no_cache)
+                future = executor.submit(hmm_produce,candidate_class, tax_id, self.class_hmms_seed_sequences[candidate_class.value], no_cache=no_cache)
                 loading_futures.append(future)
             for future in concurrent.futures.as_completed(loading_futures):
                 loaded_results.append(future.result())
 
             # ! populate hmms
             for (cls, hmm) in loaded_results:
-                 self.hmms_registry.update({cls.value:hmm})
+                 self.class_hmms_registry.update({cls.value:hmm})
 
 
+            # pprint(self.class_hmms_registry)
 # # !-
 #         for candidate_class in candidate_classes:
 #             seqs                                       = [*fasta_phylogenetic_correction(candidate_class, tax_id, max_n_neighbors=max_seed_seqs)]
@@ -289,7 +294,18 @@ class HMMScanner():
 #             print("Loded HMM: {}".format(candidate_class))
 # # !-
 
-    def scan(self, alphabet:pyhmmer.easel.Alphabet, target_seqs:list[SeqRecord]):
+
+    def classify(self, alphabet, target_seqs:SeqRecord)->dict[str, list[PolymerClass]]:
+        """analogue of `scan`"""
+
+        query_seqs = []
+        for seq_record in target_seqs:
+            query_seq  = pyhmmer.easel.TextSequence(name=bytes(seq_record.id,'utf-8'), sequence=seq_record.seq)
+            query_seqs.append(query_seq.digitize(alphabet))
+
+
+
+    def scan(self, alphabet:pyhmmer.easel.Alphabet, target_seq:SeqRecord):
         """Construct a scan pipeline for the current classifier"""
 
         # convert seq records to a list of pyhmmer.DigitalSequences
@@ -297,18 +313,19 @@ class HMMScanner():
         for seq_record in target_seqs:
             query_seq  = pyhmmer.easel.TextSequence(name=bytes(seq_record.id,'utf-8'), sequence=seq_record.seq)
             query_seqs.append(query_seq.digitize(alphabet))
-        scans = list(pyhmmer.hmmscan(query_seqs,[*self.hmms_registry.values()] ))
+
+        scans = list(pyhmmer.hmmscan(query_seqs,[*self.class_hmms_registry.values()] ))
         return scans
 
     def info(self)->dict:
         """Get info for the constituent HMMs in the current classifier"""
         _ = {
              "seed_seqs": {
-                str(k.value): [{"seq":str(seqrecord.seq), "tax_id":seqrecord.id} for seqrecord in v] for (k, v) in self.seed_sequences.items()
+                k: [{"seq":str(seqrecord.seq), "tax_id":seqrecord.id} for seqrecord in v] for (k, v) in self.class_hmms_seed_sequences.items()
              },
              "hmms_registry": {
-                    str( k.value ): {"name": v.name.decode(),  "M":v.M, "nseq":v.nseq, "nseq_effective":v.nseq_effective}
-                    for (k, v) in self.hmms_registry.items()
+                    k: {"name": v.name.decode(),  "M":v.M, "nseq":v.nseq, "nseq_effective":v.nseq_effective}
+                    for (k, v) in self.class_hmms_registry.items()
                 },
              }
         return _
@@ -316,7 +333,7 @@ class HMMScanner():
 
 class HMMClassifier():
 
-    organism_scanners : dict[int, HMMScanner] = {}
+    organism_scanners : dict[int, HMMs] = {}
     chains            : list[Polymer] = []
     alphabet          : pyhmmer.easel.Alphabet
     candidate_classes : list[PolymerClass]
@@ -324,19 +341,18 @@ class HMMClassifier():
     bitscore_threshold: int = 35
     report            : dict
 
-    def __init__(self, chains: list[Polymer], alphabet:pyhmmer.easel.Alphabet) -> None:
+    def __init__(self, chains: list[Polymer], alphabet:pyhmmer.easel.Alphabet, candidate_classes:list[PolymerClass]) -> None:
         self.chains         = chains
         self.alphabet       = alphabet
         self.report         = {}
+        self.candidate_classes = candidate_classes
 
-        if alphabet == Alphabet.amino():
-            self.candidate_classes  = [pc for pc in [*list(ProteinClass), *list(LifecycleFactorClass)]]
-
-        elif alphabet == Alphabet.rna():
-            self.candidate_classes  = [pc for pc in [*list(RNAClass)]]
-
-        else:
-            raise Exception("HMMClassifier: Unimplemented alphabet")
+        # if alphabet.is_amino():
+        #     self.candidate_classes  = [pc for pc in [*list(ProteinClass), *list(LifecycleFactorClass)]]
+        # elif alphabet.is_rna():
+        #     self.candidate_classes  = [pc for pc in [*list(RNAClass)]]
+        # else:
+        #     raise Exception("HMMClassifier: Unimplemented alphabet")
 
     def pick_best_hit(self, hits:list[dict]) -> list[PolymerClass]:
         # TODO: look at filtering allunder self.bitscore threshold (while scaling the scores by the [average of the lowest half * 1.5]/[average of the lowest half])
@@ -349,6 +365,43 @@ class HMMClassifier():
 
         # return [ sorted(hits, key=lambda x: x["hit.score"])[0]["hit.name"].decode() ] if len(hits) >0 else []
 
+    def classify_chains(self)->None:
+        """This is an alternative implementation of `scan_chains` that does not use `hmmscan`. Waiting on https://github.com/althonos/pyhmmer/issues/53 to resolve"""
+
+        for chain in self.chains:
+            organism_taxid = chain.src_organism_ids[0]
+            if organism_taxid not in self.organism_scanners:
+                hmmscanner                             = HMMs(organism_taxid, self.candidate_classes, no_cache = True, max_seed_seqs = 5)
+                self.organism_scanners[organism_taxid] = hmmscanner
+            else:
+                hmmscanner = self.organism_scanners[organism_taxid]
+
+            self.report[chain.auth_asym_id] = []
+            seq_record = chain.to_SeqRecord()
+            query_seq  = pyhmmer.easel.TextSequence(name=bytes(seq_record.id,'utf-8'), sequence=seq_record.seq).digitize(self.alphabet)
+
+            # -- convert seq to easel format
+            
+            # print("Scanning chain {}.{} against {} HMMs".format(chain.parent_rcsb_id, chain.auth_asym_id, len(hmmscanner.class_hmms_registry)))
+            # print("seq:", query_seq.sequence)
+
+            # print("Scanning query seqs", [*query_seqs][0].alphabet, [*query_seqs][0].sequence)
+            # print("Against hmms", [*hmmscanner.class_hmms_registry.values()])
+            
+            for hmmpass in HMMs.classify:
+                for hit in [*scan]:
+                   d_hit = {
+                    "fasta_seed"        : [str(seqrecord.seq) for seqrecord in hmmscanner.class_hmms_seed_sequences[hit.name.decode()]],
+                    "seed_organism_ids" : [seqrecord.id for seqrecord in hmmscanner.class_hmms_seed_sequences[hit.name.decode()]],
+                    "class_name"        : hit.name.decode(),                                                             # <- comes from the emitting hmm
+                    "evalue"            : hit.evalue,
+                    "bitscore"          : hit.score,
+                    "target_organism_id": organism_taxid,
+                    "consensus"         : hmmscanner.class_hmms_registry[hit.name.decode()].consensus,
+                    "domains"           : [( d.score, d.c_evalue, d.env_from, d.env_to ) for d in hit.domains]
+                    }
+                   self.report[chain.auth_asym_id].append(d_hit)
+
     def scan_chains(self)->None:
 
         for chain in self.chains:
@@ -356,37 +409,38 @@ class HMMClassifier():
 
             # -- pick scanner'|
             if organism_taxid not in self.organism_scanners:
-                    hmmscanner = HMMScanner( organism_taxid, self.candidate_classes, no_cache = True, max_seed_seqs = 5)
-                    print("Added scanner {} for organism {}".format( hmmscanner.__str__(), organism_taxid ))
+                    hmmscanner                             = HMMs(organism_taxid, self.candidate_classes, no_cache = True, max_seed_seqs = 5)
                     self.organism_scanners[organism_taxid] = hmmscanner
-
+                    pprint(hmmscanner.class_hmms_registry)
             else:
                 hmmscanner = self.organism_scanners[organism_taxid]
             # -- pick scanner.|
- 
 
             self.report[chain.auth_asym_id] = []
-            # -- convert seq to easel format
             seq_record = chain.to_SeqRecord()
             query_seq  = pyhmmer.easel.TextSequence(name=bytes(seq_record.id,'utf-8'), sequence=seq_record.seq)
             query_seqs = [query_seq.digitize(self.alphabet)]
+
             # -- convert seq to easel format
             
-            print("Scanning chain {}.{} against {} HMMs".format(chain.parent_rcsb_id, chain.auth_asym_id, len(hmmscanner.hmms_registry)))
-            print("seq:", query_seq.sequence)
-            for scan in list(pyhmmer.hmmscan(query_seqs,[*hmmscanner.hmms_registry.values()])):
+            # print("Scanning chain {}.{} against {} HMMs".format(chain.parent_rcsb_id, chain.auth_asym_id, len(hmmscanner.class_hmms_registry)))
+            # print("seq:", query_seq.sequence)
+
+            # print("Scanning query seqs", [*query_seqs][0].alphabet, [*query_seqs][0].sequence)
+            # print("Against hmms", [*hmmscanner.class_hmms_registry.values()])
+            
+            for scan in list(pyhmmer.hmmscan(query_seqs,[*hmmscanner.class_hmms_registry.values()], self.alphabet, background =pyhmmer.plan7.Background(self.alphabet))):
                 for hit in [*scan]:
                    d_hit = {
-                    "fasta_seed"        : [str(seqrecord.seq) for seqrecord in hmmscanner.seed_sequences[hit.name.decode()]],
-                    "seed_organism_ids" : [seqrecord.id for seqrecord in hmmscanner.seed_sequences[hit.name.decode()]],
+                    "fasta_seed"        : [str(seqrecord.seq) for seqrecord in hmmscanner.class_hmms_seed_sequences[hit.name.decode()]],
+                    "seed_organism_ids" : [seqrecord.id for seqrecord in hmmscanner.class_hmms_seed_sequences[hit.name.decode()]],
                     "class_name"        : hit.name.decode(),                                                             # <- comes from the emitting hmm
                     "evalue"            : hit.evalue,
                     "bitscore"          : hit.score,
                     "target_organism_id": organism_taxid,
-                    "consensus"         : hmmscanner.hmms_registry[hit.name.decode()].consensus,
+                    "consensus"         : hmmscanner.class_hmms_registry[hit.name.decode()].consensus,
                     "domains"           : [( d.score, d.c_evalue, d.env_from, d.env_to ) for d in hit.domains]
                     }
-
                    self.report[chain.auth_asym_id].append(d_hit)
 
     def produce_classification(self)->dict[str,list]:
