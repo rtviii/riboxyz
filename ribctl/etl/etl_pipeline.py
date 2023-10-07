@@ -743,17 +743,19 @@ class ReannotationPipeline:
                 case _:
                     _other_polymers.append(polymer)
 
-        
-        pipeline_polynucleotides = HMMClassifier(_rna_polynucleotides, pyhmmer.easel.Alphabet.rna(), [p for p in list(RNAClass)])
-        pipeline_polynucleotides.classify_chains()
-        rna_report              = pipeline_polynucleotides.produce_classification()
-        print("rna report", rna_report)
-
-        pipeline_polypeptides    = HMMClassifier( _prot_polypeptides, pyhmmer.easel.Alphabet.amino(), [p for p in [ *list(ProteinClass),*list(LifecycleFactorClass) ] ])
-        pipeline_polypeptides.classify_chains()
-        prots_report =            pipeline_polypeptides.produce_classification()
+        protein_alphabet      = pyhmmer.easel.Alphabet.amino()
+        protein_classifier    = HMMClassifier( _prot_polypeptides, protein_alphabet, [p for p in [ *list(ProteinClass),*list(LifecycleFactorClass) ] ])
+        protein_classifier.classify_chains()
+        prots_report = protein_classifier.produce_classification()
         print("prots report", prots_report)
 
+        del protein_classifier
+        
+        rna_alphabet             = pyhmmer.easel.Alphabet.rna()
+        rna_classifier           = HMMClassifier(_rna_polynucleotides, rna_alphabet, [p for p in list(RNAClass)])
+        rna_classifier.classify_chains()
+        rna_report              = rna_classifier.produce_classification()
+        print("rna report", rna_report)
 
         # [reshaped_proteins, reshaped_polymeric_factors_prot] = self.process_polypeptides()
         # [reshaped_rnas, reshaped_polymeric_factors_rna]      = self.process_polynucleotides()
