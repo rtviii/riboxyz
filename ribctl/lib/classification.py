@@ -245,14 +245,13 @@ class HMMs():
     - a sequence is searched against all HMMs in the registry
     """
 
-    class_hmms_seed_sequences : dict[PolymerClass, list[SeqRecord]] = {}
-    class_hmms_registry       : dict[PolymerClass, HMM]             = {}
-
 
     def __init__(self, tax_id:int, candidate_classes:list[PolymerClass],  no_cache:bool=False, max_seed_seqs:int=5) -> None:
 
         self.organism_tax_id = tax_id
-
+        self.class_hmms_seed_sequences : dict[PolymerClass, list[SeqRecord]] = {}
+        self.class_hmms_registry       : dict[PolymerClass, HMM]             = {}
+    
         def __load_seed_sequences(candidate_class:PolymerClass,tax_id:int, max_seed_seqs:int)->Tuple[PolymerClass, list[SeqRecord]]:
             """This is just for housekeeping. Keeping sequences with which the HMMs were seeded as state on the classifier."""
             return (candidate_class, [*fasta_phylogenetic_correction(candidate_class, tax_id, max_n_neighbors=max_seed_seqs)] )
@@ -335,14 +334,16 @@ class HMMs():
 
 class HMMClassifier():
 
-    organism_scanners : dict[int, HMMs] = {}
-    chains            : list[Polymer] = []
-    alphabet          : pyhmmer.easel.Alphabet
-    candidate_classes : list[PolymerClass]
+    # organism_scanners : dict[int, HMMs] 
+    # chains            : list[Polymer] 
+    # alphabet          : pyhmmer.easel.Alphabet
+    # candidate_classes : list[PolymerClass]
     bitscore_threshold: int = 35
-    report            : dict
+    # report            : dict
 
     def __init__(self, chains: list[Polymer], alphabet:pyhmmer.easel.Alphabet, candidate_classes:list[PolymerClass]) -> None:
+
+        self.organism_scanners = {}
         self.chains            = chains
         self.alphabet          = alphabet
         self.report            = {}
@@ -372,31 +373,20 @@ class HMMClassifier():
 
             self.report[chain.auth_asym_id] = []
             seq_record                      = chain.to_SeqRecord()
-
             query_seq                       = pyhmmer.easel.TextSequence(name=bytes(seq_record.id,'utf-8'), sequence=seq_record.seq).digitize(self.alphabet)
 
-            print("Query seq:", query_seq)
-
-            # -- convert seq to easel format
-            
-            # print("Scanning chain {}.{} against {} HMMs".format(chain.parent_rcsb_id, chain.auth_asym_id, len(hmmscanner.class_hmms_registry)))
-            # print("seq:", query_seq.sequence)
-
-            # print("Scanning query seqs", [*query_seqs][0].alphabet, [*query_seqs][0].sequence)
-            # print("Against hmms", [*hmmscanner.class_hmms_registry.values()])
             
             for ( candidate_class, tophits ) in hmmscanner.classify_seq(self.alphabet, query_seq):
                 for hit in tophits:
-                       print("HIT model IS", candidate_class)
                        d_hit = {
-                        "fasta_seed"        : [str(seqrecord.seq) for seqrecord in hmmscanner.class_hmms_seed_sequences[candidate_class]],
-                        "seed_organism_ids" : [seqrecord.id for seqrecord in hmmscanner.class_hmms_seed_sequences[candidate_class]],
-                        "class_name"        : candidate_class,
-                        "evalue"            : hit.evalue,
-                        "bitscore"          : hit.score,
-                        "target_organism_id": organism_taxid,
-                        "consensus"         : hmmscanner.class_hmms_registry[hit.name.decode()].consensus,
-                        "domains"           : [( d.score, d.c_evalue, d.env_from, d.env_to ) for d in hit.domains]
+                            "fasta_seed"        : [str(seqrecord.seq) for seqrecord in hmmscanner.class_hmms_seed_sequences[candidate_class]],
+                            "seed_organism_ids" : [seqrecord.id for seqrecord in hmmscanner.class_hmms_seed_sequences[candidate_class]],
+                            "class_name"        : candidate_class,
+                            "evalue"            : hit.evalue,
+                            "bitscore"          : hit.score,
+                            "target_organism_id": organism_taxid,
+                            "consensus"         : hmmscanner.class_hmms_registry[candidate_class].consensus,
+                            "domains"           : [( d.score, d.c_evalue, d.env_from, d.env_to ) for d in hit.domains]
                         }
                        self.report[chain.auth_asym_id].append(d_hit)
 
