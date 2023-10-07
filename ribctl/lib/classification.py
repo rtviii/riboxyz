@@ -16,7 +16,7 @@ from ribctl.lib.msalib import Fasta, muscle_align_N_seq, phylogenetic_neighborho
 from ribctl.lib.ribosome_types.types_ribosome import RNA, ElongationFactorClass, InitiationFactorClass, LifecycleFactorClass, Polymer, PolymerClass, LifecycleFactor, Protein, ProteinClass, ProteinClass, RNAClass
 # from ribctl.etl.ribosome_assets import RibosomeAssets
 from pyhmmer.easel import Alphabet, DigitalSequenceBlock, TextSequence, SequenceFile, SequenceBlock, TextSequenceBlock, DigitalSequence
-from pyhmmer.plan7 import Pipeline, HMM 
+from pyhmmer.plan7 import Pipeline, HMM , TopHits
 import logging
 import concurrent.futures
 from ribctl.lib.util_taxonomy import taxid_domain
@@ -36,7 +36,6 @@ hmm_cachedir = ASSETS['__hmm_cache']
 
 
 def fasta_phylogenetic_correction(candidate_class:ProteinClass|RNAClass|LifecycleFactorClass, organism_taxid:int, max_n_neighbors:int=10)->Iterator[SeqRecord]:
-
     """Given a candidate class and an organism taxid, retrieve the corresponding fasta file, and perform phylogenetic correction on it."""
 
     if candidate_class in ProteinClass:
@@ -63,11 +62,17 @@ def fasta_phylogenetic_correction(candidate_class:ProteinClass|RNAClass|Lifecycl
     seqs         = records.pick_taxids(phylo_nbhd)
     return iter(seqs)
 
-def seq_evaluate_v_hmm(seq:str,alphabet:Alphabet, hmm:HMM):
+
+def digitize_seq_record(seq_record:SeqRecord, alphabet:Alphabet)->DigitalSequence:
+    """Convert a SeqRecord to a DigitalSequence"""
+    seq_  = pyhmmer.easel.TextSequence(name=bytes(seq_record.id,'utf-8'), sequence=seq_record.seq)
+    return seq_.digitize(alphabet)
+
+
+def seq_evaluate_v_hmm(seq:DigitalSequence,alphabet:Alphabet, hmm:HMM, T:int=100)->TopHits:
     """Fit a sequence to a given HMM"""
-    seq_  = pyhmmer.easel.TextSequence(name=b"template", sequence=seq)
-    dsb   = DigitalSequenceBlock(alphabet, [seq_.digitize(alphabet)])
-    return pyhmmer.plan7.Pipeline(alphabet=alphabet, T=100).search_hmm(hmm,dsb)
+    dsb   = DigitalSequenceBlock(alphabet, [seq])
+    return pyhmmer.plan7.Pipeline(alphabet=alphabet, T=T).search_hmm(hmm,dsb)
 
 def seq_evaluate_v_hmm_dict(seq:str,alphabet:Alphabet, hmm_dict:dict)->dict[PolymerClass, list[float]]:
     """Fit a sequence against all protein classes simultaneously"""
@@ -295,17 +300,18 @@ class HMMs():
 # # !-
 
 
-    def classify(self, alphabet, target_seqs:SeqRecord)->dict[str, list[PolymerClass]]:
+    def classify_seq(self, alphabet, target_seq:DigitalSequence):
         """analogue of `scan`"""
+        _ = []
+        for (candidate_class, hmm) in self.class_hmms_registry.items():
+            result = seq_evaluate_v_hmm(target_seq,alphabet, hmm)
+            if len(result) > 0:
+                _ = [*_, *result]
+        return _
 
-        query_seqs = []
-        for seq_record in target_seqs:
-            query_seq  = pyhmmer.easel.TextSequence(name=bytes(seq_record.id,'utf-8'), sequence=seq_record.seq)
-            query_seqs.append(query_seq.digitize(alphabet))
 
 
-
-    def scan(self, alphabet:pyhmmer.easel.Alphabet, target_seq:SeqRecord):
+    def scan_seq(self, alphabet:pyhmmer.easel.Alphabet, target_seq:SeqRecord):
         """Construct a scan pipeline for the current classifier"""
 
         # convert seq records to a list of pyhmmer.DigitalSequences
@@ -388,8 +394,8 @@ class HMMClassifier():
             # print("Scanning query seqs", [*query_seqs][0].alphabet, [*query_seqs][0].sequence)
             # print("Against hmms", [*hmmscanner.class_hmms_registry.values()])
             
-            for hmmpass in HMMs.classify:
-                for hit in [*scan]:
+            for hmmpass in hmmscanner.classify_seq(self.alphabet, query_seq):
+                for hit in hmmpass:
                    d_hit = {
                     "fasta_seed"        : [str(seqrecord.seq) for seqrecord in hmmscanner.class_hmms_seed_sequences[hit.name.decode()]],
                     "seed_organism_ids" : [seqrecord.id for seqrecord in hmmscanner.class_hmms_seed_sequences[hit.name.decode()]],

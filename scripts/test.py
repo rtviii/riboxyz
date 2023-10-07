@@ -445,7 +445,7 @@ elif sys.argv[1] == "hmmx":
     #     pprint(rna)
 
     hmms = HMMs(cca['src_organism_ids'][0], [p for p in RNAClass], no_cache=True)
-    hmms.scan(alphabet, [ SeqRecord(cca['entity_poly_seq_one_letter_code_can']) ] )
+    hmms.scan_seq(alphabet, [ SeqRecord(cca['entity_poly_seq_one_letter_code_can']) ] )
     # pprint(hmms.info())
 
     # pprint()
