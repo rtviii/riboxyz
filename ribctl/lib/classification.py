@@ -69,19 +69,10 @@ def digitize_seq_record(seq_record:SeqRecord, alphabet:Alphabet)->DigitalSequenc
     return seq_.digitize(alphabet)
 
 
-def seq_evaluate_v_hmm(seq:DigitalSequence,alphabet:Alphabet, hmm:HMM, T:int=100)->TopHits:
+def seq_evaluate_v_hmm(seq:DigitalSequence,alphabet:Alphabet, hmm:HMM, T:int=35)->TopHits:
     """Fit a sequence to a given HMM"""
     dsb   = DigitalSequenceBlock(alphabet, [seq])
     return pyhmmer.plan7.Pipeline(alphabet=alphabet, T=T).search_hmm(hmm,dsb)
-
-# def seq_evaluate_v_hmm_dict(seq:str,alphabet:Alphabet, hmm_dict:dict)->dict[PolymerClass, list[float]]:
-#     """Fit a sequence against all protein classes simultaneously"""
-#     _ = {}
-#     for (candidate_class, hmm) in hmm_dict.items():
-#         result = seq_evaluate_v_hmm(seq,alphabet, hmm)
-#         _.update({candidate_class: [] if len(result) == 0 else list(map(lambda x: { "evalue":x.evalue, "score":x.score }, result))})
-#     return _
-
 
 def pick_best_hmm_hit(matches_dict:dict[PolymerClass, list[float]], chain_info:Polymer)->PolymerClass | None:
     """Given a dictionary of sequence-HMMe e-values, pick the best candidate class"""
@@ -116,12 +107,10 @@ def pick_best_hmm_hit(matches_dict:dict[PolymerClass, list[float]], chain_info:P
 #         candidates_dict = candidates_dict if candidates_dict is not None else hmm_dict_init__candidates_per_organism(candidate_category, organism)
 #         results         = seq_evaluate_v_hmm_dict(seq, pyhmmer.easel.Alphabet.amino(), candidates_dict)
 #         return results
-
 #     elif candidate_category == RNAClass:
 #         candidates_dict = candidates_dict if candidates_dict is not None else hmm_dict_init__candidates_per_organism(candidate_category, organism)
 #         results         = seq_evaluate_v_hmm_dict(seq, pyhmmer.easel.Alphabet.rna(), candidates_dict)
 #         return results
-
 #     elif candidate_category == LifecycleFactorClass:
 #         candidates_dict = candidates_dict if candidates_dict is not None else hmm_dict_init__candidates_per_organism(candidate_category, organism)
 #         results         = seq_evaluate_v_hmm_dict(seq, pyhmmer.easel.Alphabet.amino(), candidates_dict)

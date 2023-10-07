@@ -729,9 +729,9 @@ class ReannotationPipeline:
         polymers      = [*mitt.flatten([self.raw_to_polymer(_) for _ in poly_entities])]
         _prot_polypeptides, _rna_polynucleotides, _other_polymers = [], [], []
 
-        for i,plm in enumerate( polymers ):
-            if len( plm.entity_poly_seq_one_letter_code_can ) < 15:
-                _other_polymers.append(polymers.pop(i))
+        # for i,plm in enumerate( polymers ):
+        #     if len( plm.entity_poly_seq_one_letter_code_can ) < 15:
+        #         _other_polymers.append(polymers.pop(i))
 
 
         for polymer in polymers:
@@ -746,17 +746,16 @@ class ReannotationPipeline:
         protein_alphabet      = pyhmmer.easel.Alphabet.amino()
         protein_classifier    = HMMClassifier( _prot_polypeptides, protein_alphabet, [p for p in [ *list(ProteinClass),*list(LifecycleFactorClass) ] ])
         protein_classifier.classify_chains()
-        prots_report = protein_classifier.produce_classification()
-        print("prots report", prots_report)
-
-        del protein_classifier
-        
+       
         rna_alphabet             = pyhmmer.easel.Alphabet.rna()
         rna_classifier           = HMMClassifier(_rna_polynucleotides, rna_alphabet, [p for p in list(RNAClass)])
         rna_classifier.classify_chains()
-        rna_report              = rna_classifier.produce_classification()
-        print("rna report", rna_report)
 
+        prot_classification = protein_classifier.produce_classification()
+        rna_classification  = rna_classifier.produce_classification()
+
+        report = { k:v for ( k,v ) in [*prot_classification.items(), *rna_classification.items()] }
+        pprint(report)
         # [reshaped_proteins, reshaped_polymeric_factors_prot] = self.process_polypeptides()
         # [reshaped_rnas, reshaped_polymeric_factors_rna]      = self.process_polynucleotides()
         # other_polymers                                       = self.process_other_polymers()
