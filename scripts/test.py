@@ -421,11 +421,11 @@ elif sys.argv[1] == "hmmt":
         rna      = [ *prof.rnas, *prof.other_polymers ]
 
         pipeline_polypeptides    = HMMClassifier( proteins, Alphabet.amino())
-        pipeline_polypeptides.scan_chains()
+        pipeline_polypeptides.___scan_chains()
         prots_report = pipeline_polypeptides.produce_classification()
 
         pipeline_polynucleotides = HMMClassifier( proteins, Alphabet.rna())
-        pipeline_polynucleotides.scan_chains()
+        pipeline_polynucleotides.___scan_chains()
         rna_report = pipeline_polynucleotides.produce_classification()
 
         report_path = os.path.join(LOGS_PATH,'classification_reports','{}_classification_report.json'.format(rcsb_id))

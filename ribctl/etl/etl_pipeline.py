@@ -716,7 +716,6 @@ class ReannotationPipeline:
         ]
 
     def process_structure(self):
-
         
         # ! According to RCSB schema, polymer_entites include "Protein", "RNA" but also "DNA", N"A-Hybrids" and "Other".
         # ! We only make the distinction between Proteins and RNA and Other for purposes of simplicity
@@ -732,7 +731,6 @@ class ReannotationPipeline:
 
         for i,plm in enumerate( polymers ):
             if len( plm.entity_poly_seq_one_letter_code_can ) < 15:
-                pprint(plm.entity_poly_polymer_type)
                 _other_polymers.append(polymers.pop(i))
 
 
@@ -746,13 +744,13 @@ class ReannotationPipeline:
                     _other_polymers.append(polymer)
 
         
-        pipeline_polynucleotides = HMMClassifier( _rna_polynucleotides, pyhmmer.easel.Alphabet.rna(), [p for p in list(RNAClass)])
-        pipeline_polynucleotides.scan_chains()
+        pipeline_polynucleotides = HMMClassifier(_rna_polynucleotides, pyhmmer.easel.Alphabet.rna(), [p for p in list(RNAClass)])
+        pipeline_polynucleotides.classify_chains()
         rna_report              = pipeline_polynucleotides.produce_classification()
         print("rna report", rna_report)
 
         pipeline_polypeptides    = HMMClassifier( _prot_polypeptides, pyhmmer.easel.Alphabet.amino(), [p for p in [ *list(ProteinClass),*list(LifecycleFactorClass) ] ])
-        pipeline_polypeptides.scan_chains()
+        pipeline_polypeptides.classify_chains()
         prots_report =            pipeline_polypeptides.produce_classification()
         print("prots report", prots_report)
 
