@@ -33,12 +33,8 @@ from ribctl.etl.etl_pipeline import (
 from ribctl.etl.obtain import obtain_assets_threadpool
 from ribctl.lib.classification import (
     HMMClassifier,
-    HMMScanner,
-    classify_sequence,
-    classify_subchain,
-    classify_subchains,
+    HMMs,
     hmm_create,
-    hmm_dict_init__candidates_per_organism,
     hmm_produce,
 )
 from ribctl.etl.ribosome_assets import Assetlist, RibosomeAssets
@@ -70,50 +66,8 @@ log_format = logging.Formatter("%(asctime)s [%(levelname)s] [%(name)s] %(message
 file_handler.setFormatter(log_format)
 logger.addHandler(file_handler)
 
-if sys.argv[1] == "process_struct":
-    rcsb_id = sys.argv[2].upper()
-    rib = RibosomeAssets(rcsb_id).profile()
-    organism_taxid = rib.src_organism_ids[0]
-    rnas = rib.rnas
-    result = classify_subchains(rnas, RNAClass)
-    print(result)
-elif sys.argv[1] == "process_all":
-    for rcsb_id in RibosomeAssets.list_all_structs():
-        logger.debug("Processing {}".format(rcsb_id))
-        rib = RibosomeAssets(rcsb_id).profile()
-        organism_taxid = rib.src_organism_ids[0]
-        rnas = rib.rnas
-        results = classify_subchains(prots)
-        print(results)
-        with open("/home/rtviii/dev/riboxyz/nomv2/{}.json".format(rcsb_id), "w") as f:
-            json.dump(results, f)
 
-elif sys.argv[1] == "merge_nomenclature":
-    for f in os.listdir(nomv2dict):
-        print(f)
-        with open(os.path.join(nomv2dict, f), "r") as infile:
-            nomv2 = json.load(infile)
-        struct, _ = f.split(".")
-        rib_asset = RibosomeAssets(struct)
-
-        filepath = rib_asset._json_profile_filepath()
-        profile = rib_asset.profile()
-
-        for chain in profile.proteins:
-            if chain.auth_asym_id in nomv2:
-                if (
-                    nomv2[chain.auth_asym_id] != None
-                    and nomv2[chain.auth_asym_id] not in chain.nomenclature
-                ):
-                    chain.nomenclature = [nomv2[chain.auth_asym_id]]
-                elif nomv2[chain.auth_asym_id] == None and chain.nomenclature != []:
-                    chain.nomenclature = []
-
-        rib_asset.write_own_json_profile(
-            new_profile=json.loads(profile.json()), overwrite=True
-        )
-
-elif sys.argv[1] == "tunnel":
+if sys.argv[1] == "tunnel":
 
     def list_euk_structs():
         EUK_STRUCTS = []
@@ -327,27 +281,6 @@ elif sys.argv[1] == "ll":
         #     __structs.append(rcsb_id)
         #     print("{}.".format(i),rcsb_id, taxid, ncbi.get_taxid_translator([taxid])[taxid])
 
-elif sys.argv[1] == "classify_rna":
-    prof = RibosomeAssets("3J9m").profile()
-    p = prof.rnas
-    [rna16s, rna12s] = p
-    seq = rna12s.entity_poly_seq_one_letter_code_can
-    hmms = []
-    alphabet = pyhmmer.easel.Alphabet.rna()
-
-    for val in RNAClass:
-        hmm_path = "class_{}_taxid_{}.hmm".format(val.value, prof.src_organism_ids[0])
-        if os.path.isfile(os.path.join(hmm_cachedir, hmm_path)):
-            hmm_path = os.path.join(hmm_cachedir, hmm_path)
-            with pyhmmer.plan7.HMMFile(hmm_path) as hmm_file:
-                hmm = hmm_file.read()
-        else:
-            hmm = hmm_produce(val, prof.src_organism_ids[0])
-        hmms.append(hmm)
-
-    seq_ = pyhmmer.easel.TextSequence(name=b"template", sequence=seq)
-    dsb = DigitalSequenceBlock(alphabet, [seq_.digitize(alphabet)])
-    for hmm in hmms:
         print("\t>>>>>>>>>>>> ", hmm)
         hits = pyhmmer.plan7.Pipeline(alphabet=alphabet).search_hmm(hmm, dsb)
         for hit in hits:
@@ -356,17 +289,6 @@ elif sys.argv[1] == "classify_rna":
             print(hit.bias)
             print(hit.description)
             print(hit.sum_score)
-
-elif sys.argv[1] == "struct_rnas":
-    print("ss")
-    for struct in RibosomeAssets.list_all_structs()[10:20]:
-        print(
-            "========================Processing {}=====================".format(struct)
-        )
-        prof = RibosomeAssets(struct).profile()
-        p = prof.rnas
-        k = classify_subchains(p, RNAClass)
-
 elif sys.argv[1] == "tsv_to_fasta":
     import csv
 
@@ -509,7 +431,35 @@ elif sys.argv[1] == "hmmt":
         report_path = os.path.join(LOGS_PATH,'classification_reports','{}_classification_report.json'.format(rcsb_id))
         pipeline.write_classification_report(report_path)
 
+elif sys.argv[1] == "hmmx":
 
+    p        = RibosomeAssets('3j7z').profile()
+    rnas     = p.rnas
+    alphabet = pyhmmer.easel.Alphabet.rna()
+    alphabet = pyhmmer.easel.Alphabet.amino()
+    # p.other_polymers
+    cca = p.polymeric_factors[1]
+    # cca= p.rnas[0]
+    # pprint(cca)
+    # for rna in [ * p.polymeric_factors]:
+    #     pprint(rna)
+
+    hmms = HMMs(cca['src_organism_ids'][0], [p for p in RNAClass], no_cache=True)
+    hmms.scan(alphabet, [ SeqRecord(cca['entity_poly_seq_one_letter_code_can']) ] )
+    # pprint(hmms.info())
+
+    # pprint()
+
+    
+
+    # pipeline_polynucleotides = HMMClassifier( rna, Alphabet.rna())
+    # pipeline_polynucleotides.scan_chains()
+    # rna_report = pipeline_polynucleotides.produce_classification()
+
+    # report_path = os.path.join(LOGS_PATH,'classification_reports','{}_classification_report.json'.format(rcsb_id))
+    # pipeline.write_classification_report(report_path)
+
+#+
 #     hmmx        = HMMScanner(
 #         prof.src_organism_ids[0],
 #         [pc for pc in [*list(ProteinClass), *list(LifecycleFactorClass)]],

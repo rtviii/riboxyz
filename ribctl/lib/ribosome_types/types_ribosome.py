@@ -417,11 +417,16 @@ class RibosomeStructure(BaseModel):
 
     assembly_map: list[AssemblyInstancesMap]
 
-    proteins            : list[Protein]
-    rnas                : list[RNA]
-    nonpolymeric_ligands: list[NonpolymericLigand]
-    polymeric_factors   : list[LifecycleFactor]
-    # This includes DNA-RNA hybrid strands, DNA and all other polymers
+    proteins            : list[Any]
+    rnas                : list[Any]
+    nonpolymeric_ligands: list[Any]
+    polymeric_factors   : list[Any]
+
+    # proteins            : list[Protein]
+    # rnas                : list[RNA]
+    # nonpolymeric_ligands: list[NonpolymericLigand]
+    # polymeric_factors   : list[LifecycleFactor]
+    #? This includes DNA-RNA hybrid strands, DNA and all other polymers
     other_polymers   : list[Polymer]
     
     @staticmethod
