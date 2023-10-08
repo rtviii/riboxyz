@@ -33,8 +33,6 @@ logging.basicConfig(
 hmm_cachedir = ASSETS['__hmm_cache']
 
 #? Constructon
-
-
 def fasta_phylogenetic_correction(candidate_class:ProteinClass|RNAClass|LifecycleFactorClass, organism_taxid:int, max_n_neighbors:int=10)->Iterator[SeqRecord]:
     """Given a candidate class and an organism taxid, retrieve the corresponding fasta file, and perform phylogenetic correction on it."""
 
