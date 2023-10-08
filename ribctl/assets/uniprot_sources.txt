@@ -1,6 +1,6 @@
 uniref_clusters ={
-    "us1m" : "UniRef90_Q9Y2Q9",
-    "us2m" : "UniRef90_Q9Y399",
+    "bS1m" : "UniRef90_Q9Y2Q9",
+    "uS2m" : "UniRef90_Q9Y399",
     "uS3m" : "UniRef90_P02381",
     "uS4m" : "UniRef90_P27929",
     "uS5m" : "UniRef90_P82675",
@@ -22,7 +22,7 @@ uniref_clusters ={
     "mS22" : "UniRef90_P82650",
     "mS23" : "UniRef90_Q9Y3D9",
     "mS25" : "UniRef90_P82663",
-    "ms26" : "UniRef90_Q9BYN8",
+    "mS26" : "UniRef90_Q9BYN8",
     "mS27" : "UniRef90_P12686",
     "mS29" : "UniRef90_P51398",
     "mS31" : "UniRef90_P82925",
