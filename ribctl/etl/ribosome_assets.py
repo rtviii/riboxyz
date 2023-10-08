@@ -14,7 +14,7 @@ from ribctl.lib.mod_split_rename import split_rename
 from ribctl.etl.etl_pipeline import current_rcsb_structs, ReannotationPipeline, rcsb_single_structure_graphql, query_rcsb_api
 from ribctl.lib.mod_render_thumbnail import render_thumbnail
 from ribctl.lib.utils import download_unpack_place, open_structure
-from ribctl.lib.ribosome_types.types_ribosome import RNA, LifecycleFactorClass, PolymerClass, LifecycleFactor, Protein, ProteinClass, RNAClass, RibosomeStructure
+from ribctl.lib.ribosome_types.types_ribosome import RNA, LifecycleFactorClass, PolymerClass, LifecycleFactor, PolynucleotideClass, Protein, CytosolicProteinClass, RibosomeStructure
 from ribctl import RIBETL_DATA
 from pydantic import BaseModel, parse_obj_as
 from concurrent.futures import ALL_COMPLETED, Future, ProcessPoolExecutor, ThreadPoolExecutor, wait
@@ -69,7 +69,7 @@ class RibosomeAssets():
         with open(PTC_RESIDUES_PATH, 'r') as infile:
             return json.load(infile)
 
-    def ____nomenclature_v2(self) -> dict[str, ProteinClass]:
+    def ____nomenclature_v2(self) -> dict[str, CytosolicProteinClass]:
         with open("/home/rxz/dev/docker_ribxz/api/ribctl/assets/nomenclaturev2/{}.json".format(self.rcsb_id.upper()), 'r') as infile:
             return json.load(infile)
 
@@ -178,7 +178,7 @@ class RibosomeAssets():
 
         return (None, None)
 
-    def get_rna_by_nomclass(self, class_: RNAClass, assembly: int = 0) -> RNA | None:
+    def get_rna_by_nomclass(self, class_: PolynucleotideClass, assembly: int = 0) -> RNA | None:
         """@assembly here stands to specify which of the two or more models the rna comes from
         in the case that a structure contains multiple models (ex. 4V4Q XRAY)"""
 
@@ -191,7 +191,7 @@ class RibosomeAssets():
             if class_ in rna.nomenclature and rna.assembly_id == assembly:
                 return rna
 
-    def get_prot_by_nomclass(self, class_: ProteinClass, assembly: int = 0) -> Protein | None:
+    def get_prot_by_nomclass(self, class_: CytosolicProteinClass, assembly: int = 0) -> Protein | None:
         _auth_asym_id = {
             v: k for k, v in self.____nomenclature_v2().items()}.get(class_, None)
         if _auth_asym_id != None:

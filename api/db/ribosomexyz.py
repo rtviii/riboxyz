@@ -13,7 +13,7 @@ from ribctl.lib.ribosome_types.types_ribosome import RibosomeStructure
 from ribctl.etl.ribosome_assets import RibosomeAssets
 from ribctl.lib.ribosome_types.types_poly_nonpoly_ligand import list_LSUProteinClass, list_SSUProteinClass, list_RNAClass
 from neo4j import GraphDatabase, Driver, ManagedTransaction, Transaction
-from ribctl.lib.ribosome_types.types_ribosome import  NonpolymericLigand,  ProteinClass, RibosomeStructure
+from ribctl.lib.ribosome_types.types_ribosome import  NonpolymericLigand,  CytosolicProteinClass, RibosomeStructure
 from schema.data_requests import LigandsByStruct
 from schema.v0 import ExogenousRNAByStruct,BanClassMetadata, LigandInstance, NeoStruct, NomenclatureClass, NomenclatureClassMember
 from ribctl.lib.ribosome_types.types_poly_nonpoly_ligand import RNAClass, list_LSUProteinClass, list_SSUProteinClass, list_RNAClass
@@ -320,7 +320,7 @@ class ribosomexyzDB():
                         """).data()[0]['struct_ligs']
             return session.execute_read(_)
 
-    def match_structs_w_proteins(self, targets: list[ProteinClass]) -> list[str]:
+    def match_structs_w_proteins(self, targets: list[CytosolicProteinClass]) -> list[str]:
         with self.driver.session() as session:
             def _(tx: Transaction | ManagedTransaction):
                 return [s[0] for s in tx.run("""//
@@ -353,7 +353,7 @@ class ribosomexyzDB():
                         """, {"RCSB_ID": rcsb_id.upper()}).data()[0]
             return session.execute_read(_)
 
-    def get_banclass_for_chain(self, rcsb_id: str, auth_asym_id) -> list[ProteinClass]:
+    def get_banclass_for_chain(self, rcsb_id: str, auth_asym_id) -> list[CytosolicProteinClass]:
         # TODO: This method should handle both protein and RNA chains(atm only proteins)
         with self.driver.session() as session:
 
@@ -403,7 +403,7 @@ class ribosomexyzDB():
                  """).data()
             return session.execute_read(_)
 
-    def gmo_nom_class(self, class_id: ProteinClass) -> list[NomenclatureClassMember]:
+    def gmo_nom_class(self, class_id: CytosolicProteinClass) -> list[NomenclatureClassMember]:
 
         with self.driver.session() as session:
             def _(tx: Transaction | ManagedTransaction):

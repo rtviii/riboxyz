@@ -13,7 +13,7 @@ import re
 import pyhmmer
 from ribctl import ASSETS, MUSCLE_BIN
 from ribctl.lib.msalib import Fasta, muscle_align_N_seq, phylogenetic_neighborhood
-from ribctl.lib.ribosome_types.types_ribosome import RNA, ElongationFactorClass, InitiationFactorClass, LifecycleFactorClass, Polymer, PolymerClass, LifecycleFactor, Protein, ProteinClass, ProteinClass, RNAClass
+from ribctl.lib.ribosome_types.types_ribosome import RNA, ElongationFactorClass, InitiationFactorClass, LifecycleFactorClass, MitochondrialProteinClass, Polymer, PolymerClass, LifecycleFactor, PolynucleotideClass, PolypeptideClass, Protein, CytosolicProteinClass, CytosolicProteinClass
 # from ribctl.etl.ribosome_assets import RibosomeAssets
 from pyhmmer.easel import Alphabet, DigitalSequenceBlock, TextSequence, SequenceFile, SequenceBlock, TextSequenceBlock, DigitalSequence
 from pyhmmer.plan7 import Pipeline, HMM , TopHits
@@ -33,13 +33,15 @@ logging.basicConfig(
 hmm_cachedir = ASSETS['__hmm_cache']
 
 #? Constructon
-def fasta_phylogenetic_correction(candidate_class:ProteinClass|RNAClass|LifecycleFactorClass, organism_taxid:int, max_n_neighbors:int=10)->Iterator[SeqRecord]:
+def fasta_phylogenetic_correction(candidate_class:PolymerClass, organism_taxid:int, max_n_neighbors:int=10)->Iterator[SeqRecord]:
     """Given a candidate class and an organism taxid, retrieve the corresponding fasta file, and perform phylogenetic correction on it."""
 
-    if candidate_class in ProteinClass:
+    if candidate_class in CytosolicProteinClass:
         fasta_path = os.path.join(ASSETS["fasta_proteins_cytosolic"], f"{candidate_class.value}.fasta")
+    if candidate_class in MitochondrialProteinClass:
+        fasta_path = os.path.join(ASSETS["fasta_proteins_mitochondrial"], f"{candidate_class.value}.fasta")
 
-    elif candidate_class in RNAClass:
+    elif candidate_class in PolynucleotideClass:
         fasta_path = os.path.join(ASSETS["fasta_rrna"], f"{candidate_class.value}.fasta")
 
     elif candidate_class in LifecycleFactorClass:
@@ -49,15 +51,15 @@ def fasta_phylogenetic_correction(candidate_class:ProteinClass|RNAClass|Lifecycl
             factor_class_path = ASSETS["fasta_factors_initiation"]
         else:
             raise Exception("Phylogenetic correction: Unimplemented factor class")
-
         fasta_path = os.path.join(factor_class_path, f"{candidate_class.value}.fasta")
     else:
         raise Exception("Phylogenetic correction: Unimplemented candidate class")
 
-    records      = Fasta(fasta_path)
-    ids          = records.all_taxids()
-    phylo_nbhd   = phylogenetic_neighborhood(list(map(lambda x: str(x),ids)), str(organism_taxid), max_n_neighbors)
-    seqs         = records.pick_taxids(phylo_nbhd)
+    records    = Fasta(fasta_path)
+    ids        = records.all_taxids()
+    phylo_nbhd = phylogenetic_neighborhood(list(map(lambda x: str(x),ids)), str(organism_taxid), max_n_neighbors)
+    seqs       = records.pick_taxids(phylo_nbhd)
+
     return iter(seqs)
 
 def digitize_seq_record(seq_record:SeqRecord, alphabet:Alphabet)->DigitalSequence:
@@ -108,7 +110,7 @@ def hmm_cache(hmm:HMM):
     else:
         ...
 
-def hmm_check_cache(candidate_class: ProteinClass | RNAClass | LifecycleFactorClass, organism_taxid:int)->HMM | None:
+def hmm_check_cache(candidate_class: PolymerClass, organism_taxid:int)->HMM | None:
     hmm_path = "class_{}_taxid_{}.hmm".format(candidate_class.value, organism_taxid)
     if os.path.isfile(os.path.join(hmm_cachedir, hmm_path)):
         hmm_path = os.path.join(hmm_cachedir, hmm_path)
@@ -129,12 +131,12 @@ def hmm_create(name:str, seqs:Iterator[SeqRecord], alphabet:Alphabet)->HMM:
 
     return HMM
 
-def hmm_produce(candidate_class: ProteinClass | RNAClass | LifecycleFactorClass, organism_taxid:int, seed_sequences:list[SeqRecord], no_cache:bool=False)->Tuple[PolymerClass,HMM]:  # type: ignore
+def hmm_produce(candidate_class: PolymerClass, organism_taxid:int, seed_sequences:list[SeqRecord], no_cache:bool=False)->Tuple[PolymerClass,HMM]:  # type: ignore
     """Produce an organism-specific HMM. Retrieve from cache if exists, otherwise generate and cache."""
     if ( hmm := hmm_check_cache(candidate_class, organism_taxid) ) != None and not no_cache:
         return (candidate_class, hmm )
     else:
-        if candidate_class in ProteinClass or candidate_class in LifecycleFactorClass:
+        if candidate_class in CytosolicProteinClass or candidate_class in LifecycleFactorClass:
             alphabet = pyhmmer.easel.Alphabet.amino()
         elif candidate_class in RNAClass: 
             alphabet = pyhmmer.easel.Alphabet.rna()

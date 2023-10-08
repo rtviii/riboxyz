@@ -2,16 +2,20 @@ from typing import Any, Optional
 from enum import Enum, auto
 from Bio.SeqRecord import SeqRecord
 import typing
-import typing
 from typing import NewType
 from pydantic import BaseModel
 from ribctl.lib.enumunion import enum_union
 
-RCSB_ID = NewType('RCSB_ID', str)
-# Nomenclature
 
-#TODO: obtain seed sequences
+# TODO:
+# |********************************************************************************************************|
+# | https://docs.google.com/spreadsheets/d/1mapshbn1ArofPN-Omu8GG5QdcwlJ0ym0BlN252kkUBU/edit#gid=815712128 |
+# |********************************************************************************************************|
+
+
+#? ----------------------------------------------{ Subcomponent Types }------------------------------------------------
 class MitochondrialProteinClass(Enum):
+
     #mSSU
     bS1m  = "bS1m"
     uS2m  = "uS2m"
@@ -117,7 +121,7 @@ class MitochondrialProteinClass(Enum):
     mL66  = "mL66"
     mL67  = "mL67"
             
-class ProteinClass(Enum):
+class CytosolicProteinClass(Enum):
     # SSU
     bS1   = "bS1"
     eS1   = "eS1"
@@ -222,11 +226,11 @@ class ProteinClass(Enum):
     eL43  = "eL43"
     P1P2  = "P1P2"
 
-class RNAClass(Enum):
-    #TODO: Assembly missing
-
+class MitochondrialRNAClass(Enum):
     mt_rRNA_12S = "mt12SrRNA" # mitochondrial
     mt_rRNA_16S = "mt16SrRNA" # mitochondrial
+
+class CytosolicRNAClass(Enum):
 
     rRNA_5S   = "5SrRNA"  #  bacterial or eykaryotic
     rRNA_16S  = "16SrRNA" #  c-bacterial or mitochondrial
@@ -320,9 +324,11 @@ class InitiationFactorClass(Enum):
 
 # LifecycleFactorClass = typing.Union[ElongationFactorClass, InitiationFactorClass]
 LifecycleFactorClass = enum_union(ElongationFactorClass, InitiationFactorClass)
-PolymerClass         = enum_union(RNAClass, ProteinClass, LifecycleFactorClass)
+PolypeptideClass     = enum_union(CytosolicProteinClass, LifecycleFactorClass, MitochondrialProteinClass)
+PolynucleotideClass  = enum_union(CytosolicRNAClass, CytosolicRNAClass)
+PolymerClass         = enum_union(PolynucleotideClass, PolypeptideClass)
 
-# Object Types
+#? ----------------------------------------------{ Object Types }------------------------------------------------
 class Polymer(BaseModel):
     def __hash__(self):
         return hash(self.auth_asym_id + self.parent_rcsb_id)

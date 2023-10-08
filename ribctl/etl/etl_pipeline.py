@@ -16,14 +16,14 @@ from ribctl.lib.ribosome_types.types_ribosome import (
     RNA,
     AssemblyInstancesMap,
     LifecycleFactorClass,
+    MitochondrialProteinClass,
     NonpolymericLigand,
     Polymer,
     PolymerClass,
     LifecycleFactor,
     Protein,
-    ProteinClass,
-    ProteinClass,
-    RNAClass,
+    CytosolicProteinClass,
+    CytosolicProteinClass,
     RibosomeStructure,
 )
 from ribctl.etl.gql_querystrings import single_structure_graphql_template
@@ -101,7 +101,7 @@ class ReannotationPipeline:
     rcsb_data_dict: dict
 
     # ? Initialized classification resources:
-    hmm_ribosomal_proteins: dict[ProteinClass, HMM]
+    hmm_ribosomal_proteins: dict[CytosolicProteinClass, HMM]
     # hmm_ribosomal_rnas:dict[RNAClass, HMM]
     # hmm_ribosomal_factors:dict[PolymericFactorClass, HMM]
     # hmm_ribosomal_ligands:dict[NonpolymericLigandClass, HMM]
@@ -744,7 +744,7 @@ class ReannotationPipeline:
                     _other_polymers.append(polymer)
 
         protein_alphabet      = pyhmmer.easel.Alphabet.amino()
-        protein_classifier    = HMMClassifier( _prot_polypeptides, protein_alphabet, [p for p in [ *list(ProteinClass),*list(LifecycleFactorClass) ] ])
+        protein_classifier    = HMMClassifier( _prot_polypeptides, protein_alphabet, [p for p in [ *list(CytosolicProteinClass),*list(LifecycleFactorClass) , *list(MitochondrialProteinClass)] ])
         protein_classifier.classify_chains()
        
         rna_alphabet             = pyhmmer.easel.Alphabet.rna()

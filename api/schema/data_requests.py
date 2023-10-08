@@ -1,6 +1,6 @@
 from ninja import Schema
 from ribctl.lib.ribosome_types.types_poly_nonpoly_ligand import RNAClass
-from ribctl.lib.ribosome_types.types_ribosome import Protein, ProteinClass
+from ribctl.lib.ribosome_types.types_ribosome import Protein, CytosolicProteinClass
 """This file documents the possible requests that the API can receive."""
 
 
@@ -9,7 +9,7 @@ class ProteinsNumber(Schema):
     pass
 
 class BanclassAnnotation(Schema):
-    banclass: ProteinClass
+    banclass: CytosolicProteinClass
 
 
 class NomclassVisualize(Schema):

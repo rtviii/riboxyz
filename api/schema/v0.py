@@ -3,7 +3,7 @@ import typing
 from ninja import Schema
 from pydantic import BaseModel, create_model
 from ribctl.lib.ribosome_types.types_poly_nonpoly_ligand import RNAClass
-from ribctl.lib.ribosome_types.types_ribosome import NonpolymericLigand, Protein, ProteinClass, RibosomeStructure
+from ribctl.lib.ribosome_types.types_ribosome import NonpolymericLigand, Protein, CytosolicProteinClass, RibosomeStructure
 """This file documents the possible requests that the API can receive."""
 
 
@@ -120,7 +120,7 @@ class NomenclatureClassMember(Schema):
     entity_poly_polymer_type           : str
     entity_poly_entity_type            : str
     
-    nomenclature:  list[ProteinClass | RNAClass]
+    nomenclature:  list[CytosolicProteinClass | RNAClass]
     ligand_like:   bool | None
 
 
@@ -272,7 +272,7 @@ class ProteinProfile(Schema):
     entity_poly_polymer_type           : str
     entity_poly_entity_type            : str
 
-    nomenclature:  list[ProteinClass]
+    nomenclature:  list[CytosolicProteinClass]
 
     parent_resolution: float
     parent_year      : int
@@ -329,7 +329,7 @@ class LigandResponseShape(Schema):
 
 
 class BanClassMetadata(Schema):
-    banClass: ProteinClass
+    banClass: CytosolicProteinClass
     organisms: list[int]
     comments: list[list[str]]
     structs: list[str]
@@ -346,4 +346,4 @@ class RPSummary(Schema):
 class NomenclatureClass(Schema): 
       structs                  : list[str]
       rps                      : list[RPSummary]
-      banClass                 : ProteinClass
+      banClass                 : CytosolicProteinClass

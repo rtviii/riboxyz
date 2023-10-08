@@ -4,7 +4,7 @@ from django.http import HttpResponse
 from ninja import Router
 from ribctl.lib.mod_superimpose import pymol_super, ranged_align_by_auth_asym_id, ranged_align_by_polyclass
 from ribctl.lib.ribosome_types.types_poly_nonpoly_ligand import RNAClass
-from ribctl.lib.ribosome_types.types_ribosome import PolymerClass, ProteinClass, RibosomeStructure
+from ribctl.lib.ribosome_types.types_ribosome import PolymerClass, CytosolicProteinClass, RibosomeStructure
 from schema.v0 import BanClassMetadata, ExogenousRNAByStruct,LigandInstance, LigandlikeInstance, NeoStruct, NomenclatureClass, NomenclatureClassMember
 from rbxz_bend.application import db_connection
 from wsgiref.util import FileWrapper
@@ -98,10 +98,10 @@ def get_RibosomeStructure(request,rcsb_id:str):
     return db_connection.get_RibosomeStructure(rcsb_id.upper())
 
 @v0.get('/match_structs_w_proteins', response=RibosomeStructure, tags=['Structure'])
-def match_structs_w_proteins(request,has_proteins:list[ProteinClass]):
+def match_structs_w_proteins(request,has_proteins:list[CytosolicProteinClass]):
     return db_connection.match_structs_w_proteins(has_proteins)
 
-@v0.get('/get_banclass_for_chain', response=list[ProteinClass], tags=['Classification'])
+@v0.get('/get_banclass_for_chain', response=list[CytosolicProteinClass], tags=['Classification'])
 def get_banclass_for_chain(request,rcsb_id:str, auth_asym_id:str):
     return db_connection.get_banclass_for_chain(rcsb_id,auth_asym_id)
 
@@ -114,7 +114,7 @@ def get_nom_classes(request,):
     return db_connection.list_nom_classes()
 
 @v0.get('/gmo_nom_class', response=list[ NomenclatureClassMember ], tags=['Classification'])
-def gmo_nom_class(request,class_id:ProteinClass):
+def gmo_nom_class(request,class_id:CytosolicProteinClass):
     return db_connection.gmo_nom_class(class_id)
 
 @v0.get('/proteins_number', response=int, tags=['Protein'])
