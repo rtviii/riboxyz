@@ -10,7 +10,6 @@ from ribctl import ASSETS, ASSETS_PATH
 # File not found: /home/rtviii/dev/riboxyz/ribctl/assets/fasta_proteins_mitochondrial/mS26.fasta
 
 
-
 uniref_clusters ={
     "bS1m" : "UniRef90_Q9Y2Q9",
     "uS2m" : "UniRef90_Q9Y399",
@@ -35,7 +34,7 @@ uniref_clusters ={
     "mS22" : "UniRef90_P82650",
     "mS23" : "UniRef90_Q9Y3D9",
     "mS25" : "UniRef90_P82663",
-    "ms26" : "UniRef90_Q9BYN8",
+    "mS26" : "UniRef90_Q9BYN8",
     "mS27" : "UniRef90_P12686",
     "mS29" : "UniRef90_P51398",
     "mS31" : "UniRef90_P82925",
@@ -117,10 +116,7 @@ uniref_clusters ={
     "mL67"  :"UniRef90_Q06630",
 }
 
-
-
 os.path.join(ASSETS_PATH,'')
-
 for (mrp, uniref_cluster_id) in uniref_clusters.items():
     if mrp in [ "bS1m", "uS2m", "mS26"]:
         url               = "https://rest.uniprot.org/uniprotkb/search?compressed=false&fields=accession%2Corganism_id%2Csequence&format=tsv&query=%28%28uniref_cluster_90%3A{}%29+NOT+%28accession%3AQ9Y2Q9%29%29&size=500".format(uniref_cluster_id)
