@@ -42,7 +42,7 @@ from ribctl.lib.ribosome_types.types_ribosome import (
     LifecycleFactorClass,
     Polymer,
     PolymerClass,
-    ProteinClass,
+    CytosolicProteinClass,
     RNAClass,
 )
 from ribctl import model_subgenuses
