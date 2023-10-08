@@ -5,10 +5,15 @@ from ribctl import ASSETS, ASSETS_PATH
 
 # Define the UniProt entry name
 
+# File not found: /home/rtviii/dev/riboxyz/ribctl/assets/fasta_proteins_mitochondrial/bS1m.fasta
+# File not found: /home/rtviii/dev/riboxyz/ribctl/assets/fasta_proteins_mitochondrial/uS2m.fasta
+# File not found: /home/rtviii/dev/riboxyz/ribctl/assets/fasta_proteins_mitochondrial/mS26.fasta
+
+
 
 uniref_clusters ={
-    "us1m" : "UniRef90_Q9Y2Q9",
-    "us2m" : "UniRef90_Q9Y399",
+    "bS1m" : "UniRef90_Q9Y2Q9",
+    "uS2m" : "UniRef90_Q9Y399",
     "uS3m" : "UniRef90_P02381",
     "uS4m" : "UniRef90_P27929",
     "uS5m" : "UniRef90_P82675",
@@ -117,12 +122,13 @@ uniref_clusters ={
 os.path.join(ASSETS_PATH,'')
 
 for (mrp, uniref_cluster_id) in uniref_clusters.items():
-    url               = "https://rest.uniprot.org/uniprotkb/search?compressed=false&fields=accession%2Corganism_id%2Csequence&format=tsv&query=%28%28uniref_cluster_90%3A{}%29+NOT+%28accession%3AQ9Y2Q9%29%29&size=500".format(uniref_cluster_id)
-    response          = requests.get(url)
-    savepath = os.path.join(ASSETS['fasta_proteins_mitochondrial'], '{}.fasta'.format(mrp))
-    if response.status_code == 200:
-        with open(savepath, "w") as file:
-            file.write(response.text)
-    else:
-        print(f"Error: Unable to retrieve data. Status code: {response.status_code}")
+    if mrp in [ "bS1m", "uS2m", "mS26"]:
+        url               = "https://rest.uniprot.org/uniprotkb/search?compressed=false&fields=accession%2Corganism_id%2Csequence&format=tsv&query=%28%28uniref_cluster_90%3A{}%29+NOT+%28accession%3AQ9Y2Q9%29%29&size=500".format(uniref_cluster_id)
+        response          = requests.get(url)
+        savepath = os.path.join(ASSETS['fasta_proteins_mitochondrial'], '{}.fasta'.format(mrp))
+        if response.status_code == 200:
+            with open(savepath, "w") as file:
+                file.write(response.text)
+        else:
+            print(f"Error: Unable to retrieve data. Status code: {response.status_code}")
 #+ -----------------------------------------------------------------------------------------------------------------------+
