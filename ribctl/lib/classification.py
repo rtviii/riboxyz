@@ -35,10 +35,12 @@ hmm_cachedir = ASSETS['__hmm_cache']
 #? Constructon
 def fasta_phylogenetic_correction(candidate_class:PolymerClass, organism_taxid:int, max_n_neighbors:int=10)->Iterator[SeqRecord]:
     """Given a candidate class and an organism taxid, retrieve the corresponding fasta file, and perform phylogenetic correction on it."""
+    print(">>>>>>>>Requesting class", candidate_class)
 
     if candidate_class in CytosolicProteinClass:
         fasta_path = os.path.join(ASSETS["fasta_proteins_cytosolic"], f"{candidate_class.value}.fasta")
-    if candidate_class in MitochondrialProteinClass:
+
+    elif candidate_class in MitochondrialProteinClass:
         fasta_path = os.path.join(ASSETS["fasta_proteins_mitochondrial"], f"{candidate_class.value}.fasta")
 
     elif candidate_class in PolynucleotideClass:
@@ -55,7 +57,11 @@ def fasta_phylogenetic_correction(candidate_class:PolymerClass, organism_taxid:i
     else:
         raise Exception("Phylogenetic correction: Unimplemented candidate class")
 
+    if not os.path.isfile(fasta_path):
+        raise Exception("Not found: {}".format(fasta_path))
     records    = Fasta(fasta_path)
+    if len( list(records.records) ) == 0 :
+        raise Exception("Empty fasta file: {}".format(fasta_path))
     ids        = records.all_taxids()
     phylo_nbhd = phylogenetic_neighborhood(list(map(lambda x: str(x),ids)), str(organism_taxid), max_n_neighbors)
     seqs       = records.pick_taxids(phylo_nbhd)
@@ -136,9 +142,9 @@ def hmm_produce(candidate_class: PolymerClass, organism_taxid:int, seed_sequence
     if ( hmm := hmm_check_cache(candidate_class, organism_taxid) ) != None and not no_cache:
         return (candidate_class, hmm )
     else:
-        if candidate_class in CytosolicProteinClass or candidate_class in LifecycleFactorClass:
+        if candidate_class in CytosolicProteinClass or candidate_class in LifecycleFactorClass or candidate_class in MitochondrialProteinClass:
             alphabet = pyhmmer.easel.Alphabet.amino()
-        elif candidate_class in RNAClass: 
+        elif candidate_class in PolynucleotideClass: 
             alphabet = pyhmmer.easel.Alphabet.rna()
         else:
             raise Exception("hmm_produce: Unimplemented candidate class")

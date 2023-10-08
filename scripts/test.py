@@ -42,8 +42,6 @@ from ribctl.lib.ribosome_types.types_ribosome import (
     LifecycleFactorClass,
     Polymer,
     PolymerClass,
-    CytosolicProteinClass,
-    RNAClass,
 )
 from ribctl import model_subgenuses
 from ete3 import NCBITaxa
@@ -292,33 +290,31 @@ elif sys.argv[1] == "ll":
 elif sys.argv[1] == "tsv_to_fasta":
     import csv
 
-    tsv_path = os.path.join(
-        "/home/rtviii/dev/riboxyz/ribctl/assets", "eIF3_subunitI.tsv"
-    )
-    fasta_path = os.path.join(
-        "/home/rtviii/dev/riboxyz/ribctl/assets", "eIF3_subunitI.fasta"
-    )
-    records = []
+    
+    mitoproteins_path = "/home/rtviii/dev/riboxyz/ribctl/assets/fasta_proteins_mitochondrial"
 
-    with open(tsv_path, "r", newline="", encoding="utf-8") as tsvfile:
-        tsvreader = csv.reader(tsvfile, delimiter="\t")
-        next(tsvreader, None)
-        for row in tsvreader:
-            entry, orgid, sequence = row
-            records.append((entry, orgid, sequence))
+    for i in os.listdir(mitoproteins_path):
+        tsv_path   = os.path.join(mitoproteins_path, i)
+        fasta_path = os.path.join(mitoproteins_path, "{}.fasta".format(i.split(".")[0]))
+        records    = []
 
-    seqrecords = []
+        with open(tsv_path, "r", newline="", encoding="utf-8") as tsvfile:
+            tsvreader = csv.reader(tsvfile, delimiter="\t")
+            next(tsvreader, None)
+            for row in tsvreader:
+                entry, orgid, sequence = row
+                records.append((entry, orgid, sequence))
 
-    for record in records:
-        (entry, taxid, sequence) = record
-        seqrecords.append(
-            SeqRecord(Seq(sequence), id=taxid, description="uniprot_{}".format(entry))
-        )
+        seqrecords = []
 
-    dest = os.path.join(fasta_path)
-    with open(dest, "w") as output_handle:
-        SeqIO.write(seqrecords, output_handle, "fasta")
-        print("Wrote {} seqs to  to {}".format(len(seqrecords), dest))
+        for record in records:
+            (entry, taxid, sequence) = record
+            seqrecords.append( SeqRecord(Seq(sequence), id=taxid, description="uniprot_{}".format(entry)) )
+
+        dest = os.path.join(fasta_path)
+        with open(dest, "w") as output_handle:
+            SeqIO.write(seqrecords, output_handle, "fasta")
+            print("Wrote {} seqs to  to {}".format(len(seqrecords), dest))
 
 elif sys.argv[1] == "struct_factors":
     for struct in RibosomeAssets.list_all_structs()[:10]:
@@ -432,7 +428,6 @@ elif sys.argv[1] == "hmmt":
         pipeline.write_classification_report(report_path)
 
 elif sys.argv[1] == "hmmx":
-
     p        = RibosomeAssets('3j7z').profile()
     rnas     = p.rnas
     alphabet = pyhmmer.easel.Alphabet.rna()
