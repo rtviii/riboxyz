@@ -16,6 +16,8 @@ volume/*
 node_modules/**
 node_modules
 
+**/classification_reports/**
+
 *.env
 **/*.env
 

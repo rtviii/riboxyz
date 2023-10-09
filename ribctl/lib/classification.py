@@ -283,31 +283,33 @@ class HMMClassifier():
         """This is an alternative implementation of `scan_chains` that does not use `hmmscan`. Waiting on https://github.com/althonos/pyhmmer/issues/53 to resolve"""
 
         for chain in self.chains:
-            organism_taxid = chain.src_organism_ids[0]
-            if organism_taxid not in self.organism_scanners:
-                hmmscanner                             = HMMs(organism_taxid, self.candidate_classes, no_cache = True, max_seed_seqs = 5)
-                self.organism_scanners[organism_taxid] = hmmscanner
-            else:
-                hmmscanner = self.organism_scanners[organism_taxid]
+            try:
+                organism_taxid = chain.src_organism_ids[0]
+                if organism_taxid not in self.organism_scanners:
+                    hmmscanner                             = HMMs(organism_taxid, self.candidate_classes, no_cache = True, max_seed_seqs = 5)
+                    self.organism_scanners[organism_taxid] = hmmscanner
+                else:
+                    hmmscanner = self.organism_scanners[organism_taxid]
 
-            self.report[chain.auth_asym_id] = []
-            seq_record                      = chain.to_SeqRecord()
-            query_seq                       = pyhmmer.easel.TextSequence(name=bytes(seq_record.id,'utf-8'), sequence=seq_record.seq).digitize(self.alphabet)
+                self.report[chain.auth_asym_id] = []
+                seq_record                      = chain.to_SeqRecord()
+                query_seq                       = pyhmmer.easel.TextSequence(name=bytes(seq_record.id,'utf-8'), sequence=seq_record.seq).digitize(self.alphabet)
+                for ( candidate_class, tophits ) in hmmscanner.classify_seq(self.alphabet, query_seq):
+                    for hit in tophits:
+                           d_hit = {
+                                "fasta_seed"        : [str(seqrecord.seq) for seqrecord in hmmscanner.class_hmms_seed_sequences[candidate_class]],
+                                "seed_organism_ids" : [seqrecord.id for seqrecord in hmmscanner.class_hmms_seed_sequences[candidate_class]],
+                                "class_name"        : candidate_class,
+                                "evalue"            : hit.evalue,
+                                "bitscore"          : hit.score,
+                                "target_organism_id": organism_taxid,
+                                "consensus"         : hmmscanner.class_hmms_registry[candidate_class].consensus,
+                                "domains"           : [( d.score, d.c_evalue, d.env_from, d.env_to ) for d in hit.domains]
+                            }
+                           self.report[chain.auth_asym_id].append(d_hit)
+            except Exception as e:
+                print(e)
 
-            
-            for ( candidate_class, tophits ) in hmmscanner.classify_seq(self.alphabet, query_seq):
-                for hit in tophits:
-                       d_hit = {
-                            "fasta_seed"        : [str(seqrecord.seq) for seqrecord in hmmscanner.class_hmms_seed_sequences[candidate_class]],
-                            "seed_organism_ids" : [seqrecord.id for seqrecord in hmmscanner.class_hmms_seed_sequences[candidate_class]],
-                            "class_name"        : candidate_class,
-                            "evalue"            : hit.evalue,
-                            "bitscore"          : hit.score,
-                            "target_organism_id": organism_taxid,
-                            "consensus"         : hmmscanner.class_hmms_registry[candidate_class].consensus,
-                            "domains"           : [( d.score, d.c_evalue, d.env_from, d.env_to ) for d in hit.domains]
-                        }
-                       self.report[chain.auth_asym_id].append(d_hit)
 
     def ___scan_chains(self)->None:
         """DEPRECATED: Waiting on https://github.com/althonos/pyhmmer/issues/53 to resolve"""
