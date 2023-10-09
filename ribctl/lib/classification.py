@@ -4,7 +4,7 @@ import pickle
 from pprint import pprint
 import subprocess
 from tempfile import NamedTemporaryFile
-from typing import Generic, Iterator, Literal, LiteralString, Optional, Tuple, TypeVar
+from typing import Generic, Iterator, Literal, LiteralString, Optional, Tuple, Type, TypeVar
 import typing
 from Bio.Align import MultipleSeqAlignment,Seq, SeqRecord
 from Bio.Align.Applications import MuscleCommandline

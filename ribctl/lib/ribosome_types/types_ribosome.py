@@ -1,3 +1,4 @@
+from pprint import pprint
 from typing import Any, Optional
 from enum import Enum, auto
 from Bio.SeqRecord import SeqRecord
@@ -323,10 +324,10 @@ class InitiationFactorClass(Enum):
     aIF_5B       = "aIF5B"
 
 # LifecycleFactorClass = typing.Union[ElongationFactorClass, InitiationFactorClass]
-LifecycleFactorClass = enum_union(ElongationFactorClass, InitiationFactorClass)
-PolypeptideClass     = enum_union(CytosolicProteinClass, LifecycleFactorClass, MitochondrialProteinClass)
-PolynucleotideClass  = enum_union(CytosolicRNAClass, MitochondrialRNAClass)
-PolymerClass         = enum_union(PolynucleotideClass, PolypeptideClass)
+LifecycleFactorClass = enum_union(ElongationFactorClass, InitiationFactorClass                           )
+PolypeptideClass     = enum_union(CytosolicProteinClass, LifecycleFactorClass , MitochondrialProteinClass)
+PolynucleotideClass  = enum_union(CytosolicRNAClass    , MitochondrialRNAClass                           )
+PolymerClass         = enum_union(PolynucleotideClass  , PolypeptideClass                                )
 
 #? ----------------------------------------------{ Object Types }------------------------------------------------
 class Polymer(BaseModel):
@@ -367,18 +368,25 @@ class Protein(Polymer):
 
     @staticmethod
     def from_polymer(p: Polymer,
-                      pfam_accessions  : list[str],
-                      pfam_comments    : list[str],
-                      pfam_descriptions: list[str],
-                      uniprot_accession: list[str]): 
-        print(p.dict())
+                      **kwargs): 
 
+        if ( kwargs["pfams"] != None and len(kwargs["pfams"]) > 0 ):
+            pfam_comments     = list( set( [ pfam["rcsb_pfam_comment"    ] for pfam in kwargs["pfams"] ] ) )
+            pfam_descriptions = list( set( [ pfam["rcsb_pfam_description"] for pfam in kwargs["pfams"] ] ) )
+            pfam_accessions   = list( set( [ pfam["rcsb_pfam_accession"  ] for pfam in kwargs["pfams"] ] ) )
+
+        else:
+            pfam_comments     = []
+            pfam_descriptions = []
+            pfam_accessions   = []
+
+        
         return Protein(**{
               **p.dict(),
               "pfam_accessions"   : pfam_accessions,
               "pfam_comments"     : pfam_comments,
               "pfam_descriptions" : pfam_descriptions,
-              "uniprot_accession" : uniprot_accession
+              "uniprot_accession" : [ entry["rcsb_id"] for entry in kwargs["uniprots"] ] if kwargs["uniprots"] != None and len(kwargs["uniprots"]) > 0 else []
         })
 
 
@@ -396,7 +404,7 @@ class Protein(Polymer):
 class RNA(Polymer):
     def __hash__(self):
         return hash(self.auth_asym_id + self.parent_rcsb_id)
-    pass
+    # pass
 
 class NonpolymericLigand(BaseModel)  : 
 
