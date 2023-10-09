@@ -756,31 +756,10 @@ class ReannotationPipeline:
             if polymer_dict.auth_asym_id in reported_classes.keys():
                 polymer_dict.nomenclature = reported_classes[polymer_dict.auth_asym_id]
 
-        # [reshaped_proteins, reshaped_polymeric_factors_prot] = self.process_polypeptides()
-        # [reshaped_rnas, reshaped_polymeric_factors_rna]      = self.process_polynucleotides()
-        # other_polymers                                       = self.process_other_polymers()
-
-        # prot_noms: dict[str, PolymerClass] = classify_subchains( [*reshaped_proteins, *reshaped_polymeric_factors_prot], ProteinClass )
-        # for aaid, protname in prot_noms.items():
-        #     for prot in reshaped_proteins:
-        #         if prot.auth_asym_id == aaid and protname != None:
-        #             prot.nomenclature = [protname]
-        #         else:
-        #             continue
-
-        # rna_noms: dict[str, PolymerClass] = classify_subchains( [*reshaped_rnas, *reshaped_polymeric_factors_prot], RNAClass )
-        # for aaid, rnaname in rna_noms.items():
-        #     for rna in reshaped_rnas:
-        #         if rna.auth_asym_id == aaid and rna != None:
-        #             rna.nomenclature = [rnaname]
-        #         else:
-        #             continue
         assert (
             len(_rna_polynucleotides)
             + len(_prot_polypeptides)
             + len(_other_polymers)
-            # + len(reshaped_polymeric_factors_prot)
-            # + len(other_polymers)
         ) == self.polymers_target_count
 
         # assert (
@@ -791,10 +770,10 @@ class ReannotationPipeline:
         #     + len(other_polymers)
         # ) == self.flattened_polymers_target
 
-        reshaped_nonpolymers = self.process_nonpolymers()
+        reshaped_nonpolymers                     = self.process_nonpolymers()
         [externalRefs, pub, kwords_text, kwords] = self.process_metadata()
-        organisms = self.infer_organisms_from_polymers([*_prot_polypeptides, *_rna_polynucleotides])
-        reshaped = RibosomeStructure(
+        organisms                                = self.infer_organisms_from_polymers([*_prot_polypeptides, *_rna_polynucleotides])
+        reshaped                                 = RibosomeStructure(
             rcsb_id                = self.rcsb_data_dict["rcsb_id"],
             expMethod              = self.rcsb_data_dict["exptl"][0]["method"],
             resolution             = self.rcsb_data_dict["rcsb_entry_info"]["resolution_combined"][0],
