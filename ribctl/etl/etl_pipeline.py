@@ -462,7 +462,6 @@ class ReannotationPipeline:
         )
         for auth_asym_id in data_dict[ "rcsb_polymer_entity_container_identifiers" ]["auth_asym_ids"]]
 
-
     def poly_reshape_to_rprotein(self, rpotein_polymer_obj) -> list[Protein]:
         if ( rpotein_polymer_obj["pfams"] != None and len(rpotein_polymer_obj["pfams"]) > 0 ):
             pfam_comments = list( set( [pfam["rcsb_pfam_comment"] for pfam in rpotein_polymer_obj["pfams"]] ) )
@@ -707,25 +706,24 @@ class ReannotationPipeline:
         poly_entities = self.rcsb_data_dict["polymer_entities"]
         polymers      = [*mitt.flatten([self.raw_to_polymer(_) for _ in poly_entities])]
 
-        _prot_polypeptides  :list[Polymer] = []
-        _rna_polynucleotides:list[Polymer]     = []
+        _prot_polypeptides  :list[Protein] = []
+        _rna_polynucleotides:list[RNA]     = []
         _other_polymers     :list[Polymer] = []
 
 
-        p =  Protein.from_polymer(polymers[0],
-                             pfam_accessions   = [],
-                             pfam_comments     = [],
-                             pfam_descriptions = [],
-                             uniprot_accession = [])
 
-        for polymer in polymers:
-            match polymer.entity_poly_polymer_type:
-                case "Protein":
-                    _prot_polypeptides.append(polymer)
-                case "RNA":
-                    _rna_polynucleotides.append(polymer)
-                case _:
-                    _other_polymers.append(polymer)
+        for polymer_dict in poly_entities:
+            polys = self.raw_to_polymer(polymer_dict)
+            for poly in polys:
+                match poly.entity_poly_polymer_type:
+                    case "Protein":
+                        prot = Protein.from_polymer(poly, **polymer_dict)
+                        _prot_polypeptides.append(prot)
+                    case "RNA":
+                        rna = RNA(**poly.dict())
+                        _rna_polynucleotides.append(rna)
+                    case _:
+                        _other_polymers.append(poly)
 
         protein_alphabet      = pyhmmer.easel.Alphabet.amino()
         protein_classifier    = HMMClassifier( _prot_polypeptides, protein_alphabet, [p for p in [ *list(CytosolicProteinClass),*list(LifecycleFactorClass) , *list(MitochondrialProteinClass)] ])
@@ -750,13 +748,13 @@ class ReannotationPipeline:
         pprint(reported_classes)
 
         #! TODO : PROPAGATE NOMENCLATUERE
-        for polymer in _rna_polynucleotides:
-            if polymer.auth_asym_id in reported_classes.keys():
-                polymer.nomenclature = reported_classes[polymer.auth_asym_id]
+        for polymer_dict in _rna_polynucleotides:
+            if polymer_dict.auth_asym_id in reported_classes.keys():
+                polymer_dict.nomenclature = reported_classes[polymer_dict.auth_asym_id]
 
-        for polymer in _prot_polypeptides:
-            if polymer.auth_asym_id in reported_classes.keys():
-                polymer.nomenclature = reported_classes[polymer.auth_asym_id]
+        for polymer_dict in _prot_polypeptides:
+            if polymer_dict.auth_asym_id in reported_classes.keys():
+                polymer_dict.nomenclature = reported_classes[polymer_dict.auth_asym_id]
 
         # [reshaped_proteins, reshaped_polymeric_factors_prot] = self.process_polypeptides()
         # [reshaped_rnas, reshaped_polymeric_factors_rna]      = self.process_polynucleotides()
