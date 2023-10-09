@@ -325,7 +325,7 @@ class InitiationFactorClass(Enum):
 # LifecycleFactorClass = typing.Union[ElongationFactorClass, InitiationFactorClass]
 LifecycleFactorClass = enum_union(ElongationFactorClass, InitiationFactorClass)
 PolypeptideClass     = enum_union(CytosolicProteinClass, LifecycleFactorClass, MitochondrialProteinClass)
-PolynucleotideClass  = enum_union(CytosolicRNAClass, CytosolicRNAClass)
+PolynucleotideClass  = enum_union(CytosolicRNAClass, MitochondrialRNAClass)
 PolymerClass         = enum_union(PolynucleotideClass, PolypeptideClass)
 
 #? ----------------------------------------------{ Object Types }------------------------------------------------
@@ -365,13 +365,32 @@ class Protein(Polymer):
     def __hash__(self):
         return hash(self.auth_asym_id + self.parent_rcsb_id)
 
+    @staticmethod
+    def from_polymer(p: Polymer,
+                      pfam_accessions  : list[str],
+                      pfam_comments    : list[str],
+                      pfam_descriptions: list[str],
+                      uniprot_accession: list[str]): 
+        print(p.dict())
+
+        return Protein(**{
+              **p.dict(),
+              "pfam_accessions"   : pfam_accessions,
+              "pfam_comments"     : pfam_comments,
+              "pfam_descriptions" : pfam_descriptions,
+              "uniprot_accession" : uniprot_accession
+        })
+
+
+
+
     pfam_accessions  : list[str]
     pfam_comments    : list[str]
     pfam_descriptions: list[str]
 
     uniprot_accession: list[str]
 
-    def to_poly(self)->Polymer:
+    def to_polymer(self)->Polymer:
         return Polymer(**self.dict())
 
 class RNA(Polymer):
@@ -529,14 +548,14 @@ class RibosomeStructure(BaseModel):
 
     assembly_map: list[AssemblyInstancesMap]
 
-    proteins            : list[Any]
-    rnas                : list[Any]
-    nonpolymeric_ligands: list[Any]
-    polymeric_factors   : list[Any]
+    # proteins            : list[Any]
+    # rnas                : list[Any]
+    # nonpolymeric_ligands: list[Any]
+    # polymeric_factors   : list[Any]
 
-    # proteins            : list[Protein]
-    # rnas                : list[RNA]
-    # nonpolymeric_ligands: list[NonpolymericLigand]
+    proteins            : list[Protein]
+    rnas                : list[RNA]
+    nonpolymeric_ligands: list[NonpolymericLigand]
     # polymeric_factors   : list[LifecycleFactor]
     #? This includes DNA-RNA hybrid strands, DNA and all other polymers
     other_polymers   : list[Polymer]
