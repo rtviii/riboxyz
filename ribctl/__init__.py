@@ -6,9 +6,10 @@ from typing import Literal
 RIBETL_DATA = os.environ.get("RIBETL_DATA")
 
 # This amounts to "_assets folder is expected to exist in the root of `ribctl`(next to top-level __init__.py)"
-ASSETS_PATH = os.path.join(pathlib.Path(__file__).parent, "assets")
-LOGS_PATH   = os.path.join(pathlib.Path(__file__).parent, "logs")
-MUSCLE_BIN  = os.path.join(ASSETS_PATH, "muscle3.8.1")
+ASSETS_PATH            = os.path.join(pathlib.Path(__file__).parent, "assets")
+LOGS_PATH              = os.path.join(pathlib.Path(__file__).parent, "logs")
+CLASSIFICATION_REPORTS = os.path.join(pathlib.Path(__file__).parent, "assets","classification_reports")
+MUSCLE_BIN             = os.path.join(ASSETS_PATH, "muscle3.8.1")
 
 asset_type  = Literal[
     "subunit_map_lsu",
@@ -41,7 +42,6 @@ if os.environ.get("RIBETL_DATA") == "" or not os.path.exists(ASSETS_PATH):
     )
 
 ASSETS: dict[asset_type, pathlib.Path] = {
-
     "subunit_map_lsu"         : pathlib.Path(os.path.join(ASSETS_PATH, "subunit_map_LSU.json")),
     "subunit_map_ssu"         : pathlib.Path(os.path.join(ASSETS_PATH, "subunit_map_SSU.json")),
     "old_names_lsu"           : pathlib.Path(os.path.join(ASSETS_PATH, "old_names_LSU.json")),

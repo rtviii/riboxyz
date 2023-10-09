@@ -35,7 +35,6 @@ hmm_cachedir = ASSETS['__hmm_cache']
 #? Constructon
 def fasta_phylogenetic_correction(candidate_class:PolymerClass, organism_taxid:int, max_n_neighbors:int=10)->Iterator[SeqRecord]:
     """Given a candidate class and an organism taxid, retrieve the corresponding fasta file, and perform phylogenetic correction on it."""
-    print(">>>>>>>>Requesting class", candidate_class)
 
     if candidate_class in CytosolicProteinClass:
         fasta_path = os.path.join(ASSETS["fasta_proteins_cytosolic"], f"{candidate_class.value}.fasta")
