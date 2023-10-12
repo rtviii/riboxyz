@@ -15,6 +15,9 @@ from ribctl.lib.enumunion import enum_union
 
 
 #? ----------------------------------------------{ Subcomponent Types }------------------------------------------------
+class tRNA(Enum):
+    tRNA  = "tRNA"
+
 class MitochondrialProteinClass(Enum):
 
     #mSSU
@@ -121,7 +124,7 @@ class MitochondrialProteinClass(Enum):
     mL65  = "mL65"
     mL66  = "mL66"
     mL67  = "mL67"
-            
+
 class CytosolicProteinClass(Enum):
     # SSU
     bS1   = "bS1"
@@ -326,7 +329,7 @@ class InitiationFactorClass(Enum):
 # LifecycleFactorClass = typing.Union[ElongationFactorClass, InitiationFactorClass]
 LifecycleFactorClass = enum_union(ElongationFactorClass, InitiationFactorClass                           )
 PolypeptideClass     = enum_union(CytosolicProteinClass, LifecycleFactorClass , MitochondrialProteinClass)
-PolynucleotideClass  = enum_union(CytosolicRNAClass    , MitochondrialRNAClass                           )
+PolynucleotideClass  = enum_union(CytosolicRNAClass    , MitochondrialRNAClass, tRNA )
 PolymerClass         = enum_union(PolynucleotideClass  , PolypeptideClass                                )
 
 #? ----------------------------------------------{ Object Types }------------------------------------------------
