@@ -9,9 +9,9 @@ import os
 import subprocess
 from typing import Iterator
 from Bio.Align import  SeqRecord
-import os
 from ribctl import MUSCLE_BIN
 from ete3 import NCBITaxa
+import os
 
 
 def util__backwards_match(aligned_target:str, resid:int):
@@ -65,6 +65,11 @@ class Fasta:
             print(f"File not found: {path}")
         except Exception as e:
             print(f"An error occurred: {str(e)}")
+
+    @staticmethod
+    def write_fasta(seqrecords: list[SeqRecord], outfile: str):
+        with open(outfile, "w") as fasta_out:
+            SeqIO.write(seqrecords, fasta_out, "fasta")
 
     def pick_taxids(self, taxids: list[str]) -> list[SeqRecord]:
         
