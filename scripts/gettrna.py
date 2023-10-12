@@ -6,19 +6,13 @@ from ribctl.etl.ribosome_assets import RibosomeAssets
 from ribctl.lib.msalib import Fasta
 from io import StringIO
 import os
-import subprocess
-from Bio import SeqIO
 from Bio import SeqRecord
-from functools import reduce
-from io import StringIO
 import os
 import subprocess
-from typing import Iterator
 from Bio.SeqRecord import SeqRecord
 from Bio.Seq import Seq
-
-
 records = []
+
 for s in RibosomeAssets.list_all_structs():
     try:
         with open(os.path.join(RIBETL_DATA,s,"{}.json".format(s)), 'r') as f:

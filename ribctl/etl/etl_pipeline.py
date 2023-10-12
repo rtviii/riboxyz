@@ -723,6 +723,7 @@ class ReannotationPipeline:
                         rna = RNA(**poly.dict())
                         _rna_polynucleotides.append(rna)
                     case _:
+                        print(poly.auth_asym_id)
                         _other_polymers.append(poly)
 
         protein_alphabet      = pyhmmer.easel.Alphabet.amino()
