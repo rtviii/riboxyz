@@ -43,7 +43,7 @@ def fasta_phylogenetic_correction(candidate_class:PolymerClass, organism_taxid:i
         fasta_path = os.path.join(ASSETS["fasta_proteins_mitochondrial"], f"{candidate_class.value}.fasta")
 
     elif candidate_class in PolynucleotideClass:
-        fasta_path = os.path.join(ASSETS["fasta_rrna"], f"{candidate_class.value}.fasta")
+        fasta_path = os.path.join(ASSETS["fasta_rna"], f"{candidate_class.value}.fasta")
 
     elif candidate_class in LifecycleFactorClass:
         if candidate_class in ElongationFactorClass:
@@ -55,8 +55,6 @@ def fasta_phylogenetic_correction(candidate_class:PolymerClass, organism_taxid:i
             raise Exception("Phylogenetic correction: Unimplemented factor class")
         fasta_path = os.path.join(factor_class_path, f"{candidate_class.value}.fasta")
         
-    # elif candidate_class in tRNA:
-    #     fasta_path = os.path.join(ASSETS["fasta_trna"], f"{candidate_class.value}.fasta")
     else:
         raise Exception("Phylogenetic correction: Unimplemented candidate class")
 
