@@ -5,14 +5,12 @@ import json
 import logging
 from pprint import pprint
 from typing import Any, Optional
-from pyhmmer import phmmer
 import pyhmmer
 from pyhmmer.plan7 import HMM
 import requests
 from ribctl import ASSETS, CLASSIFICATION_REPORTS, RIBETL_DATA
 from ribctl.lib.classification import (
     HMMClassifier,
-    HMMs,
 )
 from ribctl.lib.ribosome_types.types_ribosome import (
     RNA,
@@ -21,7 +19,6 @@ from ribctl.lib.ribosome_types.types_ribosome import (
     MitochondrialProteinClass,
     NonpolymericLigand,
     Polymer,
-    PolymerClass,
     LifecycleFactor,
     PolynucleotideClass,
     Protein,
@@ -105,9 +102,6 @@ class ReannotationPipeline:
 
     # ? Initialized classification resources:
     hmm_ribosomal_proteins: dict[CytosolicProteinClass, HMM]
-    # hmm_ribosomal_rnas:dict[RNAClass, HMM]
-    # hmm_ribosomal_factors:dict[PolymericFactorClass, HMM]
-    # hmm_ribosomal_ligands:dict[NonpolymericLigandClass, HMM]
 
     # ? Housekeeping
     asm_maps                 : list[AssemblyInstancesMap]
@@ -115,10 +109,6 @@ class ReannotationPipeline:
     rcsb_nonpolymers         : int
 
     polymers_target_count: int
-
-
-    # rProteins: list[Protein] | None
-    # rRNA     : list[RNA] | None
 
     def __init__(self, response: dict):
         self.rcsb_data_dict = response
@@ -723,7 +713,6 @@ class ReannotationPipeline:
                         rna = RNA(**poly.dict())
                         _rna_polynucleotides.append(rna)
                     case _:
-                        print(poly.auth_asym_id)
                         _other_polymers.append(poly)
 
         protein_alphabet      = pyhmmer.easel.Alphabet.amino()
@@ -762,14 +751,6 @@ class ReannotationPipeline:
             + len(_prot_polypeptides)
             + len(_other_polymers)
         ) == self.polymers_target_count
-
-        # assert (
-        #     len(reshaped_proteins)
-        #     + len(reshaped_rnas)
-        #     + len(reshaped_polymeric_factors_rna)
-        #     + len(reshaped_polymeric_factors_prot)
-        #     + len(other_polymers)
-        # ) == self.flattened_polymers_target
 
         reshaped_nonpolymers                     = self.process_nonpolymers()
         [externalRefs, pub, kwords_text, kwords] = self.process_metadata()
