@@ -184,6 +184,7 @@ class HMMs():
             for candidate_class in candidate_classes:
                 future = executor.submit(__load_seed_sequences, candidate_class, tax_id, max_seed_seqs)
                 loading_futures.append(future)
+
             for future in concurrent.futures.as_completed(loading_futures): 
                 loaded_results.append(future.result())
             # ! populate seqs records
@@ -309,7 +310,6 @@ class HMMClassifier():
                            self.report[chain.auth_asym_id].append(d_hit)
             except Exception as e:
                 print(e)
-
 
     def ___scan_chains(self)->None:
         """DEPRECATED: Waiting on https://github.com/althonos/pyhmmer/issues/53 to resolve"""

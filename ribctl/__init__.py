@@ -32,6 +32,7 @@ asset_type  = Literal[
     "fasta_factors_initiation_bacteria",
     "fasta_factors_initiation_eukaryota",
     "fasta_trna",
+    "hmm_trna",
 
     "__hmm_cache",
 ]
@@ -63,6 +64,7 @@ ASSETS: dict[asset_type, pathlib.Path] = {
     "fasta_factors_elongation_eukaryota": pathlib.Path(os.path.join(ASSETS_PATH, "fasta_factors_elongation","eukaryota")),
     "fasta_factors_elongation_archaea"  : pathlib.Path(os.path.join(ASSETS_PATH, "fasta_factors_elongation","archaea")),
     "fasta_trna"                        : pathlib.Path(os.path.join(ASSETS_PATH, "fasta_trna")),
+    "hmm_trna"                          : pathlib.Path(os.path.join(ASSETS_PATH, "fasta_trna","trna.hmm")),
 
     "__hmm_cache"             : pathlib.Path(os.path.join(ASSETS_PATH, "__hmm_cache")),
 }
