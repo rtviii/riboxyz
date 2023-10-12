@@ -19,8 +19,7 @@ asset_type  = Literal[
 
     "fasta_proteins_cytosolic",
     "fasta_proteins_mitochondrial",
-    "fasta_rrna",
-    "fasta_trna",
+    "fasta_rna",
 
     "fasta_factors_elongation",
     "fasta_factors_elongation_archaea",
@@ -31,8 +30,6 @@ asset_type  = Literal[
     "fasta_factors_initiation_archaea",
     "fasta_factors_initiation_bacteria",
     "fasta_factors_initiation_eukaryota",
-    "fasta_trna",
-    "hmm_trna",
 
     "__hmm_cache",
 ]
@@ -51,8 +48,7 @@ ASSETS: dict[asset_type, pathlib.Path] = {
     "fasta_proteins_cytosolic"    : pathlib.Path(os.path.join(ASSETS_PATH, "fasta_proteins_cytosolic") ),
     "fasta_proteins_mitochondrial": pathlib.Path(os.path.join(ASSETS_PATH, "fasta_proteins_mitochondrial") ),
 
-    "fasta_rrna"         : pathlib.Path(os.path.join(ASSETS_PATH, "fasta_rrna") ),
-    "fasta_trna"         : pathlib.Path(os.path.join(ASSETS_PATH, "fasta_trna") ),
+    "fasta_rna": pathlib.Path(os.path.join(ASSETS_PATH, "fasta_rrna") ),
 
     "fasta_factors_initiation"    : pathlib.Path(os.path.join(ASSETS_PATH, "fasta_factors_initiation")),
     "fasta_factors_initiation_archaea"  : pathlib.Path(os.path.join(ASSETS_PATH, "fasta_factors_initiation","archaea")),
@@ -63,8 +59,6 @@ ASSETS: dict[asset_type, pathlib.Path] = {
     "fasta_factors_elongation_bacteria" : pathlib.Path(os.path.join(ASSETS_PATH, "fasta_factors_elongation","bacteria")),
     "fasta_factors_elongation_eukaryota": pathlib.Path(os.path.join(ASSETS_PATH, "fasta_factors_elongation","eukaryota")),
     "fasta_factors_elongation_archaea"  : pathlib.Path(os.path.join(ASSETS_PATH, "fasta_factors_elongation","archaea")),
-    "fasta_trna"                        : pathlib.Path(os.path.join(ASSETS_PATH, "fasta_trna")),
-    "hmm_trna"                          : pathlib.Path(os.path.join(ASSETS_PATH, "fasta_trna","trna.hmm")),
 
     "__hmm_cache"             : pathlib.Path(os.path.join(ASSETS_PATH, "__hmm_cache")),
 }

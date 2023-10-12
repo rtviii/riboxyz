@@ -13,7 +13,7 @@ import re
 import pyhmmer
 from ribctl import ASSETS, MUSCLE_BIN
 from ribctl.lib.msalib import Fasta, muscle_align_N_seq, phylogenetic_neighborhood
-from ribctl.lib.ribosome_types.types_ribosome import RNA, ElongationFactorClass, InitiationFactorClass, LifecycleFactorClass, MitochondrialProteinClass, Polymer, PolymerClass, LifecycleFactor, PolynucleotideClass, PolypeptideClass, Protein, CytosolicProteinClass, CytosolicProteinClass
+from ribctl.lib.ribosome_types.types_ribosome import RNA, ElongationFactorClass, InitiationFactorClass, LifecycleFactorClass, MitochondrialProteinClass, Polymer, PolymerClass, LifecycleFactor, PolynucleotideClass, PolypeptideClass, Protein, CytosolicProteinClass, CytosolicProteinClass, tRNA
 # from ribctl.etl.ribosome_assets import RibosomeAssets
 from pyhmmer.easel import Alphabet, DigitalSequenceBlock, TextSequence, SequenceFile, SequenceBlock, TextSequenceBlock, DigitalSequence
 from pyhmmer.plan7 import Pipeline, HMM , TopHits
@@ -48,16 +48,21 @@ def fasta_phylogenetic_correction(candidate_class:PolymerClass, organism_taxid:i
     elif candidate_class in LifecycleFactorClass:
         if candidate_class in ElongationFactorClass:
             factor_class_path = ASSETS["fasta_factors_elongation"]
+
         elif candidate_class in InitiationFactorClass:
             factor_class_path = ASSETS["fasta_factors_initiation"]
         else:
             raise Exception("Phylogenetic correction: Unimplemented factor class")
         fasta_path = os.path.join(factor_class_path, f"{candidate_class.value}.fasta")
+        
+    # elif candidate_class in tRNA:
+    #     fasta_path = os.path.join(ASSETS["fasta_trna"], f"{candidate_class.value}.fasta")
     else:
         raise Exception("Phylogenetic correction: Unimplemented candidate class")
 
     if not os.path.isfile(fasta_path):
         raise Exception("Not found: {}".format(fasta_path))
+
     records    = Fasta(fasta_path)
     if len( list(records.records) ) == 0 :
         raise Exception("Empty fasta file: {}".format(fasta_path))
