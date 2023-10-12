@@ -21,6 +21,9 @@ node_modules
 *.env
 **/*.env
 
+**.fa
+**.fasta
+
 __pycache__
 __pycache__/**
 **/__pycache__/
