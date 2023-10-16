@@ -1,5 +1,16 @@
 
+
+# Consolidation tomorrow:
+
+- tally each type of polymer 
+- get rid of the garbage
+- auto-update functionality
+- boot up django, fix mixing docker-compose dependencies
+
+
+<!-- ---------- -->
 # WIP
+
 
 ### Datastructure:
 

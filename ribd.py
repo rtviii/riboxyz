@@ -8,6 +8,9 @@ def parse_comma_separated_list(value):
 
 
 
+
+
+
 parser     = argparse.ArgumentParser(description="Command line interface for the `ribctl` package.")
 subparsers = parser.add_subparsers(title='Subcommands', dest='command')
 
@@ -30,11 +33,9 @@ parser_cmd_etl.add_argument('--png_thumbnail'           , action ='store_true' )
 parser_cmd_etl.add_argument('--overwrite'               , action ='store_true' )
 
 
-
-
 import asyncio
 import os
-from ribctl import RIBETL_DATA
+from ribctl import ASSETS, RIBETL_DATA
 from ribctl.etl.obtain import obtain_assets, obtain_assets_threadpool
 from ribctl.etl.ribosome_assets import Assetlist
 
@@ -65,7 +66,7 @@ def cmd_etl(args):
         obtain_assets_threadpool(
             [],
             ASL,
-            workers=16,
+            workers=4,
             get_all=True,
             overwrite=args.overwrite or False
         )
@@ -82,7 +83,6 @@ def cmd_etl(args):
         )
     else:
         parser_cmd_etl.print_help()
-
 
 
 parser_cmd_etl.set_defaults(func=cmd_etl)
