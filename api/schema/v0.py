@@ -2,8 +2,7 @@ from typing import NewType, TypedDict
 import typing
 from ninja import Schema
 from pydantic import BaseModel, create_model
-from ribctl.lib.ribosome_types.types_poly_nonpoly_ligand import RNAClass
-from ribctl.lib.ribosome_types.types_ribosome import NonpolymericLigand, Protein, CytosolicProteinClass, RibosomeStructure
+from ribctl.lib.ribosome_types.types_ribosome import NonpolymericLigand, PolynucleotideClass, Protein, CytosolicProteinClass, RibosomeStructure
 """This file documents the possible requests that the API can receive."""
 
 
@@ -120,7 +119,7 @@ class NomenclatureClassMember(Schema):
     entity_poly_polymer_type           : str
     entity_poly_entity_type            : str
     
-    nomenclature:  list[CytosolicProteinClass | RNAClass]
+    nomenclature:  list
     ligand_like:   bool | None
 
 
@@ -286,7 +285,7 @@ class RNA(Schema):
     asym_ids: list[str]
 
     auth_asym_id: str
-    nomenclature: list[RNAClass]
+    nomenclature: list[PolynucleotideClass]
     parent_rcsb_id: str
 
     src_organism_names: list[str]
