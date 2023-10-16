@@ -125,7 +125,6 @@ def ptc_residues_to_atom_coordinates(
 ) -> dict[str, dict[str, list[float]]]:
     """
     Given a list of residues (representing the PTC), return a dictionary of the form:
-
     auth_asym_id:
         residue_id:
             atom_name: [x, y, z]

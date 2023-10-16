@@ -27,7 +27,6 @@ logging.basicConfig(
     ]
 )
 
-
 import os
 
 async def obtain_assets(rcsb_id: str, assetlist: Assetlist, overwrite: bool = False):
@@ -54,9 +53,11 @@ async def obtain_assets(rcsb_id: str, assetlist: Assetlist, overwrite: bool = Fa
             asset_ptc_coords_path = os.path.join(assets._dir_path(),f'{assets.rcsb_id}_PTC_COORDINATES.json')
             if os.path.exists(asset_ptc_coords_path) and not overwrite:
                 raise Exception(f'PTC coordinates already exist for {assets.rcsb_id} and overwrite is set to False')
+
             ress, auth_asym_id = ptc_resdiues_get(assets.biopython_structure(),  assets.profile().rnas)
+
             midpoint_coords = ptc_residues_calculate_midpoint(ress, auth_asym_id)
-            # residue_labels = [(res.get_resname(), res.id[1]) for res in ress]
+
             writeout = {
                 "site_9_residues"      : [(res.get_resname(), res.get_segid()) for res in ress],
                 "LSU_rRNA_auth_asym_id": auth_asym_id,
