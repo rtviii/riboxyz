@@ -271,7 +271,7 @@ class ElongationFactorClass(Enum):
     aIF5A = "aIF5A"
 
 class InitiationFactorClass(Enum):
-    # Eukaryotic
+    #!Eukaryotic
     eIF1          = "eIF1"
     eIF1A         = "eIF1A"
 
@@ -307,23 +307,19 @@ class InitiationFactorClass(Enum):
     eIF5B         = "eIF5B"
     eIF5          = "eIF5"
 
-    # Bacterial
+    #!Bacterial
     IF1           = "IF1"
     IF2           = "IF2"
     IF3           = "IF3"
 
-    # Archaeal
-
+    #!Archaeal
     aIF_1A       = "aIF1A"
-
-    aIF_2_alpha = "aIF2_alpha"
-    aIF_2_beta  = "aIF2_beta"
-    aIF_2_gamma = "aIF2_gamma"
-
+    aIF_2_alpha  = "aIF2_alpha"
+    aIF_2_beta   = "aIF2_beta"
+    aIF_2_gamma  = "aIF2_gamma"
     aIF_2B_alpha = "aIF2B_alpha"
     aIF_2B_beta  = "aIF2B_beta"
     aIF_2B_delta = "aIF2B_delta"
-
     aIF_5B       = "aIF5B"
 
 # LifecycleFactorClass = typing.Union[ElongationFactorClass, InitiationFactorClass]
@@ -568,7 +564,9 @@ class RibosomeStructure(BaseModel):
 
     proteins            : list[Protein]
     rnas                : list[RNA]
+
     nonpolymeric_ligands: list[NonpolymericLigand]
+
     # polymeric_factors   : list[LifecycleFactor]
     #? This includes DNA-RNA hybrid strands, DNA and all other polymers
     other_polymers   : list[Polymer]

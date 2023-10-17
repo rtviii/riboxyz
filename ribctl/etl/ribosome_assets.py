@@ -56,6 +56,11 @@ class RibosomeAssets():
         self._envcheck()
         return os.path.join(RIBETL_DATA, self.rcsb_id)
 
+    def _emdb_path(self):
+        self._envcheck()
+        emdb_path = os.path.join(RIBETL_DATA, self.rcsb_id.upper(), "{}.map.gz")
+        return os.path.join(RIBETL_DATA, self.rcsb_id)
+
     def _cif_filepath(self):
         self._envcheck()
         return f"{self._dir_path()}/{self.rcsb_id}.cif"
