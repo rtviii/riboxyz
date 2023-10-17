@@ -1,10 +1,7 @@
-from typing import NewType, TypedDict
 import typing
 from ninja import Schema
-from pydantic import BaseModel, create_model
 from ribctl.lib.ribosome_types.types_ribosome import NonpolymericLigand, PolynucleotideClass, Protein, CytosolicProteinClass, RibosomeStructure
 """This file documents the possible requests that the API can receive."""
-
 
 class ExogenousRNAByStruct(Schema):
     struct: str
@@ -21,7 +18,6 @@ class LigandsByStruct(Schema):
       organism               : list[str]
       taxid                  : list[int]
       ligands                : list[LigandByStructInstance]
-
 
 class PresentInStruct(Schema): 
       citation_title         : str
@@ -48,7 +44,6 @@ class PolymerMinimal(Schema):
     nomenclature: list[str]
     auth_asym_id: str
     entity_poly_seq_one_letter_code: str
-
 
 class RibosomeHeader(Schema):
     rcsb_id:    str
@@ -79,13 +74,10 @@ class NeoStruct(Schema):
       rps              : list[PolymerMinimal]
       rnas             : list[PolymerMinimal] | None
 
-
-
 class Residue(Schema):
     residue_name: str
     residue_id: int
     parent_auth_asym_id: str
-
 
 class ExogenousRNAInStruct(Schema):
     struct: str
@@ -122,8 +114,6 @@ class NomenclatureClassMember(Schema):
     nomenclature:  list
     ligand_like:   bool | None
 
-
-
 class BindingSiteChain(Schema): 
       sequence                : str
       nomenclature            : list[str]
@@ -144,7 +134,6 @@ class LigandBindingSite(Schema):
     __root__: dict[str, BindingSiteChain]
     def __getattr__(self, attr):
         return self.__root__[attr]
-
 
 
 class PredictionSource(Schema):
@@ -171,7 +160,6 @@ class Alignement(Schema):
 #   }
 # }
 
-
 class MixedLigand(Schema): 
       category           : str | None
       polymer            : bool
@@ -196,7 +184,6 @@ class LigandClass(Schema):
 # export type LigandClass = {
 #   [ligand_description:string]: MixedLigand[]
 # }
-
 
 
 
@@ -242,7 +229,6 @@ class NeoHomolog(Schema):
 # }
 
 
-
 class ProteinProfile(Schema):
 
     asym_ids: list[str]
@@ -277,9 +263,6 @@ class ProteinProfile(Schema):
     parent_year      : int
     parent_method    : str
 
-
-
-
 class RNA(Schema):
 
     asym_ids: list[str]
@@ -308,8 +291,6 @@ class RNA(Schema):
     parent_resolution: float
     parent_method    : str
 
-
-
 class StructureWithLigand(Schema):
 
     src_organism_ids: list[int]
@@ -321,11 +302,9 @@ class StructureWithLigand(Schema):
     citation_title: str
     pdbx_keywords_text: str | None
 
-
 class LigandResponseShape(Schema):
     ligand: NonpolymericLigand
     presentIn: list[StructureWithLigand]
-
 
 class BanClassMetadata(Schema):
     banClass: CytosolicProteinClass

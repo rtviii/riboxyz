@@ -11,13 +11,6 @@ from wsgiref.util import FileWrapper
 
 v0 = Router()
 
-#   | ranged_align
-#   | cif_chain_by_class
-#   | ligand_prediction
-#   | downloadCifChain
-#   | download_ligand_nbhd 
-#   | download_structure
-
 @v0.get('/ranged_align',tags=['Static Files'])
 def ranged_align(request,
                  range_start     : int,
@@ -65,7 +58,6 @@ def ranged_align(request,
         )
 def get_all_structures(request,):
     return db_connection.get_all_structures()
-
 
 @v0.get('/get_struct', 
         # response=NeoStruct, # TODO: validate

@@ -10,6 +10,7 @@ from ribctl.lib.util_taxonomy import  get_descendants_of, taxid_is_descendant_of
 
 def cmd_ls(args):
     all_structs = os.listdir(RIBETL_DATA)
+
     if args.struct != None:
         if "." in args.struct:
             rcsb_id, auth_asym_id = args.struct.split(".")
