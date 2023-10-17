@@ -17,6 +17,7 @@ from ribctl.lib.ribosome_types.types_ribosome import (
     AssemblyInstancesMap,
     LifecycleFactorClass,
     MitochondrialProteinClass,
+    MitochondrialRNAClass,
     NonpolymericLigand,
     Polymer,
     LifecycleFactor,
@@ -752,6 +753,15 @@ class ReannotationPipeline:
             + len(_other_polymers)
         ) == self.polymers_target_count
 
+
+        is_mitochondrial=False
+        for rna_d in _rna_polynucleotides:
+            if len( rna_d.nomenclature )>0 :
+               if ( rna_d.nomenclature[0].value in [k.value for k in list(MitochondrialRNAClass)] ):
+                    is_mitochondrial=True
+                    break
+
+
         reshaped_nonpolymers                     = self.process_nonpolymers()
         [externalRefs, pub, kwords_text, kwords] = self.process_metadata()
         organisms                                = self.infer_organisms_from_polymers([*_prot_polypeptides, *_rna_polynucleotides])
@@ -777,6 +787,7 @@ class ReannotationPipeline:
             nonpolymeric_ligands   = reshaped_nonpolymers,
             other_polymers         = _other_polymers,
             assembly_map           = self.asm_maps,
+            mitochondrial          = is_mitochondrial
         )
 
         return reshaped

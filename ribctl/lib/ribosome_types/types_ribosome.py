@@ -539,6 +539,7 @@ class RibosomeStructure(BaseModel):
     expMethod : str
     resolution: float
 
+
     pdbx_keywords         : Optional[str]
     pdbx_keywords_text    : Optional[str]
 
@@ -558,6 +559,7 @@ class RibosomeStructure(BaseModel):
     host_organism_names: list[str]
 
     assembly_map: list[AssemblyInstancesMap]
+    mitochondrial: bool
 
     # proteins            : list[Any]
     # rnas                : list[Any]

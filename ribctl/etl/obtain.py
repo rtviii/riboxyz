@@ -62,7 +62,7 @@ async def obtain_assets(rcsb_id: str, assetlist: Assetlist, overwrite: bool = Fa
                 "site_9_residues"      : [(res.get_resname(), res.get_segid()) for res in ress],
                 "LSU_rRNA_auth_asym_id": auth_asym_id,
                 "midpoint_coordinates" : midpoint_coords,
-                'nomenclature_table'   : assets.nomenclature_table()
+                'nomenclature_table'   : assets.__nomenclature_table()
             }
 
             with open(asset_ptc_coords_path, 'w') as f:
