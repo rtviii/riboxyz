@@ -108,7 +108,6 @@ parser_cmd_ls.add_argument('-elem', '--subelement', help="Subelement type (rna,p
 parser_cmd_ls.set_defaults(func=cmd_ls)
 
 
-
 #! -------------------------- Filerts and options -------------------------- #
 parser.add_argument('--has_protein', type=parse_comma_separated_list, help="Global option description")
 parser.add_argument('--taxid')
