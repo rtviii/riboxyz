@@ -69,9 +69,6 @@ class RibosomeAssets():
         with open(PTC_RESIDUES_PATH, 'r') as infile:
             return json.load(infile)
 
-    def ____nomenclature_v2(self) -> dict[str, CytosolicProteinClass]:
-        with open("/home/rxz/dev/docker_ribxz/api/ribctl/assets/nomenclaturev2/{}.json".format(self.rcsb_id.upper()), 'r') as infile:
-            return json.load(infile)
 
     def _json_profile_filepath(self):
         self._envcheck()
@@ -81,7 +78,8 @@ class RibosomeAssets():
         with open(self._json_profile_filepath(), "r") as f:
             return RibosomeStructure.parse_obj(json.load(f))
 
-    def nomenclature_table(self) -> dict[str, dict]:
+    def __nomenclature_table(self) -> dict[str, dict]:
+        #TODO: update getter
         prof = self.profile()
         m    = {}
         if prof.polymeric_factors != None:
@@ -127,6 +125,7 @@ class RibosomeAssets():
         elif overwrite:
             with open(self._json_profile_filepath(), "w") as f:
                 json.dump(new_profile, f)
+                print("Wrote {}".format(self._json_profile_filepath()))
              
 
     @staticmethod
