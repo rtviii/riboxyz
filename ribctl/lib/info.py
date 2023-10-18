@@ -1,42 +1,53 @@
 import json
 from pprint import pprint
 import sys
+from typing import Literal
 from ribctl.etl.ribosome_assets import RibosomeAssets
-from ribctl.lib.ribosome_types.types_ribosome import MitochondrialRNAClass, Polymer
+from ribctl.lib.ribosome_types.types_ribosome import RNA, CytosolicRNAClass, LifecycleFactorClass, MitochondrialRNAClass, Polymer, tRNA
 
 
 
 def struct_stats(ra:RibosomeAssets):
     profile     = ra.profile()
-    struct_stat = {}
 
-    has_factors = False
-    has_trna    = False
-    n_dbank_compounds  = 0
+    struct_stat          = {}
+    nomenclature_classes = {}
+    lig_compounds        = {}
 
+    n_dbank_compounds    = 0
 
     rnas  = profile.rnas
     prots = profile.proteins
     ligs  = profile.nonpolymeric_ligands
 
-
     for lig in ligs:
         if lig.nonpolymer_comp.drugbank != None:
             n_dbank_compounds += 1
-            print(lig.nonpolymer_comp.drugbank)
+            chemn =  lig.chemicalName
+            if chemn not in nomenclature_classes:
+                lig_compounds[chemn] = 1
+            else:
+                lig_compounds[chemn]= nomenclature_classes[chemn] + 1
+            lig_compounds[lig.chemicalName] =1
         else:
-            print("No drugbank")
+            ...
+            # print("No drugbank")
     
-    
-    def lsu_ssu_presence(rnas:list[Polymer]):
+    def lsu_ssu_presence(rnas:list[RNA])->Literal["both","ssu","lsu"]:
         has_lsu     = 0
         has_ssu     = 0
+
         for rna in rnas:
             if profile.mitochondrial :
-                if  "mt12SrRNA" in rna.nomenclature:
+                if  MitochondrialRNAClass.mt_rRNA_12S in rna.nomenclature:
                     has_ssu = 1
-                elif  "mt16SrRNA" in rna.nomenclature:
+                elif  MitochondrialRNAClass.mt_rRNA_16S in rna.nomenclature:
                     has_lsu = 2
+            else:
+                if  ( CytosolicRNAClass.rRNA_5_8S in rna.nomenclature )or ( CytosolicRNAClass.rRNA_5S in rna.nomenclature ) or( CytosolicRNAClass.rRNA_28S in rna.nomenclature ) or ( CytosolicRNAClass.rRNA_25S in rna.nomenclature ) or ( CytosolicRNAClass.rRNA_23S in rna.nomenclature ):
+                    has_lsu = 2
+                elif ( CytosolicRNAClass.rRNA_16S in rna.nomenclature ) or ( CytosolicRNAClass.rRNA_18S  in rna.nomenclature ):
+                    has_ssu = 1
 
         match has_ssu + has_lsu:
             case 1:
@@ -45,10 +56,39 @@ def struct_stats(ra:RibosomeAssets):
                 return "lsu"
             case 3:
                 return "both"
+            case _:
+                raise Exception("No ssu or lsu found")
+
+    struct_stat['has_factors']         = False
+    struct_stat['has_trna']            = False
+    struct_stat['subunit_composition'] = lsu_ssu_presence(rnas)
+
+        
+    for chain in [*rnas,*prots]:
+        if chain.assembly_id != 0: continue
+
+        if len(chain.nomenclature) > 0:
+            cls = chain.nomenclature[0].value
+
+
+            #! class acc
+            if cls not in nomenclature_classes:
+                nomenclature_classes[cls] = 1
+            else:
+                nomenclature_classes[cls]= nomenclature_classes[cls] + 1
+
+            #! subunit determinatiaon
+            if cls in [k.value for k in list(LifecycleFactorClass)]:
+                struct_stat["has_factors"] = True
+            if cls in [k.value for k in list(tRNA)]:
+                struct_stat["has_trna"] = True
+
+    return [struct_stat,nomenclature_classes,lig_compounds,n_dbank_compounds]
 
         
             
-            
+
+   
 
 
     
@@ -69,10 +109,10 @@ def get_stats():
     }
     chain_classes={}
        
-    for struct in RibosomeAssets.list_all_structs():
+    # for struct in RibosomeAssets.list_all_structs():
 
 
 
 
 
-struct_stats(RibosomeAssets(sys.argv[1].upper()))
+print(struct_stats(RibosomeAssets(sys.argv[1].upper())))
