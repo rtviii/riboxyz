@@ -98,21 +98,62 @@ def struct_stats(ra:RibosomeAssets):
 def get_stats():
 
     global_stats = {
-        "mitochondrial"     : 0,
-        "cytosolic"         : 0,
         "lsu_only"          : 0,
         "ssu_only"          : 0,
         "ssu_lsu"           : 0,
+
         "with_trna"         : 0,
         "with_factor"       : 0,
         "drugbank_compounds": 0
     }
-    chain_classes={}
-       
-    # for struct in RibosomeAssets.list_all_structs():
+    chain_classes = {}
+    lig_global    = {}
 
 
 
+    for struct in RibosomeAssets.list_all_structs():
+        print(struct)
+        try:
+            [struct_stat,nomenclature_classes,lig_compounds,n_dbank_compounds] = struct_stats(RibosomeAssets(struct))
+
+            for (k,v) in nomenclature_classes.items():
+                if k not in chain_classes:
+                    chain_classes[k] = v
+                else:
+                    chain_classes[k] += v
 
 
-print(struct_stats(RibosomeAssets(sys.argv[1].upper())))
+            if struct_stat["subunit_composition"] == "lsu":
+                global_stats["lsu_only"] += 1
+            elif struct_stat["subunit_composition"] == "ssu":
+                global_stats["ssu_only"] += 1
+            elif struct_stat["subunit_composition"] == "both":
+                global_stats["ssu_lsu"] += 1
+
+            if struct_stat["has_trna"] == True:
+                global_stats["with_trna"] += 1
+            if struct_stat["has_factors"] == True:
+                global_stats["with_factor"] += 1
+
+            global_stats["drugbank_compounds"] += n_dbank_compounds
+
+
+            for (k,v) in lig_compounds.items():
+                if k not in lig_global:
+                    lig_global[k] = v
+                else:
+                    lig_global[k] += v
+
+        except Exception as e:
+            print ("e--->" ,e)
+
+    return {
+        **global_stats,
+        "chain_classes" : {key: chain_classes[key] for key in sorted(chain_classes)} ,
+        "lig_global"    :  {key: value for key, value in sorted(lig_global.items(), key=lambda item: item[1], reverse=True)}   
+    }
+
+s = get_stats()
+with open('stats.json', 'w') as of:
+    json.dump(s, of, indent=4)
+pprint(s)
