@@ -322,17 +322,15 @@ class RibosomeAssets():
         # def ligand_path(chem_id): return os.path.join(self._dir_path(), f"polymer_{chem_id.upper()}.json")
         # def poly_factor_path(auth_asym_id): return os.path.join(self._dir_path(), f"polymer_{auth_asym_id.upper()}.json")
 
-        ligands = struct_ligand_ids(self.rcsb_id, self.profile())
+        ligands           = struct_ligand_ids(self.rcsb_id, self.profile())
         polymeric_factors = struct_polymeric_factor_ids(self.profile())
         all_verified_flag = True
 
         for ligand_chemid in ligands:
             if not os.path.exists(BindingSite.path_nonpoly_ligand(self.rcsb_id, ligand_chemid)):
                 all_verified_flag = False
-                bsite = bsite_nonpolymeric_ligand(
-                    ligand_chemid, self.biopython_structure())
-                bsite.save(bsite.path_nonpoly_ligand(
-                    self.rcsb_id, ligand_chemid))
+                bsite = bsite_nonpolymeric_ligand( ligand_chemid, self.biopython_structure())
+                bsite.save(bsite.path_nonpoly_ligand( self.rcsb_id, ligand_chemid))
             else:
                 if overwrite:
                     bsite = bsite_nonpolymeric_ligand(
