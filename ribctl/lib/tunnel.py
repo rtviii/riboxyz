@@ -44,10 +44,8 @@ def pick_match(matches, rna_length: int):
     else:
         return matches[0]
 
-
 def residue_labels(res: Residue | ResidueSummary) -> bool:
     return res.resname in [*AMINO_ACIDS.keys(), *NUCLEOTIDES]
-
 
 def ptc_fuzzyfind_subseq_in_chain(biopython_struct, auth_asym_id:str, assembly_id:int=0)->tuple[list[Residue],list[Residue],list[Residue],str]:
     chain3d: Chain = biopython_struct.child_dict[assembly_id].child_dict[auth_asym_id]

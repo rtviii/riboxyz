@@ -1,11 +1,12 @@
 import json
 import os
 from pprint import pprint
+import sys
 from typing import List
 from pymol import cmd
-from ribctl._tunnel.scratch_tunnel_workflow import exit_port_posn, ptc_residues_calculate_midpoint, ptc_resdiues_get, tunnel_obstructions
+sys.path.append('/home/rtviii/dev/riboxyz')       #! hack until ribctl is a separate pypi project
+from ribctl.lib.tunnel import ptc_residues_calculate_midpoint, ptc_resdiues_get
 from ribctl import RIBETL_DATA
-
 
 colormap__LSU_Proteins = {
                           "uL1"  : "lawrencium",
@@ -140,28 +141,28 @@ def pseudoatom_ptc(struct: str):
     midpoint = ptc_residues_calculate_midpoint(reslist,auth_asym_id)
     create_marker_at_atom("centroid",midpoint, color_="red")
 
-def visualize_obstructions(rcsb_id):
-    ptcres, auth_asym_id = ptc_resdiues_get(rcsb_id, 0)
-    midpoint = ptc_residues_calculate_midpoint(ptcres, auth_asym_id)
-    polys,nonpolys = tunnel_obstructions(rcsb_id, midpoint)
+# def visualize_obstructions(rcsb_id):
+#     ptcres, auth_asym_id = ptc_resdiues_get(rcsb_id, 0)
+#     midpoint = ptc_residues_calculate_midpoint(ptcres, auth_asym_id)
+#     polys,nonpolys = tunnel_obstructions(rcsb_id, midpoint)
 
-    cmd.color("white", "all")
+#     cmd.color("white", "all")
 
-    pseudoatom_ptc(rcsb_id)
+#     pseudoatom_ptc(rcsb_id)
 
-    for poly in polys:
-        cname = "chain_{}".format(poly.auth_asym_id, )
-        csele = "c. {} and m. {}".format(poly.auth_asym_id, rcsb_id.upper()) 
-        cmd.create(cname, csele)
-        cmd.remove(csele)
-        cmd.color("red", cname)
+#     for poly in polys:
+#         cname = "chain_{}".format(poly.auth_asym_id, )
+#         csele = "c. {} and m. {}".format(poly.auth_asym_id, rcsb_id.upper()) 
+#         cmd.create(cname, csele)
+#         cmd.remove(csele)
+#         cmd.color("red", cname)
 
-    for res in nonpolys:
-        resname = "res_{}_{}".format(res.parent_auth_asym_id,res.resname)
-        ressele = "m. {} and c. {} and resn {}".format(rcsb_id.upper(),res.parent_auth_asym_id,res.resname)
-        cmd.create(resname,  ressele)
-        cmd.remove(ressele)
-        cmd.color("blue", resname)
+#     for res in nonpolys:
+#         resname = "res_{}_{}".format(res.parent_auth_asym_id,res.resname)
+#         ressele = "m. {} and c. {} and resn {}".format(rcsb_id.upper(),res.parent_auth_asym_id,res.resname)
+#         cmd.create(resname,  ressele)
+#         cmd.remove(ressele)
+#         cmd.color("blue", resname)
 
 def struct_paint_chains(pdbid: str):
     pdbid          = pdbid.upper()
@@ -215,17 +216,20 @@ def sload(pdbid: str):
     cmd.delete('all')
     cmd.load(path)
 
-def pseudoatom_exitport(rcsb_id:str):
-    posn = exit_port_posn(rcsb_id)
-    print("Got positions :", posn)
-    create_marker_at_atom("Exitport", posn)
+# def pseudoatom_exitport(rcsb_id:str):
+#     posn = exit_port_posn(rcsb_id)
+#     print("Got positions :", posn)
+#     create_marker_at_atom("Exitport", posn)
 
+def test_():
+    print("Extended scripts loaded correctly")
 
 cmd.extend("sload"            , sload                  )
 cmd.extend("by_chain"         , struct_paint_chains    )
 cmd.extend("ptc"              , pseudoatom_ptc         )
 cmd.extend("list_bacteria"    , list_bacteria          )
-cmd.extend("tun_obstructions" , visualize_obstructions )
-cmd.extend("exitport"         , pseudoatom_exitport    )
+cmd.extend("test_"    , test_          )
+# cmd.extend("tun_obstructions" , visualize_obstructions )
+# cmd.extend("exitport"         , pseudoatom_exitport    )
     
 
