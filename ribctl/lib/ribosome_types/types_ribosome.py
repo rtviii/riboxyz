@@ -235,6 +235,10 @@ class MitochondrialRNAClass(Enum):
     mt_rRNA_16S = "mt16SrRNA" # mitochondrial
 
 class CytosolicRNAClass(Enum):
+
+    rRNA_5S   = "5SrRNA"  #  bacterial or eykaryotic
+    rRNA_16S  = "16SrRNA" #  c-bacterial or mitochondrial
+    rRNA_23S  = "23SrRNA" # bacterial
     rRNA_25S  = "25SrRNA" # plants
 
     rRNA_5_8S = "5.8SrRNA" # eukaryotic
