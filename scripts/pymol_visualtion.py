@@ -1,6 +1,7 @@
 import json
 import os
 from pprint import pprint
+import random
 import sys
 from typing import List
 from pymol import cmd
@@ -8,6 +9,16 @@ sys.path.append('/home/rtviii/dev/riboxyz')       #! hack until ribctl is a sepa
 from ribctl.lib.tunnel import ptc_residues_calculate_midpoint, ptc_resdiues_get
 from ribctl import RIBETL_DATA
 
+colormap__RNA = {
+    "23SrRNA"  : "gray70",    # plants
+    "25SrRNA"  : "gray70",    # plants
+    "28SrRNA"  : 'gray70',    # eukaryotic
+    "5.8SrRNA" : 'lightblue', # eukaryotic
+    "5SrRNA"   : "palegreen",
+    "18SrRNA"  : "palegreen", # eukaryotic
+    "mt12SrRNA": "palegreen", # mitochondrial
+    "mt16SrRNA": 'gray70',    # mitochondrial
+          }
 colormap__LSU_Proteins = {
                           "uL1"  : "lawrencium",
                           "uL2"  : "lead",
@@ -164,30 +175,45 @@ def pseudoatom_ptc(struct: str):
 #         cmd.remove(ressele)
 #         cmd.color("blue", resname)
 
-def struct_paint_chains(pdbid: str):
+def by_chain(pdbid: str):
     pdbid          = pdbid.upper()
     RIBETL_DATA    = str(os.environ.get('RIBETL_DATA'))
-    nomenclaturev2 = os.path.join("/home/rxz/dev/docker_ribxz/api/ribctl/assets/nomenclaturev2", f"{pdbid.upper()}.json")
     profilepath    = os.path.join(RIBETL_DATA, pdbid, f"{pdbid}.json")
-
-    with open(nomenclaturev2, 'rb') as ninfile:
-        nomenclaturev2 = json.load(ninfile)
 
     with open(profilepath, 'rb') as infile:
         profile = json.load(infile)
 
     if profile['rnas'] != None:
         for rna in profile['rnas']:
-            # cmd.color('white', f"chain {rna['auth_asym_id']}")
+
+            if len( rna['nomenclature'] )>0:
+                nomclass = rna['nomenclature'][0]
+            else:
+                nomclass = random.choice(list(colormap__RNA.keys()))
+            prot_tmp = f"{nomclass}.{rna['auth_asym_id']}"
+            cmd.create(prot_tmp, f"chain {rna[ 'auth_asym_id' ]}")
+            cmd.remove(f"chain {rna[ 'auth_asym_id' ]} and m. {pdbid}")
+
+            #! black surface with white lines inside
+            # cmd.hide ( 'everything'           , f"chain {rna['auth_asym_id']}")
+            # cmd.show ( 'surface'              , f"chain {rna['auth_asym_id']}")
+            # cmd.show ( 'cartoon'              , f"chain {rna['auth_asym_id']}")
+            # cmd.color( 'gray70', f"chain {rna['auth_asym_id']}")
+            # cmd.set( 'transparency'  , 0.6    , f"chain {rna['auth_asym_id']}")
+            # cmd.set( 'cartoon_color' , 'gray80', f"chain {rna['auth_asym_id']}")
+
+            # #! transparent mesh with colored lines inside
             cmd.hide('everything', f"chain {rna['auth_asym_id']}")
-            # cmd.show('surface', f"chain {rna['auth_asym_id']}")
+            cmd.show('mesh', f"chain {rna['auth_asym_id']}")
             cmd.show('cartoon', f"chain {rna['auth_asym_id']}")
-            cmd.color('white', f"chain {rna['auth_asym_id']}")
-            # cmd.set('transparency', 0.3, f"chain {rna['auth_asym_id']}")
+            cmd.color(colormap__RNA[nomclass], f"chain {rna['auth_asym_id']}")
             cmd.set('cartoon_transparency', 0.2, f"chain {rna['auth_asym_id']}")
 
     for protein in profile['proteins']:
-        nomclass = nomenclaturev2[protein['auth_asym_id']]
+        if len( protein['nomenclature'] )>0:
+            nomclass = protein['nomenclature'][0]
+        else:
+            nomclass = random.choice([ *list(colormap__LSU_Proteins.keys()), *list(colormap__SSU_Proteins.keys()) ])
 
         if nomclass in colormap__LSU_Proteins:
             CLR = colormap__LSU_Proteins[nomclass]
@@ -198,17 +224,24 @@ def struct_paint_chains(pdbid: str):
         prot_tmp = f"{nomclass}.{protein['auth_asym_id']}"
 
         cmd.create(prot_tmp, f"chain {protein[ 'auth_asym_id' ]}")
-
         cmd.remove(f"chain {protein[ 'auth_asym_id' ]} and m. {pdbid}")
 
-        cmd.hide('everything', prot_tmp)
-        cmd.show('surface', prot_tmp)
-        cmd.show('sticks', prot_tmp)
-        cmd.show('cartoon', prot_tmp)
-        cmd.show('lines', prot_tmp)
-        cmd.set('transparency', 0.75, prot_tmp)
-        cmd.color(CLR , prot_tmp)
+        #! black surface with white lines inside
 
+        # cmd.hide ( 'everything'           , f"chain {protein['auth_asym_id']}")
+        # cmd.show ( 'surface'              , f"chain {protein['auth_asym_id']}")
+        # cmd.show ( 'cartoon'              , f"chain {protein['auth_asym_id']}")
+        # cmd.color('gray70', f"chain {protein['auth_asym_id']}")
+        # cmd.set( 'transparency'  , 0.5    , f"chain {protein['auth_asym_id']}")
+        # cmd.set( 'cartoon_color' , 'black', f"chain {protein['auth_asym_id']}")
+        #! transparent mesh with colored lines inside
+        cmd.hide ('everything'           ,      f"chain {protein['auth_asym_id']}")
+        cmd.show ('mesh'                 ,      f"chain {protein['auth_asym_id']}")
+        cmd.show ('cartoon'              ,      f"chain {protein['auth_asym_id']}")
+        cmd.color(CLR                    ,      f"chain {protein['auth_asym_id']}")
+        cmd.set  ('cartoon_transparency' , 0.2, f"chain {protein['auth_asym_id']}")
+
+    cmd.reset()
 def sload(pdbid: str):
     pdbid       = pdbid.upper()
     RIBETL_DATA = str(os.environ.get('RIBETL_DATA'))
@@ -216,19 +249,28 @@ def sload(pdbid: str):
     cmd.delete('all')
     cmd.load(path)
 
-# def pseudoatom_exitport(rcsb_id:str):
-#     posn = exit_port_posn(rcsb_id)
-#     print("Got positions :", posn)
-#     create_marker_at_atom("Exitport", posn)
+def ray_picture(pdbid:str):
+    cmd.reset()
+    cmd.set('ray_trace_mode', 1)
+    cmd.set('ambient', 1)
+    cmd.bg_color('white')
+    cmd.png(f"/home/rtviii/dev/riboxyz/rays/{pdbid}.png", ray=1, width=1920, height=1080, dpi=300)
 
 def test_():
     print("Extended scripts loaded correctly")
 
 cmd.extend("sload"            , sload                  )
-cmd.extend("by_chain"         , struct_paint_chains    )
+cmd.extend("by_chain"         , by_chain    )
 cmd.extend("ptc"              , pseudoatom_ptc         )
 cmd.extend("list_bacteria"    , list_bacteria          )
 cmd.extend("test_"    , test_          )
+cmd.extend("ray_picture"    , ray_picture          )
+
+
+sload('3j7z')
+by_chain('3j7z')
+ray_picture('3j7z')
+
 # cmd.extend("tun_obstructions" , visualize_obstructions )
 # cmd.extend("exitport"         , pseudoatom_exitport    )
     
