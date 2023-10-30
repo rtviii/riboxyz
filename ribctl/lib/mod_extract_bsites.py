@@ -133,8 +133,8 @@ if __name__ == "__main__":
     args  = parser.parse_args()
     PDBID = args.structure.upper()
 
-    _structure_cif_handle :Structure = utils.open_structure(PDBID,'cif')
-    struct_profile_handle       = RibosomeStructure.parse_obj(utils.open_structure(PDBID,'json'))
+    _structure_cif_handle :Structure        = utils.open_structure(PDBID,'cif')
+    struct_profile_handle:RibosomeStructure = RibosomeStructure.parse_obj(utils.open_structure(PDBID,'json'))
 
     liglike_polys = struct_polymeric_factor_ids(struct_profile_handle)
     ligands       = struct_ligand_ids(PDBID, struct_profile_handle)
