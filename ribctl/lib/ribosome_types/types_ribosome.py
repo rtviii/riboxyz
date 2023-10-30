@@ -565,11 +565,12 @@ class RibosomeStructure(BaseModel):
     proteins            : list[Protein]
     rnas                : list[RNA]
 
-    nonpolymeric_ligands: list[NonpolymericLigand]
-
     # polymeric_factors   : list[LifecycleFactor]
     #? This includes DNA-RNA hybrid strands, DNA and all other polymers
     other_polymers   : list[Polymer]
+
+    nonpolymeric_ligands: list[NonpolymericLigand]
+
     
     @staticmethod
     def from_json_profile(d: Any):
