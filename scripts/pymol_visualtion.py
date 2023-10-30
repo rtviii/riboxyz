@@ -15,9 +15,12 @@ colormap__RNA = {
     "28SrRNA"  : 'gray70',    # eukaryotic
     "5.8SrRNA" : 'lightblue', # eukaryotic
     "5SrRNA"   : "palegreen",
+    "16SrRNA"  : "palegreen",
     "18SrRNA"  : "palegreen", # eukaryotic
     "mt12SrRNA": "palegreen", # mitochondrial
-    "mt16SrRNA": 'gray70',    # mitochondrial
+    "mt16SrRNA": 'gray70',    # mitochondrial,
+    "tRNA"     : "lightblue",
+
           }
 colormap__LSU_Proteins = {
                           "uL1"  : "lawrencium",
@@ -204,10 +207,10 @@ def by_chain(pdbid: str):
 
             # #! transparent mesh with colored lines inside
             cmd.hide('everything', f"chain {rna['auth_asym_id']}")
-            cmd.show('mesh', f"chain {rna['auth_asym_id']}")
+            cmd.show('surface', f"chain {rna['auth_asym_id']}")
             cmd.show('cartoon', f"chain {rna['auth_asym_id']}")
             cmd.color(colormap__RNA[nomclass], f"chain {rna['auth_asym_id']}")
-            cmd.set('cartoon_transparency', 0.2, f"chain {rna['auth_asym_id']}")
+            cmd.set('transparency', 0.5, f"chain {rna['auth_asym_id']}")
 
     for protein in profile['proteins']:
         if len( protein['nomenclature'] )>0:
@@ -236,10 +239,10 @@ def by_chain(pdbid: str):
         # cmd.set( 'cartoon_color' , 'black', f"chain {protein['auth_asym_id']}")
         #! transparent mesh with colored lines inside
         cmd.hide ('everything'           ,      f"chain {protein['auth_asym_id']}")
-        cmd.show ('mesh'                 ,      f"chain {protein['auth_asym_id']}")
+        cmd.show ('surface'                 ,      f"chain {protein['auth_asym_id']}")
         cmd.show ('cartoon'              ,      f"chain {protein['auth_asym_id']}")
         cmd.color(CLR                    ,      f"chain {protein['auth_asym_id']}")
-        cmd.set  ('cartoon_transparency' , 0.2, f"chain {protein['auth_asym_id']}")
+        cmd.set  ('transparency' , 0.5, f"chain {protein['auth_asym_id']}")
 
     cmd.reset()
 def sload(pdbid: str):
@@ -252,9 +255,7 @@ def sload(pdbid: str):
 def ray_picture(pdbid:str):
     cmd.reset()
     cmd.set('ray_trace_mode', 1)
-    cmd.set('ambient', 1)
-    cmd.bg_color('white')
-    cmd.png(f"/home/rtviii/dev/riboxyz/rays/{pdbid}.png", ray=1, width=1920, height=1080, dpi=300)
+    cmd.png(f"/home/rtviii/dev/riboxyz/rays/{pdbid}.png", ray=1, width=400, height=400, dpi=300)
 
 def test_():
     print("Extended scripts loaded correctly")
@@ -266,10 +267,6 @@ cmd.extend("list_bacteria"    , list_bacteria          )
 cmd.extend("test_"    , test_          )
 cmd.extend("ray_picture"    , ray_picture          )
 
-
-sload('3j7z')
-by_chain('3j7z')
-ray_picture('3j7z')
 
 # cmd.extend("tun_obstructions" , visualize_obstructions )
 # cmd.extend("exitport"         , pseudoatom_exitport    )
