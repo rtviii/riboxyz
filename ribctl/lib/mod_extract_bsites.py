@@ -64,15 +64,15 @@ def get_ligand_nbrs(
     pdbid = struct.get_id().upper()
 
     profile = RibosomeStructure.from_json_profile(utils.open_structure(pdbid, 'json'))
-    poly_entities = itertools.chain(profile.proteins, profile.rnas if profile.rnas else [])
 
+    poly_entities = itertools.chain(profile.proteins, profile.rnas if profile.rnas else [])
     pdbid        = struct.get_id()
     ns           = NeighborSearch(list(struct.get_atoms()))
     nbr_residues = []
 
     for lig_res in ligand_residues:
         for atom in lig_res.child_list:
-            nbr_residues.extend(ns.search(atom.get_coord(), 10, level='R'))
+            nbr_residues.extend(ns.search(atom.get_coord(), 5, level='R'))
 
     nbr_residues = list(set([* map(ResidueSummary.from_biopython_residue, nbr_residues)]))
 
@@ -85,20 +85,15 @@ def get_ligand_nbrs(
     for c in chain_names:
         for poly_entity in poly_entities:
             if c == poly_entity.auth_asym_id:
-                    nbr_dict[c] = BindingSiteChain(
-                        **poly_entity.dict(),
-                        residues=sorted(
-                            [residue for residue in nbr_residues if residue.get_parent_auth_asym_id() == c],
-                            key=operator.attrgetter('seqid')
-                        ))
+                    nbr_dict[c] = BindingSiteChain( **json.loads(poly_entity.json()), residues=sorted( [residue for residue in nbr_residues if residue.get_parent_auth_asym_id() == c], key=operator.attrgetter('seqid') ))
 
     return BindingSite.parse_obj(nbr_dict)
 
 def get_ligand_residue_ids(ligchemid: str, struct: Structure) -> list[Residue]:
+
     ligandResidues: list[Residue] = list(filter(lambda x: x.get_resname() == ligchemid, list(struct.get_residues())))
+    print("GOT LIGAND RESIDUES", ligandResidues)
     return ligandResidues
-
-
 
 def struct_ligand_ids(pdbid: str, profile:RibosomeStructure) -> list[NonpolymericLigand]:
     """
