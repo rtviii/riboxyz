@@ -12,7 +12,7 @@ from ribctl import AMINO_ACIDS_3_TO_1_CODE
 from ribctl.etl.ribosome_assets import Assetlist, RibosomeAssets
 from ribctl.lib.tunnel import ptc_resdiues_get, ptc_residues_calculate_midpoint
 from ribctl.lib.ribosome_types.types_binding_site import BindingSite
-from ribctl.lib.mod_extract_bsites import bsite_nonpolymeric_ligand, struct_ligand_ids, struct_polymeric_factor_ids, bsite_polymeric_factor, bsite_polymeric_factor
+from ribctl.lib.mod_extract_bsites import bsite_ligand, struct_ligand_ids, bsite_extrarbx_polymer, bsite_extrarbx_polymer
 from ribctl.lib.mod_split_rename import split_rename
 from ribctl.etl.etl_pipeline import current_rcsb_structs, ReannotationPipeline, rcsb_single_structure_graphql, query_rcsb_api
 from ribctl.lib.mod_render_thumbnail import render_thumbnail
@@ -46,8 +46,8 @@ async def obtain_assets(rcsb_id: str, assetlist: Assetlist, overwrite: bool = Fa
     if assetlist.cif:
         coroutines.append(assets._verify_cif(overwrite))
 
-    if assetlist.factors_and_ligands:
-        coroutines.append(assets._verify_ligads_and_ligandlike_polys(overwrite))
+    if assetlist.ligands:
+        coroutines.append(assets._verify_ligands(overwrite))
 
     if assetlist.ptc_coords:
             asset_ptc_coords_path = os.path.join(assets._dir_path(),f'{assets.rcsb_id}_PTC_COORDINATES.json')

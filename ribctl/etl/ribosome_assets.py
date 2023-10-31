@@ -9,7 +9,7 @@ from api.logs.loggers import get_updates_logger
 from ribctl import AMINO_ACIDS_3_TO_1_CODE
 from ribctl.lib.tunnel import ptc_resdiues_get, ptc_residues_calculate_midpoint
 from ribctl.lib.ribosome_types.types_binding_site import BindingSite
-from ribctl.lib.mod_extract_bsites import bsite_nonpolymeric_ligand, struct_ligand_ids, struct_polymeric_factor_ids, bsite_polymeric_factor, bsite_polymeric_factor
+from ribctl.lib.mod_extract_bsites import  struct_ligand_ids, bsite_ligand
 from ribctl.lib.mod_split_rename import split_rename
 from ribctl.etl.etl_pipeline import current_rcsb_structs, ReannotationPipeline, rcsb_single_structure_graphql, query_rcsb_api
 from ribctl.lib.mod_render_thumbnail import render_thumbnail
@@ -37,7 +37,7 @@ class Assetlist(BaseModel)   :
       ptc_coords             : Optional[bool]
       cif                    : Optional[bool]
       cif_modified_and_chains: Optional[bool]
-      factors_and_ligands    : Optional[bool]
+      ligands                : Optional[bool]
       png_thumbnail          : Optional[bool]
 
 class RibosomeAssets():
@@ -321,58 +321,61 @@ class RibosomeAssets():
 
 
     async def _verify_ligands(self, overwrite:bool=False):
-        ligands           = struct_ligand_ids(self.rcsb_id, self.profile())
 
-        for ligand_chemid in ligands:
+        ligands           = struct_ligand_ids(self.rcsb_id, self.profile())
+        
+        for ligand in ligands:
+            ligand_chemid  = ligand.chemicalId
             if not os.path.exists(BindingSite.path_nonpoly_ligand(self.rcsb_id, ligand_chemid)):
-                bsite = bsite_nonpolymeric_ligand( ligand_chemid, self.biopython_structure())
+                bsite = bsite_ligand( ligand_chemid, self.biopython_structure())
                 bsite.save(bsite.path_nonpoly_ligand( self.rcsb_id, ligand_chemid))
             else:
+
                 if overwrite:
-                    bsite = bsite_nonpolymeric_ligand( ligand_chemid, self.biopython_structure())
+                    bsite = bsite_ligand( ligand_chemid, self.biopython_structure())
                     bsite.save(bsite.path_nonpoly_ligand( self.rcsb_id, ligand_chemid))
                 else:
                     ...
-    async def _verify_ligads_and_ligandlike_polys(self, overwrite: bool = False):
+    # async def _verify_ligads_and_ligandlike_polys(self, overwrite: bool = False):
 
-        # def ligand_path(chem_id): return os.path.join(self._dir_path(), f"polymer_{chem_id.upper()}.json")
-        # def poly_factor_path(auth_asym_id): return os.path.join(self._dir_path(), f"polymer_{auth_asym_id.upper()}.json")
+    #     # def ligand_path(chem_id): return os.path.join(self._dir_path(), f"polymer_{chem_id.upper()}.json")
+    #     # def poly_factor_path(auth_asym_id): return os.path.join(self._dir_path(), f"polymer_{auth_asym_id.upper()}.json")
 
-        ligands           = struct_ligand_ids(self.rcsb_id, self.profile())
+    #     ligands           = struct_ligand_ids(self.rcsb_id, self.profile())
         # polymeric_factors = struct_polymeric_factor_ids(self.profile())
-        all_verified_flag = True
+    #     all_verified_flag = True
 
-        for ligand_chemid in ligands:
-            if not os.path.exists(BindingSite.path_nonpoly_ligand(self.rcsb_id, ligand_chemid)):
-                all_verified_flag = False
-                bsite = bsite_nonpolymeric_ligand( ligand_chemid, self.biopython_structure())
+    #     for ligand_chemid in ligands:
+    #         if not os.path.exists(BindingSite.path_nonpoly_ligand(self.rcsb_id, ligand_chemid)):
+    #             all_verified_flag = False
+    #             bsite = bsite_ligand( ligand_chemid, self.biopython_structure())
 
-                bsite.save(bsite.path_nonpoly_ligand( self.rcsb_id, ligand_chemid))
-            else:
-                if overwrite:
-                    bsite = bsite_nonpolymeric_ligand( ligand_chemid, self.biopython_structure())
-                    bsite.save(bsite.path_nonpoly_ligand( self.rcsb_id, ligand_chemid))
-                else:
-                    ...
+    #             bsite.save(bsite.path_nonpoly_ligand( self.rcsb_id, ligand_chemid))
+    #         else:
+    #             if overwrite:
+    #                 bsite = bsite_ligand( ligand_chemid, self.biopython_structure())
+    #                 bsite.save(bsite.path_nonpoly_ligand( self.rcsb_id, ligand_chemid))
+    #             else:
+    #                 ...
 
-        if polymeric_factors is not None:
-            for poly in polymeric_factors:
-                if not os.path.exists(BindingSite.path_poly_factor(self.rcsb_id, poly.nomenclature[0], poly.auth_asym_id)):
-                    all_verified_flag = False
-                    bsite = bsite_polymeric_factor(
-                        poly.auth_asym_id, self.biopython_structure())
-                    bsite.save(bsite.path_poly_factor(
-                        self.rcsb_id, poly.nomenclature[0], poly.auth_asym_id))
-                else:
-                    if overwrite:
-                        bsite = bsite_polymeric_factor(
-                            poly.auth_asym_id, self.biopython_structure())
-                        bsite.save(bsite.path_poly_factor(
-                            self.rcsb_id, poly.nomenclature[0], poly.auth_asym_id))
-                    else:
-                        ...
+        # if polymeric_factors is not None:
+        #     for poly in polymeric_factors:
+        #         if not os.path.exists(BindingSite.path_poly_factor(self.rcsb_id, poly.nomenclature[0], poly.auth_asym_id)):
+        #             all_verified_flag = False
+        #             bsite = bsite_extrarbx_polymer(
+        #                 poly.auth_asym_id, self.biopython_structure())
+        #             bsite.save(bsite.path_poly_factor(
+        #                 self.rcsb_id, poly.nomenclature[0], poly.auth_asym_id))
+        #         else:
+        #             if overwrite:
+        #                 bsite = bsite_extrarbx_polymer(
+        #                     poly.auth_asym_id, self.biopython_structure())
+        #                 bsite.save(bsite.path_poly_factor(
+        #                     self.rcsb_id, poly.nomenclature[0], poly.auth_asym_id))
+        #             else:
+        #                 ...
 
-        return all_verified_flag
+        # return all_verified_flag
 
 
 def classify_struct_by_proportions(ribosome: RibosomeStructure) -> int:
