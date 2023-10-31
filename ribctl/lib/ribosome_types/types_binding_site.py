@@ -77,10 +77,7 @@ class BindingSite(BaseModel):
     @staticmethod
     def path_nonpoly_ligand( rcsb_id: str, class_: str):
         RIBETL_DATA = os.environ.get('RIBETL_DATA')
-        return os.path.join(
-            str(RIBETL_DATA), rcsb_id.upper() , "ligand_" +
-            class_.replace(" ", "_").lower() + ".json"
-        )
+        return os.path.join( str(RIBETL_DATA), rcsb_id.upper() , "ligand_" + class_.replace(" ", "_").lower() + ".json")
 
     @staticmethod
     def path_poly_factor( rcsb_id: str, class_: str, auth_asym_id: str):
@@ -138,5 +135,4 @@ class LigandPrediction(BaseModel):
     def dict(self,):
         return super().dict()['__root__']
 
-# TODO: A PL feature that lets you transform objects with different schemas into one another up to the typing of the fields.
 # So, optimal transport for types.

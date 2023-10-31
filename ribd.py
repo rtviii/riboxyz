@@ -28,7 +28,7 @@ parser_cmd_etl.add_argument('--profile'                 , action ='store_true' )
 parser_cmd_etl.add_argument('--ptc_coords'              , action ='store_true' )
 parser_cmd_etl.add_argument('--cif'                     , action ='store_true' )
 parser_cmd_etl.add_argument('--cif_modified_and_chains' , action ='store_true' )
-parser_cmd_etl.add_argument('--factors_and_ligands'     , action ='store_true' )
+parser_cmd_etl.add_argument('--ligands'                 , action ='store_true' )
 parser_cmd_etl.add_argument('--png_thumbnail'           , action ='store_true' )
 parser_cmd_etl.add_argument('--overwrite'               , action ='store_true' )
 
@@ -55,8 +55,8 @@ def cmd_etl(args):
     if args.cif_modified_and_chains:
         ASL.cif_modified_and_chains=True
 
-    if args.factors_and_ligands:
-        ASL.factors_and_ligands=True
+    if args.ligands:
+        ASL.ligands=True
 
     if args.png_thumbnail:
         ASL.png_thumbnail=True

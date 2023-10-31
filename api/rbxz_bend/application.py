@@ -2,7 +2,7 @@ import os
 from db.ribosomexyz import ribosomexyzDB
 from ribctl.lib.ribosome_types import RibosomeStructure
 from rbxz_bend.settings import NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER, RIBETL_DATA
-from ribctl.lib.mod_extract_bsites  import struct_ligand_ids, struct_polymeric_factor_ids, bsite_polymeric_factor, bsite_polymeric_factor
+from ribctl.lib.mod_extract_bsites  import struct_ligand_ids, struct_polymeric_factor_ids, bsite_extrarbx_polymer, bsite_extrarbx_polymer
 from ribctl.lib import utils
 
 class App:
@@ -33,7 +33,7 @@ class App:
                 for polyref in liglike_polys:
 
                     try:
-                        bsite_polymeric_factor(polyref.parent_rcsb_id, polyref.auth_asym_id, _structure_cif_handle, True)
+                        bsite_extrarbx_polymer(polyref.parent_rcsb_id, polyref.auth_asym_id, _structure_cif_handle, True)
                         # logger.info("Rendered liglike polymer {} in {}.".format(polyref.auth_asym_id, polyref.parent_rcsb_id))
 
                     except Exception as e:
@@ -45,7 +45,7 @@ class App:
                 for l in ligands:
 
                     try:
-                        bsite_polymeric_factor(PDBID, l[0], _structure_cif_handle, True)
+                        bsite_extrarbx_polymer(PDBID, l[0], _structure_cif_handle, True)
                         # logger.info("Rendered ligand {} in {}.".format(l[0], PDBID))
 
                     except Exception as e:
