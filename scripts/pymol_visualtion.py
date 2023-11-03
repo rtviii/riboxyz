@@ -150,7 +150,6 @@ def create_marker_at_atom(selection_name:str, posn:List[float], color_:str="red"
     cmd.pseudoatom(selection_name, pos=posn, vdw=1, color=color_,  label=label)
     cmd.show(repr, selection_name)
 
-
 def pseudoatom_ptc(rcsb_id: str):
     assets =  RibosomeAssets(rcsb_id)
     profile = assets.profile()
@@ -167,29 +166,6 @@ def pseudoatom_ptc(rcsb_id: str):
 
 
     create_marker_at_atom("centroid",midpoint, color_="red")
-
-# def visualize_obstructions(rcsb_id):
-#     ptcres, auth_asym_id = ptc_resdiues_get(rcsb_id, 0)
-#     midpoint = ptc_residues_calculate_midpoint(ptcres, auth_asym_id)
-#     polys,nonpolys = tunnel_obstructions(rcsb_id, midpoint)
-
-#     cmd.color("white", "all")
-
-#     pseudoatom_ptc(rcsb_id)
-
-#     for poly in polys:
-#         cname = "chain_{}".format(poly.auth_asym_id, )
-#         csele = "c. {} and m. {}".format(poly.auth_asym_id, rcsb_id.upper()) 
-#         cmd.create(cname, csele)
-#         cmd.remove(csele)
-#         cmd.color("red", cname)
-
-#     for res in nonpolys:
-#         resname = "res_{}_{}".format(res.parent_auth_asym_id,res.resname)
-#         ressele = "m. {} and c. {} and resn {}".format(rcsb_id.upper(),res.parent_auth_asym_id,res.resname)
-#         cmd.create(resname,  ressele)
-#         cmd.remove(ressele)
-#         cmd.color("blue", resname)
 
 def by_chain(pdbid: str):
     pdbid          = pdbid.upper()
@@ -258,6 +234,7 @@ def by_chain(pdbid: str):
         cmd.set  ('transparency' , 0.5, f"chain {protein['auth_asym_id']}")
 
     cmd.reset()
+
 def sload(pdbid: str):
     pdbid       = pdbid.upper()
     RIBETL_DATA = str(os.environ.get('RIBETL_DATA'))

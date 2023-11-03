@@ -1,0 +1,478 @@
+[
+  {
+    "identifier": "1JZY",
+    "data": {
+      "rcsb_id": "1JZY",
+      "exptl": [
+        {
+          "method": "X-RAY DIFFRACTION"
+        }
+      ],
+      "rcsb_accession_info": {
+        "deposit_date": "2001-09-17T00:00:00Z",
+        "initial_release_date": "2001-10-26T00:00:00Z"
+      },
+      "rcsb_entry_container_identifiers": {
+        "emdb_ids": null
+      },
+      "rcsb_entry_info": {
+        "resolution_combined": [
+          3.5
+        ]
+      }
+    },
+    "type": "entry"
+  },
+  {
+    "identifier": "1YI2",
+    "data": {
+      "rcsb_id": "1YI2",
+      "exptl": [
+        {
+          "method": "X-RAY DIFFRACTION"
+        }
+      ],
+      "rcsb_accession_info": {
+        "deposit_date": "2005-01-11T00:00:00Z",
+        "initial_release_date": "2005-04-26T00:00:00Z"
+      },
+      "rcsb_entry_container_identifiers": {
+        "emdb_ids": null
+      },
+      "rcsb_entry_info": {
+        "resolution_combined": [
+          2.65
+        ]
+      }
+    },
+    "type": "entry"
+  },
+  {
+    "identifier": "4V7U",
+    "data": {
+      "rcsb_id": "4V7U",
+      "exptl": [
+        {
+          "method": "X-RAY DIFFRACTION"
+        }
+      ],
+      "rcsb_accession_info": {
+        "deposit_date": "2010-08-15T00:00:00Z",
+        "initial_release_date": "2014-07-09T00:00:00Z"
+      },
+      "rcsb_entry_container_identifiers": {
+        "emdb_ids": null
+      },
+      "rcsb_entry_info": {
+        "resolution_combined": [
+          3.1
+        ]
+      }
+    },
+    "type": "entry"
+  },
+  {
+    "identifier": "4WFN",
+    "data": {
+      "rcsb_id": "4WFN",
+      "exptl": [
+        {
+          "method": "X-RAY DIFFRACTION"
+        }
+      ],
+      "rcsb_accession_info": {
+        "deposit_date": "2014-09-16T00:00:00Z",
+        "initial_release_date": "2015-12-23T00:00:00Z"
+      },
+      "rcsb_entry_container_identifiers": {
+        "emdb_ids": null
+      },
+      "rcsb_entry_info": {
+        "resolution_combined": [
+          3.54
+        ]
+      }
+    },
+    "type": "entry"
+  },
+  {
+    "identifier": "5JTE",
+    "data": {
+      "rcsb_id": "5JTE",
+      "exptl": [
+        {
+          "method": "ELECTRON MICROSCOPY"
+        }
+      ],
+      "rcsb_accession_info": {
+        "deposit_date": "2016-05-09T00:00:00Z",
+        "initial_release_date": "2016-07-20T00:00:00Z"
+      },
+      "rcsb_entry_container_identifiers": {
+        "emdb_ids": [
+          "EMD-8175"
+        ]
+      },
+      "rcsb_entry_info": {
+        "resolution_combined": [
+          3.6
+        ]
+      }
+    },
+    "type": "entry"
+  },
+  {
+    "identifier": "5JU8",
+    "data": {
+      "rcsb_id": "5JU8",
+      "exptl": [
+        {
+          "method": "ELECTRON MICROSCOPY"
+        }
+      ],
+      "rcsb_accession_info": {
+        "deposit_date": "2016-05-10T00:00:00Z",
+        "initial_release_date": "2016-07-20T00:00:00Z"
+      },
+      "rcsb_entry_container_identifiers": {
+        "emdb_ids": [
+          "EMD-8176"
+        ]
+      },
+      "rcsb_entry_info": {
+        "resolution_combined": [
+          3.6
+        ]
+      }
+    },
+    "type": "entry"
+  },
+  {
+    "identifier": "6S0X",
+    "data": {
+      "rcsb_id": "6S0X",
+      "exptl": [
+        {
+          "method": "ELECTRON MICROSCOPY"
+        }
+      ],
+      "rcsb_accession_info": {
+        "deposit_date": "2019-06-18T00:00:00Z",
+        "initial_release_date": "2019-08-21T00:00:00Z"
+      },
+      "rcsb_entry_container_identifiers": {
+        "emdb_ids": [
+          "EMD-10076"
+        ]
+      },
+      "rcsb_entry_info": {
+        "resolution_combined": [
+          2.425
+        ]
+      }
+    },
+    "type": "entry"
+  },
+  {
+    "identifier": "6S0Z",
+    "data": {
+      "rcsb_id": "6S0Z",
+      "exptl": [
+        {
+          "method": "ELECTRON MICROSCOPY"
+        }
+      ],
+      "rcsb_accession_info": {
+        "deposit_date": "2019-06-18T00:00:00Z",
+        "initial_release_date": "2019-08-21T00:00:00Z"
+      },
+      "rcsb_entry_container_identifiers": {
+        "emdb_ids": [
+          "EMD-10077"
+        ]
+      },
+      "rcsb_entry_info": {
+        "resolution_combined": [
+          2.3
+        ]
+      }
+    },
+    "type": "entry"
+  },
+  {
+    "identifier": "6XHX",
+    "data": {
+      "rcsb_id": "6XHX",
+      "exptl": [
+        {
+          "method": "X-RAY DIFFRACTION"
+        }
+      ],
+      "rcsb_accession_info": {
+        "deposit_date": "2020-06-19T00:00:00Z",
+        "initial_release_date": "2020-12-23T00:00:00Z"
+      },
+      "rcsb_entry_container_identifiers": {
+        "emdb_ids": null
+      },
+      "rcsb_entry_info": {
+        "resolution_combined": [
+          2.55
+        ]
+      }
+    },
+    "type": "entry"
+  },
+  {
+    "identifier": "7B5K",
+    "data": {
+      "rcsb_id": "7B5K",
+      "exptl": [
+        {
+          "method": "ELECTRON MICROSCOPY"
+        }
+      ],
+      "rcsb_accession_info": {
+        "deposit_date": "2020-12-03T00:00:00Z",
+        "initial_release_date": "2021-05-26T00:00:00Z"
+      },
+      "rcsb_entry_container_identifiers": {
+        "emdb_ids": [
+          "EMD-12035"
+        ]
+      },
+      "rcsb_entry_info": {
+        "resolution_combined": [
+          2.9
+        ]
+      }
+    },
+    "type": "entry"
+  },
+  {
+    "identifier": "7NSO",
+    "data": {
+      "rcsb_id": "7NSO",
+      "exptl": [
+        {
+          "method": "ELECTRON MICROSCOPY"
+        }
+      ],
+      "rcsb_accession_info": {
+        "deposit_date": "2021-03-08T00:00:00Z",
+        "initial_release_date": "2021-07-14T00:00:00Z"
+      },
+      "rcsb_entry_container_identifiers": {
+        "emdb_ids": [
+          "EMD-12573"
+        ]
+      },
+      "rcsb_entry_info": {
+        "resolution_combined": [
+          2.9
+        ]
+      }
+    },
+    "type": "entry"
+  },
+  {
+    "identifier": "7NSP",
+    "data": {
+      "rcsb_id": "7NSP",
+      "exptl": [
+        {
+          "method": "ELECTRON MICROSCOPY"
+        }
+      ],
+      "rcsb_accession_info": {
+        "deposit_date": "2021-03-08T00:00:00Z",
+        "initial_release_date": "2021-08-11T00:00:00Z"
+      },
+      "rcsb_entry_container_identifiers": {
+        "emdb_ids": [
+          "EMD-12574"
+        ]
+      },
+      "rcsb_entry_info": {
+        "resolution_combined": [
+          3.5
+        ]
+      }
+    },
+    "type": "entry"
+  },
+  {
+    "identifier": "7Q4K",
+    "data": {
+      "rcsb_id": "7Q4K",
+      "exptl": [
+        {
+          "method": "ELECTRON MICROSCOPY"
+        }
+      ],
+      "rcsb_accession_info": {
+        "deposit_date": "2021-10-31T00:00:00Z",
+        "initial_release_date": "2022-11-16T00:00:00Z"
+      },
+      "rcsb_entry_container_identifiers": {
+        "emdb_ids": [
+          "EMD-13805"
+        ]
+      },
+      "rcsb_entry_info": {
+        "resolution_combined": [
+          3
+        ]
+      }
+    },
+    "type": "entry"
+  },
+  {
+    "identifier": "8FC1",
+    "data": {
+      "rcsb_id": "8FC1",
+      "exptl": [
+        {
+          "method": "X-RAY DIFFRACTION"
+        }
+      ],
+      "rcsb_accession_info": {
+        "deposit_date": "2022-12-01T00:00:00Z",
+        "initial_release_date": "2023-07-12T00:00:00Z"
+      },
+      "rcsb_entry_container_identifiers": {
+        "emdb_ids": null
+      },
+      "rcsb_entry_info": {
+        "resolution_combined": [
+          2.5
+        ]
+      }
+    },
+    "type": "entry"
+  },
+  {
+    "identifier": "8FC4",
+    "data": {
+      "rcsb_id": "8FC4",
+      "exptl": [
+        {
+          "method": "X-RAY DIFFRACTION"
+        }
+      ],
+      "rcsb_accession_info": {
+        "deposit_date": "2022-12-01T00:00:00Z",
+        "initial_release_date": "2023-07-26T00:00:00Z"
+      },
+      "rcsb_entry_container_identifiers": {
+        "emdb_ids": null
+      },
+      "rcsb_entry_info": {
+        "resolution_combined": [
+          2.45
+        ]
+      }
+    },
+    "type": "entry"
+  },
+  {
+    "identifier": "3J5L",
+    "data": {
+      "rcsb_id": "3J5L",
+      "exptl": [
+        {
+          "method": "ELECTRON MICROSCOPY"
+        }
+      ],
+      "rcsb_accession_info": {
+        "deposit_date": "2013-10-23T00:00:00Z",
+        "initial_release_date": "2014-03-26T00:00:00Z"
+      },
+      "rcsb_entry_container_identifiers": {
+        "emdb_ids": [
+          "EMD-5771"
+        ]
+      },
+      "rcsb_entry_info": {
+        "resolution_combined": [
+          6.6
+        ]
+      }
+    },
+    "type": "entry"
+  },
+  {
+    "identifier": "3J7Z",
+    "data": {
+      "rcsb_id": "3J7Z",
+      "exptl": [
+        {
+          "method": "ELECTRON MICROSCOPY"
+        }
+      ],
+      "rcsb_accession_info": {
+        "deposit_date": "2014-08-27T00:00:00Z",
+        "initial_release_date": "2014-10-22T00:00:00Z"
+      },
+      "rcsb_entry_container_identifiers": {
+        "emdb_ids": [
+          "EMD-6057"
+        ]
+      },
+      "rcsb_entry_info": {
+        "resolution_combined": [
+          3.9
+        ]
+      }
+    },
+    "type": "entry"
+  },
+  {
+    "identifier": "4V7X",
+    "data": {
+      "rcsb_id": "4V7X",
+      "exptl": [
+        {
+          "method": "X-RAY DIFFRACTION"
+        }
+      ],
+      "rcsb_accession_info": {
+        "deposit_date": "2010-08-17T00:00:00Z",
+        "initial_release_date": "2014-07-09T00:00:00Z"
+      },
+      "rcsb_entry_container_identifiers": {
+        "emdb_ids": null
+      },
+      "rcsb_entry_info": {
+        "resolution_combined": [
+          3
+        ]
+      }
+    },
+    "type": "entry"
+  },
+  {
+    "identifier": "6ND6",
+    "data": {
+      "rcsb_id": "6ND6",
+      "exptl": [
+        {
+          "method": "X-RAY DIFFRACTION"
+        }
+      ],
+      "rcsb_accession_info": {
+        "deposit_date": "2018-12-13T00:00:00Z",
+        "initial_release_date": "2019-02-20T00:00:00Z"
+      },
+      "rcsb_entry_container_identifiers": {
+        "emdb_ids": null
+      },
+      "rcsb_entry_info": {
+        "resolution_combined": [
+          2.85
+        ]
+      }
+    },
+    "type": "entry"
+  }
+]

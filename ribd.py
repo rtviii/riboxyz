@@ -131,8 +131,8 @@ def cmd_lig(args):
 
     
     # with open(BindingSite.path_nonpoly_ligand(chemid, src), 'r') as infile:
-    #     ligdict = json.load(infile)
-    bsite_src=  BindingSite.parse_file(BindingSite.path_nonpoly_ligand(src,chemid))
+    # ligdict      = json.load(infile)
+    bsite_src    = BindingSite.parse_file(BindingSite.path_nonpoly_ligand(src,chemid))
     dest_profile = RibosomeAssets(dest).profile()
     # BindingSite.parse_obj()
     transpose = init_transpose_ligand(dest_profile, bsite_src)
@@ -141,8 +141,10 @@ def cmd_lig(args):
     for key in t.dict().keys():
         s[key.value] = t[key]
 
-    with open(os.path.join(RIBETL_DATA, dest, f'PREDICTION_{chemid}_{src}_{dest}.json'.upper()), 'w+') as outfile:
+    dest_path = os.path.join(RIBETL_DATA, dest, f'PREDICTION_{chemid}_{src}_{dest}.json'.upper())
+    with open(dest_path, 'w+') as outfile:
         json.dump(s, outfile, indent=4)
+        print("saved ", dest_path)
     
 
 parser_lig.set_defaults(func=cmd_lig)
