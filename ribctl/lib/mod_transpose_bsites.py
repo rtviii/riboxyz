@@ -1,5 +1,6 @@
 import argparse
 import json
+from pprint import pprint
 import re
 import os
 from typing import List
@@ -120,6 +121,7 @@ def init_transpose_ligand(
 		target_profile:RibosomeStructure,
 		binding_site : BindingSite
 	)->LigandPrediction:
+	"""returns @LigandPrediction"""
 
 	by_class_origin_polymers:dict[PolymerClass, dict] = {}
 
@@ -150,7 +152,8 @@ def init_transpose_ligand(
 			if  str(nomenclature_class) in list(map(lambda x : x.value,tgt_polymer.nomenclature)):
 				return tgt_polymer
 			else:
-				print("Did not find ", nomenclature_class, " in ", tgt_polymer.nomenclature)
+				...
+				# print("Did not find ", nomenclature_class, " in ", tgt_polymer.nomenclature)
 
 		raise Exception("Could not find a polymer class {} in structure {} ".format(nomenclature_class, structure.rcsb_id))
 
@@ -205,7 +208,9 @@ def init_transpose_ligand(
 		}
 
 
-	return LigandPrediction.parse_obj(prediction)
+	lp = LigandPrediction.parse_obj(prediction)
+
+	return  lp
 
 if __name__ =="__main__":
 

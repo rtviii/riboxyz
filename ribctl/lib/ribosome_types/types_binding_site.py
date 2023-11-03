@@ -122,6 +122,13 @@ class PredictedResiduesPolymer(BaseModel):
 class LigandPrediction(BaseModel):
     __root__: typing.Dict[PolymerClass, PredictedResiduesPolymer]
 
+
+    def save(self, filename: str):
+        print(self.dict())
+        with open(filename, 'w') as outfile:
+            json.dump(self.dict(), outfile, indent=4)
+            print("Saved: ",filename)
+
     def __getattr__(self, attr):
         return super().dict()['__root__'].__getattribute__(attr)
 
