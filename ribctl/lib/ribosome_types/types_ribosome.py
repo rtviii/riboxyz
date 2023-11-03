@@ -269,7 +269,6 @@ class ElongationFactorClass(Enum):
     # Archaeal
     aEF1A = "aEF1A"
     aEF2  = "aEF2"
-    aIF5A = "aIF5A"
 
 class InitiationFactorClass(Enum):
     #!Eukaryotic
@@ -284,7 +283,7 @@ class InitiationFactorClass(Enum):
     eIF2B_beta    = "eIF2B_beta"
     eIF2B_gamma   = "eIF2B_gamma"
     eIF2B_delta   = "eIF2B_delta"
-    eIF2B_epsilon = "eIF2B_epsilon"
+    eIF2B_epsilon = "eIF2B_epsilonv"
 
     eIF3_subunitA     = "eIF3_subunitA"
     eIF3_subunitB     = "eIF3_subunitB"
@@ -321,6 +320,7 @@ class InitiationFactorClass(Enum):
     aIF_2B_alpha = "aIF2B_alpha"
     aIF_2B_beta  = "aIF2B_beta"
     aIF_2B_delta = "aIF2B_delta"
+    aIF5A        = "aIF5A"
     aIF_5B       = "aIF5B"
 
 # LifecycleFactorClass = typing.Union[ElongationFactorClass, InitiationFactorClass]

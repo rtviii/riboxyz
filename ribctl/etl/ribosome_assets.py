@@ -1,6 +1,7 @@
 import asyncio
 import json
 import logging
+from pprint import pprint
 import typing
 from Bio.PDB.Structure import Structure
 from Bio.PDB.Chain import Chain
@@ -82,32 +83,32 @@ class RibosomeAssets():
         with open(self._json_profile_filepath(), "r") as f:
             return RibosomeStructure.parse_obj(json.load(f))
 
-    def __nomenclature_table(self) -> dict[str, dict]:
+    def _nomenclature_table(self) -> dict[str, dict]:
         #TODO: update getter
         prof = self.profile()
         m    = {}
-        if prof.polymeric_factors != None:
-            for p_factor in prof.polymeric_factors:
-                m[p_factor.auth_asym_id]=  {
-                   "nomenclature"         : p_factor.nomenclature,
-                   "entity_poly_strand_id": p_factor.entity_poly_strand_id,
-                   "rcsb_pdbx_description":p_factor.rcsb_pdbx_description
-                   }
+        
+        for p in prof.other_polymers:
+            m[p.auth_asym_id]=  {
+                   "nomenclature"         : list(map(lambda x: x.name, p.nomenclature)),
+               "entity_poly_strand_id": p.entity_poly_strand_id,
+               "rcsb_pdbx_description": p.rcsb_pdbx_description
+               }
 
         for prot in prof.proteins:
             m[prot.auth_asym_id] = {
-                   "nomenclature"         : prot.nomenclature,
+                   "nomenclature"         : list(map(lambda x: x.name, prot.nomenclature)),
                    "entity_poly_strand_id": prot.entity_poly_strand_id,
-
                    "rcsb_pdbx_description":prot.rcsb_pdbx_description
                    }
         if prof.rnas!=None:
             for rna in prof.rnas:
                 m[rna.auth_asym_id] = {
-                   "nomenclature"         : rna.nomenclature,
+                   "nomenclature"         : list(map(lambda x: x.name, rna.nomenclature)),
                    "entity_poly_strand_id": rna.entity_poly_strand_id,
                    "rcsb_pdbx_description": rna.rcsb_pdbx_description
                    }
+
 
         return m
                 

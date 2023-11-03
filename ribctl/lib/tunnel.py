@@ -179,6 +179,10 @@ def ptc_residues_calculate_midpoint(
         # first residue of the comb
         U_start_pos = [*subseq_residues.values()][0]["C4"]
 
+    print("UEND")
+    pprint(U_end_pos)
+    print("USTAR")
+    pprint(U_start_pos)
     midpoint = [
         (U_end_pos[0] + U_start_pos[0]) / 2,
         (U_end_pos[1] + U_start_pos[1]) / 2,

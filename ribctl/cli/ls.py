@@ -30,7 +30,7 @@ def cmd_ls(args):
             rp = RibosomeAssets(struct).profile()
             pdbid_taxid_tuples.append(( rp.rcsb_id, rp.src_organism_ids[0] ))
 
-        print(descendants_of_taxid( pdbid_taxid_tuples, int(args.taxid)))
+        pprint(descendants_of_taxid( pdbid_taxid_tuples, int(args.taxid)))
 
     elif args.subelement != None:
         print("Listing subelement information for", args.subelement)

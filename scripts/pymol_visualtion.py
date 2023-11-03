@@ -5,6 +5,7 @@ import random
 import sys
 from typing import List
 from pymol import cmd
+from ribctl.etl.ribosome_assets import RibosomeAssets
 sys.path.append('/home/rtviii/dev/riboxyz')       #! hack until ribctl is a separate pypi project
 from ribctl.lib.tunnel import ptc_residues_calculate_midpoint, ptc_resdiues_get
 from ribctl import RIBETL_DATA
@@ -146,13 +147,25 @@ def get_markerspath(struct: str):
     return _path
 
 def create_marker_at_atom(selection_name:str, posn:List[float], color_:str="red", repr="spheres", label=''):
-
     cmd.pseudoatom(selection_name, pos=posn, vdw=1, color=color_,  label=label)
     cmd.show(repr, selection_name)
 
-def pseudoatom_ptc(struct: str):
-    reslist,auth_asym_id = ptc_resdiues_get(struct, 0)
-    midpoint = ptc_residues_calculate_midpoint(reslist,auth_asym_id)
+
+def pseudoatom_ptc(rcsb_id: str):
+    assets =  RibosomeAssets(rcsb_id)
+    profile = assets.profile()
+    ptc_path = os.path.join(assets._dir_path(), "{}_PTC_COORDINATES.json".format(rcsb_id))
+
+
+    if not os.path.isfile(ptc_path):
+        reslist,auth_asym_id = ptc_resdiues_get(assets.biopython_structure(), profile.rnas, 0)
+        midpoint = ptc_residues_calculate_midpoint(reslist,auth_asym_id)
+    else:
+        with open(ptc_path, 'r') as infile:
+            ptc_coords = json.load(infile)
+            midpoint = ptc_coords['midpoint_coordinates']
+
+
     create_marker_at_atom("centroid",midpoint, color_="red")
 
 # def visualize_obstructions(rcsb_id):
