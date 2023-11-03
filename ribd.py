@@ -125,9 +125,9 @@ parser_cmd_ls.set_defaults(func=cmd_ls)
 
 # #! -------------------------- lig       -------------------------- #
 def cmd_lig(args):
-    chemid = args.chemid
-    src    = args.src
-    dest   = args.dest
+    chemid = args.chemid.upper()
+    src    = args.src.upper()
+    dest   = args.dest.upper()
 
     
     # with open(BindingSite.path_nonpoly_ligand(chemid, src), 'r') as infile:
@@ -136,9 +136,14 @@ def cmd_lig(args):
     dest_profile = RibosomeAssets(dest).profile()
     # BindingSite.parse_obj()
     transpose = init_transpose_ligand(dest_profile, bsite_src)
-    pprint(transpose)
+    t         = transpose
+    s= {}
+    for key in t.dict().keys():
+        s[key.value] = t[key]
+
+    with open(os.path.join(RIBETL_DATA, dest, f'PREDICTION_{chemid}_{src}_{dest}.json'.upper()), 'w+') as outfile:
+        json.dump(s, outfile, indent=4)
     
-    print(f'Processing chemical {chemid} from {src} to {dest}')
 
 parser_lig.set_defaults(func=cmd_lig)
 
