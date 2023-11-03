@@ -1,9 +1,12 @@
 import argparse
+import json
+from pprint import pprint
 
 # from ribctl.cli.etl import cmd_etl
 from ribctl.cli.ls import cmd_ls
 from ribctl.cli.sync import cmd_sync
 from ribctl.lib.mod_transpose_bsites import init_transpose_ligand
+from ribctl.lib.ribosome_types.types_binding_site import BindingSite
 
 def parse_comma_separated_list(value):
     return value.split(',')
@@ -50,7 +53,7 @@ import asyncio
 import os
 from ribctl import ASSETS, RIBETL_DATA
 from ribctl.etl.obtain import obtain_assets, obtain_assets_threadpool
-from ribctl.etl.ribosome_assets import Assetlist
+from ribctl.etl.ribosome_assets import Assetlist, RibosomeAssets
 
 def cmd_etl(args):
 
@@ -126,8 +129,14 @@ def cmd_lig(args):
     src    = args.src
     dest   = args.dest
 
-    # src_bsite = os.path.join(RIBETL_DATA, src, f'{chemid}_bsite.json')
-    # init_transpose_ligand()
+    
+    # with open(BindingSite.path_nonpoly_ligand(chemid, src), 'r') as infile:
+    #     ligdict = json.load(infile)
+    bsite_src=  BindingSite.parse_file(BindingSite.path_nonpoly_ligand(src,chemid))
+    dest_profile = RibosomeAssets(dest).profile()
+    # BindingSite.parse_obj()
+    transpose = init_transpose_ligand(dest_profile, bsite_src)
+    pprint(transpose)
     
     print(f'Processing chemical {chemid} from {src} to {dest}')
 
