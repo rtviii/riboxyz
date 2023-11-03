@@ -3,7 +3,6 @@ import os
 import operator
 import argparse
 import itertools
-from pprint import pprint
 from Bio.PDB.NeighborSearch import NeighborSearch
 from Bio.PDB.Residue import Residue
 from Bio.PDB.Structure import Structure
@@ -72,12 +71,9 @@ def get_ligand_nbrs(
 
     for lig_res in ligand_residues:
         for atom in lig_res.child_list:
-            print("Got atom in ligand:", atom.get_name())
             nbr_residues.extend(ns.search(atom.get_coord(), 5, level='R'))
 
     nbr_residues = list(set([* map(ResidueSummary.from_biopython_residue, nbr_residues)]))
-    print("Got nbr residues:")
-    pprint(nbr_residues)
 
 
     # Filter the ligand itself, water and other special residues
@@ -85,9 +81,7 @@ def get_ligand_nbrs(
     nbr_dict     = {}
     chain_names  = list(set(map(lambda _:  _.get_parent_auth_asym_id(), nbr_residues)))
     for c in chain_names:
-        print("checking chain", c)
         for poly_entity in poly_entities:
-            print("compared against {} ?= {}".format(c, poly_entity.auth_asym_id))
             if c == poly_entity.auth_asym_id:
                 nbr_dict[c] = BindingSiteChain(**json.loads(poly_entity.json()), residues=sorted( [residue for residue in nbr_residues if residue.get_parent_auth_asym_id() == c], key=operator.attrgetter('seqid') ))
 
@@ -96,7 +90,6 @@ def get_ligand_nbrs(
 def get_ligand_residue_ids(ligchemid: str, struct: Structure) -> list[Residue]:
 
     ligandResidues: list[Residue] = list(filter(lambda x: x.get_resname() == ligchemid, list(struct.get_residues())))
-    print("GOT LIGAND RESIDUES", ligandResidues)
     return ligandResidues
 
 def struct_ligand_ids(pdbid: str, profile:RibosomeStructure) -> list[NonpolymericLigand]:
