@@ -146,21 +146,23 @@ class RibosomeAssets():
     def get_struct_and_profile(self) -> tuple[Structure, RibosomeStructure]:
         return self.biopython_structure(), self.profile()
 
-    def get_chain_by_polymer_class(self, poly_class: PolymerClass | LifecycleFactorClass, assembly: int = 0) -> LifecycleFactor | RNA | Protein | None:
+    def get_chain_by_polymer_class(self, poly_class: PolymerClass , assembly: int = 0) -> PolymerClass | None:
         profile = self.profile()
-
+        # print("Got provfile for ", profile.rcsb_id)
+        # print("searching for ", poly_class)
         for prot in profile.proteins:
-            if poly_class in prot.nomenclature and prot.assembly_id == assembly:
+            # print(prot.nomenclature)
+            if poly_class in [v.value for v in prot.nomenclature] and prot.assembly_id == assembly:
                 return prot
 
         if profile.rnas is not None:
             for rna in profile.rnas:
-                if poly_class in rna.nomenclature and rna.assembly_id == assembly:
+                if poly_class in [r.value for r in rna.nomenclature] and rna.assembly_id == assembly:
                     return rna
 
-        if profile.polymeric_factors is not None:
-            for polyf in profile.polymeric_factors:
-                if poly_class in polyf.nomenclature and polyf.assembly_id == assembly:
+        if profile.other_polymers:
+            for polyf in profile.other_polymers:
+                if poly_class in [ p.value for p in polyf.nomenclature ] and polyf.assembly_id == assembly:
                     return polyf
         return None
 
@@ -178,6 +180,7 @@ class RibosomeAssets():
                 if chain.auth_asym_id == auth_asym_id:
                     return (chain, "RNA")
 
+        #TODO: update getter
         if profile.polymeric_factors is not None:
             for chain in profile.polymeric_factors:
                 if chain.auth_asym_id == auth_asym_id:

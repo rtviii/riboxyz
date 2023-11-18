@@ -324,10 +324,10 @@ class InitiationFactorClass(Enum):
     aIF_5B       = "aIF5B"
 
 # LifecycleFactorClass = typing.Union[ElongationFactorClass, InitiationFactorClass]
-LifecycleFactorClass = enum_union(ElongationFactorClass, InitiationFactorClass                           )
-PolypeptideClass     = enum_union(CytosolicProteinClass, LifecycleFactorClass , MitochondrialProteinClass)
-PolynucleotideClass  = enum_union(CytosolicRNAClass    , MitochondrialRNAClass, tRNA )
-PolymerClass         = enum_union(PolynucleotideClass  , PolypeptideClass                                )
+LifecycleFactorClass = enum_union(ElongationFactorClass, InitiationFactorClass)
+PolypeptideClass     = enum_union(CytosolicProteinClass, LifecycleFactorClass, MitochondrialProteinClass)
+PolynucleotideClass  = enum_union(CytosolicRNAClass, MitochondrialRNAClass, tRNA)
+PolymerClass         = enum_union(PolynucleotideClass, PolypeptideClass)
 
 #? ----------------------------------------------{ Object Types }------------------------------------------------
 class Polymer(BaseModel):
