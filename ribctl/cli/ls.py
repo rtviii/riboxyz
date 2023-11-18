@@ -4,7 +4,7 @@ import os
 from pprint import pprint
 from ribctl import RIBETL_DATA
 from ribctl.etl.ribosome_assets import RibosomeAssets
-from ribctl.lib.ribosome_types.types_ribosome import RibosomeStructure
+from ribctl.lib.ribosome_types.types_ribosome import PolynucleotideClass, PolypeptideClass, RibosomeStructure
 from ribctl.lib.util_taxonomy import  get_descendants_of, taxid_is_descendant_of,descendants_of_taxid
 
 
@@ -33,7 +33,28 @@ def cmd_ls(args):
         pprint(descendants_of_taxid( pdbid_taxid_tuples, int(args.taxid)))
 
     elif args.subelement != None:
-        taxid =args.subelement
-        assert()
+        subelem =args.subelement
+        found =  []
+        try:
+            assert(subelem in [_.value for _ in [*list(PolynucleotideClass), *list(PolypeptideClass)]])
+        except AssertionError:
+            print("Subelement must be one of the following:")
+            print([_.value for _ in [*list(PolynucleotideClass), *list(PolypeptideClass)]])
+            exit(1)
+        for struct in all_structs:
+            ra = RibosomeAssets(struct)
+            elem = ra.get_chain_by_polymer_class(subelem)
+            if elem  != None:
+                print("Found elem:", elem)
+            else:
+                ...
+
+                
+               
+
+           
+
+
+
     else:
         print(all_structs)
