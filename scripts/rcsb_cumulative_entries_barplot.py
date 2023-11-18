@@ -157,7 +157,7 @@ fig, ax = plt.subplots()
 rc('axes', linewidth=2)
 xraybars = ax.bar(d_years, d_xrays, width,                label='X-RAY DIFFRACTION' , color="black"   , edgecolor="black")
 embars   = ax.bar(d_years, d_ems  , width, bottom=d_xrays,label='ELECTRON MICROSCOPY'  ,fill=None , edgecolor="black")
-ax.scatter(d_years, d_num_maps, color="blue", marker='*', label="Associated EMDB maps", s=150)
+# ax.scatter(d_years, d_num_maps, color="blue", marker='*', label="Associated EMDB maps", s=150)
 # ax.plot(d_years, d_cryoem_reso, color="cyan", label="Cryo-EM resolution", linewidth=3)
 # ax.plot(d_years, d_xray_reso, color="pink", label="X-ray resolution", linewidth=3)
 # ax.lines[0].set_linestyle("--")
@@ -173,7 +173,7 @@ print("nume entires", len(d_years))
 ax.set_xlabel('Year'                      , fontsize=24)
 # ax.set_ylabel('Number of released RCSB models' , fontsize=24)
 # title= "Number of entries in $\it{ribosome.xyz}$ by year"
-title= "Number of RIBOSOME structures deposited to $\it{rcsb.org}$"
+title= "Number of ribosome structures deposited to $\it{rcsb.org}$"
 ax.set_title (title, fontsize=24)
 plt.legend(loc=2, prop={'size': 22})
 
@@ -189,6 +189,6 @@ for ( bar, i_em, i_xray ) in zip(embars.patches, d_ems, d_xrays):
     ax.text(text_x, text_y + 3, text, ha='center',color='black',size=18)
 
 fig.set_size_inches(18.5, 10.5)
-# plt.show()
+plt.show()
 fig.savefig('cumulative_entries.png', format='png', dpi=300, bbox_inches='tight')
 fig.savefig('cumulative_entries.pdf', format='pdf', dpi=300, bbox_inches='tight')

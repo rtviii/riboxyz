@@ -33,6 +33,7 @@ def cmd_ls(args):
         pprint(descendants_of_taxid( pdbid_taxid_tuples, int(args.taxid)))
 
     elif args.subelement != None:
-        print("Listing subelement information for", args.subelement)
+        taxid =args.subelement
+        assert()
     else:
         print(all_structs)
