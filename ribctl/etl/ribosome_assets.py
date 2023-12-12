@@ -280,6 +280,7 @@ class RibosomeAssets():
                 return False
 
     async def _verify_cif_modified_and_chains(self, overwrite: bool = False) -> bool:
+        print("verifying chains")
         if not os.path.isdir(self.chains_dir()):
             os.makedirs(self.chains_dir())
             await split_rename(self.rcsb_id)
