@@ -8,11 +8,11 @@ import os
 
 
 def neoget(cypher_string: str):
-    uri = os.getenv('NEO4J_URI')
-    user = os.getenv('NEO4J_USER')
-    password = os.getenv('NEO4J_PASSWORD')
+    uri        = os.getenv('NEO4J_URI')
+    user       = os.getenv('NEO4J_USER')
+    password   = os.getenv('NEO4J_PASSWORD')
     current_db = os.getenv('NEO4J_CURRENTDB')
-    driver = GraphDatabase.driver(uri, auth=(user, password))
+    driver     = GraphDatabase.driver(uri, auth=(user, password))
 
     def parametrized_query(tx, **kwargs):
         result: Result = tx.run(cypher_string, **kwargs)
