@@ -33,8 +33,9 @@ def cmd_ls(args):
         pprint(descendants_of_taxid( pdbid_taxid_tuples, int(args.taxid)))
 
     elif args.subelement != None:
-        subelem =args.subelement
-        found =  []
+        subelem = args.subelement
+        found   =  []
+
         try:
             assert(subelem in [_.value for _ in [*list(PolynucleotideClass), *list(PolypeptideClass)]])
         except AssertionError:
@@ -42,13 +43,17 @@ def cmd_ls(args):
             print([_.value for _ in [*list(PolynucleotideClass), *list(PolypeptideClass)]])
             exit(1)
         for struct in all_structs:
-            ra = RibosomeAssets(struct)
+            ra   = RibosomeAssets(struct)
             elem = ra.get_chain_by_polymer_class(subelem)
+
             if elem  != None:
-                print("Found elem:", elem)
+                found.append(elem)
             else:
                 ...
 
+        with open('found_{}.json'.format(subelem), 'w') as outfile:
+            json.dump([json.loads(_.json()) for _ in found], outfile, indent=4)
+            print("Saved:", 'found_{}.json'.format(subelem))
                 
                
 
