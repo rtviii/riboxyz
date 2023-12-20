@@ -21,7 +21,7 @@ with ThreadPoolExecutor(max_workers=50) as executor:
         try:
             emd_id      = list(filter(lambda x: "EMD-" in x, prof.rcsb_external_ref_id))[0]
             url         = "https://ftp.ebi.ac.uk/pub/databases/emdb/structures/{}/map/{}.map.gz".format(emd_id,emd_id.replace('-','_').lower() )
-            destination = os.path.join(RIBETL_DATA, struct.upper(), "{}_{}.map.gz".format(emd_id.replace('-','_').lower() ,struct.lower()))
+            destination = os.path.join(RIBETL_DATA, struct.upper(), "{}.map.gz".format(struct.upper()))
             if not os.path.exists(destination):
                 executor.submit(download_file, url, destination)
             else:
@@ -30,3 +30,5 @@ with ThreadPoolExecutor(max_workers=50) as executor:
             print("NO EMD LINK FOR {}".format(struct))
 
 # Replace "https://ftp.ebi.ac.uk/pub/databases/emdb/structures/EMD-0393/map/emd_0393.map.gz" and add more URLs to the urls list as needed. The script will create a thread pool with 10 workers to download the files concurrently and save them to the specified directory.
+
+

@@ -35,9 +35,9 @@ NUCLEOTIDES = ['A', 'T', 'C', 'G', 'U']
 
 class ResidueSummary(BaseModel):
 
-    full_id: tuple[str, int, str, tuple[str, int, str]]
-    resname: str
-    seqid: int
+    full_id            : tuple[str, int, str, tuple[str, int, str]]
+    resname            : str
+    seqid              : int
     parent_auth_asym_id: str
 
     def __hash__(self):
@@ -52,7 +52,7 @@ class ResidueSummary(BaseModel):
         return seqid
 
     def get_parent_auth_asym_id(self):
-        (structure_id, model_id, chain_id, _) = self.full_id
+        (structure_id, assembly_id, chain_id, _) = self.full_id
         return chain_id
 
     @staticmethod
@@ -77,19 +77,12 @@ class BindingSite(BaseModel):
     @staticmethod
     def path_nonpoly_ligand( rcsb_id: str, class_: str):
         RIBETL_DATA = os.environ.get('RIBETL_DATA')
-        return os.path.join(
-            str(RIBETL_DATA), rcsb_id.upper() , "ligand_" +
-            class_.replace(" ", "_").lower() + ".json"
-        )
+        return os.path.join( str(RIBETL_DATA), rcsb_id.upper() , "LIGAND_" + class_.replace(" ", "_").upper() + ".json")
 
-    @staticmethod
-    def path_poly_factor( rcsb_id: str, class_: str, auth_asym_id: str):
-        RIBETL_DATA = os.environ.get('RIBETL_DATA')
-        return os.path.join(
-            str(RIBETL_DATA),
-            rcsb_id.upper(), "polymer_"+auth_asym_id +  "_" + 
-            class_.replace(" ", "_").lower() + ".json"
-        )
+    # @staticmethod
+    # def path_poly_factor( rcsb_id: str, class_: str, auth_asym_id: str):
+    #     RIBETL_DATA = os.environ.get('RIBETL_DATA')
+    #     return os.path.join( str(RIBETL_DATA), rcsb_id.upper(), "POLYMER_"+auth_asym_id +  "_" + class_.replace(" ", "_").upper() + ".json" )
 
     def save(self, filename: str):
         with open(filename, 'w') as outfile:
@@ -129,6 +122,13 @@ class PredictedResiduesPolymer(BaseModel):
 class LigandPrediction(BaseModel):
     __root__: typing.Dict[PolymerClass, PredictedResiduesPolymer]
 
+
+    def save(self, filename: str):
+        print(self.dict())
+        with open(filename, 'w') as outfile:
+            json.dump(self.dict(), outfile, indent=4)
+            print("Saved: ",filename)
+
     def __getattr__(self, attr):
         return super().dict()['__root__'].__getattribute__(attr)
 
@@ -138,5 +138,4 @@ class LigandPrediction(BaseModel):
     def dict(self,):
         return super().dict()['__root__']
 
-# TODO: A PL feature that lets you transform objects with different schemas into one another up to the typing of the fields.
 # So, optimal transport for types.

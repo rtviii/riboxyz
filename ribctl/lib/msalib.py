@@ -9,7 +9,7 @@ import os
 import subprocess
 from typing import Iterator
 from Bio.Align import  SeqRecord
-from ribctl import MUSCLE_BIN
+from ribctl import ASSETS, MUSCLE_BIN
 from ete3 import NCBITaxa
 import os
 

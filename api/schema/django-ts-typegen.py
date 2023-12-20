@@ -4,6 +4,7 @@ os.environ["DJANGO_SETTINGS_MODULE"] = 'rbxz_bend.settings'
 from pydantic2ts import generate_typescript_defs
 import argparse
 
+#+ looks like this is obsolete (replaced by djangoninja?)
 
 DEFAULT_DJANGO_TYPES_DIR = os.path.join(os.path.dirname(__file__), 'schema')
 DEFAULT_DJANGO_OUT_DIR   = os.path.join(os.path.dirname(__file__), '__typescript_d_ts')

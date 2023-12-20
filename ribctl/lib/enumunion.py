@@ -159,6 +159,9 @@ class UnionEnumMeta(enum.EnumMeta):
     def __instancecheck__(cls, instance):
         return any(isinstance(instance, subenum) for subenum in cls._subenums_)
 
+    def __hash__(cls):
+        """Hash based on the tuple of subenums (order-sensitive)."""
+        return hash(cls._subenums_)
     def __eq__(cls, other):
         """Equality based on the tuple of subenums (order-sensitive)."""
         if not isinstance(other, UnionEnumMeta):

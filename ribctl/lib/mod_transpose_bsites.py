@@ -1,5 +1,6 @@
 import argparse
 import json
+from pprint import pprint
 import re
 import os
 from typing import List
@@ -9,11 +10,10 @@ from Bio import pairwise2
 import itertools
 from ribctl.lib.ribosome_types.types_binding_site import LigandPrediction, PredictedResiduesPolymer
 from ribctl.lib.ribosome_types.types_ribosome import PolymerClass, RibosomeStructure
-from ribctl.lib.mod_extract_bsites import  BindingSite, struct_ligand_ids, struct_polymeric_factor_ids
+from ribctl.lib.mod_extract_bsites import  BindingSite, struct_ligand_ids, bsite_extrarbx_polymer
 from ribctl.lib.utils import open_structure
 import numpy as np
 
-flatten = itertools.chain.from_iterable
 n1      = np.array
 
 class SeqMatch():
@@ -108,7 +108,7 @@ def struct_bsites(rcsb_id:str):
 	"""Returns a list of binding sites from a structure"""
 	rcsb_id =rcsb_id.upper()
 	struct_profile_handle = RibosomeStructure.parse_obj(open_structure(rcsb_id, 'json'))
-	liglike_polys = struct_polymeric_factor_ids(struct_profile_handle)
+	# liglike_polys = struct_polymeric_factor_ids(struct_profile_handle)
 	ligands       = struct_ligand_ids(rcsb_id, struct_profile_handle)
 	return ligands, liglike_polys
 
@@ -118,53 +118,47 @@ def open_bsite(path:str)->BindingSite:
 	return BindingSite.parse_obj(data)
 	
 def init_transpose_ligand( 
-	# source_struct: str,
-	# target_struct: str,
-	target_profile:RibosomeStructure,
-	binding_site : BindingSite
+		target_profile:RibosomeStructure,
+		binding_site : BindingSite
 	)->LigandPrediction:
+	"""returns @LigandPrediction"""
 
 	by_class_origin_polymers:dict[PolymerClass, dict] = {}
 
-
 	origin_polymers = binding_site.dict()
 
-	print("Got the following binding site:")
-	# pprint(origin_polymers)
-	print("total keys : ", len(origin_polymers.keys()))
 
-
-	for ( auth_asym_id, polymer ) in origin_polymers.items():
-		if len(polymer['nomenclature']) <1:
-			print("auth asym id " + auth_asym_id + " has no nomenclature:" +  polymer['nomenclature'] +". Skipping -1")
+	for ( auth_asym_id, nbr_polymer ) in origin_polymers.items():
+		if len(nbr_polymer['nomenclature']) <1:
+			print("auth asym id " + auth_asym_id + " has no nomenclature:" +  nbr_polymer['nomenclature'] +". Skipping -1")
 			continue
-
 		else:
-			print("auth asym id " + auth_asym_id + " has  nomenclature:" +  ",".join(polymer['nomenclature']))
-			by_class_origin_polymers[polymer['nomenclature'][0]] = {
-				'seq'         : polymer['entity_poly_seq_one_letter_code_can'],
-				'auth_asym_id': polymer['auth_asym_id'],
-				'ids'         : [ resid for resid in [*map(lambda x : x['seqid'], polymer['residues'])] ]
+			print("auth asym id " + auth_asym_id + " has  nomenclature: " +  nbr_polymer['nomenclature'][0].value)
+			by_class_origin_polymers[nbr_polymer['nomenclature'][0].value ] = {
+				'seq'         : nbr_polymer['entity_poly_seq_one_letter_code_can'],
+				'auth_asym_id': nbr_polymer['auth_asym_id'],
+				'ids'         : [ resid for resid in [*map(lambda x : x['seqid'], nbr_polymer['residues'])] ]
 			}
 
 	
 	
 	by_class_target_polymers:dict[PolymerClass, dict] = {}
 
-	for nomenclature_class, polymer in by_class_origin_polymers.items():
-		def get_polymer_class(structure:RibosomeStructure, nomenclature_class:PolymerClass):
-			target_polymers = itertools.chain(structure.rnas if structure.rnas is not None else [],structure.proteins)
-			for tgt_polymer in target_polymers:
-				if  nomenclature_class in tgt_polymer.nomenclature:
-					print("Found ", nomenclature_class, " in ", tgt_polymer.nomenclature)
-					return tgt_polymer
-				else:
-					print("Did not find ", nomenclature_class, " in ", tgt_polymer.nomenclature)
+	def get_polymer_class(structure:RibosomeStructure, nomenclature_class:PolymerClass):
 
-			raise Exception("Could not find a polymer class {} in structure {} ".format(nomenclature_class, structure.rcsb_id))
-			
-		try:
-			target_polymer= get_polymer_class(target_profile, nomenclature_class)
+		target_polymers = [*structure.rnas ,*structure.proteins]
+
+		for tgt_polymer in target_polymers:
+			if  str(nomenclature_class) in list(map(lambda x : x.value,tgt_polymer.nomenclature)):
+				return tgt_polymer
+			else:
+				...
+				# print("Did not find ", nomenclature_class, " in ", tgt_polymer.nomenclature)
+
+		raise Exception("Could not find a polymer class {} in structure {} ".format(nomenclature_class, structure.rcsb_id))
+
+	for nomenclature_class, nbr_polymer in by_class_origin_polymers.items():
+			target_polymer        = get_polymer_class(target_profile, nomenclature_class)
 			tgt_poly_seq          = target_polymer.entity_poly_seq_one_letter_code_can
 			tgt_poly_auth_asym_id = target_polymer.auth_asym_id
 
@@ -173,11 +167,8 @@ def init_transpose_ligand(
 				'auth_asym_id': tgt_poly_auth_asym_id,
 			}
 
-		except Exception as e:
-			...
-
-
 	prediction = {}
+
 	for ( nomenclature_class, seqstats ) in by_class_origin_polymers.items():
 		if nomenclature_class not in by_class_target_polymers:
 			continue
@@ -217,7 +208,9 @@ def init_transpose_ligand(
 		}
 
 
-	return LigandPrediction.parse_obj(prediction)
+	lp = LigandPrediction.parse_obj(prediction)
+
+	return  lp
 
 if __name__ =="__main__":
 

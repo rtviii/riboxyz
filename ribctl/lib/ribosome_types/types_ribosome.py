@@ -1,3 +1,4 @@
+import json
 from pprint import pprint
 from typing import Any, Optional
 from enum import Enum, auto
@@ -268,10 +269,9 @@ class ElongationFactorClass(Enum):
     # Archaeal
     aEF1A = "aEF1A"
     aEF2  = "aEF2"
-    aIF5A = "aIF5A"
 
 class InitiationFactorClass(Enum):
-    # Eukaryotic
+    #!Eukaryotic
     eIF1          = "eIF1"
     eIF1A         = "eIF1A"
 
@@ -283,7 +283,7 @@ class InitiationFactorClass(Enum):
     eIF2B_beta    = "eIF2B_beta"
     eIF2B_gamma   = "eIF2B_gamma"
     eIF2B_delta   = "eIF2B_delta"
-    eIF2B_epsilon = "eIF2B_epsilon"
+    eIF2B_epsilon = "eIF2B_epsilonv"
 
     eIF3_subunitA     = "eIF3_subunitA"
     eIF3_subunitB     = "eIF3_subunitB"
@@ -307,35 +307,39 @@ class InitiationFactorClass(Enum):
     eIF5B         = "eIF5B"
     eIF5          = "eIF5"
 
-    # Bacterial
+    #!Bacterial
     IF1           = "IF1"
     IF2           = "IF2"
     IF3           = "IF3"
 
-    # Archaeal
-
+    #!Archaeal
     aIF_1A       = "aIF1A"
-
-    aIF_2_alpha = "aIF2_alpha"
-    aIF_2_beta  = "aIF2_beta"
-    aIF_2_gamma = "aIF2_gamma"
-
+    aIF_2_alpha  = "aIF2_alpha"
+    aIF_2_beta   = "aIF2_beta"
+    aIF_2_gamma  = "aIF2_gamma"
     aIF_2B_alpha = "aIF2B_alpha"
     aIF_2B_beta  = "aIF2B_beta"
     aIF_2B_delta = "aIF2B_delta"
-
+    aIF5A        = "aIF5A"
     aIF_5B       = "aIF5B"
 
 # LifecycleFactorClass = typing.Union[ElongationFactorClass, InitiationFactorClass]
-LifecycleFactorClass = enum_union(ElongationFactorClass, InitiationFactorClass                           )
-PolypeptideClass     = enum_union(CytosolicProteinClass, LifecycleFactorClass , MitochondrialProteinClass)
-PolynucleotideClass  = enum_union(CytosolicRNAClass    , MitochondrialRNAClass, tRNA )
-PolymerClass         = enum_union(PolynucleotideClass  , PolypeptideClass                                )
+LifecycleFactorClass = enum_union(ElongationFactorClass, InitiationFactorClass)
+PolypeptideClass     = enum_union(CytosolicProteinClass, LifecycleFactorClass, MitochondrialProteinClass)
+PolynucleotideClass  = enum_union(CytosolicRNAClass, MitochondrialRNAClass, tRNA)
+PolymerClass         = enum_union(PolynucleotideClass, PolypeptideClass)
 
 #? ----------------------------------------------{ Object Types }------------------------------------------------
 class Polymer(BaseModel):
+
     def __hash__(self):
         return hash(self.auth_asym_id + self.parent_rcsb_id)
+
+    def to_dict(self):
+        """A hack for enum.union to work with pydantic BaseModel. Otherwise EnumUnion instances are represented as <MitochondrialProteinClass.mL64: 'mL64'> etc.(Correct is "mL64")"""
+        return json.loads(self.json())
+
+
     def to_SeqRecord(self)->SeqRecord:
         return SeqRecord(self.entity_poly_seq_one_letter_code_can, id=f"{self.parent_rcsb_id}.{self.auth_asym_id}", 
                          description="{}|{}".format(self.src_organism_ids[0],self.rcsb_pdbx_description))
@@ -539,6 +543,7 @@ class RibosomeStructure(BaseModel):
     expMethod : str
     resolution: float
 
+
     pdbx_keywords         : Optional[str]
     pdbx_keywords_text    : Optional[str]
 
@@ -558,6 +563,7 @@ class RibosomeStructure(BaseModel):
     host_organism_names: list[str]
 
     assembly_map: list[AssemblyInstancesMap]
+    mitochondrial: bool
 
     # proteins            : list[Any]
     # rnas                : list[Any]
@@ -566,10 +572,13 @@ class RibosomeStructure(BaseModel):
 
     proteins            : list[Protein]
     rnas                : list[RNA]
-    nonpolymeric_ligands: list[NonpolymericLigand]
+
     # polymeric_factors   : list[LifecycleFactor]
     #? This includes DNA-RNA hybrid strands, DNA and all other polymers
     other_polymers   : list[Polymer]
+
+    nonpolymeric_ligands: list[NonpolymericLigand]
+
     
     @staticmethod
     def from_json_profile(d: Any):

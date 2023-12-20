@@ -1,5 +1,22 @@
 
+
+# Consolidation tomorrow:
+
+- tally each type of polymer, mito/cyto structures
+- get rid of the garbage
+- auto-update functionality
+- boot up django, fix mixing docker-compose dependencies
+
+<!-- ---------- -->
+7p7q ->spectinomycin
+
+spectonomycin -> 4wu1
+spectonomycin -> 4wro
+spectonomycin -> 6o8z
+
+
 # WIP
+
 
 ### Datastructure:
 
