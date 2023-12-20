@@ -76,8 +76,6 @@ assembly_stages = {
 "srmb-E-a3" : "https://www.ebi.ac.uk/emdb/EMD-40513",
 "srmb-G1"   : "https://www.ebi.ac.uk/emdb/EMD-4051"}
 
-
-
 assembly_intermediates = [
 "https://www.ebi.ac.uk/emdb/EMD-40517",
 "https://www.ebi.ac.uk/emdb/EMD-40519",
@@ -144,13 +142,11 @@ assembly_intermediates = [
 "https://www.ebi.ac.uk/emdb/EMD-40513",
 "https://www.ebi.ac.uk/emdb/EMD-40515"]
 
-
 def extract_emdb_id(emdb_url:str):
     # "https://www.ebi.ac.uk/emdb/EMD-40517",
     emdb_id  = emdb_url.split('/')[-1]
     filename = emdb_id.replace("-","_").lower() + ".map.gz"
     return emdb_id, filename
-
 
 
 
