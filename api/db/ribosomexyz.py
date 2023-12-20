@@ -9,14 +9,12 @@ from rbxz_bend.settings import NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER
 from api.db.inits.proteins import add_protein, node__protein_class
 from api.db.inits.rna import add_rna, node__rna_class
 from api.db.inits.structure import add_ligand, node__structure
-from ribctl.lib.ribosome_types.types_ribosome import RibosomeStructure
+from ribctl.lib.ribosome_types.types_ribosome import MitochondrialProteinClass, PolynucleotideClass, RibosomeStructure
 from ribctl.etl.ribosome_assets import RibosomeAssets
-from ribctl.lib.ribosome_types.types_poly_nonpoly_ligand import list_LSUProteinClass, list_SSUProteinClass, list_RNAClass
 from neo4j import GraphDatabase, Driver, ManagedTransaction, Transaction
 from ribctl.lib.ribosome_types.types_ribosome import  NonpolymericLigand,  CytosolicProteinClass, RibosomeStructure
 from schema.data_requests import LigandsByStruct
 from schema.v0 import ExogenousRNAByStruct,BanClassMetadata, LigandInstance, NeoStruct, NomenclatureClass, NomenclatureClassMember
-from ribctl.lib.ribosome_types.types_poly_nonpoly_ligand import RNAClass, list_LSUProteinClass, list_SSUProteinClass, list_RNAClass
 
 
 # ※ ----------------[ 0.Database  inits: constraints & nomenclature classes]
@@ -478,7 +476,7 @@ with n.rcsb_id as struct, collect(r.rcsb_pdbx_description) as rnas
                     """).data()
             return session.execute_read(_)
 
-    def get_rna_class(self, class_id: RNAClass) -> list[NomenclatureClassMember]:
+    def get_rna_class(self, class_id: PolynucleotideClass) -> list[NomenclatureClassMember]:
         with self.driver.session() as session:
             def _(tx: Transaction | ManagedTransaction):
                 return [ rna[0] for rna in tx.run("""//
@@ -556,10 +554,11 @@ with n.rcsb_id as struct, collect(r.rcsb_pdbx_description) as rnas
 
     def __init_protein_classes(self):
         with self.driver.session() as session:
-            for protein_class in [*list_LSUProteinClass, *  list_SSUProteinClass]:
+            for protein_class in [*list(CytosolicProteinClass), *list(MitochondrialProteinClass)]:
+                
                 session.execute_write(node__protein_class(protein_class))
 
     def __init_rna_classes(self):
         with self.driver.session() as session:
-            for rna_class in list_RNAClass:
+            for rna_class in list(PolynucleotideClass):
                 session.execute_write(node__rna_class(rna_class))

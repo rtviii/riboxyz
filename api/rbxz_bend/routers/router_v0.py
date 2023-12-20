@@ -2,21 +2,14 @@ from io import BytesIO
 import typing
 from django.http import HttpResponse
 from ninja import Router
+import ribctl
 from ribctl.lib.mod_superimpose import pymol_super, ranged_align_by_auth_asym_id, ranged_align_by_polyclass
-from ribctl.lib.ribosome_types.types_poly_nonpoly_ligand import RNAClass
-from ribctl.lib.ribosome_types.types_ribosome import PolymerClass, CytosolicProteinClass, RibosomeStructure
+from ribctl.lib.ribosome_types.types_ribosome import PolymerClass, CytosolicProteinClass, PolynucleotideClass, RibosomeStructure
 from schema.v0 import BanClassMetadata, ExogenousRNAByStruct,LigandInstance, LigandlikeInstance, NeoStruct, NomenclatureClass, NomenclatureClassMember
 from rbxz_bend.application import db_connection
 from wsgiref.util import FileWrapper
 
 v0 = Router()
-
-#   | ranged_align
-#   | cif_chain_by_class
-#   | ligand_prediction
-#   | downloadCifChain
-#   | download_ligand_nbhd 
-#   | download_structure
 
 @v0.get('/ranged_align',tags=['Static Files'])
 def ranged_align(request,
@@ -65,7 +58,6 @@ def ranged_align(request,
         )
 def get_all_structures(request,):
     return db_connection.get_all_structures()
-
 
 @v0.get('/get_struct', 
         # response=NeoStruct, # TODO: validate
@@ -130,7 +122,7 @@ def get_rnas_by_struct(request):
     return db_connection.get_rnas_by_struct()
 
 @v0.get('/get_rna_class', response=list[NomenclatureClassMember], tags=['RNA'])
-def get_rna_class(request,rna_class:RNAClass):
+def get_rna_class(request,rna_class:PolynucleotideClass):
     return db_connection.get_rna_class(rna_class)
 
 

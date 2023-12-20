@@ -12,7 +12,7 @@ from ribctl import AMINO_ACIDS_3_TO_1_CODE
 from ribctl.etl.ribosome_assets import Assetlist, RibosomeAssets
 from ribctl.lib.tunnel import ptc_resdiues_get, ptc_residues_calculate_midpoint
 from ribctl.lib.ribosome_types.types_binding_site import BindingSite
-from ribctl.lib.mod_extract_bsites import bsite_nonpolymeric_ligand, struct_ligand_ids, struct_polymeric_factor_ids, bsite_polymeric_factor, bsite_polymeric_factor
+from ribctl.lib.mod_extract_bsites import bsite_ligand, struct_ligand_ids, bsite_extrarbx_polymer, bsite_extrarbx_polymer
 from ribctl.lib.mod_split_rename import split_rename
 from ribctl.etl.etl_pipeline import current_rcsb_structs, ReannotationPipeline, rcsb_single_structure_graphql, query_rcsb_api
 from ribctl.lib.mod_render_thumbnail import render_thumbnail
@@ -26,7 +26,6 @@ logging.basicConfig(
         logging.FileHandler('etl.log')  
     ]
 )
-
 
 import os
 
@@ -47,21 +46,23 @@ async def obtain_assets(rcsb_id: str, assetlist: Assetlist, overwrite: bool = Fa
     if assetlist.cif:
         coroutines.append(assets._verify_cif(overwrite))
 
-    if assetlist.factors_and_ligands:
-        coroutines.append(assets._verify_ligads_and_ligandlike_polys(overwrite))
+    if assetlist.ligands:
+        coroutines.append(assets._verify_ligands(overwrite))
 
     if assetlist.ptc_coords:
             asset_ptc_coords_path = os.path.join(assets._dir_path(),f'{assets.rcsb_id}_PTC_COORDINATES.json')
             if os.path.exists(asset_ptc_coords_path) and not overwrite:
                 raise Exception(f'PTC coordinates already exist for {assets.rcsb_id} and overwrite is set to False')
+
             ress, auth_asym_id = ptc_resdiues_get(assets.biopython_structure(),  assets.profile().rnas)
+
             midpoint_coords = ptc_residues_calculate_midpoint(ress, auth_asym_id)
-            # residue_labels = [(res.get_resname(), res.id[1]) for res in ress]
+
             writeout = {
-                "site_9_residues"      : [(res.get_resname(), res.get_segid()) for res in ress],
+                "site_9_residues"      : [(res.get_resname(), res.get_segid(), res.full_id) for res in ress],
                 "LSU_rRNA_auth_asym_id": auth_asym_id,
                 "midpoint_coordinates" : midpoint_coords,
-                'nomenclature_table'   : assets.nomenclature_table()
+                'nomenclature_table'   : assets._nomenclature_table()
             }
 
             with open(asset_ptc_coords_path, 'w') as f:
