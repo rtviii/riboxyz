@@ -9,7 +9,6 @@ from rest_framework.response import Response
 from wsgiref.util import FileWrapper
 import os
 from rbxz_bend.settings import RIBETL_DATA
-from pymol import cmd
 from subprocess import Popen, PIPE, STDOUT, run
 
 #-⋯⋯⋅⋱⋰⋆⋅⋅⋄⋅⋅∶⋅⋅⋄▫▪▭┈┅✕⋅⋅⋄⋅⋅✕∶⋅⋅⋄⋱⋰⋯⋯⋯⋯⋅⋱⋰⋆⋅⋅⋄⋅⋅∶⋅⋅⋄▫▪▭┈┅✕⋅⋅⋄⋅⋅✕∶⋅⋅⋄⋱⋰⋯⋯⋯⋅⋱⋰⋆⋅⋅⋄⋅⋅∶⋅⋅⋄▫▪▭┈┅✕⋅⋅⋄⋅⋅✕∶⋅⋅⋄⋱⋰⋯⋯⋯
@@ -17,19 +16,19 @@ from subprocess import Popen, PIPE, STDOUT, run
 def hello(request):
     return Response("Hello from comp january")
 
-@api_view(['GET'])
-def edit_chain(request):
+# @api_view(['GET'])
+# def edit_chain(request):
 
-    params     = dict(request.GET)
-    structid   = str.upper(params['structid'][0])
-    filehandle = os.path.join(RIBETL_DATA, structid + ".cif")
-    cmd.select("resi 1-3")
-    cmd.create("{}_test".format(structid), "sele")
-    tosave=os.path.join(RIBETL_DATA, f"tempchain{structid}.cif")
-    print("Saving to ", tosave)
-    cmd.save(tosave)
+#     params     = dict(request.GET)
+#     structid   = str.upper(params['structid'][0])
+#     filehandle = os.path.join(RIBETL_DATA, structid + ".cif")
+#     cmd.select("resi 1-3")
+#     cmd.create("{}_test".format(structid), "sele")
+#     tosave=os.path.join(RIBETL_DATA, f"tempchain{structid}.cif")
+#     print("Saving to ", tosave)
+#     cmd.save(tosave)
 
-    return Response("Edited chain successfully")
+#     return Response("Edited chain successfully")
 
 
 @api_view(['GET'])

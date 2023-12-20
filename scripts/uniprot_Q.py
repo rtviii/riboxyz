@@ -9,7 +9,6 @@ from ribctl import ASSETS, ASSETS_PATH
 # File not found: /home/rtviii/dev/riboxyz/ribctl/assets/fasta_proteins_mitochondrial/uS2m.fasta
 # File not found: /home/rtviii/dev/riboxyz/ribctl/assets/fasta_proteins_mitochondrial/mS26.fasta
 
-
 uniref_clusters ={
     "bS1m" : "UniRef90_Q9Y2Q9",
     "uS2m" : "UniRef90_Q9Y399",
