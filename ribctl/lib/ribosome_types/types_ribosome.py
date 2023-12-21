@@ -1,10 +1,8 @@
 import json
 from pprint import pprint
 from typing import Any, Optional
-from enum import Enum, auto
+from enum import Enum
 from Bio.SeqRecord import SeqRecord
-import typing
-from typing import NewType
 from pydantic import BaseModel
 from ribctl.lib.enumunion import enum_union
 

@@ -1,9 +1,0 @@
-{
-    "python.analysis.extraPaths": [
-        "./pymol_source/modules"
-    ],
-    "[python]": {
-        "editor.defaultFormatter": "ms-python.python"
-    },
-    "python.formatting.provider": "none"
-}

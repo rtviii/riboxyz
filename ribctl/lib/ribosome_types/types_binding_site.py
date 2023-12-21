@@ -138,4 +138,3 @@ class LigandPrediction(BaseModel):
     def dict(self,):
         return super().dict()['__root__']
 
-# So, optimal transport for types.
