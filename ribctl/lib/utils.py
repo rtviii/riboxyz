@@ -8,7 +8,6 @@ import typing
 import requests
 from ribctl import RIBETL_DATA
 
-
 async def download_unpack_place(struct_id: str) -> None:
 
     BASE_URL = "http://files.rcsb.org/download/"
