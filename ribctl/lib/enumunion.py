@@ -101,6 +101,7 @@ class UnionEnumMeta(enum.EnumMeta):
         >>> set(UnionAB).issubset(UnionABC)
         True
         """
+        
         subenums = mcs._normalize_subenums(subenums)
         mcs._check_duplicates(subenums)
 
@@ -150,6 +151,9 @@ class UnionEnumMeta(enum.EnumMeta):
             pass  # keep default name ("UnionEnum")
 
         return union_enum
+
+    def __str__(self) -> str:
+        return super().__str__()
 
     def __repr__(cls):
         return f"<union enum of {cls._subenums_}>"
