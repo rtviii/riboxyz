@@ -130,10 +130,21 @@ class BindingSiteChain(Schema):
 # }
 
 # ? https://stackoverflow.com/questions/72268685/pydantic-checks-on-newtype
-class LigandBindingSite(Schema):
-    __root__: dict[str, BindingSiteChain]
-    def __getattr__(self, attr):
-        return self.__root__[attr]
+# class LigandBindingSite(Schema):
+#     __root__: dict[str, BindingSiteChain]
+#     def __getattr__(self, attr):
+#         return self.__root__[attr]
+# class MixedLigand(Schema): 
+#       category           : str | None
+#       polymer            : bool
+#       description        : str
+#       chemicalId         : str |None
+#       present_in         : LigandBindingSite
+
+# class LigandClass(Schema):
+#     __root__: dict[str, list[MixedLigand]]
+#     def __getattr__(self, attr):
+#         return self.__root__[attr]
 
 
 class PredictionSource(Schema):
@@ -160,13 +171,6 @@ class Alignement(Schema):
 #   }
 # }
 
-class MixedLigand(Schema): 
-      category           : str | None
-      polymer            : bool
-      description        : str
-      chemicalId         : str |None
-      present_in         : LigandBindingSite
-
 # export interface MixedLigand{
 #     category     ?: string,
 #     polymer       : boolean,
@@ -175,10 +179,6 @@ class MixedLigand(Schema):
 #     present_in: BindingSite
 # }
 
-class LigandClass(Schema):
-    __root__: dict[str, list[MixedLigand]]
-    def __getattr__(self, attr):
-        return self.__root__[attr]
 
 
 # export type LigandClass = {
@@ -200,10 +200,10 @@ class BindingSite(Schema):
     rcsb_id: str
     resolution: float
 
-class StructureBindingSites(Schema):
-    __root__: dict[str, list[BindingSite]]
-    def __getattr__(self, attr):
-        return self.__root__[attr]
+# class StructureBindingSites(Schema):
+#     __root__: dict[str, list[BindingSite]]
+#     def __getattr__(self, attr):
+#         return self.__root__[attr]
 
 # export type BindingSite  =  {
 #                                  src_organism_ids   : number[],

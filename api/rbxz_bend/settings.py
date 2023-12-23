@@ -26,6 +26,7 @@ NEO4J_USER      :str= os.getenv("NEO4J_USER")
 NEO4J_CURRENTDB :str= os.getenv("NEO4J_CURRENTDB")
 
 for var in vars:
+    print(var,":",os.getenv(var))
     if var not in os.environ:
         print("Environment variable {} not set".format(var))
         exit(1)

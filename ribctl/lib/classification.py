@@ -4,16 +4,18 @@ import pickle
 from pprint import pprint
 import subprocess
 from tempfile import NamedTemporaryFile
-from typing import Generic, Iterator, Literal, LiteralString, Optional, Tuple, Type, TypeVar
+from typing import Generic, Iterator, Literal, Optional, Tuple, Type, TypeVar
 import typing
-from Bio.Align import MultipleSeqAlignment,Seq, SeqRecord
+from Bio.Align import MultipleSeqAlignment
+from Bio.Seq import Seq 
+from Bio.SeqRecord import SeqRecord
 from Bio.Align.Applications import MuscleCommandline
 from Bio import SeqIO, AlignIO, pairwise2
 import re
 import pyhmmer
 from ribctl import ASSETS, MUSCLE_BIN
 from ribctl.lib.msalib import Fasta, muscle_align_N_seq, phylogenetic_neighborhood
-from ribctl.lib.ribosome_types.types_ribosome import RNA, ElongationFactorClass, InitiationFactorClass, LifecycleFactorClass, MitochondrialProteinClass, Polymer, PolymerClass, LifecycleFactor, PolynucleotideClass, PolypeptideClass, Protein, CytosolicProteinClass, CytosolicProteinClass, tRNA
+from ribctl.lib.ribosome_types.types_ribosome import RNA, ElongationFactorClass, InitiationFactorClass, LifecycleFactorClass, MitochondrialProteinClass, Polymer, PolymerClass, PolynucleotideClass, PolypeptideClass, Protein, CytosolicProteinClass, CytosolicProteinClass, tRNA
 # from ribctl.etl.ribosome_assets import RibosomeAssets
 from pyhmmer.easel import Alphabet, DigitalSequenceBlock, TextSequence, SequenceFile, SequenceBlock, TextSequenceBlock, DigitalSequence
 from pyhmmer.plan7 import Pipeline, HMM , TopHits
