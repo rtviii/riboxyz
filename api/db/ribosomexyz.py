@@ -2,7 +2,6 @@ from concurrent.futures import ALL_COMPLETED, Future, ThreadPoolExecutor, wait
 from api.logs.loggers import get_updates_logger
 import typing
 from neo4j.exceptions import AuthError
-from pyparsing import Any
 from neo4j import Driver, GraphDatabase
 from ribctl.etl.etl_pipeline import current_rcsb_structs
 from rbxz_bend.settings import NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER
@@ -72,6 +71,8 @@ class ribosomexyzDB():
         self.user     = user
         self.password = password
         try:
+            print("Trying to establish connection")
+            print(self.uri)
             self.driver = GraphDatabase.driver(uri, auth=(user, password))
         except AuthError as ae:
             self.change_default_pass()
@@ -102,7 +103,7 @@ class ribosomexyzDB():
             r = s.run(cypher)
             return r.data()
 
-    def see_constraints(self) -> list[dict[str, Any]]:
+    def see_constraints(self) -> list[dict[str, typing.Any]]:
         with self.driver.session() as s:
             r = s.run("""//
             CALL db.constraints;
@@ -121,7 +122,7 @@ class ribosomexyzDB():
             """).values('n.rcsb_id'))]
             return struct_ids
 
-    def get_any(self) -> list[dict[str, Any]]:
+    def get_any(self) -> list[dict[str, typing.Any]]:
         with self.driver.session() as s:
 
             return s.execute_read(lambda tx: tx.run("""//

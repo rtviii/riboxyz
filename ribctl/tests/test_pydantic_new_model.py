@@ -276,3 +276,4 @@ class RibosomeStructure(BaseModel):
     # @staticmethod
     # def from_json_profile(d: Any):
     #     return RibosomeStructure(**d)
+

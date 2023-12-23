@@ -20,7 +20,6 @@ from ribctl.lib.ribosome_types.types_ribosome import (
     MitochondrialRNAClass,
     NonpolymericLigand,
     Polymer,
-    LifecycleFactor,
     PolynucleotideClass,
     Protein,
     CytosolicProteinClass,
@@ -281,11 +280,11 @@ class ReannotationPipeline:
                         return int(assembly_map.rcsb_id.split("-")[1]) - 1
             else: raise LookupError("Could not assign chain {} to any assembly".format(auth_asym_id))
 
-    def process_polypeptides(self) -> tuple[list[Protein], list[LifecycleFactor]]:
+    def process_polypeptides(self) -> tuple[list[Protein], list[Polymer]]:
         poly_entities = self.rcsb_data_dict["polymer_entities"]
 
         reshaped_proteins         : list[Protein]         = []
-        reshaped_polymeric_factors: list[LifecycleFactor] = []
+        reshaped_polymeric_factors: list[Polymer] = []
 
         def is_protein(poly):
             # ! According to RCSB schema, polymer_entites include "Protein", "RNA" but also "DNA", N"A-Hybrids" and "Other".
@@ -317,7 +316,7 @@ class ReannotationPipeline:
         self.rProteins = reshaped_proteins
         return (reshaped_proteins, reshaped_polymeric_factors)
 
-    def process_polynucleotides(self) -> tuple[list[RNA], list[LifecycleFactor]]:
+    def process_polynucleotides(self) -> tuple[list[RNA], list[Polymer]]:
 
         poly_entities = self.rcsb_data_dict["polymer_entities"]
         rnas          = []
@@ -331,7 +330,7 @@ class ReannotationPipeline:
             rnas.append(poly) if is_rna(poly) else ...
 
         reshaped_rnas             : list[RNA]             = []
-        reshaped_polymeric_factors: list[LifecycleFactor] = []
+        reshaped_polymeric_factors: list[Polymer] = []
         for j, poly_rna in enumerate(rnas):
             if ( True!= None ):
                 # TODO: HMM WORKFLOW
@@ -583,7 +582,7 @@ class ReannotationPipeline:
             for auth_asym_id in rrna_polymer_obj[ "rcsb_polymer_entity_container_identifiers" ]["auth_asym_ids"]
         ]
 
-    def poly_reshape_to_factor(self, factor_polymer_obj) -> list[LifecycleFactor]:
+    def poly_reshape_to_factor(self, factor_polymer_obj) -> list[Protein]:
         host_organisms: list[Any] | None = factor_polymer_obj[ "rcsb_entity_host_organism" ]
         source_organisms: list[Any] | None = factor_polymer_obj[ "rcsb_entity_source_organism" ]
 
@@ -614,7 +613,7 @@ class ReannotationPipeline:
         nomenclature = [ ]
 
         return [
-            LifecycleFactor(
+            Protein(
                 assembly_id                         = self.poly_assign_to_asm(auth_asym_id) ,
                 nomenclature                        = nomenclature ,
                 asym_ids                            = factor_polymer_obj[ "rcsb_polymer_entity_container_identifiers" ]["asym_ids"] ,
@@ -630,6 +629,12 @@ class ReannotationPipeline:
                 entity_poly_seq_length              = factor_polymer_obj["entity_poly"][ "rcsb_sample_sequence_length" ] ,
                 entity_poly_entity_type             = factor_polymer_obj["entity_poly"]["type"] ,
                 entity_poly_polymer_type            = factor_polymer_obj["entity_poly"][ "rcsb_entity_polymer_type" ] ,
+                pfam_accessions= [],
+                pfam_comments= [],
+                pfam_descriptions= [],
+                uniprot_accession=[]
+
+
             ) for auth_asym_id in factor_polymer_obj[ "rcsb_polymer_entity_container_identifiers" ]["auth_asym_ids"]
         ]
 

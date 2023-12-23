@@ -13,9 +13,9 @@ from ribctl.lib.ribosome_types.types_binding_site import BindingSite
 from ribctl.lib.mod_extract_bsites import  struct_ligand_ids, bsite_ligand
 from ribctl.lib.mod_split_rename import split_rename
 from ribctl.etl.etl_pipeline import current_rcsb_structs, ReannotationPipeline, rcsb_single_structure_graphql, query_rcsb_api
-from ribctl.lib.mod_render_thumbnail import render_thumbnail
+# from ribctl.lib.mod_render_thumbnail import render_thumbnail
 from ribctl.lib.utils import download_unpack_place, open_structure
-from ribctl.lib.ribosome_types.types_ribosome import RNA, LifecycleFactorClass, PolymerClass, LifecycleFactor, PolynucleotideClass, Protein, CytosolicProteinClass, RibosomeStructure
+from ribctl.lib.ribosome_types.types_ribosome import RNA, LifecycleFactorClass, PolymerClass, PolynucleotideClass, Protein, CytosolicProteinClass, RibosomeStructure
 from ribctl import RIBETL_DATA
 from pydantic import BaseModel, parse_obj_as
 from concurrent.futures import ALL_COMPLETED, Future, ProcessPoolExecutor, ThreadPoolExecutor, wait
@@ -167,7 +167,7 @@ class RibosomeAssets():
         return None
 
     def get_chain_by_auth_asym_id(self, auth_asym_id: str) -> tuple[
-            RNA | Protein | LifecycleFactor | None,
+            RNA | Protein  | None,
             typing.Literal["RNA", "Protein", "PolymericFactor"] | None]:
 
         profile = self.profile()

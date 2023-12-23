@@ -397,7 +397,6 @@ class Protein(Polymer):
     pfam_accessions  : list[str]
     pfam_comments    : list[str]
     pfam_descriptions: list[str]
-
     uniprot_accession: list[str]
 
     def to_polymer(self)->Polymer:
@@ -475,8 +474,7 @@ class NonpolymericLigand(BaseModel)  :
 # class LifecycleFactor(Polymer): 
 #     def __hash__(self) -> int:
 #         return hash(self.auth_asym_id + self.parent_rcsb_id)
-
-#     nomenclature: list[Any] 
+#     nomenclature: list[LifecycleFactorClass] 
     
 class AssemblyInstancesMap(BaseModel):
     """
