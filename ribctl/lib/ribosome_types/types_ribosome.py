@@ -394,9 +394,6 @@ class Protein(Polymer):
               "uniprot_accession" : [ entry["rcsb_id"] for entry in kwargs["uniprots"] ] if kwargs["uniprots"] != None and len(kwargs["uniprots"]) > 0 else []
         })
 
-
-
-
     pfam_accessions  : list[str]
     pfam_comments    : list[str]
     pfam_descriptions: list[str]

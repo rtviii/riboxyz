@@ -1,4 +1,3 @@
-
 from Bio.PDB.Structure import Structure
 from Bio.PDB import FastMMCIFParser
 import gzip
