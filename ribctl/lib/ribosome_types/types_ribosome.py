@@ -439,7 +439,6 @@ class NonpolymericLigand(BaseModel)  :
         chemp_comp           : Optional[ChemComp]
         drugbank             : Optional[Drugbank]
         rcsb_chem_comp_target: Optional[list[RcsbChemCompTarget]]
-       
 
       chemicalId         : str
       chemicalName       : str
@@ -472,12 +471,12 @@ class NonpolymericLigand(BaseModel)  :
         #     "reference_database_name": "UniProt",
         # },
 
-class LifecycleFactor(Polymer): 
-    def __hash__(self) -> int:
+# TODO: Is this needed? I don't think so (handle protein differences at the level of the nomenclature)
+# class LifecycleFactor(Polymer): 
+#     def __hash__(self) -> int:
+#         return hash(self.auth_asym_id + self.parent_rcsb_id)
 
-        return hash(self.auth_asym_id + self.parent_rcsb_id)
-    # nomenclature: list
-    nomenclature: list[Any] 
+#     nomenclature: list[Any] 
     
 class AssemblyInstancesMap(BaseModel):
     """
@@ -575,6 +574,7 @@ class RibosomeStructure(BaseModel):
     nonpolymeric_ligands: list[NonpolymericLigand]
 
     
-    @staticmethod
-    def from_json_profile(d: Any):
-        return RibosomeStructure(**d)
+    # TODO: Deprecate this
+    # @staticmethod
+    # def from_json_profile(d: Any):
+    #     return RibosomeStructure(**d)
