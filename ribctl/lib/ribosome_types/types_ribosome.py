@@ -337,7 +337,6 @@ class Polymer(BaseModel):
         """A hack for enum.union to work with pydantic BaseModel. Otherwise EnumUnion instances are represented as <MitochondrialProteinClass.mL64: 'mL64'> etc.(Correct is "mL64")"""
         return json.loads(self.json())
 
-
     def to_SeqRecord(self)->SeqRecord:
         return SeqRecord(self.entity_poly_seq_one_letter_code_can, id=f"{self.parent_rcsb_id}.{self.auth_asym_id}", 
                          description="{}|{}".format(self.src_organism_ids[0],self.rcsb_pdbx_description))
