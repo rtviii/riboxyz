@@ -12,6 +12,10 @@ Separately implement the source/host thing for structs.
 """
 
 
+
+
+
+
 def taxid_domain(
     taxid: int,
 ) -> typing.Literal["bacteria", "eukaryota", "archaea", "virus"]:
@@ -54,7 +58,6 @@ def get_descendants_of(parent: int, targets: list[int]):
 
 
 # ? Struct-specific functions
-
 
 def taxid_is_descendant_of(
     parent_taxid: int, target_taxid: int

@@ -21,7 +21,7 @@ from pyhmmer.easel import Alphabet, DigitalSequenceBlock, TextSequence, Sequence
 from pyhmmer.plan7 import Pipeline, HMM , TopHits
 import logging
 import concurrent.futures
-from ribctl.lib.util_taxonomy import taxid_domain
+from ribctl.lib.taxlib import taxid_domain
 
 # Configure the logging settings
 logging.basicConfig(

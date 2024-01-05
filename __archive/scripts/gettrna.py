@@ -36,11 +36,4 @@ for s in RibosomeAssets.list_all_structs():
                        records.append(s)
     except Exception as e:
         print(e)
-
-        
-
 Fasta.write_fasta(records, "/home/rtviii/dev/riboxyz/ribctl/assets/fasta_trna/trna.fasta")
-
-# p = RibosomeAssets("4P6F").profile().dict()
-
-# print(p['polymeric_factors'])
