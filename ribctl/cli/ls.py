@@ -5,7 +5,7 @@ from pprint import pprint
 from ribctl import RIBETL_DATA
 from ribctl.etl.ribosome_assets import RibosomeAssets
 from ribctl.lib.ribosome_types.types_ribosome import PolynucleotideClass, PolypeptideClass, RibosomeStructure
-from ribctl.lib.util_taxonomy import  get_descendants_of, taxid_is_descendant_of,descendants_of_taxid
+from ribctl.lib.taxlib import  get_descendants_of, taxid_is_descendant_of,descendants_of_taxid
 
 
 def cmd_ls(args):

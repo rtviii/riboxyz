@@ -1,5 +1,6 @@
 from io import StringIO
 import os
+import re
 import subprocess
 from Bio import SeqIO
 from Bio import SeqRecord
@@ -12,47 +13,6 @@ from Bio.Align import  SeqRecord
 from ribctl import ASSETS, MUSCLE_BIN
 from ete3 import NCBITaxa
 import os
-
-
-def util__backwards_match(aligned_target:str, resid:int):
-	"""Returns the target-sequence index of a residue in the (aligned) target sequence
-	Basically, "count back ignoring gaps" until you arrive at @resid
-	"""
-	if resid > len(aligned_target):
-		exit(IndexError(f"Passed residue with invalid index ({resid}) to back-match to target.Seqlen:{len(aligned_target)}"))
-	counter_proper = 0
-	for i,char in enumerate(aligned_target):
-		if i == resid:
-			return counter_proper
-		if char =='-':
-			continue
-		else: 
-			counter_proper  +=1
-
-def util__forwards_match(aligned_seq:str, resid:int):
-	"""Returns the index of a source-sequence residue in the aligned source sequence.
-	Basically, "count forward including gaps until you reach @resid"
-	"""
-
-	count_proper = 0
-	for alignment_indx,char in enumerate( aligned_seq ):
-		if count_proper == resid:
-			return alignment_indx
-		if char =='-':
-			continue
-		else: 
-			count_proper  +=1
-
-
-def barr2str(bArr):
-    return ''.join([x.decode("utf-8") for x in bArr])
-
-def seq_to_fasta(rcsb_id: str, _seq: str, outfile: str):
-    from Bio.Seq import Seq
-    _seq = _seq.replace("\n", "")
-    seq_record = SeqRecord.SeqRecord(Seq(_seq).upper())
-    seq_record.id = seq_record.description = rcsb_id
-    SeqIO.write(seq_record, outfile, 'fasta')
 
 
 class Fasta:
@@ -97,8 +57,48 @@ class Fasta:
         With the assumption that the tax id is the id of each seq record."""
         taxids = []
         for record in self.records:
-            taxids =[*taxids, record.id]
+            taxids =[*taxids, get_taxid(record.description)]
         return taxids
+
+def util__backwards_match(aligned_target:str, resid:int):
+	"""Returns the target-sequence index of a residue in the (aligned) target sequence
+	Basically, "count back ignoring gaps" until you arrive at @resid
+	"""
+	if resid > len(aligned_target):
+		exit(IndexError(f"Passed residue with invalid index ({resid}) to back-match to target.Seqlen:{len(aligned_target)}"))
+	counter_proper = 0
+	for i,char in enumerate(aligned_target):
+		if i == resid:
+			return counter_proper
+		if char =='-':
+			continue
+		else: 
+			counter_proper  +=1
+
+def util__forwards_match(aligned_seq:str, resid:int):
+	"""Returns the index of a source-sequence residue in the aligned source sequence.
+	Basically, "count forward including gaps until you reach @resid"
+	"""
+
+	count_proper = 0
+	for alignment_indx,char in enumerate( aligned_seq ):
+		if count_proper == resid:
+			return alignment_indx
+		if char =='-':
+			continue
+		else: 
+			count_proper  +=1
+
+
+def barr2str(bArr):
+    return ''.join([x.decode("utf-8") for x in bArr])
+
+def seq_to_fasta(rcsb_id: str, _seq: str, outfile: str):
+    from Bio.Seq import Seq
+    _seq = _seq.replace("\n", "")
+    seq_record = SeqRecord.SeqRecord(Seq(_seq).upper())
+    seq_record.id = seq_record.description = rcsb_id
+    SeqIO.write(seq_record, outfile, 'fasta')
 
 def phylogenetic_neighborhood(taxids_base: list[str], taxid_target: str, n_neighbors: int = 10) -> list[str]:
     """Given a set of taxids and a target taxid, return a list of the [n_neighbors] phylogenetically closest to the target."""
@@ -141,11 +141,30 @@ def muscle_align_N_seq(seq_records: Iterator[SeqRecord]) -> Iterator[ SeqRecord 
             os.remove(temp_filename)
             raise Exception("Error running muscle.")
 
-
-
 def fasta_display_species(fasta_path:str):
-    taxids = Fasta(fasta_path).all_taxids(lambda x: x.split("|")[-1].split(":")[-1])
+    def extract_tax_id(input_string):
+        # Define the regular expression pattern
+        pattern = r'taxID:(\d+)'
+        
+        # Search for the pattern in the input string
+        match = re.search(pattern, input_string)
+        
+        # If a match is found, return the extracted number; otherwise, return None
+        if match:
+            return match.group(1)
+        else:
+            return None
+
+    taxids = Fasta(fasta_path).all_taxids(extract_tax_id)
+    ncbi = NCBITaxa()
+    
+    # Retrieve taxonomic information for the given taxIDs
+    tree = ncbi.get_topology(taxids)
+    print(tree)
+    print(tree.get_ascii())
     print(taxids)
+
+
 
 # # RMPRD
 # def msa_dict_get_meta_info(msa: dict[ProteinClass, MSA]) -> dict[ProteinClass, dict]:

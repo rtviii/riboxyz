@@ -7,6 +7,7 @@ from ribctl.cli.ls import cmd_ls
 from ribctl.cli.sync import cmd_sync
 from ribctl.lib.mod_transpose_bsites import init_transpose_ligand
 from ribctl.lib.ribosome_types.types_binding_site import BindingSite
+from ribctl.lib.msalib import fasta_display_species
 
 def parse_comma_separated_list(value):
     return value.split(',')
@@ -24,6 +25,14 @@ subparsers = parser.add_subparsers(title='Subcommands', dest='command')
 #! -------------------------- --- -------------------------- #
 
 parser_cmd_fasta = subparsers.add_parser('fasta', help='Dealing with sequences')
+parser_cmd_fasta.add_argument('--path', type=str, required=True, help='Path to fasta file')
+
+def cmd_fasta(args):
+    if args.path:
+        fasta_display_species(args.path)
+
+parser_cmd_fasta.set_defaults(func=cmd_fasta)
+
 
 #! -------------------------- --- -------------------------- #
 #! -------------------------- etl -------------------------- #
@@ -166,7 +175,6 @@ parser.add_argument('--t', action='store_true')
 
 
 args = parser.parse_args()
-print(args)
 if args.t:
     ...
     # test()
