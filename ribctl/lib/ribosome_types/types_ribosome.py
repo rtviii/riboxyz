@@ -6,12 +6,10 @@ from Bio.SeqRecord import SeqRecord
 from pydantic import BaseModel
 from ribctl.lib.enumunion import enum_union
 
-
 # TODO:
 # |********************************************************************************************************|
 # | https://docs.google.com/spreadsheets/d/1mapshbn1ArofPN-Omu8GG5QdcwlJ0ym0BlN252kkUBU/edit#gid=815712128 |
 # |********************************************************************************************************|
-
 
 #? ----------------------------------------------{ Subcomponent Types }------------------------------------------------
 class tRNA(Enum):
@@ -406,7 +404,7 @@ class RNA(Polymer):
         return hash(self.auth_asym_id + self.parent_rcsb_id)
     # pass
 
-class NonpolymericLigand(BaseModel)  : 
+class NonpolymericLigand(BaseModel): 
 
       class NonpolymerComp(BaseModel):
         class ChemComp(BaseModel):

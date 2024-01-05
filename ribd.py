@@ -19,6 +19,11 @@ def parse_comma_separated_list(value):
 parser     = argparse.ArgumentParser(description="Command line interface for the `ribctl` package.")
 subparsers = parser.add_subparsers(title='Subcommands', dest='command')
 
+#! -------------------------- --- -------------------------- #
+#! -------------------------- fasta -------------------------- #
+#! -------------------------- --- -------------------------- #
+
+parser_cmd_fasta = subparsers.add_parser('fasta', help='Dealing with sequences')
 
 #! -------------------------- --- -------------------------- #
 #! -------------------------- etl -------------------------- #
@@ -113,9 +118,6 @@ parser_sync.set_defaults(func=cmd_sync)
 
 
 
-
-
-
 # #! -------------------------- ls       -------------------------- #
 parser_cmd_ls = subparsers.add_parser('ls', help='List information')
 parser_cmd_ls.add_argument('-struct', help="Structure ID")
@@ -164,6 +166,7 @@ parser.add_argument('--t', action='store_true')
 
 
 args = parser.parse_args()
+print(args)
 if args.t:
     ...
     # test()
