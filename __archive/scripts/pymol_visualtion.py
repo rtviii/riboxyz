@@ -151,8 +151,8 @@ def create_marker_at_atom(selection_name:str, posn:List[float], color_:str="red"
     cmd.show(repr, selection_name)
 
 def pseudoatom_ptc(rcsb_id: str):
-    assets =  RibosomeAssets(rcsb_id)
-    profile = assets.profile()
+    assets   = RibosomeAssets(rcsb_id)
+    profile  = assets.profile()
     ptc_path = os.path.join(assets._dir_path(), "{}_PTC_COORDINATES.json".format(rcsb_id))
 
 

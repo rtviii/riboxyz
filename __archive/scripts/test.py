@@ -58,15 +58,14 @@ hmm_cachedir = ASSETS["__hmm_cache"]
 
 import sys
 
-logger = logging.getLogger(__name__)
+logger       = logging.getLogger(__name__)
 file_handler = logging.FileHandler("classification.log")
-log_format = logging.Formatter("%(asctime)s [%(levelname)s] [%(name)s] %(message)s")
+log_format   = logging.Formatter("%(asctime)s [%(levelname)s] [%(name)s] %(message)s")
 file_handler.setFormatter(log_format)
 logger.addHandler(file_handler)
 
 
 if sys.argv[1] == "tunnel":
-
     def list_euk_structs():
         EUK_STRUCTS = []
         with open("eukarya_2023.txt", "r") as data_file:
@@ -74,10 +73,8 @@ if sys.argv[1] == "tunnel":
                 structs = line.split(",")
                 EUK_STRUCTS = [*EUK_STRUCTS, *structs]
         return EUK_STRUCTS
-
     if __name__ == "__main__":
         EUK = list_euk_structs()
-
     print("tunnel")
 elif sys.argv[1] == "spec":
 
@@ -111,7 +108,6 @@ elif sys.argv[1] == "spec":
             _ = {**_, **{organism_name: taxonomic_id}}
             print(f"Taxonomic ID for {organism_name}: {taxonomic_id}")
     print(_)
-
 elif sys.argv[1] == "test":
     ncbi = NCBITaxa()
     all_structs = os.listdir(RIBETL_DATA)
@@ -151,7 +147,6 @@ elif sys.argv[1] == "test":
     # print(tree.get_ascii(attributes=["taxid"]))
 
     # obtain_assets_threadpool([rcsb_id for (rcsb_id, taxid) in rcsb_id_taxid_tuples], Assetlist(ptc_coords=True), overwrite=True)
-
 elif sys.argv[1] == "processtax":
     RCSB_ID = "5MYJ"
     ReannotationPipeline(
@@ -315,7 +310,6 @@ elif sys.argv[1] == "tsv_to_fasta":
         with open(dest, "w") as output_handle:
             SeqIO.write(seqrecords, output_handle, "fasta")
             print("Wrote {} seqs to  to {}".format(len(seqrecords), dest))
-
 elif sys.argv[1] == "struct_factors":
     for struct in RibosomeAssets.list_all_structs()[:10]:
         print(
@@ -347,7 +341,6 @@ elif sys.argv[1] == "struct_factors":
                     )
                 )
                 pprint(k)
-
 elif sys.argv[1] == "collect_factors":
     factor_structs = [
         "8FL4",
@@ -405,8 +398,6 @@ elif sys.argv[1] == "collect_factors":
 
     with open("factors_sample.json", "w") as outfile:
         json.dump(factors, outfile)
-
-
 elif sys.argv[1] == "hmmt":
 
     
@@ -426,7 +417,6 @@ elif sys.argv[1] == "hmmt":
 
         report_path = os.path.join(LOGS_PATH,'classification_reports','{}_classification_report.json'.format(rcsb_id))
         pipeline.write_classification_report(report_path)
-
 elif sys.argv[1] == "hmmx":
     p        = RibosomeAssets('3j7z').profile()
     rnas     = p.rnas

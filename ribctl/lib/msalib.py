@@ -7,7 +7,7 @@ from functools import reduce
 from io import StringIO
 import os
 import subprocess
-from typing import Iterator
+from typing import Callable, Iterator, Optional
 from Bio.Align import  SeqRecord
 from ribctl import ASSETS, MUSCLE_BIN
 from ete3 import NCBITaxa
@@ -92,7 +92,7 @@ class Fasta:
 
         return list(filtered_records['result'])
 
-    def all_taxids(self) ->list[int]:
+    def all_taxids(self, get_taxid:Optional[Callable[[str], str]]=None) ->list[int]:
         """Given a fasta file, return all the taxids present in it
         With the assumption that the tax id is the id of each seq record."""
         taxids = []
@@ -115,7 +115,6 @@ def phylogenetic_neighborhood(taxids_base: list[str], taxid_target: str, n_neigh
         return nbr_taxids[1:]
     else:
         return nbr_taxids[1:n_neighbors+1]
-
 
 def muscle_align_N_seq(seq_records: Iterator[SeqRecord]) -> Iterator[ SeqRecord ]:
     """Given a MSA of a protein class, and a fasta string of a chain, return a new MSA with the chain added to the class MSA."""
@@ -141,6 +140,12 @@ def muscle_align_N_seq(seq_records: Iterator[SeqRecord]) -> Iterator[ SeqRecord 
             temp_file.close()
             os.remove(temp_filename)
             raise Exception("Error running muscle.")
+
+
+
+def fasta_display_species(fasta_path:str):
+    taxids = Fasta(fasta_path).all_taxids(lambda x: x.split("|")[-1].split(":")[-1])
+    print(taxids)
 
 # # RMPRD
 # def msa_dict_get_meta_info(msa: dict[ProteinClass, MSA]) -> dict[ProteinClass, dict]:
