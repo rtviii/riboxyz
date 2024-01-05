@@ -156,27 +156,31 @@ def fasta_display_species(fasta_path:str):
             return None
 
     taxids = Fasta(fasta_path).all_taxids(extract_tax_id)
+    print(len(set(taxids)))
     ncbi = NCBITaxa()
-    print(taxids)
     
-    # Retrieve taxonomic information for the given taxIDs
+    taxids = coerce_all_to_lineage_level(taxids, 'species')
+
     tree = ncbi.get_topology(taxids)
     for node in tree.traverse():
         taxid = int(node.name)
         scientific_name = ncbi.get_taxid_translator([taxid]).get(taxid, "Unknown")
         node.name = scientific_name
-
-    # print(tree.get_ascii(attributes=["name", "sci_name"]))
-    taxid_lineage_level(83333, 'species')
-    
-
+    print(tree.get_ascii(attributes=["name", "sci_name"]))
 
 
 LineageLevel =  Literal['superkingdom', 'phylum', 'class','order','family','genus','species','strain']
 
 def coerce_all_to_lineage_level(taxids:list[int], level:LineageLevel)->list[int]:
     """Given a list of taxids, return a list of the same taxids but coerced to the species level."""
-    return [taxid_lineage_level(taxid, 'species') for taxid in taxids]
+    new = []
+    for taxid in taxids:
+        try:
+            new.append(taxid_lineage_level(taxid, level))
+        except Exception as e:
+             print(e)
+    return new
+
 
 def taxid_lineage_level(taxid:int, level:LineageLevel )->int| None:
     ncbi    = NCBITaxa()
@@ -185,7 +189,7 @@ def taxid_lineage_level(taxid:int, level:LineageLevel )->int| None:
         rank = ncbi.get_rank([item])[item]
         if rank == level:
             return item
-    return None
+    raise IndexError('Taxid {} does not have a {} level'.format(taxid, level))
 
 
 
