@@ -8,7 +8,7 @@ from functools import reduce
 from io import StringIO
 import os
 import subprocess
-from typing import Callable, Iterator, Optional
+from typing import Callable, Iterator, Literal, NewType, Optional
 from Bio.Align import  SeqRecord
 from ribctl import ASSETS, MUSCLE_BIN
 from ete3 import NCBITaxa
@@ -157,12 +157,37 @@ def fasta_display_species(fasta_path:str):
 
     taxids = Fasta(fasta_path).all_taxids(extract_tax_id)
     ncbi = NCBITaxa()
+    print(taxids)
     
     # Retrieve taxonomic information for the given taxIDs
     tree = ncbi.get_topology(taxids)
-    print(tree)
-    print(tree.get_ascii())
-    print(taxids)
+    for node in tree.traverse():
+        taxid = int(node.name)
+        scientific_name = ncbi.get_taxid_translator([taxid]).get(taxid, "Unknown")
+        node.name = scientific_name
+
+    # print(tree.get_ascii(attributes=["name", "sci_name"]))
+    taxid_lineage_level(83333, 'species')
+    
+
+
+
+LineageLevel =  Literal['superkingdom', 'phylum', 'class','order','family','genus','species','strain']
+
+def coerce_all_to_lineage_level(taxids:list[int], level:LineageLevel)->list[int]:
+    """Given a list of taxids, return a list of the same taxids but coerced to the species level."""
+    return [taxid_lineage_level(taxid, 'species') for taxid in taxids]
+
+def taxid_lineage_level(taxid:int, level:LineageLevel )->int| None:
+    ncbi    = NCBITaxa()
+    lineage = ncbi.get_lineage(taxid)
+    for item in lineage:
+        rank = ncbi.get_rank([item])[item]
+        if rank == level:
+            return item
+    return None
+
+
 
 
 
