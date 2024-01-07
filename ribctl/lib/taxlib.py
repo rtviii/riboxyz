@@ -16,7 +16,7 @@ Separately implement the source/host thing for structs.
 
 
 
-def taxid_domain(
+def taxid_superkingdom(
     taxid: int,
 ) -> typing.Literal["bacteria", "eukaryota", "archaea", "virus"]:
     match (

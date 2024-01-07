@@ -1,3 +1,5 @@
+import sys
+sys.dont_write_bytecode = True
 import argparse
 import json
 from pprint import pprint
@@ -8,7 +10,6 @@ from ribctl.cli.sync import cmd_sync
 from ribctl.lib.mod_transpose_bsites import init_transpose_ligand
 from ribctl.lib.ribosome_types.types_binding_site import BindingSite
 from ribctl.lib.msalib import fasta_display_species
-
 def parse_comma_separated_list(value):
     return value.split(',')
 

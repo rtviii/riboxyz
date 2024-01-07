@@ -1,5 +1,6 @@
 import json
-from django.http import HttpResponse
+from pprint import pprint
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 
 # Create your views here.
@@ -47,12 +48,15 @@ def get_chain(request):
 
 @api_view(['GET'])
 def get_profile(request):
-    params   = dict(request.GET)
-    rcsb_id = str.upper(params['rcsb_id'][0])
-    filename = "{}.json".format(rcsb_id)
+    params      = dict(request.GET)
+    rcsb_id     = str.upper(params['rcsb_id'][0])
+    filename    = "{}.json".format(rcsb_id)
     file_handle = os.path.join(RIBETL_DATA,rcsb_id, filename)
 
     with open(file_handle, 'rb') as f:
         profile = json.load(f)
-        return Response(profile)
+        pprint(profile)
+        # return HttpResponse(profile, content_type="application/json")
+
+        return JsonResponse(profile)
 

@@ -50,7 +50,7 @@ logging.getLogger("urllib3.connectionpool").setLevel(logging.CRITICAL)
 logging.getLogger("asyncio").setLevel(logging.WARNING)
 from ribctl.lib.taxlib import (
     descendants_of_taxid,
-    taxid_domain,
+    taxid_superkingdom,
     taxid_is_descendant_of,
 )
 
