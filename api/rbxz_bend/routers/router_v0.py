@@ -7,7 +7,9 @@ import ribctl
 from ribctl.lib.ribosome_types.types_ribosome import PolymerClass, CytosolicProteinClass, PolynucleotideClass, RibosomeStructure
 from schema.v0 import BanClassMetadata, ExogenousRNAByStruct,LigandInstance, LigandlikeInstance, NeoStruct, NomenclatureClass, NomenclatureClassMember
 from rbxz_bend.application import db_connection
+
 from wsgiref.util import FileWrapper
+
 
 v0 = Router()
 
@@ -49,7 +51,6 @@ def ranged_align(request,
     response = HttpResponse(FileWrapper(BytesIO(bytes(cif_str,'utf-8'))), content_type='chemical/x-mmcif')
     response['Content-Disposition'] = 'attachment; filename="{}-{}_{}-{}.cif"'.format(src_rcsb_id,src_auth_asym_id,tgt_rcsb_id,tgt_auth_asym_id)
     return response
-
 
 ## ----- Old data endpoints ----- 
 @v0.get('/get_all_structures',tags=['Structure'], 

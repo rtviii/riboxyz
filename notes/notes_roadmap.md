@@ -1,5 +1,4 @@
 
-
 # Consolidation tomorrow:
 
 - tally each type of polymer, mito/cyto structures
@@ -20,7 +19,7 @@ spectonomycin -> 6o8z
 
 ### Datastructure:
 
-- [ ] Pydantic 2.0
+- [x] Pydantic 2.0
 
 - [x] rewrite taxonomy inference: **<<<<<<<<<<**;
     - src ids and host ids separately

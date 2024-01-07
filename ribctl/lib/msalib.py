@@ -159,7 +159,7 @@ def fasta_display_species(fasta_path:str):
     print(len(set(taxids)))
     ncbi = NCBITaxa()
     
-    taxids = coerce_all_to_lineage_level(taxids, 'species')
+    taxids = coerce_all_to_rank(taxids, 'species')
 
     tree = ncbi.get_topology(taxids)
     for node in tree.traverse():
@@ -169,27 +169,30 @@ def fasta_display_species(fasta_path:str):
     print(tree.get_ascii(attributes=["name", "sci_name"]))
 
 
-LineageLevel =  Literal['superkingdom', 'phylum', 'class','order','family','genus','species','strain']
+PhylogenyRank =  Literal['superkingdom', 'phylum', 'class','order','family','genus','species','strain']
 
-def coerce_all_to_lineage_level(taxids:list[int], level:LineageLevel)->list[int]:
-    """Given a list of taxids, return a list of the same taxids but coerced to the species level."""
+def coerce_all_to_rank(taxids:list[int], level:PhylogenyRank)->list[int]:
+    """Given a list of taxids, return a list of the same taxids but coerced to the given lineage level(rank)."""
     new = []
     for taxid in taxids:
         try:
-            new.append(taxid_lineage_level(taxid, level))
+            new.append(taxid_rank(taxid, level))
         except Exception as e:
              print(e)
     return new
 
 
-def taxid_lineage_level(taxid:int, level:LineageLevel )->int| None:
+
+def taxid_rank(taxid:int, rank:PhylogenyRank )->int| None:
+    """Given a @taxid and a @level, return the taxid of the first ancestor of @taxid that is at @rank"""
     ncbi    = NCBITaxa()
     lineage = ncbi.get_lineage(taxid)
     for item in lineage:
         rank = ncbi.get_rank([item])[item]
-        if rank == level:
+        if rank == rank:
             return item
-    raise IndexError('Taxid {} does not have a {} level'.format(taxid, level))
+
+    raise IndexError('Taxid {} does not have a {} level'.format(taxid, rank))
 
 
 
