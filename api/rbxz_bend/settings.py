@@ -46,8 +46,9 @@ INSTALLED_APPS = [
     'corsheaders',
     'ninja',
     'mod_comp',
-    'mod_db',
-]
+    # 'mod_db',
+    ]
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
