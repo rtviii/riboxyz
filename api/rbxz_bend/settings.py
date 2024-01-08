@@ -19,17 +19,17 @@ RIBETL_DATA = os.environ["RIBETL_DATA"] if os.environ["RIBETL_DATA"] else os.pat
 # export PYMOL_PATH=/home/rxz/dev/pymol3.11 && export PYTHONPATH="$PYTHONPATH:$PYMOL_PATH/modules/:"
 
 
-vars          = ["NEO4J_URI", "NEO4J_USER", "NEO4J_PASSWORD","NEO4J_CURRENTDB", "RIBETL_DATA"]
-NEO4J_URI       :str= os.getenv("NEO4J_URI")
-NEO4J_PASSWORD  :str= os.getenv("NEO4J_PASSWORD")
-NEO4J_USER      :str= os.getenv("NEO4J_USER")
-NEO4J_CURRENTDB :str= os.getenv("NEO4J_CURRENTDB")
+# vars          = ["NEO4J_URI", "NEO4J_USER", "NEO4J_PASSWORD","NEO4J_CURRENTDB", "RIBETL_DATA"]
+# NEO4J_URI       :str= os.getenv("NEO4J_URI")
+# NEO4J_PASSWORD  :str= os.getenv("NEO4J_PASSWORD")
+# NEO4J_USER      :str= os.getenv("NEO4J_USER")
+# NEO4J_CURRENTDB :str= os.getenv("NEO4J_CURRENTDB")
 
-for var in vars:
-    print(var,":",os.getenv(var))
-    if var not in os.environ:
-        print("Environment variable {} not set".format(var))
-        exit(1)
+# for var in vars:
+#     print(var,":",os.getenv(var))
+#     if var not in os.environ:
+#         print("Environment variable {} not set".format(var))
+#         exit(1)
 
 
 DEBUG = True
