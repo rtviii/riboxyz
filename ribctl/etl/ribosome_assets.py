@@ -47,7 +47,6 @@ class RibosomeAssets():
     def __init__(self, rcsb_id: str) -> None:
         self.rcsb_id = rcsb_id.upper()
 
-
     def _envcheck(self):
         if not RIBETL_DATA:
             raise Exception(
@@ -81,7 +80,7 @@ class RibosomeAssets():
 
     def profile(self) -> RibosomeStructure:
         with open(self._json_profile_filepath(), "r") as f:
-            return RibosomeStructure.parse_obj(json.load(f))
+            return RibosomeStructure.model_validate(json.load(f))
 
     def _nomenclature_table(self) -> dict[str, dict]:
         #TODO: update getter
