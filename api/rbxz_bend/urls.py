@@ -8,5 +8,5 @@ urlpatterns = [
     # path('admin/' , admin.site .urls                   ),
     # path('db/', include('mod_db.urls', 'mod_db')),
     path('comp/', include('mod_comp.urls', 'mod_comp')),
-    path("api/", root_api.urls),
+    path("", root_api.urls),
 ]+ static(STATIC_URL, document_root=STATIC_ROOT)

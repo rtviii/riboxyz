@@ -4,7 +4,9 @@ from .router_v0 import v0
 from .router_test import test
 from ninja.errors import ValidationError
 
-root = NinjaAPI(docs_url='/docs', openapi_url='/openapi.json', title='riboxyz-api', description='A programming interface for ribosome data.')
+root = NinjaAPI(docs_url='/docs', openapi_url='/openapi_spec.json',
+                 title='riboxyz-api',
+                  description='A programming interface for ribosome data.', version="0.1")
 
 @root.exception_handler(ValidationError)
 def validation_errors(request, exc):
