@@ -31,13 +31,6 @@ def structure_mmcif(request, rcsb_id:str):
     rcsb_id     = str.upper(params['rcsb_id'][0])
     
 
-    # params   = dict(request.GET)
-    # chainid  = params['auth_asym_id'][0]
-    # structid = str.upper(params['rcsb_id'][0])
-    # filename = "{}_STRAND_{}.cif".format(structid, chainid)
-
-    # file_handle = os.path.join(RIBETL_DATA,structid,"CHAINS", filename)
-
     document = open(RibosomeAssets(rcsb_id)._cif_filepath(), 'rb')
     response = HttpResponse(FileWrapper(document), content_type='chemical/x-mmcif')
     response['Content-Disposition'] = 'attachment; filename="{}.cif"'.format(rcsb_id)
