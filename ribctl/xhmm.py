@@ -10,7 +10,6 @@ euk, prok, arch = [], [], []
 
 for t in taxids:
     supk = Taxid.superkingdom(t)
-    print(supk)
     match (supk):
         case 'archaea':
             arch.append(t)
@@ -19,9 +18,6 @@ for t in taxids:
         case 'bacteria':
             prok.append(t)
 
-
-
-print(len(euk), len(prok), len(arch))
 
 # Fasta.fasta_display_species(taxids)
 

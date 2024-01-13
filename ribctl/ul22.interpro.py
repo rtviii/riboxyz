@@ -87,19 +87,20 @@ def output_list():
           raise e
 
     for i, item in enumerate(payload["results"]):
-      sys.stdout.write(parse_column(item["metadata"]["accession"], 'metadata.accession') + "\t")
-      sys.stdout.write(parse_column(item["metadata"]["source_database"], 'metadata.source_database') + "\t")
-      sys.stdout.write(parse_column(item["metadata"]["name"], 'metadata.name') + "\t")
-      sys.stdout.write(parse_column(item["metadata"]["source_organism"]["taxId"], 'metadata.source_organism.taxId') + "\t")
-      sys.stdout.write(parse_column(item["metadata"]["source_organism"]["scientificName"], 'metadata.source_organism.scientificName') + "\t")
-      sys.stdout.write(parse_column(item["metadata"]["length"], 'metadata.length') + "\t")
-      sys.stdout.write(parse_column(item["entries"][0]["accession"], 'entries[0].accession') + "\t")
-      sys.stdout.write(parse_column(item["entries"][0]["entry_protein_locations"], 'entries[0].entry_protein_locations') + "\t")
+      sys.stdout.write(parse_column(item["metadata"][   "accession"              ]                  , 'metadata.accession'                     ) + "\t")
+      sys.stdout.write(parse_column(item["metadata"][   "accession"              ]                  , 'metadata.accession'                     ) + "\t")
+      sys.stdout.write(parse_column(item["metadata"][   "source_database"        ]                  , 'metadata.source_database'               ) + "\t")
+      sys.stdout.write(parse_column(item["metadata"][   "name"                   ]                  , 'metadata.name'                          ) + "\t")
+      sys.stdout.write(parse_column(item["metadata"][   "source_organism"        ]["taxId"]         , 'metadata.source_organism.taxId'         ) + "\t")
+      sys.stdout.write(parse_column(item["metadata"][   "source_organism"        ]["scientificName"], 'metadata.source_organism.scientificName') + "\t")
+      sys.stdout.write(parse_column(item["metadata"][   "length"                 ]                  , 'metadata.length'                        ) + "\t")
+      sys.stdout.write(parse_column(item["entries" ][0]["accession"              ]                  , 'entries[0].accession'                   ) + "\t")
+      sys.stdout.write(parse_column(item["entries" ][0]["entry_protein_locations"]                  , 'entries[0].entry_protein_locations'     ) + "\t")
       sys.stdout.write("\n")
       
     # Don't overload the server, give it time before asking for more
     if next:
-      sleep(1)
+      sleep(0.5)
 
 if __name__ == "__main__":
   output_list()
