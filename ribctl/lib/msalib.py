@@ -65,7 +65,10 @@ class Taxid:
                 raise ValueError( "Taxid {} is not a descendant of any of the three domains".format( taxid ) )
 
 class Fasta:
-    records = list[SeqRecord]
+    records      = list[SeqRecord]
+
+    """a custom getter for a record in a fasta file. Defaults to the record id."""
+    taxid_getter:Callable[[SeqRecord],int] = lambda record: int(record.id)
 
     def __init__(self, path: str) -> None:
         try:
@@ -77,6 +80,7 @@ class Fasta:
             print(f"An error occurred: {str(e)}")
 
 
+    
     @staticmethod
     def write_fasta(seqrecords: list[SeqRecord], outfile: str):
         with open(outfile, "w") as fasta_out:
