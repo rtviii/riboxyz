@@ -98,6 +98,18 @@ class Fasta:
             node.name = scientific_name
         print(tree.get_ascii(attributes=["name", "sci_name"]))
 
+    @staticmethod
+    def get_descendants_of(parent: int, targets: list[int]):
+        """Given a @parent taxid and a list of @taxids, return the subset of @taxids that are descendants of @parent"""
+        ncbi = NCBITaxa()
+        descendants = set()
+
+        for tax_id in targets:
+            lineage = ncbi.get_lineage(tax_id)
+            if parent in lineage:
+                descendants.add(tax_id)
+        return descendants
+
     def pick_taxids(self, taxids: list[str]) -> list[SeqRecord]:
         for taxid in set(taxids):
             if taxid not in self.all_taxids():
@@ -131,6 +143,9 @@ class Fasta:
         for record in self.records:
             taxids = [*taxids, get_taxid(record.description)]
         return taxids
+
+
+
 
 
 def util__backwards_match(aligned_target: str, resid: int):
