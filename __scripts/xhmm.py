@@ -1,13 +1,27 @@
 """Another one is create an MSA for a given rank (e.g. superkingdom) and compare the conservation of a given region in the MSA against this background"""
+"""Protocol
+Within superkingdom:
+ - Get all available sequences (interpro): S
+ - Reduce the same-species strains to a single representative consensus seq 
+ - align the species consesus seqs into superkingdom MSA:  K
+ - construct an HMM of species' consensus sequences for the superkingdom 
+ - asses the region of interest (e.g. constriction site) against the superkingdom HMM for each sequence:
+    - { find outliers, insertions, deletions, reason from HMM stats... }
 
-from ribctl.lib.msalib import Fasta, Taxid
+Compare between superkingdoms:
+...
 
-f = Fasta("/home/rtviii/dev/riboxyz/ribctl/uL22-protein-matching-IPR001063.fasta")
+"""
+from ribctl.lib.libmsa import Fasta, Taxid
 
+uL4_euk = Fasta("/home/rtviii/dev/riboxyz/__scripts/uL4_euk.fasta")
 
-taxids = f.all_taxids(lambda x: int( (x.split("|")[-1]).split(":")[-1]) )
+# f = Fasta("/home/rtviii/dev/riboxyz/ribctl/uL22-protein-matching-IPR001063.fasta")
+
+taxids = uL4_euk.all_taxids()
 euk, prok, arch = [], [], []
 
+# ! Partition into
 for t in taxids:
     supk = Taxid.superkingdom(t)
     match (supk):
@@ -17,6 +31,12 @@ for t in taxids:
             euk.append(t)
         case 'bacteria':
             prok.append(t)
+
+
+
+
+
+
 
 
 # Fasta.fasta_display_species(taxids)

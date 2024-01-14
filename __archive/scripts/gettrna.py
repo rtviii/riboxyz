@@ -3,7 +3,7 @@ import os
 from pprint import pprint
 from ribctl import RIBETL_DATA
 from ribctl.etl.ribosome_assets import RibosomeAssets
-from ribctl.lib.msalib import Fasta
+from ribctl.lib.libmsa import Fasta
 from io import StringIO
 import os
 from Bio import SeqRecord

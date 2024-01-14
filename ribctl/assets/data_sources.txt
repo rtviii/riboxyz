@@ -103,3 +103,11 @@ uniref_clusters ={
     "mL66"  :"UniRef90_Q9NVS2",
     "mL67"  :"UniRef90_Q06630",
 }
+
+interpro = {
+    https://www.ebi.ac.uk/interpro/entry/InterPro/IPR045240/
+    https://www.ebi.ac.uk/interpro/entry/InterPro/IPR019970/
+    https://www.ebi.ac.uk/interpro/entry/InterPro/IPR013005/
+   
+}
+

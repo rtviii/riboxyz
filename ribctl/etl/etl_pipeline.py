@@ -9,7 +9,7 @@ import pyhmmer
 from pyhmmer.plan7 import HMM
 import requests
 from ribctl import ASSETS, CLASSIFICATION_REPORTS, RIBETL_DATA
-from ribctl.lib.classification import (
+from ribctl.lib.libhmm import (
     HMMClassifier,
 )
 from ribctl.lib.ribosome_types.types_ribosome import (

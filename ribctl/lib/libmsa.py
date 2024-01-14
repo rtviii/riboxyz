@@ -4,21 +4,17 @@ import re
 import subprocess
 import typing
 from Bio import SeqIO
-from Bio import SeqRecord
+from Bio.SeqRecord import SeqRecord
 from functools import reduce
 from io import StringIO
 import os
 import subprocess
-from typing import Callable, Iterator, Literal, NewType, Optional
-from Bio.Align import SeqRecord
-from ribctl import ASSETS, MUSCLE_BIN, TAXID_ARCHAEA, TAXID_BACTERIA, TAXID_EUKARYOTA
+from typing import Callable, Iterator, Literal, Optional
+from ribctl import  MUSCLE_BIN, TAXID_ARCHAEA, TAXID_BACTERIA, TAXID_EUKARYOTA
 from ete3 import NCBITaxa
 import os
 
-PhylogenyRank = Literal[
-    "superkingdom", "phylum", "class", "order", "family", "genus", "species", "strain"
-]
-
+PhylogenyRank = Literal[ "superkingdom", "phylum", "class", "order", "family", "genus", "species", "strain" ]
 
 class Taxid:
     @staticmethod
@@ -64,16 +60,27 @@ class Taxid:
             case _:
                 raise ValueError( "Taxid {} is not a descendant of any of the three domains".format( taxid ) )
 
-class Fasta:
-    records      = list[SeqRecord]
 
-    """a custom getter for a record in a fasta file. Defaults to the record id."""
-    taxid_getter:Callable[[SeqRecord],int] = lambda record: int(record.id)
+    @staticmethod
+    def coerce_all_to_rank(taxids: list[int], level: PhylogenyRank) -> list[int]:
+        """Given a list of taxids, return a list of the same taxids but coerced to the given lineage level(rank)."""
+        new = []
+        for taxid in taxids:
+            try:
+                new.append(Taxid.ancestor_at_rank(taxid, level))
+            except Exception as e:
+                print(e)
+        return new
+
+
+class Fasta:
+
+    records: list[SeqRecord]
 
     def __init__(self, path: str) -> None:
         try:
             with open(path, "r") as fasta_in:
-                self.records = [*SeqIO.parse(fasta_in, "fasta")]
+                self.records:list[SeqRecord] = [*SeqIO.parse(fasta_in, "fasta")]
         except FileNotFoundError:
             print(f"File not found: {path}")
         except Exception as e:
@@ -110,6 +117,9 @@ class Fasta:
                 descendants.add(tax_id)
         return descendants
 
+
+
+
     def pick_taxids(self, taxids: list[str]) -> list[SeqRecord]:
         for taxid in set(taxids):
             if taxid not in self.all_taxids():
@@ -136,12 +146,13 @@ class Fasta:
 
         return list(filtered_records["result"])
 
-    def all_taxids(self, get_taxid: Optional[Callable[[str], str]] = None) -> list[int]:
+
+    def all_taxids(self, taxid_getter: Optional[Callable[[SeqRecord], int]] = lambda x: int(x.id)) -> list[int]:
         """Given a fasta file, return all the taxids present in it
         With the assumption that the tax id is the id of each seq record."""
         taxids = []
         for record in self.records:
-            taxids = [*taxids, get_taxid(record.description)]
+            taxids = [*taxids, taxid_getter(record)]
         return taxids
 
 
@@ -275,15 +286,6 @@ def fasta_display_species(fasta_path: str):
     print(tree.get_ascii(attributes=["name", "sci_name"]))
 
 
-def coerce_all_to_rank(taxids: list[int], level: PhylogenyRank) -> list[int]:
-    """Given a list of taxids, return a list of the same taxids but coerced to the given lineage level(rank)."""
-    new = []
-    for taxid in taxids:
-        try:
-            new.append(taxid_ancestor_at_rank(taxid, level))
-        except Exception as e:
-            print(e)
-    return new
 
 
 # def taxid_ancestor_at_rank(taxid:int, rank:PhylogenyRank )->int| None:
