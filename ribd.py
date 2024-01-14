@@ -9,7 +9,7 @@ from ribctl.cli.ls import cmd_ls
 from ribctl.cli.sync import cmd_sync
 from ribctl.lib.mod_transpose_bsites import init_transpose_ligand
 from ribctl.lib.ribosome_types.types_binding_site import BindingSite
-from ribctl.lib.msalib import fasta_display_species
+from ribctl.lib.libmsa import fasta_display_species
 
 def parse_comma_separated_list(value):
     return value.split(',')

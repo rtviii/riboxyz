@@ -31,7 +31,7 @@ from ribctl.etl.etl_pipeline import (
     rcsb_single_structure_graphql,
 )
 from ribctl.etl.obtain import obtain_assets_threadpool
-from ribctl.lib.classification import (
+from ribctl.lib.libhmm import (
     HMMClassifier,
     HMMs,
     hmm_create,

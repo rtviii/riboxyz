@@ -14,14 +14,13 @@ from Bio import SeqIO, AlignIO, pairwise2
 import re
 import pyhmmer
 from ribctl import ASSETS, MUSCLE_BIN
-from ribctl.lib.msalib import Fasta, muscle_align_N_seq, phylogenetic_neighborhood
+from ribctl.lib.libmsa import Fasta, muscle_align_N_seq, phylogenetic_neighborhood
 from ribctl.lib.ribosome_types.types_ribosome import RNA, ElongationFactorClass, InitiationFactorClass, LifecycleFactorClass, MitochondrialProteinClass, Polymer, PolymerClass, PolynucleotideClass, PolypeptideClass, Protein, CytosolicProteinClass, CytosolicProteinClass, tRNA
 # from ribctl.etl.ribosome_assets import RibosomeAssets
 from pyhmmer.easel import Alphabet, DigitalSequenceBlock, TextSequence, SequenceFile, SequenceBlock, TextSequenceBlock, DigitalSequence
 from pyhmmer.plan7 import Pipeline, HMM , TopHits
 import logging
 import concurrent.futures
-from ribctl.lib.taxlib import taxid_superkingdom
 
 # Configure the logging settings
 logging.basicConfig(
