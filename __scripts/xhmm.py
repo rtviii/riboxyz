@@ -52,6 +52,7 @@ for spec_id,v in eukaryotic_tree.items():
         print(spec_id, v['name'], v['members'])
 
 
+
 # Fasta.fasta_display_species(taxids)
 # """One simple approach is just to grab the conserved region and based on the shannon entropy determine the deviation of a given
 # member of the MSA"""
