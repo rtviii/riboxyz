@@ -1,5 +1,6 @@
-"""Another one is create an MSA for a given rank (e.g. superkingdom) and compare the conservation of a given region in the MSA against this background"""
+"""We'd like to compare the conservation of a given region in the MSA against the background of a superkingdom's (or finer rank's) MSA"""
 """Protocol
+
 I. Compare within superkingdom:
  - Get all available sequences (interpro): S
  - Reduce the same-species strains and sequences to a single representative consensus sequence
@@ -14,17 +15,20 @@ I. Compare within superkingdom:
 
 
 II. Compare between superkingdoms:
-...
-|---------------- * ---------------- *---------------- * ----------------
+... WIP
+
+
+
+|---------------- * ---------------- *---------------- * ---------------- Notes  ---------------- * ---------------- * ---------------- * ----------------|
 * some of the species are still quite similar and therefore are overrepresented even after collapsing strains into species:
-Perhaps some evolutionary metric can be used to "normalize" the tree over not just species<->strains but along all ranks.
 
     e.g. Rotaria 
      2762511: {'members': [2762511, 2762511, 2762511, 2762511, 2762511, 2762511, 2762511, 2762511, 2762511, 2762511], 'name': 'Rotaria sp. Silwood1'},
      2762512: {'members': [2762512, 2762512, 2762512, 2762512, 2762512, 2762512, 2762512, 2762512, 2762512, 2762512, 2762512], 'name': 'Rotaria sp. Silwood2'},
 
+  Perhaps some evolutionary metric can be used to "normalize" the tree over not just species<->strains relationships but along all ranks.
 """
-# ?? A good first sanity check: find g.lambdia and the other 2 empirically found species.
+# ?? A good first sanity check: find g.lambdia and the other 2 empirically found species via the hmm method.
 
 from pprint import pprint
 from typing import NewType
@@ -65,12 +69,13 @@ def spec_strain_tree(_:list[SeqRecord])->dict:
 def normalize_from_tree(tree:dict)->list[SeqRecord]:
     """See notes above on full rank-normalization."""
     normalized  = []
+
     for species_taxid, v in tree.items():
         members = v['members']
         if len(members) > 2:
-            aligned_ = muscle_align_N_seq(members)
-            consensus = generate_consensus([*aligned_]).dumb_consensus(threshold=0.75,require_multiple=True)
-            normalized.append(SeqRecord(seq=consensus, description="Consensus sequence for taxids {}".format(" ".join(map(lambda r: r.id, v['members'])), id=species_taxid)))
+            aligned_  = muscle_align_N_seq(members)
+            consensus = generate_consensus([*aligned_]).dumb_consensus(threshold=0.75,require_multiple=True, ambiguous='')
+            normalized.append(SeqRecord(seq=consensus, description="Consensus sequence for taxids {}".format(" ".join(map(lambda r: r.id, v['members'])) ),id=str( species_taxid )))
         else:
             normalized.append(max(v['members'], key=lambda x: len(x.seq)))
     return normalized
@@ -80,6 +85,9 @@ def normalize_from_tree(tree:dict)->list[SeqRecord]:
 
 
 norm = normalize_from_tree(spec_strain_tree(euk_species))
+
+# Fasta(records = norm)
+Fasta.write_fasta(norm, 'uL4_euk_normalized_tree.fasta')
 pprint(norm)
 pprint(len(norm))
 
