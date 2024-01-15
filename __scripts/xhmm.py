@@ -62,19 +62,26 @@ def spec_strain_tree(_:list[SeqRecord])->dict:
             tree[species_taxid]['members'].append(record)
     return tree
 
-def normalize_tree(tree:dict):
+def normalize_from_tree(tree:dict)->list[SeqRecord]:
     """See notes above on full rank-normalization."""
+    normalized  = []
     for species_taxid, v in tree.items():
-        if len(v['members']) > 1:
-            print(species_taxid, v['name'],)
-            pprint( v['members'])
-            generate_consensus()
-            print('\n')
+        members = v['members']
+        if len(members) > 2:
+            aligned_ = muscle_align_N_seq(members)
+            consensus = generate_consensus([*aligned_]).dumb_consensus(threshold=0.75,require_multiple=True)
+            normalized.append(SeqRecord(seq=consensus, description="Consensus sequence for taxids {}".format(" ".join(map(lambda r: r.id, v['members'])), id=species_taxid)))
+        else:
+            normalized.append(max(v['members'], key=lambda x: len(x.seq)))
+    return normalized
+
     
 
 
 
-normalize_tree(spec_strain_tree(euk_species))
+norm = normalize_from_tree(spec_strain_tree(euk_species))
+pprint(norm)
+pprint(len(norm))
 
 
 
