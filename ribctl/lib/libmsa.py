@@ -18,11 +18,11 @@ PhylogenyRank = Literal[ "superkingdom", "phylum", "class", "order", "family", "
 ncbi          = NCBITaxa()
 
 class Taxid:
+
     @staticmethod
     def is_descendant_of(
         parent_taxid: int, target_taxid: int
     ) -> bool:
-
         ncbi    = NCBITaxa()
         lineage = ncbi.get_lineage(target_taxid)
         if lineage is None:
@@ -44,21 +44,23 @@ class Taxid:
     def ancestor_at_rank(taxid: int, target_rank: PhylogenyRank) -> int | None:
         """Given a @taxid and a @rank, return the taxid of the first ancestor of @taxid that is at @rank"""
         lineage = ncbi.get_lineage(taxid)
+        if lineage is None:
+            raise LookupError("Lineage is None. Check if taxid is NCBI-valid.")
         for item in lineage:
             rank = ncbi.get_rank([item])[item]
             if rank == target_rank:
                 return item
 
-        raise IndexError("Taxid {} does not have a {} level".format(taxid, rank))
+        raise IndexError("Taxid {} does not have a {} level".format(taxid, target_rank))
 
     @staticmethod
     def superkingdom(
         taxid: int,
     ) -> typing.Literal["bacteria", "eukaryota", "archaea", "virus"]:
         match (
-            Taxid.is_descendant_of(TAXID_EUKARYOTA, taxid)[0],
-            Taxid.is_descendant_of(TAXID_BACTERIA, taxid)[0],
-            Taxid.is_descendant_of(TAXID_ARCHAEA, taxid)[0],
+            Taxid.is_descendant_of(TAXID_EUKARYOTA, taxid),
+            Taxid.is_descendant_of(TAXID_BACTERIA, taxid),
+            Taxid.is_descendant_of(TAXID_ARCHAEA, taxid),
         ):
             case (False, False, True):
                 return "archaea"
@@ -84,15 +86,28 @@ class Taxid:
                 print(e)
         return new
 
-
+    @staticmethod
+    def get_descendants_of(parent: int, targets: list[int]):
+        """Given a @parent taxid and a list of @taxids, return the subset of @taxids that are descendants of @parent"""
+        ncbi = NCBITaxa()
+        descendants = set()
+        for tax_id in targets:
+            lineage = ncbi.get_lineage(tax_id)
+            if lineage == None:
+                raise LookupError("Lineage is None. Check if taxid is NCBI-valid.")
+            if parent in lineage:
+                descendants.add(tax_id)
+        return descendants
 
 
 class Fasta:
 
-    records: list[SeqRecord]
+    records     : list[SeqRecord]
+    taxid_getter: Callable[[SeqRecord], int] = lambda x: int(x.id)
 
 
-    def __init__(self, path: str|None=None, records:list[SeqRecord]|None = None) -> None:
+    def __init__(self, path: str|None=None, records:list[SeqRecord]|None = None, taxid_getter:Callable[[SeqRecord], int] |None=None) -> None:
+
         if path is not None:
             try:
                 with open(path, "r") as fasta_in:
@@ -103,6 +118,9 @@ class Fasta:
                 print(f"An error occurred: {str(e)}")
         elif records is not None:
             self.records = records
+        
+        if taxid_getter is not None:
+            self.taxid_getter = taxid_getter
 
     def _yield_subset(self, predicate:Callable[[SeqRecord], bool])->list[SeqRecord]:
         return [*filter(predicate,self.records)]
@@ -127,17 +145,6 @@ class Fasta:
             node.name = scientific_name
         print(tree.get_ascii(attributes=["name", "sci_name"]))
 
-    @staticmethod
-    def get_descendants_of(parent: int, targets: list[int]):
-        """Given a @parent taxid and a list of @taxids, return the subset of @taxids that are descendants of @parent"""
-        ncbi = NCBITaxa()
-        descendants = set()
-
-        for tax_id in targets:
-            lineage = ncbi.get_lineage(tax_id)
-            if parent in lineage:
-                descendants.add(tax_id)
-        return descendants
 
     def pick_taxids(self, taxids: list[str]) -> list[SeqRecord]:
         for taxid in set(taxids):
@@ -165,12 +172,12 @@ class Fasta:
 
         return list(filtered_records["result"])
 
-    def all_taxids(self, taxid_getter: Optional[Callable[[SeqRecord], int]] = lambda x: int(x.id)) -> list[int]:
+    def all_taxids(self) -> list[int]:
         """Given a fasta file, return all the taxids present in it
         With the assumption that the tax id is the id of each seq record."""
         taxids = []
         for record in self.records:
-            taxids = [*taxids, taxid_getter(record)]
+            taxids = [*taxids, self.taxid_getter(record)]
         return taxids
 
 #!----------------------
@@ -224,7 +231,7 @@ def seq_to_fasta(rcsb_id: str, _seq: str, outfile: str):
     from Bio.Seq import Seq
 
     _seq = _seq.replace("\n", "")
-    seq_record = SeqRecord.SeqRecord(Seq(_seq).upper())
+    seq_record = SeqRecord(Seq(_seq).upper())
     seq_record.id = seq_record.description = rcsb_id
     SeqIO.write(seq_record, outfile, "fasta")
 
@@ -277,32 +284,32 @@ def muscle_align_N_seq(seq_records: Iterator[SeqRecord]) -> Iterator[SeqRecord]:
             os.remove(temp_filename)
             raise Exception("Error running muscle.")
 
-def fasta_display_species(fasta_path: str):
-    def extract_tax_id(input_string):
-        # Define the regular expression pattern
-        pattern = r"taxID:(\d+)"
+# def fasta_display_species(fasta_path: str):
+#     def extract_tax_id(input_string):
+#         # Define the regular expression pattern
+#         pattern = r"taxID:(\d+)"
 
-        # Search for the pattern in the input string
-        match = re.search(pattern, input_string)
+#         # Search for the pattern in the input string
+#         match = re.search(pattern, input_string)
 
-        # If a match is found, return the extracted number; otherwise, return None
-        if match:
-            return match.group(1)
-        else:
-            return None
+#         # If a match is found, return the extracted number; otherwise, return None
+#         if match:
+#             return match.group(1)
+#         else:
+#             return None
 
-    taxids = Fasta(fasta_path).all_taxids(extract_tax_id)
-    print(len(set(taxids)))
-    ncbi = NCBITaxa()
+#     taxids = Fasta(fasta_path).all_taxids(extract_tax_id)
+#     print(len(set(taxids)))
+#     ncbi = NCBITaxa()
 
-    taxids = coerce_all_to_rank(taxids, "species")
+#     taxids = coerce_all_to_rank(taxids, "species")
 
-    tree = ncbi.get_topology(taxids)
-    for node in tree.traverse():
-        taxid = int(node.name)
-        scientific_name = ncbi.get_taxid_translator([taxid]).get(taxid, "Unknown")
-        node.name = scientific_name
-    print(tree.get_ascii(attributes=["name", "sci_name"]))
+#     tree = ncbi.get_topology(taxids)
+#     for node in tree.traverse():
+#         taxid = int(node.name)
+#         scientific_name = ncbi.get_taxid_translator([taxid]).get(taxid, "Unknown")
+#         node.name = scientific_name
+#     print(tree.get_ascii(attributes=["name", "sci_name"]))
 
 
 
