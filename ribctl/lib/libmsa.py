@@ -15,10 +15,12 @@ from ete3 import NCBITaxa
 import os
 
 PhylogenyRank = Literal[ "superkingdom", "phylum", "class", "order", "family", "genus", "species", "strain" ]
+ncbi          = NCBITaxa()
 
 class Taxid:
     @staticmethod
     def is_descendant_of(
+
         parent_taxid: int, target_taxid: int
     ) -> (bool, list[int] | None):
         ncbi = NCBITaxa()
@@ -26,15 +28,24 @@ class Taxid:
         if lineage is None:
             raise LookupError("Lineage is None. Check if taxid is NCBI-valid.")
         return (False, lineage) if parent_taxid not in lineage else (True, lineage)
+    @staticmethod
+    def get_name(taxid):
+        return ncbi.get_taxid_translator([ taxid ])
 
     @staticmethod
-    def ancestor_at_rank(taxid: int, rank: PhylogenyRank) -> int | None:
-        """Given a @taxid and a @rank, return the taxid of the first ancestor of @taxid that is at @rank"""
+    def rank(taxid: int) -> str:
+        """Given a @taxid, return the rank of the taxid"""
         ncbi = NCBITaxa()
+        lineage = ncbi.get_lineage(taxid)
+        return ncbi.get_rank(lineage)[taxid]
+
+    @staticmethod
+    def ancestor_at_rank(taxid: int, target_rank: PhylogenyRank) -> int | None:
+        """Given a @taxid and a @rank, return the taxid of the first ancestor of @taxid that is at @rank"""
         lineage = ncbi.get_lineage(taxid)
         for item in lineage:
             rank = ncbi.get_rank([item])[item]
-            if rank == rank:
+            if rank == target_rank:
                 return item
 
         raise IndexError("Taxid {} does not have a {} level".format(taxid, rank))
@@ -155,9 +166,16 @@ class Fasta:
             taxids = [*taxids, taxid_getter(record)]
         return taxids
 
+#!----------------------
+
+def get_consensus(records:list[SeqRecord])->SeqRecord:
+    
+
+    return SeqRecord('sda')
 
 
 
+#!----------------------
 
 def util__backwards_match(aligned_target: str, resid: int):
     """Returns the target-sequence index of a residue in the (aligned) target sequence
@@ -178,7 +196,6 @@ def util__backwards_match(aligned_target: str, resid: int):
         else:
             counter_proper += 1
 
-
 def util__forwards_match(aligned_seq: str, resid: int):
     """Returns the index of a source-sequence residue in the aligned source sequence.
     Basically, "count forward including gaps until you reach @resid"
@@ -193,10 +210,8 @@ def util__forwards_match(aligned_seq: str, resid: int):
         else:
             count_proper += 1
 
-
 def barr2str(bArr):
     return "".join([x.decode("utf-8") for x in bArr])
-
 
 def seq_to_fasta(rcsb_id: str, _seq: str, outfile: str):
     from Bio.Seq import Seq
@@ -205,7 +220,6 @@ def seq_to_fasta(rcsb_id: str, _seq: str, outfile: str):
     seq_record = SeqRecord.SeqRecord(Seq(_seq).upper())
     seq_record.id = seq_record.description = rcsb_id
     SeqIO.write(seq_record, outfile, "fasta")
-
 
 def phylogenetic_neighborhood(
     taxids_base: list[str], taxid_target: str, n_neighbors: int = 10
@@ -226,7 +240,6 @@ def phylogenetic_neighborhood(
         return nbr_taxids[1:]
     else:
         return nbr_taxids[1 : n_neighbors + 1]
-
 
 def muscle_align_N_seq(seq_records: Iterator[SeqRecord]) -> Iterator[SeqRecord]:
     """Given a MSA of a protein class, and a fasta string of a chain, return a new MSA with the chain added to the class MSA."""
@@ -256,7 +269,6 @@ def muscle_align_N_seq(seq_records: Iterator[SeqRecord]) -> Iterator[SeqRecord]:
             temp_file.close()
             os.remove(temp_filename)
             raise Exception("Error running muscle.")
-
 
 def fasta_display_species(fasta_path: str):
     def extract_tax_id(input_string):
