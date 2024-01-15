@@ -1,4 +1,6 @@
 from io import StringIO
+from pprint import pprint
+import tempfile
 import os
 import re
 import subprocess
@@ -14,8 +16,14 @@ from ribctl import  MUSCLE_BIN, TAXID_ARCHAEA, TAXID_BACTERIA, TAXID_EUKARYOTA
 from ete3 import NCBITaxa
 import os
 
+
+TAXID_BACTERIA  = 2
+TAXID_EUKARYOTA = 2759
+TAXID_ARCHAEA   = 2157
+
 PhylogenyRank = Literal[ "superkingdom", "phylum", "class", "order", "family", "genus", "species", "strain" ]
 ncbi          = NCBITaxa()
+
 
 class Taxid:
 
@@ -182,11 +190,15 @@ class Fasta:
 
 #!----------------------
 
-def get_consensus(records:list[SeqRecord])->SeqRecord:
+from Bio import AlignIO, SeqIO
+from Bio.Align import MultipleSeqAlignment, AlignInfo
 
-
-    return SeqRecord('sda')
-
+def generate_consensus(records):
+    # Convert the list of sequence records to a MultipleSeqAlignment object
+    alignment     = MultipleSeqAlignment(records)
+    summary_align = AlignInfo.SummaryInfo(alignment)
+    summary_align.dumb_consensus()
+    return summary_align
 
 
 #!----------------------
@@ -255,24 +267,32 @@ def phylogenetic_neighborhood(
     else:
         return nbr_taxids[1 : n_neighbors + 1]
 
-def muscle_align_N_seq(seq_records: Iterator[SeqRecord]) -> Iterator[SeqRecord]:
+def muscle_align_N_seq(seq_records: list[SeqRecord], vvv:bool=False) -> Iterator[SeqRecord]:
     """Given a MSA of a protein class, and a fasta string of a chain, return a new MSA with the chain added to the class MSA."""
-    import tempfile
 
     with tempfile.NamedTemporaryFile(delete=False, mode="w") as temp_file:
         temp_filename = temp_file.name
+
+        if vvv:
+            pprint("Aligning sequences with muscle...")
+            pprint([*seq_records])
+
         SeqIO.write([*seq_records], temp_filename, "fasta")
         muscle_cmd = [MUSCLE_BIN, "-in", temp_filename, "-quiet"]
-
         try:
             process = subprocess.run(muscle_cmd, stdout=subprocess.PIPE, text=True)
             if process.returncode == 0:
-                muscle_out = process.stdout
+                muscle_out           = process.stdout
                 muscle_output_handle = StringIO(muscle_out)
-                seq_records = SeqIO.parse(muscle_output_handle, "fasta")
+                seq_records_a          = SeqIO.parse(muscle_output_handle, "fasta")
+
+                if vvv:
+                    pprint("Done.")
+                    pprint(seq_records_a)
+
                 temp_file.close()
                 os.remove(temp_filename)
-                return seq_records
+                return seq_records_a
             else:
                 print(
                     "{} failed with code {}".format(" ".join(muscle_cmd)),
