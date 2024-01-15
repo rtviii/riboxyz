@@ -20,14 +20,15 @@ ncbi          = NCBITaxa()
 class Taxid:
     @staticmethod
     def is_descendant_of(
-
         parent_taxid: int, target_taxid: int
-    ) -> (bool, list[int] | None):
-        ncbi = NCBITaxa()
+    ) -> bool:
+
+        ncbi    = NCBITaxa()
         lineage = ncbi.get_lineage(target_taxid)
         if lineage is None:
             raise LookupError("Lineage is None. Check if taxid is NCBI-valid.")
-        return (False, lineage) if parent_taxid not in lineage else (True, lineage)
+        return False if parent_taxid not in lineage else True
+
     @staticmethod
     def get_name(taxid):
         return ncbi.get_taxid_translator([ taxid ])
@@ -84,21 +85,32 @@ class Taxid:
         return new
 
 
+
+
 class Fasta:
 
     records: list[SeqRecord]
 
-    def __init__(self, path: str) -> None:
-        try:
-            with open(path, "r") as fasta_in:
-                self.records:list[SeqRecord] = [*SeqIO.parse(fasta_in, "fasta")]
-        except FileNotFoundError:
-            print(f"File not found: {path}")
-        except Exception as e:
-            print(f"An error occurred: {str(e)}")
 
+    def __init__(self, path: str|None=None, records:list[SeqRecord]|None = None) -> None:
+        if path is not None:
+            try:
+                with open(path, "r") as fasta_in:
+                    self.records:list[SeqRecord] = [*SeqIO.parse(fasta_in, "fasta")]
+            except FileNotFoundError:
+                print(f"File not found: {path}")
+            except Exception as e:
+                print(f"An error occurred: {str(e)}")
+        elif records is not None:
+            self.records = records
 
-    
+    def _yield_subset(self, predicate:Callable[[SeqRecord], bool])->list[SeqRecord]:
+        return [*filter(predicate,self.records)]
+
+    def pick_descendants_of_taxid(self, taxid: int) -> list[SeqRecord]:
+        """Given a taxid, return the subset of records that are descendants of that taxid"""
+        return  self._yield_subset(lambda record: Taxid.is_descendant_of(taxid, int(record.id)))
+
     @staticmethod
     def write_fasta(seqrecords: list[SeqRecord], outfile: str):
         with open(outfile, "w") as fasta_out:
@@ -106,10 +118,9 @@ class Fasta:
 
     @staticmethod
     def fasta_display_species(taxids: list[int]):
-        ncbi = NCBITaxa()
-        taxids = coerce_all_to_rank(taxids, "species")
-
-        tree = ncbi.get_topology(taxids)
+        ncbi   = NCBITaxa()
+        taxids = Taxid.coerce_all_to_rank(taxids, "species")
+        tree   = ncbi.get_topology(taxids)
         for node in tree.traverse():
             taxid = int(node.name)
             scientific_name = ncbi.get_taxid_translator([taxid]).get(taxid, "Unknown")
@@ -127,9 +138,6 @@ class Fasta:
             if parent in lineage:
                 descendants.add(tax_id)
         return descendants
-
-
-
 
     def pick_taxids(self, taxids: list[str]) -> list[SeqRecord]:
         for taxid in set(taxids):
@@ -157,7 +165,6 @@ class Fasta:
 
         return list(filtered_records["result"])
 
-
     def all_taxids(self, taxid_getter: Optional[Callable[[SeqRecord], int]] = lambda x: int(x.id)) -> list[int]:
         """Given a fasta file, return all the taxids present in it
         With the assumption that the tax id is the id of each seq record."""
@@ -169,7 +176,7 @@ class Fasta:
 #!----------------------
 
 def get_consensus(records:list[SeqRecord])->SeqRecord:
-    
+
 
     return SeqRecord('sda')
 
