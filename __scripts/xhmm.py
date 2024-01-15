@@ -12,7 +12,10 @@ Compare between superkingdoms:
 ...
 
 """
-from ribctl.lib.libmsa import Fasta, Taxid
+# ?? A good first sanity check: find g.lambdia and the other 2 empirically found species.
+
+from pprint import pprint
+from ribctl.lib.libmsa import Fasta, Taxid, ncbi
 
 uL4_euk = Fasta("/home/rtviii/dev/riboxyz/__scripts/uL4_euk.fasta")
 
@@ -21,22 +24,32 @@ uL4_euk = Fasta("/home/rtviii/dev/riboxyz/__scripts/uL4_euk.fasta")
 taxids = uL4_euk.all_taxids()
 euk, prok, arch = [], [], []
 
-# ! Partition into
+eukaryotic_tree = {}
+
+# ! Partition into superkingdoms
 for t in taxids:
     supk = Taxid.superkingdom(t)
     match (supk):
-        case 'archaea':
+        case "archaea":
             arch.append(t)
-        case 'eukaryota':
+        case "eukaryota":
             euk.append(t)
-        case 'bacteria':
+        case "bacteria":
             prok.append(t)
 
+euk_species = []
+for taxid in euk:
+    spec_id = Taxid.ancestor_at_rank(taxid, "species")
+    if spec_id not in eukaryotic_tree:
+        eukaryotic_tree[spec_id] = {"name": Taxid.get_name(spec_id)[spec_id], "members": [taxid]}
+    else:
+        eukaryotic_tree[spec_id]['members'].append(taxid)
+        eukaryotic_tree[spec_id]['members'] = list(set(eukaryotic_tree[spec_id]['members']))
 
 
-
-
-
+for spec_id,v in eukaryotic_tree.items():
+    if len(v['members']) > 1:
+        print(spec_id, v['name'], v['members'])
 
 
 # Fasta.fasta_display_species(taxids)
