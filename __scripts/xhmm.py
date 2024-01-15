@@ -23,7 +23,6 @@ uL4_euk = Fasta("/home/rtviii/dev/riboxyz/__scripts/uL4_euk.fasta")
 
 taxids = uL4_euk.all_taxids()
 euk, prok, arch = [], [], []
-
 eukaryotic_tree = {}
 
 # ! Partition into superkingdoms
@@ -38,6 +37,7 @@ for t in taxids:
             prok.append(t)
 
 euk_species = []
+
 for taxid in euk:
     spec_id = Taxid.ancestor_at_rank(taxid, "species")
     if spec_id not in eukaryotic_tree:
