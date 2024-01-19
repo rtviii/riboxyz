@@ -80,8 +80,6 @@ def normalize_from_tree(tree:dict)->list[SeqRecord]:
             normalized.append(max(v['members'], key=lambda x: len(x.seq)))
     return normalized
 
-    
-
 
 
 norm = normalize_from_tree(spec_strain_tree(euk_species))
