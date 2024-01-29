@@ -1,9 +1,7 @@
-import json
 import logging
 import math
 import os
 import numpy as np
-from pprint import pprint
 from ribctl.etl.ribosome_assets import RibosomeAssets
 from ribctl.lib.ribosome_types.types_binding_site import (
     AMINO_ACIDS,
@@ -255,20 +253,6 @@ def pt_is_inside_cylinder(cylinder, point):
 
     return False
 
-    # with open("ptc_coords_eukarya.json", 'w') as outfile:
-    #     json.dump(PTC_COORDS, outfile, indent=4)
-
-    # asyncio.run( obtain_assets(RCSB_ID, al))
-
-    # for rcsb_id in EUKARYOTIC:
-    # - identify the 25/28/35S
-    # - fuzzyfind the conserved residues
-    # - triangulate from the tips of the [conserved res.] comb
-
-
-# Edge cases:
-# 8i9x is a preribosome with too many gaps to identify ptc comb from doris-site-9 (should try with more)
-
 
 #! ------------------------------ MESH GENERATION
 import open3d as o3d
@@ -300,21 +284,21 @@ def open_tunnel_csv(rcsb_id: str) -> list[list]:
     return data
 
 
-def parse_struct_via_centerline(rcsb_id: str, centerline_data: list) -> list:
+def parse_struct_via_centerline(rcsb_id: str, centerline_data: list, expansion_radius:int=15) -> list:
     """centerline data is an array of lists [radius, x, y, z]"""
     from Bio.PDB.MMCIFParser import MMCIFParser
     from Bio.PDB.NeighborSearch import NeighborSearch
     from Bio.PDB import Selection
 
-    parser = MMCIFParser()
+    parser      = MMCIFParser()
     struct_path = "{}/{}/{}.cif".format(RIBETL_DATA, rcsb_id, rcsb_id)
-    structure = parser.get_structure(rcsb_id, struct_path)
-    atoms = Selection.unfold_entities(structure, "A")
-    ns = NeighborSearch(atoms)
-    nbhd = set()
+    structure   = parser.get_structure(rcsb_id, struct_path)
+    atoms       = Selection.unfold_entities(structure, "A")
+    ns          = NeighborSearch(atoms)
+    nbhd        = set()
 
-    for [dynamic_radius, x, y, z] in centerline_data:
-        nearby_atoms = ns.search([x, y, z], dynamic_radius + 10, "A")
+    for [probe_radius, x, y, z] in centerline_data:
+        nearby_atoms = ns.search([x, y, z], probe_radius + expansion_radius, "A")
         nbhd.update(nearby_atoms)
 
     # TODO: inject residue/chain information into the encoding.
@@ -356,61 +340,45 @@ def encode_atoms(rcsb_id: str, nearby_atoms_list: list[Atom]):
                     "vdw_radius"        : vdw_radii[a_element],
                       }
         aggregate.append(atom_dict)
-
     return aggregate
 
 
-# def encode_atoms(nearby_atoms_list: list):
-#     atom_radii = {
-#         # element: vwd_radius
-#     }
-#     atom_encodings = {
-#         # C : 1
-#         # N : 2
-#     }
-
-#     coordinates = []
-#     encodings = []
-
-#     for atom in nearby_atoms_list:
-#         COORD = atom.get_coord().tolist()
-#         atom_type = atom.element
-
-#         if atom_type not in atom_radii:
-#             atom_radii[atom_type] = element(atom_type).vdw_radius / 100
-#         if atom_type not in atom_encodings:
-#             atom_encodings[atom_type] = len(atom_encodings.keys()) + 1
-
-#         VDW_R = atom_radii[atom_type]
-#         encoding_id = atom_encodings[atom_type]
-
-#         coordinates.append(COORD)
-#         encodings.append([VDW_R, encoding_id, 0])
-
-#     # TODO:     C = np.unique(C,axis=0)
-
-#     encodings_dict = {
-#         "atom_indices": atom_encodings,
-#         "coordinates": coordinates,
-#         "radius_types_0": encodings,
-#     }
-#     return encodings_dict
-
-
-def create_pcd_from_atoms(
-    positions: np.ndarray, atom_types: np.ndarray, save_path: str
-):
-    pcd = o3d.geometry.PointCloud(o3d.utility.Vector3dVector(positions))
+def create_pcd_from_atoms( positions: np.ndarray, atom_types: np.ndarray, save_path: str ):
+    pcd        = o3d.geometry.PointCloud(o3d.utility.Vector3dVector(positions))
     pcd.colors = o3d.utility.Vector3dVector(atom_types)
     o3d.io.write_point_cloud(save_path, pcd)
 
+#TODO : 1. Remove ions and non-standard residues when refining the tunnel
+#TODO : CHECK. make the centerline scan in refinement dynamic (on radius of probe) 
+def get_sphere_indices_voxelized(center: np.ndarray, radius: int):
 
-def parse_encod():
-    atoms = parse_struct_via_centerline()
-    encodings_dict = encode_atoms(atoms)
-    coordinates = encodings_dict["coordinates"]
-    colors = encodings_dict["radius_types_0"]
-    encodings_path = "/Users/rtviii/dev/open3d_mesh/encodings/{}.json".format(RCSB_ID)
+    """Make sure radius reflects the size of the underlying voxel grid"""
+    x0, y0, z0 = center
 
-    with open(encodings_path, "w") as fp:
-        json.dump(encodings_dict, fp)
+    #!------ Generate indices of a voxel cube of side 2r+2  around the centerpoint
+    x_range = slice(int(np.floor(x0) - (radius )), int(np.ceil(x0) + (radius )))
+    y_range = slice(int(np.floor(y0) - (radius )), int(np.ceil(y0) + (radius )))
+    z_range = slice(int(np.floor(z0) - (radius )), int(np.ceil(z0) + (radius )))
+
+    indices = np.indices( (
+            x_range.stop - x_range.start,
+            y_range.stop - y_range.start,
+            z_range.stop - z_range.start)
+    )
+
+    indices += np.array([x_range.start, y_range.start, z_range.start])[ :, np.newaxis, np.newaxis, np.newaxis ]
+    indices = indices.transpose(1, 2, 3, 0)
+    indices_list = list(map(tuple, indices.reshape(-1, 3)))
+    #!------ Generate indices of a voxel cube of side 2r+2  around the centerpoint
+
+    sphere_active_ix = []
+    for ind in indices_list:
+        x_ = ind[0]
+        y_ = ind[1]
+        z_ = ind[2]
+        if (x_ - x0) ** 2 + (y_ - y0) ** 2 + (z_ - z0) ** 2 <= radius**2:
+            sphere_active_ix.append([x_, y_, z_])
+
+    return np.array(sphere_active_ix)
+
+
