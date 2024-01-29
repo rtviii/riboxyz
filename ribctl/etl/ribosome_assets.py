@@ -8,7 +8,6 @@ from Bio.PDB.Chain import Chain
 from typing import Optional
 from api.logs.loggers import get_updates_logger
 from ribctl import AMINO_ACIDS_3_TO_1_CODE
-from ribctl.lib.tunnel import ptc_resdiues_get, ptc_residues_calculate_midpoint
 from ribctl.lib.ribosome_types.types_binding_site import BindingSite
 from ribctl.lib.mod_extract_bsites import  struct_ligand_ids, bsite_ligand
 from ribctl.lib.mod_split_rename import split_rename

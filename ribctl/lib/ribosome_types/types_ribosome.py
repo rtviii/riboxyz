@@ -554,9 +554,9 @@ class RibosomeStructure(BaseModel):
         _ = {}
 
         for prp in self.proteins:
-            _[prp.auth_asym_id] = prp.nomenclature
+            _[prp.auth_asym_id] = [ x.name for x in  prp.nomenclature]
         for prna in self.rnas:
-            _[prna.auth_asym_id] = prna.nomenclature
+            _[prna.auth_asym_id] =[ y.name for y in  prna.nomenclature]
 
         return _
 

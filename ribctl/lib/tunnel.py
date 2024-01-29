@@ -5,8 +5,6 @@ import os
 import numpy as np
 from pprint import pprint
 from ribctl.etl.ribosome_assets import RibosomeAssets
-
-# from ribctl.etl.ribosome_assets import RibosomeAssets
 from ribctl.lib.ribosome_types.types_binding_site import (
     AMINO_ACIDS,
     NUCLEOTIDES,
@@ -316,11 +314,6 @@ def parse_struct_via_centerline(rcsb_id: str, centerline_data: list) -> list:
     nbhd = set()
 
     for [dynamic_radius, x, y, z] in centerline_data:
-        print(
-            "Processing centerline point: {}, {}, {} with rad [{}]".format(
-                x, y, z, dynamic_radius + 20
-            )
-        )
         nearby_atoms = ns.search([x, y, z], dynamic_radius + 10, "A")
         nbhd.update(nearby_atoms)
 
@@ -336,31 +329,31 @@ def encode_atoms(rcsb_id: str, nearby_atoms_list: list[Atom]):
     - van der waals radius
     - atom type
     """
-    profile = RibosomeAssets(rcsb_id).profile()
+    profile      = RibosomeAssets(rcsb_id).profile()
     nomenclature = profile.get_nomenclature_map()
-    vdw_radii = { }
-
+    vdw_radii    = { }
     aggregate = []
 
 
     for a in nearby_atoms_list:
-        parent_auth_asym_id = a.get_full_id()[0]
-        residue_type        = a.get_full_id()[0]
-        parent_nomenclature = nomenclature[parent_auth_asym_id]
+        parent_residue      = a.get_parent()
+        residue_name        = parent_residue.resname
+        residue_seqid       = parent_residue.id[1]
+        chain_auth_asym_id  = a.get_full_id()[2]
+        parent_nomenclature = nomenclature[chain_auth_asym_id]
         a_element           = a.element
         
         if a_element not in vdw_radii:
             vdw_radii[a_element] = element(a_element).vdw_radius / 100
 
-        print(a)
-        print("parent",a.get_parent())
-        print("Full id", a.get_full_id())
         atom_dict = { 
-                      "auth_asym_id"       : parent_auth_asym_id,
-                      "parent_nomenclature": parent_nomenclature,
-                      "element"            : a.element,
-                      "vdw_radius"         : vdw_radii[a_element],
-                      "residue"            : residue_type
+                    "coord"             : a.get_coord().tolist(),
+                    "chain_auth_asym_id": chain_auth_asym_id,
+                    "chain_nomenclature": parent_nomenclature,
+                    "residue_name"      : residue_name,
+                    "residue_seqid"     : residue_seqid,
+                    "atom_element"      : a.element,
+                    "vdw_radius"        : vdw_radii[a_element],
                       }
         aggregate.append(atom_dict)
 
