@@ -1,5 +1,7 @@
+import json
 import logging
 import math
+import os
 from pprint import pprint
 # from ribctl.etl.ribosome_assets import RibosomeAssets
 from ribctl.lib.ribosome_types.types_binding_site import AMINO_ACIDS, NUCLEOTIDES, ResidueSummary
@@ -229,3 +231,118 @@ def pt_is_inside_cylinder(cylinder, point):
 
 # Edge cases:
 # 8i9x is a preribosome with too many gaps to identify ptc comb from doris-site-9 (should try with more)
+
+
+
+import open3d as o3d
+from open3d import core as o3c
+from mendeleev import element
+import pandas as pd
+
+
+# Tunnel refinement: 
+# - using the centerline and dynamic probe radius, extract the atoms within 15A radius of the centerline
+# - when processing atoms, encode their vdw radius, atom type and residue and chain id 
+from ribctl import ASSETS_PATH, RIBETL_DATA
+
+def open_tunnel_csv(rcsb_id: str)->list[list]:
+    
+
+    TUNNEL_PATH = os.path.join(ASSETS_PATH, "mole_tunnels","tunnel_{rcsb_id}.csv")
+    df          = pd.read_csv(TUNNEL_PATH)
+    data        = []
+
+    for index, row in df.iterrows():
+        radius       = row['Radius']
+        x_coordinate = row['X']
+        y_coordinate = row['Y']
+        z_coordinate = row['Z']
+        data.append([radius, x_coordinate, y_coordinate, z_coordinate])
+
+    return data
+
+def parse_struct_via_centerline(rcsb_id:str, centerline_data:list) -> list:
+    """centerline data is an array of lists [radius, x, y, z]"""
+    from Bio.PDB.MMCIFParser import MMCIFParser
+    from Bio.PDB.NeighborSearch import NeighborSearch
+    from Bio.PDB import Selection
+    from ribctl.lib.ribosome_types import RibosomeStructure
+    from ribctl.etl.ribosome_assets import RibosomeAssets
+
+
+    profile = RibosomeAssets(rcsb_id).profile() 
+    pprint(profile)
+
+    parser      = MMCIFParser()
+    struct_path = "{}/{}/{}.cif".format(RIBETL_DATA, rcsb_id, rcsb_id)
+    structure   = parser.get_structure(rcsb_id, struct_path)
+    atoms       = Selection.unfold_entities(structure, "A")
+    ns          = NeighborSearch(atoms)
+    nbhd        = set()
+
+    for [dynamic_radius, x,y,z] in centerline_data:
+        print("Processing centerline point: {}, {}, {} with rad [{}]".format(x,y,z, dynamic_radius+20))
+        nearby_atoms = ns.search([x,y,z], dynamic_radius+10, "A")  
+        print("Nearby atoms :", nearby_atoms)
+        nbhd.update(nearby_atoms)
+
+    #TODO: inject residue/chain information into the encoding.
+    return list(nbhd)
+
+def encode_atoms(nearby_atoms_list: list):
+
+    atom_radii = {
+        # element: vwd_radius
+    }
+    atom_encodings = {
+        # C : 1
+        # N : 2
+    }
+
+    coordinates = []
+    encodings = []
+
+    for atom in nearby_atoms_list:
+        COORD = atom.get_coord().tolist()
+        atom_type = atom.element
+
+        if atom_type not in atom_radii:
+            atom_radii[atom_type] = element(atom_type).vdw_radius / 100
+        if atom_type not in atom_encodings:
+            atom_encodings[atom_type] = len(atom_encodings.keys()) + 1
+
+        VDW_R = atom_radii[atom_type]
+        encoding_id = atom_encodings[atom_type]
+
+        coordinates.append(COORD)
+        encodings.append([VDW_R, encoding_id, 0])
+
+    #TODO:     C = np.unique(C,axis=0)
+
+    encodings_dict = {
+        "atom_indices": atom_encodings,
+        "coordinates": coordinates,
+        "radius_types_0": encodings,
+    }
+    return encodings_dict
+
+def create_pcd_from_atoms(
+    positions: np.ndarray, atom_types: np.ndarray, save_path: str
+):
+    pcd = o3d.geometry.PointCloud(o3d.utility.Vector3dVector(positions))
+    pcd.colors = o3d.utility.Vector3dVector(atom_types)
+    o3d.io.write_point_cloud(save_path, pcd)
+
+def parse_encod():
+    atoms = parse_struct_via_centerline()
+    encodings_dict = encode_atoms(atoms)
+    coordinates = encodings_dict["coordinates"]
+    colors = encodings_dict["radius_types_0"]
+    encodings_path = "/Users/rtviii/dev/open3d_mesh/encodings/{}.json".format(RCSB_ID)
+
+    with open(encodings_path, "w") as fp:
+        json.dump(encodings_dict, fp)
+
+
+data = open_tunnel_csv(RCSB_ID)
+parse_struct_via_centerline(RCSB_ID,data)
