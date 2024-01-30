@@ -12,26 +12,25 @@ from io import StringIO
 import os
 import subprocess
 from typing import Callable, Iterator, Literal, Optional
-from ribctl import  MUSCLE_BIN, TAXID_ARCHAEA, TAXID_BACTERIA, TAXID_EUKARYOTA
+from ribctl import MUSCLE_BIN, TAXID_ARCHAEA, TAXID_BACTERIA, TAXID_EUKARYOTA
 from ete3 import NCBITaxa
 import os
 
 
-TAXID_BACTERIA  = 2
+TAXID_BACTERIA = 2
 TAXID_EUKARYOTA = 2759
-TAXID_ARCHAEA   = 2157
+TAXID_ARCHAEA = 2157
 
-PhylogenyRank = Literal[ "superkingdom", "phylum", "class", "order", "family", "genus", "species", "strain" ]
-ncbi          = NCBITaxa()
+PhylogenyRank = Literal[
+    "superkingdom", "phylum", "class", "order", "family", "genus", "species", "strain"
+]
+ncbi = NCBITaxa()
 
 
 class Taxid:
-
     @staticmethod
-    def is_descendant_of(
-        parent_taxid: int, target_taxid: int
-    ) -> bool:
-        ncbi    = NCBITaxa()
+    def is_descendant_of(parent_taxid: int, target_taxid: int) -> bool:
+        ncbi = NCBITaxa()
         lineage = ncbi.get_lineage(target_taxid)
         if lineage is None:
             raise LookupError("Lineage is None. Check if taxid is NCBI-valid.")
@@ -39,7 +38,7 @@ class Taxid:
 
     @staticmethod
     def get_name(taxid):
-        return ncbi.get_taxid_translator([ taxid ])
+        return ncbi.get_taxid_translator([taxid])
 
     @staticmethod
     def rank(taxid: int) -> str:
@@ -80,8 +79,11 @@ class Taxid:
                 print("Probably a virus")
                 return "virus"
             case _:
-                raise ValueError( "Taxid {} is not a descendant of any of the three domains".format( taxid ) )
-
+                raise ValueError(
+                    "Taxid {} is not a descendant of any of the three domains".format(
+                        taxid
+                    )
+                )
 
     @staticmethod
     def coerce_all_to_rank(taxids: list[int], level: PhylogenyRank) -> list[int]:
@@ -92,6 +94,7 @@ class Taxid:
                 new.append(Taxid.ancestor_at_rank(taxid, level))
             except Exception as e:
                 print(e)
+                raise Exception(e)
         return new
 
     @staticmethod
@@ -109,33 +112,38 @@ class Taxid:
 
 
 class Fasta:
+    records: list[SeqRecord]
+    # taxid_getter: Callable[[SeqRecord], int] = lambda x: int(x.id)
 
-    records     : list[SeqRecord]
-    taxid_getter: Callable[[SeqRecord], int] = lambda x: int(x.id)
-
-
-    def __init__(self, path: str|None=None, records:list[SeqRecord]|None = None, taxid_getter:Callable[[SeqRecord], int] |None=None) -> None:
-
+    def __init__(
+        self,
+        path: str | None = None,
+        records: list[SeqRecord] | None = None,
+        # taxid_getter: Callable[[SeqRecord], int] | None = None,
+    ) -> None:
         if path is not None:
             try:
                 with open(path, "r") as fasta_in:
-                    self.records:list[SeqRecord] = [*SeqIO.parse(fasta_in, "fasta")]
+                    self.records: list[SeqRecord] = [*SeqIO.parse(fasta_in, "fasta")]
             except FileNotFoundError:
                 print(f"File not found: {path}")
             except Exception as e:
                 print(f"An error occurred: {str(e)}")
+                exit(-1)
         elif records is not None:
             self.records = records
-        
-        if taxid_getter is not None:
-            self.taxid_getter = taxid_getter
 
-    def _yield_subset(self, predicate:Callable[[SeqRecord], bool])->list[SeqRecord]:
-        return [*filter(predicate,self.records)]
+        # if taxid_getter is not None:
+        #     self.taxid_getter = taxid_getter
+
+    def _yield_subset(self, predicate: Callable[[SeqRecord], bool]) -> list[SeqRecord]:
+        return [*filter(predicate, self.records)]
 
     def pick_descendants_of_taxid(self, taxid: int) -> list[SeqRecord]:
         """Given a taxid, return the subset of records that are descendants of that taxid"""
-        return  self._yield_subset(lambda record: Taxid.is_descendant_of(taxid, int(record.id)))
+        return self._yield_subset(
+            lambda record: Taxid.is_descendant_of(taxid, int(record.id))
+        )
 
     @staticmethod
     def write_fasta(seqrecords: list[SeqRecord], outfile: str):
@@ -144,15 +152,14 @@ class Fasta:
 
     @staticmethod
     def fasta_display_species(taxids: list[int]):
-        ncbi   = NCBITaxa()
+        ncbi = NCBITaxa()
         taxids = Taxid.coerce_all_to_rank(taxids, "species")
-        tree   = ncbi.get_topology(taxids)
+        tree = ncbi.get_topology(taxids)
         for node in tree.traverse():
             taxid = int(node.name)
             scientific_name = ncbi.get_taxid_translator([taxid]).get(taxid, "Unknown")
             node.name = scientific_name
         print(tree.get_ascii(attributes=["name", "sci_name"]))
-
 
     def pick_taxids(self, taxids: list[str]) -> list[SeqRecord]:
         for taxid in set(taxids):
@@ -185,23 +192,27 @@ class Fasta:
         With the assumption that the tax id is the id of each seq record."""
         taxids = []
         for record in self.records:
-            taxids = [*taxids, self.taxid_getter(record)]
+            # taxids = [*taxids, self.taxid_getter(record)]
+            taxids = [*taxids, record.id]
         return taxids
+
 
 #!----------------------
 
 from Bio import AlignIO, SeqIO
 from Bio.Align import MultipleSeqAlignment, AlignInfo
 
+
 def generate_consensus(records):
     # Convert the list of sequence records to a MultipleSeqAlignment object
-    alignment     = MultipleSeqAlignment(records)
+    alignment = MultipleSeqAlignment(records)
     summary_align = AlignInfo.SummaryInfo(alignment)
     summary_align.dumb_consensus()
     return summary_align
 
 
 #!----------------------
+
 
 def util__backwards_match(aligned_target: str, resid: int):
     """Returns the target-sequence index of a residue in the (aligned) target sequence
@@ -222,6 +233,7 @@ def util__backwards_match(aligned_target: str, resid: int):
         else:
             counter_proper += 1
 
+
 def util__forwards_match(aligned_seq: str, resid: int):
     """Returns the index of a source-sequence residue in the aligned source sequence.
     Basically, "count forward including gaps until you reach @resid"
@@ -236,8 +248,10 @@ def util__forwards_match(aligned_seq: str, resid: int):
         else:
             count_proper += 1
 
+
 def barr2str(bArr):
     return "".join([x.decode("utf-8") for x in bArr])
+
 
 def seq_to_fasta(rcsb_id: str, _seq: str, outfile: str):
     from Bio.Seq import Seq
@@ -247,27 +261,31 @@ def seq_to_fasta(rcsb_id: str, _seq: str, outfile: str):
     seq_record.id = seq_record.description = rcsb_id
     SeqIO.write(seq_record, outfile, "fasta")
 
+
 def phylogenetic_neighborhood(
     taxids_base: list[str], taxid_target: str, n_neighbors: int = 10
 ) -> list[str]:
     """Given a set of taxids and a target taxid, return a list of the [n_neighbors] phylogenetically closest to the target."""
 
-    tree            = NCBITaxa().get_topology(list(set([*taxids_base, str(taxid_target)])))
-    target_node     = tree.search_nodes(name=str(taxid_target))[0]
-    phylo_all_nodes = [
-        (node.name, tree.get_distance(target_node, node)) for node in tree.traverse()
-    ]
+    ncbi_ = NCBITaxa()
+    tree = ncbi_.get_topology(list(set([*taxids_base, str(taxid_target)])))
+    target_node = tree.search_nodes(name=str(taxid_target))[0]
+    phylo_all_nodes = [(node.name, tree.get_distance(target_node, node)) for node in tree.traverse()]
     phylo_extant_nodes = filter(lambda taxid: taxid[0] in taxids_base, phylo_all_nodes)
     phylo_sorted_nodes = sorted(phylo_extant_nodes, key=lambda x: x[1])
 
     nbr_taxids = list(map(lambda tax_phydist: tax_phydist[0], phylo_sorted_nodes))
 
+    print("phylo nbhd end")
     if len(nbr_taxids) < n_neighbors:
         return nbr_taxids[1:]
     else:
         return nbr_taxids[1 : n_neighbors + 1]
 
-def muscle_align_N_seq(seq_records: list[SeqRecord], vvv:bool=False) -> Iterator[SeqRecord]:
+
+def muscle_align_N_seq(
+    seq_records: list[SeqRecord], vvv: bool = False
+) -> Iterator[SeqRecord]:
     """Given a MSA of a protein class, and a fasta string of a chain, return a new MSA with the chain added to the class MSA."""
 
     with tempfile.NamedTemporaryFile(delete=False, mode="w") as temp_file:
@@ -282,9 +300,9 @@ def muscle_align_N_seq(seq_records: list[SeqRecord], vvv:bool=False) -> Iterator
         try:
             process = subprocess.run(muscle_cmd, stdout=subprocess.PIPE, text=True)
             if process.returncode == 0:
-                muscle_out           = process.stdout
+                muscle_out = process.stdout
                 muscle_output_handle = StringIO(muscle_out)
-                seq_records_a          = SeqIO.parse(muscle_output_handle, "fasta")
+                seq_records_a = SeqIO.parse(muscle_output_handle, "fasta")
 
                 if vvv:
                     pprint("Done.")
@@ -303,6 +321,7 @@ def muscle_align_N_seq(seq_records: list[SeqRecord], vvv:bool=False) -> Iterator
             temp_file.close()
             os.remove(temp_filename)
             raise Exception("Error running muscle.")
+
 
 # def fasta_display_species(fasta_path: str):
 #     def extract_tax_id(input_string):
@@ -330,8 +349,6 @@ def muscle_align_N_seq(seq_records: list[SeqRecord], vvv:bool=False) -> Iterator
 #         scientific_name = ncbi.get_taxid_translator([taxid]).get(taxid, "Unknown")
 #         node.name = scientific_name
 #     print(tree.get_ascii(attributes=["name", "sci_name"]))
-
-
 
 
 # def taxid_ancestor_at_rank(taxid:int, rank:PhylogenyRank )->int| None:

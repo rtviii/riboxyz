@@ -254,13 +254,6 @@ def pt_is_inside_cylinder(cylinder, point):
     return False
 
 
-#! ------------------------------ MESH GENERATION
-import open3d as o3d
-from open3d import core as o3c
-from mendeleev import element
-import pandas as pd
-
-
 # Tunnel refinement:
 # - using the centerline and dynamic probe radius, extract the atoms within 15A radius of the centerline
 # - when processing atoms, encode their vdw radius, atom type and residue and chain id
@@ -315,8 +308,8 @@ def encode_atoms(rcsb_id: str, nearby_atoms_list: list[Atom]):
     """
     profile      = RibosomeAssets(rcsb_id).profile()
     nomenclature = profile.get_nomenclature_map()
-    vdw_radii    = { }
-    aggregate = []
+    vdw_radii    = {}
+    aggregate    = []
 
 
     for a in nearby_atoms_list:
