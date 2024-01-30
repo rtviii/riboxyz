@@ -9,7 +9,6 @@ from ribctl.cli.ls import cmd_ls
 from ribctl.cli.sync import cmd_sync
 from ribctl.lib.mod_transpose_bsites import init_transpose_ligand
 from ribctl.lib.ribosome_types.types_binding_site import BindingSite
-from ribctl.lib.libmsa import fasta_display_species
 
 def parse_comma_separated_list(value):
     return value.split(',')
@@ -22,14 +21,8 @@ subparsers = parser.add_subparsers(title='Subcommands', dest='command')
 #! -------------------------- fasta -------------------------- #
 #! -------------------------- --- -------------------------- #
 
-parser_cmd_fasta = subparsers.add_parser('fasta', help='Dealing with sequences')
-parser_cmd_fasta.add_argument('--path', type=str, required=True, help='Path to fasta file')
 
-def cmd_fasta(args):
-    if args.path:
-        fasta_display_species(args.path)
 
-parser_cmd_fasta.set_defaults(func=cmd_fasta)
 
 
 #! -------------------------- --- -------------------------- #
@@ -69,7 +62,16 @@ from ribctl.etl.ribosome_assets import Assetlist, RibosomeAssets
 
 def cmd_etl(args):
 
-    ASL = Assetlist()
+    ASL = Assetlist(
+        profile                 = False,
+        ptc_coords              = False,
+        cif                     = False,
+        cif_modified_and_chains = False,
+        ligands                 = False,
+        png_thumbnail           = False,
+        
+
+    )
 
     if args.profile:
         ASL.profile=True

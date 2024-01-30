@@ -5,7 +5,7 @@ from pprint import pprint
 from ribctl import RIBETL_DATA
 from ribctl.etl.ribosome_assets import RibosomeAssets
 from ribctl.lib.ribosome_types.types_ribosome import PolynucleotideClass, PolypeptideClass, RibosomeStructure
-from ribctl.lib.taxlib import  get_descendants_of, taxid_is_descendant_of,descendants_of_taxid
+# from ribctl.lib.libmsa import  Taxid
 
 
 def cmd_ls(args):
@@ -30,7 +30,7 @@ def cmd_ls(args):
             rp = RibosomeAssets(struct).profile()
             pdbid_taxid_tuples.append(( rp.rcsb_id, rp.src_organism_ids[0] ))
 
-        pprint(descendants_of_taxid( pdbid_taxid_tuples, int(args.taxid)))
+        pprint(Taxid.descendants_of_taxid( pdbid_taxid_tuples, int(args.taxid)))
 
     elif args.subelement != None:
         subelem = args.subelement

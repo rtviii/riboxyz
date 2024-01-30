@@ -3,6 +3,7 @@ import open3d as o3d
 import json
 import os
 import numpy as np
+<<<<<<< Updated upstream
 from ribctl.lib.tunnel import (
     encode_atoms,
     open_tunnel_csv,
@@ -18,8 +19,32 @@ tunnel_encoding = (
     "/home/rtviii/dev/riboxyz/mesh_generation/{}_tunnel_atoms.json".format(RCSB_ID)
 )
 encoded = None
+=======
+from ribctl.lib.tunnel import encode_atoms, open_tunnel_csv, parse_struct_via_centerline, get_sphere_indices_voxelized
 
 
+RCSB_ID = '6Z6K'
+#? Linining radius is the increment(in Angstroms ) to the dynamic probe radius that mole extracts 
+LINING_RADIUS = 15
+
+
+tunnel_encoding = '/home/rtviii/dev/riboxyz/mesh_generation/{}_{}A_tunnel_atoms.json'.format(RCSB_ID,LINING_RADIUS)
+encoded         = None
+
+if not os.path.isfile(tunnel_encoding):
+    data    = open_tunnel_csv(RCSB_ID)
+    atoms   = parse_struct_via_centerline(RCSB_ID,data, LINING_RADIUS)
+    encoded = encode_atoms(RCSB_ID,atoms)
+    with open(tunnel_encoding, 'w') as f:
+        json.dump(encoded,f)
+        print("Wrote tunnel atoms to {}".format(f))
+else:
+    with open(tunnel_encoding, 'r') as f:
+        encoded = json.load(f)
+>>>>>>> Stashed changes
+
+
+<<<<<<< Updated upstream
 def get_tunnel_atoms_file() -> list:
     if not os.path.isfile(tunnel_encoding):
         data = open_tunnel_csv(RCSB_ID)
@@ -33,6 +58,11 @@ def get_tunnel_atoms_file() -> list:
         with open(tunnel_encoding, "r") as f:
             encoded = json.load(f)
             return encoded
+=======
+spheres_sources = [(atom['coord'],atom['vdw_radius']) for atom in encoded]
+expanded_coords = [[0,0,0]]
+# expanded_coords = np.array([])
+>>>>>>> Stashed changes
 
 
 # for i,atom in enumerate(encoded):

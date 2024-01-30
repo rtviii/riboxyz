@@ -310,7 +310,7 @@ class ReannotationPipeline:
                     # TODO: MOVE TO HMM BASED CLASSIFICATION METHOD
                     reshaped_proteins.extend(self.poly_reshape_to_rprotein(poly))
             else:
-                # print("Filtered out a protein")
+                print("Filtered out a protein")
                 ...
 
         self.rProteins = reshaped_proteins
@@ -723,6 +723,7 @@ class ReannotationPipeline:
 
         protein_alphabet      = pyhmmer.easel.Alphabet.amino()
         protein_classifier    = HMMClassifier( _prot_polypeptides, protein_alphabet, [p for p in [ *list(CytosolicProteinClass),*list(LifecycleFactorClass) , *list(MitochondrialProteinClass)] ])
+        print("Initialized a classifier: ", protein_classifier)
         protein_classifier.classify_chains()
        
         rna_alphabet             = pyhmmer.easel.Alphabet.rna()
@@ -734,6 +735,8 @@ class ReannotationPipeline:
 
         full_report      = { **rna_classifier.report, **protein_classifier.report }
         reported_classes = { k:v for ( k,v ) in [*prot_classification.items(), *rna_classification.items()] }
+
+        print("Got here <<<<<<<")
 
         #! Saving results
         report_path      = os.path.join(CLASSIFICATION_REPORTS, f"{rcsb_id}.json")
