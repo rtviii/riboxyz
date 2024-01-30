@@ -10,7 +10,6 @@ from Bio.Align import MultipleSeqAlignment
 from Bio.Seq import Seq 
 from Bio.SeqRecord import SeqRecord
 from Bio.Align.Applications import MuscleCommandline
-from Bio import SeqIO, AlignIO, pairwise2
 import re
 import pyhmmer
 from ribctl import ASSETS, MUSCLE_BIN
