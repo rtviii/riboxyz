@@ -7,7 +7,6 @@ from typing import List
 import sys
 import typing
 from Bio import pairwise2
-import itertools
 from ribctl.lib.ribosome_types.types_binding_site import LigandPrediction, PredictedResiduesPolymer
 from ribctl.lib.ribosome_types.types_ribosome import PolymerClass, RibosomeStructure
 from ribctl.lib.mod_extract_bsites import  BindingSite, struct_ligand_ids, bsite_extrarbx_polymer
