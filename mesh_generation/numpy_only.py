@@ -95,8 +95,8 @@ with open(
 
 
 num_workers      = 15
-cords_NORMALIZED = np.array(list(map(lambda x: x["coord"], data)))
-cords_NORMALIZED = normalize_atom_coordinates(cords_NORMALIZED)
+cords            = np.array(list(map(lambda x: x["coord"], data)))
+cords_NORMALIZED = normalize_atom_coordinates(cords)
 cords_SPHERES    = []
 radii            = np.array(list(map(lambda x: x["vdw_radius"], data)))
 sphere_sources   = zip(cords_NORMALIZED,radii)
@@ -145,19 +145,21 @@ final_source = xyz_v.T
 
 print("shape of grid: ", np.shape(vox_grid))
 print(np.shape(xyz_v.T))
+import cc3d
+import numpy as np
 
-N_points = np.shape(xyz_v.T)[0]
+# N_points = np.shape(xyz_v.T)[0]
 
-color_vals = final_source.copy()
-for position, color_value in np.ndenumerate(final_source):
-    color_vals[position] = abs(color_value - random.randrange(0, 255))
+# color_vals = final_source.copy()
+# for position, color_value in np.ndenumerate(final_source):
+#     color_vals[position] = abs(color_value - random.randrange(0, 255))
 
-cval_opacity = []
-for point in final_source:
-    # cval_opacity.append([ 0.2,*cval,])
-    cval_opacity.append([ 100,100,100,0.1])
-    # print(cval)
-# exit()
+# cval_opacity = []
+# for point in final_source:
+#     # cval_opacity.append([ 0.2,*cval,])
+#     cval_opacity.append([ 100,100,100,0.1])
+#     # print(cval)
+# # exit()
 
 
 # print(color_vals)
