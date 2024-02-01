@@ -95,11 +95,12 @@ with open(
 
 
 num_workers      = 15
-cords            = np.array(list(map(lambda x: x["coord"], data)))
-cords_NORMALIZED = normalize_atom_coordinates(cords)
+
+__cords = np.array(list(map(lambda x: x["coord"], data)))
+__radii            = np.array(list(map(lambda x: x["vdw_radius"], data)))
+cords_NORMALIZED = normalize_atom_coordinates(__cords)
 cords_SPHERES    = []
-radii            = np.array(list(map(lambda x: x["vdw_radius"], data)))
-sphere_sources   = zip(cords_NORMALIZED,radii)
+sphere_sources   = zip(cords_NORMALIZED,__radii)
 
 
 def voxelize_to_spheres():
@@ -135,18 +136,19 @@ VOXEL_SIZE  = 1
 coordinates_x = cords_SPHERES[:, 0]; max_dim_x = np.max(coordinates_x)
 coordinates_y = cords_SPHERES[:, 1]; max_dim_y = np.max(coordinates_y)
 coordinates_z = cords_SPHERES[:, 2]; max_dim_z = np.max(coordinates_z)
+
 xyz_q         = np.round(np.array(cords_SPHERES/VOXEL_SIZE)).astype(int) # quantized point values, here you will loose precision
 vox_grid      = np.zeros((int(max_dim_x/VOXEL_SIZE)+1, int(max_dim_y/VOXEL_SIZE)+1, int(max_dim_z/VOXEL_SIZE)+1))
 
 vox_grid[xyz_q[:,0],xyz_q[:,1],xyz_q[:,2]] = 1
 
-xyz_v        = np.asarray(np.where(vox_grid == 1))
+xyz_v        = np.asarray(np.where(vox_grid != 1))
 final_source = xyz_v.T
 
-print("shape of grid: ", np.shape(vox_grid))
-print(np.shape(xyz_v.T))
-import cc3d
-import numpy as np
+# print("shape of grid: ", np.shape(vox_grid))
+# print(np.shape(xyz_v.T))
+# import cc3d
+# import numpy as np
 
 # N_points = np.shape(xyz_v.T)[0]
 
@@ -162,15 +164,13 @@ import numpy as np
 # # exit()
 
 
-# print(color_vals)
-# exit()
 import pyvista as pv
 ptcloud = pv.PolyData(xyz_v.T)
 plotter = pv.Plotter()
 plotter.add_points(ptcloud, opacity=0.1)
 plotter.show()
 
-exit()
+# exit()
 
 
 # import open3d as o3d
@@ -194,20 +194,20 @@ exit()
 # rescaled_coordinates, dim = normalize_atom_coordinates(coordinates)
 
 
-x,y,z = np.indices((dim, dim, dim))
-xc = midpoints(x)
-yc = midpoints(y)
-zc = midpoints(z)
-filled = xc + yc + zc  < -1 # nulling out the entire grid
+# x,y,z = np.indices((dim, dim, dim))
+# xc = midpoints(x)
+# yc = midpoints(y)
+# zc = midpoints(z)
+# filled = xc + yc + zc  < -1 # nulling out the entire grid
 
-for coordinate in cords_NORMALIZED:
-    # coordinates of the side of the given voxel
-    vox_x, vox_y, vox_z = (
-        int(np.floor(coordinate[0])),
-        int(np.floor(coordinate[1])),
-        int(np.floor(coordinate[2])),
-    )
-    nulled_grid[vox_x, vox_y, vox_z] = True
-filled = visualize_source_coordinates(filled,rescaled_coordinates)
+# for coordinate in cords_NORMALIZED:
+#     # coordinates of the side of the given voxel
+#     vox_x, vox_y, vox_z = (
+#         int(np.floor(coordinate[0])),
+#         int(np.floor(coordinate[1])),
+#         int(np.floor(coordinate[2])),
+#     )
+#     nulled_grid[vox_x, vox_y, vox_z] = True
+# filled = visualize_source_coordinates(filled,rescaled_coordinates)
 
-print(np.shape(filled))
+# print(np.shape(filled))
