@@ -81,6 +81,10 @@ def voxelize_to_spheres():
             update_expanded_coordinates(result)
 
 voxelize_to_spheres()
+
+np.array(expanded_coords)
+
+
 pcd        = o3d.geometry.PointCloud()
 pcd.points = o3d.utility.Vector3dVector(np.array(expanded_coords))
 voxel_grid = o3d.geometry.VoxelGrid.create_from_point_cloud(pcd, voxel_size=1)
@@ -91,6 +95,7 @@ o3d.visualization.draw_geometries([voxel_grid])
 import multiprocessing as mp
 print(mp.cpu_count())
 
+pprint(dir(o3d.geometry.VoxelGrid))
 # import pyvista
 # import numpy as np
 # import pooch
