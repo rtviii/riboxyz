@@ -56,40 +56,41 @@ expanded_coords = []
 print("Processing {} tunnel atoms".format(len(encoded)))
 
 
-def voxelize_to_spheres():
-    # Function to be executed by each worker
-    def sphere_task(args):
-        coordinate, vdw_R = args
-        result = get_sphere_indices_voxelized(coordinate, vdw_R)
-        return result
+# def voxelize_to_spheres():
+#     # Function to be executed by each worker
+#     def sphere_task(args):
+#         coordinate, vdw_R = args
+#         result = get_sphere_indices_voxelized(coordinate, vdw_R)
+#         return result
 
-    def update_expanded_coordinates(result):
-        expanded_coords.extend(result)
+#     def update_expanded_coordinates(result):
+#         expanded_coords.extend(result)
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=num_workers) as executor:
-        future_to_args = {
-            executor.submit(sphere_task, args): args for args in spheres_sources
-        }
+#     with concurrent.futures.ThreadPoolExecutor(max_workers=num_workers) as executor:
+#         future_to_args = {
+#             executor.submit(sphere_task, args): args for args in spheres_sources
+#         }
 
-        for future in concurrent.futures.as_completed(future_to_args):
-            result = future.result()
-            print(
-                "Added {} coordinates to expanded radii. Total: {}".format(
-                    len(result), len(expanded_coords)
-                )
-            )
-            update_expanded_coordinates(result)
+#         for future in concurrent.futures.as_completed(future_to_args):
+#             result = future.result()
+#             print(
+#                 "Added {} coordinates to expanded radii. Total: {}".format(
+#                     len(result), len(expanded_coords)
+#                 )
+#             )
+#             update_expanded_coordinates(result)
 
-voxelize_to_spheres()
+# voxelize_to_spheres()
 
-np.array(expanded_coords)
+# np.array(expanded_coords)
 
 
 pcd        = o3d.geometry.PointCloud()
-pcd.points = o3d.utility.Vector3dVector(np.array(expanded_coords))
+pcd.points = o3d.utility.Vector3dVector(np.array(center_coordinates))
 voxel_grid = o3d.geometry.VoxelGrid.create_from_point_cloud(pcd, voxel_size=1)
 pprint(dir(voxel_grid))
 
+o3d.visualization.draw_geometries([pcd])
 o3d.visualization.draw_geometries([voxel_grid])
 
 import multiprocessing as mp
