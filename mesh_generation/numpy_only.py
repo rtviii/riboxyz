@@ -2,6 +2,7 @@
 import json
 from pprint import pprint
 import concurrent.futures
+import random
 import numpy as np
 
 
@@ -93,11 +94,12 @@ with open(
     data = json.load(infile)
 
 
-num_workers         = 15
-coordinates         = np.array(list(map(lambda x: x["coord"], data)))
-coordinates_SPHERES = []
-radii               = np.array(list(map(lambda x: x["vdw_radius"], data)))
-sphere_sources      = zip(coordinates,radii)
+num_workers      = 15
+cords_NORMALIZED = np.array(list(map(lambda x: x["coord"], data)))
+cords_NORMALIZED = normalize_atom_coordinates(cords_NORMALIZED)
+cords_SPHERES    = []
+radii            = np.array(list(map(lambda x: x["vdw_radius"], data)))
+sphere_sources   = zip(cords_NORMALIZED,radii)
 
 
 def voxelize_to_spheres():
@@ -108,7 +110,7 @@ def voxelize_to_spheres():
         return result
 
     def update_expanded_coordinates(result):
-        coordinates_SPHERES.extend(result)
+        cords_SPHERES.extend(result)
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=num_workers) as executor:
         future_to_args = {
@@ -119,34 +121,62 @@ def voxelize_to_spheres():
             result = future.result()
             print(
                 "Added {} coordinates to expanded radii. Total: {}".format(
-                    len(result), len(coordinates_SPHERES)
+                    len(result), len(cords_SPHERES)
                 )
             )
             update_expanded_coordinates(result)
 
 voxelize_to_spheres()
-coordinates_SPHERES = np.array(coordinates_SPHERES)
+
+cords_SPHERES = np.array(cords_SPHERES)
 
 VOXEL_SIZE  = 1
 
-coordinates_x = coordinates_SPHERES[:, 0]; max_dim_x = np.max(coordinates_x)
-coordinates_y = coordinates_SPHERES[:, 1]; max_dim_y = np.max(coordinates_y)
-coordinates_z = coordinates_SPHERES[:, 2]; max_dim_z = np.max(coordinates_z)
-
-xyz_q    = np.round(np.array(coordinates_SPHERES/VOXEL_SIZE)).astype(int) # quantized point values, here you will loose precision
-vox_grid = np.zeros((int(max_dim_x/VOXEL_SIZE)+1, int(max_dim_y/VOXEL_SIZE)+1, int(max_dim_z/VOXEL_SIZE)+1))
+coordinates_x = cords_SPHERES[:, 0]; max_dim_x = np.max(coordinates_x)
+coordinates_y = cords_SPHERES[:, 1]; max_dim_y = np.max(coordinates_y)
+coordinates_z = cords_SPHERES[:, 2]; max_dim_z = np.max(coordinates_z)
+xyz_q         = np.round(np.array(cords_SPHERES/VOXEL_SIZE)).astype(int) # quantized point values, here you will loose precision
+vox_grid      = np.zeros((int(max_dim_x/VOXEL_SIZE)+1, int(max_dim_y/VOXEL_SIZE)+1, int(max_dim_z/VOXEL_SIZE)+1))
 
 vox_grid[xyz_q[:,0],xyz_q[:,1],xyz_q[:,2]] = 1
-xyz_v = np.asarray(np.where(vox_grid != 1))
+
+xyz_v        = np.asarray(np.where(vox_grid == 1))
+final_source = xyz_v.T
 
 print("shape of grid: ", np.shape(vox_grid))
 print(np.shape(xyz_v.T))
+
+N_points = np.shape(xyz_v.T)[0]
+
+color_vals = final_source.copy()
+for position, color_value in np.ndenumerate(final_source):
+    color_vals[position] = abs(color_value - random.randrange(0, 255))
+
+cval_opacity = []
+for point in final_source:
+    # cval_opacity.append([ 0.2,*cval,])
+    cval_opacity.append([ 100,100,100,0.1])
+    # print(cval)
+# exit()
+
+
+# print(color_vals)
+# exit()
+import pyvista as pv
+ptcloud = pv.PolyData(xyz_v.T)
+plotter = pv.Plotter()
+plotter.add_points(ptcloud, opacity=0.1)
+plotter.show()
+
+exit()
 
 
 # import open3d as o3d
 # pcd = o3d.geometry.PointCloud()
 # pcd.points = o3d.utility.Vector3dVector(xyz_v.T)
+# pcd.colors = o3d.utility.Vector3dVector()
 # voxel_grid = o3d.geometry.VoxelGrid.create_from_point_cloud(pcd, voxel_size=1)
+# o3d.visualization.draw_geometries([pcd])
 # o3d.visualization.draw_geometries([voxel_grid])
 
 
@@ -157,7 +187,6 @@ print(np.shape(xyz_v.T))
 #-------------; 
 
 
-exit(1)
 # voxel_size  = 0.5
 
 # rescaled_coordinates, dim = normalize_atom_coordinates(coordinates)
@@ -169,7 +198,7 @@ yc = midpoints(y)
 zc = midpoints(z)
 filled = xc + yc + zc  < -1 # nulling out the entire grid
 
-for coordinate in coordinates:
+for coordinate in cords_NORMALIZED:
     # coordinates of the side of the given voxel
     vox_x, vox_y, vox_z = (
         int(np.floor(coordinate[0])),
