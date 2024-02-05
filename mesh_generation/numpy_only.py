@@ -1,8 +1,5 @@
-
 import json
-from pprint import pprint
 import concurrent.futures
-import random
 import numpy as np
 
 
@@ -12,6 +9,7 @@ def midpoints(x):
         x = (x[sl + np.index_exp[:-1]] + x[sl + np.index_exp[1:]]) / 2.0
         sl += np.index_exp[:]
     return x
+
 
 def get_sphere_indices_voxelized(center: np.ndarray, radius: int):
     """Make sure radius reflects the size of the underlying voxel grid"""
@@ -48,6 +46,7 @@ def get_sphere_indices_voxelized(center: np.ndarray, radius: int):
 
     return np.array(sphere_active_ix)
 
+
 def normalize_atom_coordinates(coordinates: np.ndarray):
     """@param coordinates: numpy array of shape (N,3) for atoms lining the tunnel in radius R (usually 15Angstrom) from MOLE centerline"""
     #! normalize to origin
@@ -73,6 +72,7 @@ def normalize_atom_coordinates(coordinates: np.ndarray):
     # biggest_dimension = int( np.ceil(np.max([amplitude_Z, amplitude_Y, amplitude_X])) + 1 )
     return rescaled_coords
 
+
 def visualize_source_coordinates(
     nulled_grid: np.ndarray,
     coordinates: np.ndarray,
@@ -94,13 +94,13 @@ with open(
     data = json.load(infile)
 
 
-num_workers      = 15
+num_workers = 20
 
-__cords = np.array(list(map(lambda x: x["coord"], data)))
-__radii            = np.array(list(map(lambda x: x["vdw_radius"], data)))
+__cords          = np.array(list(map(lambda x: x["coord"], data)))
+__radii          = np.array(list(map(lambda x: x["vdw_radius"], data)))
 cords_NORMALIZED = normalize_atom_coordinates(__cords)
 cords_SPHERES    = []
-sphere_sources   = zip(cords_NORMALIZED,__radii)
+sphere_sources   = zip(cords_NORMALIZED, __radii)
 
 
 def voxelize_to_spheres():
@@ -127,44 +127,38 @@ def voxelize_to_spheres():
             )
             update_expanded_coordinates(result)
 
+
 voxelize_to_spheres()
 
 cords_SPHERES = np.array(cords_SPHERES)
 
-VOXEL_SIZE  = 1
+VOXEL_SIZE    = 1
 
-coordinates_x = cords_SPHERES[:, 0]; max_dim_x = np.max(coordinates_x)
-coordinates_y = cords_SPHERES[:, 1]; max_dim_y = np.max(coordinates_y)
-coordinates_z = cords_SPHERES[:, 2]; max_dim_z = np.max(coordinates_z)
+coordinates_x = cords_SPHERES[:, 0]
+max_dim_x     = np.max(coordinates_x)
+coordinates_y = cords_SPHERES[:, 1]
+max_dim_y     = np.max(coordinates_y)
+coordinates_z = cords_SPHERES[:, 2]
+max_dim_z     = np.max(coordinates_z)
 
-xyz_q         = np.round(np.array(cords_SPHERES/VOXEL_SIZE)).astype(int) # quantized point values, here you will loose precision
-vox_grid      = np.zeros((int(max_dim_x/VOXEL_SIZE)+1, int(max_dim_y/VOXEL_SIZE)+1, int(max_dim_z/VOXEL_SIZE)+1))
+xyz_q = np.round(np.array(cords_SPHERES / VOXEL_SIZE)).astype(
+    int
+)  # quantized point values, here you will loose precision
+vox_grid = np.zeros(
+    (
+        int(max_dim_x / VOXEL_SIZE) + 1,
+        int(max_dim_y / VOXEL_SIZE) + 1,
+        int(max_dim_z / VOXEL_SIZE) + 1,
+    )
+)
 
-vox_grid[xyz_q[:,0],xyz_q[:,1],xyz_q[:,2]] = 1
+vox_grid[xyz_q[:, 0], xyz_q[:, 1], xyz_q[:, 2]] = 1
 
-xyz_v        = np.asarray(np.where(vox_grid != 1))
+xyz_v = np.asarray(np.where(vox_grid != 1))
 final_source = xyz_v.T
 
-# print("shape of grid: ", np.shape(vox_grid))
-# print(np.shape(xyz_v.T))
-# import cc3d
-# import numpy as np
-
-# N_points = np.shape(xyz_v.T)[0]
-
-# color_vals = final_source.copy()
-# for position, color_value in np.ndenumerate(final_source):
-#     color_vals[position] = abs(color_value - random.randrange(0, 255))
-
-# cval_opacity = []
-# for point in final_source:
-#     # cval_opacity.append([ 0.2,*cval,])
-#     cval_opacity.append([ 100,100,100,0.1])
-#     # print(cval)
-# # exit()
-
-
 import pyvista as pv
+
 ptcloud = pv.PolyData(xyz_v.T)
 plotter = pv.Plotter()
 plotter.add_points(ptcloud, opacity=0.1)
@@ -182,11 +176,7 @@ plotter.show()
 # o3d.visualization.draw_geometries([voxel_grid])
 
 
-
-
-
-
-#-------------; 
+# -------------;
 
 
 # voxel_size  = 0.5
