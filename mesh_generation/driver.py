@@ -3,7 +3,7 @@ import open3d as o3d
 import json
 import os
 import numpy as np
-from ribctl.lib.tunnel import (
+from extraction import (
     encode_atoms,
     open_tunnel_csv,
     parse_struct_via_centerline,
