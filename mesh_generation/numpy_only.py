@@ -88,9 +88,7 @@ def visualize_source_coordinates(
     return nulled_grid
 
 
-with open(
-    "/home/rtviii/dev/riboxyz/mesh_generation/6Z6K_tunnel_atoms.json", "r"
-) as infile:
+with open( "/home/rtviii/dev/riboxyz/mesh_generation/6Z6K_tunnel_atoms.json", "r" ) as infile:
     data = json.load(infile)
 
 
@@ -161,6 +159,7 @@ import pyvista as pv
 
 ptcloud = pv.PolyData(xyz_v.T)
 plotter = pv.Plotter()
+
 plotter.add_points(ptcloud, opacity=0.1)
 plotter.show()
 

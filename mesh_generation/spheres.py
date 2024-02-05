@@ -4,14 +4,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 import open3d as o3d
 
-
 # TODO: convert to 1/10 Angstrom before scaling & shiftin to get a finer representation
 def bbox2(img):
     rows = np.any(img, axis=1)
     cols = np.any(img, axis=0)
     rmin, rmax = np.where(rows)[0][[0, -1]]
     cmin, cmax = np.where(cols)[0][[0, -1]]
-
     return rmin, rmax, cmin, cmax
 
 
@@ -107,8 +105,6 @@ def get_sphere_indices_voxelized(center: np.ndarray, radius: int):
 
     return np.array(sphere_active_ix)
 
-
-# Visualize just center coordinates
 def visualize_source_coordinates(
     nulled_grid: np.ndarray,
     coordinates: np.ndarray,
@@ -122,7 +118,6 @@ def visualize_source_coordinates(
         )
         nulled_grid[vox_x, vox_y, vox_z] = True
     return nulled_grid
-
 
 def visualize_as_spheres(
     nulled_grid, source_coordinates: np.ndarray, radii_types: np.ndarray
@@ -140,7 +135,6 @@ def visualize_as_spheres(
             nulled_grid[index] = True
     return nulled_grid
 
-
 def plt_plot(x_ix, y_ix, z_ix, filled_grid):
     # facecolors =  np.zeros(filled.shape + (3,))
     ax = plt.figure().add_subplot(projection="3d")
@@ -150,7 +144,6 @@ def plt_plot(x_ix, y_ix, z_ix, filled_grid):
 
     plt.show()
     exit()
-
 
 # * -------- KEEP
 rescaled_coordinates, dim = normalize_atom_coordinates(C)
@@ -179,10 +172,7 @@ plt_plot(x, y, z, filled)
 pcd = o3d.geometry.PointCloud()
 pcd.points = o3d.utility.Vector3dVector(np.array(expanded_indices))
 clrs = [[0, 0, 1]] * len(expanded_indices)
-# print(clrs)
-# exit()
 pcd.colors = o3d.utility.Vector3dVector(np.array(clrs))
-# o3d.visualization.draw_geometries([pcd])
 pcd = o3d.geometry.PointCloud()
 pcd.points = o3d.utility.Vector3dVector(np.array(expanded_indices))
 voxel_grid = o3d.geometry.VoxelGrid.create_from_point_cloud(pcd, voxel_size=1)

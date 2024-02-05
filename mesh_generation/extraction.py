@@ -1,7 +1,8 @@
-
 #! ------------------------------ MESH GENERATION
+import json
 import os
 from pprint import pprint
+import sys
 from typing import Tuple
 import numpy as np
 import open3d as o3d
@@ -46,18 +47,20 @@ def open_tunnel_csv(rcsb_id: str) -> list[list]:
     return data
 
 
-def parse_struct_via_centerline(rcsb_id: str, centerline_data: list, expansion_radius:int=15) -> list:
+def parse_struct_via_centerline(
+    rcsb_id: str, centerline_data: list, expansion_radius: int = 15
+) -> list:
     """centerline data is an array of lists [radius, x, y, z]"""
     from Bio.PDB.MMCIFParser import MMCIFParser
     from Bio.PDB.NeighborSearch import NeighborSearch
     from Bio.PDB import Selection
 
-    parser      = MMCIFParser()
+    parser = MMCIFParser()
     struct_path = "{}/{}/{}.cif".format(RIBETL_DATA, rcsb_id, rcsb_id)
-    structure   = parser.get_structure(rcsb_id, struct_path)
-    atoms       = Selection.unfold_entities(structure, "A")
-    ns          = NeighborSearch(atoms)
-    nbhd        = set()
+    structure = parser.get_structure(rcsb_id, struct_path)
+    atoms = Selection.unfold_entities(structure, "A")
+    ns = NeighborSearch(atoms)
+    nbhd = set()
 
     for [probe_radius, x, y, z] in centerline_data:
         nearby_atoms = ns.search([x, y, z], probe_radius + expansion_radius, "A")
@@ -65,26 +68,38 @@ def parse_struct_via_centerline(rcsb_id: str, centerline_data: list, expansion_r
 
     return list(nbhd)
 
-def parse_struct_via_bbox(rcsb_id: str, bbox:Tuple[list,list]) -> list:
+
+def parse_struct_via_bbox(rcsb_id: str, bbox: Tuple[list, list]) -> list:
     """bbox is a tuple of minx,miny,minz and maxx,maxy,maxz points"""
     from Bio.PDB.MMCIFParser import MMCIFParser
     from Bio.PDB.NeighborSearch import NeighborSearch
     from Bio.PDB import Selection
 
-    parser      = MMCIFParser()
-    struct_path = "{}/{}/{}.cif".format(RIBETL_DATA, rcsb_id, rcsb_id)
-    structure   = parser.get_structure(rcsb_id, struct_path)
-    atoms       = Selection.unfold_entities(structure, "A")
-    ns          = NeighborSearch(atoms)
-    nbhd        = set()
+    bbox_min, bbox_max = bbox
+    min_x, min_y, min_z = bbox_min
+    max_x, max_y, max_z = bbox_max
 
-    for [probe_radius, x, y, z] in centerline_data:
-        nearby_atoms = ns.search([x, y, z], probe_radius + expansion_radius, "A")
-        nbhd.update(nearby_atoms)
+    parser = MMCIFParser()
+    struct_path = "{}/{}/{}.cif".format(RIBETL_DATA, rcsb_id, rcsb_id)
+    structure = parser.get_structure(rcsb_id, struct_path)
+    atoms = Selection.unfold_entities(structure, "A")
+    nbhd = []
+
+    print(
+        "Checking atoms (# {})in struct against bbox: ".format(len(atoms)),
+        bbox_min,
+        bbox_max,
+    )
+    for atom in atoms:
+        a_x, a_y, a_z = atom.get_coord()
+        if min_x+10 <= a_x <= max_x+10 and min_y+10 <= a_y <= max_y+10 and min_z+10 <= a_z <= max_z+10:
+            print("Passed <<<<<<<<<<<<<")
+            nbhd.append(atom)
 
     return list(nbhd)
 
-def encode_atoms(rcsb_id: str, nearby_atoms_list: list[Atom]):
+
+def encode_atoms(rcsb_id: str, nearby_atoms_list: list[Atom], write=False) -> list:
     """given a list of atoms lining the tunnel, annotate each with:
     - parent chain id
     - nomenclature
@@ -94,9 +109,8 @@ def encode_atoms(rcsb_id: str, nearby_atoms_list: list[Atom]):
     """
     profile      = RibosomeAssets(rcsb_id).profile()
     nomenclature = profile.get_nomenclature_map()
-    vdw_radii    = { }
-    aggregate = []
-
+    vdw_radii    = {}
+    aggregate    = []
 
     for a in nearby_atoms_list:
         parent_residue      = a.get_parent()
@@ -105,50 +119,63 @@ def encode_atoms(rcsb_id: str, nearby_atoms_list: list[Atom]):
         chain_auth_asym_id  = a.get_full_id()[2]
         parent_nomenclature = nomenclature[chain_auth_asym_id]
         a_element           = a.element
-        
+
         if a_element not in vdw_radii:
             vdw_radii[a_element] = element(a_element).vdw_radius / 100
 
-        atom_dict = { 
-                    "coord"             : a.get_coord().tolist(),
-                    "chain_auth_asym_id": chain_auth_asym_id,
-                    "chain_nomenclature": parent_nomenclature,
-                    "residue_name"      : residue_name,
-                    "residue_seqid"     : residue_seqid,
-                    "atom_element"      : a.element,
-                    "vdw_radius"        : vdw_radii[a_element],
-                      }
+        atom_dict = {
+            "coord": a.get_coord().tolist(),
+            "chain_auth_asym_id": chain_auth_asym_id,
+            "chain_nomenclature": parent_nomenclature,
+            "residue_name": residue_name,
+            "residue_seqid": residue_seqid,
+            "atom_element": a.element,
+            "vdw_radius": vdw_radii[a_element],
+        }
         aggregate.append(atom_dict)
+
+    if write:
+        with open( "/home/rtviii/dev/riboxyz/mesh_generation/{}_tunnel_atoms_bbox.json".format( rcsb_id ), "w", ) as outfile:
+            json.dump(aggregate, outfile, indent=4)
+        print( "Wrote {} tunnel atoms to disk : /home/rtviii/dev/riboxyz/mesh_generation/{}_tunnel_atoms_bbox.json".format( len(aggregate), rcsb_id ) )
+
     return aggregate
 
-def create_pcd_from_atoms( positions: np.ndarray, atom_types: np.ndarray, save_path: str ):
-    pcd        = o3d.geometry.PointCloud(o3d.utility.Vector3dVector(positions))
+
+def create_pcd_from_atoms(
+    positions: np.ndarray, atom_types: np.ndarray, save_path: str
+):
+    pcd = o3d.geometry.PointCloud(o3d.utility.Vector3dVector(positions))
     pcd.colors = o3d.utility.Vector3dVector(atom_types)
     o3d.io.write_point_cloud(save_path, pcd)
 
-#TODO : 1. Remove ions and non-standard residues when refining the tunnel
-#TODO : CHECK. make the centerline scan in refinement dynamic (on radius of probe) 
+
+# TODO : 1. Remove ions and non-standard residues when refining the tunnel
+# TODO : CHECK. make the centerline scan in refinement dynamic (on radius of probe)
+
 
 def get_sphere_indices_voxelized(center: np.ndarray, radius: int):
-
     """Make sure radius reflects the size of the underlying voxel grid"""
     x0, y0, z0 = center
 
     #!------ Generate indices of a voxel cube of side 2r+2  around the centerpoint
-    x_range = slice(int(np.floor(x0) - (radius )), int(np.ceil(x0) + (radius )))
-    y_range = slice(int(np.floor(y0) - (radius )), int(np.ceil(y0) + (radius )))
-    z_range = slice(int(np.floor(z0) - (radius )), int(np.ceil(z0) + (radius )))
+    x_range = slice(int(np.floor(x0) - (radius)), int(np.ceil(x0) + (radius)))
+    y_range = slice(int(np.floor(y0) - (radius)), int(np.ceil(y0) + (radius)))
+    z_range = slice(int(np.floor(z0) - (radius)), int(np.ceil(z0) + (radius)))
 
-    indices = np.indices((
-                x_range.stop - x_range.start,
-                y_range.stop - y_range.start,
-                z_range.stop - z_range.start
-            )
+    indices = np.indices(
+        (
+            x_range.stop - x_range.start,
+            y_range.stop - y_range.start,
+            z_range.stop - z_range.start,
+        )
     )
 
-    indices      += np.array([x_range.start, y_range.start, z_range.start])[ :, np.newaxis, np.newaxis, np.newaxis ]
-    indices       = indices.transpose(1, 2, 3, 0)
-    indices_list  = list(map(tuple, indices.reshape(-1, 3)))
+    indices += np.array([x_range.start, y_range.start, z_range.start])[
+        :, np.newaxis, np.newaxis, np.newaxis
+    ]
+    indices = indices.transpose(1, 2, 3, 0)
+    indices_list = list(map(tuple, indices.reshape(-1, 3)))
     #!------ Generate indices of a voxel cube of side 2r+2  around the centerpoint
 
     sphere_active_ix = []
@@ -163,16 +190,17 @@ def get_sphere_indices_voxelized(center: np.ndarray, radius: int):
     return np.array(sphere_active_ix)
 
 
-def centerline_get_bbox(rcsb_id:str):
+def centerline_get_bbox(rcsb_id: str):
 
     data = np.array(open_tunnel_csv(rcsb_id))
     Cx = data[:, 1]
     Cy = data[:, 2]
     Cz = data[:, 3]
 
+    return [np.min(Cx), np.min(Cy), np.min(Cz)], [np.max(Cx), np.max(Cy), np.max(Cz)]
 
-    return [ np.min(Cx), np.min(Cy),  np.min(Cz) ],[ np.max(Cx), np.max(Cy), np.max(Cz) ]
 
-print(centerline_get_bbox("6Z6K"))
-
-(bb_p1, bb_p2) = parse_struct_via_centerline("6Z6K", open_tunnel_csv("6Z6K"))
+RCSB_ID        = sys.argv[1].upper()
+(bb_p1, bb_p2) = centerline_get_bbox(RCSB_ID)
+atoms          = parse_struct_via_bbox(RCSB_ID, (bb_p1, bb_p2))
+encode_atoms(RCSB_ID, atoms, write=True)
