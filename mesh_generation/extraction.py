@@ -22,7 +22,7 @@ from Bio.PDB.Atom import Atom
 from functools import reduce
 from Bio.PDB.Structure import Structure
 from ribctl.lib.ribosome_types.types_ribosome import RNA
-
+from compas.geometry import bounding_box, oriented_bounding_box_numpy
 
 # Tunnel refinement:
 # - using the centerline and dynamic probe radius, extract the atoms within 15A radius of the centerline
@@ -69,15 +69,12 @@ def parse_struct_via_centerline(
     return list(nbhd)
 
 
-def parse_struct_via_bbox(rcsb_id: str, bbox: Tuple[list, list]) -> list:
+def parse_struct_via_bbox(rcsb_id: str, bbox: list) -> list:
     """bbox is a tuple of minx,miny,minz and maxx,maxy,maxz points"""
     from Bio.PDB.MMCIFParser import MMCIFParser
     from Bio.PDB.NeighborSearch import NeighborSearch
     from Bio.PDB import Selection
 
-    bbox_min, bbox_max = bbox
-    min_x, min_y, min_z = bbox_min
-    max_x, max_y, max_z = bbox_max
 
     parser = MMCIFParser()
     struct_path = "{}/{}/{}.cif".format(RIBETL_DATA, rcsb_id, rcsb_id)
@@ -85,16 +82,28 @@ def parse_struct_via_bbox(rcsb_id: str, bbox: Tuple[list, list]) -> list:
     atoms = Selection.unfold_entities(structure, "A")
     nbhd = []
 
-    print(
-        "Checking atoms (# {})in struct against bbox: ".format(len(atoms)),
-        bbox_min,
-        bbox_max,
-    )
+    def is_inside_box(point, box_coordinates):
+        EXPANSION_RADIUS = 20
+        min_x = min(box_coordinates, key=lambda x: x[0])[0]
+        max_x = max(box_coordinates, key=lambda x: x[0])[0]
+
+        min_y = min(box_coordinates, key=lambda x: x[1])[1]
+        max_y = max(box_coordinates, key=lambda x: x[1])[1]
+
+        min_z = min(box_coordinates, key=lambda x: x[2])[2]
+        max_z = max(box_coordinates, key=lambda x: x[2])[2]
+
+        if  min_x+EXPANSION_RADIUS <= point[0] <= max_x+EXPANSION_RADIUS and \
+            min_y+EXPANSION_RADIUS <= point[1] <= max_y+EXPANSION_RADIUS and \
+            min_z+EXPANSION_RADIUS <= point[2] <= max_z+EXPANSION_RADIUS:
+            return True
+        else:
+            return False
+
     for atom in atoms:
-        a_x, a_y, a_z = atom.get_coord()
-        if min_x+10 <= a_x <= max_x+10 and min_y+10 <= a_y <= max_y+10 and min_z+10 <= a_z <= max_z+10:
-            print("Passed <<<<<<<<<<<<<")
+        if is_inside_box(atom.get_coord(), bbox):
             nbhd.append(atom)
+        
 
     return list(nbhd)
 
@@ -190,17 +199,18 @@ def get_sphere_indices_voxelized(center: np.ndarray, radius: int):
     return np.array(sphere_active_ix)
 
 
-def centerline_get_bbox(rcsb_id: str):
+def cloud_get_bbox(coords: np.ndarray):
 
-    data = np.array(open_tunnel_csv(rcsb_id))
-    Cx = data[:, 1]
-    Cy = data[:, 2]
-    Cz = data[:, 3]
-
-    return [np.min(Cx), np.min(Cy), np.min(Cz)], [np.max(Cx), np.max(Cy), np.max(Cz)]
+    bbox = bounding_box()
+    return bbox
 
 
-RCSB_ID        = sys.argv[1].upper()
-(bb_p1, bb_p2) = centerline_get_bbox(RCSB_ID)
-atoms          = parse_struct_via_bbox(RCSB_ID, (bb_p1, bb_p2))
-encode_atoms(RCSB_ID, atoms, write=True)
+
+
+RCSB_ID = sys.argv[1].upper()
+cloud   = parse_struct_via_centerline(RCSB_ID, open_tunnel_csv(RCSB_ID))
+bbox    = bounding_box(cloud)
+print("Got cloud," , len(cloud), "atoms")
+print("got bbox", bbox)
+# atoms   = parse_struct_via_bbox(RCSB_ID, bbox)
+# encode_atoms(RCSB_ID, atoms, write=True)
