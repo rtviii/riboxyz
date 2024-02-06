@@ -2,7 +2,7 @@
 # `riboxyz`
 
 <p align="center">
-<img src="./ray-logo-transp.png" height="200" width="220" >
+<img src="./riboxyz_logo.png" height="200" width="220" >
 </p>
 
 `riboxyz` (available at https://ribosome.xyz) is a package and a database application that provides organized access to ribosome structures, with several tools for visualisation and study. The database is up-to-date with the Protein Data Bank (PDB), provides a [standardized nomenclature](https://github.com/rtviii/riboxyz/blob/master/ribctl/lib/ribosome_types/types_ribosome.py) to ribosomal components:
