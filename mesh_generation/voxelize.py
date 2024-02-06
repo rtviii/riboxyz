@@ -111,7 +111,7 @@ def voxelize_to_spheres(sphere_sources):
     # Function to be executed by each worker
     def sphere_task(args):
         coordinate, vdw_R = args
-        result = get_sphere_indices_voxelized(coordinate, vdw_R)
+        result = get_sphere_indices_voxelized(coordinate, 2)
         return result
 
     def update_expanded_coordinates(result):
@@ -130,43 +130,24 @@ def voxelize_to_spheres(sphere_sources):
 
 RCSB_ID = sys.argv[1].upper()
 with open( "/Users/rtviii/dev/riboxyz/mesh_generation/{}_tunnel_atoms_bbox.json".format(RCSB_ID), "r" ) as infile:
-    data = json.load(infile)
+    ptcloud_data = json.load(infile)
 
-__cords          = np.array(list(map(lambda x: x["coord"], data)))
-__radii          = np.array(list(map(lambda x: x["vdw_radius"], data)))
+__cords          = np.array(list(map(lambda x: x["coord"], ptcloud_data)))
+__radii          = np.array(list(map(lambda x: x["vdw_radius"], ptcloud_data)))
 # cords_NORMALIZED = normalize_atom_coordinates(__cords)
 sphere_sources   = zip(__cords, __radii)
 voxelize_to_spheres(sphere_sources) # This is called dynamically to expand coordinates to van der waals spheres
 cords_SPHERES = np.array(cords_SPHERES)
 
 
-# import pyvista as pv
-
-# point_cloud           = pv.PolyData(cords_SPHERES)
-# rgba= np.array([[100,50,60,0.1] for _ in range(cords_SPHERES.shape[0])])
-# point_cloud['rgba'] = rgba
-# point_cloud.plot(scalars='rgba', rgb=True, notebook=False)
-
-
-# N = cords_SPHERES_normalized.shape[0]
 import pyvista as pv
 normalized_sphere_cords = normalize_atom_coordinates(cords_SPHERES)
-print(normalized_sphere_cords.shape)
-# 
-# exit()
-
 voxel_size = 1 
 sphere_cords_quantized      = np.round(np.array(normalized_sphere_cords/voxel_size)).astype(int) 
 
 max_values = np.max(sphere_cords_quantized, axis=0)
 grid_dimensions = max_values +1
-print("got grid dims:", grid_dimensions)
 vox_grid = np.zeros(grid_dimensions)
-
-
-# vox_grid   = np.zeros(( biggest_dims[0], 
-#                        biggest_dims[1],
-#                        biggest_dims[2] )) 
 
 vox_grid[sphere_cords_quantized[:,0],sphere_cords_quantized[:,1],sphere_cords_quantized[:,2]] = 1 # Setting all voxels containitn a points equal to 1
 
@@ -174,12 +155,57 @@ xyz_v_negative = np.asarray(np.where(vox_grid != 1)) # get back indexes of popul
 xyz_v_positive = np.asarray(np.where(vox_grid == 1)) # get back indexes of populated voxels
 
 
-dd = np.concatenate([xyz_v_positive.T, xyz_v_negative.T])
-print(dd)
+# ptcloud_data = np.concatenate([xyz_v_positive.T, xyz_v_negative.T])
+# # ptcloud_data = xyz_v_negative.T
 
-point_cloud = pv.PolyData(dd)
-rgba_n                = np.array([[100,50,60,0.1] for _ in xyz_v_negative.T] )
-rgba_p                = np.array([[20,240,0, 1] for _ in xyz_v_positive.T] )
-point_cloud['rgba'] = np.concatenate([rgba_p, rgba_n])
-point_cloud.plot(scalars='rgba', rgb=True, notebook=False)
+# point_cloud  = pv.PolyData(ptcloud_data)
+# rgba_n                = np.array([[250,0,0,0.1] for _ in xyz_v_negative.T] )
+# rgba_p                = np.array([[10,200,200, 1] for _ in xyz_v_positive.T] )
+# point_cloud['rgba']  = np.concatenate([rgba_p, rgba_n])
+# # point_cloud['rgba']  = rgba_n
+# point_cloud.plot(scalars='rgba', rgb=True, notebook=False)
 
+
+# pcd = o3d.geometry.PointCloud(o3d.utility.Vector3dVector(xyz_v_positive.T))
+# with o3d.utility.VerbosityContextManager(
+#         o3d.utility.VerbosityLevel.Debug) as cm:
+#     labels = np.array(
+#         pcd.cluster_dbscan(eps=1, min_points=10, print_progress=True))
+
+# max_label = labels.max()
+# print(f"point cloud has {max_label + 1} clusters")
+# colors = plt.get_cmap("tab20")(labels / (max_label if max_label > 0 else 1))
+# colors[labels < 0] = 0
+# pcd.colors = o3d.utility.Vector3dVector(colors[:, :3])
+# o3d.visualization.draw_geometries([pcd],
+#                                   zoom=0.455,
+#                                   front=[-0.4999, -0.1659, -0.8499],
+#                                   lookat=[2.1813, 2.0619, 2.0999],
+#                                   up=[0.1204, -0.9852, 0.1215])
+
+
+import numpy as np
+from sklearn import metrics
+from sklearn.cluster import DBSCAN
+
+EPSILON = 1
+MIN_SAMPLES = 1000
+METRIC = 'canberra'
+
+# From scipy.spatial.distance: 
+metrics = ["braycurtis", "canberra", "chebyshev", "correlation", "dice", 
+ "hamming", "jaccard", "kulsinski", "mahalanobis", "minkowski",
+  "rogerstanimoto", "russellrao", "seuclidean", "sokalmichener", 
+  "sokalsneath", "sqeuclidean", "yule"] + ["cityblock", "cosine", "euclidean", "l1", "l2", "manhattan"]
+
+
+
+db = DBSCAN(eps=1, min_samples=1000, metric='canberra', n_jobs=-1).fit(xyz_v_negative.T)
+labels = db.labels_
+
+# Number of clusters in labels, ignoring noise if present.
+n_clusters_ = len(set(labels)) - (1 if -1 in labels else 0)
+n_noise_ = list(labels).count(-1)
+
+print("Estimated number of clusters: %d" % n_clusters_)
+print("Estimated number of noise points: %d" % n_noise_)
