@@ -1,10 +1,10 @@
 import json
+from pprint import pprint
 from matplotlib import pyplot as plt
 import open3d as o3d
 import sys
 import numpy as np
 import concurrent.futures
-
 
 # Old
 def __np_workflow(C):
@@ -26,28 +26,23 @@ def midpoints(x):
 
 def normalize_atom_coordinates(coordinates: np.ndarray):
     """@param coordinates: numpy array of shape (N,3)"""
-    #! normalize to origin
+
+
     C = coordinates
     Cx = C[:, 0] - np.mean(C[:, 0])
     Cy = C[:, 1] - np.mean(C[:, 1])
     Cz = C[:, 2] - np.mean(C[:, 2])
 
-    #! negative deviation from zero"
-    dev = np.min([np.min(Cx), np.min(Cy), np.min(Cz)])
+    [ dev_x, dev_y, dev_z ] = [np.min(Cx), np.min(Cy), np.min(Cz)]
 
     #! shift to positive quadrant
-    Cx = Cx + abs(dev)
-    Cy = Cy + abs(dev)
-    Cz = Cz + abs(dev)
+    Cx = Cx + abs(dev_x)
+    Cy = Cy + abs(dev_y)
+    Cz = Cz + abs(dev_z)
+
     rescaled_coords = np.array(list(zip(Cx, Cy, Cz)))
 
-    # ! Create a 3D grid 10 voxels larger than the max amplitude of the point cloud in any direction
-    amplitude_X = np.max(Cx) - np.min(Cx)
-    amplitude_Y = np.max(Cy) - np.min(Cy)
-    amplitude_Z = np.max(Cz) - np.min(Cz)
-
-    return rescaled_coords, [np.ceil(np.max(amplitude_X)), np.ceil(np.max(amplitude_Y)), np.ceil(np.max(amplitude_Z))]
-
+    return rescaled_coords
 
 def visualize_source_coordinates(
     nulled_grid: np.ndarray,
@@ -134,7 +129,7 @@ def voxelize_to_spheres(sphere_sources):
             update_expanded_coordinates(result)
 
 RCSB_ID = sys.argv[1].upper()
-with open( "/home/rtviii/dev/riboxyz/mesh_generation/{}_tunnel_atoms_bbox.json".format(RCSB_ID), "r" ) as infile:
+with open( "/Users/rtviii/dev/riboxyz/mesh_generation/{}_tunnel_atoms_bbox.json".format(RCSB_ID), "r" ) as infile:
     data = json.load(infile)
 
 __cords          = np.array(list(map(lambda x: x["coord"], data)))
@@ -155,15 +150,25 @@ cords_SPHERES = np.array(cords_SPHERES)
 
 # N = cords_SPHERES_normalized.shape[0]
 import pyvista as pv
-normalized_sphere_cords, biggest_dims = normalize_atom_coordinates(cords_SPHERES)
+normalized_sphere_cords = normalize_atom_coordinates(cords_SPHERES)
+print(normalized_sphere_cords.shape)
+# 
+# exit()
 
-voxel_size = 1 # each voxel will be half of the pointclouds unit along each axis
-xyz_q      = np.round(np.array(normalized_sphere_cords/voxel_size)).astype(int) # quantized point values, here you will loose precision
-vox_grid   = np.zeros((int(np.max(biggest_dims)/voxel_size)+1, 
-                       int(np.max(biggest_dims)/voxel_size)+1,
-                       int(np.max(biggest_dims)/voxel_size)+1)) #Empty voxel grid
+voxel_size = 1 
+sphere_cords_quantized      = np.round(np.array(normalized_sphere_cords/voxel_size)).astype(int) 
 
-vox_grid[xyz_q[:,0],xyz_q[:,1],xyz_q[:,2]] = 1 # Setting all voxels containitn a points equal to 1
+max_values = np.max(sphere_cords_quantized, axis=0)
+grid_dimensions = max_values +1
+print("got grid dims:", grid_dimensions)
+vox_grid = np.zeros(grid_dimensions)
+
+
+# vox_grid   = np.zeros(( biggest_dims[0], 
+#                        biggest_dims[1],
+#                        biggest_dims[2] )) 
+
+vox_grid[sphere_cords_quantized[:,0],sphere_cords_quantized[:,1],sphere_cords_quantized[:,2]] = 1 # Setting all voxels containitn a points equal to 1
 
 xyz_v_negative = np.asarray(np.where(vox_grid != 1)) # get back indexes of populated voxels
 xyz_v_positive = np.asarray(np.where(vox_grid == 1)) # get back indexes of populated voxels
