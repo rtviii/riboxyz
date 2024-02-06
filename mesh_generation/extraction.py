@@ -175,15 +175,9 @@ if IF_VISUALIZE:
     point_cloud['colors'] = random_rgbs
     point_cloud.plot(scalars='colors', rgb=True, notebook=False)
 
-
-bbox_o  = oriented_bounding_box_numpy(np.array([a.get_coord() for a in cloud]))
-print("Oriented bounding box: ", bbox_o)
-
 bbox  = bounding_box(np.array([a.get_coord() for a in cloud]))
 print("Vanilla bounding box:", bbox)
-
 atoms_bboxed = parse_struct_via_bbox(RCSB_ID, bbox)
-
 if IF_VISUALIZE:
     cords_inside_bbox = np.array([a.get_coord() for a in atoms_bboxed])
     point_cloud           = pv.PolyData(cords_inside_bbox)
@@ -191,4 +185,4 @@ if IF_VISUALIZE:
     point_cloud['colors'] = random_rgbs
     point_cloud.plot(scalars='colors', rgb=True, notebook=False)
 
-# encode_atoms(RCSB_ID, atoms)
+encode_atoms(RCSB_ID, atoms_bboxed, write=True)

@@ -144,15 +144,13 @@ sphere_sources   = zip(__cords, __radii)
 voxelize_to_spheres(sphere_sources) # This is called dynamically to expand coordinates to van der waals spheres
 cords_SPHERES = np.array(cords_SPHERES)
 
+
 import pyvista as pv
+
 point_cloud           = pv.PolyData(cords_SPHERES)
-
-# Coloration
-random_rgbs           = np.random.randint(0, 256, size=cords_SPHERES.shape)
-point_cloud['colors'] = random_rgbs
-
-point_cloud.plot(scalars='colors', rgb=True, notebook=False)
-# point_cloud.plot()
+rgba= np.array([[100,50,60,0.1] for _ in range(cords_SPHERES.shape[0])])
+point_cloud['rgba'] = rgba
+point_cloud.plot(scalars='rgba', rgb=True, notebook=False)
 
 
 
