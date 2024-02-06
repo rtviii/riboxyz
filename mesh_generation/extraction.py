@@ -1,4 +1,5 @@
 #! ------------------------------ MESH GENERATION
+import pyvista as pv
 import json
 import os
 from pprint import pprint
@@ -76,14 +77,15 @@ def parse_struct_via_bbox(rcsb_id: str, bbox: list) -> list:
     from Bio.PDB import Selection
 
 
-    parser = MMCIFParser()
+    parser      = MMCIFParser()
     struct_path = "{}/{}/{}.cif".format(RIBETL_DATA, rcsb_id, rcsb_id)
-    structure = parser.get_structure(rcsb_id, struct_path)
-    atoms = Selection.unfold_entities(structure, "A")
-    nbhd = []
+    structure   = parser.get_structure(rcsb_id, struct_path)
+    atoms       = Selection.unfold_entities(structure, "A")
+    nbhd        = []
 
     def is_inside_box(point, box_coordinates):
-        EXPANSION_RADIUS = 20
+        EXPANSION_RADIUS = 0
+
         min_x = min(box_coordinates, key=lambda x: x[0])[0]
         max_x = max(box_coordinates, key=lambda x: x[0])[0]
 
@@ -93,9 +95,9 @@ def parse_struct_via_bbox(rcsb_id: str, bbox: list) -> list:
         min_z = min(box_coordinates, key=lambda x: x[2])[2]
         max_z = max(box_coordinates, key=lambda x: x[2])[2]
 
-        if  min_x+EXPANSION_RADIUS <= point[0] <= max_x+EXPANSION_RADIUS and \
-            min_y+EXPANSION_RADIUS <= point[1] <= max_y+EXPANSION_RADIUS and \
-            min_z+EXPANSION_RADIUS <= point[2] <= max_z+EXPANSION_RADIUS:
+        if  ( min_x+EXPANSION_RADIUS ) <= point[0] <= ( max_x+EXPANSION_RADIUS ) and \
+            ( min_y+EXPANSION_RADIUS ) <= point[1] <= ( max_y+EXPANSION_RADIUS ) and \
+            ( min_z+EXPANSION_RADIUS ) <= point[2] <= ( max_z+EXPANSION_RADIUS ) :
             return True
         else:
             return False
@@ -150,7 +152,6 @@ def encode_atoms(rcsb_id: str, nearby_atoms_list: list[Atom], write=False) -> li
 
     return aggregate
 
-
 def create_pcd_from_atoms(
     positions: np.ndarray, atom_types: np.ndarray, save_path: str
 ):
@@ -160,8 +161,34 @@ def create_pcd_from_atoms(
 
 
 
-RCSB_ID = sys.argv[1].upper()
-cloud   = parse_struct_via_centerline(RCSB_ID, open_tunnel_csv(RCSB_ID))
-bbox    = bounding_box(np.array([a.get_coord() for a in cloud]))
-atoms   = parse_struct_via_bbox(RCSB_ID, bbox)
-encode_atoms(RCSB_ID, atoms, write=True)
+RCSB_ID      = sys.argv[1].upper()
+IF_VISUALIZE = sys.argv[2].upper()
+
+
+cloud            = parse_struct_via_centerline(RCSB_ID, open_tunnel_csv(RCSB_ID))
+cords_walls_only = np.array([a.get_coord() for a in cloud])
+
+if IF_VISUALIZE:
+    point_cloud           = pv.PolyData(cords_walls_only)
+    # Coloration
+    random_rgbs           = np.random.randint(0, 256, size=( cords_walls_only.shape[0],4 ))
+    point_cloud['colors'] = random_rgbs
+    point_cloud.plot(scalars='colors', rgb=True, notebook=False)
+
+
+bbox_o  = oriented_bounding_box_numpy(np.array([a.get_coord() for a in cloud]))
+print("Oriented bounding box: ", bbox_o)
+
+bbox  = bounding_box(np.array([a.get_coord() for a in cloud]))
+print("Vanilla bounding box:", bbox)
+
+atoms_bboxed = parse_struct_via_bbox(RCSB_ID, bbox)
+
+if IF_VISUALIZE:
+    cords_inside_bbox = np.array([a.get_coord() for a in atoms_bboxed])
+    point_cloud           = pv.PolyData(cords_inside_bbox)
+    random_rgbs           = np.random.randint(0, 256, size=( cords_inside_bbox.shape[0],4 ))
+    point_cloud['colors'] = random_rgbs
+    point_cloud.plot(scalars='colors', rgb=True, notebook=False)
+
+# encode_atoms(RCSB_ID, atoms)
