@@ -25,7 +25,7 @@ def midpoints(x):
     return x
 
 def normalize_atom_coordinates(coordinates: np.ndarray):
-    """@param coordinates: numpy array of shape (N,3) for atoms lining the tunnel in radius R (usually 15Angstrom) from MOLE centerline"""
+    """@param coordinates: numpy array of shape (N,3)"""
     #! normalize to origin
     C = coordinates
     Cx = C[:, 0] - np.mean(C[:, 0])
@@ -42,12 +42,12 @@ def normalize_atom_coordinates(coordinates: np.ndarray):
     rescaled_coords = np.array(list(zip(Cx, Cy, Cz)))
 
     # ! Create a 3D grid 10 voxels larger than the max amplitude of the point cloud in any direction
-    # amplitude_X = np.max(Cx) - np.min(Cx)
-    # amplitude_Y = np.max(Cy) - np.min(Cy)
-    # amplitude_Z = np.max(Cz) - np.min(Cz)
+    amplitude_X = np.max(Cx) - np.min(Cx)
+    amplitude_Y = np.max(Cy) - np.min(Cy)
+    amplitude_Z = np.max(Cz) - np.min(Cz)
 
-    # biggest_dimension = int( np.ceil(np.max([amplitude_Z, amplitude_Y, amplitude_X])) + 1 )
-    return rescaled_coords
+    return rescaled_coords, [np.ceil(np.max(amplitude_X)), np.ceil(np.max(amplitude_Y)), np.ceil(np.max(amplitude_Z))]
+
 
 def visualize_source_coordinates(
     nulled_grid: np.ndarray,
@@ -139,23 +139,42 @@ with open( "/home/rtviii/dev/riboxyz/mesh_generation/{}_tunnel_atoms_bbox.json".
 
 __cords          = np.array(list(map(lambda x: x["coord"], data)))
 __radii          = np.array(list(map(lambda x: x["vdw_radius"], data)))
-cords_NORMALIZED = normalize_atom_coordinates(__cords)
+# cords_NORMALIZED = normalize_atom_coordinates(__cords)
 sphere_sources   = zip(__cords, __radii)
 voxelize_to_spheres(sphere_sources) # This is called dynamically to expand coordinates to van der waals spheres
 cords_SPHERES = np.array(cords_SPHERES)
 
 
-import pyvista as pv
+# import pyvista as pv
 
-point_cloud           = pv.PolyData(cords_SPHERES)
-rgba= np.array([[100,50,60,0.1] for _ in range(cords_SPHERES.shape[0])])
-point_cloud['rgba'] = rgba
+# point_cloud           = pv.PolyData(cords_SPHERES)
+# rgba= np.array([[100,50,60,0.1] for _ in range(cords_SPHERES.shape[0])])
+# point_cloud['rgba'] = rgba
+# point_cloud.plot(scalars='rgba', rgb=True, notebook=False)
+
+
+# N = cords_SPHERES_normalized.shape[0]
+import pyvista as pv
+normalized_sphere_cords, biggest_dims = normalize_atom_coordinates(cords_SPHERES)
+
+voxel_size = 1 # each voxel will be half of the pointclouds unit along each axis
+xyz_q      = np.round(np.array(normalized_sphere_cords/voxel_size)).astype(int) # quantized point values, here you will loose precision
+vox_grid   = np.zeros((int(np.max(biggest_dims)/voxel_size)+1, 
+                       int(np.max(biggest_dims)/voxel_size)+1,
+                       int(np.max(biggest_dims)/voxel_size)+1)) #Empty voxel grid
+
+vox_grid[xyz_q[:,0],xyz_q[:,1],xyz_q[:,2]] = 1 # Setting all voxels containitn a points equal to 1
+
+xyz_v_negative = np.asarray(np.where(vox_grid != 1)) # get back indexes of populated voxels
+xyz_v_positive = np.asarray(np.where(vox_grid == 1)) # get back indexes of populated voxels
+
+
+dd = np.concatenate([xyz_v_positive.T, xyz_v_negative.T])
+print(dd)
+
+point_cloud = pv.PolyData(dd)
+rgba_n                = np.array([[100,50,60,0.1] for _ in xyz_v_negative.T] )
+rgba_p                = np.array([[20,240,0, 1] for _ in xyz_v_positive.T] )
+point_cloud['rgba'] = np.concatenate([rgba_p, rgba_n])
 point_cloud.plot(scalars='rgba', rgb=True, notebook=False)
 
-
-
-
-# pcd = o3d.geometry.PointCloud()
-# pcd.points = o3d.utility.Vector3dVector(__cords)
-# voxel_grid = o3d.geometry.VoxelGrid.create_from_point_cloud(pcd, voxel_size=2)
-# o3d.visualization.draw_geometries([pcd])

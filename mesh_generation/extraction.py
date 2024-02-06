@@ -178,6 +178,7 @@ if IF_VISUALIZE:
 bbox  = bounding_box(np.array([a.get_coord() for a in cloud]))
 print("Vanilla bounding box:", bbox)
 atoms_bboxed = parse_struct_via_bbox(RCSB_ID, bbox)
+
 if IF_VISUALIZE:
     cords_inside_bbox = np.array([a.get_coord() for a in atoms_bboxed])
     point_cloud           = pv.PolyData(cords_inside_bbox)
