@@ -42,9 +42,6 @@ def main():
     elif args.subcommand == "plt":
         plot = args.plot
         cluster_only = args.cluster_only
-        print("Plot Options:")
-        print("Plot:", plot)
-        print("Cluster Only:", cluster_only)
 
     elif args.subcommand == "etl":
         rcsb_id = args.rcsb_id
