@@ -1,3 +1,4 @@
+import argparse
 from enum import Enum
 import json
 from pprint import pprint
@@ -9,6 +10,29 @@ import open3d as o3d
 import sys
 import numpy as np
 import concurrent.futures
+DBSCAN_METRICS = [ "braycurtis", "canberra", "chebyshev", "correlation", "dice", 
+ "hamming", "jaccard", "kulsinski", "mahalanobis", "minkowski",
+  "rogerstanimoto", "russellrao", "seuclidean", "sokalmichener", 
+  "sokalsneath", "sqeuclidean", "yule","cityblock", "cosine", "euclidean", "l1", "l2", "manhattan" ]
+
+
+
+parser = argparse.ArgumentParser(description="tunnel_extraction")
+
+
+parser.add_argument("--eps", type=float, help="Specify eps value")
+parser.add_argument("--min_samples", type=int, help="Specify min_samples value")
+parser.add_argument("--metric", choices=DBSCAN_METRICS, help="Choose a metric")
+
+parser.add_argument("--plot", action="store_true", help="Enable plotting")
+parser.add_argument("--cluster_only", type=int, help="Specify cluster only value")
+
+parser.add_argument("--rcsb_id", type=str, help="Specify RCSB ID", required=True)
+parser.add_argument("--input", type=str, help="Specify input file path")
+
+args = parser.parse_args()
+
+
 
 # Old
 def __np_workflow(C):
@@ -132,12 +156,12 @@ def voxelize_to_spheres(sphere_sources):
             # )
             update_expanded_coordinates(result)
 
-RCSB_ID = sys.argv[1].upper()
+RCSB_ID = args.rcsb_id.upper()
 with open( "/Users/rtviii/dev/riboxyz/mesh_generation/{}_tunnel_atoms_bbox.json".format(RCSB_ID), "r" ) as infile:
-    ptcloud_data = json.load(infile)
+    ptcloud_data_cluster = json.load(infile)
 
-__cords          = np.array(list(map(lambda x: x["coord"], ptcloud_data)))
-__radii          = np.array(list(map(lambda x: x["vdw_radius"], ptcloud_data)))
+__cords          = np.array(list(map(lambda x: x["coord"], ptcloud_data_cluster)))
+__radii          = np.array(list(map(lambda x: x["vdw_radius"], ptcloud_data_cluster)))
 # cords_NORMALIZED = normalize_atom_coordinates(__cords)
 sphere_sources   = zip(__cords, __radii)
 voxelize_to_spheres(sphere_sources) # This is called dynamically to expand coordinates to van der waals spheres
@@ -146,18 +170,16 @@ cords_SPHERES = np.array(cords_SPHERES)
 
 normalized_sphere_cords = normalize_atom_coordinates(cords_SPHERES)
 voxel_size = 1 
-sphere_cords_quantized      = np.round(np.array(normalized_sphere_cords/voxel_size)).astype(int) 
+sphere_cords_quantized = np.round(np.array(normalized_sphere_cords/voxel_size)).astype(int) 
 
-max_values = np.max(sphere_cords_quantized, axis=0)
+max_values      = np.max(sphere_cords_quantized, axis=0)
 grid_dimensions = max_values +1
-vox_grid = np.zeros(grid_dimensions)
+vox_grid        = np.zeros(grid_dimensions)
 
 vox_grid[sphere_cords_quantized[:,0],sphere_cords_quantized[:,1],sphere_cords_quantized[:,2]] = 1 # Setting all voxels containitn a points equal to 1
 
 xyz_v_negative = np.asarray(np.where(vox_grid != 1)) # get back indexes of populated voxels
 xyz_v_positive = np.asarray(np.where(vox_grid == 1)) # get back indexes of populated voxels
-
-
 
 
 
@@ -172,8 +194,6 @@ for (k,v) in cluster_colors.items():
 
 import numpy as np
 from sklearn.cluster import DBSCAN
-
-
 # From scipy.spatial.distance: 
 metrics = [ "braycurtis", "canberra", "chebyshev", "correlation", "dice", 
  "hamming", "jaccard", "kulsinski", "mahalanobis", "minkowski",
@@ -191,6 +211,15 @@ attempts:list[typing.Tuple[float, int,str ]] =[
     (6,400, "euclidean" ), # In 1.583s. Estimated number of [ clusters, noise points ]: [ 2, 8442 ]
     (5,500, "euclidean" ), # <<<< Really good result In 0.98s. Estimated number of [ clusters, noise points ]: [ 10, 123078 ]
     (6,600, "euclidean" ), # <<<< Best so far In 1.46s. Estimated number of [ clusters, noise points ]: [ 9, 53038 ]
+    (5.5,600, "euclidean" ), # <<<< A little finer res
+    (5.5,650, "euclidean" ), # 
+    (5.5,650, "canberra" ), # failed
+    (5.5,650, "sqeuclidean" ), # 0 clusters
+    (4,100, "sqeuclidean" ), 
+    (3,40, "canberra" ), 
+    (6,600, "euclidean" ), # <<<< Best so far In 1.46s. Estimated number of [ clusters, noise points ]: [ 9, 53038 ]
+    (5.5,600, "euclidean" ), # <<<< A little finer res
+
 ]
 
 u_EPSILON     = attempts[-1][0]
@@ -210,10 +239,6 @@ n_clusters_ = len(set(labels)) - (1 if -1 in labels else 0)
 n_noise_    = list(labels).count(-1)
 print("In {}s. Estimated number of [ clusters, noise points ]: [ {}, {} ] ".format(np.round(t2-t1, 3),n_clusters_, n_noise_))
 
-
-print("\nLabels")
-pprint(list( labels ))
-
 CLUSTER_CONTAINER = {}
 for ( point, label ) in zip(xyz_v_negative.T, labels):
     if label not in CLUSTER_CONTAINER:
@@ -227,21 +252,42 @@ for k,v in CLUSTER_CONTAINER.items():
 
 
 
-IF_PLOT = False
+if args.plot ==True:
+    if args.cluster_only!=None:
+        ptcloud_data_cluster = CLUSTER_CONTAINER[args.cluster_only]
+        ptcloud_data_positive= np.array(xyz_v_positive.T)
 
-# ----------------- Plotting
-if IF_PLOT:
-    # pv.set_plot_theme('dark')
-    # ptcloud_data_combined = np.concatenate([xyz_v_positive.T, xyz_v_negative.T])
-    ptcloud_data_negative = np.concatenate(xyz_v_negative.T)
-    point_cloud  = pv.PolyData(ptcloud_data_negative)
-    # rgba_n                = np.array([[250,0,0,0.1] for _ in xyz_v_negative.T] )
-    # rgba_p                = np.array([[10,200,200, 1] for _ in xyz_v_positive.T] )
-    # rgba_combined         = np.concatenate([rgba_p, rgba_n])
-    # point_cloud['rgba']  = rgba_combined
 
-    point_cloud['rgba']  = dbscan_colors
-    point_cloud.plot(scalars='rgba', rgb=True, notebook=False, show_bounds=True)
+        ptcloud_data_cluster = CLUSTER_CONTAINER[args.cluster_only]
+        ptcloud_data_positive= np.array(xyz_v_positive.T)
+
+
+
+
+        rgbas_cluster = [[15,10,221,1] for datapoint in ptcloud_data_cluster]
+        rgbas_positive = np.array([[205,209,228,0.2] for _ in xyz_v_positive.T] )
+        # rgba_combined         = np.concatenate([rgba_p, rgba_n])
+        # point_cloud['rgba']  = rgba_combined
+        combined = np.concatenate([ptcloud_data_cluster, ptcloud_data_positive])
+        rgbas_combined = np.concatenate([rgbas_cluster, rgbas_positive])
+
+        point_cloud  = pv.PolyData(combined)
+        point_cloud['rgba']  = rgbas_combined
+        point_cloud.plot(scalars='rgba', rgb=True, notebook=False, show_bounds=True)
+
+    else:
+        # pv.set_plot_theme('dark')
+        # ptcloud_data_combined = np.concatenate([xyz_v_positive.T, xyz_v_negative.T])
+        ptcloud_data_negative = np.concatenate(xyz_v_negative.T)
+        point_cloud  = pv.PolyData(ptcloud_data_negative)
+        # rgba_n                = np.array([[250,0,0,0.1] for _ in xyz_v_negative.T] )
+        # rgba_p                = np.array([[10,200,200, 1] for _ in xyz_v_positive.T] )
+        # rgba_combined         = np.concatenate([rgba_p, rgba_n])
+        # point_cloud['rgba']  = rgba_combined
+
+        point_cloud['rgba']  = dbscan_colors
+        point_cloud.plot(scalars='rgba', rgb=True, notebook=False, show_bounds=True)
+
 
 
 
