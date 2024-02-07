@@ -1,5 +1,9 @@
+from enum import Enum
 import json
 from pprint import pprint
+from time import time
+import typing
+import pyvista as pv
 from matplotlib import pyplot as plt
 import open3d as o3d
 import sys
@@ -124,8 +128,8 @@ def voxelize_to_spheres(sphere_sources):
 
         for future in concurrent.futures.as_completed(future_to_args):
             result = future.result()
-            print( "Added {} coordinates to expanded radii. Total: {}".format( len(result), len(cords_SPHERES) )
-            )
+            # print( "Added {} coordinates to expanded radii. Total: {}".format( len(result), len(cords_SPHERES) )
+            # )
             update_expanded_coordinates(result)
 
 RCSB_ID = sys.argv[1].upper()
@@ -140,7 +144,6 @@ voxelize_to_spheres(sphere_sources) # This is called dynamically to expand coord
 cords_SPHERES = np.array(cords_SPHERES)
 
 
-import pyvista as pv
 normalized_sphere_cords = normalize_atom_coordinates(cords_SPHERES)
 voxel_size = 1 
 sphere_cords_quantized      = np.round(np.array(normalized_sphere_cords/voxel_size)).astype(int) 
@@ -155,57 +158,81 @@ xyz_v_negative = np.asarray(np.where(vox_grid != 1)) # get back indexes of popul
 xyz_v_positive = np.asarray(np.where(vox_grid == 1)) # get back indexes of populated voxels
 
 
-# ptcloud_data = np.concatenate([xyz_v_positive.T, xyz_v_negative.T])
-# # ptcloud_data = xyz_v_negative.T
-
-# point_cloud  = pv.PolyData(ptcloud_data)
-# rgba_n                = np.array([[250,0,0,0.1] for _ in xyz_v_negative.T] )
-# rgba_p                = np.array([[10,200,200, 1] for _ in xyz_v_positive.T] )
-# point_cloud['rgba']  = np.concatenate([rgba_p, rgba_n])
-# # point_cloud['rgba']  = rgba_n
-# point_cloud.plot(scalars='rgba', rgb=True, notebook=False)
 
 
-# pcd = o3d.geometry.PointCloud(o3d.utility.Vector3dVector(xyz_v_positive.T))
-# with o3d.utility.VerbosityContextManager(
-#         o3d.utility.VerbosityLevel.Debug) as cm:
-#     labels = np.array(
-#         pcd.cluster_dbscan(eps=1, min_points=10, print_progress=True))
 
-# max_label = labels.max()
-# print(f"point cloud has {max_label + 1} clusters")
-# colors = plt.get_cmap("tab20")(labels / (max_label if max_label > 0 else 1))
-# colors[labels < 0] = 0
-# pcd.colors = o3d.utility.Vector3dVector(colors[:, :3])
-# o3d.visualization.draw_geometries([pcd],
-#                                   zoom=0.455,
-#                                   front=[-0.4999, -0.1659, -0.8499],
-#                                   lookat=[2.1813, 2.0619, 2.0999],
-#                                   up=[0.1204, -0.9852, 0.1215])
 
+
+
+#! --------------------------------- DBSCAN
+
+cluster_colors = dict(zip(range(-1, 40), plt.cm.terrain(np.linspace(0, 1, 40))))
+for (k,v) in cluster_colors.items():
+    cluster_colors[k] = [ *v[:3],0.5 ]
 
 import numpy as np
-from sklearn import metrics
 from sklearn.cluster import DBSCAN
 
-EPSILON = 1
-MIN_SAMPLES = 1000
-METRIC = 'canberra'
 
 # From scipy.spatial.distance: 
-metrics = ["braycurtis", "canberra", "chebyshev", "correlation", "dice", 
+metrics = [ "braycurtis", "canberra", "chebyshev", "correlation", "dice", 
  "hamming", "jaccard", "kulsinski", "mahalanobis", "minkowski",
   "rogerstanimoto", "russellrao", "seuclidean", "sokalmichener", 
-  "sokalsneath", "sqeuclidean", "yule"] + ["cityblock", "cosine", "euclidean", "l1", "l2", "manhattan"]
+  "sokalsneath", "sqeuclidean", "yule","cityblock", "cosine", "euclidean", "l1", "l2", "manhattan" ]
+
+attempts:list[typing.Tuple[float, int,str ]] =[
+    ( 2.5,30, "sqeuclidean" ),
+    ( 2,20, "euclidean" ), #In 0.407s. Estimated number of [ clusters, noise points ]: [ 22, 6389 ]
+    (2 ,40, "euclidean" ),
+    (3 ,40, "euclidean" ), # In 0.602s. Estimated number of [ clusters, noise points ]: [ 3, 1040 ]
+    (2 ,60, "euclidean" ), #0
+    (4 ,100, "euclidean" ), #In 0.84s. Estimated number of [ clusters, noise points ]: [ 3, 2610 ]
+    (5 ,200, "euclidean" ), #In 0.84s. Estimated number of [ clusters, noise points ]: [ 3, 2610 ]
+    (6 ,400, "euclidean" ), # In 1.583s. Estimated number of [ clusters, noise points ]: [ 2, 8442 ]
+    (5 ,500, "euclidean" ), # <<<< Really good result In 0.98s. Estimated number of [ clusters, noise points ]: [ 10, 123078 ]
+    (6 ,600, "euclidean" ), # <<<< Best so far In 1.46s. Estimated number of [ clusters, noise points ]: [ 9, 53038 ]
 
 
 
-db = DBSCAN(eps=1, min_samples=1000, metric='canberra', n_jobs=-1).fit(xyz_v_negative.T)
+
+]
+u_EPSILON     = attempts[-1][0]
+u_MIN_SAMPLES = attempts[-1][1]
+u_METRIC      = attempts[-1][2]
+
+
+print("Running DBSCAN on {} points. eps={}, min_samples={}, distance_metric={}".format(len(xyz_v_negative.T), u_EPSILON, u_MIN_SAMPLES, u_METRIC))
+t1 = time()
+db     = DBSCAN(eps=u_EPSILON, min_samples=u_MIN_SAMPLES, metric=u_METRIC, n_jobs=5).fit(xyz_v_negative.T)
+t2= time()
 labels = db.labels_
-
+dbscan_colors = [cluster_colors[label*2] if label != -1 else [0,0,0,1] for label in labels]
 # Number of clusters in labels, ignoring noise if present.
 n_clusters_ = len(set(labels)) - (1 if -1 in labels else 0)
 n_noise_ = list(labels).count(-1)
+print("In {}s. Estimated number of [ clusters, noise points ]: [ {}, {} ] ".format(np.round(t2-t1, 3),n_clusters_, n_noise_))
 
-print("Estimated number of clusters: %d" % n_clusters_)
-print("Estimated number of noise points: %d" % n_noise_)
+
+
+
+
+
+# pv.set_plot_theme('dark')
+
+# ptcloud_data_combined = np.concatenate([xyz_v_positive.T, xyz_v_negative.T])
+ptcloud_data_negative = np.concatenate(xyz_v_negative.T)
+point_cloud  = pv.PolyData(ptcloud_data_negative)
+# rgba_n                = np.array([[250,0,0,0.1] for _ in xyz_v_negative.T] )
+# rgba_p                = np.array([[10,200,200, 1] for _ in xyz_v_positive.T] )
+# rgba_combined         = np.concatenate([rgba_p, rgba_n])
+# point_cloud['rgba']  = rgba_combined
+
+point_cloud['rgba']  = dbscan_colors
+point_cloud.plot(scalars='rgba', rgb=True, notebook=False, show_bounds=True)
+
+
+
+# TODO: Strategies:
+
+# - weigh the samples by their distance from the centerline
+# - explore appropriate distance metric
