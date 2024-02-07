@@ -181,21 +181,18 @@ metrics = [ "braycurtis", "canberra", "chebyshev", "correlation", "dice",
   "sokalsneath", "sqeuclidean", "yule","cityblock", "cosine", "euclidean", "l1", "l2", "manhattan" ]
 
 attempts:list[typing.Tuple[float, int,str ]] =[
-    ( 2.5,30, "sqeuclidean" ),
-    ( 2,20, "euclidean" ), #In 0.407s. Estimated number of [ clusters, noise points ]: [ 22, 6389 ]
-    (2 ,40, "euclidean" ),
-    (3 ,40, "euclidean" ), # In 0.602s. Estimated number of [ clusters, noise points ]: [ 3, 1040 ]
-    (2 ,60, "euclidean" ), #0
-    (4 ,100, "euclidean" ), #In 0.84s. Estimated number of [ clusters, noise points ]: [ 3, 2610 ]
-    (5 ,200, "euclidean" ), #In 0.84s. Estimated number of [ clusters, noise points ]: [ 3, 2610 ]
-    (6 ,400, "euclidean" ), # In 1.583s. Estimated number of [ clusters, noise points ]: [ 2, 8442 ]
-    (5 ,500, "euclidean" ), # <<<< Really good result In 0.98s. Estimated number of [ clusters, noise points ]: [ 10, 123078 ]
-    (6 ,600, "euclidean" ), # <<<< Best so far In 1.46s. Estimated number of [ clusters, noise points ]: [ 9, 53038 ]
-
-
-
-
+    (2.5,30, "sqeuclidean" ),
+    (2,20, "euclidean" ), #In 0.407s. Estimated number of [ clusters, noise points ]: [ 22, 6389 ]
+    (2,40, "euclidean" ),
+    (3,40, "euclidean" ), # In 0.602s. Estimated number of [ clusters, noise points ]: [ 3, 1040 ]
+    (2,60, "euclidean" ), 
+    (4,100, "euclidean" ), #In 0.84s. Estimated number of [ clusters, noise points ]: [ 3, 2610 ]
+    (5,200, "euclidean" ), #In 0.84s. Estimated number of [ clusters, noise points ]: [ 3, 2610 ]
+    (6,400, "euclidean" ), # In 1.583s. Estimated number of [ clusters, noise points ]: [ 2, 8442 ]
+    (5,500, "euclidean" ), # <<<< Really good result In 0.98s. Estimated number of [ clusters, noise points ]: [ 10, 123078 ]
+    (6,600, "euclidean" ), # <<<< Best so far In 1.46s. Estimated number of [ clusters, noise points ]: [ 9, 53038 ]
 ]
+
 u_EPSILON     = attempts[-1][0]
 u_MIN_SAMPLES = attempts[-1][1]
 u_METRIC      = attempts[-1][2]
@@ -203,32 +200,49 @@ u_METRIC      = attempts[-1][2]
 
 print("Running DBSCAN on {} points. eps={}, min_samples={}, distance_metric={}".format(len(xyz_v_negative.T), u_EPSILON, u_MIN_SAMPLES, u_METRIC))
 t1 = time()
-db     = DBSCAN(eps=u_EPSILON, min_samples=u_MIN_SAMPLES, metric=u_METRIC, n_jobs=5).fit(xyz_v_negative.T)
-t2= time()
-labels = db.labels_
+db = DBSCAN(eps=u_EPSILON, min_samples=u_MIN_SAMPLES, metric=u_METRIC, n_jobs=5).fit(xyz_v_negative.T)
+t2 = time()
+labels        = db.labels_
 dbscan_colors = [cluster_colors[label*2] if label != -1 else [0,0,0,1] for label in labels]
+
 # Number of clusters in labels, ignoring noise if present.
 n_clusters_ = len(set(labels)) - (1 if -1 in labels else 0)
-n_noise_ = list(labels).count(-1)
+n_noise_    = list(labels).count(-1)
 print("In {}s. Estimated number of [ clusters, noise points ]: [ {}, {} ] ".format(np.round(t2-t1, 3),n_clusters_, n_noise_))
 
 
+print("\nLabels")
+pprint(list( labels ))
+
+CLUSTER_CONTAINER = {}
+for ( point, label ) in zip(xyz_v_negative.T, labels):
+    if label not in CLUSTER_CONTAINER:
+        CLUSTER_CONTAINER[label] = []
+    CLUSTER_CONTAINER[label].append(point)
+    
+print("Clusters and noise points:")
+for k,v in CLUSTER_CONTAINER.items():
+    print("Cluster {}: {} points".format(k, len(v)))
+# Now to partition the points into clusters and noise
 
 
 
 
-# pv.set_plot_theme('dark')
+IF_PLOT = False
 
-# ptcloud_data_combined = np.concatenate([xyz_v_positive.T, xyz_v_negative.T])
-ptcloud_data_negative = np.concatenate(xyz_v_negative.T)
-point_cloud  = pv.PolyData(ptcloud_data_negative)
-# rgba_n                = np.array([[250,0,0,0.1] for _ in xyz_v_negative.T] )
-# rgba_p                = np.array([[10,200,200, 1] for _ in xyz_v_positive.T] )
-# rgba_combined         = np.concatenate([rgba_p, rgba_n])
-# point_cloud['rgba']  = rgba_combined
+# ----------------- Plotting
+if IF_PLOT:
+    # pv.set_plot_theme('dark')
+    # ptcloud_data_combined = np.concatenate([xyz_v_positive.T, xyz_v_negative.T])
+    ptcloud_data_negative = np.concatenate(xyz_v_negative.T)
+    point_cloud  = pv.PolyData(ptcloud_data_negative)
+    # rgba_n                = np.array([[250,0,0,0.1] for _ in xyz_v_negative.T] )
+    # rgba_p                = np.array([[10,200,200, 1] for _ in xyz_v_positive.T] )
+    # rgba_combined         = np.concatenate([rgba_p, rgba_n])
+    # point_cloud['rgba']  = rgba_combined
 
-point_cloud['rgba']  = dbscan_colors
-point_cloud.plot(scalars='rgba', rgb=True, notebook=False, show_bounds=True)
+    point_cloud['rgba']  = dbscan_colors
+    point_cloud.plot(scalars='rgba', rgb=True, notebook=False, show_bounds=True)
 
 
 
