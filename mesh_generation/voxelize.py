@@ -205,9 +205,9 @@ sphere_cords_quantized = np.round(
     np.array(normalized_sphere_cords / voxel_size)
 ).astype(int)
 
-max_values = np.max(sphere_cords_quantized, axis=0)
+max_values      = np.max(sphere_cords_quantized, axis=0)
 grid_dimensions = max_values + 1
-vox_grid = np.zeros(grid_dimensions)
+vox_grid        = np.zeros(grid_dimensions)
 
 vox_grid[
     sphere_cords_quantized[:, 0],
