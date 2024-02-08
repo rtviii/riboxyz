@@ -10,11 +10,32 @@ import open3d as o3d
 import sys
 import numpy as np
 import concurrent.futures
-DBSCAN_METRICS = [ "braycurtis", "canberra", "chebyshev", "correlation", "dice", 
- "hamming", "jaccard", "kulsinski", "mahalanobis", "minkowski",
-  "rogerstanimoto", "russellrao", "seuclidean", "sokalmichener", 
-  "sokalsneath", "sqeuclidean", "yule","cityblock", "cosine", "euclidean", "l1", "l2", "manhattan" ]
 
+DBSCAN_METRICS = [
+    "braycurtis",
+    "canberra",
+    "chebyshev",
+    "correlation",
+    "dice",
+    "hamming",
+    "jaccard",
+    "kulsinski",
+    "mahalanobis",
+    "minkowski",
+    "rogerstanimoto",
+    "russellrao",
+    "seuclidean",
+    "sokalmichener",
+    "sokalsneath",
+    "sqeuclidean",
+    "yule",
+    "cityblock",
+    "cosine",
+    "euclidean",
+    "l1",
+    "l2",
+    "manhattan",
+]
 
 
 parser = argparse.ArgumentParser(description="tunnel_extraction")
@@ -33,17 +54,17 @@ parser.add_argument("--input", type=str, help="Specify input file path")
 args = parser.parse_args()
 
 
-
 # Old
 def __np_workflow(C):
     rescaled_coordinates, dim = normalize_atom_coordinates(C)
-    x,y,z = np.indices((dim, dim, dim))
+    x, y, z = np.indices((dim, dim, dim))
     xc = midpoints(x)
     yc = midpoints(y)
     zc = midpoints(z)
-    filled = xc + yc + zc  < -1
-    filled = visualize_source_coordinates(filled,rescaled_coordinates)
+    filled = xc + yc + zc < -1
+    filled = visualize_source_coordinates(filled, rescaled_coordinates)
     return filled
+
 
 def midpoints(x):
     sl = ()
@@ -52,16 +73,16 @@ def midpoints(x):
         sl += np.index_exp[:]
     return x
 
+
 def normalize_atom_coordinates(coordinates: np.ndarray):
     """@param coordinates: numpy array of shape (N,3)"""
-
 
     C = coordinates
     Cx = C[:, 0] - np.mean(C[:, 0])
     Cy = C[:, 1] - np.mean(C[:, 1])
     Cz = C[:, 2] - np.mean(C[:, 2])
 
-    [ dev_x, dev_y, dev_z ] = [np.min(Cx), np.min(Cy), np.min(Cz)]
+    [dev_x, dev_y, dev_z] = [np.min(Cx), np.min(Cy), np.min(Cz)]
 
     #! shift to positive quadrant
     Cx = Cx + abs(dev_x)
@@ -71,6 +92,7 @@ def normalize_atom_coordinates(coordinates: np.ndarray):
     rescaled_coords = np.array(list(zip(Cx, Cy, Cz)))
 
     return rescaled_coords
+
 
 def visualize_source_coordinates(
     nulled_grid: np.ndarray,
@@ -86,6 +108,7 @@ def visualize_source_coordinates(
         nulled_grid[vox_x, vox_y, vox_z] = True
     return nulled_grid
 
+
 def plt_plot(x_ix, y_ix, z_ix, filled_grid):
     # facecolors =  np.zeros(filled.shape + (3,))
     ax = plt.figure().add_subplot(projection="3d")
@@ -95,6 +118,7 @@ def plt_plot(x_ix, y_ix, z_ix, filled_grid):
 
     plt.show()
     exit()
+
 
 def get_sphere_indices_voxelized(center: np.ndarray, radius: int):
     """Make sure radius reflects the size of the underlying voxel grid"""
@@ -131,11 +155,12 @@ def get_sphere_indices_voxelized(center: np.ndarray, radius: int):
 
     return np.array(sphere_active_ix)
 
-cords_SPHERES    = []
+cords_SPHERES = []
 
 def voxelize_to_spheres(sphere_sources):
 
     num_workers = 20
+
     # Function to be executed by each worker
     def sphere_task(args):
         coordinate, vdw_R = args
@@ -152,143 +177,213 @@ def voxelize_to_spheres(sphere_sources):
 
         for future in concurrent.futures.as_completed(future_to_args):
             result = future.result()
-            # print( "Added {} coordinates to expanded radii. Total: {}".format( len(result), len(cords_SPHERES) )
-            # )
             update_expanded_coordinates(result)
 
+
 RCSB_ID = args.rcsb_id.upper()
-with open( "/Users/rtviii/dev/riboxyz/mesh_generation/{}_tunnel_atoms_bbox.json".format(RCSB_ID), "r" ) as infile:
+with open(
+    "/home/rtviii/dev/riboxyz/mesh_generation/{}_tunnel_atoms_bbox.json".format(
+        RCSB_ID
+    ),
+    "r",
+) as infile:
     ptcloud_data_cluster = json.load(infile)
 
-__cords          = np.array(list(map(lambda x: x["coord"], ptcloud_data_cluster)))
-__radii          = np.array(list(map(lambda x: x["vdw_radius"], ptcloud_data_cluster)))
+__cords = np.array(list(map(lambda x: x["coord"], ptcloud_data_cluster)))
+__radii = np.array(list(map(lambda x: x["vdw_radius"], ptcloud_data_cluster)))
 # cords_NORMALIZED = normalize_atom_coordinates(__cords)
-sphere_sources   = zip(__cords, __radii)
-voxelize_to_spheres(sphere_sources) # This is called dynamically to expand coordinates to van der waals spheres
+sphere_sources = zip(__cords, __radii)
+voxelize_to_spheres(
+    sphere_sources
+)  # This is called dynamically to expand coordinates to van der waals spheres
 cords_SPHERES = np.array(cords_SPHERES)
 
 
 normalized_sphere_cords = normalize_atom_coordinates(cords_SPHERES)
-voxel_size = 1 
-sphere_cords_quantized = np.round(np.array(normalized_sphere_cords/voxel_size)).astype(int) 
+voxel_size = 1
+sphere_cords_quantized = np.round(
+    np.array(normalized_sphere_cords / voxel_size)
+).astype(int)
 
-max_values      = np.max(sphere_cords_quantized, axis=0)
-grid_dimensions = max_values +1
-vox_grid        = np.zeros(grid_dimensions)
+max_values = np.max(sphere_cords_quantized, axis=0)
+grid_dimensions = max_values + 1
+vox_grid = np.zeros(grid_dimensions)
 
-vox_grid[sphere_cords_quantized[:,0],sphere_cords_quantized[:,1],sphere_cords_quantized[:,2]] = 1 # Setting all voxels containitn a points equal to 1
+vox_grid[
+    sphere_cords_quantized[:, 0],
+    sphere_cords_quantized[:, 1],
+    sphere_cords_quantized[:, 2],
+] = 1  
 
-xyz_v_negative = np.asarray(np.where(vox_grid != 1)) # get back indexes of populated voxels
-xyz_v_positive = np.asarray(np.where(vox_grid == 1)) # get back indexes of populated voxels
-
-
-
-
+xyz_v_negative = np.asarray(
+    np.where(vox_grid != 1)
+)  
+xyz_v_positive = np.asarray(
+    np.where(vox_grid == 1)
+)  # get back indexes of populated voxels
 
 
 #! --------------------------------- DBSCAN
 
 cluster_colors = dict(zip(range(-1, 40), plt.cm.terrain(np.linspace(0, 1, 40))))
-for (k,v) in cluster_colors.items():
-    cluster_colors[k] = [ *v[:3],0.5 ]
+for k, v in cluster_colors.items():
+    cluster_colors[k] = [*v[:3], 0.5]
 
 import numpy as np
 from sklearn.cluster import DBSCAN
-# From scipy.spatial.distance: 
-metrics = [ "braycurtis", "canberra", "chebyshev", "correlation", "dice", 
- "hamming", "jaccard", "kulsinski", "mahalanobis", "minkowski",
-  "rogerstanimoto", "russellrao", "seuclidean", "sokalmichener", 
-  "sokalsneath", "sqeuclidean", "yule","cityblock", "cosine", "euclidean", "l1", "l2", "manhattan" ]
 
-attempts:list[typing.Tuple[float, int,str ]] =[
-    (2.5,30, "sqeuclidean" ),
-    (2,20, "euclidean" ), #In 0.407s. Estimated number of [ clusters, noise points ]: [ 22, 6389 ]
-    (2,40, "euclidean" ),
-    (3,40, "euclidean" ), # In 0.602s. Estimated number of [ clusters, noise points ]: [ 3, 1040 ]
-    (2,60, "euclidean" ), 
-    (4,100, "euclidean" ), #In 0.84s. Estimated number of [ clusters, noise points ]: [ 3, 2610 ]
-    (5,200, "euclidean" ), #In 0.84s. Estimated number of [ clusters, noise points ]: [ 3, 2610 ]
-    (6,400, "euclidean" ), # In 1.583s. Estimated number of [ clusters, noise points ]: [ 2, 8442 ]
-    (5,500, "euclidean" ), # <<<< Really good result In 0.98s. Estimated number of [ clusters, noise points ]: [ 10, 123078 ]
-    (6,600, "euclidean" ), # <<<< Best so far In 1.46s. Estimated number of [ clusters, noise points ]: [ 9, 53038 ]
-    (5.5,600, "euclidean" ), # <<<< A little finer res
-    (5.5,650, "euclidean" ), # 
-    (5.5,650, "canberra" ), # failed
-    (5.5,650, "sqeuclidean" ), # 0 clusters
-    (4,100, "sqeuclidean" ), 
-    (3,40, "canberra" ), 
-    (6,600, "euclidean" ), # <<<< Best so far In 1.46s. Estimated number of [ clusters, noise points ]: [ 9, 53038 ]
-    (5.5,600, "euclidean" ), # <<<< A little finer res
-
+# From scipy.spatial.distance:
+metrics = [
+    "braycurtis",
+    "canberra",
+    "chebyshev",
+    "correlation",
+    "dice",
+    "hamming",
+    "jaccard",
+    "kulsinski",
+    "mahalanobis",
+    "minkowski",
+    "rogerstanimoto",
+    "russellrao",
+    "seuclidean",
+    "sokalmichener",
+    "sokalsneath",
+    "sqeuclidean",
+    "yule",
+    "cityblock",
+    "cosine",
+    "euclidean",
+    "l1",
+    "l2",
+    "manhattan",
 ]
 
-u_EPSILON     = attempts[-1][0]
+attempts: list[typing.Tuple[float, int, str]] = [
+    (2.5, 30, "sqeuclidean"),
+    (
+        2,
+        20,
+        "euclidean",
+    ),  # In 0.407s. Estimated number of [ clusters, noise points ]: [ 22, 6389 ]
+    (2, 40, "euclidean"),
+    (
+        3,
+        40,
+        "euclidean",
+    ),  # In 0.602s. Estimated number of [ clusters, noise points ]: [ 3, 1040 ]
+    (2, 60, "euclidean"),
+    (
+        4,
+        100,
+        "euclidean",
+    ),  # In 0.84s. Estimated number of [ clusters, noise points ]: [ 3, 2610 ]
+    (
+        5,
+        200,
+        "euclidean",
+    ),  # In 0.84s. Estimated number of [ clusters, noise points ]: [ 3, 2610 ]
+    (
+        6,
+        400,
+        "euclidean",
+    ),  # In 1.583s. Estimated number of [ clusters, noise points ]: [ 2, 8442 ]
+    (
+        5,
+        500,
+        "euclidean",
+    ),  # <<<< Really good result In 0.98s. Estimated number of [ clusters, noise points ]: [ 10, 123078 ]
+    (
+        6,
+        600,
+        "euclidean",
+    ),  # <<<< Best so far In 1.46s. Estimated number of [ clusters, noise points ]: [ 9, 53038 ]
+    (5.5, 600, "euclidean"),  # <<<< A little finer res
+    (5.5, 650, "euclidean"),  #
+    (5.5, 650, "canberra"),  # failed
+    (5.5, 650, "sqeuclidean"),  # 0 clusters
+    (4, 100, "sqeuclidean"),
+    (3, 40, "canberra"),
+    (
+        6,
+        600,
+        "euclidean",
+    ),  # <<<< Best so far In 1.46s. Estimated number of [ clusters, noise points ]: [ 9, 53038 ]
+    (5.5, 600, "euclidean"),  # <<<< A little finer res
+]
+
+u_EPSILON = attempts[-1][0]
 u_MIN_SAMPLES = attempts[-1][1]
-u_METRIC      = attempts[-1][2]
+u_METRIC = attempts[-1][2]
 
 
-print("Running DBSCAN on {} points. eps={}, min_samples={}, distance_metric={}".format(len(xyz_v_negative.T), u_EPSILON, u_MIN_SAMPLES, u_METRIC))
+print(
+    "Running DBSCAN on {} points. eps={}, min_samples={}, distance_metric={}".format(
+        len(xyz_v_negative.T), u_EPSILON, u_MIN_SAMPLES, u_METRIC
+    )
+)
 t1 = time()
-db = DBSCAN(eps=u_EPSILON, min_samples=u_MIN_SAMPLES, metric=u_METRIC, n_jobs=5).fit(xyz_v_negative.T)
+db = DBSCAN(eps=u_EPSILON, min_samples=u_MIN_SAMPLES, metric=u_METRIC, n_jobs=5).fit(
+    xyz_v_negative.T
+)
 t2 = time()
-labels        = db.labels_
-dbscan_colors = [cluster_colors[label*2] if label != -1 else [0,0,0,1] for label in labels]
+labels = db.labels_
+dbscan_colors = [
+    cluster_colors[label * 2] if label != -1 else [0, 0, 0, 1] for label in labels
+]
 
 # Number of clusters in labels, ignoring noise if present.
 n_clusters_ = len(set(labels)) - (1 if -1 in labels else 0)
-n_noise_    = list(labels).count(-1)
-print("In {}s. Estimated number of [ clusters, noise points ]: [ {}, {} ] ".format(np.round(t2-t1, 3),n_clusters_, n_noise_))
+n_noise_ = list(labels).count(-1)
+print(
+    "In {}s. Estimated number of [ clusters, noise points ]: [ {}, {} ] ".format(
+        np.round(t2 - t1, 3), n_clusters_, n_noise_
+    )
+)
 
 CLUSTER_CONTAINER = {}
-for ( point, label ) in zip(xyz_v_negative.T, labels):
+for point, label in zip(xyz_v_negative.T, labels):
     if label not in CLUSTER_CONTAINER:
         CLUSTER_CONTAINER[label] = []
     CLUSTER_CONTAINER[label].append(point)
-    
+
 print("Clusters and noise points:")
-for k,v in CLUSTER_CONTAINER.items():
+for k, v in CLUSTER_CONTAINER.items():
     print("Cluster {}: {} points".format(k, len(v)))
 # Now to partition the points into clusters and noise
 
 
-
-if args.plot ==True:
-    if args.cluster_only!=None:
+if args.plot == True:
+    if args.cluster_only != None:
         ptcloud_data_cluster = CLUSTER_CONTAINER[args.cluster_only]
-        ptcloud_data_positive= np.array(xyz_v_positive.T)
-
+        ptcloud_data_positive = np.array(xyz_v_positive.T)
 
         ptcloud_data_cluster = CLUSTER_CONTAINER[args.cluster_only]
-        ptcloud_data_positive= np.array(xyz_v_positive.T)
+        ptcloud_data_positive = np.array(xyz_v_positive.T)
 
-
-
-
-        rgbas_cluster = [[15,10,221,1] for datapoint in ptcloud_data_cluster]
-        rgbas_positive = np.array([[205,209,228,0.2] for _ in xyz_v_positive.T] )
+        rgbas_cluster = [[15, 10, 221, 1] for datapoint in ptcloud_data_cluster]
+        rgbas_positive = np.array([[205, 209, 228, 0.2] for _ in xyz_v_positive.T])
         # rgba_combined         = np.concatenate([rgba_p, rgba_n])
         # point_cloud['rgba']  = rgba_combined
         combined = np.concatenate([ptcloud_data_cluster, ptcloud_data_positive])
         rgbas_combined = np.concatenate([rgbas_cluster, rgbas_positive])
 
-        point_cloud  = pv.PolyData(combined)
-        point_cloud['rgba']  = rgbas_combined
-        point_cloud.plot(scalars='rgba', rgb=True, notebook=False, show_bounds=True)
+        point_cloud = pv.PolyData(combined)
+        point_cloud["rgba"] = rgbas_combined
+        point_cloud.plot(scalars="rgba", rgb=True, notebook=False, show_bounds=True)
 
     else:
         # pv.set_plot_theme('dark')
         # ptcloud_data_combined = np.concatenate([xyz_v_positive.T, xyz_v_negative.T])
         ptcloud_data_negative = np.concatenate(xyz_v_negative.T)
-        point_cloud  = pv.PolyData(ptcloud_data_negative)
+        point_cloud = pv.PolyData(ptcloud_data_negative)
         # rgba_n                = np.array([[250,0,0,0.1] for _ in xyz_v_negative.T] )
         # rgba_p                = np.array([[10,200,200, 1] for _ in xyz_v_positive.T] )
         # rgba_combined         = np.concatenate([rgba_p, rgba_n])
         # point_cloud['rgba']  = rgba_combined
 
-        point_cloud['rgba']  = dbscan_colors
-        point_cloud.plot(scalars='rgba', rgb=True, notebook=False, show_bounds=True)
-
-
+        point_cloud["rgba"] = dbscan_colors
+        point_cloud.plot(scalars="rgba", rgb=True, notebook=False, show_bounds=True)
 
 
 # TODO: Strategies:
