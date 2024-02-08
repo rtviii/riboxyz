@@ -3,6 +3,8 @@ sys.dont_write_bytecode = True
 import argparse
 import json
 from pprint import pprint
+import warnings
+warnings.filterwarnings("ignore")
 
 # from ribctl.cli.etl import cmd_etl
 from ribctl.cli.ls import cmd_ls
@@ -36,8 +38,6 @@ parser_lig = subparsers.add_parser('lig', help='ligands')
 parser_lig.add_argument('--chemid', type=str, required=True, help='Chemical identifier')
 parser_lig.add_argument('--src', type=str, required=True, help='Source file or path')
 parser_lig.add_argument('--dest', type=str, required=True, help='Destination file or path')
-
-
 
 
 parser_cmd_etl.add_argument('-getall'      , '--obtain_all_structures', action='store_true')
@@ -181,7 +181,6 @@ if args.t:
 else:
     if hasattr(args, 'func'):
         args.func(args)
-
     else:
         parser.print_help()
 

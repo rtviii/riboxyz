@@ -12,14 +12,19 @@ def cmd_ls(args):
     all_structs = os.listdir(RIBETL_DATA)
 
     if args.struct != None:
+        rcsb_id, auth_asym_id = None,None
         if "." in args.struct:
             rcsb_id, auth_asym_id = args.struct.split(".")
-        rp = RibosomeAssets(rcsb_id)
-        if "." in args.struct:
-            chain, rp_class = rp.get_chain_by_auth_asym_id(auth_asym_id)
-            pprint(json.loads(chain.json()))
         else:
-            pprint(json.loads(RibosomeAssets(args.struct).profile().json()))
+            rcsb_id = args.struct
+
+
+        ribosome_profile = RibosomeAssets(rcsb_id)
+        if "." in args.struct:
+            chain, rp_class = ribosome_profile.get_chain_by_auth_asym_id(auth_asym_id)
+            print(json.loads(chain.model_dump_json()))
+        else:
+            pprint(json.loads(RibosomeAssets(args.struct).profile().model_dump_json()))
 
     elif args.taxid != None:
         print("Listing species information for", args.taxid)
@@ -27,8 +32,8 @@ def cmd_ls(args):
         pdbid_taxid_tuples:list = []    
 
         for struct in all_structs:
-            rp = RibosomeAssets(struct).profile()
-            pdbid_taxid_tuples.append(( rp.rcsb_id, rp.src_organism_ids[0] ))
+            ribosome_profile = RibosomeAssets(struct).profile()
+            pdbid_taxid_tuples.append(( ribosome_profile.rcsb_id, ribosome_profile.src_organism_ids[0] ))
 
         pprint(Taxid.descendants_of_taxid( pdbid_taxid_tuples, int(args.taxid)))
 

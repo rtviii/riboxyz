@@ -296,8 +296,9 @@ class RibosomeAssets():
         self._verify_dir_exists()
         if not os.path.isfile(self._json_profile_filepath()):
             ribosome = ReannotationPipeline(query_rcsb_api(rcsb_single_structure_graphql(self.rcsb_id.upper()))).process_structure()
-            if not parse_obj_as(RibosomeStructure, ribosome):
-                raise Exception("Invalid ribosome structure profile.")
+
+            if not RibosomeStructure.model_validate(ribosome):
+                raise Exception("Created invalid ribosome profile (Schema validation failed). Not writing")
             self.write_own_json_profile( ribosome.dict(), overwrite=True)
         else:
             print("STRUCT EXISTS ",self._json_profile_filepath())
@@ -334,7 +335,6 @@ class RibosomeAssets():
                 bsite = bsite_ligand( ligand_chemid, self.biopython_structure())
                 bsite.save(bsite.path_nonpoly_ligand( self.rcsb_id, ligand_chemid))
             else:
-
                 if overwrite:
                     bsite = bsite_ligand( ligand_chemid, self.biopython_structure())
                     bsite.save(bsite.path_nonpoly_ligand( self.rcsb_id, ligand_chemid))

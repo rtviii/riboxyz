@@ -365,7 +365,7 @@ class Polymer(BaseModel):
     src_organism_ids: list[int]
     host_organism_ids: list[int]
 
-    rcsb_pdbx_description: Optional[str]
+    rcsb_pdbx_description: Optional[str] = None
 
     entity_poly_strand_id: str
     entity_poly_seq_one_letter_code: str
@@ -428,6 +428,7 @@ class RNA(Polymer):
 
 
 class NonpolymericLigand(BaseModel):
+
     class NonpolymerComp(BaseModel):
         class ChemComp(BaseModel):
             class ChemCompContainerIdentifiers(BaseModel):
@@ -439,8 +440,8 @@ class NonpolymericLigand(BaseModel):
 
         class Drugbank(BaseModel):
             class DrugbankInfo(BaseModel):
-                cas_number: Optional[str]
-                description: Optional[str]
+                cas_number: Optional[str] =None
+                description: Optional[str] =None
 
             class DrugbankContainerIdentifiers(BaseModel):
                 drugbank_id: str
@@ -449,19 +450,19 @@ class NonpolymericLigand(BaseModel):
             drugbank_info: DrugbankInfo
 
         class RcsbChemCompTarget(BaseModel):
-            interaction_type: Optional[str]
-            name: Optional[str]
-            provenance_source: Optional[str]
-            reference_database_accession_code: Optional[str]
-            reference_database_name: Optional[str]
+            interaction_type: Optional[str] = None
+            name: Optional[str] =None
+            provenance_source: Optional[str] =None
+            reference_database_accession_code: Optional[str] =None
+            reference_database_name: Optional[str] =None
 
-        chemp_comp: Optional[ChemComp]
-        drugbank: Optional[Drugbank]
-        rcsb_chem_comp_target: Optional[list[RcsbChemCompTarget]]
+        chemp_comp           : Optional[ChemComp]=None
+        drugbank             : Optional[Drugbank]=None
+        rcsb_chem_comp_target: Optional[list[RcsbChemCompTarget]]=None
 
     chemicalId: str
     chemicalName: str
-    formula_weight: Optional[float]
+    formula_weight: Optional[float] =None
 
     pdbx_description: str
     number_of_instances: int
@@ -544,7 +545,7 @@ class AssemblyInstancesMap(BaseModel):
         rcsb_polymer_entity_instance_container_identifiers: PolymerEntityInstanceContainerIdentifiers
 
     rcsb_id: str  # ex. 5AFI-1
-    nonpolymer_entity_instances: Optional[list[NonpolymerEntityInstance]]
+    nonpolymer_entity_instances: Optional[list[NonpolymerEntityInstance]] =None
     polymer_entity_instances: list[PolymerEntityInstance]
 
 
@@ -564,17 +565,17 @@ class RibosomeStructure(BaseModel):
     expMethod: str
     resolution: float
 
-    pdbx_keywords: Optional[str]
-    pdbx_keywords_text: Optional[str]
+    pdbx_keywords     : Optional[str] =None
+    pdbx_keywords_text: Optional[str] = None
 
     rcsb_external_ref_id: list[str]
     rcsb_external_ref_type: list[str]
     rcsb_external_ref_link: list[str]
 
-    citation_year: Optional[int]
-    citation_rcsb_authors: Optional[list[str]]
-    citation_title: Optional[str]
-    citation_pdbx_doi: Optional[str]
+    citation_year        : Optional[int] = None
+    citation_rcsb_authors: Optional[list[str]] = None
+    citation_title       : Optional[str] = None
+    citation_pdbx_doi    : Optional[str] = None
 
     src_organism_ids: list[int]
     src_organism_names: list[str]
