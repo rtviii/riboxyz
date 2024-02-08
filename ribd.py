@@ -26,7 +26,6 @@ subparsers = parser.add_subparsers(title='Subcommands', dest='command')
 
 
 
-
 #! -------------------------- --- -------------------------- #
 #! -------------------------- etl -------------------------- #
 #! -------------------------- --- -------------------------- #
@@ -174,16 +173,14 @@ parser.add_argument('--t', action='store_true')
 
 
 
-args = parser.parse_args()
-if args.t:
-    ...
-    # test()
-else:
+try:
+    args = parser.parse_args()
     if hasattr(args, 'func'):
         args.func(args)
     else:
         parser.print_help()
+except (BrokenPipeError, IOError):
+    pass
 
 # Notes
-
 # `awk '/ERROR/ {print $3}' | sed 's/:.*$//'`  to get every structure in the log file that failed
