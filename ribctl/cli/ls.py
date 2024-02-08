@@ -19,12 +19,14 @@ def cmd_ls(args):
             rcsb_id = args.struct
 
 
-        ribosome_profile = RibosomeAssets(rcsb_id)
+        ribosome_Assets = RibosomeAssets(rcsb_id)
+
         if "." in args.struct:
-            chain, rp_class = ribosome_profile.get_chain_by_auth_asym_id(auth_asym_id)
-            print(json.loads(chain.model_dump_json()))
+            chain, rp_class = ribosome_Assets.get_chain_by_auth_asym_id(auth_asym_id)
+            if chain != None:
+                print(json.loads(chain.model_dump_json()))
         else:
-            pprint(json.loads(RibosomeAssets(args.struct).profile().model_dump_json()))
+            print(RibosomeAssets(args.struct).profile().model_dump_json())
 
     elif args.taxid != None:
         print("Listing species information for", args.taxid)
@@ -32,8 +34,8 @@ def cmd_ls(args):
         pdbid_taxid_tuples:list = []    
 
         for struct in all_structs:
-            ribosome_profile = RibosomeAssets(struct).profile()
-            pdbid_taxid_tuples.append(( ribosome_profile.rcsb_id, ribosome_profile.src_organism_ids[0] ))
+            ribosome_Assets = RibosomeAssets(struct).profile()
+            pdbid_taxid_tuples.append(( ribosome_Assets.rcsb_id, ribosome_Assets.src_organism_ids[0] ))
 
         pprint(Taxid.descendants_of_taxid( pdbid_taxid_tuples, int(args.taxid)))
 
