@@ -723,7 +723,6 @@ class ReannotationPipeline:
 
         protein_alphabet      = pyhmmer.easel.Alphabet.amino()
         protein_classifier    = HMMClassifier( _prot_polypeptides, protein_alphabet, [p for p in [ *list(CytosolicProteinClass),*list(LifecycleFactorClass) , *list(MitochondrialProteinClass)] ])
-        print("Initialized a classifier: ", protein_classifier)
         protein_classifier.classify_chains()
        
         rna_alphabet             = pyhmmer.easel.Alphabet.rna()
@@ -736,7 +735,6 @@ class ReannotationPipeline:
         full_report      = { **rna_classifier.report, **protein_classifier.report }
         reported_classes = { k:v for ( k,v ) in [*prot_classification.items(), *rna_classification.items()] }
 
-        print("Got here <<<<<<<")
 
         #! Saving results
         report_path      = os.path.join(CLASSIFICATION_REPORTS, f"{rcsb_id}.json")
@@ -744,7 +742,6 @@ class ReannotationPipeline:
             json.dump(full_report, outfile, indent=4)
             print("Saved classification report to : ", report_path)
 
-        pprint(reported_classes)
 
         #! TODO : PROPAGATE NOMENCLATUERE
         for polymer_dict in _rna_polynucleotides:
@@ -765,7 +762,7 @@ class ReannotationPipeline:
         is_mitochondrial=False
         for rna_d in _rna_polynucleotides:
             if len( rna_d.nomenclature )>0 :
-               if ( rna_d.nomenclature[0].value in [k.value for k in list(MitochondrialRNAClass)] ):
+               if ( rna_d.nomenclature[0] in [k.value for k in list(MitochondrialRNAClass)] ):
                     is_mitochondrial=True
                     break
 

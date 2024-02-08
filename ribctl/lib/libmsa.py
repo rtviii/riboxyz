@@ -276,7 +276,6 @@ def phylogenetic_neighborhood(
 
     nbr_taxids = list(map(lambda tax_phydist: tax_phydist[0], phylo_sorted_nodes))
 
-    print("phylo nbhd end")
     if len(nbr_taxids) < n_neighbors:
         return nbr_taxids[1:]
     else:

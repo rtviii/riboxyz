@@ -68,9 +68,7 @@ def fasta_phylogenetic_correction(candidate_class:PolymerClass, organism_taxid:i
 
     ids        = records.all_taxids()
     phylo_nbhd = phylogenetic_neighborhood(list(map(lambda x: str(x),ids)), str(organism_taxid), max_n_neighbors)
-    print("Got phylogenetic neighborhood of {} among {}".format(organism_taxid,list(map(lambda x: str(x),ids))))
     seqs       = records.pick_taxids(phylo_nbhd)
-    print("Returning seqs", len(seqs))
 
     return iter(seqs)
 
@@ -87,8 +85,8 @@ def seq_evaluate_v_hmm(seq:DigitalSequence,alphabet:Alphabet, hmm:HMM, T:int=35)
 def pick_best_hmm_hit(matches_dict:dict[PolymerClass, list[float]], chain_info:Polymer)->PolymerClass | None:
     """Given a dictionary of sequence-HMMe e-values, pick the best candidate class"""
     results = []
-    if len([ item for x in list(matches_dict.values()) for item in x ]) > 0:
-        pprint(matches_dict)
+    # if len([ item for x in list(matches_dict.values()) for item in x ]) > 0:
+    #     pprint(matches_dict)
     for (candidate_class, match) in matches_dict.items():
         if len(match) == 0:
             continue
@@ -118,7 +116,7 @@ def hmm_cache(hmm:HMM):
     if not os.path.isfile(filename):
         with open(filename, "wb") as hmm_file:
             hmm.write(hmm_file)
-            print("Wrote `{}` to `{}`".format(filename, hmm_cachedir))
+            # print("Wrote `{}` to `{}`".format(filename, hmm_cachedir))
     else:
         ...
 
@@ -290,20 +288,16 @@ class HMMClassifier():
     def classify_chains(self)->None:
         """This is an alternative implementation of `scan_chains` that does not use `hmmscan`. Waiting on https://github.com/althonos/pyhmmer/issues/53 to resolve"""
 
-        print("Classifying chains")
         for chain in self.chains:
             try:
             
                 organism_taxid = chain.src_organism_ids[0]
-                print("Got organism taxid", organism_taxid)
 
                 if organism_taxid not in self.organism_scanners:
                     hmmscanner                             = HMMs(organism_taxid, self.candidate_classes, no_cache = True, max_seed_seqs = 5)
                     self.organism_scanners[organism_taxid] = hmmscanner
-                    print("Got hmmscanner", hmmscanner)
                 else:
                     hmmscanner = self.organism_scanners[organism_taxid]
-                    print("else ", hmmscanner)
 
                 self.report[chain.auth_asym_id] = []
                 seq_record                      = chain.to_SeqRecord()
@@ -335,7 +329,6 @@ class HMMClassifier():
             if organism_taxid not in self.organism_scanners:
                     hmmscanner                             = HMMs(organism_taxid, self.candidate_classes, no_cache = True, max_seed_seqs = 5)
                     self.organism_scanners[organism_taxid] = hmmscanner
-                    # pprint(hmmscanner.class_hmms_registry)
             else:
                 hmmscanner = self.organism_scanners[organism_taxid]
             # -- pick scanner.|

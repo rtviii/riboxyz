@@ -31,4 +31,28 @@ Xu et Al. 2022 Elongation Factors Review
 
 The physiological significance of phosphorylated EF-G still needs to be elucidated.
 The molecular mechanism of how ADP-ribosylation impairs the function of eEF2 has not been fully elucidated
-EF4 may contribute to the cell survival under adverse conditions, but the physiological role of the protein remains unclear.
+EF4 may contribute to the cell survival under adverse conditions, but the physiological 
+
+
+# Assembly actors
+role of the protein remains unclear.
+[ Emerging Quantitative Biochemical, Structural and Biophysical Methods... Dus & Gor, Biomolecules 2023] 
+
+- rrnTAC
+
+# WTH is:
+
+- plasmid
+- pseudouridinylations
+- methylation
+- CP central proturberance
+- chaperones and their mediation of rna folding
+- does "co-transcriptional" mean "simultaneously with transcription"?
+
+- how's transcription elongation different from translation-elongation?
+
+
+- is the nomenclature for domains and helices fully specified? 
+
+    Switch 1 domain doesn't have a single specific nucleotide sequence, its location is determined by its structural characteristics and interactions within the ribosome. 
+
