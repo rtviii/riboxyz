@@ -1,9 +1,8 @@
 import functools
+
 import os
 import more_itertools as mitt
 import json
-import logging
-from pprint import pprint
 from typing import Any, Optional
 import pyhmmer
 from pyhmmer.plan7 import HMM
@@ -28,7 +27,6 @@ from ribctl.lib.ribosome_types.types_ribosome import (
 )
 from ribctl.etl.gql_querystrings import single_structure_graphql_template
 
-logging.getLogger("urllib3.connectionpool").setLevel(logging.CRITICAL)
 
 def current_rcsb_structs() -> list[str]:
     """Return all structures in the rcsb that contain the phrase RIBOSOME and have more than 25 protein entities"""
@@ -681,10 +679,6 @@ class ReannotationPipeline:
         _rna_polynucleotides:list[RNA]     = []
         _other_polymers     :list[Polymer] = []
 
-
-
-        print("Processing polymers({}).".format(len(poly_entities)))
-
         for polymer_dict in poly_entities:
             polys = self.raw_to_polymer(polymer_dict)
             for poly in polys:
@@ -698,14 +692,10 @@ class ReannotationPipeline:
                     case _:
                         _other_polymers.append(poly)
 
-        print("Collected {} proteins, {} rnas and {} other polymers".format(len(_prot_polypeptides), len(_rna_polynucleotides), len(_other_polymers)))
-
-        print("Classifying proteins.")
         protein_alphabet      = pyhmmer.easel.Alphabet.amino()
         protein_classifier    = HMMClassifier( _prot_polypeptides, protein_alphabet, [p for p in [ *list(CytosolicProteinClass),*list(LifecycleFactorClass) , *list(MitochondrialProteinClass)] ])
         protein_classifier.classify_chains()
        
-        print("Classifying RNA.")
         rna_alphabet             = pyhmmer.easel.Alphabet.rna()
         rna_classifier           = HMMClassifier(_rna_polynucleotides, rna_alphabet, [p for p in list(PolynucleotideClass)])
         rna_classifier.classify_chains()
@@ -725,7 +715,6 @@ class ReannotationPipeline:
 
 
         #! TODO : PROPAGATE NOMENCLATUERE
-        print("Propagatin nomenclature.")
         for polymer_dict in _rna_polynucleotides:
             if polymer_dict.auth_asym_id in reported_classes.keys():
                 polymer_dict.nomenclature = reported_classes[polymer_dict.auth_asym_id]
