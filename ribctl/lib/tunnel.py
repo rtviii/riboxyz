@@ -1,4 +1,3 @@
-import logging
 import math
 import os
 import numpy as np
@@ -15,12 +14,6 @@ from Bio.PDB.Atom import Atom
 from functools import reduce
 from Bio.PDB.Structure import Structure
 from ribctl.lib.ribosome_types.types_ribosome import RNA
-
-logging.basicConfig(
-    level=logging.DEBUG,
-    format="%(asctime)s [%(levelname)s] [%(name)s] %(message)s",
-    handlers=[logging.StreamHandler(), logging.FileHandler("tunnel.log")],
-)
 
 
 # https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4574749/pdf/1719.pdf
@@ -126,9 +119,7 @@ def ptc_resdiues_get(
             filter(lambda match_kv: len(match_kv[1][2]) > 0, list(matches.items()))
         )[0]
     except:
-        logging.error(
-            "Could not identify PTC residues in {}".format(biopython_structure.id)
-        )
+        print("Error:Could not identify PTC residues in {}".format(biopython_structure.id)   )
         exit(1)
 
     chain3d: Chain = struct_profile.child_dict[assembly_id].child_dict[auth_asym_id]

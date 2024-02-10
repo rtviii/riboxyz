@@ -1,13 +1,13 @@
 from concurrent.futures import ALL_COMPLETED, Future, ThreadPoolExecutor, wait
-from api.logs.loggers import get_updates_logger
+# from api.logs.loggers import get_updates_logger
 import typing
 from neo4j.exceptions import AuthError
 from neo4j import Driver, GraphDatabase
 from ribctl.etl.etl_pipeline import current_rcsb_structs
 from rbxz_bend.settings import NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER
-from api.db.inits.proteins import add_protein, node__protein_class
-from api.db.inits.rna import add_rna, node__rna_class
-from api.db.inits.structure import add_ligand, node__structure
+# from api.db.inits.proteins import add_protein, node__protein_class
+# from api.db.inits.rna import add_rna, node__rna_class
+# from api.db.inits.structure import add_ligand, node__structure
 from ribctl.lib.ribosome_types.types_ribosome import MitochondrialProteinClass, PolynucleotideClass, RibosomeStructure
 from ribctl.etl.ribosome_assets import RibosomeAssets
 from neo4j import GraphDatabase, Driver, ManagedTransaction, Transaction

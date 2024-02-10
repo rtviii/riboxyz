@@ -1,5 +1,4 @@
 import asyncio
-import dill
 import pickle
 from pyhmmer.easel import (
     Alphabet,
@@ -14,7 +13,6 @@ from functools import reduce
 from io import StringIO
 from itertools import tee
 import json
-import logging
 import os
 from pprint import pprint
 from tempfile import NamedTemporaryFile
@@ -46,8 +44,6 @@ from ribctl.lib.ribosome_types.types_ribosome import (
 from ribctl import model_subgenuses
 from ete3 import NCBITaxa
 
-logging.getLogger("urllib3.connectionpool").setLevel(logging.CRITICAL)
-logging.getLogger("asyncio").setLevel(logging.WARNING)
 from ribctl.lib.taxlib import (
     descendants_of_taxid,
     taxid_superkingdom,
@@ -58,11 +54,6 @@ hmm_cachedir = ASSETS["__hmm_cache"]
 
 import sys
 
-logger       = logging.getLogger(__name__)
-file_handler = logging.FileHandler("classification.log")
-log_format   = logging.Formatter("%(asctime)s [%(levelname)s] [%(name)s] %(message)s")
-file_handler.setFormatter(log_format)
-logger.addHandler(file_handler)
 
 
 if sys.argv[1] == "tunnel":

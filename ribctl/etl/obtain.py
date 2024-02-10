@@ -1,13 +1,10 @@
-
 import asyncio
 from concurrent import futures
 import json
-import logging
 import typing
 from Bio.PDB.Structure import Structure
 from Bio.PDB.Chain import Chain
 from typing import Optional
-from api.logs.loggers import get_updates_logger
 from ribctl import AMINO_ACIDS_3_TO_1_CODE
 from ribctl.etl.ribosome_assets import Assetlist, RibosomeAssets
 from ribctl.lib.tunnel import ptc_resdiues_get, ptc_residues_calculate_midpoint
@@ -16,24 +13,14 @@ from ribctl.lib.mod_extract_bsites import bsite_ligand, struct_ligand_ids, bsite
 from ribctl.lib.mod_split_rename import split_rename
 from ribctl.etl.etl_pipeline import current_rcsb_structs, ReannotationPipeline, rcsb_single_structure_graphql, query_rcsb_api
 from concurrent.futures import  Future, ThreadPoolExecutor
-logging.getLogger('asyncio').setLevel(logging.WARNING)
-logging.basicConfig(
-    level=logging.DEBUG,  
-    format='%(asctime)s [%(levelname)s] [%(name)s] %(message)s',  
-    handlers=[
-        logging.StreamHandler(),  
-        logging.FileHandler('etl.log')  
-    ]
-)
 
+from ribctl.logs.loggers import get_etl_logger
 import os
 
 async def obtain_assets(rcsb_id: str, assetlist: Assetlist, overwrite: bool = False):
     """Obtain all assets for a given RCSB ID"""
 
     rcsb_id = rcsb_id.upper()
-    logging.debug("\t\t\t※ {} ※".format(rcsb_id))
-
     assets = RibosomeAssets(rcsb_id)
     assets._verify_dir_exists()
 
@@ -65,7 +52,6 @@ async def obtain_assets(rcsb_id: str, assetlist: Assetlist, overwrite: bool = Fa
             }
 
             with open(asset_ptc_coords_path, 'w') as f:
-                logging.debug(f'Writing PTC coordinates to {asset_ptc_coords_path}')
                 json.dump(writeout, f)
 
     if assetlist.cif_modified_and_chains:
@@ -75,11 +61,14 @@ async def obtain_assets(rcsb_id: str, assetlist: Assetlist, overwrite: bool = Fa
 
 def obtain_assets_threadpool(targets: list[str], assetlist: Assetlist, workers: int = 15, get_all: bool = False, overwrite=False):
     """Get all ribosome profiles from RCSB via a threadpool"""
-    logger = get_updates_logger()
+    logger = get_etl_logger()
+
     if get_all:
         unsynced = sorted(current_rcsb_structs())
     else:
         unsynced = list(map(lambda _: _.upper(), targets))
+        
+    logger.info(f"Found {len(unsynced)} unsynced structures")
 
     tasks: list[Future] = []
     results=[]

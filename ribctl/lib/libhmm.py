@@ -18,18 +18,10 @@ from ribctl.lib.ribosome_types.types_ribosome import RNA, ElongationFactorClass,
 # from ribctl.etl.ribosome_assets import RibosomeAssets
 from pyhmmer.easel import Alphabet, DigitalSequenceBlock, TextSequence, SequenceFile, SequenceBlock, TextSequenceBlock, DigitalSequence
 from pyhmmer.plan7 import Pipeline, HMM , TopHits
-import logging
+from ribctl.logs.loggers import get_classification_logger
 import concurrent.futures
 
-# Configure the logging settings
-logging.basicConfig(
-    level=logging.DEBUG,  # Set the logging level to DEBUG (you can adjust this)
-    format='%(asctime)s [%(levelname)s] [%(name)s] %(message)s',  # Define the log message format
-    handlers=[
-        logging.StreamHandler(),  # Log to the console
-        logging.FileHandler('classification.log')  # Log to a file named 'my_log_file.log'
-    ]
-)
+logger= get_classification_logger()
 hmm_cachedir = ASSETS['__hmm_cache']
 
 #? Constructon
@@ -105,7 +97,7 @@ def pick_best_hmm_hit(matches_dict:dict[PolymerClass, list[float]], chain_info:P
         second_best_match = results[1]['match'][0]
         
         if best_match == 0 and second_best_match == 0:
-            logging.warning("{}.{} : Multiple sensible matches detected, picked {} (smallest e-value) : \n {}".format(chain_info.parent_rcsb_id, chain_info.auth_asym_id,results[0][0], results))
+            logger.warning("{}.{} : Multiple sensible matches detected, picked {} (smallest e-value) : \n {}".format(chain_info.parent_rcsb_id, chain_info.auth_asym_id,results[0][0], results))
 
     return results[0]['candidate_class']
 
