@@ -69,7 +69,6 @@ def parse_struct_via_centerline(
 
     return list(nbhd)
 
-
 def parse_struct_via_bbox(rcsb_id: str, bbox: list) -> list:
     """bbox is a tuple of minx,miny,minz and maxx,maxy,maxz points"""
     from Bio.PDB.MMCIFParser import MMCIFParser
@@ -108,7 +107,6 @@ def parse_struct_via_bbox(rcsb_id: str, bbox: list) -> list:
         
 
     return list(nbhd)
-
 
 def encode_atoms(rcsb_id: str, nearby_atoms_list: list[Atom], write=False) -> list:
     """given a list of atoms lining the tunnel, annotate each with:
@@ -155,32 +153,30 @@ def encode_atoms(rcsb_id: str, nearby_atoms_list: list[Atom], write=False) -> li
 def create_pcd_from_atoms(
     positions: np.ndarray, atom_types: np.ndarray, save_path: str
 ):
-    pcd = o3d.geometry.PointCloud(o3d.utility.Vector3dVector(positions))
+    pcd        = o3d.geometry.PointCloud(o3d.utility.Vector3dVector(positions))
     pcd.colors = o3d.utility.Vector3dVector(atom_types)
     o3d.io.write_point_cloud(save_path, pcd)
-
 
 
 RCSB_ID      = sys.argv[1].upper()
 IF_VISUALIZE = sys.argv[2].upper()
 
 
-cloud            = parse_struct_via_centerline(RCSB_ID, open_tunnel_csv(RCSB_ID))
-cords_walls_only = np.array([a.get_coord() for a in cloud])
+centerline_expansion_atoms       = parse_struct_via_centerline(RCSB_ID, open_tunnel_csv(RCSB_ID))
+centerline_expansion_coordinates = np.array([a.get_coord() for a in centerline_expansion_atoms])
+
+bbox                             = bounding_box(centerline_expansion_coordinates)
+atoms_bboxed                     = parse_struct_via_bbox(RCSB_ID, bbox)
+
+# if IF_VISUALIZE:
+#     point_cloud           = pv.PolyData(centerline_expansion_coordinates)
+#     random_rgbs           = np.random.randint(0, 256, size=( centerline_expansion_coordinates.shape[0],4 ))
+#     point_cloud['colors'] = random_rgbs
+#     point_cloud.plot(scalars='colors', rgb=True, notebook=False)
+
 
 if IF_VISUALIZE:
-    point_cloud           = pv.PolyData(cords_walls_only)
-    # Coloration
-    random_rgbs           = np.random.randint(0, 256, size=( cords_walls_only.shape[0],4 ))
-    point_cloud['colors'] = random_rgbs
-    point_cloud.plot(scalars='colors', rgb=True, notebook=False)
-
-bbox  = bounding_box(np.array([a.get_coord() for a in cloud]))
-print("Vanilla bounding box:", bbox)
-atoms_bboxed = parse_struct_via_bbox(RCSB_ID, bbox)
-
-if IF_VISUALIZE:
-    cords_inside_bbox = np.array([a.get_coord() for a in atoms_bboxed])
+    cords_inside_bbox     = np.array([a.get_coord() for a in atoms_bboxed])
     point_cloud           = pv.PolyData(cords_inside_bbox)
     random_rgbs           = np.random.randint(0, 256, size=( cords_inside_bbox.shape[0],4 ))
     point_cloud['colors'] = random_rgbs
