@@ -181,12 +181,7 @@ def voxelize_to_spheres(sphere_sources):
 
 
 RCSB_ID = args.rcsb_id.upper()
-with open(
-    "/home/rtviii/dev/riboxyz/mesh_generation/{}_tunnel_atoms_bbox.json".format(
-        RCSB_ID
-    ),
-    "r",
-) as infile:
+with open( "/home/rtviii/dev/riboxyz/mesh_generation/{}_tunnel_atoms_bbox.json".format( RCSB_ID ), "r", ) as infile:
     ptcloud_data_cluster = json.load(infile)
 
 __cords = np.array(list(map(lambda x: x["coord"], ptcloud_data_cluster)))
@@ -308,9 +303,9 @@ attempts: list[typing.Tuple[float, int, str]] = [
     (5.5, 600, "euclidean"),  # <<<< A little finer res
 ]
 
-u_EPSILON = attempts[-1][0]
+u_EPSILON     = attempts[-1][0]
 u_MIN_SAMPLES = attempts[-1][1]
-u_METRIC = attempts[-1][2]
+u_METRIC      = attempts[-1][2]
 
 
 print(
