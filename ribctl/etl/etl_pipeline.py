@@ -26,6 +26,8 @@ from ribctl.lib.ribosome_types.types_ribosome import (
     RibosomeStructure,
 )
 from ribctl.etl.gql_querystrings import single_structure_graphql_template
+from ribctl.logs.loggers import get_etl_logger
+logger = get_etl_logger()
 
 
 def current_rcsb_structs() -> list[str]:
@@ -678,6 +680,7 @@ class ReannotationPipeline:
         _prot_polypeptides  :list[Protein] = []
         _rna_polynucleotides:list[RNA]     = []
         _other_polymers     :list[Polymer] = []
+        logger.debug("Processing {}: {} polypeptides, {} polynucleotides, {} other.".format(rcsb_id, len(_prot_polypeptides), len(_rna_polynucleotides), len(_other_polymers)))
 
         for polymer_dict in poly_entities:
             polys = self.raw_to_polymer(polymer_dict)
@@ -692,10 +695,12 @@ class ReannotationPipeline:
                     case _:
                         _other_polymers.append(poly)
 
+        logger.debug("Classifying polymers: Proteins.")
         protein_alphabet      = pyhmmer.easel.Alphabet.amino()
         protein_classifier    = HMMClassifier( _prot_polypeptides, protein_alphabet, [p for p in [ *list(CytosolicProteinClass),*list(LifecycleFactorClass) , *list(MitochondrialProteinClass)] ])
         protein_classifier.classify_chains()
        
+        logger.debug("Classifying polymers: RNA.")
         rna_alphabet             = pyhmmer.easel.Alphabet.rna()
         rna_classifier           = HMMClassifier(_rna_polynucleotides, rna_alphabet, [p for p in list(PolynucleotideClass)])
         rna_classifier.classify_chains()
@@ -705,13 +710,10 @@ class ReannotationPipeline:
 
         full_report      = { **rna_classifier.report, **protein_classifier.report }
         reported_classes = { k:v for ( k,v ) in [*prot_classification.items(), *rna_classification.items()] }
-
-
-        #! Saving results
         report_path      = os.path.join(CLASSIFICATION_REPORTS, f"{rcsb_id}.json")
         with open(report_path, "w") as outfile:
             json.dump(full_report, outfile, indent=4)
-            print("Saved classification report to : ", report_path)
+            logger.debug("Saved classification report to {}".format(report_path))
 
 
         #! TODO : PROPAGATE NOMENCLATUERE
