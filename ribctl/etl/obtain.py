@@ -24,6 +24,8 @@ async def obtain_assets(rcsb_id: str, assetlist: Assetlist, overwrite: bool = Fa
     assets = RibosomeAssets(rcsb_id)
     assets._verify_dir_exists()
 
+    logger = get_etl_logger()
+    logger.debug(f"Obtaining assets for {rcsb_id}: {list(assetlist)}")
     coroutines = []
 
     if assetlist.profile:

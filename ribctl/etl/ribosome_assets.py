@@ -119,7 +119,6 @@ class RibosomeAssets():
             with open(self._json_profile_filepath(), "w") as f:
                 json.dump(new_profile, f)
                 logger.debug(f"Updated profile for {self.rcsb_id}")
-             
 
     @staticmethod
     def list_all_structs():

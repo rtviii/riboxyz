@@ -8,7 +8,7 @@ RIBETL_DATA = os.environ.get("RIBETL_DATA")
 # This amounts to "_assets folder is expected to exist in the root of `ribctl`(next to top-level __init__.py)"
 ASSETS_PATH            = os.path.join(pathlib.Path(__file__).parent, "assets")
 LOGS_PATH              = os.path.join(pathlib.Path(__file__).parent, "logs")
-CLASSIFICATION_REPORTS = os.path.join(pathlib.Path(__file__).parent, "assets","classification_reports")
+CLASSIFICATION_REPORTS = os.path.join(pathlib.Path(__file__).parent, "logs","hmm_classification_reports")
 MUSCLE_BIN             = os.path.join(ASSETS_PATH, "muscle3.8.1")
 
 asset_type  = Literal[
