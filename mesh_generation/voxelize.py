@@ -304,11 +304,7 @@ attempts: list[typing.Tuple[float, int, str]] = [
     (5.5, 650, "sqeuclidean"),  # 0 clusters
     (4, 100, "sqeuclidean"),
     (3, 40, "canberra"),
-    (
-        6,
-        600,
-        "euclidean",
-    ),  # <<<< Best so far In 1.46s. Estimated number of [ clusters, noise points ]: [ 9, 53038 ]
+    ( 6, 600, "euclidean", ),  # <<<< Best so far In 1.46s. Estimated number of [ clusters, noise points ]: [ 9, 53038 ]
     (5.5, 600, "euclidean"),  # <<<< A little finer res
 ]
 
@@ -370,7 +366,45 @@ if args.plot == True:
 
         point_cloud = pv.PolyData(combined)
         point_cloud["rgba"] = rgbas_combined
-        point_cloud.plot(scalars="rgba", rgb=True, notebook=False, show_bounds=True)
+        # point_cloud.plot(scalars="rgba", rgb=True, notebook=False, show_bounds=True)
+        # !-----------
+
+
+        cloud = pv.PolyData(ptcloud_data_cluster)
+        # cloud.plot(point_size=1)
+
+        #? Alpha of about >  2.5 starts to hide the detail
+        surf              = cloud.delaunay_3d(alpha=3, tol=1.5,offset=2,progress_bar=True)
+        surf.save("{}_tunnel_delaunay.vtk".format(RCSB_ID))
+        print(surf)
+        surf.plot(show_edges=True)
+        exit()
+
+        pcd = o3d.geometry.PointCloud(o3d.utility.Vector3dVector(ptcloud_data_cluster))
+        pcd.estimate_normals( search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=5, max_nn=40))
+
+        # o3d.visualization.draw_geometries([pcd],
+        #                                   zoom=0.3412,
+        #                                   front=[0.4257, -0.2125, -0.8795],
+        #                                   lookat=[2.6172, 2.0475, 1.532],
+        #                                   up=[-0.0694, -0.9768, 0.2024],
+        #                                   point_show_normal=True)
+        # exit()
+        def poisson_mesh(pc, depth=8, width=0, scale=1.1, linear_fit=False):
+            """`pc` is a `pyvista.PolyData` point cloud. The default arguments are abitrary"""
+            cloud = o3d.geometry.PointCloud()
+            cloud.points = o3d.utility.Vector3dVector(pc.points)
+            cloud.normals = o3d.utility.Vector3dVector(pc.normals)
+            trimesh, _ = o3d.geometry.TriangleMesh.create_from_point_cloud_poisson(cloud, depth=depth, width=width, scale=scale, linear_fit=linear_fit)
+            v = np.asarray(trimesh.vertices)
+            f = np.array(trimesh.triangles)
+            f = np.c_[np.full(len(f), 3), f]
+            mesh = pv.PolyData(v, f)
+            return mesh.clean()
+
+        x = poisson_mesh(pcd, depth=5, width=1, scale=1.1, linear_fit=False)
+        x.plot()
+        # print(x)
 
     else:
         # pv.set_plot_theme('dark')
