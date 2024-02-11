@@ -279,7 +279,6 @@ class RibosomeAssets():
                 return False
 
     async def _update_json_profile(self, overwrite: bool = False) -> bool:
-        print("Vv")
         self._verify_dir_exists()
         if not os.path.isfile(self._json_profile_filepath()):
             ribosome = ReannotationPipeline(query_rcsb_api(rcsb_single_structure_graphql(self.rcsb_id.upper()))).process_structure()
