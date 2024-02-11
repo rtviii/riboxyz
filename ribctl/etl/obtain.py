@@ -14,8 +14,9 @@ from ribctl.lib.mod_split_rename import split_rename
 from ribctl.etl.etl_pipeline import current_rcsb_structs, ReannotationPipeline, rcsb_single_structure_graphql, query_rcsb_api
 from concurrent.futures import  Future, ThreadPoolExecutor
 
-from ribctl.logs.loggers import get_etl_logger
 import os
+
+from ribctl.logs.loggers import get_etl_logger
 
 async def obtain_assets(rcsb_id: str, assetlist: Assetlist, overwrite: bool = False):
     """Obtain all assets for a given RCSB ID"""
@@ -24,8 +25,6 @@ async def obtain_assets(rcsb_id: str, assetlist: Assetlist, overwrite: bool = Fa
     assets = RibosomeAssets(rcsb_id)
     assets._verify_dir_exists()
 
-    logger = get_etl_logger()
-    logger.debug(f"Obtaining assets for {rcsb_id}: {list(assetlist)}")
     coroutines = []
 
     if assetlist.profile:
@@ -65,6 +64,7 @@ def obtain_assets_threadpool(targets: list[str], assetlist: Assetlist, workers: 
     """Get all ribosome profiles from RCSB via a threadpool"""
     logger = get_etl_logger()
 
+    
     if get_all:
         unsynced = sorted(current_rcsb_structs())
     else:
@@ -74,14 +74,14 @@ def obtain_assets_threadpool(targets: list[str], assetlist: Assetlist, workers: 
 
     tasks: list[Future] = []
     results=[]
-    logger.info("Begun downloading ribosome profiles via RCSB")
+    logger.debug("Begun downloading ribosome profiles via RCSB")
 
     def log_commit_result(rcsb_id: str):
         def _(f: Future):
             if not None == f.exception():
                 logger.error(rcsb_id + ":" + f.exception().__str__())
             else:
-                logger.info(rcsb_id + ": processed successfully.")
+                logger.debug(rcsb_id + ": processed successfully.")
         return _
 
     with ThreadPoolExecutor(max_workers=workers) as executor:

@@ -195,7 +195,6 @@ class ReannotationPipeline:
         if len(host_id_tally.keys()) == 0:
             host_id = []
         else:
-            print(host_id_tally)
             for hkey in host_id_tally:
                 host_id_tally[hkey] = host_id_tally[hkey] / len(host_organism_ids)
             host_id = [max(host_id_tally, key=lambda k: host_id_tally[k])]
@@ -321,8 +320,6 @@ class ReannotationPipeline:
         poly_entities = self.rcsb_data_dict["polymer_entities"]
         other = []
 
-        # print("Processing polypeptides :")
-        # print(len(poly_entities))
 
         def is_not_rna_protein_polymer(poly):
             # * According to RCSB schema, polymer_entites include Proteins, RNA but also DNA, NA-Hybrids and "Other".
@@ -680,7 +677,6 @@ class ReannotationPipeline:
         _prot_polypeptides  :list[Protein] = []
         _rna_polynucleotides:list[RNA]     = []
         _other_polymers     :list[Polymer] = []
-        logger.debug("Processing {}: {} polypeptides, {} polynucleotides, {} other.".format(rcsb_id, len(_prot_polypeptides), len(_rna_polynucleotides), len(_other_polymers)))
 
         for polymer_dict in poly_entities:
             polys = self.raw_to_polymer(polymer_dict)
@@ -695,12 +691,13 @@ class ReannotationPipeline:
                     case _:
                         _other_polymers.append(poly)
 
-        logger.debug("Classifying polymers: Proteins.")
+        logger.debug("Classifying {}: {} polypeptides, {} polynucleotides, {} other.".format(rcsb_id, len(_prot_polypeptides), len(_rna_polynucleotides), len(_other_polymers)))
+        # logger.debug("Classifying polymers: Proteins.")
         protein_alphabet      = pyhmmer.easel.Alphabet.amino()
         protein_classifier    = HMMClassifier( _prot_polypeptides, protein_alphabet, [p for p in [ *list(CytosolicProteinClass),*list(LifecycleFactorClass) , *list(MitochondrialProteinClass)] ])
         protein_classifier.classify_chains()
        
-        logger.debug("Classifying polymers: RNA.")
+        # logger.debug("Classifying polymers: RNA.")
         rna_alphabet             = pyhmmer.easel.Alphabet.rna()
         rna_classifier           = HMMClassifier(_rna_polynucleotides, rna_alphabet, [p for p in list(PolynucleotideClass)])
         rna_classifier.classify_chains()

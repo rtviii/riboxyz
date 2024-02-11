@@ -283,17 +283,18 @@ class RibosomeAssets():
         self._verify_dir_exists()
         if not os.path.isfile(self._json_profile_filepath()):
             ribosome = ReannotationPipeline(query_rcsb_api(rcsb_single_structure_graphql(self.rcsb_id.upper()))).process_structure()
-
             if not RibosomeStructure.model_validate(ribosome):
                 raise Exception("Created invalid ribosome profile (Schema validation failed). Not writing")
             self.write_own_json_profile( ribosome.model_dump(), overwrite=True)
+            logger.debug("Processing {} profile.".format(self.rcsb_id))
         else:
-
             if overwrite:
                 ribosome = ReannotationPipeline(query_rcsb_api(rcsb_single_structure_graphql(self.rcsb_id.upper()))).process_structure()
                 self.write_own_json_profile(ribosome.model_dump(),overwrite)
+                logger.debug("Processing {} profile: already exists for {}.Overwriting".format(self.rcsb_id, self.rcsb_id))
             else:
-                print("Profile already exists for {}".format(self.rcsb_id))
+
+                logger.debug("Processing {} profile: already exists for {}.".format(self.rcsb_id, self.rcsb_id))
         return True
         
     def _verify_png_thumbnail(self, overwrite: bool = False) -> bool:

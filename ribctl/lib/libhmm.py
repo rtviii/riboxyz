@@ -1,7 +1,6 @@
 import json
 import os
 import pickle
-from pprint import pprint
 import subprocess
 from tempfile import NamedTemporaryFile
 from typing import Generic, Iterator, Literal, Optional, Tuple, Type, TypeVar
@@ -21,7 +20,7 @@ from pyhmmer.plan7 import Pipeline, HMM , TopHits
 from ribctl.logs.loggers import get_classification_logger
 import concurrent.futures
 
-logger= get_classification_logger()
+# logger= get_classification_logger()
 hmm_cachedir = ASSETS['__hmm_cache']
 
 #? Constructon
@@ -78,7 +77,6 @@ def pick_best_hmm_hit(matches_dict:dict[PolymerClass, list[float]], chain_info:P
     """Given a dictionary of sequence-HMMe e-values, pick the best candidate class"""
     results = []
     # if len([ item for x in list(matches_dict.values()) for item in x ]) > 0:
-    #     pprint(matches_dict)
     for (candidate_class, match) in matches_dict.items():
         if len(match) == 0:
             continue
@@ -108,7 +106,6 @@ def hmm_cache(hmm:HMM):
     if not os.path.isfile(filename):
         with open(filename, "wb") as hmm_file:
             hmm.write(hmm_file)
-            # print("Wrote `{}` to `{}`".format(filename, hmm_cachedir))
     else:
         ...
 
@@ -162,7 +159,6 @@ class HMMs():
     - a sequence is searched against all HMMs in the registry
     """
 
-
     def __init__(self, tax_id:int, candidate_classes:list[PolymerClass],  no_cache:bool=False, max_seed_seqs:int=5) -> None:
 
         self.organism_tax_id = tax_id
@@ -187,8 +183,6 @@ class HMMs():
             # ! populate seqs records
             for (cls, seedseqs) in loaded_results:
                  self.class_hmms_seed_sequences.update({str( cls.value ):seedseqs})
-            # pprint("ADDED SEQUENCES TO CLASSIFIER")
-            # pprint(self.class_hmms_seed_sequences)
 
             # ! clean containers
             loaded_results, loading_futures = [],[]
@@ -204,7 +198,6 @@ class HMMs():
                  self.class_hmms_registry.update({cls.value:hmm})
 
 
-            # pprint(self.class_hmms_registry)
 # # !-
 #         for candidate_class in candidate_classes:
 #             seqs                                       = [*fasta_phylogenetic_correction(candidate_class, tax_id, max_n_neighbors=max_seed_seqs)]
@@ -308,7 +301,8 @@ class HMMClassifier():
                             }
                            self.report[chain.auth_asym_id].append(d_hit)
             except Exception as e:
-                print(e)
+                l = get_classification_logger()
+                l.error("Error in classification of chain {}.{} : {}".format(chain.parent_rcsb_id, chain.auth_asym_id, e))
                 exit(-1)
 
     def ___scan_chains(self)->None:
@@ -330,13 +324,6 @@ class HMMClassifier():
             query_seq  = pyhmmer.easel.TextSequence(name=bytes(seq_record.id,'utf-8'), sequence=seq_record.seq)
             query_seqs = [query_seq.digitize(self.alphabet)]
 
-            # -- convert seq to easel format
-            
-            # print("Scanning chain {}.{} against {} HMMs".format(chain.parent_rcsb_id, chain.auth_asym_id, len(hmmscanner.class_hmms_registry)))
-            # print("seq:", query_seq.sequence)
-
-            # print("Scanning query seqs", [*query_seqs][0].alphabet, [*query_seqs][0].sequence)
-            # print("Against hmms", [*hmmscanner.class_hmms_registry.values()])
             
             for scan in list(pyhmmer.hmmscan(query_seqs,[*hmmscanner.class_hmms_registry.values()], self.alphabet, background =pyhmmer.plan7.Background(self.alphabet))):
                 for hit in [*scan]:
