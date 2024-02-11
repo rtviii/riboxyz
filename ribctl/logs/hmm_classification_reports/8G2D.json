@@ -10,8 +10,8 @@
                 "10090"
             ],
             "class_name": "28SrRNA",
-            "evalue": 5.172667226038632e-96,
-            "bitscore": 307.96685791015625,
+            "evalue": 1.0745084704340336e-96,
+            "bitscore": 310.23248291015625,
             "target_organism_id": 300852,
             "consensus": "cgcgaccucagaucagacguggcgacccgcugaauuuaagcauauuagucagcggaggaaaagaaacuaaccaggauucccucaguaacggcgagugaacagggaagagcccagcgccgaauccccgccgcgcgguggggcgugggaaauguggcguacggaagacccacuccccggcgccgcucguggggggcccaaguccuucugaucgaggcccagcccguggacggugugaggccgguagcggccccggcgcgccgggcucgggucuucccggagucggguugcuugggaaugcagcccaaagcgggugguaaacuccaucuaaggcuaaauaccggcacgagaccgauagucaacaaguaccguaagggaaaguugaaaagaacuuugaagagagaguucaagagggcgugaaaccguuaagagguaaacgggugggguccgcgcaguccgcccggaggauucaacccggcggcgggcguccggccgugcccgguggucucggcggaucuuucccgcuccccguuccucccgaccccuccacccgcgcgucguuccccucuuccgccccgcggucggcgccuuuggcgggggguggggggggggguguggggguggcgcgcgggcggggccggggguggggucggcgggggaccgucccccggccggcgaccggccgccgccgggcgcauuuccaccguggcggugcgccgcgaccggcuccgggacggcugggaaggcccgguggggaagguggcucggggggggcggcgcgucugagggggcggcgggcgaccucuccccggguguuacagcccuccggcagcgguuucgccgaaucccggggccgagggagcgagauaugugucgccgcgcucucccucuccccccguucgccgcccgggcgggcgugggggggggggccgggccgccccucccacggcgcgaccgcucucccggcccccgccgucgccucuuugggggugcggugggggguggggcggacuguccccagugcgccccgggcguggucgcgccgucggguucgggggggacggugggucgcgcgucucccggcgaggucgagcgcacggggucggcggcgaugucggcuacccacccgacccgucuugaaacacggaccaaggagucuaacgcgugcgcgagucgggggcucguacgaaagccgccguggcgcaaugaaggugaagggccccgccuggggggccgaggugggaucccgaggccuuuccaguccgccgagggcgcaccaccggcccgucucgcccgccgcgccggggagguggagcacgagcguacguguuaggacccgaaagauggugaacuaugcuugggcagggcgaagccagaggaaacucugguggagguccguagcgguccugacgugcaaaucggucguccgaccuggguauaggggcgaaagacuaaucgaaccaucuaguagcugguucccuccgaaguuucccucaggauagcuggcgcucucgcuaccgacguacgcaguuuuauccgguaaagcgaaugauuagaggucuuggggccgaaacgaucucaaccuauucucaaacuuuaaauggguaagaagcccggcucgcuggcguggagccgggcguggaaugcgagugccuagugggccacuuuugguaagcagaacuggcgcugcgggaugaaccgaacgccggguuaaggcgcccgaugccgacgcucaucagaccccagaaaagguguugguugauauagacagcaggacgguggccauggaagucggaauccgcuaaggaguguguaacaacucaccugccgaaucaacuagcccugaaaauggauggcgcuggagcgucgggcccauacccggccgucgcuggcagucggaacggaacggggcgggagagggagugggugcgcgucucucgggguggggggugcguggcgggggcccguccccggccuccccuccgcgcgccggguucgcccccgcggcgucgggccccgcggacgcuacgccgcgacgaguaggagggccgcugcggugagccuugaagccuagggcgcgggcccggguggagccgccgcaggugcagaucuuggugguaguagcaaauauucaaacgagaacuuugaaggccgaaguggagaaggguuccaugugaacagcaguugaacaugggucagucgguccugagagaugggcgagugccguuccgaagggacgggcgauggccuccguugcccucggccgaucgaaagggagucggguucagauccccgaauccggaguggcggagaugggcgccgcgaggccagugcgguaacgcgaccgaucccggagaagccggcgggagccccggggagaguucucuuuucuuugugaagggcagggcgcccuggaauggguucgccccgagagaggggcccgugccuuggaaagcgucgcgguuccggcggcguccggugagcucucgcuggcccuugaaaauccgggggagaggguguaaaucucgcgccgggccguacccauauccgcagcaggucuccaaggugaacagccucuggcauguuggaacaauguagguaagggaagucggcaagccggauccguaacuucgggauaaggauuggcucuaagggcugggucggucgggcuggggcgcgaagcggggcugggcgcgcgccgcggcuggacgaggcgccgccgcccucucccacguccggggagaccucccgucgguuggguccgggcccgcgcgcgcgugugcgccguggggccccggcgucgcgcgcguggucgagaccugucuuccucccuccuucuucccgucggggggggggucgggggggggcgggcggggcgggcgcugggggggcgggugcgucgcugcgggggugccggagcgggggguacggggggucuccgguggggcggggggcccgggcacucggggggccggcggcggcggcgacucuggacgcgagccgggcccuucccguggaucgccucagcugcggcgggcgucgcggccgcucucggggagcccggcgggugccggcgcgggugugcgcgccggggggcgggggggugcgaggcaggggaggcucucgaggugcguggcgggggcgggcgggggggugccgcgcguguggggggaaccuccgcgucgguguucccccgccggguccgcccccggggccgcgguuuuccgcgcggcgcccucgccucggccggcgccuagcagccgacuuagaacuggugcggaccaggggaauccgacuguuuaauuaaaacaaagcaucgcgaaggcccgcggcggguguugacgcgaugugauuucugcccagugcucugaaugucaaagugaagaaauucaaugaagcgcggguaaacggcgggaguaacuaugacucucuuaagguagccaaaugccucgucaucuaauuagugacgcgcaugaauggaugaacgagauucccacugucccuaccuacuauccagcgaaaccacagccaagggaacgggcuuggcggaaucagcggggaaagaagacccuguugagcuugacucuagucuggcacggugaagagacaugagagguguagaauaagugggaggcccccggcgcccggccgcguccgcgaggggggggcgggguacgccggccuugcgggccgccggugaaauaccacuacucuuaucguuuuuucacugacccggugaggcgggggggcgagccccgaggggcucucgcuucuggcgccaagcguccgguccgcgcgggcgggcgggcgcgacccgcuccggggacagugccagguggggaguuugacuggggcgguacaccugucaaacgguaacgcagguguccuaaggcgagcucagggaggacagaaaccucccguggagcagaagggcaaaagcucgcuugaucuugauuuucaguacgaauacagaccgugaaagcggggccucacgauccuucugagcuuuuggguuuuaagcaggaggugucagaaaaguuaccacagggauaacuggcuuguggcggccaagcguucauagcgacgucgcuuuuugauccuucgaugucggcucuuccuaucauugugaagcagaauucaccaagcguuggauuguucacccacuaauagggaacgugagcuggguuuagaccgucgugagacagguuaguuuuacccuacugaugauguguuguugccaugguaauccugcucaguacgagaggaaccgcagguucagacauuugguguaugugcuuggcugaggagccaauggggcgaagcuaccaucugugggauuaugacugaacgccucuaagucagaaucccgcccaggcggaacgauacggcagcgccgaaggagccucgguuggccucggauagccggguccccguccguccccgcugggggggggcgucguguggucgccgcggcggcguggggucgccccccgccgggcgucgggaccgggguccggugcggagagccguucgucuugggaaauggggugcggccggaaagggggccgcccucucgcccgucacguugaacgcacguucguggggaaccuggcgcuaaaccauucguagacgaccugcuucugggucgggguuucguacguagcagagcagcucccucgcugcgaucuauugaaagucagcccucgacacaaggguuugucucugcgggcuuuc",
             "domains": [
@@ -40,8 +40,8 @@
                     2201
                 ],
                 [
-                    156.51002502441406,
-                    2.183201069573849e-50,
+                    158.7755889892578,
+                    4.535314678064637e-51,
                     2198,
                     2899
                 ]
@@ -64,12 +64,12 @@
             ],
             "class_name": "23SrRNA",
             "evalue": 0.0,
-            "bitscore": 3248.033203125,
+            "bitscore": 3250.66552734375,
             "target_organism_id": 300852,
             "consensus": "ggucaagauaguaagggcccacgguggaugccuuggcacuggagccgaugaaggacgugguuaccugcgauaagccacggggagcugguaauaggcuuggauccggggauguccgaaugggggaacccggcuggugggaacgccgguaaccgcaauuuugcgggaggggaacuuggggaacugaaacaucucaguacccagaggagaagaaagagaauucgauuccgugaguagcggcgagcgaaagcggaucagcccaaaccgaaaggcuugucgggucgggguuguagggccagcgguuaagauuuaaccacucuagccgaagcuguuggaaagcagcgccugagagggugagagccccguaggcgaaagagugguuggauguauugggguaccugaguagcucgugguucguggaacgaugagugaaucugcgcggaccaccgcguaaggcuaaauacuccgagugaccgauagcgcaccaguaccgugagggaaaggugaaaagaaccccgggaggggagugaaauagagccugaaaccgugggcuuacaagcagucauggcaccuuaagguguuauggcgugccuauugaagcaugagccggcgacuuaggguugucgggcgagcuuaagcuguagaggcggaggcguagcgaaagcgaguccgaauagggcggcauuaguacguggggguagacccgaaaccgggugagcuaggcaugaccagguugaagcuggggugacagcgaguggaggaccgaaccggugcgugaugaaacagucucggaugaguugugguuaggagugaaaagcuaaccgaacccggagauagcugguucuccccgaaaugucuuuagggucagccucagauguugacuagggccuguagagcacugauagggcuagggggccuaccagcuuaccaaacccuaugaaacuccgaagggucacggguuuagucugggagugaggcugcgagagauaacuuccguggccgagaggggaacaacccagaccaucagcuaagguccccaaaugauggcuaagugguaaaggauguggcgucgcgaagacagccaggagguuggcuuagaagcagccauccuuuaaagagugcguaauagcucacuggucgaguggcgaugcgccgaaaaugaucggggcuuaagugaaguaccgaagcuauggauuugagugaugacgcgaggugguaggggagcguucaaugcggguggaagccaaaccgggaggagugguggagccaagggaagugcgaaugccggcaugaguaacgauaaagggagugagaaucucccucgccguaaggccaaggguuccugggcaagggucguccgcccaggguuagucgggaccuaaggugaggccgaaaggcguagccgauggacagcagguuaauauuccugcacuuaccguuggagugauggagggacgcauuaggcuauccaguccggagccauggaugugcugggugauaagcucaagggugguaggguaggcaaauccgccggucaaaagcuuuggguggugggggagcuuguacgggugacaacccagcgaaguuggaaacgccagggugccaagaaaagcuucuaagcguaaacucgcgguaacccguaccgcaaaccgacacaggugggcgaguguaagugcacuaaggcgcgcgagagaacccucgccaaggaacucugcaaguugaccccguaacuucgggagaaggggugcucaugaugagcgugagccgcagugaauaggcucuggcgacuguuuaccaaaaacacagcucucugccaacucguaaguggagguauagggugugacgccugcccggugccggaaggucaaggggaggggugcaagcugcgaacugaagccccggugaacggcggccguaacuauaacgguccuaagguagcgaaauuccuugucggguaaguuccgaccugcacgaaaggcguaacgaucugggcgcugucucggcgagggacucggugaaauugaauuggcugugaagaugcggccuacccguagcaggacgaaaagaccccguggagcuuuacuguagccugguauuggguuuuggguuugccugcguaggauaggugggagccugcgaaacugggccucugggguggguggaggcgacggugaaauaccacccuggggagguugggguucuaaccugaaaaaucgguuugggggacagugcuuggcgggcaguuugacuggggcggucgccuccuaaaagguaacggaggcgcccaaagguccccucaggacgguuggaaaucgucuguagagcgcaaggguagaagggggcuugacugcgagacuuacaagucgagcaggggggaaagccgggcuuagugaaccgguggucccguguggaagggccaucgaucaacggauaaaaguuaccccggggauaacaggcugaucucccccgagaguccauaucggcggggagguuuggcaccucgaugucggcucgucgcauccuggggcugaagaaggucccaaggguugggcuguucgcccauuaaagcggcacgcgagcuggguucagaacgucgugagacaguucggucucuauccgcuacgggcgcaggaggauugagggggguugcuccuaguacgagaggaccggagugaacgcaccucugguuucccagcugucgcuccagcggcacaugcuggguagcuaugugcggaagggauaaccgcugaaagcaucuaagcgggaagccagccccaagaugaguccucccacugcgucaagcagguaagaacccgggaagaccaccggguugauaggccagggguguaagcauagcgauguguugagcggacuggugcuaaucguucgaggucuugaccacuc",
             "domains": [
                 [
-                    3247.8505859375,
+                    3250.4833984375,
                     0.0,
                     1,
                     2914
@@ -92,8 +92,8 @@
                 "5476"
             ],
             "class_name": "25SrRNA",
-            "evalue": 5.720428161377974e-119,
-            "bitscore": 384.3095703125,
+            "evalue": 1.0828195567712999e-119,
+            "bitscore": 386.7085266113281,
             "target_organism_id": 300852,
             "consensus": "gugaccucaaaucagguaggaguacccgcugaacuuaagcauaucaauaagcggaggaaaagaaaccaacagggauugccuuaguaacggcgagugaagcggcaaaagcucaaauuugaaaucuggcggcuucggcguccgaguuguaauuuggagaaggcaucuuuggggccgguccuugucuauguuccuuggaacaggacgucauagagggugagaaucccguguggcgaggagcccgguucuuuguaaagugccuucgacgagucgaguuguuugggaaugcagcucuaagugggugguaaauuccaucuaaagcuaaauauuggcgagagaccgauagcgaacaaguacagugauggaaagaugaaaagaacuuugaaaagagagugaaaaaguacgugaaauuguugaaagggaagggcaugggaucagacgugguguuuuggucggugugguacggugacgaggggguccgccgaucgucucggggccagcaucaguuuggauuggcaggauaaaugcauaggaauguggcacgcccguggguagguguuauagccuuugggaauacugccagcugggacugaggacugcggcguaugccaaggaugcuggcauaaugguuauaugccgcccgucuugaaacacggaccaaggagucuaacgucuaugcgaguguuuggguguaaaacccguacgcguaaugaaagugaacguaggugggggccccguaaggggugcaccaucgaccgauccugauguuuucggauggauuugaguaagagcauagcuguugggacccgaaagauggugaacuaugccugaauagggugaagccagaggaaacucugguggaggcucguagcgguucugacgugcaaaucgaucgucgaauuuggguauaggggcgaaagacuaaucgaaccaucuaguagcugguuccugccgaaguuucccucaggauagcagaagcucguaucaguuuuaugagguaaagcgaaugauuagagguuucggggucgcaaugaccuugaccuauucucaaacuuuaaauauguaagaaguccuuguugcuuaauugaacguggacaauugaaugaagagcuuuuagugggccauuuuugguaagcagaacuggcgaugcgggaugaaccgaacguagaguuaaggugccggaaugcacgcucaucagacaccacaaaagguguuaguucaucuagacagccggacgguggccauggaagucggaauccgcuaaggaguguguaacaacucaccggccgaaugaacuagcccugaaaauggauggcgcucaagcgugcuaccuauacucuaccgucagggcuggugugaugcccugacgaguaggcaggcguggaggucagugacgaagccuuggccguaaggcugggucgaacggccucuagugcagaucuuggugguaguagcaaauauucaaaugagaacuuugaagacugaaguggggaaagguuccaugucaacagcaguuggacauggguuagucgauccuaagagauggggaagcuccguuucaaagggcugguuuugugcgggcuaccaucgaaagggaauccgguuaaaauuccggaaccuggauauggauucuucacggcaacguaacugaauguggagacgucggcgggagcccugggaggaguuaucuuuucuucuuaacagcuuaucacccuggaauugguuuauccggagauggggucuuauggcuggaagagcacagcacguuugcuguguccggugcgcuugcgacggcccuugaaaauccacaggaaggaauaguuuucaugccaggucguacucauaaccgcagcaggucuccaaggugaacagccucuaguugauagaauaauguagauaagggaagucggcaaaauagauccguaacuucgggauaaggauuggcucuaagggucggguacggggggccuugucccgaagccggcggcuguugguggacugcucgagcugcucccgcggcgagggcgggucgcugcgugccggccgggggacggacuggguaggguuccuuugggggccuucccggggcguugaacgaucaacuuagaacugguacggacaaggggaaucugacugucuaauuaaaacauagcauugcgauggucagaaagugauguugacgcaaugugauuucugcccagugcucugaaugucaaagugaagaaauucaaccaagcgcggguaaacggcgggaguaacuaugacucucuuaagguagccaaaugccucgucaucuaauuagugacgcgcaugaauggauuaacgagauucccacugucccuaucuacuaucuagcgaaaccacagccaagggaacgggcuuggcagaaucagcggggaaagaagacccuguugagcuugacucuaguuugacauugugaaaagacuugggagguguaguauaagugggagccgaggcgaaggugaaauaccacuacuuuuauaguuuuuuuacuuauucaaugaagcggagcuggaguucauuuuccacguucuagcauucaaggcccgcuucggggccgauccggguugaagacauugucagguggggaguuuggcuggggcggcacaucuguuaaacgauaacgcagguguccuaaggggggcucauggagaacagaaaucuccaguagaacaaaaggguaaaagcccccuugauuuugauuuucagugugaauacaaaccaugaaaguguggccuaucgauccuuuagucccucggaauuugaggcuagaggugccagaaaaguuaccacagggauaacuggcuuguggcagucaagcguucauagcgacauugcuuuuugauucuucgaugucggcucuuccuaucauaccgaagcagaauucgguaagcguuggauuguucacccacuaauagggaacgugagcuggguuuagaccgucgugagacagguuaguuuuacccuacugaugaauguuaucgcaauaguaauugaacuuaguacgagaggaaccguucauucggauaauugguuuuugcggcugucugaucaggcagugccgcgaagcuaccauccgcuggauuauggcugaacgccucuaagucagaauccaugcuagaacgcggugauuuauuugcccgacacaauauagauggauacgaauaaggccuuuuggcucgcuggaccauagcaggcuggcaacggugcacuuggcggaaaggccuugggugcuugccggcgaauagcaaugucaucgugcguggggauaaauccuuugcauacgacuuagauguacaacgggguauuguaagcaguagaguagccuuguuguuacgaucugcugagauuaagccuuuguugucugauuugu",
             "domains": [
@@ -110,14 +110,14 @@
                     1507
                 ],
                 [
-                    7.980812072753906,
-                    1.4314627004413823e-05,
+                    7.980836868286133,
+                    1.4314380738243109e-05,
                     1705,
                     1801
                 ],
                 [
-                    209.67904663085938,
-                    2.390430675514016e-66,
+                    212.13375854492188,
+                    4.3531435248529526e-67,
                     1788,
                     2868
                 ]
@@ -139,8 +139,8 @@
                 "50507"
             ],
             "class_name": "mt16SrRNA",
-            "evalue": 4.47640890189582e-85,
-            "bitscore": 272.86895751953125,
+            "evalue": 4.480206528359034e-85,
+            "bitscore": 272.86773681640625,
             "target_organism_id": 300852,
             "consensus": "gaguuuaAuuucuuGcuucGaguucacGuucuucauucauuuuaaaacauucaaaucguuuugacuugguuaauugaaauuagugAuAAgauuaauuaAgauucugucaaaguuuuauaaagucuuuuuuAuaguuuuuaaauuuccaguauaAcgcuacgaguuuuaguucugagAcggguGgGuAcuacacucaaaauauacuuauucuuugagGauugauagugcAcaAuucugugagggaauggugagauuaauacuugugauuucaacuuuauguucuagaguuGcaaauaAuaAccugAgauuucuuuaAgggugaAcauuuugagAuuugaaccgAaacuaaucgauguaucuauuaagAgguugaAgugaacuauuuuaggacauGgauggccgAacucacguguGuggagaaauuuggagaugauuuguuuaaggguAgAgcacuugauagcauuuaauuuuuuaccaacuuuaauaaAAcuccgaauAauguuuaaAuuguaAgugaaAuauucuaaguacugagauuuagugucaaaagggaagcAgcccagauuauucguuAAgGuucguAAgaguaAuucagcuuaauggaacAugAAgugaucgagAcAaccaguaggugcagcAagcguAAuagcucacuaguuuaguauuuugcuaAAguaAuuuaccgaaguuuucugucagaguaAcggaAaAuuauGaaaacauuauggcuuugaguucuaaagcuuuucagguggagcguuAaAauuucuuauuuuuugAacguuccuuaauaguaaagacgguAaucuuuucugAAggugaaguaagaAaaaauuagucuuuuuugauuagcguAaaggauuugcuuuuauuucaugaccuaAaugaugguuuucaccuaauuuucaauAaguaucuuaAguuuucuAuuuauAaaAagguuagcauugaaagcauggauuccuucuggugaccacgauuguguacaucaAgguugaaaggaacucagaaaAaugacuccGuaucugcggaAgaAgggguGcuucuccugucauuuaAuuugacaaucggcgcaaaaccgggaauaccaguuuuuuuauaaaaacucaggucuuugcuaauuuguaacAagaaguauagacugacaucugccaugugauguaAguuuaaaAgguaAaguuugauaugcuuuuauuggaauucccggugaAcGgcugccguaaguccgacuguccugAgguagcgaaauuccuugucguuuaaucgguguugaacGgacGuaAcccggacuguucuuuuguacuuaacAugaucuuuguuaAauugaauuuugugugAAgAuggcuagacgguAaGuccuuaugacccuaauaaAgugugcaguauagauGugauauaguaagaccAgucuuucaccuAauguugcauaacccccucuacuaccuuuuggagAAAGcguaacggagguguguuaguauaagugugccugAcuguaAgaucaacuaaggauuuuuguguugaaaggcucucgcucaAcggaucAAAgguaacaagcuaAucauucucaagAgcucguaacgaugaauuaguuuggcguucuaagauuuugauuaaucgucaauugaAacgguaacguGAguugguucuagaauguugugcgacaguucggucccuaucuaccguguuaaaggaagAauugcgaggAuuuaaccuuaguaugagAgguaGauuguuaugccauuagcaccgccgugcagcuaauuugguAugaaauAacuGcugucgauaggcgugaggugaacgugucGcuagguuuuAagcuuaucuagaauaAAucuuuu",
             "domains": [
@@ -151,8 +151,8 @@
                     1186
                 ],
                 [
-                    224.48855590820312,
-                    1.7668742405992648e-70,
+                    224.48733520507812,
+                    1.768373194005963e-70,
                     1601,
                     2886
                 ]
@@ -170,8 +170,8 @@
                 "10090"
             ],
             "class_name": "28SrRNA",
-            "evalue": 5.172667226038632e-96,
-            "bitscore": 307.96685791015625,
+            "evalue": 1.0745084704340336e-96,
+            "bitscore": 310.23248291015625,
             "target_organism_id": 300852,
             "consensus": "cgcgaccucagaucagacguggcgacccgcugaauuuaagcauauuagucagcggaggaaaagaaacuaaccaggauucccucaguaacggcgagugaacagggaagagcccagcgccgaauccccgccgcgcgguggggcgugggaaauguggcguacggaagacccacuccccggcgccgcucguggggggcccaaguccuucugaucgaggcccagcccguggacggugugaggccgguagcggccccggcgcgccgggcucgggucuucccggagucggguugcuugggaaugcagcccaaagcgggugguaaacuccaucuaaggcuaaauaccggcacgagaccgauagucaacaaguaccguaagggaaaguugaaaagaacuuugaagagagaguucaagagggcgugaaaccguuaagagguaaacgggugggguccgcgcaguccgcccggaggauucaacccggcggcgggcguccggccgugcccgguggucucggcggaucuuucccgcuccccguuccucccgaccccuccacccgcgcgucguuccccucuuccgccccgcggucggcgccuuuggcgggggguggggggggggguguggggguggcgcgcgggcggggccggggguggggucggcgggggaccgucccccggccggcgaccggccgccgccgggcgcauuuccaccguggcggugcgccgcgaccggcuccgggacggcugggaaggcccgguggggaagguggcucggggggggcggcgcgucugagggggcggcgggcgaccucuccccggguguuacagcccuccggcagcgguuucgccgaaucccggggccgagggagcgagauaugugucgccgcgcucucccucuccccccguucgccgcccgggcgggcgugggggggggggccgggccgccccucccacggcgcgaccgcucucccggcccccgccgucgccucuuugggggugcggugggggguggggcggacuguccccagugcgccccgggcguggucgcgccgucggguucgggggggacggugggucgcgcgucucccggcgaggucgagcgcacggggucggcggcgaugucggcuacccacccgacccgucuugaaacacggaccaaggagucuaacgcgugcgcgagucgggggcucguacgaaagccgccguggcgcaaugaaggugaagggccccgccuggggggccgaggugggaucccgaggccuuuccaguccgccgagggcgcaccaccggcccgucucgcccgccgcgccggggagguggagcacgagcguacguguuaggacccgaaagauggugaacuaugcuugggcagggcgaagccagaggaaacucugguggagguccguagcgguccugacgugcaaaucggucguccgaccuggguauaggggcgaaagacuaaucgaaccaucuaguagcugguucccuccgaaguuucccucaggauagcuggcgcucucgcuaccgacguacgcaguuuuauccgguaaagcgaaugauuagaggucuuggggccgaaacgaucucaaccuauucucaaacuuuaaauggguaagaagcccggcucgcuggcguggagccgggcguggaaugcgagugccuagugggccacuuuugguaagcagaacuggcgcugcgggaugaaccgaacgccggguuaaggcgcccgaugccgacgcucaucagaccccagaaaagguguugguugauauagacagcaggacgguggccauggaagucggaauccgcuaaggaguguguaacaacucaccugccgaaucaacuagcccugaaaauggauggcgcuggagcgucgggcccauacccggccgucgcuggcagucggaacggaacggggcgggagagggagugggugcgcgucucucgggguggggggugcguggcgggggcccguccccggccuccccuccgcgcgccggguucgcccccgcggcgucgggccccgcggacgcuacgccgcgacgaguaggagggccgcugcggugagccuugaagccuagggcgcgggcccggguggagccgccgcaggugcagaucuuggugguaguagcaaauauucaaacgagaacuuugaaggccgaaguggagaaggguuccaugugaacagcaguugaacaugggucagucgguccugagagaugggcgagugccguuccgaagggacgggcgauggccuccguugcccucggccgaucgaaagggagucggguucagauccccgaauccggaguggcggagaugggcgccgcgaggccagugcgguaacgcgaccgaucccggagaagccggcgggagccccggggagaguucucuuuucuuugugaagggcagggcgcccuggaauggguucgccccgagagaggggcccgugccuuggaaagcgucgcgguuccggcggcguccggugagcucucgcuggcccuugaaaauccgggggagaggguguaaaucucgcgccgggccguacccauauccgcagcaggucuccaaggugaacagccucuggcauguuggaacaauguagguaagggaagucggcaagccggauccguaacuucgggauaaggauuggcucuaagggcugggucggucgggcuggggcgcgaagcggggcugggcgcgcgccgcggcuggacgaggcgccgccgcccucucccacguccggggagaccucccgucgguuggguccgggcccgcgcgcgcgugugcgccguggggccccggcgucgcgcgcguggucgagaccugucuuccucccuccuucuucccgucggggggggggucgggggggggcgggcggggcgggcgcugggggggcgggugcgucgcugcgggggugccggagcgggggguacggggggucuccgguggggcggggggcccgggcacucggggggccggcggcggcggcgacucuggacgcgagccgggcccuucccguggaucgccucagcugcggcgggcgucgcggccgcucucggggagcccggcgggugccggcgcgggugugcgcgccggggggcgggggggugcgaggcaggggaggcucucgaggugcguggcgggggcgggcgggggggugccgcgcguguggggggaaccuccgcgucgguguucccccgccggguccgcccccggggccgcgguuuuccgcgcggcgcccucgccucggccggcgccuagcagccgacuuagaacuggugcggaccaggggaauccgacuguuuaauuaaaacaaagcaucgcgaaggcccgcggcggguguugacgcgaugugauuucugcccagugcucugaaugucaaagugaagaaauucaaugaagcgcggguaaacggcgggaguaacuaugacucucuuaagguagccaaaugccucgucaucuaauuagugacgcgcaugaauggaugaacgagauucccacugucccuaccuacuauccagcgaaaccacagccaagggaacgggcuuggcggaaucagcggggaaagaagacccuguugagcuugacucuagucuggcacggugaagagacaugagagguguagaauaagugggaggcccccggcgcccggccgcguccgcgaggggggggcgggguacgccggccuugcgggccgccggugaaauaccacuacucuuaucguuuuuucacugacccggugaggcgggggggcgagccccgaggggcucucgcuucuggcgccaagcguccgguccgcgcgggcgggcgggcgcgacccgcuccggggacagugccagguggggaguuugacuggggcgguacaccugucaaacgguaacgcagguguccuaaggcgagcucagggaggacagaaaccucccguggagcagaagggcaaaagcucgcuugaucuugauuuucaguacgaauacagaccgugaaagcggggccucacgauccuucugagcuuuuggguuuuaagcaggaggugucagaaaaguuaccacagggauaacuggcuuguggcggccaagcguucauagcgacgucgcuuuuugauccuucgaugucggcucuuccuaucauugugaagcagaauucaccaagcguuggauuguucacccacuaauagggaacgugagcuggguuuagaccgucgugagacagguuaguuuuacccuacugaugauguguuguugccaugguaauccugcucaguacgagaggaaccgcagguucagacauuugguguaugugcuuggcugaggagccaauggggcgaagcuaccaucugugggauuaugacugaacgccucuaagucagaaucccgcccaggcggaacgauacggcagcgccgaaggagccucgguuggccucggauagccggguccccguccguccccgcugggggggggcgucguguggucgccgcggcggcguggggucgccccccgccgggcgucgggaccgggguccggugcggagagccguucgucuugggaaauggggugcggccggaaagggggccgcccucucgcccgucacguugaacgcacguucguggggaaccuggcgcuaaaccauucguagacgaccugcuucugggucgggguuucguacguagcagagcagcucccucgcugcgaucuauugaaagucagcccucgacacaaggguuugucucugcgggcuuuc",
             "domains": [
@@ -200,8 +200,8 @@
                     2201
                 ],
                 [
-                    156.51002502441406,
-                    2.183201069573849e-50,
+                    158.7755889892578,
+                    4.535314678064637e-51,
                     2198,
                     2899
                 ]
@@ -224,12 +224,12 @@
             ],
             "class_name": "23SrRNA",
             "evalue": 0.0,
-            "bitscore": 3248.033203125,
+            "bitscore": 3250.66552734375,
             "target_organism_id": 300852,
             "consensus": "ggucaagauaguaagggcccacgguggaugccuuggcacuggagccgaugaaggacgugguuaccugcgauaagccacggggagcugguaauaggcuuggauccggggauguccgaaugggggaacccggcuggugggaacgccgguaaccgcaauuuugcgggaggggaacuuggggaacugaaacaucucaguacccagaggagaagaaagagaauucgauuccgugaguagcggcgagcgaaagcggaucagcccaaaccgaaaggcuugucgggucgggguuguagggccagcgguuaagauuuaaccacucuagccgaagcuguuggaaagcagcgccugagagggugagagccccguaggcgaaagagugguuggauguauugggguaccugaguagcucgugguucguggaacgaugagugaaucugcgcggaccaccgcguaaggcuaaauacuccgagugaccgauagcgcaccaguaccgugagggaaaggugaaaagaaccccgggaggggagugaaauagagccugaaaccgugggcuuacaagcagucauggcaccuuaagguguuauggcgugccuauugaagcaugagccggcgacuuaggguugucgggcgagcuuaagcuguagaggcggaggcguagcgaaagcgaguccgaauagggcggcauuaguacguggggguagacccgaaaccgggugagcuaggcaugaccagguugaagcuggggugacagcgaguggaggaccgaaccggugcgugaugaaacagucucggaugaguugugguuaggagugaaaagcuaaccgaacccggagauagcugguucuccccgaaaugucuuuagggucagccucagauguugacuagggccuguagagcacugauagggcuagggggccuaccagcuuaccaaacccuaugaaacuccgaagggucacggguuuagucugggagugaggcugcgagagauaacuuccguggccgagaggggaacaacccagaccaucagcuaagguccccaaaugauggcuaagugguaaaggauguggcgucgcgaagacagccaggagguuggcuuagaagcagccauccuuuaaagagugcguaauagcucacuggucgaguggcgaugcgccgaaaaugaucggggcuuaagugaaguaccgaagcuauggauuugagugaugacgcgaggugguaggggagcguucaaugcggguggaagccaaaccgggaggagugguggagccaagggaagugcgaaugccggcaugaguaacgauaaagggagugagaaucucccucgccguaaggccaaggguuccugggcaagggucguccgcccaggguuagucgggaccuaaggugaggccgaaaggcguagccgauggacagcagguuaauauuccugcacuuaccguuggagugauggagggacgcauuaggcuauccaguccggagccauggaugugcugggugauaagcucaagggugguaggguaggcaaauccgccggucaaaagcuuuggguggugggggagcuuguacgggugacaacccagcgaaguuggaaacgccagggugccaagaaaagcuucuaagcguaaacucgcgguaacccguaccgcaaaccgacacaggugggcgaguguaagugcacuaaggcgcgcgagagaacccucgccaaggaacucugcaaguugaccccguaacuucgggagaaggggugcucaugaugagcgugagccgcagugaauaggcucuggcgacuguuuaccaaaaacacagcucucugccaacucguaaguggagguauagggugugacgccugcccggugccggaaggucaaggggaggggugcaagcugcgaacugaagccccggugaacggcggccguaacuauaacgguccuaagguagcgaaauuccuugucggguaaguuccgaccugcacgaaaggcguaacgaucugggcgcugucucggcgagggacucggugaaauugaauuggcugugaagaugcggccuacccguagcaggacgaaaagaccccguggagcuuuacuguagccugguauuggguuuuggguuugccugcguaggauaggugggagccugcgaaacugggccucugggguggguggaggcgacggugaaauaccacccuggggagguugggguucuaaccugaaaaaucgguuugggggacagugcuuggcgggcaguuugacuggggcggucgccuccuaaaagguaacggaggcgcccaaagguccccucaggacgguuggaaaucgucuguagagcgcaaggguagaagggggcuugacugcgagacuuacaagucgagcaggggggaaagccgggcuuagugaaccgguggucccguguggaagggccaucgaucaacggauaaaaguuaccccggggauaacaggcugaucucccccgagaguccauaucggcggggagguuuggcaccucgaugucggcucgucgcauccuggggcugaagaaggucccaaggguugggcuguucgcccauuaaagcggcacgcgagcuggguucagaacgucgugagacaguucggucucuauccgcuacgggcgcaggaggauugagggggguugcuccuaguacgagaggaccggagugaacgcaccucugguuucccagcugucgcuccagcggcacaugcuggguagcuaugugcggaagggauaaccgcugaaagcaucuaagcgggaagccagccccaagaugaguccucccacugcgucaagcagguaagaacccgggaagaccaccggguugauaggccagggguguaagcauagcgauguguugagcggacuggugcuaaucguucgaggucuugaccacuc",
             "domains": [
                 [
-                    3247.8505859375,
+                    3250.4833984375,
                     0.0,
                     1,
                     2914
@@ -252,8 +252,8 @@
                 "5476"
             ],
             "class_name": "25SrRNA",
-            "evalue": 5.720428161377974e-119,
-            "bitscore": 384.3095703125,
+            "evalue": 1.0828195567712999e-119,
+            "bitscore": 386.7085266113281,
             "target_organism_id": 300852,
             "consensus": "gugaccucaaaucagguaggaguacccgcugaacuuaagcauaucaauaagcggaggaaaagaaaccaacagggauugccuuaguaacggcgagugaagcggcaaaagcucaaauuugaaaucuggcggcuucggcguccgaguuguaauuuggagaaggcaucuuuggggccgguccuugucuauguuccuuggaacaggacgucauagagggugagaaucccguguggcgaggagcccgguucuuuguaaagugccuucgacgagucgaguuguuugggaaugcagcucuaagugggugguaaauuccaucuaaagcuaaauauuggcgagagaccgauagcgaacaaguacagugauggaaagaugaaaagaacuuugaaaagagagugaaaaaguacgugaaauuguugaaagggaagggcaugggaucagacgugguguuuuggucggugugguacggugacgaggggguccgccgaucgucucggggccagcaucaguuuggauuggcaggauaaaugcauaggaauguggcacgcccguggguagguguuauagccuuugggaauacugccagcugggacugaggacugcggcguaugccaaggaugcuggcauaaugguuauaugccgcccgucuugaaacacggaccaaggagucuaacgucuaugcgaguguuuggguguaaaacccguacgcguaaugaaagugaacguaggugggggccccguaaggggugcaccaucgaccgauccugauguuuucggauggauuugaguaagagcauagcuguugggacccgaaagauggugaacuaugccugaauagggugaagccagaggaaacucugguggaggcucguagcgguucugacgugcaaaucgaucgucgaauuuggguauaggggcgaaagacuaaucgaaccaucuaguagcugguuccugccgaaguuucccucaggauagcagaagcucguaucaguuuuaugagguaaagcgaaugauuagagguuucggggucgcaaugaccuugaccuauucucaaacuuuaaauauguaagaaguccuuguugcuuaauugaacguggacaauugaaugaagagcuuuuagugggccauuuuugguaagcagaacuggcgaugcgggaugaaccgaacguagaguuaaggugccggaaugcacgcucaucagacaccacaaaagguguuaguucaucuagacagccggacgguggccauggaagucggaauccgcuaaggaguguguaacaacucaccggccgaaugaacuagcccugaaaauggauggcgcucaagcgugcuaccuauacucuaccgucagggcuggugugaugcccugacgaguaggcaggcguggaggucagugacgaagccuuggccguaaggcugggucgaacggccucuagugcagaucuuggugguaguagcaaauauucaaaugagaacuuugaagacugaaguggggaaagguuccaugucaacagcaguuggacauggguuagucgauccuaagagauggggaagcuccguuucaaagggcugguuuugugcgggcuaccaucgaaagggaauccgguuaaaauuccggaaccuggauauggauucuucacggcaacguaacugaauguggagacgucggcgggagcccugggaggaguuaucuuuucuucuuaacagcuuaucacccuggaauugguuuauccggagauggggucuuauggcuggaagagcacagcacguuugcuguguccggugcgcuugcgacggcccuugaaaauccacaggaaggaauaguuuucaugccaggucguacucauaaccgcagcaggucuccaaggugaacagccucuaguugauagaauaauguagauaagggaagucggcaaaauagauccguaacuucgggauaaggauuggcucuaagggucggguacggggggccuugucccgaagccggcggcuguugguggacugcucgagcugcucccgcggcgagggcgggucgcugcgugccggccgggggacggacuggguaggguuccuuugggggccuucccggggcguugaacgaucaacuuagaacugguacggacaaggggaaucugacugucuaauuaaaacauagcauugcgauggucagaaagugauguugacgcaaugugauuucugcccagugcucugaaugucaaagugaagaaauucaaccaagcgcggguaaacggcgggaguaacuaugacucucuuaagguagccaaaugccucgucaucuaauuagugacgcgcaugaauggauuaacgagauucccacugucccuaucuacuaucuagcgaaaccacagccaagggaacgggcuuggcagaaucagcggggaaagaagacccuguugagcuugacucuaguuugacauugugaaaagacuugggagguguaguauaagugggagccgaggcgaaggugaaauaccacuacuuuuauaguuuuuuuacuuauucaaugaagcggagcuggaguucauuuuccacguucuagcauucaaggcccgcuucggggccgauccggguugaagacauugucagguggggaguuuggcuggggcggcacaucuguuaaacgauaacgcagguguccuaaggggggcucauggagaacagaaaucuccaguagaacaaaaggguaaaagcccccuugauuuugauuuucagugugaauacaaaccaugaaaguguggccuaucgauccuuuagucccucggaauuugaggcuagaggugccagaaaaguuaccacagggauaacuggcuuguggcagucaagcguucauagcgacauugcuuuuugauucuucgaugucggcucuuccuaucauaccgaagcagaauucgguaagcguuggauuguucacccacuaauagggaacgugagcuggguuuagaccgucgugagacagguuaguuuuacccuacugaugaauguuaucgcaauaguaauugaacuuaguacgagaggaaccguucauucggauaauugguuuuugcggcugucugaucaggcagugccgcgaagcuaccauccgcuggauuauggcugaacgccucuaagucagaauccaugcuagaacgcggugauuuauuugcccgacacaauauagauggauacgaauaaggccuuuuggcucgcuggaccauagcaggcuggcaacggugcacuuggcggaaaggccuugggugcuugccggcgaauagcaaugucaucgugcguggggauaaauccuuugcauacgacuuagauguacaacgggguauuguaagcaguagaguagccuuguuguuacgaucugcugagauuaagccuuuguugucugauuugu",
             "domains": [
@@ -270,14 +270,14 @@
                     1507
                 ],
                 [
-                    7.980812072753906,
-                    1.4314627004413823e-05,
+                    7.980836868286133,
+                    1.4314380738243109e-05,
                     1705,
                     1801
                 ],
                 [
-                    209.67904663085938,
-                    2.390430675514016e-66,
+                    212.13375854492188,
+                    4.3531435248529526e-67,
                     1788,
                     2868
                 ]
@@ -298,12 +298,12 @@
                 "1659845",
                 "50507"
             ],
-            "class_name"        : "mt16SrRNA",
-            "evalue"            : 4.47640890189582e-85,
-            "bitscore"          : 272.86895751953125,
+            "class_name": "mt16SrRNA",
+            "evalue": 4.480206528359034e-85,
+            "bitscore": 272.86773681640625,
             "target_organism_id": 300852,
-            "consensus"         : "gaguuuaAuuucuuGcuucGaguucacGuucuucauucauuuuaaaacauucaaaucguuuugacuugguuaauugaaauuagugAuAAgauuaauuaAgauucugucaaaguuuuauaaagucuuuuuuAuaguuuuuaaauuuccaguauaAcgcuacgaguuuuaguucugagAcggguGgGuAcuacacucaaaauauacuuauucuuugagGauugauagugcAcaAuucugugagggaauggugagauuaauacuugugauuucaacuuuauguucuagaguuGcaaauaAuaAccugAgauuucuuuaAgggugaAcauuuugagAuuugaaccgAaacuaaucgauguaucuauuaagAgguugaAgugaacuauuuuaggacauGgauggccgAacucacguguGuggagaaauuuggagaugauuuguuuaaggguAgAgcacuugauagcauuuaauuuuuuaccaacuuuaauaaAAcuccgaauAauguuuaaAuuguaAgugaaAuauucuaaguacugagauuuagugucaaaagggaagcAgcccagauuauucguuAAgGuucguAAgaguaAuucagcuuaauggaacAugAAgugaucgagAcAaccaguaggugcagcAagcguAAuagcucacuaguuuaguauuuugcuaAAguaAuuuaccgaaguuuucugucagaguaAcggaAaAuuauGaaaacauuauggcuuugaguucuaaagcuuuucagguggagcguuAaAauuucuuauuuuuugAacguuccuuaauaguaaagacgguAaucuuuucugAAggugaaguaagaAaaaauuagucuuuuuugauuagcguAaaggauuugcuuuuauuucaugaccuaAaugaugguuuucaccuaauuuucaauAaguaucuuaAguuuucuAuuuauAaaAagguuagcauugaaagcauggauuccuucuggugaccacgauuguguacaucaAgguugaaaggaacucagaaaAaugacuccGuaucugcggaAgaAgggguGcuucuccugucauuuaAuuugacaaucggcgcaaaaccgggaauaccaguuuuuuuauaaaaacucaggucuuugcuaauuuguaacAagaaguauagacugacaucugccaugugauguaAguuuaaaAgguaAaguuugauaugcuuuuauuggaauucccggugaAcGgcugccguaaguccgacuguccugAgguagcgaaauuccuugucguuuaaucgguguugaacGgacGuaAcccggacuguucuuuuguacuuaacAugaucuuuguuaAauugaauuuugugugAAgAuggcuagacgguAaGuccuuaugacccuaauaaAgugugcaguauagauGugauauaguaagaccAgucuuucaccuAauguugcauaacccccucuacuaccuuuuggagAAAGcguaacggagguguguuaguauaagugugccugAcuguaAgaucaacuaaggauuuuuguguugaaaggcucucgcucaAcggaucAAAgguaacaagcuaAucauucucaagAgcucguaacgaugaauuaguuuggcguucuaagauuuugauuaaucgucaauugaAacgguaacguGAguugguucuagaauguugugcgacaguucggucccuaucuaccguguuaaaggaagAauugcgaggAuuuaaccuuaguaugagAgguaGauuguuaugccauuagcaccgccgugcagcuaauuugguAugaaauAacuGcugucgauaggcgugaggugaacgugucGcuagguuuuAagcuuaucuagaauaAAucuuuu",
-            "domains"           : [
+            "consensus": "gaguuuaAuuucuuGcuucGaguucacGuucuucauucauuuuaaaacauucaaaucguuuugacuugguuaauugaaauuagugAuAAgauuaauuaAgauucugucaaaguuuuauaaagucuuuuuuAuaguuuuuaaauuuccaguauaAcgcuacgaguuuuaguucugagAcggguGgGuAcuacacucaaaauauacuuauucuuugagGauugauagugcAcaAuucugugagggaauggugagauuaauacuugugauuucaacuuuauguucuagaguuGcaaauaAuaAccugAgauuucuuuaAgggugaAcauuuugagAuuugaaccgAaacuaaucgauguaucuauuaagAgguugaAgugaacuauuuuaggacauGgauggccgAacucacguguGuggagaaauuuggagaugauuuguuuaaggguAgAgcacuugauagcauuuaauuuuuuaccaacuuuaauaaAAcuccgaauAauguuuaaAuuguaAgugaaAuauucuaaguacugagauuuagugucaaaagggaagcAgcccagauuauucguuAAgGuucguAAgaguaAuucagcuuaauggaacAugAAgugaucgagAcAaccaguaggugcagcAagcguAAuagcucacuaguuuaguauuuugcuaAAguaAuuuaccgaaguuuucugucagaguaAcggaAaAuuauGaaaacauuauggcuuugaguucuaaagcuuuucagguggagcguuAaAauuucuuauuuuuugAacguuccuuaauaguaaagacgguAaucuuuucugAAggugaaguaagaAaaaauuagucuuuuuugauuagcguAaaggauuugcuuuuauuucaugaccuaAaugaugguuuucaccuaauuuucaauAaguaucuuaAguuuucuAuuuauAaaAagguuagcauugaaagcauggauuccuucuggugaccacgauuguguacaucaAgguugaaaggaacucagaaaAaugacuccGuaucugcggaAgaAgggguGcuucuccugucauuuaAuuugacaaucggcgcaaaaccgggaauaccaguuuuuuuauaaaaacucaggucuuugcuaauuuguaacAagaaguauagacugacaucugccaugugauguaAguuuaaaAgguaAaguuugauaugcuuuuauuggaauucccggugaAcGgcugccguaaguccgacuguccugAgguagcgaaauuccuugucguuuaaucgguguugaacGgacGuaAcccggacuguucuuuuguacuuaacAugaucuuuguuaAauugaauuuugugugAAgAuggcuagacgguAaGuccuuaugacccuaauaaAgugugcaguauagauGugauauaguaagaccAgucuuucaccuAauguugcauaacccccucuacuaccuuuuggagAAAGcguaacggagguguguuaguauaagugugccugAcuguaAgaucaacuaaggauuuuuguguugaaaggcucucgcucaAcggaucAAAgguaacaagcuaAucauucucaagAgcucguaacgaugaauuaguuuggcguucuaagauuuugauuaaucgucaauugaAacgguaacguGAguugguucuagaauguugugcgacaguucggucccuaucuaccguguuaaaggaagAauugcgaggAuuuaaccuuaguaugagAgguaGauuguuaugccauuagcaccgccgugcagcuaauuugguAugaaauAacuGcugucgauaggcgugaggugaacgugucGcuagguuuuAagcuuaucuagaauaAAucuuuu",
+            "domains": [
                 [
                     45.465511322021484,
                     1.811842464367801e-16,
@@ -311,8 +311,8 @@
                     1186
                 ],
                 [
-                    224.48855590820312,
-                    1.7668742405992648e-70,
+                    224.48733520507812,
+                    1.768373194005963e-70,
                     1601,
                     2886
                 ]
@@ -655,93 +655,35 @@
     ],
     "1v": [],
     "2v": [],
-    "1w": [
-        {
-            "fasta_seed": [
-                "CGCGGGGUGGAGCAGCCUGGUAGCUCGUCGGGCUCAUAACCCGAAGAUCGUCGGUUCAAAUCCGGCCCCCGCAACCA",
-                "GCCCGGAUAGCUCAGUCGGUAGAGCAGGGGAUUGAAAAUCCCCGUGXCCUUGGUUCGAUUCCGAGUCCGGGCACCA",
-                "CGCGGGGUGGAGCAGCCUGGUAGCUCGUCGGGCUCAUAACCCGAAGGUCGUCGGUUCAAAUCCGGCCCCCGCAACCA",
-                "GGGGCUAUAGCUCAGCUGGGAGAGCGCUUGCAUGGCAUGCAAGAGGUCAGCGGUUCGAUCCCGCUUAGCUCCACCA",
-                "GGCGGGGUGGAGCAGCCUGGUAGCUCGUCGGGCUUACAACCCGAAGGUCGUCGGUUCAAAUCCGGCCCCCGCAACCA"
-            ],
-            "seed_organism_ids": [
-                "83333",
-                "536056",
-                "469008",
-                "1354003",
-                "37762"
-            ],
-            "class_name": "tRNA",
-            "evalue": 7.443530901402219e-21,
-            "bitscore": 60.77886199951172,
-            "target_organism_id": 562,
-            "consensus": "ggcggggugGcucAGcuGGuAGagcgucgGgcugacAacccgaaggucgucGGuucgAuuccGgcucccgccAccA",
-            "domains": [
-                [
-                    60.69316101074219,
-                    7.916373868677527e-21,
-                    1,
-                    76
-                ]
-            ]
-        }
-    ],
-    "2w": [
-        {
-            "fasta_seed": [
-                "CGCGGGGUGGAGCAGCCUGGUAGCUCGUCGGGCUCAUAACCCGAAGAUCGUCGGUUCAAAUCCGGCCCCCGCAACCA",
-                "GCCCGGAUAGCUCAGUCGGUAGAGCAGGGGAUUGAAAAUCCCCGUGXCCUUGGUUCGAUUCCGAGUCCGGGCACCA",
-                "CGCGGGGUGGAGCAGCCUGGUAGCUCGUCGGGCUCAUAACCCGAAGGUCGUCGGUUCAAAUCCGGCCCCCGCAACCA",
-                "GGGGCUAUAGCUCAGCUGGGAGAGCGCUUGCAUGGCAUGCAAGAGGUCAGCGGUUCGAUCCCGCUUAGCUCCACCA",
-                "GGCGGGGUGGAGCAGCCUGGUAGCUCGUCGGGCUUACAACCCGAAGGUCGUCGGUUCAAAUCCGGCCCCCGCAACCA"
-            ],
-            "seed_organism_ids": [
-                "83333",
-                "536056",
-                "469008",
-                "1354003",
-                "37762"
-            ],
-            "class_name": "tRNA",
-            "evalue": 7.443530901402219e-21,
-            "bitscore": 60.77886199951172,
-            "target_organism_id": 562,
-            "consensus": "ggcggggugGcucAGcuGGuAGagcgucgGgcugacAacccgaaggucgucGGuucgAuuccGgcucccgccAccA",
-            "domains": [
-                [
-                    60.69316101074219,
-                    7.916373868677527e-21,
-                    1,
-                    76
-                ]
-            ]
-        }
-    ],
+    "1w": [],
+    "1y": [],
+    "2w": [],
+    "2y": [],
     "1x": [
         {
             "fasta_seed": [
                 "CGCGGGGUGGAGCAGCCUGGUAGCUCGUCGGGCUCAUAACCCGAAGAUCGUCGGUUCAAAUCCGGCCCCCGCAACCA",
-                "GCCCGGAUAGCUCAGUCGGUAGAGCAGGGGAUUGAAAAUCCCCGUGXCCUUGGUUCGAUUCCGAGUCCGGGCACCA",
+                "CGCGGGGUGGAGCAGCCUGGUAGCUCGUCGGGCUCAUAACCCGAAGGUCGUCGGUUCAAAUCCGGCCCCCGCAACCX",
                 "CGCGGGGUGGAGCAGCCUGGUAGCUCGUCGGGCUCAUAACCCGAAGGUCGUCGGUUCAAAUCCGGCCCCCGCAACCA",
                 "GGGGCUAUAGCUCAGCUGGGAGAGCGCUUGCAUGGCAUGCAAGAGGUCAGCGGUUCGAUCCCGCUUAGCUCCACCA",
                 "GGCGGGGUGGAGCAGCCUGGUAGCUCGUCGGGCUUACAACCCGAAGGUCGUCGGUUCAAAUCCGGCCCCCGCAACCA"
             ],
             "seed_organism_ids": [
                 "83333",
-                "536056",
+                "668369",
                 "469008",
                 "1354003",
                 "37762"
             ],
             "class_name": "tRNA",
-            "evalue": 3.4054673328124175e-26,
-            "bitscore": 77.8874740600586,
+            "evalue": 1.8119218753151802e-29,
+            "bitscore": 88.46096801757812,
             "target_organism_id": 562,
-            "consensus": "ggcggggugGcucAGcuGGuAGagcgucgGgcugacAacccgaaggucgucGGuucgAuuccGgcucccgccAccA",
+            "consensus": "ggcgggguggagcagccugguagcucgucgggcucauaacccgaaggucgucgguucaaauccggcccccgcaacca",
             "domains": [
                 [
-                    77.79118347167969,
-                    3.6494636000646745e-26,
+                    88.35018920898438,
+                    1.9620555057539203e-29,
                     1,
                     77
                 ]
@@ -752,91 +694,29 @@
         {
             "fasta_seed": [
                 "CGCGGGGUGGAGCAGCCUGGUAGCUCGUCGGGCUCAUAACCCGAAGAUCGUCGGUUCAAAUCCGGCCCCCGCAACCA",
-                "GCCCGGAUAGCUCAGUCGGUAGAGCAGGGGAUUGAAAAUCCCCGUGXCCUUGGUUCGAUUCCGAGUCCGGGCACCA",
+                "CGCGGGGUGGAGCAGCCUGGUAGCUCGUCGGGCUCAUAACCCGAAGGUCGUCGGUUCAAAUCCGGCCCCCGCAACCX",
                 "CGCGGGGUGGAGCAGCCUGGUAGCUCGUCGGGCUCAUAACCCGAAGGUCGUCGGUUCAAAUCCGGCCCCCGCAACCA",
                 "GGGGCUAUAGCUCAGCUGGGAGAGCGCUUGCAUGGCAUGCAAGAGGUCAGCGGUUCGAUCCCGCUUAGCUCCACCA",
                 "GGCGGGGUGGAGCAGCCUGGUAGCUCGUCGGGCUUACAACCCGAAGGUCGUCGGUUCAAAUCCGGCCCCCGCAACCA"
             ],
             "seed_organism_ids": [
                 "83333",
-                "536056",
+                "668369",
                 "469008",
                 "1354003",
                 "37762"
             ],
             "class_name": "tRNA",
-            "evalue": 3.4054673328124175e-26,
-            "bitscore": 77.8874740600586,
+            "evalue": 1.8119218753151802e-29,
+            "bitscore": 88.46096801757812,
             "target_organism_id": 562,
-            "consensus": "ggcggggugGcucAGcuGGuAGagcgucgGgcugacAacccgaaggucgucGGuucgAuuccGgcucccgccAccA",
+            "consensus": "ggcgggguggagcagccugguagcucgucgggcucauaacccgaaggucgucgguucaaauccggcccccgcaacca",
             "domains": [
                 [
-                    77.79118347167969,
-                    3.6494636000646745e-26,
+                    88.35018920898438,
+                    1.9620555057539203e-29,
                     1,
                     77
-                ]
-            ]
-        }
-    ],
-    "1y": [
-        {
-            "fasta_seed": [
-                "CGCGGGGUGGAGCAGCCUGGUAGCUCGUCGGGCUCAUAACCCGAAGAUCGUCGGUUCAAAUCCGGCCCCCGCAACCA",
-                "GCCCGGAUAGCUCAGUCGGUAGAGCAGGGGAUUGAAAAUCCCCGUGXCCUUGGUUCGAUUCCGAGUCCGGGCACCA",
-                "CGCGGGGUGGAGCAGCCUGGUAGCUCGUCGGGCUCAUAACCCGAAGGUCGUCGGUUCAAAUCCGGCCCCCGCAACCA",
-                "GGGGCUAUAGCUCAGCUGGGAGAGCGCUUGCAUGGCAUGCAAGAGGUCAGCGGUUCGAUCCCGCUUAGCUCCACCA",
-                "GGCGGGGUGGAGCAGCCUGGUAGCUCGUCGGGCUUACAACCCGAAGGUCGUCGGUUCAAAUCCGGCCCCCGCAACCA"
-            ],
-            "seed_organism_ids": [
-                "83333",
-                "536056",
-                "469008",
-                "1354003",
-                "37762"
-            ],
-            "class_name": "tRNA",
-            "evalue": 2.304720684674004e-21,
-            "bitscore": 62.41026306152344,
-            "target_organism_id": 562,
-            "consensus": "ggcggggugGcucAGcuGGuAGagcgucgGgcugacAacccgaaggucgucGGuucgAuuccGgcucccgccAccA",
-            "domains": [
-                [
-                    62.30914306640625,
-                    2.4784369568854773e-21,
-                    1,
-                    76
-                ]
-            ]
-        }
-    ],
-    "2y": [
-        {
-            "fasta_seed": [
-                "CGCGGGGUGGAGCAGCCUGGUAGCUCGUCGGGCUCAUAACCCGAAGAUCGUCGGUUCAAAUCCGGCCCCCGCAACCA",
-                "GCCCGGAUAGCUCAGUCGGUAGAGCAGGGGAUUGAAAAUCCCCGUGXCCUUGGUUCGAUUCCGAGUCCGGGCACCA",
-                "CGCGGGGUGGAGCAGCCUGGUAGCUCGUCGGGCUCAUAACCCGAAGGUCGUCGGUUCAAAUCCGGCCCCCGCAACCA",
-                "GGGGCUAUAGCUCAGCUGGGAGAGCGCUUGCAUGGCAUGCAAGAGGUCAGCGGUUCGAUCCCGCUUAGCUCCACCA",
-                "GGCGGGGUGGAGCAGCCUGGUAGCUCGUCGGGCUUACAACCCGAAGGUCGUCGGUUCAAAUCCGGCCCCCGCAACCA"
-            ],
-            "seed_organism_ids": [
-                "83333",
-                "536056",
-                "469008",
-                "1354003",
-                "37762"
-            ],
-            "class_name": "tRNA",
-            "evalue": 2.304720684674004e-21,
-            "bitscore": 62.41026306152344,
-            "target_organism_id": 562,
-            "consensus": "ggcggggugGcucAGcuGGuAGagcgucgGgcugacAacccgaaggucgucGGuucgAuuccGgcucccgccAccA",
-            "domains": [
-                [
-                    62.30914306640625,
-                    2.4784369568854773e-21,
-                    1,
-                    76
                 ]
             ]
         }
@@ -998,27 +878,27 @@
         {
             "fasta_seed": [
                 "MWRLLARASAPLLRVPLSDSWALLPASAGVKTLLPVPSFEDVSIPEKPKLRFIERAPLVPKVRREPKNLSDIRGPSTEATEFTEGNFAILALGGGYLHWGHFEMMRLTINRSMDPKNMFAIWRVPAPFKPITRKSVGHRMGGGKGAIDHYVTPVKAGRLVVEMGGRCEFEEVQGFLDQVAHKLPFAAKAVSRGTLEKMRKDQEERERNNQNPWTFERIATANMLGIRKVLSPYDLTHKGKYWGKFYMPKRV",
-                "MWRLLARASAPLLRVRLSDVSIPEKPKLRFIERAPLVPKVRREPKNLSDIRGPSTEATEFTEGNFAILALGGGYLHWGHFEMMRLTINRSMDPKNMFAIWRVPAPFKAITRKGVGHRMGGGKGSIDHYVTPVKAGRLVVEMGGRCEFKEVQGFLDQVAHKLPFAAKAVSRETLEKMRKDQEERERNNQNPWTFERIATANMLGIRKVLSPYDLTHKGKYWGKFYMPKRV",
+                "MWRLLARASAPFLRVPLSDSWAPLPASAGLKTLLPVPSFEDVSIPEKPKLRFIERAPLVPKVRREPKNLSDIRGPSTEATEFTEGKFAILALGGGYLHWGHFEMMRLTINRAMDPKNMFAIWRVPAPFKPITRKGVGHRMGGGKGAIDHYVTPVKAGRLVVEMGGRCEFKEVQGFLDQVAHKLPFAAKAVSRETLEKMQKDQEERERNNQNPWTFERIATANMLGIRKVLSPYDLTHKGKYWGKFYMPKRV",
                 "MNLASEPQEVLHMRGRTRVIMWRLLARACAPLLRAPLSDSWAAPSATAGFKTLLPVPTFEDVAIPEKPKLRFVERVPLVPKVRRERKNLSDIRGPSTEATEFTEGRFAILALGGGYLHWGHFEMMRLTINRSMDPKNMFALWRVPAPFKPITRKGMGQRMGGGKGAIDHYVTPVKAGRLIVEMGGRCEFKEVQGFLDLVAHKLPFPAKAVSRETLEKMRKDQEERERNNQNPWTFERIATANMLGIRKVLSPYDLTHKGRYWGKFYTPERV",
-                "MWRLLARASAPLLRVPVSDSWAPLPASAGLKTLLPVPGFEDVSIPEKPKLRFIERAPLVPKVRREPKNLSDIRGPSTEATEFTEGNFAILALGGGYLHWGHFEMMRLTINRSMDPKNMFAIWRVPAPFKPITRKGVGHRMGGGKGAIDHYVTPVKAGRLVVEMGGRCEFKEVQGFLDQVAHKLPFAAKAVSRKTLEKMRKDQEERERNNQNPWTFERIATANMLGIRKVLSPYDLTHKGKYWGKFYMPKRV",
+                "MWRLLGRASAPLLRVPLSDSWAPLPASAGLKTLLPVPSFEDVPIPEKPKLRFIERAPLVPKVRREPKNLSDIRGPSTEATEFTEGKFAILALGGGYLHWGHFEMMRLTINRAMDPKNMFAIWRVPAPFKPITRKGVGHRMGGGKGAIDHYVTPVKAGRLVVEMGGRCEFKEVQGFLDQVAHKLPFAAKAVSRETLEKMRKDQEERERNNQNPWTFERIATANMLGIRKVLSPYDLTHKGKYWGKFYMPKRV",
                 "MWRLLARASAPLLRVPLSDSWAPLPASAGLKTLLPVPSFEDVSIPEKPKLRFVERVPLVPKVKKEPRNLSDIRGPSTEATEFTEGNFAILALGGGYLHWGHFEMMRLTINRSMDPKNMFAIWRVPAPFKPITRKGVGHRMGGGKGAIDHYVTPVKAGRLVVEMGGRCEFEEVQGFLNQVAHKLPFPAKAVSRETLAKMRKDQEERERNNQNPWTFERIATANMLGIRKVLSPYDLTQKGKYWGKFYMPERV"
             ],
             "seed_organism_ids": [
                 "9601",
-                "9568",
+                "61621",
                 "9823",
-                "60711",
+                "591936",
                 "9483"
             ],
             "class_name": "uL16m",
-            "evalue": 1.7383998040335043e-16,
-            "bitscore": 46.32360076904297,
+            "evalue": 9.839864510428993e-17,
+            "bitscore": 47.160362243652344,
             "target_organism_id": 300852,
-            "consensus": "mwrllarasapllrvplsdswaalpasaglktllpvpsfedvsipekpklrfveraplvpkvrrepknlsdirgpsteateftegnfailalgggylhwghfemmrltinrsmdpknmfaiwrvpapfkpitrkgvghrmgggkgaidhyvtpvkagrlvvemggrcefkevqgfldqvahklpfaakavsretlekmrkdqeerernnqnpwtferiatanmlgirkvlspydlthkgkywgkfympkrv",
+            "consensus": "mwrllarasapllrvplsdswaalpasaglktllpvpsfedvsipekpklrfveraplvpkvrrepknlsdirgpsteateftegkfailalgggylhwghfemmrltinrsmdpknmfaiwrvpapfkpitrkgvghrmgggkgaidhyvtpvkagrlvvemggrcefkevqgfldqvahklpfaakavsretlekmrkdqeerernnqnpwtferiatanmlgirkvlspydlthkgkywgkfympkrv",
             "domains": [
                 [
-                    46.26342010498047,
-                    1.8135092559514653e-16,
+                    47.096839904785156,
+                    1.0289161645971367e-16,
                     1,
                     141
                 ]
@@ -1058,27 +938,27 @@
         {
             "fasta_seed": [
                 "MWRLLARASAPLLRVPLSDSWALLPASAGVKTLLPVPSFEDVSIPEKPKLRFIERAPLVPKVRREPKNLSDIRGPSTEATEFTEGNFAILALGGGYLHWGHFEMMRLTINRSMDPKNMFAIWRVPAPFKPITRKSVGHRMGGGKGAIDHYVTPVKAGRLVVEMGGRCEFEEVQGFLDQVAHKLPFAAKAVSRGTLEKMRKDQEERERNNQNPWTFERIATANMLGIRKVLSPYDLTHKGKYWGKFYMPKRV",
-                "MWRLLARASAPLLRVRLSDVSIPEKPKLRFIERAPLVPKVRREPKNLSDIRGPSTEATEFTEGNFAILALGGGYLHWGHFEMMRLTINRSMDPKNMFAIWRVPAPFKAITRKGVGHRMGGGKGSIDHYVTPVKAGRLVVEMGGRCEFKEVQGFLDQVAHKLPFAAKAVSRETLEKMRKDQEERERNNQNPWTFERIATANMLGIRKVLSPYDLTHKGKYWGKFYMPKRV",
+                "MWRLLARASAPFLRVPLSDSWAPLPASAGLKTLLPVPSFEDVSIPEKPKLRFIERAPLVPKVRREPKNLSDIRGPSTEATEFTEGKFAILALGGGYLHWGHFEMMRLTINRAMDPKNMFAIWRVPAPFKPITRKGVGHRMGGGKGAIDHYVTPVKAGRLVVEMGGRCEFKEVQGFLDQVAHKLPFAAKAVSRETLEKMQKDQEERERNNQNPWTFERIATANMLGIRKVLSPYDLTHKGKYWGKFYMPKRV",
                 "MNLASEPQEVLHMRGRTRVIMWRLLARACAPLLRAPLSDSWAAPSATAGFKTLLPVPTFEDVAIPEKPKLRFVERVPLVPKVRRERKNLSDIRGPSTEATEFTEGRFAILALGGGYLHWGHFEMMRLTINRSMDPKNMFALWRVPAPFKPITRKGMGQRMGGGKGAIDHYVTPVKAGRLIVEMGGRCEFKEVQGFLDLVAHKLPFPAKAVSRETLEKMRKDQEERERNNQNPWTFERIATANMLGIRKVLSPYDLTHKGRYWGKFYTPERV",
-                "MWRLLARASAPLLRVPVSDSWAPLPASAGLKTLLPVPGFEDVSIPEKPKLRFIERAPLVPKVRREPKNLSDIRGPSTEATEFTEGNFAILALGGGYLHWGHFEMMRLTINRSMDPKNMFAIWRVPAPFKPITRKGVGHRMGGGKGAIDHYVTPVKAGRLVVEMGGRCEFKEVQGFLDQVAHKLPFAAKAVSRKTLEKMRKDQEERERNNQNPWTFERIATANMLGIRKVLSPYDLTHKGKYWGKFYMPKRV",
+                "MWRLLGRASAPLLRVPLSDSWAPLPASAGLKTLLPVPSFEDVPIPEKPKLRFIERAPLVPKVRREPKNLSDIRGPSTEATEFTEGKFAILALGGGYLHWGHFEMMRLTINRAMDPKNMFAIWRVPAPFKPITRKGVGHRMGGGKGAIDHYVTPVKAGRLVVEMGGRCEFKEVQGFLDQVAHKLPFAAKAVSRETLEKMRKDQEERERNNQNPWTFERIATANMLGIRKVLSPYDLTHKGKYWGKFYMPKRV",
                 "MWRLLARASAPLLRVPLSDSWAPLPASAGLKTLLPVPSFEDVSIPEKPKLRFVERVPLVPKVKKEPRNLSDIRGPSTEATEFTEGNFAILALGGGYLHWGHFEMMRLTINRSMDPKNMFAIWRVPAPFKPITRKGVGHRMGGGKGAIDHYVTPVKAGRLVVEMGGRCEFEEVQGFLNQVAHKLPFPAKAVSRETLAKMRKDQEERERNNQNPWTFERIATANMLGIRKVLSPYDLTQKGKYWGKFYMPERV"
             ],
             "seed_organism_ids": [
                 "9601",
-                "9568",
+                "61621",
                 "9823",
-                "60711",
+                "591936",
                 "9483"
             ],
             "class_name": "uL16m",
-            "evalue": 1.7383998040335043e-16,
-            "bitscore": 46.32360076904297,
+            "evalue": 9.839864510428993e-17,
+            "bitscore": 47.160362243652344,
             "target_organism_id": 300852,
-            "consensus": "mwrllarasapllrvplsdswaalpasaglktllpvpsfedvsipekpklrfveraplvpkvrrepknlsdirgpsteateftegnfailalgggylhwghfemmrltinrsmdpknmfaiwrvpapfkpitrkgvghrmgggkgaidhyvtpvkagrlvvemggrcefkevqgfldqvahklpfaakavsretlekmrkdqeerernnqnpwtferiatanmlgirkvlspydlthkgkywgkfympkrv",
+            "consensus": "mwrllarasapllrvplsdswaalpasaglktllpvpsfedvsipekpklrfveraplvpkvrrepknlsdirgpsteateftegkfailalgggylhwghfemmrltinrsmdpknmfaiwrvpapfkpitrkgvghrmgggkgaidhyvtpvkagrlvvemggrcefkevqgfldqvahklpfaakavsretlekmrkdqeerernnqnpwtferiatanmlgirkvlspydlthkgkywgkfympkrv",
             "domains": [
                 [
-                    46.26342010498047,
-                    1.8135092559514653e-16,
+                    47.096839904785156,
+                    1.0289161645971367e-16,
                     1,
                     141
                 ]
@@ -2510,31 +2390,31 @@
                 "MLVLGSLRSVLWSSSTASLIGKKSPCYTYGILYRGFSQSVKTWQENVLKDESSLNLTPRLLKIVPNDTDIVTLEKQDELIKRRRKLSKEVTQMKKLKPVSPGLRWYRSPIYPYLYKGRPVRALTIVRKKHGGRNNSGKITVRHQGGGHKNRTRLVDFNRWESGSQTVQRIEYDPGRSSHIALLKHSATGELSYIVACDGLRPGDIVESYRKGIPQTLLDEMGGKVDPAILSVKTTQRGNCLPISMIPIGTIVHNVGITPVGPAKFCRSAGTYARVLAKLPEKKKAVVRLQSGEHRYVSLEAIATVGVVSNIDHQNRSLGKAGRSRWLGIRPTVRGVAMNKCDHPHGGGRGKSKSNKLSMSPWGQLAKGYKTRRGKNQNTMKVKDRPRGKDKRL",
                 "MLVLGSLRSVLWSSSTASLIGKKSPCYTYGILYRGFSQSVKTWQENVLKDESSLNLTPRLLKIVPNDTDIVTLEKQDELIKRRRKLSKEVTQMKKLKPVSPGLRWYRSPIYPYLYKGRPVRALTVVRKKHGGRNNSGKITVRHQGGGHKNRTRLVDFNRWESGSQTVQRIEYDPGRSSHIALLKHSATGELSYIIACDGLRPGDIVESYRKGIPQTLLDEMGGKVDPAILSVKTTQRGNCLPISMIPIGTIVHNVGITPVGPAKFCRSAGTYARVLAKLPEKKKAVVRLQSGEHRYVSLEAIATVGVVSNIDHQNRSLGKAGRSRWLGIRPTVRGVAMNKCDHPHGGGRGKSKSNKLSMSPWGQLAKGYKTRRGKNQNTMKVKDRPRGKDKRL",
                 "MLVLGSLRSVLWSSSSASLIGRRSPCYPYGVLYRGFSQTVRSWQDSVPKDDSNLNLTPRLLKIVPNDTDIVTLERQDELIKRRRKLAKEVTQMKRLKPVSPGLRWYRSPIYPYLFKGRPVRALTVVRKKHGGRNNSGKITVRHHGGGHKNRTRLIDFSRWEGGSQTVQRIEYDPGRSSHIALLKHNTTGELSYIIACDGLRPGDVVESYRKGIPQSLLNEMGGKVDPAILSVKTTQRGNCLPISMIPIGTIVHNVGITPVGPGKFCRSAGTYARVLAKLPEKKKATVRLQSGEHRYVSLEAIATVGVVSNIDHQNRSLGKAGRSRWLGIRPTVRGVAMNKCDHPHGGGRGKSKSNKLSMSPWGQLAKGYKTRRGKNQNRMKVKDRPRGKDARL",
-                "MLVLGSLRSALSCSSTASLISKRNPCYPYGILCRTLSQSVKLWQENTSKDDSSLNITPRLLKIIPNDTDIVTLEKQDELIKRRRKLSKEVTQMKRLKPVSPGLRWYRSPIYPYLYKGRPVRALTVVRKKHGGRNNSGKITVRHQGGGHRNRTRLIDFNRWEGGAQTVQRIEYDPGRSSHIALLKHNTTGELSYIIACDGLRPGDVVESFRRGIPQTLLNEMGGKVDPAILSVKTTQRGNCLPISMIPIGTIIHNVGITPVGPGKFCRSAGTYARVLAKLPEKKKAIVRLQSGEHRYVSLEAVATIGVVSNIDHQNRSLGKAGRSRWLGIRPTVRGVAMNKCDHPHGGGRGKSKSNKLSMSPWGQLAKGYKTRRGKNQNRMKVKDRPRGKDARL",
+                "MSMLGSLRSVLWSSSSASLFGKRNPCYPYGILYRGLSHSIKPWQESVSKDDSNLNLTPRLLAIVPNDTDIVTLEKQDELIKRRRKLSKEITQMKRLKPVSPGLRWYRSPIYPYLYKGRPVRTLTVVRKRHGGRNNSGKITVRHQGGGHKNRTRLVDFNRWEGGSQTVERIEYDPGRSSHIALLKHNATGNLSYIIACDGLRPGDVVESYRKGIPQTLLDEMGGKVDPAILSVKTTQRGNCLPISMIPIGTIVHNVGITPVGPGKFCRSAGTYARVLAKIPEKKKAIVRLQSGEHRYTSLEAVATIGVVSNIDHQNRSLGKAGRSRWLGIRPTVRGVAMNKCDHPHGGGRGKSKSNKLSMSPWGQLAKGYKTRRGKNQNRMKVKDRPRGKDKRL",
                 "MLVLGPLRSVLSCSSSASLIGRRNPCYPYGILYRTLSQSFKSRQENVSKDDSSLNLTPRLLKIVPNDTDIVTLEKQDELIKRRRKLSKEVTQMKRLKPVSPGLRWYRSPIYPYLYKGRPVRSLTVVRKKHGGRNNSGKITVRHQGGGHRNRTRLIDFNRWEGGAQTVQRIEYDPGRSSHIALLKHNATGKLSYIIACDGLRPGDVVESFRRGIPQTLLNEMGGKVDPAILSVKTTQRGNCLPISMIPIGTIVHNVGITPVGPGKFCRSAGTYARVLAKLPEKKKAVVRLQSGEHRYVSLESVATIGVVSNIDHQNRSLGKAGRSRWLGIRPTVRGVAMNKCDHPHGGGRGKSKSNKLSMSPWGQLAKGYKTRRGKNQNRMKVKDRPRGKDARL"
             ],
             "seed_organism_ids": [
                 "27292",
                 "1080349",
                 "1095631",
-                "252598",
+                "1160507",
                 "27291"
             ],
             "class_name": "uL2m",
-            "evalue": 1.6745180955336657e-71,
-            "bitscore": 227.3863983154297,
+            "evalue": 2.710032512861634e-71,
+            "bitscore": 226.7294921875,
             "target_organism_id": 300852,
-            "consensus": "mlvlgslrsvlsssstasligkkspcytygilyrglsqsvkswqenvskddsslnltprllkivpndtdivtlekqdelikrrrklskevtqmkklkpvspglrwyrspiypylykgrpvraltvvrkkhggrnnsgkitvrhqggghknrtrlidfnrweggsqtvqrieydpgrsshiallkhnatgelsyiiacdglrpgdvvesyrkgipqtlldemggkvdpailsvkttqrgnclpismipigtivhnvgitpvgpakfcrsagtyarvlaklpekkkavvrlqsgehryvsleaiatvgvvsnidhqnrslgkagrsrwlgirptvrgvamnkcdhphgggrgksksnklsmspwgqlakgyktrrgknqnrmkvkdrprgkdarl",
+            "consensus": "mlvlgslrsvlwssssasligkkspcytygilyrglsqsvkswqenvskddsslnltprllkivpndtdivtlekqdelikrrrklskevtqmkklkpvspglrwyrspiypylykgrpvraltvvrkkhggrnnsgkitvrhqggghknrtrlvdfnrweggsqtvqrieydpgrsshiallkhnatgelsyiiacdglrpgdvvesyrkgipqtlldemggkvdpailsvkttqrgnclpismipigtivhnvgitpvgpakfcrsagtyarvlaklpekkkavvrlqsgehryvsleaiatvgvvsnidhqnrslgkagrsrwlgirptvrgvamnkcdhphgggrgksksnklsmspwgqlakgyktrrgknqnrmkvkdrprgkdkrl",
             "domains": [
                 [
-                    90.45248413085938,
-                    6.582124191333095e-30,
+                    89.95909118652344,
+                    9.495716338334019e-30,
                     1,
-                    120
+                    121
                 ],
                 [
-                    138.9982147216797,
-                    1.1811821164344365e-44,
+                    138.60931396484375,
+                    1.584269585621099e-44,
                     122,
                     276
                 ]
@@ -2576,31 +2456,31 @@
                 "MLVLGSLRSVLWSSSTASLIGKKSPCYTYGILYRGFSQSVKTWQENVLKDESSLNLTPRLLKIVPNDTDIVTLEKQDELIKRRRKLSKEVTQMKKLKPVSPGLRWYRSPIYPYLYKGRPVRALTIVRKKHGGRNNSGKITVRHQGGGHKNRTRLVDFNRWESGSQTVQRIEYDPGRSSHIALLKHSATGELSYIVACDGLRPGDIVESYRKGIPQTLLDEMGGKVDPAILSVKTTQRGNCLPISMIPIGTIVHNVGITPVGPAKFCRSAGTYARVLAKLPEKKKAVVRLQSGEHRYVSLEAIATVGVVSNIDHQNRSLGKAGRSRWLGIRPTVRGVAMNKCDHPHGGGRGKSKSNKLSMSPWGQLAKGYKTRRGKNQNTMKVKDRPRGKDKRL",
                 "MLVLGSLRSVLWSSSTASLIGKKSPCYTYGILYRGFSQSVKTWQENVLKDESSLNLTPRLLKIVPNDTDIVTLEKQDELIKRRRKLSKEVTQMKKLKPVSPGLRWYRSPIYPYLYKGRPVRALTVVRKKHGGRNNSGKITVRHQGGGHKNRTRLVDFNRWESGSQTVQRIEYDPGRSSHIALLKHSATGELSYIIACDGLRPGDIVESYRKGIPQTLLDEMGGKVDPAILSVKTTQRGNCLPISMIPIGTIVHNVGITPVGPAKFCRSAGTYARVLAKLPEKKKAVVRLQSGEHRYVSLEAIATVGVVSNIDHQNRSLGKAGRSRWLGIRPTVRGVAMNKCDHPHGGGRGKSKSNKLSMSPWGQLAKGYKTRRGKNQNTMKVKDRPRGKDKRL",
                 "MLVLGSLRSVLWSSSSASLIGRRSPCYPYGVLYRGFSQTVRSWQDSVPKDDSNLNLTPRLLKIVPNDTDIVTLERQDELIKRRRKLAKEVTQMKRLKPVSPGLRWYRSPIYPYLFKGRPVRALTVVRKKHGGRNNSGKITVRHHGGGHKNRTRLIDFSRWEGGSQTVQRIEYDPGRSSHIALLKHNTTGELSYIIACDGLRPGDVVESYRKGIPQSLLNEMGGKVDPAILSVKTTQRGNCLPISMIPIGTIVHNVGITPVGPGKFCRSAGTYARVLAKLPEKKKATVRLQSGEHRYVSLEAIATVGVVSNIDHQNRSLGKAGRSRWLGIRPTVRGVAMNKCDHPHGGGRGKSKSNKLSMSPWGQLAKGYKTRRGKNQNRMKVKDRPRGKDARL",
-                "MLVLGSLRSALSCSSTASLISKRNPCYPYGILCRTLSQSVKLWQENTSKDDSSLNITPRLLKIIPNDTDIVTLEKQDELIKRRRKLSKEVTQMKRLKPVSPGLRWYRSPIYPYLYKGRPVRALTVVRKKHGGRNNSGKITVRHQGGGHRNRTRLIDFNRWEGGAQTVQRIEYDPGRSSHIALLKHNTTGELSYIIACDGLRPGDVVESFRRGIPQTLLNEMGGKVDPAILSVKTTQRGNCLPISMIPIGTIIHNVGITPVGPGKFCRSAGTYARVLAKLPEKKKAIVRLQSGEHRYVSLEAVATIGVVSNIDHQNRSLGKAGRSRWLGIRPTVRGVAMNKCDHPHGGGRGKSKSNKLSMSPWGQLAKGYKTRRGKNQNRMKVKDRPRGKDARL",
+                "MSMLGSLRSVLWSSSSASLFGKRNPCYPYGILYRGLSHSIKPWQESVSKDDSNLNLTPRLLAIVPNDTDIVTLEKQDELIKRRRKLSKEITQMKRLKPVSPGLRWYRSPIYPYLYKGRPVRTLTVVRKRHGGRNNSGKITVRHQGGGHKNRTRLVDFNRWEGGSQTVERIEYDPGRSSHIALLKHNATGNLSYIIACDGLRPGDVVESYRKGIPQTLLDEMGGKVDPAILSVKTTQRGNCLPISMIPIGTIVHNVGITPVGPGKFCRSAGTYARVLAKIPEKKKAIVRLQSGEHRYTSLEAVATIGVVSNIDHQNRSLGKAGRSRWLGIRPTVRGVAMNKCDHPHGGGRGKSKSNKLSMSPWGQLAKGYKTRRGKNQNRMKVKDRPRGKDKRL",
                 "MLVLGPLRSVLSCSSSASLIGRRNPCYPYGILYRTLSQSFKSRQENVSKDDSSLNLTPRLLKIVPNDTDIVTLEKQDELIKRRRKLSKEVTQMKRLKPVSPGLRWYRSPIYPYLYKGRPVRSLTVVRKKHGGRNNSGKITVRHQGGGHRNRTRLIDFNRWEGGAQTVQRIEYDPGRSSHIALLKHNATGKLSYIIACDGLRPGDVVESFRRGIPQTLLNEMGGKVDPAILSVKTTQRGNCLPISMIPIGTIVHNVGITPVGPGKFCRSAGTYARVLAKLPEKKKAVVRLQSGEHRYVSLESVATIGVVSNIDHQNRSLGKAGRSRWLGIRPTVRGVAMNKCDHPHGGGRGKSKSNKLSMSPWGQLAKGYKTRRGKNQNRMKVKDRPRGKDARL"
             ],
             "seed_organism_ids": [
                 "27292",
                 "1080349",
                 "1095631",
-                "252598",
+                "1160507",
                 "27291"
             ],
             "class_name": "uL2m",
-            "evalue": 1.6745180955336657e-71,
-            "bitscore": 227.3863983154297,
+            "evalue": 2.710032512861634e-71,
+            "bitscore": 226.7294921875,
             "target_organism_id": 300852,
-            "consensus": "mlvlgslrsvlsssstasligkkspcytygilyrglsqsvkswqenvskddsslnltprllkivpndtdivtlekqdelikrrrklskevtqmkklkpvspglrwyrspiypylykgrpvraltvvrkkhggrnnsgkitvrhqggghknrtrlidfnrweggsqtvqrieydpgrsshiallkhnatgelsyiiacdglrpgdvvesyrkgipqtlldemggkvdpailsvkttqrgnclpismipigtivhnvgitpvgpakfcrsagtyarvlaklpekkkavvrlqsgehryvsleaiatvgvvsnidhqnrslgkagrsrwlgirptvrgvamnkcdhphgggrgksksnklsmspwgqlakgyktrrgknqnrmkvkdrprgkdarl",
+            "consensus": "mlvlgslrsvlwssssasligkkspcytygilyrglsqsvkswqenvskddsslnltprllkivpndtdivtlekqdelikrrrklskevtqmkklkpvspglrwyrspiypylykgrpvraltvvrkkhggrnnsgkitvrhqggghknrtrlvdfnrweggsqtvqrieydpgrsshiallkhnatgelsyiiacdglrpgdvvesyrkgipqtlldemggkvdpailsvkttqrgnclpismipigtivhnvgitpvgpakfcrsagtyarvlaklpekkkavvrlqsgehryvsleaiatvgvvsnidhqnrslgkagrsrwlgirptvrgvamnkcdhphgggrgksksnklsmspwgqlakgyktrrgknqnrmkvkdrprgkdkrl",
             "domains": [
                 [
-                    90.45248413085938,
-                    6.582124191333095e-30,
+                    89.95909118652344,
+                    9.495716338334019e-30,
                     1,
-                    120
+                    121
                 ],
                 [
-                    138.9982147216797,
-                    1.1811821164344365e-44,
+                    138.60931396484375,
+                    1.584269585621099e-44,
                     122,
                     276
                 ]
@@ -4530,34 +4410,34 @@
         {
             "fasta_seed": [
                 "MTIKRNLVKTLQSIRYQATTATAHAESTLSPLPNAAIPPKYALVTVRSFPSLEPLTFVPVPTSTVAAPLRRDILWRAVVYENDNRRVGASNPPGRSENGFSRRKLMPQKGSGRARVGDANSPTRHNGGRALARTAPNDYTTELPSKVYSMAFNNALSHQYKSGKLFVIGGEKVDLISPTPELDLNRLDLVNTNTVEGKEIFEGEVIFRKFLEEFQLKGKRLLFITDKTREGLIKSSDPYKQKVDVIQKELVEVNDILRAQAVFIELEALEYLAMAHQKEILHSVSN",
-                "MTMKRNLVKTLQSIRYQATNATTHAETVLNPLPNAAIPPKYALVTVRSFPSLEPLTFVPVPTSTVAAPLRRDILWKAVVYENDNRRVGASNPPGRSENGFSRRKLMPQKGSGRARVGDANSPTRHNGARALARTAPNDYTTELPSKVYSMAFNNALSHQYKSGKLFVIGGDKVDLISPTSGLDLNTLDLVNTNTVEGKEIFEGEVIFRKFLEEFELEDKRLLFITDKTREGLIKSSDSYKQKVDVIQKELVEVNDILRAQAVFIELEALEYLAMAHQKETLFSVPN",
+                "MTIKRNLVKTLQSIRYQATTATAHAESTLNPLPNAAIPPKYALVTVRSFPSLEPLTFVPVPTSTVAAPLRRDILWRAVVYENDNRRVGASNPPGRSENGFSRRKLMPQKGSGRARVGDANSPTRHNGGRALARTAPNDYTTELPSKVYSMAFNNALSHQYKSGKLFVIGGEKVDLISPTPELDLNRLDLVNTNTVEGKEIFEGEVIFRKFLEEFQLKGKRLLFITDKTREGLIKSSDPYKQKVDVIQKELVEVNDILRAQAVFIELEALEYLAMAHQKEILHSVSN",
                 "MTIKRNLVKTLQSIRYQATTATAHAESTLSPLPNAAIPPKYALVTVRSFPSLEPLTFVPVPTSTVAAPLRRDILWRAVVYENDNRRVGASNPPGRSENGFSRRKLMPQKGSGRARVGDANSPTRHNGGRALARTAPNDYTTELPSKVYSMAFNNALSHQYKSGKLFVIGGEKVDLISPTPELDLNRLDLVNTNTVEGKEIFEGEVIFRKFLEEFQLKGKRLLFITDKTREGLIKSSDPYKQKVDVIQKELVEVNDILRAQAVFIELEALEYLAMAHQKEILHSVSN",
                 "MPQKGSGRARVGDANSPTRHNGGRALARTAPNDYTTELPSKVYSMAFNNALSHQYKSGKLFVIGGEKVDLISPTPELDLNRLDLVNTNTVEGKEIFEGEVIFRKFLEEFQLKGKRLLFITDKTREGLIKSSDPYKQKVDVIQKELVEVNDILRAQAVFIELEALEYLAMAHQKEILHSVSN",
                 "MPQKGSGRARVGDANSPTRHNGGRALARTAPNDYTTELPSKVYSMAFNNALSHQYKSGKLFVIGGEKVDLISPTPELDLNRLDLVNTNTVEGKEIFEGEVIFRKFLEEFQLKGKRLLFITDKTREGLIKSSDPYKQKVDVIQKELVEVNDILRAQAVFIELEALEYLAMAHQKEILHSVSN"
             ],
             "seed_organism_ids": [
                 "252598",
-                "27291",
+                "27292",
                 "643680",
                 "545124",
                 "1095631"
             ],
             "class_name": "uL4m",
-            "evalue": 9.935410849905848e-18,
-            "bitscore": 50.4583625793457,
+            "evalue": 6.530185201548175e-18,
+            "bitscore": 51.0858268737793,
             "target_organism_id": 300852,
-            "consensus": "mtikrnlvktlqsiryqattatahaesvlsplpnaaippkyalvtvrsfpslepltfvpvptstvaaplrrdilwravvyendnrrvgasnppgrsengfsrrklmpqkgsgrarvgdansptrhnggralartapndyttelpskvysmafnnalshqyksgklfviggekvdlisptpeldlnrldlvntntvegkeifegevifrkfleefqlkgkrllfitdktreglikssdpykqkvdviqkelvevndilraqavfielealeylamahqkeilhsvsn",
+            "consensus": "mtikrnlvktlqsiryqattatahaestlsplpnaaippkyalvtvrsfpslepltfvpvptstvaaplrrdilwravvyendnrrvgasnppgrsengfsrrklmpqkgsgrarvgdansptrhnggralartapndyttelpskvysmafnnalshqyksgklfviggekvdlisptpeldlnrldlvntntvegkeifegevifrkfleefqlkgkrllfitdktreglikssdpykqkvdviqkelvevndilraqavfielealeylamahqkeilhsvsn",
             "domains": [
                 [
-                    48.761043548583984,
-                    3.2686432020612127e-17,
+                    49.32192611694336,
+                    2.251518960449073e-17,
                     3,
                     135
                 ],
                 [
-                    -0.8805525302886963,
-                    0.04369308358974401,
-                    160,
+                    -0.8119294047355652,
+                    0.04273725042113489,
+                    158,
                     204
                 ]
             ]
@@ -4596,34 +4476,34 @@
         {
             "fasta_seed": [
                 "MTIKRNLVKTLQSIRYQATTATAHAESTLSPLPNAAIPPKYALVTVRSFPSLEPLTFVPVPTSTVAAPLRRDILWRAVVYENDNRRVGASNPPGRSENGFSRRKLMPQKGSGRARVGDANSPTRHNGGRALARTAPNDYTTELPSKVYSMAFNNALSHQYKSGKLFVIGGEKVDLISPTPELDLNRLDLVNTNTVEGKEIFEGEVIFRKFLEEFQLKGKRLLFITDKTREGLIKSSDPYKQKVDVIQKELVEVNDILRAQAVFIELEALEYLAMAHQKEILHSVSN",
-                "MTMKRNLVKTLQSIRYQATNATTHAETVLNPLPNAAIPPKYALVTVRSFPSLEPLTFVPVPTSTVAAPLRRDILWKAVVYENDNRRVGASNPPGRSENGFSRRKLMPQKGSGRARVGDANSPTRHNGARALARTAPNDYTTELPSKVYSMAFNNALSHQYKSGKLFVIGGDKVDLISPTSGLDLNTLDLVNTNTVEGKEIFEGEVIFRKFLEEFELEDKRLLFITDKTREGLIKSSDSYKQKVDVIQKELVEVNDILRAQAVFIELEALEYLAMAHQKETLFSVPN",
+                "MTIKRNLVKTLQSIRYQATTATAHAESTLNPLPNAAIPPKYALVTVRSFPSLEPLTFVPVPTSTVAAPLRRDILWRAVVYENDNRRVGASNPPGRSENGFSRRKLMPQKGSGRARVGDANSPTRHNGGRALARTAPNDYTTELPSKVYSMAFNNALSHQYKSGKLFVIGGEKVDLISPTPELDLNRLDLVNTNTVEGKEIFEGEVIFRKFLEEFQLKGKRLLFITDKTREGLIKSSDPYKQKVDVIQKELVEVNDILRAQAVFIELEALEYLAMAHQKEILHSVSN",
                 "MTIKRNLVKTLQSIRYQATTATAHAESTLSPLPNAAIPPKYALVTVRSFPSLEPLTFVPVPTSTVAAPLRRDILWRAVVYENDNRRVGASNPPGRSENGFSRRKLMPQKGSGRARVGDANSPTRHNGGRALARTAPNDYTTELPSKVYSMAFNNALSHQYKSGKLFVIGGEKVDLISPTPELDLNRLDLVNTNTVEGKEIFEGEVIFRKFLEEFQLKGKRLLFITDKTREGLIKSSDPYKQKVDVIQKELVEVNDILRAQAVFIELEALEYLAMAHQKEILHSVSN",
                 "MPQKGSGRARVGDANSPTRHNGGRALARTAPNDYTTELPSKVYSMAFNNALSHQYKSGKLFVIGGEKVDLISPTPELDLNRLDLVNTNTVEGKEIFEGEVIFRKFLEEFQLKGKRLLFITDKTREGLIKSSDPYKQKVDVIQKELVEVNDILRAQAVFIELEALEYLAMAHQKEILHSVSN",
                 "MPQKGSGRARVGDANSPTRHNGGRALARTAPNDYTTELPSKVYSMAFNNALSHQYKSGKLFVIGGEKVDLISPTPELDLNRLDLVNTNTVEGKEIFEGEVIFRKFLEEFQLKGKRLLFITDKTREGLIKSSDPYKQKVDVIQKELVEVNDILRAQAVFIELEALEYLAMAHQKEILHSVSN"
             ],
             "seed_organism_ids": [
                 "252598",
-                "27291",
+                "27292",
                 "643680",
                 "545124",
                 "1095631"
             ],
             "class_name": "uL4m",
-            "evalue": 9.935410849905848e-18,
-            "bitscore": 50.4583625793457,
+            "evalue": 6.530185201548175e-18,
+            "bitscore": 51.0858268737793,
             "target_organism_id": 300852,
-            "consensus": "mtikrnlvktlqsiryqattatahaesvlsplpnaaippkyalvtvrsfpslepltfvpvptstvaaplrrdilwravvyendnrrvgasnppgrsengfsrrklmpqkgsgrarvgdansptrhnggralartapndyttelpskvysmafnnalshqyksgklfviggekvdlisptpeldlnrldlvntntvegkeifegevifrkfleefqlkgkrllfitdktreglikssdpykqkvdviqkelvevndilraqavfielealeylamahqkeilhsvsn",
+            "consensus": "mtikrnlvktlqsiryqattatahaestlsplpnaaippkyalvtvrsfpslepltfvpvptstvaaplrrdilwravvyendnrrvgasnppgrsengfsrrklmpqkgsgrarvgdansptrhnggralartapndyttelpskvysmafnnalshqyksgklfviggekvdlisptpeldlnrldlvntntvegkeifegevifrkfleefqlkgkrllfitdktreglikssdpykqkvdviqkelvevndilraqavfielealeylamahqkeilhsvsn",
             "domains": [
                 [
-                    48.761043548583984,
-                    3.2686432020612127e-17,
+                    49.32192611694336,
+                    2.251518960449073e-17,
                     3,
                     135
                 ],
                 [
-                    -0.8805525302886963,
-                    0.04369308358974401,
-                    160,
+                    -0.8119294047355652,
+                    0.04273725042113489,
+                    158,
                     204
                 ]
             ]
@@ -4893,28 +4773,28 @@
         },
         {
             "fasta_seed": [
-                "MQRFSLVTHRSFSHSCMKPKSACSLVKPVHHLVKIDKSKLSPRFPELKYDKSDIRSPGFKPKDTHADRLNDHYLNTLQSDLLLINYSHNAAVVKGLKQRAWSGDSPYHLNRPPKNPRGSKAQLPDIHPIKWSNIPGLEGVVINCFVREARENQLLAITAALQLQQITGCKPHPIFSKNDVPTWKLRKGHQMGAKVELKGKEMSQFLSTLTEIVLPRIREYKGISNQSGNRFGGISFGLTAEDIKFFPEIDANQDSWPKTFGMHININTSAQLDYQARTLLSGFQFPFFGEEK",
                 "MQKFTSVTHRSFSHSCINAKAACSLIKPVHHLVKIDKSKLSPRFPELKYDKSDIRSPGFKPKDTHADRLNDHYLNTLQSDLLLINYSHDAAVEKGLKQRAWSGDSPYHLNRPPKNPQGSKVQLPDIHPIKWGNIPGLENVVINCFVREARENQLFAITAALQLQQITGCKPKPIFSKNDVPTWKLRKGHQMGAKVELKGKEMSQFLTTLTEIVLPRIREYKGISNQSGNRFGGISFGLTAEDIKFFPEIDANQDSWPKTFGMHININTSAQLDYQARTLLSGFQFPFFGDEK",
                 "MQRFSLVTHRSFSHSCXKPKSACSLVKPVHHLVKIDKSKLSPRFPELKYDKSDIRSPGFKPKDTHADRLNDHYLNTLQSDLLLINYSHNAAVVKGLKQRAWSGDSPYHLNRPPKNPRGSKAQLPDIHPIKWSNIPGLEGVVINCFVREARENQLLAITAALQLQQITGCKPHPIFSKNDVPTWKLRKGHQMGAKVELKGKEMSQFLSTLTEIVLPRIREYKGISNQSGNRFGGISFGLTAEDIKFFPEIDANQDSWPKTFGMHININTSAQLDYQARTLLSGFQFPFFGEEK",
                 "MQRFTLVTHRSFSHSCVKPKSACSLVKPVHHLVKIDKSKLSPRFPELKYDKCDIRSPGFKPKDTHADRLNDHYLNTLQSDLLLINYSHNATVTKGLKQRAWSGNSPYHLNRPPKNPQGSKVQLPDIHPIKWSNIPGLESVVINCFVREARENQLYAITAALQLQQITGCKPHPIFSKNDVPTWKLRKGHQMGAKVELKGKEMSQFLSTLTEIVLPRIREYKGINNQSGNRFGGISFGLTPEDIKFFPEIDANQDSWPKTFGMHINVNTSAQLDYQARTLLSGFQFPFFGEEK",
-                "MQKFTSVTHRSFSHSCINAKAACSLIKPVHHLVKIDKSKLSPRFPELKYDKSDIRSPGFKPKDTHADRLNDHYLNTLQSDLLLINYSHNAAVEKGLKQRAWSGDSPYHLNRPPKNPQGSKVQLPDIHPIKWGNIPGLENVVINCFVREARENQLFAITAALQLQQITGCKPKPIFSKNDVPTWKLRKGHQMGAKVELKGKEMSQFLTTLTEIVLPRIREYKGISNQSGNRFGGISFGLTAEDIKFFPEIDANQDSWPKTFGMHININTSAQLDYQARTLLSGFQFPFFGDEK"
+                "MQKFTSVTHRSFSHSCINAKAACSLIKPVHHLVKIDKSKLSPRFPELKYDKSDIRSPGFKPKDTHADRLNDHYLNTLQSDLLLINYSHNAAVEKGLKQRAWSGDSPYHLNRPPKNPQGSKVQLPDIHPIKWGNIPGLENVVINCFVREARENQLFAITAALQLQQITGCKPKPIFSKNDVPTWKLRKGHQMGAKVELKGKEMSQFLTTLTEIVLPRIREYKGISNQSGNRFGGISFGLTAEDIKFFPEIDANQDSWPKTFGMHININTSAQLDYQARTLLSGFQFPFFGDEK",
+                "MQKFTRVTHRSFSHSCIHPKSACSLVKPVHHLVKIDKSKLSPRFPELKYEKSDIRSPGFKPKDTHADRFNDHYLNTLQSDLLLINYSHNATVEKGLKQRAWSGNSPYHLNRPPKNPQGSKTQLPDIHPIKWSNVPGLESVVLNCFVREARENQLFAITSALQLQQITGCKPKPVFSKNDVPTWKLRKGHQMGAKVELKGKEMSQFLSTLTEIVLPRIREYKGISNQSGNRFGGISFGLTAEDIKFFPEIDANQDSWPKTFGMHININTTAQLDYQARTLLSGFQFPFFGEEK"
             ],
             "seed_organism_ids": [
-                "252598",
                 "27292",
                 "1095631",
                 "27291",
-                "1080349"
+                "1080349",
+                "1160507"
             ],
             "class_name": "uL5m",
-            "evalue": 2.0033442208539002e-27,
-            "bitscore": 82.1258544921875,
+            "evalue": 1.5355682653542672e-27,
+            "bitscore": 82.49948120117188,
             "target_organism_id": 300852,
-            "consensus": "mqkftlvthrsfshscvkaksacslvkpvhhlvkidksklsprfpelkydksdirspgfkpkdthadrlndhylntlqsdlllinyshnaavekglkqrawsgdspyhlnrppknprgskvqlpdihpikwsnipglesvvincfvrearenqllaitaalqlqqitgckpkpifskndvptwklrkghqmgakvelkgkemsqflstlteivlprireykgisnqsgnrfggisfgltaedikffpeidanqdswpktfgmhinintsaqldyqartllsgfqfpffgeek",
+            "consensus": "mqkftsvthrsfshscikaksacslvkpvhhlvkidksklsprfpelkydksdirspgfkpkdthadrlndhylntlqsdlllinyshnaavekglkqrawsgdspyhlnrppknpqgskvqlpdihpikwsnipglesvvincfvrearenqlfaitaalqlqqitgckpkpifskndvptwklrkghqmgakvelkgkemsqflstlteivlprireykgisnqsgnrfggisfgltaedikffpeidanqdswpktfgmhinintsaqldyqartllsgfqfpffgeek",
             "domains": [
                 [
-                    81.89430236816406,
-                    2.3566607762038907e-27,
+                    82.26433563232422,
+                    1.8109525974867177e-27,
                     20,
                     182
                 ]
@@ -4953,28 +4833,28 @@
         },
         {
             "fasta_seed": [
-                "MQRFSLVTHRSFSHSCMKPKSACSLVKPVHHLVKIDKSKLSPRFPELKYDKSDIRSPGFKPKDTHADRLNDHYLNTLQSDLLLINYSHNAAVVKGLKQRAWSGDSPYHLNRPPKNPRGSKAQLPDIHPIKWSNIPGLEGVVINCFVREARENQLLAITAALQLQQITGCKPHPIFSKNDVPTWKLRKGHQMGAKVELKGKEMSQFLSTLTEIVLPRIREYKGISNQSGNRFGGISFGLTAEDIKFFPEIDANQDSWPKTFGMHININTSAQLDYQARTLLSGFQFPFFGEEK",
                 "MQKFTSVTHRSFSHSCINAKAACSLIKPVHHLVKIDKSKLSPRFPELKYDKSDIRSPGFKPKDTHADRLNDHYLNTLQSDLLLINYSHDAAVEKGLKQRAWSGDSPYHLNRPPKNPQGSKVQLPDIHPIKWGNIPGLENVVINCFVREARENQLFAITAALQLQQITGCKPKPIFSKNDVPTWKLRKGHQMGAKVELKGKEMSQFLTTLTEIVLPRIREYKGISNQSGNRFGGISFGLTAEDIKFFPEIDANQDSWPKTFGMHININTSAQLDYQARTLLSGFQFPFFGDEK",
                 "MQRFSLVTHRSFSHSCXKPKSACSLVKPVHHLVKIDKSKLSPRFPELKYDKSDIRSPGFKPKDTHADRLNDHYLNTLQSDLLLINYSHNAAVVKGLKQRAWSGDSPYHLNRPPKNPRGSKAQLPDIHPIKWSNIPGLEGVVINCFVREARENQLLAITAALQLQQITGCKPHPIFSKNDVPTWKLRKGHQMGAKVELKGKEMSQFLSTLTEIVLPRIREYKGISNQSGNRFGGISFGLTAEDIKFFPEIDANQDSWPKTFGMHININTSAQLDYQARTLLSGFQFPFFGEEK",
                 "MQRFTLVTHRSFSHSCVKPKSACSLVKPVHHLVKIDKSKLSPRFPELKYDKCDIRSPGFKPKDTHADRLNDHYLNTLQSDLLLINYSHNATVTKGLKQRAWSGNSPYHLNRPPKNPQGSKVQLPDIHPIKWSNIPGLESVVINCFVREARENQLYAITAALQLQQITGCKPHPIFSKNDVPTWKLRKGHQMGAKVELKGKEMSQFLSTLTEIVLPRIREYKGINNQSGNRFGGISFGLTPEDIKFFPEIDANQDSWPKTFGMHINVNTSAQLDYQARTLLSGFQFPFFGEEK",
-                "MQKFTSVTHRSFSHSCINAKAACSLIKPVHHLVKIDKSKLSPRFPELKYDKSDIRSPGFKPKDTHADRLNDHYLNTLQSDLLLINYSHNAAVEKGLKQRAWSGDSPYHLNRPPKNPQGSKVQLPDIHPIKWGNIPGLENVVINCFVREARENQLFAITAALQLQQITGCKPKPIFSKNDVPTWKLRKGHQMGAKVELKGKEMSQFLTTLTEIVLPRIREYKGISNQSGNRFGGISFGLTAEDIKFFPEIDANQDSWPKTFGMHININTSAQLDYQARTLLSGFQFPFFGDEK"
+                "MQKFTSVTHRSFSHSCINAKAACSLIKPVHHLVKIDKSKLSPRFPELKYDKSDIRSPGFKPKDTHADRLNDHYLNTLQSDLLLINYSHNAAVEKGLKQRAWSGDSPYHLNRPPKNPQGSKVQLPDIHPIKWGNIPGLENVVINCFVREARENQLFAITAALQLQQITGCKPKPIFSKNDVPTWKLRKGHQMGAKVELKGKEMSQFLTTLTEIVLPRIREYKGISNQSGNRFGGISFGLTAEDIKFFPEIDANQDSWPKTFGMHININTSAQLDYQARTLLSGFQFPFFGDEK",
+                "MQKFTRVTHRSFSHSCIHPKSACSLVKPVHHLVKIDKSKLSPRFPELKYEKSDIRSPGFKPKDTHADRFNDHYLNTLQSDLLLINYSHNATVEKGLKQRAWSGNSPYHLNRPPKNPQGSKTQLPDIHPIKWSNVPGLESVVLNCFVREARENQLFAITSALQLQQITGCKPKPVFSKNDVPTWKLRKGHQMGAKVELKGKEMSQFLSTLTEIVLPRIREYKGISNQSGNRFGGISFGLTAEDIKFFPEIDANQDSWPKTFGMHININTTAQLDYQARTLLSGFQFPFFGEEK"
             ],
             "seed_organism_ids": [
-                "252598",
                 "27292",
                 "1095631",
                 "27291",
-                "1080349"
+                "1080349",
+                "1160507"
             ],
             "class_name": "uL5m",
-            "evalue": 2.0033442208539002e-27,
-            "bitscore": 82.1258544921875,
+            "evalue": 1.5355682653542672e-27,
+            "bitscore": 82.49948120117188,
             "target_organism_id": 300852,
-            "consensus": "mqkftlvthrsfshscvkaksacslvkpvhhlvkidksklsprfpelkydksdirspgfkpkdthadrlndhylntlqsdlllinyshnaavekglkqrawsgdspyhlnrppknprgskvqlpdihpikwsnipglesvvincfvrearenqllaitaalqlqqitgckpkpifskndvptwklrkghqmgakvelkgkemsqflstlteivlprireykgisnqsgnrfggisfgltaedikffpeidanqdswpktfgmhinintsaqldyqartllsgfqfpffgeek",
+            "consensus": "mqkftsvthrsfshscikaksacslvkpvhhlvkidksklsprfpelkydksdirspgfkpkdthadrlndhylntlqsdlllinyshnaavekglkqrawsgdspyhlnrppknpqgskvqlpdihpikwsnipglesvvincfvrearenqlfaitaalqlqqitgckpkpifskndvptwklrkghqmgakvelkgkemsqflstlteivlprireykgisnqsgnrfggisfgltaedikffpeidanqdswpktfgmhinintsaqldyqartllsgfqfpffgeek",
             "domains": [
                 [
-                    81.89430236816406,
-                    2.3566607762038907e-27,
+                    82.26433563232422,
+                    1.8109525974867177e-27,
                     20,
                     182
                 ]
