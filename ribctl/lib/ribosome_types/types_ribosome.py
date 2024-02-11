@@ -341,7 +341,7 @@ class Polymer(BaseModel):
 
     def to_dict(self):
         """A hack for enum.union to work with pydantic BaseModel. Otherwise EnumUnion instances are represented as <MitochondrialProteinClass.mL64: 'mL64'> etc.(Correct is "mL64")"""
-        return json.loads(self.json())
+        return json.loads(self.model_dump_json())
 
     def to_SeqRecord(self) -> SeqRecord:
         return SeqRecord(
@@ -401,7 +401,7 @@ class Protein(Polymer):
 
         return Protein(
             **{
-                **p.dict(),
+                **p.model_dump(),
                 "pfam_accessions": pfam_accessions,
                 "pfam_comments": pfam_comments,
                 "pfam_descriptions": pfam_descriptions,
@@ -417,7 +417,7 @@ class Protein(Polymer):
     uniprot_accession: list[str]
 
     def to_polymer(self) -> Polymer:
-        return Polymer(**self.dict())
+        return Polymer(**self.model_dump())
 
 
 class RNA(Polymer):

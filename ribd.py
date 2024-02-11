@@ -1,4 +1,6 @@
 import sys
+
+from ribctl.lib.ribosome_types.types_ribosome import RibosomeStructure
 sys.dont_write_bytecode = True
 import argparse
 import json
@@ -17,6 +19,10 @@ def parse_comma_separated_list(value):
 
 
 parser     = argparse.ArgumentParser(description="Command line interface for the `ribctl` package.")
+
+
+parser.add_argument('--verify_schema', action='store_true', help="Verify the schema for every file in the database")
+
 subparsers = parser.add_subparsers(title='Subcommands', dest='command')
 
 #! -------------------------- --- -------------------------- #
@@ -167,14 +173,43 @@ parser.add_argument('--t', action='store_true')
 #?---------------------------------------------------------------------------------------------------------
 #?---------------------------------------------------------------------------------------------------------
 
+
+def verify_structure_profile_schema(rcsb_id:str):
+    s = RibosomeAssets(rcsb_id).profile().model_dump_json()
+    try:
+        RibosomeStructure.model_validate_json(s)
+        return True
+    except Exception as e:
+        print(e)
+        return False
+
+
 try:
     args = parser.parse_args()
     if hasattr(args, 'func'):
         args.func(args)
+
+    elif args.verify_schema:
+        all_structs = os.listdir(RIBETL_DATA)
+        tally       = { "valid": [], "invalid": []}
+
+        for struct in all_structs:
+            if  not os.path.exists(RibosomeAssets(struct)._json_profile_filepath()):
+                continue
+            if not verify_structure_profile_schema(struct):
+                tally["invalid"].append(struct)
+            else:
+                tally["valid"].append(struct)
+        print("Valid:" , len(tally["valid"]))
+        print("Invalid:", len(tally["invalid"]))
     else:
         parser.print_help()
-except (BrokenPipeError, IOError):
+except (BrokenPipeError, IOError) as e:
+    print("BrokenPipeError or IOError", e)
     pass
+
+
+
 
 # Notes
 # `awk '/ERROR/ {print $3}' | sed 's/:.*$//'`  to get every structure in the log file that failed
