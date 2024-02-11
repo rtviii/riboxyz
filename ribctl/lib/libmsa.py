@@ -1,5 +1,4 @@
 from io import StringIO
-from pprint import pprint
 import tempfile
 import os
 import re
