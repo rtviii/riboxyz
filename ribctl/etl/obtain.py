@@ -28,13 +28,13 @@ async def obtain_assets(rcsb_id: str, assetlist: Assetlist, overwrite: bool = Fa
     coroutines = []
 
     if assetlist.profile:
-        coroutines.append(assets._verify_json_profile(overwrite))
+        coroutines.append(assets._update_json_profile(overwrite))
 
     if assetlist.cif:
-        coroutines.append(assets._verify_cif(overwrite))
+        coroutines.append(assets._update_cif(overwrite))
 
     if assetlist.ligands:
-        coroutines.append(assets._verify_ligands(overwrite))
+        coroutines.append(assets._update_ligands(overwrite))
 
     if assetlist.ptc_coords:
             asset_ptc_coords_path = os.path.join(assets._dir_path(),f'{assets.rcsb_id}_PTC_COORDINATES.json')
@@ -56,7 +56,7 @@ async def obtain_assets(rcsb_id: str, assetlist: Assetlist, overwrite: bool = Fa
                 json.dump(writeout, f)
 
     if assetlist.cif_modified_and_chains:
-        coroutines.append(assets._verify_cif_modified_and_chains(overwrite))
+        coroutines.append(assets.upsert(overwrite))
 
     await asyncio.gather(*coroutines)
 

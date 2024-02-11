@@ -253,7 +253,7 @@ class RibosomeAssets():
             os.umask(0)
             os.makedirs(self._dir_path(), 0o777)
 
-    async def _verify_cif(self, overwrite: bool = False) -> bool:
+    async def _update_cif(self, overwrite: bool = False) -> bool:
         if not os.path.exists(self._cif_filepath()):
             await download_unpack_place(self.rcsb_id)
             print("Saved structure file:\t", self._cif_filepath())
@@ -266,7 +266,7 @@ class RibosomeAssets():
             else:
                 return False
 
-    async def _verify_cif_modified_and_chains(self, overwrite: bool = False) -> bool:
+    async def _update_cif_modified_and_chains(self, overwrite: bool = False) -> bool:
         if not os.path.isdir(self.chains_dir()):
             os.makedirs(self.chains_dir())
             await split_rename(self.rcsb_id)
@@ -278,8 +278,8 @@ class RibosomeAssets():
             else:
                 return False
 
-    async def _verify_json_profile(self, overwrite: bool = False) -> bool:
-
+    async def _update_json_profile(self, overwrite: bool = False) -> bool:
+        print("Vv")
         self._verify_dir_exists()
         if not os.path.isfile(self._json_profile_filepath()):
             ribosome = ReannotationPipeline(query_rcsb_api(rcsb_single_structure_graphql(self.rcsb_id.upper()))).process_structure()
@@ -291,13 +291,12 @@ class RibosomeAssets():
             if overwrite:
                 ribosome = ReannotationPipeline(query_rcsb_api(rcsb_single_structure_graphql(self.rcsb_id.upper()))).process_structure()
                 self.write_own_json_profile(ribosome.model_dump(),overwrite)
-                logger.debug("Processing {} profile: already exists for {}.Overwriting".format(self.rcsb_id, self.rcsb_id))
+                logger.debug("Processing {} profile: already exists for {}. Overwriting.".format(self.rcsb_id, self.rcsb_id))
             else:
-
                 logger.debug("Processing {} profile: already exists for {}.".format(self.rcsb_id, self.rcsb_id))
         return True
         
-    def _verify_png_thumbnail(self, overwrite: bool = False) -> bool:
+    def _update_png_thumbnail(self, overwrite: bool = False) -> bool:
         if overwrite:
             print("Obtaning thumbnail...")
             render_thumbnail(self.rcsb_id)
@@ -308,11 +307,11 @@ class RibosomeAssets():
             else:
                 return False
 
-    async def _verify_chains_dir(self):
+    async def _update_chains_dir(self):
         split_rename(self.rcsb_id)
 
 
-    async def _verify_ligands(self, overwrite:bool=False):
+    async def _update_ligands(self, overwrite:bool=False):
 
         ligands           = struct_ligand_ids(self.rcsb_id, self.profile())
         

@@ -540,7 +540,7 @@ with n.rcsb_id as struct, collect(r.rcsb_pdbx_description) as rnas
             for rcsb_id in list(set(unsynced ) - set(synced)):
 
                 assets = RibosomeAssets(rcsb_id)
-                assets._verify_json_profile(True)
+                assets._update_json_profile(True)
                 fut = executor.submit(self.add_structure, assets)
                 fut.add_done_callback(log_commit_result(rcsb_id))
                 futures.append(fut)
