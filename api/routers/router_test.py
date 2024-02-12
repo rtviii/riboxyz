@@ -7,22 +7,22 @@ from ribctl.etl.etl_pipeline import current_rcsb_structs
 from ribctl.etl.ribosome_assets import RibosomeAssets
 # from db.ribosomexyz import ribosomexyzDB
 # from rbxz_bend.application import db_connection, ribosomexyzApp
-from rbxz_bend.settings import NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER
+# from rbxz_bend.settings import NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER
 
 test = Router()
 
-@test.get('/see_current_auth', tags=['0test'], )
-def current_auth(request):
-    return db_connection.see_current_auth()
+# @test.get('/see_current_auth', tags=['0test'], )
+# def current_auth(request):
+#     return db_connection.see_current_auth()
 
-@test.get('/see_constraints', tags=['0test'])
-def see_constraints(request):
-    return db_connection.see_constraints()
+# @test.get('/see_constraints', tags=['0test'])
+# def see_constraints(request):
+#     return db_connection.see_constraints()
 
 
-@test.get('/render_ligands', tags=['0test'], )
-def render_ligands(request):
-    return ribosomexyzApp.render_all_ligands()
+# @test.get('/render_ligands', tags=['0test'], )
+# def render_ligands(request):
+#     return ribosomexyzApp.render_all_ligands()
 
 # @test.get('/sync_with_rcsb', tags=['0test'])
 # def sync_with_rcsb(request):
