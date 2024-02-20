@@ -1,7 +1,11 @@
 import pyvista as pv
 
-# read the data
-grid = pv.read('6Z6K_tunnel_delaunay.vtk')
+RCSB_ID = "6Z6K"
+# Load the PLY file
+file_path = "{}_poisson_recon.ply".format(RCSB_ID)  # Update with your file path
+mesh = pv.read(file_path)
 
-# plot the data with an automatically created Plotter
-grid.plot(show_scalar_bar=False, show_axes=False)
+# Plot the mesh
+plotter = pv.Plotter()
+plotter.add_mesh(mesh)
+plotter.show()
