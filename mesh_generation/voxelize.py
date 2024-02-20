@@ -360,35 +360,81 @@ if args.plot == True:
         combined = np.concatenate([ptcloud_data_cluster, ptcloud_data_positive])
         rgbas_combined = np.concatenate([rgbas_cluster, rgbas_positive])
 
-        point_cloud = pv.PolyData(combined)
+        point_cloud         = pv.PolyData(combined)
         point_cloud["rgba"] = rgbas_combined
         # point_cloud.plot(scalars="rgba", rgb=True, notebook=False, show_bounds=True)
-        # !-----------
 
-
-        cloud = pv.PolyData(ptcloud_data_cluster)
 
 
         cluster_path = "/home/rtviii/dev/riboxyz/mesh_generation/{}_cluster.npy".format(RCSB_ID)
         np.save(cluster_path, ptcloud_data_cluster)
+        # !-----------
 
         # pcd        = o3d.geometry.PointCloud()
         # pcd.points = o3d.utility.Vector3dVector(ptcloud_data_cluster)
         # normals    = pcd.estimate_normals()
 
-        # o3d.visualization.draw_geometries([normals])
-        # o3d.io.write_point_cloud("{}_cluster_cloud.ply".format(RCSB_ID), pcd)
-        # print("wrote")
+        o3d.visualization.draw_geometries([normals])
+        o3d.io.write_point_cloud("{}_cluster_cloud.ply".format(RCSB_ID), pcd)
+        print("wrote")
         # cloud.plot(point_size=1)
 
+        # exit()
+        # #? Alpha of about >  2.5 starts to hide the detail
+        cloud = pv.PolyData(ptcloud_data_cluster)
+        grid              = cloud.delaunay_3d(alpha=3, tol=1.5,offset=2,progress_bar=True)
+        convex_hull = grid.extract_surface().cast_to_pointset()
+        print(convex_hull.points)
+        print(convex_hull.points.shape)
+        np.save("convex_hull_{}.npy".format(RCSB_ID), convex_hull.points)
+        convex_hull.plot(show_edges=True)
+
+        
+        # grid.plot(show_edges=True)
+        # edges = grid.extract_all_edges()
         exit()
-        #? Alpha of about >  2.5 starts to hide the detail
-        surf              = cloud.delaunay_3d(alpha=3, tol=1.5,offset=2,progress_bar=True)
+
+        print(edges)
+        print(edges.points.shape)
+        print(edges.points)
+        exit()
+
+        surface = surf.extract_surface()
+        print(surface)
+        mask = surface.select_enclosed_points(ptcloud_data_cluster)
+        masked_points = cloud.points[mask]
+        print(cloud.points.shape)
+        print(masked_points.shape)
+
+        # from plotly import graph_objects as go
+        # boundary_mesh = surf.extract_geometry()
+        # boundary_faces = boundary_mesh.faces.reshape((-1,4))[:, 1:]  
+        # print("boundary faces shape: ",boundary_faces.shape)
+        # np.save("boundary_faces.npy", boundary_faces)
+        # #? Alpha of about >  2.5 starts to hide the detail
+
+
+        boundary_faces = np.load("boundary_faces.npy")
+        plotter = pv.Plotter()
+
+        # Add the scatter plot to the plotter
+        plotter.add_points(boundary_faces, color='red', point_size=2)
+        plotter.show()
+
+
+
+        # print(boundary_faces)
+        # # my_mesh = get_mesh(points3d,boundary_faces, opacity=1)
+        # figb = go.Figure(data=[boundary_faces])
+        # figb.update_layout(title_text="tit", title_x=0.5, width=800, height=800)
+        # figb.show()
+
+        exit()
+
         pprint(surf)
         surf.save("{}_tunnel_delaunay.vtk".format(RCSB_ID))
         print(surf)
         surf.plot(show_edges=True)
-        exit()
 
         pcd = o3d.geometry.PointCloud(o3d.utility.Vector3dVector(ptcloud_data_cluster))
         pcd.estimate_normals( search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=5, max_nn=40))
