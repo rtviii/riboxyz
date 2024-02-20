@@ -1,6 +1,7 @@
 import argparse
 from enum import Enum
 import json
+import pickle
 from pprint import pprint
 from time import time
 import typing
@@ -366,10 +367,24 @@ if args.plot == True:
 
 
         cloud = pv.PolyData(ptcloud_data_cluster)
+
+
+        cluster_path = "/home/rtviii/dev/riboxyz/mesh_generation/{}_cluster.npy".format(RCSB_ID)
+        np.save(cluster_path, ptcloud_data_cluster)
+
+        # pcd        = o3d.geometry.PointCloud()
+        # pcd.points = o3d.utility.Vector3dVector(ptcloud_data_cluster)
+        # normals    = pcd.estimate_normals()
+
+        # o3d.visualization.draw_geometries([normals])
+        # o3d.io.write_point_cloud("{}_cluster_cloud.ply".format(RCSB_ID), pcd)
+        # print("wrote")
         # cloud.plot(point_size=1)
 
+        exit()
         #? Alpha of about >  2.5 starts to hide the detail
         surf              = cloud.delaunay_3d(alpha=3, tol=1.5,offset=2,progress_bar=True)
+        pprint(surf)
         surf.save("{}_tunnel_delaunay.vtk".format(RCSB_ID))
         print(surf)
         surf.plot(show_edges=True)
