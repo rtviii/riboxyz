@@ -1,5 +1,6 @@
 import argparse
 from enum import Enum
+from functools import partial
 import json
 import os
 import pickle
@@ -12,6 +13,34 @@ import open3d as o3d
 import sys
 import numpy as np
 import concurrent.futures
+
+
+
+
+
+
+# Function to be executed by each worker
+def sphere_task(container_sink:list, atom_center_coordinate:np.ndarray, vdw_R=2):
+    result = get_sphere_indices_voxelized(atom_center_coordinate, 2)
+    container_sink.extend(result)
+    return result
+
+
+
+def expand_atomcenters_to_spheres_threadpool(sink_container:list, sphere_sources):
+  with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
+
+        futures = []
+        for (center_coordinate, vdw_R) in sphere_sources:
+            partial_task = partial(sphere_task, sink_container, center_coordinate, vdw_R)
+            future = executor.submit(partial_task)
+            futures.append(future)
+
+        concurrent.futures.wait(futures)
+
+  return sink_container
+
+
 
 DBSCAN_METRICS = [
     "braycurtis",
@@ -171,13 +200,13 @@ with open( "/home/rtviii/dev/riboxyz/mesh_generation/{}_tunnel_atoms_bbox.json".
 
 __cords = np.array(list(map(lambda x: x["coord"], ptcloud_data_cluster)))
 __radii = np.array(list(map(lambda x: x["vdw_radius"], ptcloud_data_cluster)))
-# cords_NORMALIZED = normalize_atom_coordinates(__cords)
-sphere_sources = zip(__cords, __radii)
-voxelize_to_spheres(
-    sphere_sources
-)  # This is called dynamically to expand coordinates to van der waals spheres
-cords_SPHERES = np.array(cords_SPHERES)
 
+sphere_sources = zip(__cords, __radii)
+
+sink = []
+expanded = expand_atomcenters_to_spheres_threadpool(sink, sphere_sources)
+
+exit()
 
 normalized_sphere_cords = normalize_atom_coordinates(cords_SPHERES)
 voxel_size = 1

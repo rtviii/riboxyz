@@ -23,7 +23,6 @@ from Bio.PDB.Atom import Atom
 from functools import reduce
 from Bio.PDB.Structure import Structure
 from ribctl.lib.ribosome_types.types_ribosome import RNA
-from compas.geometry import bounding_box, oriented_bounding_box_numpy
 
 # Tunnel refinement:
 # - using the centerline and dynamic probe radius, extract the atoms within 15A radius of the centerline
