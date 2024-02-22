@@ -1,6 +1,7 @@
 import argparse
 from enum import Enum
 import json
+import os
 import pickle
 from pprint import pprint
 from time import time
@@ -386,7 +387,10 @@ if args.plot == True:
         convex_hull = grid.extract_surface().cast_to_pointset()
         print(convex_hull.points)
         print(convex_hull.points.shape)
+        from ribctl import ASSETS_PATH
+        CONVEX_HULL_PATH = os.path.join(ASSETS_PATH, "convex_hull_{}.npy".format(RCSB_ID))
         np.save("convex_hull_{}.npy".format(RCSB_ID), convex_hull.points)
+        print("Saved generated convex hull to ")
         convex_hull.plot(show_edges=True)
 
         

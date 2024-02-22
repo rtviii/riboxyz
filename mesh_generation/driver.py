@@ -7,7 +7,6 @@ from extraction import (
     encode_atoms,
     open_tunnel_csv,
     parse_struct_via_centerline,
-    get_sphere_indices_voxelized,
 )
 import concurrent.futures
 
@@ -18,8 +17,6 @@ tunnel_encoding = (
     "/home/rtviii/dev/riboxyz/mesh_generation/{}_tunnel_atoms.json".format(RCSB_ID)
 )
 encoded = None
-=======
-from ribctl.lib.tunnel import encode_atoms, open_tunnel_csv, parse_struct_via_centerline, get_sphere_indices_voxelized
 
 
 RCSB_ID = '6Z6K'
@@ -108,10 +105,6 @@ print("Processing {} tunnel atoms".format(len(encoded)))
 #                 )
 #             )
 #             update_expanded_coordinates(result)
-
-# voxelize_to_spheres()
-
-# np.array(expanded_coords)
 
 
 pcd        = o3d.geometry.PointCloud()
