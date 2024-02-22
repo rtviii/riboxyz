@@ -47,7 +47,6 @@ def open_tunnel_csv(rcsb_id: str) -> list[list]:
 
     return data
 
-
 def parse_struct_via_centerline(
     rcsb_id: str, centerline_data: list, expansion_radius: int = 15
 ) -> list[Atom]:
@@ -108,7 +107,7 @@ def parse_struct_via_bbox(rcsb_id: str, bbox: list) -> list:
 
     return list(nbhd)
 
-def encode_atoms(rcsb_id: str, nearby_atoms_list: list[Atom], write=False) -> list:
+def encode_atoms(rcsb_id: str, nearby_atoms_list: list[Atom], write=False, writepath=None) -> list:
     """given a list of atoms lining the tunnel, annotate each with:
     - parent chain id
     - nomenclature
@@ -133,20 +132,23 @@ def encode_atoms(rcsb_id: str, nearby_atoms_list: list[Atom], write=False) -> li
             vdw_radii[a_element] = element(a_element).vdw_radius / 100
 
         atom_dict = {
-            "coord": a.get_coord().tolist(),
+            "coord"             : a.get_coord().tolist(),
             "chain_auth_asym_id": chain_auth_asym_id,
             "chain_nomenclature": parent_nomenclature,
-            "residue_name": residue_name,
-            "residue_seqid": residue_seqid,
-            "atom_element": a.element,
-            "vdw_radius": vdw_radii[a_element],
+            "residue_name"      : residue_name,
+            "residue_seqid"     : residue_seqid,
+            "atom_element"      : a.element,
+            "vdw_radius"        : vdw_radii[a_element],
         }
         aggregate.append(atom_dict)
 
-    if write:
-        with open( "/home/rtviii/dev/riboxyz/mesh_generation/{}_tunnel_atoms_bbox.json".format( rcsb_id ), "w", ) as outfile:
+    if write and writepath:
+        with open( writepath, "w", ) as outfile:
             json.dump(aggregate, outfile, indent=4)
-        print( "Wrote {} tunnel atoms to disk : /home/rtviii/dev/riboxyz/mesh_generation/{}_tunnel_atoms_bbox.json".format( len(aggregate), rcsb_id ) )
+        print("Wrote {} tunnel atoms to disk at {}".format( len(aggregate), writepath ) )
+    
+    if write and not writepath:
+        raise LookupError("Provide writepath to `encode_atoms`.")
 
     return aggregate
 
@@ -157,22 +159,3 @@ def create_pcd_from_atoms(
     pcd.colors = o3d.utility.Vector3dVector(atom_types)
     o3d.io.write_point_cloud(save_path, pcd)
 
-
-RCSB_ID      = sys.argv[1].upper()
-IF_VISUALIZE = sys.argv[2].upper()
-
-
-centerline_expansion_atoms       = parse_struct_via_centerline(RCSB_ID, open_tunnel_csv(RCSB_ID))
-centerline_expansion_coordinates = np.array([a.get_coord() for a in centerline_expansion_atoms])
-bbox                             = bounding_box(centerline_expansion_coordinates)
-bbox_interior_atoms              = parse_struct_via_bbox(RCSB_ID, bbox)
-
-
-# if IF_VISUALIZE:
-#     cords_inside_bbox     = np.array([a.get_coord() for a in bbox_interior_atoms])
-#     point_cloud           = pv.PolyData(cords_inside_bbox)
-#     random_rgbs           = np.random.randint(0, 256, size=( cords_inside_bbox.shape[0],4 ))
-#     point_cloud['colors'] = random_rgbs
-#     point_cloud.plot(scalars='colors', rgb=True, notebook=False)
-
-encode_atoms(RCSB_ID, bbox_interior_atoms, write=True)

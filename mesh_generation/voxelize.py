@@ -50,20 +50,9 @@ parser.add_argument("--cluster_only", type=int, help="Specify cluster only value
 
 parser.add_argument("--rcsb_id", type=str, help="Specify RCSB ID", required=True)
 parser.add_argument("--input", type=str, help="Specify input file path")
-
 args = parser.parse_args()
 
 
-# Old
-def __np_workflow(C):
-    rescaled_coordinates, dim = normalize_atom_coordinates(C)
-    x, y, z = np.indices((dim, dim, dim))
-    xc = midpoints(x)
-    yc = midpoints(y)
-    zc = midpoints(z)
-    filled = xc + yc + zc < -1
-    filled = visualize_source_coordinates(filled, rescaled_coordinates)
-    return filled
 
 
 def midpoints(x):
@@ -106,7 +95,6 @@ def visualize_source_coordinates(
         nulled_grid[vox_x, vox_y, vox_z] = True
     return nulled_grid
 
-
 def plt_plot(x_ix, y_ix, z_ix, filled_grid):
     # facecolors =  np.zeros(filled.shape + (3,))
     ax = plt.figure().add_subplot(projection="3d")
@@ -116,7 +104,6 @@ def plt_plot(x_ix, y_ix, z_ix, filled_grid):
 
     plt.show()
     exit()
-
 
 def get_sphere_indices_voxelized(center: np.ndarray, radius: int):
     """Make sure radius reflects the size of the underlying voxel grid"""
@@ -306,29 +293,19 @@ u_MIN_SAMPLES = attempts[-1][1]
 u_METRIC      = attempts[-1][2]
 
 
-print(
-    "Running DBSCAN on {} points. eps={}, min_samples={}, distance_metric={}".format(
-        len(xyz_v_negative.T), u_EPSILON, u_MIN_SAMPLES, u_METRIC
-    )
-)
+print( "Running DBSCAN on {} points. eps={}, min_samples={}, distance_metric={}".format( len(xyz_v_negative.T), u_EPSILON, u_MIN_SAMPLES, u_METRIC ) )
 t1 = time()
 db = DBSCAN(eps=u_EPSILON, min_samples=u_MIN_SAMPLES, metric=u_METRIC, n_jobs=5).fit(
     xyz_v_negative.T
 )
 t2 = time()
 labels = db.labels_
-dbscan_colors = [
-    cluster_colors[label * 2] if label != -1 else [0, 0, 0, 1] for label in labels
-]
+dbscan_colors = [ cluster_colors[label * 2] if label != -1 else [0, 0, 0, 1] for label in labels ]
 
 # Number of clusters in labels, ignoring noise if present.
 n_clusters_ = len(set(labels)) - (1 if -1 in labels else 0)
-n_noise_ = list(labels).count(-1)
-print(
-    "In {}s. Estimated number of [ clusters, noise points ]: [ {}, {} ] ".format(
-        np.round(t2 - t1, 3), n_clusters_, n_noise_
-    )
-)
+n_noise_    = list(labels).count(-1)
+print( "In {}s. Estimated number of [ clusters, noise points ]: [ {}, {} ] ".format( np.round(t2 - t1, 3), n_clusters_, n_noise_ ) )
 
 CLUSTER_CONTAINER = {}
 for point, label in zip(xyz_v_negative.T, labels):
@@ -336,7 +313,6 @@ for point, label in zip(xyz_v_negative.T, labels):
         CLUSTER_CONTAINER[label] = []
     CLUSTER_CONTAINER[label].append(point)
 
-print("Clusters and noise points:")
 for k, v in CLUSTER_CONTAINER.items():
     print("Cluster {}: {} points".format(k, len(v)))
 # Now to partition the points into clusters and noise
@@ -347,8 +323,6 @@ if args.plot == True:
         ptcloud_data_cluster = CLUSTER_CONTAINER[args.cluster_only]
         ptcloud_data_positive = np.array(xyz_v_positive.T)
 
-        ptcloud_data_cluster = CLUSTER_CONTAINER[args.cluster_only]
-        ptcloud_data_positive = np.array(xyz_v_positive.T)
 
         rgbas_cluster = [[15, 10, 221, 1] for datapoint in ptcloud_data_cluster]
         rgbas_positive = np.array([[205, 209, 228, 0.2] for _ in xyz_v_positive.T])
@@ -476,7 +450,3 @@ if args.plot == True:
         point_cloud.plot(scalars="rgba", rgb=True, notebook=False, show_bounds=True)
 
 
-# TODO: Strategies:
-
-# - weigh the samples by their distance from the centerline
-# - explore appropriate distance metric
