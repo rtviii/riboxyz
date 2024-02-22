@@ -39,9 +39,7 @@ DBSCAN_METRICS = [
     "manhattan",
 ]
 
-
 parser = argparse.ArgumentParser(description="tunnel_extraction")
-
 
 parser.add_argument("--eps", type=float, help="Specify eps value")
 parser.add_argument("--min_samples", type=int, help="Specify min_samples value")
@@ -75,7 +73,6 @@ def midpoints(x):
         sl += np.index_exp[:]
     return x
 
-
 def normalize_atom_coordinates(coordinates: np.ndarray):
     """@param coordinates: numpy array of shape (N,3)"""
 
@@ -94,7 +91,6 @@ def normalize_atom_coordinates(coordinates: np.ndarray):
     rescaled_coords = np.array(list(zip(Cx, Cy, Cz)))
 
     return rescaled_coords
-
 
 def visualize_source_coordinates(
     nulled_grid: np.ndarray,

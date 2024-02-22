@@ -164,22 +164,15 @@ IF_VISUALIZE = sys.argv[2].upper()
 
 centerline_expansion_atoms       = parse_struct_via_centerline(RCSB_ID, open_tunnel_csv(RCSB_ID))
 centerline_expansion_coordinates = np.array([a.get_coord() for a in centerline_expansion_atoms])
-
 bbox                             = bounding_box(centerline_expansion_coordinates)
-atoms_bboxed                     = parse_struct_via_bbox(RCSB_ID, bbox)
+bbox_interior_atoms              = parse_struct_via_bbox(RCSB_ID, bbox)
+
 
 # if IF_VISUALIZE:
-#     point_cloud           = pv.PolyData(centerline_expansion_coordinates)
-#     random_rgbs           = np.random.randint(0, 256, size=( centerline_expansion_coordinates.shape[0],4 ))
+#     cords_inside_bbox     = np.array([a.get_coord() for a in bbox_interior_atoms])
+#     point_cloud           = pv.PolyData(cords_inside_bbox)
+#     random_rgbs           = np.random.randint(0, 256, size=( cords_inside_bbox.shape[0],4 ))
 #     point_cloud['colors'] = random_rgbs
 #     point_cloud.plot(scalars='colors', rgb=True, notebook=False)
 
-
-if IF_VISUALIZE:
-    cords_inside_bbox     = np.array([a.get_coord() for a in atoms_bboxed])
-    point_cloud           = pv.PolyData(cords_inside_bbox)
-    random_rgbs           = np.random.randint(0, 256, size=( cords_inside_bbox.shape[0],4 ))
-    point_cloud['colors'] = random_rgbs
-    point_cloud.plot(scalars='colors', rgb=True, notebook=False)
-
-encode_atoms(RCSB_ID, atoms_bboxed, write=True)
+encode_atoms(RCSB_ID, bbox_interior_atoms, write=True)
