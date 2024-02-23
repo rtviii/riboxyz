@@ -27,12 +27,12 @@ from ribctl.lib.ribosome_types.types_ribosome import RNA
 # Tunnel refinement:
 # - using the centerline and dynamic probe radius, extract the atoms within 15A radius of the centerline
 # - when processing atoms, encode their vdw radius, atom type and residue and chain id
-from ribctl import ASSETS_PATH, RIBETL_DATA
+from ribctl import ASSETS_PATH, EXIT_TUNNEL_WORK, RIBETL_DATA
 
 
 def open_tunnel_csv(rcsb_id: str) -> list[list]:
     TUNNEL_PATH = os.path.join(
-        ASSETS_PATH, "mole_tunnels", "tunnel_{}.csv".format(rcsb_id)
+        EXIT_TUNNEL_WORK, "mole_tunnels", "tunnel_{}.csv".format(rcsb_id)
     )
     df = pd.read_csv(TUNNEL_PATH)
     data = []
@@ -55,7 +55,9 @@ def parse_struct_via_centerline(
     from Bio.PDB import Selection
 
     parser = MMCIFParser()
-    struct_path = "{}/{}/{}.cif".format(RIBETL_DATA, rcsb_id, rcsb_id)
+
+    # struct_path = "{}/{}/{}.cif".format(RIBETL_DATA, rcsb_id, rcsb_id)
+    struct_path = RibosomeAssets(rcsb_id)._cif_filepath()
     structure = parser.get_structure(rcsb_id, struct_path)
     atoms = Selection.unfold_entities(structure, "A")
     ns = NeighborSearch(atoms)
@@ -106,7 +108,7 @@ def parse_struct_via_bbox(rcsb_id: str, bbox: list) -> list:
 
     return list(nbhd)
 
-def encode_atoms(rcsb_id: str, nearby_atoms_list: list[Atom], write=False, writepath=None) -> list:
+def encode_atoms(rcsb_id: str, atoms_list: list[Atom], write=False, writepath=None) -> list:
     """given a list of atoms lining the tunnel, annotate each with:
     - parent chain id
     - nomenclature
@@ -119,7 +121,7 @@ def encode_atoms(rcsb_id: str, nearby_atoms_list: list[Atom], write=False, write
     vdw_radii    = {}
     aggregate    = []
 
-    for a in nearby_atoms_list:
+    for a in atoms_list:
         parent_residue      = a.get_parent()
         residue_name        = parent_residue.resname
         residue_seqid       = parent_residue.id[1]
