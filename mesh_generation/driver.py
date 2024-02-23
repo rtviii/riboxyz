@@ -110,14 +110,8 @@ def interior_capture_DBSCAN(xyz_v_negative:np.ndarray):
     u_METRIC      = attempts[-1][2]
 
     print( "Running DBSCAN on {} points. eps={}, min_samples={}, distance_metric={}".format( len(xyz_v_negative.T), u_EPSILON, u_MIN_SAMPLES, u_METRIC ) )
-    db = DBSCAN(eps=u_EPSILON, min_samples=u_MIN_SAMPLES, metric=u_METRIC, n_jobs=5).fit( xyz_v_negative.T )
-    labels = db.labels_
-    dbscan_colors = [ cluster_colors[label * 2] if label != -1 else [0, 0, 0, 1] for label in labels ]
-
-    # Number of clusters in labels, ignoring noise if present.
-    n_clusters_ = len(set(labels)) - (1 if -1 in labels else 0)
-    n_noise_    = list(labels).count(-1)
-    print(" Estimated number of [ clusters, noise points ]: [ {}, {} ] ".format(n_clusters_, n_noise_ ) )
+    db                 = DBSCAN(eps=u_EPSILON, min_samples=u_MIN_SAMPLES, metric=u_METRIC, n_jobs=5).fit( xyz_v_negative.T )
+    labels             = db.labels_
 
     CLUSTERS_CONTAINER = {}
     for point, label in zip(xyz_v_negative.T, labels):
@@ -125,18 +119,17 @@ def interior_capture_DBSCAN(xyz_v_negative:np.ndarray):
             CLUSTERS_CONTAINER[label] = []
         CLUSTERS_CONTAINER[label].append(point)
 
-    for k, v in CLUSTERS_CONTAINER.items():
-        print("Cluster {}: {} points".format(k, len(v)))
-
     return db, CLUSTERS_CONTAINER
 
 if not os.path.exists(tunnel_atom_encoding_path):
     bbox_atoms          = extract_bbox_atoms(RCSB_ID)
     bbox_atoms_expanded = expand_bbox_atoms_to_spheres(bbox_atoms)
+    print("Extracted tunnel atom encoding from PDB: {}.".format(RCSB_ID))
 else:
     with open( tunnel_atom_encoding_path, "r", ) as infile:
         bbox_atoms = json.load(infile)
 
+    print("Opened tunnel atom encoding from file: {}.".format(tunnel_atom_encoding_path))
     bbox_atoms_expanded = expand_bbox_atoms_to_spheres(bbox_atoms)
 
 xyz_positive, xyz_negative, _ = index_grid(bbox_atoms_expanded)
@@ -150,19 +143,27 @@ ptcloud_data_positive = xyz_positive.T
 
 
 def DBSCAN_CLUSTERS_visualize_all(dbscan_instance, dbscan_clusters):
+    # print("Receieved {} clusters.".format(len(dbscan_clusters)) )
+    for k, v in dbscan_clusters.items():
+        print("Cluster label {}: {} points".format(k, len(v)))
+
     # create a dictionary of plt colors
-    cluster_colors = dict(zip(range(-1, 40), plt.cm.terrain(np.linspace(0, 1, 40))))
-    for k, v in cluster_colors.items():
-        cluster_colors[k] = [*v[:3], 0.5]
+    clusters_palette = dict(zip(range(-1, 40), plt.cm.terrain(np.linspace(0, 1, 40))))
+    for k, v in clusters_palette.items():
 
-    labels = dbscan_instance.labels_
-    dbscan_colors = [ cluster_colors[label * 2] if label != -1 else [0, 0, 0, 1] for label in labels ]
-    n_clusters_ = len(set(labels)) - (1 if -1 in labels else 0)
-    n_noise_    = list(labels).count(-1)
+        clusters_palette[k] = [*v[:3], 0.5]
 
-    combined_clusters = ()
-    point_cloud         = pv.PolyData()
-    point_cloud["rgba"] = dbscan_clusters
+    combined_cluster_colors = []
+    combined_cluster_points = []
+    for dbscan_label, coordinates in dbscan_clusters.items():
+        combined_cluster_points.extend(coordinates)
+        combined_cluster_colors.extend([ clusters_palette[dbscan_label * 2] if dbscan_label != -1 else [0, 0, 0, 1]]*len(coordinates))
+
+    # n_clusters_ = len(set(labels)) - (1 if -1 in labels else 0)
+    # n_noise_    = list(labels).count(-1)
+
+    point_cloud         = pv.PolyData(combined_cluster_points)
+    point_cloud["rgba"] = combined_cluster_colors
     point_cloud.plot(scalars="rgba", rgb=True, notebook=False, show_bounds=True)
 
 
