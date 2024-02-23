@@ -19,7 +19,6 @@ from mesh_generation.voxelize import expand_atomcenters_to_spheres_threadpool, g
 from ribctl import  EXIT_TUNNEL_WORK
 
 #? ---------- Params ------------
-
 RCSB_ID = "6Z6K"
 
 u_EPSILON     = 5.5
@@ -27,14 +26,11 @@ u_MIN_SAMPLES = 600
 u_METRIC      = "euclidean"
 
 DBSCAN_CLUSTER_ID = 3
-
 #? ---------- Paths ------------
-
 tunnel_atom_encoding_handle  = "{}_tunnel_atoms_bbox.json".format(RCSB_ID)
 tunnel_atom_encoding_path    = os.path.join(EXIT_TUNNEL_WORK,tunnel_atom_encoding_handle)
 selected_dbscan_cluster_path = os.path.join(EXIT_TUNNEL_WORK, "{}_dbscan_cluster.npy".format(RCSB_ID))
 convex_hull_cluster_path     = os.path.join(EXIT_TUNNEL_WORK, "{}_convex_hull.npy".format(RCSB_ID))
-
 #? ------------------------------
 
 def extract_bbox_atoms(rcsb_id:str)->list:
@@ -167,7 +163,6 @@ def surface_pts_via_convex_hull(selected_cluster:np.ndarray):
         return pts
     # convex_hull.plot(show_edges=True)
 
-
 def estimate_normals():
     pcd = o3d.geometry.PointCloud(o3d.utility.Vector3dVector(ptcloud_data_cluster))
     pcd.estimate_normals( search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=5, max_nn=40))
@@ -188,6 +183,7 @@ xyz_positive, xyz_negative, _ = index_grid(bbox_atoms_expanded)
 db, clusters_container = interior_capture_DBSCAN(xyz_negative)
 
 surface_pts_via_convex_hull(clusters_container[DBSCAN_CLUSTER_ID])
+
 
 # DBSCAN_CLUSTERS_visualize_all(clusters_container)
 
