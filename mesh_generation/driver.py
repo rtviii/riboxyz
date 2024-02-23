@@ -76,10 +76,10 @@ def index_grid(expanded_sphere_voxels:np.ndarray, voxel_size:int=1):
         sphere_cords_quantized[:, 2],
     ] = 1  
 
-    xyz_v_negative = np.asarray( np.where(vox_grid != 1) )  
-    xyz_v_positive = np.asarray( np.where(vox_grid == 1) )  # get back indexes of populated voxels
+    __xyz_v_negative_ix = np.asarray( np.where(vox_grid != 1) )  
+    __xyz_v_positive_ix = np.asarray( np.where(vox_grid == 1) )  # get back indexes of populated voxels
 
-    return  xyz_v_positive,xyz_v_negative, vox_grid
+    return  __xyz_v_positive_ix.T, __xyz_v_negative_ix.T, vox_grid
 
 def interior_capture_DBSCAN(xyz_v_negative:np.ndarray):
 
@@ -109,15 +109,18 @@ def interior_capture_DBSCAN(xyz_v_negative:np.ndarray):
     u_MIN_SAMPLES = attempts[-1][1]
     u_METRIC      = attempts[-1][2]
 
-    print( "Running DBSCAN on {} points. eps={}, min_samples={}, distance_metric={}".format( len(xyz_v_negative.T), u_EPSILON, u_MIN_SAMPLES, u_METRIC ) )
-    db                 = DBSCAN(eps=u_EPSILON, min_samples=u_MIN_SAMPLES, metric=u_METRIC, n_jobs=5).fit( xyz_v_negative.T )
+    print( "Running DBSCAN on {} points. eps={}, min_samples={}, distance_metric={}".format( len(xyz_v_negative), u_EPSILON, u_MIN_SAMPLES, u_METRIC ) )
+    db                 = DBSCAN(eps=u_EPSILON, min_samples=u_MIN_SAMPLES, metric=u_METRIC, n_jobs=5).fit( xyz_v_negative )
     labels             = db.labels_
 
     CLUSTERS_CONTAINER = {}
-    for point, label in zip(xyz_v_negative.T, labels):
+    for point, label in zip(xyz_v_negative, labels):
         if label not in CLUSTERS_CONTAINER:
             CLUSTERS_CONTAINER[label] = []
         CLUSTERS_CONTAINER[label].append(point)
+
+    CLUSTERS_CONTAINER = dict(sorted(CLUSTERS_CONTAINER.items()))
+
 
     return db, CLUSTERS_CONTAINER
 
@@ -125,6 +128,7 @@ if not os.path.exists(tunnel_atom_encoding_path):
     bbox_atoms          = extract_bbox_atoms(RCSB_ID)
     bbox_atoms_expanded = expand_bbox_atoms_to_spheres(bbox_atoms)
     print("Extracted tunnel atom encoding from PDB: {}.".format(RCSB_ID))
+
 else:
     with open( tunnel_atom_encoding_path, "r", ) as infile:
         bbox_atoms = json.load(infile)
@@ -136,60 +140,46 @@ xyz_positive, xyz_negative, _ = index_grid(bbox_atoms_expanded)
 db, clusters_container = interior_capture_DBSCAN(xyz_negative)
 
 
-ptcloud_data_cluster = clusters_container[3]
-ptcloud_data_positive = xyz_positive.T
+def DBSCAN_CLUSTERS_visualize_all(dbscan_cluster_dict:dict[int, list]):
 
+    for k, v in dbscan_cluster_dict.items():
+        print("Cluster {} has {} points.".format(k, len(v)))
 
-
-
-def DBSCAN_CLUSTERS_visualize_all(dbscan_instance, dbscan_clusters):
-    # print("Receieved {} clusters.".format(len(dbscan_clusters)) )
-    for k, v in dbscan_clusters.items():
-        print("Cluster label {}: {} points".format(k, len(v)))
-
-    # create a dictionary of plt colors
     clusters_palette = dict(zip(range(-1, 40), plt.cm.terrain(np.linspace(0, 1, 40))))
     for k, v in clusters_palette.items():
-
         clusters_palette[k] = [*v[:3], 0.5]
 
     combined_cluster_colors = []
     combined_cluster_points = []
-    for dbscan_label, coordinates in dbscan_clusters.items():
+    for dbscan_label, coordinates in dbscan_cluster_dict.items():
         combined_cluster_points.extend(coordinates)
         combined_cluster_colors.extend([ clusters_palette[dbscan_label * 2] if dbscan_label != -1 else [0, 0, 0, 1]]*len(coordinates))
-
-    # n_clusters_ = len(set(labels)) - (1 if -1 in labels else 0)
-    # n_noise_    = list(labels).count(-1)
 
     point_cloud         = pv.PolyData(combined_cluster_points)
     point_cloud["rgba"] = combined_cluster_colors
     point_cloud.plot(scalars="rgba", rgb=True, notebook=False, show_bounds=True)
 
+def DBSCAN_CLUSTERS_visualize_one(positive_space:np.ndarray, selected_cluster:np.ndarray):
 
-def DBSCAN_CLUSTERS_visualize_one(positive_space:np.ndarray, select_cluster:np.ndarray):
-    rgbas_cluster  = [[15, 10, 221, 1] for datapoint in ptcloud_data_cluster]
-    rgbas_positive = np.array([[205, 209, 228, 0.2] for _ in xyz_positive.T])
 
-    combined       = np.concatenate([positive_space, select_cluster])
+    rgbas_cluster = [[15, 10, 221, 1] for datapoint in selected_cluster]
+    rgbas_positive = np.array([[205, 209, 228, 0.2] for _ in positive_space])
+    combined = np.concatenate([selected_cluster, positive_space])
     rgbas_combined = np.concatenate([rgbas_cluster, rgbas_positive])
 
     point_cloud         = pv.PolyData(combined)
     point_cloud["rgba"] = rgbas_combined
     point_cloud.plot(scalars="rgba", rgb=True, notebook=False, show_bounds=True)
 
+
+DBSCAN_CLUSTERS_visualize_all(clusters_container)
+
+
+while input("Enter to continue. 'q' to exit.") != "q":
+    cluster_id = input("Inspect (another) cluster?")
+    if int(cluster_id ) in clusters_container:
+        DBSCAN_CLUSTERS_visualize_one(xyz_positive, clusters_container[int(cluster_id)])
+
 def estimate_normals():
     pcd = o3d.geometry.PointCloud(o3d.utility.Vector3dVector(ptcloud_data_cluster))
     pcd.estimate_normals( search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=5, max_nn=40))
-
-
-DBSCAN_CLUSTERS_visualize_all(db, clusters_container)
-
-
-
-# def visualize_mesh():
-
-    # # my_mesh = get_mesh(points3d,boundary_faces, opacity=1)
-    # figb = go.Figure(data=[boundary_faces])
-    # figb.update_layout(title_text="tit", title_x=0.5, width=800, height=800)
-    # figb.show()
