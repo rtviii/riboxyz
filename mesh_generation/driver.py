@@ -154,16 +154,18 @@ def DBSCAN_CLUSTERS_visualize_one(positive_space:np.ndarray, selected_cluster:np
     point_cloud["rgba"] = rgbas_combined
     point_cloud.plot(scalars="rgba", rgb=True, notebook=False, show_bounds=True)
 
-
 def surface_pts_via_convex_hull(selected_cluster:np.ndarray):
-    cloud       = pv.PolyData(selected_cluster)
-    grid        = cloud.delaunay_3d(alpha=2, tol=1.5,offset=2,progress_bar=True)
-    convex_hull = grid.extract_surface().cast_to_pointset()
-    print(convex_hull.points)
-    print(convex_hull.points.shape)
-    np.save("convex_hull_{}.npy".format(RCSB_ID), convex_hull.points)
-    print("Saved generated convex hull to ")
-    convex_hull.plot(show_edges=True)
+    if not os.path.exists(convex_hull_cluster_path):
+        cloud       = pv.PolyData(selected_cluster)
+        grid        = cloud.delaunay_3d(alpha=2, tol=1.5,offset=2,progress_bar=True)
+        convex_hull = grid.extract_surface().cast_to_pointset()
+        np.save(convex_hull_cluster_path, convex_hull.points)
+        print("Saved generated convex hull to {}".format(convex_hull_cluster_path))
+        return convex_hull.points
+    else:
+        pts = np.load(convex_hull_cluster_path)
+        return pts
+    # convex_hull.plot(show_edges=True)
 
 
 def estimate_normals():
