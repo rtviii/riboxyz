@@ -178,7 +178,6 @@ def estimate_normals(convex_hull_surface:np.ndarray|None=None):
     o3d.visualization.draw_geometries([pcd], point_show_normal=True, window_name="Point Cloud with Normals")
     o3d.io.write_point_cloud(surface_with_normals_path, pcd)
     print("Wrote surface with normals {}".format(surface_with_normals_path))
-    print(surface_pts)
 
 
 
