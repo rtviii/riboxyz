@@ -166,9 +166,13 @@ def surface_pts_via_convex_hull(selected_cluster:np.ndarray|None=None):
         return pts
     # convex_hull.plot(show_edges=True)
 
-def estimate_normals():
+def estimate_normals(convex_hull_surface:np.ndarray|None=None):
+
     pcd = o3d.geometry.PointCloud(o3d.utility.Vector3dVector(ptcloud_data_cluster))
     pcd.estimate_normals( search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=5, max_nn=40))
+
+
+
 
 def main():
     # if not os.path.exists(tunnel_atom_encoding_path):
@@ -188,6 +192,7 @@ def main():
 
     # surface_pts = surface_pts_via_convex_hull(clusters_container[DBSCAN_CLUSTER_ID])
     surface_pts = surface_pts_via_convex_hull()
+
     point_cloud         = pv.PolyData(surface_pts)
     point_cloud.plot(notebook=False, show_bounds=True)
 
@@ -196,10 +201,7 @@ def main():
 
     pcd.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=5, max_nn=15))
     pcd.orient_normals_consistent_tangent_plane(k=10)
-    o3d.visualization.draw_geometries([pcd], 
-                                       point_show_normal=True, 
-                                       window_name="Point Cloud with Normals")
-
+    o3d.visualization.draw_geometries([pcd], point_show_normal=True, window_name="Point Cloud with Normals")
     o3d.io.write_point_cloud(surface_with_normals_path, pcd)
     print("Wrote surface with normals {}".format(surface_with_normals_path))
     print(surface_pts)
