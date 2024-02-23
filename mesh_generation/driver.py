@@ -168,11 +168,38 @@ def surface_pts_via_convex_hull(selected_cluster:np.ndarray|None=None):
 
 def estimate_normals(convex_hull_surface:np.ndarray|None=None):
 
-    pcd = o3d.geometry.PointCloud(o3d.utility.Vector3dVector(ptcloud_data_cluster))
-    pcd.estimate_normals( search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=5, max_nn=40))
+    point_cloud         = pv.PolyData(convex_hull_surface)
+    point_cloud.plot(notebook=False, show_bounds=True)
+    pcd        = o3d.geometry.PointCloud()
+    pcd.points = o3d.utility.Vector3dVector(surface_pts)
+
+    pcd.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=5, max_nn=15))
+    pcd.orient_normals_consistent_tangent_plane(k=10)
+    o3d.visualization.draw_geometries([pcd], point_show_normal=True, window_name="Point Cloud with Normals")
+    o3d.io.write_point_cloud(surface_with_normals_path, pcd)
+    print("Wrote surface with normals {}".format(surface_with_normals_path))
+    print(surface_pts)
 
 
 
+def plot_with_landmarks( surface_file_path:str, tunnel_atoms_encoding_file_path:str):
+
+    RCSB_ID   = "6Z6K"
+    file_path = os.path.join(EXIT_TUNNEL_WORK,"{}_poisson_recon.ply".format(RCSB_ID))  # Update with your file path
+    mesh      = pv.read(file_path)
+    plotter   = pv.Plotter()
+    plotter.add_mesh(mesh, opacity=0.5)
+    # plotter.show()
+
+    points1 = np.array([[40,40,40], [50,50,50]])
+    plotter.add_points(points1,  point_size=100.0, color='red', style='points_gaussian')
+    points2 = np.array([[10,10,10], [100,100,100]])
+    plotter.add_points(points2, render_points_as_spheres=True, point_size=30.0, color='blue')
+
+    # Add a text label
+    plotter.add_text('Label Text', position='upper_left', font_size=18)
+
+    plotter.show(auto_close=False)
 
 def main():
     # if not os.path.exists(tunnel_atom_encoding_path):
@@ -193,18 +220,6 @@ def main():
     # surface_pts = surface_pts_via_convex_hull(clusters_container[DBSCAN_CLUSTER_ID])
     surface_pts = surface_pts_via_convex_hull()
 
-    point_cloud         = pv.PolyData(surface_pts)
-    point_cloud.plot(notebook=False, show_bounds=True)
-
-    pcd        = o3d.geometry.PointCloud()
-    pcd.points = o3d.utility.Vector3dVector(surface_pts)
-
-    pcd.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=5, max_nn=15))
-    pcd.orient_normals_consistent_tangent_plane(k=10)
-    o3d.visualization.draw_geometries([pcd], point_show_normal=True, window_name="Point Cloud with Normals")
-    o3d.io.write_point_cloud(surface_with_normals_path, pcd)
-    print("Wrote surface with normals {}".format(surface_with_normals_path))
-    print(surface_pts)
 
 
 if __name__ == "__main__":

@@ -13,10 +13,10 @@ plotter.add_mesh(mesh, opacity=0.5)
 # plotter.show()
 
 # Add a sphere with specified size and color
-points1 =np.array([[40,40,40], [50,50,50]])
+points1 = np.array([[40,40,40], [50,50,50]])
 # plotter.add_points(points1, render_points_as_spheres=True, point_size=100.0, color='red', style='points_gaussian')
 plotter.add_points(points1,  point_size=100.0, color='red', style='points_gaussian')
-points2 =np.array([[10,10,10], [100,100,100]])
+points2 = np.array([[10,10,10], [100,100,100]])
 plotter.add_points(points2, render_points_as_spheres=True, point_size=30.0, color='blue')
 
 # Add a text label
