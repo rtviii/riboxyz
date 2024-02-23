@@ -375,20 +375,19 @@ from sklearn.cluster import DBSCAN
 
 #         # exit()
 #         # #? Alpha of about >  2.5 starts to hide the detail
-#         cloud = pv.PolyData(ptcloud_data_cluster)
-#         grid              = cloud.delaunay_3d(alpha=3, tol=1.5,offset=2,progress_bar=True)
-#         convex_hull = grid.extract_surface().cast_to_pointset()
-#         print(convex_hull.points)
-#         print(convex_hull.points.shape)
-#         from ribctl import ASSETS_PATH
-#         CONVEX_HULL_PATH = os.path.join(ASSETS_PATH, "convex_hull_{}.npy".format(RCSB_ID))
-#         np.save("convex_hull_{}.npy".format(RCSB_ID), convex_hull.points)
-#         print("Saved generated convex hull to ")
-#         convex_hull.plot(show_edges=True)
+        # cloud = pv.PolyData(ptcloud_data_cluster)
+        # grid              = cloud.delaunay_3d(alpha=3, tol=1.5,offset=2,progress_bar=True)
+        # convex_hull = grid.extract_surface().cast_to_pointset()
+        # print(convex_hull.points)
+        # print(convex_hull.points.shape)
+        # from ribctl import ASSETS_PATH
+        # np.save("convex_hull_{}.npy".format(RCSB_ID), convex_hull.points)
+        # print("Saved generated convex hull to ")
+        # convex_hull.plot(show_edges=True)
 
         
-#         # grid.plot(show_edges=True)
-#         # edges = grid.extract_all_edges()
+        # grid.plot(show_edges=True)
+        # edges = grid.extract_all_edges()
 #         exit()
 
 #         print(edges)
@@ -418,56 +417,56 @@ from sklearn.cluster import DBSCAN
 
 
 
-#         # print(boundary_faces)
-#         # # my_mesh = get_mesh(points3d,boundary_faces, opacity=1)
-#         # figb = go.Figure(data=[boundary_faces])
-#         # figb.update_layout(title_text="tit", title_x=0.5, width=800, height=800)
-#         # figb.show()
+# #         # print(boundary_faces)
+# #         # # my_mesh = get_mesh(points3d,boundary_faces, opacity=1)
+# #         # figb = go.Figure(data=[boundary_faces])
+# #         # figb.update_layout(title_text="tit", title_x=0.5, width=800, height=800)
+# #         # figb.show()
 
-#         exit()
+# #         exit()
 
-#         pprint(surf)
-#         surf.save("{}_tunnel_delaunay.vtk".format(RCSB_ID))
-#         print(surf)
-#         surf.plot(show_edges=True)
+# #         pprint(surf)
+# #         surf.save("{}_tunnel_delaunay.vtk".format(RCSB_ID))
+# #         print(surf)
+# #         surf.plot(show_edges=True)
 
-#         pcd = o3d.geometry.PointCloud(o3d.utility.Vector3dVector(ptcloud_data_cluster))
-#         pcd.estimate_normals( search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=5, max_nn=40))
+# #         pcd = o3d.geometry.PointCloud(o3d.utility.Vector3dVector(ptcloud_data_cluster))
+# #         pcd.estimate_normals( search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=5, max_nn=40))
 
-#         # # o3d.visualization.draw_geometries([pcd],
-#         # #                                   zoom=0.3412,
-#         # #                                   front=[0.4257, -0.2125, -0.8795],
-#         # #                                   lookat=[2.6172, 2.0475, 1.532],
-#         # #                                   up=[-0.0694, -0.9768, 0.2024],
-#         # #                                   point_show_normal=True)
-#         # # exit()
-#         # def poisson_mesh(pc, depth=8, width=0, scale=1.1, linear_fit=False):
-#         #     """`pc` is a `pyvista.PolyData` point cloud. The default arguments are abitrary"""
-#         #     cloud = o3d.geometry.PointCloud()
-#         #     cloud.points = o3d.utility.Vector3dVector(pc.points)
-#         #     cloud.normals = o3d.utility.Vector3dVector(pc.normals)
-#         #     trimesh, _ = o3d.geometry.TriangleMesh.create_from_point_cloud_poisson(cloud, depth=depth, width=width, scale=scale, linear_fit=linear_fit)
-#         #     v = np.asarray(trimesh.vertices)
-#         #     f = np.array(trimesh.triangles)
-#         #     f = np.c_[np.full(len(f), 3), f]
-#         #     mesh = pv.PolyData(v, f)
-#         #     return mesh.clean()
+# #         # # o3d.visualization.draw_geometries([pcd],
+# #         # #                                   zoom=0.3412,
+# #         # #                                   front=[0.4257, -0.2125, -0.8795],
+# #         # #                                   lookat=[2.6172, 2.0475, 1.532],
+# #         # #                                   up=[-0.0694, -0.9768, 0.2024],
+# #         # #                                   point_show_normal=True)
+# #         # # exit()
+# #         # def poisson_mesh(pc, depth=8, width=0, scale=1.1, linear_fit=False):
+# #         #     """`pc` is a `pyvista.PolyData` point cloud. The default arguments are abitrary"""
+# #         #     cloud = o3d.geometry.PointCloud()
+# #         #     cloud.points = o3d.utility.Vector3dVector(pc.points)
+# #         #     cloud.normals = o3d.utility.Vector3dVector(pc.normals)
+# #         #     trimesh, _ = o3d.geometry.TriangleMesh.create_from_point_cloud_poisson(cloud, depth=depth, width=width, scale=scale, linear_fit=linear_fit)
+# #         #     v = np.asarray(trimesh.vertices)
+# #         #     f = np.array(trimesh.triangles)
+# #         #     f = np.c_[np.full(len(f), 3), f]
+# #         #     mesh = pv.PolyData(v, f)
+# #         #     return mesh.clean()
 
-#         # x = poisson_mesh(pcd, depth=5, width=1, scale=1.1, linear_fit=False)
-#         # x.plot()
-#         # # print(x)
+# #         # x = poisson_mesh(pcd, depth=5, width=1, scale=1.1, linear_fit=False)
+# #         # x.plot()
+# #         # # print(x)
 
-#     else:
-#         # pv.set_plot_theme('dark')
-#         # ptcloud_data_combined = np.concatenate([xyz_v_positive.T, xyz_v_negative.T])
-#         ptcloud_data_negative = np.concatenate(xyz_v_negative.T)
-#         point_cloud = pv.PolyData(ptcloud_data_negative)
-#         # rgba_n                = np.array([[250,0,0,0.1] for _ in xyz_v_negative.T] )
-#         # rgba_p                = np.array([[10,200,200, 1] for _ in xyz_v_positive.T] )
-#         # rgba_combined         = np.concatenate([rgba_p, rgba_n])
-#         # point_cloud['rgba']  = rgba_combined
+# #     else:
+# #         # pv.set_plot_theme('dark')
+# #         # ptcloud_data_combined = np.concatenate([xyz_v_positive.T, xyz_v_negative.T])
+# #         ptcloud_data_negative = np.concatenate(xyz_v_negative.T)
+# #         point_cloud = pv.PolyData(ptcloud_data_negative)
+# #         # rgba_n                = np.array([[250,0,0,0.1] for _ in xyz_v_negative.T] )
+# #         # rgba_p                = np.array([[10,200,200, 1] for _ in xyz_v_positive.T] )
+# #         # rgba_combined         = np.concatenate([rgba_p, rgba_n])
+# #         # point_cloud['rgba']  = rgba_combined
 
-#         point_cloud["rgba"] = dbscan_colors
-#         point_cloud.plot(scalars="rgba", rgb=True, notebook=False, show_bounds=True)
+# #         point_cloud["rgba"] = dbscan_colors
+# #         point_cloud.plot(scalars="rgba", rgb=True, notebook=False, show_bounds=True)
 
 

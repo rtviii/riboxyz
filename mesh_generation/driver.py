@@ -30,9 +30,10 @@ DBSCAN_CLUSTER_ID = 3
 
 #? ---------- Paths ------------
 
-tunnel_atom_encoding_handle = "{}_tunnel_atoms_bbox.json".format(RCSB_ID)
-tunnel_atom_encoding_path   = os.path.join(EXIT_TUNNEL_WORK,tunnel_atom_encoding_handle)
-select_dbscan_cluster_path  = os.path.join(EXIT_TUNNEL_WORK, "dbscan_cluster_{}.npy".format(DBSCAN_CLUSTER_ID))
+tunnel_atom_encoding_handle  = "{}_tunnel_atoms_bbox.json".format(RCSB_ID)
+tunnel_atom_encoding_path    = os.path.join(EXIT_TUNNEL_WORK,tunnel_atom_encoding_handle)
+selected_dbscan_cluster_path = os.path.join(EXIT_TUNNEL_WORK, "{}_dbscan_cluster.npy".format(RCSB_ID))
+convex_hull_cluster_path     = os.path.join(EXIT_TUNNEL_WORK, "{}_convex_hull.npy".format(RCSB_ID))
 
 #? ------------------------------
 
@@ -124,22 +125,6 @@ def interior_capture_DBSCAN(xyz_v_negative:np.ndarray):
 
     return db, CLUSTERS_CONTAINER
 
-if not os.path.exists(tunnel_atom_encoding_path):
-    bbox_atoms          = extract_bbox_atoms(RCSB_ID)
-    bbox_atoms_expanded = expand_bbox_atoms_to_spheres(bbox_atoms)
-    print("Extracted tunnel atom encoding from PDB: {}.".format(RCSB_ID))
-
-else:
-    with open( tunnel_atom_encoding_path, "r", ) as infile:
-        bbox_atoms = json.load(infile)
-
-    print("Opened tunnel atom encoding from file: {}.".format(tunnel_atom_encoding_path))
-    bbox_atoms_expanded = expand_bbox_atoms_to_spheres(bbox_atoms)
-
-xyz_positive, xyz_negative, _ = index_grid(bbox_atoms_expanded)
-db, clusters_container = interior_capture_DBSCAN(xyz_negative)
-
-
 def DBSCAN_CLUSTERS_visualize_all(dbscan_cluster_dict:dict[int, list]):
 
     for k, v in dbscan_cluster_dict.items():
@@ -160,11 +145,9 @@ def DBSCAN_CLUSTERS_visualize_all(dbscan_cluster_dict:dict[int, list]):
     point_cloud.plot(scalars="rgba", rgb=True, notebook=False, show_bounds=True)
 
 def DBSCAN_CLUSTERS_visualize_one(positive_space:np.ndarray, selected_cluster:np.ndarray):
-
-
-    rgbas_cluster = [[15, 10, 221, 1] for datapoint in selected_cluster]
+    rgbas_cluster  = [[15, 10, 221, 1] for datapoint in selected_cluster]
     rgbas_positive = np.array([[205, 209, 228, 0.2] for _ in positive_space])
-    combined = np.concatenate([selected_cluster, positive_space])
+    combined       = np.concatenate([selected_cluster, positive_space])
     rgbas_combined = np.concatenate([rgbas_cluster, rgbas_positive])
 
     point_cloud         = pv.PolyData(combined)
@@ -172,14 +155,41 @@ def DBSCAN_CLUSTERS_visualize_one(positive_space:np.ndarray, selected_cluster:np
     point_cloud.plot(scalars="rgba", rgb=True, notebook=False, show_bounds=True)
 
 
-DBSCAN_CLUSTERS_visualize_all(clusters_container)
+def surface_pts_via_convex_hull(selected_cluster:np.ndarray):
+    cloud       = pv.PolyData(selected_cluster)
+    grid        = cloud.delaunay_3d(alpha=2, tol=1.5,offset=2,progress_bar=True)
+    convex_hull = grid.extract_surface().cast_to_pointset()
+    print(convex_hull.points)
+    print(convex_hull.points.shape)
+    np.save("convex_hull_{}.npy".format(RCSB_ID), convex_hull.points)
+    print("Saved generated convex hull to ")
+    convex_hull.plot(show_edges=True)
 
-
-while input("Enter to continue. 'q' to exit.") != "q":
-    cluster_id = input("Inspect (another) cluster?")
-    if int(cluster_id ) in clusters_container:
-        DBSCAN_CLUSTERS_visualize_one(xyz_positive, clusters_container[int(cluster_id)])
 
 def estimate_normals():
     pcd = o3d.geometry.PointCloud(o3d.utility.Vector3dVector(ptcloud_data_cluster))
     pcd.estimate_normals( search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=5, max_nn=40))
+
+if not os.path.exists(tunnel_atom_encoding_path):
+    bbox_atoms          = extract_bbox_atoms(RCSB_ID)
+    bbox_atoms_expanded = expand_bbox_atoms_to_spheres(bbox_atoms)
+    print("Extracted tunnel atom encoding from PDB: {}.".format(RCSB_ID))
+
+else:
+    with open( tunnel_atom_encoding_path, "r", ) as infile:
+        bbox_atoms = json.load(infile)
+
+    print("Opened tunnel atom encoding from file: {}.".format(tunnel_atom_encoding_path))
+    bbox_atoms_expanded = expand_bbox_atoms_to_spheres(bbox_atoms)
+
+xyz_positive, xyz_negative, _ = index_grid(bbox_atoms_expanded)
+db, clusters_container = interior_capture_DBSCAN(xyz_negative)
+
+surface_pts_via_convex_hull(clusters_container[DBSCAN_CLUSTER_ID])
+
+# DBSCAN_CLUSTERS_visualize_all(clusters_container)
+
+# while input("Enter to continue. 'q' to exit.") != "q":
+    # cluster_id = input("Inspect (another) cluster?")
+    # if int(cluster_id ) in clusters_container:
+        # DBSCAN_CLUSTERS_visualize_one(xyz_positive, clusters_container[int(cluster_id)])
