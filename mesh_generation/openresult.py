@@ -1,17 +1,16 @@
+import os
 import numpy as np
 import pyvista as pv
 
-# RCSB_ID = "6Z6K"
-# # Load the PLY file
-# file_path = "poisson_recon_{}.ply".format(RCSB_ID)  # Update with your file path
+from ribctl import EXIT_TUNNEL_WORK
 
-# mesh = pv.read(file_path)
+RCSB_ID   = "6Z6K"
+file_path = os.path.join(EXIT_TUNNEL_WORK,"{}_poisson_recon.ply".format(RCSB_ID))  # Update with your file path
 
-
-# # Plot the mesh
-# plotter = pv.Plotter()
-# plotter.add_mesh(mesh)
-# plotter.show()
+mesh    = pv.read(file_path)
+plotter = pv.Plotter()
+plotter.add_mesh(mesh)
+plotter.show()
 
 
 #!----
@@ -27,14 +26,14 @@ import pyvista as pv
 
 
 
-import open3d as o3d
-import numpy as np
+# import open3d as o3d
+# import numpy as np
 
-# Load the PLY file
-ply_path = "convex_hull_6Z6K.ply"
-point_cloud = o3d.io.read_point_cloud(ply_path)
-o3d.visualization.draw_geometries([point_cloud], "Point Cloud Visualization")
-point_cloud.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=5, max_nn=15))
-o3d.visualization.draw_geometries([point_cloud], 
-                                   point_show_normal=True, 
-                                   window_name="Point Cloud with Normals")
+# # Load the PLY file
+# ply_path = "convex_hull_6Z6K.ply"
+# point_cloud = o3d.io.read_point_cloud(ply_path)
+# o3d.visualization.draw_geometries([point_cloud], "Point Cloud Visualization")
+# point_cloud.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=5, max_nn=15))
+# o3d.visualization.draw_geometries([point_cloud], 
+#                                    point_show_normal=True, 
+#                                    window_name="Point Cloud with Normals")

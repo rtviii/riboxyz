@@ -31,6 +31,7 @@ tunnel_atom_encoding_handle  = "{}_tunnel_atoms_bbox.json".format(RCSB_ID)
 tunnel_atom_encoding_path    = os.path.join(EXIT_TUNNEL_WORK,tunnel_atom_encoding_handle)
 selected_dbscan_cluster_path = os.path.join(EXIT_TUNNEL_WORK, "{}_dbscan_cluster.npy".format(RCSB_ID))
 convex_hull_cluster_path     = os.path.join(EXIT_TUNNEL_WORK, "{}_convex_hull.npy".format(RCSB_ID))
+surface_with_normals_path    = os.path.join(EXIT_TUNNEL_WORK, "{}_normal_estimated_surf.ply".format(RCSB_ID))
 #? ------------------------------
 
 def extract_bbox_atoms(rcsb_id:str)->list:
@@ -150,8 +151,9 @@ def DBSCAN_CLUSTERS_visualize_one(positive_space:np.ndarray, selected_cluster:np
     point_cloud["rgba"] = rgbas_combined
     point_cloud.plot(scalars="rgba", rgb=True, notebook=False, show_bounds=True)
 
-def surface_pts_via_convex_hull(selected_cluster:np.ndarray):
+def surface_pts_via_convex_hull(selected_cluster:np.ndarray|None=None):
     if not os.path.exists(convex_hull_cluster_path):
+        assert(selected_cluster is not None)
         cloud       = pv.PolyData(selected_cluster)
         grid        = cloud.delaunay_3d(alpha=2, tol=1.5,offset=2,progress_bar=True)
         convex_hull = grid.extract_surface().cast_to_pointset()
@@ -160,6 +162,7 @@ def surface_pts_via_convex_hull(selected_cluster:np.ndarray):
         return convex_hull.points
     else:
         pts = np.load(convex_hull_cluster_path)
+        print("Loaded generated convex hull from {}".format(convex_hull_cluster_path))
         return pts
     # convex_hull.plot(show_edges=True)
 
@@ -167,27 +170,48 @@ def estimate_normals():
     pcd = o3d.geometry.PointCloud(o3d.utility.Vector3dVector(ptcloud_data_cluster))
     pcd.estimate_normals( search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=5, max_nn=40))
 
-if not os.path.exists(tunnel_atom_encoding_path):
-    bbox_atoms          = extract_bbox_atoms(RCSB_ID)
-    bbox_atoms_expanded = expand_bbox_atoms_to_spheres(bbox_atoms)
-    print("Extracted tunnel atom encoding from PDB: {}.".format(RCSB_ID))
+def main():
+    # if not os.path.exists(tunnel_atom_encoding_path):
+    #     bbox_atoms          = extract_bbox_atoms(RCSB_ID)
+    #     bbox_atoms_expanded = expand_bbox_atoms_to_spheres(bbox_atoms)
+    #     print("Extracted tunnel atom encoding from PDB: {}.".format(RCSB_ID))
 
-else:
-    with open( tunnel_atom_encoding_path, "r", ) as infile:
-        bbox_atoms = json.load(infile)
+    # else:
+    #     with open( tunnel_atom_encoding_path, "r", ) as infile:
+    #         bbox_atoms = json.load(infile)
 
-    print("Opened tunnel atom encoding from file: {}.".format(tunnel_atom_encoding_path))
-    bbox_atoms_expanded = expand_bbox_atoms_to_spheres(bbox_atoms)
+    #     print("Opened tunnel atom encoding from file: {}.".format(tunnel_atom_encoding_path))
+    #     bbox_atoms_expanded = expand_bbox_atoms_to_spheres(bbox_atoms)
 
-xyz_positive, xyz_negative, _ = index_grid(bbox_atoms_expanded)
-db, clusters_container = interior_capture_DBSCAN(xyz_negative)
+    # xyz_positive, xyz_negative, _ = index_grid(bbox_atoms_expanded)
+    # db, clusters_container = interior_capture_DBSCAN(xyz_negative)
 
-surface_pts_via_convex_hull(clusters_container[DBSCAN_CLUSTER_ID])
+    # surface_pts = surface_pts_via_convex_hull(clusters_container[DBSCAN_CLUSTER_ID])
+    surface_pts = surface_pts_via_convex_hull()
+    point_cloud         = pv.PolyData(surface_pts)
+    point_cloud.plot(notebook=False, show_bounds=True)
 
+    pcd        = o3d.geometry.PointCloud()
+    pcd.points = o3d.utility.Vector3dVector(surface_pts)
+
+    pcd.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=5, max_nn=15))
+    pcd.orient_normals_consistent_tangent_plane(k=10)
+    o3d.visualization.draw_geometries([pcd], 
+                                       point_show_normal=True, 
+                                       window_name="Point Cloud with Normals")
+
+    o3d.io.write_point_cloud(surface_with_normals_path, pcd)
+    print("Wrote surface with normals {}".format(surface_with_normals_path))
+    print(surface_pts)
+
+
+if __name__ == "__main__":
+    main()
 
 # DBSCAN_CLUSTERS_visualize_all(clusters_container)
 
 # while input("Enter to continue. 'q' to exit.") != "q":
+
     # cluster_id = input("Inspect (another) cluster?")
     # if int(cluster_id ) in clusters_container:
         # DBSCAN_CLUSTERS_visualize_one(xyz_positive, clusters_container[int(cluster_id)])
