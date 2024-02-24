@@ -50,7 +50,7 @@ def extract_bbox_atoms(rcsb_id:str)->list:
 def expand_bbox_atoms_to_spheres(bbox_data:list|None ):
 
     if bbox_data is None:
-        with open( tunnel_atom_encoding_path, "r", ) as infile:
+        with open( tunnel_atom_encoding_path(RCSB_ID), "r", ) as infile:
             bbox_data = json.load(infile)
 
     __cords = np.array(list(map(lambda x: x["coord"], bbox_data)))
@@ -156,16 +156,16 @@ def DBSCAN_CLUSTERS_visualize_one(positive_space:np.ndarray, selected_cluster:np
     point_cloud.plot(scalars="rgba", rgb=True, notebook=False, show_bounds=True)
 
 def surface_pts_via_convex_hull(selected_cluster:np.ndarray|None=None):
-    if not os.path.exists(convex_hull_cluster_path):
+    if not os.path.exists(convex_hull_cluster_path(RCSB_ID)):
         assert(selected_cluster is not None)
         cloud       = pv.PolyData(selected_cluster)
         grid        = cloud.delaunay_3d(alpha=2, tol=1.5,offset=2,progress_bar=True)
         convex_hull = grid.extract_surface().cast_to_pointset()
-        np.save(convex_hull_cluster_path, convex_hull.points)
+        np.save(convex_hull_cluster_path(RCSB_ID), convex_hull.points)
         print("Saved generated convex hull to {}".format(convex_hull_cluster_path))
         return convex_hull.points
     else:
-        pts = np.load(convex_hull_cluster_path)
+        pts = np.load(convex_hull_cluster_path(RCSB_ID))
         print("Loaded generated convex hull from {}".format(convex_hull_cluster_path))
         return pts
     # convex_hull.plot(show_edges=True)
@@ -195,6 +195,13 @@ class TunnelAtomEncoding(BaseModel):
       vdw_radius                   : float
 
 def plot_with_landmarks(rcsb_id:str, translation_vectors:np.ndarray):
+    """
+    @translation_vectors is a np.ndarray of shape (2,3) where 
+        - the first row is the means of the coordinate set 
+        - the second row is the deviations of the normalized coordinate set
+        (to be used to reverse the normalization process or to travel to this coordinate frame)
+
+    """
     with open( tunnel_atom_encoding_path(rcsb_id), "r", ) as infile:
         tunnel_atoms_data:list[TunnelAtomEncoding] = json.load(infile)
 
@@ -206,13 +213,17 @@ def plot_with_landmarks(rcsb_id:str, translation_vectors:np.ndarray):
         a = TunnelAtomEncoding.model_validate(atom)
         if a.chain_nomenclature[0] not in atom_coordinates_by_chain:
             atom_coordinates_by_chain[ a.chain_nomenclature[0] ] = []
-        atom_coordinates_by_chain[ a.chain_nomenclature[0] ].extend( [ a.coord ] )
-
-
-
+        atom_coordinates_by_chain[ a.chain_nomenclature[0] ].extend( [ a.coord ])
     ptc_midpoint = np.array(ptc_data["midpoint_coordinates"])
-    pprint(atom_coordinates_by_chain)
-    pprint(ptc_midpoint)
+    # pprint(atom_coordinates_by_chain)
+    # pprint(ptc_midpoint)
+    #!----- convert to the normalized coord frame
+    ptc_midpoint = ptc_midpoint - translation_vectors[0] + translation_vectors[1]
+    for chain_name, coords in atom_coordinates_by_chain.items():
+        atom_coordinates_by_chain[chain_name] = np.array(coords) - translation_vectors[0] + translation_vectors[1]
+    #!----- convert to the normalized coord frame
+
+
 
 
     
@@ -253,7 +264,7 @@ def main():
         with open( tunnel_atom_encoding_path(RCSB_ID), "r", ) as infile:
             bbox_atoms = json.load(infile)
 
-        print("Opened tunnel atom encoding from file: {}.".format(tunnel_atom_encoding_path))
+        print("Opened tunnel atom encoding from file: {}.".format(tunnel_atom_encoding_path(RCSB_ID)))
         bbox_atoms_expanded = expand_bbox_atoms_to_spheres(bbox_atoms)
 
     xyz_positive, xyz_negative, _, normalization_vectors = index_grid(bbox_atoms_expanded)
