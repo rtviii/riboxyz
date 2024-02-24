@@ -30,7 +30,7 @@ u_METRIC      = "euclidean"
 DBSCAN_CLUSTER_ID = 3
 #? ---------- Paths ------------
 tunnel_atom_encoding_path    = lambda rcsb_id : os.path.join(EXIT_TUNNEL_WORK, "{}_tunnel_atoms_bbox.json".format(rcsb_id))
-normalization_vectors        = lambda rcsb_id : os.path.join(EXIT_TUNNEL_WORK, "{}_normalization_vectors.npy".format(rcsb_id))
+normalization_vectors_path   = lambda rcsb_id : os.path.join(EXIT_TUNNEL_WORK, "{}_normalization_vectors.npy".format(rcsb_id))
 selected_dbscan_cluster_path = lambda rcsb_id : os.path.join(EXIT_TUNNEL_WORK, "{}_dbscan_cluster.npy".format(rcsb_id))
 convex_hull_cluster_path     = lambda rcsb_id : os.path.join(EXIT_TUNNEL_WORK, "{}_convex_hull.npy".format(rcsb_id))
 surface_with_normals_path    = lambda rcsb_id : os.path.join(EXIT_TUNNEL_WORK, "{}_normal_estimated_surf.ply".format(rcsb_id))
@@ -81,7 +81,7 @@ def index_grid(expanded_sphere_voxels:np.ndarray, voxel_size:int=1):
     __xyz_v_negative_ix = np.asarray( np.where(vox_grid != 1) )  
     __xyz_v_positive_ix = np.asarray( np.where(vox_grid == 1) )  # get back indexes of populated voxels
 
-    return  __xyz_v_positive_ix.T, __xyz_v_negative_ix.T, vox_grid
+    return  __xyz_v_positive_ix.T, __xyz_v_negative_ix.T, vox_grid, mean_abs_vectors
 
 def interior_capture_DBSCAN(xyz_v_negative:np.ndarray):
 
@@ -244,25 +244,26 @@ def plot_with_landmarks(rcsb_id:str, translation_vectors:np.ndarray):
     plotter.show(auto_close=False)
 
 def main():
-    # if not os.path.exists(tunnel_atom_encoding_path):
-    #     bbox_atoms          = extract_bbox_atoms(RCSB_ID)
-    #     bbox_atoms_expanded = expand_bbox_atoms_to_spheres(bbox_atoms)
-    #     print("Extracted tunnel atom encoding from PDB: {}.".format(RCSB_ID))
+    if not os.path.exists(tunnel_atom_encoding_path(RCSB_ID)):
+        bbox_atoms          = extract_bbox_atoms(RCSB_ID)
+        bbox_atoms_expanded = expand_bbox_atoms_to_spheres(bbox_atoms)
+        print("Extracted tunnel atom encoding from PDB: {}.".format(RCSB_ID))
 
-    # else:
-    #     with open( tunnel_atom_encoding_path, "r", ) as infile:
-    #         bbox_atoms = json.load(infile)
+    else:
+        with open( tunnel_atom_encoding_path(RCSB_ID), "r", ) as infile:
+            bbox_atoms = json.load(infile)
 
-    #     print("Opened tunnel atom encoding from file: {}.".format(tunnel_atom_encoding_path))
-    #     bbox_atoms_expanded = expand_bbox_atoms_to_spheres(bbox_atoms)
+        print("Opened tunnel atom encoding from file: {}.".format(tunnel_atom_encoding_path))
+        bbox_atoms_expanded = expand_bbox_atoms_to_spheres(bbox_atoms)
 
-    # xyz_positive, xyz_negative, _ = index_grid(bbox_atoms_expanded)
-    # db, clusters_container = interior_capture_DBSCAN(xyz_negative)
+    xyz_positive, xyz_negative, _, normalization_vectors = index_grid(bbox_atoms_expanded)
+    np.save(normalization_vectors_path(RCSB_ID), normalization_vectors)
+    db, clusters_container = interior_capture_DBSCAN(xyz_negative)
 
-    # surface_pts = surface_pts_via_convex_hull(clusters_container[DBSCAN_CLUSTER_ID])
+    surface_pts = surface_pts_via_convex_hull(clusters_container[DBSCAN_CLUSTER_ID])
     # surface_pts = surface_pts_via_convex_hull()
-    # estimate_normals(surface_pts)
-    plot_with_landmarks(RCSB_ID)
+    estimate_normals(surface_pts)
+    plot_with_landmarks(RCSB_ID, normalization_vectors)
 
 
 
