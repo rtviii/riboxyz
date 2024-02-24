@@ -30,6 +30,7 @@ u_METRIC      = "euclidean"
 DBSCAN_CLUSTER_ID = 3
 #? ---------- Paths ------------
 tunnel_atom_encoding_path    = lambda rcsb_id : os.path.join(EXIT_TUNNEL_WORK, "{}_tunnel_atoms_bbox.json".format(rcsb_id))
+normalization_vectors        = lambda rcsb_id : os.path.join(EXIT_TUNNEL_WORK, "{}_normalization_vectors.npy".format(rcsb_id))
 selected_dbscan_cluster_path = lambda rcsb_id : os.path.join(EXIT_TUNNEL_WORK, "{}_dbscan_cluster.npy".format(rcsb_id))
 convex_hull_cluster_path     = lambda rcsb_id : os.path.join(EXIT_TUNNEL_WORK, "{}_convex_hull.npy".format(rcsb_id))
 surface_with_normals_path    = lambda rcsb_id : os.path.join(EXIT_TUNNEL_WORK, "{}_normal_estimated_surf.ply".format(rcsb_id))
@@ -64,7 +65,7 @@ def expand_bbox_atoms_to_spheres(bbox_data:list|None ):
     return np.array(expanded)
 
 def index_grid(expanded_sphere_voxels:np.ndarray, voxel_size:int=1):
-    normalized_sphere_cords = normalize_atom_coordinates(expanded_sphere_voxels)
+    normalized_sphere_cords, mean_abs_vectors = normalize_atom_coordinates(expanded_sphere_voxels)
     sphere_cords_quantized  = np.round( np.array(normalized_sphere_cords / voxel_size) ).astype(int)
 
     max_values      = np.max(sphere_cords_quantized, axis=0)
@@ -193,7 +194,7 @@ class TunnelAtomEncoding(BaseModel):
       residue_seqid                : int
       vdw_radius                   : float
 
-def plot_with_landmarks(rcsb_id:str, translation_mxx):
+def plot_with_landmarks(rcsb_id:str, translation_vectors:np.ndarray):
     with open( tunnel_atom_encoding_path(rcsb_id), "r", ) as infile:
         tunnel_atoms_data:list[TunnelAtomEncoding] = json.load(infile)
 

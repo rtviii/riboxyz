@@ -1,6 +1,7 @@
 from functools import partial
 from pprint import pprint
 from time import time
+from typing import Tuple
 from matplotlib import pyplot as plt
 import numpy as np
 import concurrent.futures
@@ -11,8 +12,6 @@ def sphere_task(container_sink:list, atom_center_coordinate:np.ndarray, vdw_R=2)
     result = get_sphere_indices_voxelized(atom_center_coordinate, 2)
     container_sink.extend(result)
     return result
-
-
 
 def expand_atomcenters_to_spheres_threadpool(sink_container:list, sphere_sources):
   with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
@@ -26,8 +25,6 @@ def expand_atomcenters_to_spheres_threadpool(sink_container:list, sphere_sources
         concurrent.futures.wait(futures)
 
   return sink_container
-
-
 
 DBSCAN_METRICS = [
     "braycurtis",
@@ -55,10 +52,6 @@ DBSCAN_METRICS = [
     "manhattan",
 ]
 
-
-
-
-
 def midpoints(x):
     sl = ()
     for _ in range(x.ndim):
@@ -66,13 +59,15 @@ def midpoints(x):
         sl += np.index_exp[:]
     return x
 
-def normalize_atom_coordinates(coordinates: np.ndarray):
+def normalize_atom_coordinates(coordinates: np.ndarray)->tuple[ np.ndarray, np.ndarray ]:
     """@param coordinates: numpy array of shape (N,3)"""
 
-    C = coordinates
-    Cx = C[:, 0] - np.mean(C[:, 0])
-    Cy = C[:, 1] - np.mean(C[:, 1])
-    Cz = C[:, 2] - np.mean(C[:, 2])
+    C      = coordinates
+    mean_x = np.mean(C[:, 0]); mean_y = np.mean(C[:, 1]); mean_z = np.mean(C[:, 2])
+
+    Cx = C[:, 0] - mean_x
+    Cy = C[:, 1] - mean_y
+    Cz = C[:, 2] - mean_z
     
 
     [dev_x, dev_y, dev_z] = [np.min(Cx), np.min(Cy), np.min(Cz)]
@@ -84,7 +79,7 @@ def normalize_atom_coordinates(coordinates: np.ndarray):
 
     rescaled_coords = np.array(list(zip(Cx, Cy, Cz)))
 
-    return rescaled_coords
+    return rescaled_coords, np.array([[mean_x,mean_y,mean_z], [dev_x, dev_y, dev_z]])
 
 def visualize_source_coordinates(
     nulled_grid: np.ndarray,
