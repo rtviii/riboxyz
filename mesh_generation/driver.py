@@ -64,7 +64,8 @@ def expand_bbox_atoms_to_spheres(bbox_data:list|None ):
 
     return np.array(expanded)
 
-def index_grid(expanded_sphere_voxels:np.ndarray, voxel_size:int=1):
+def index_grid(expanded_sphere_voxels:np.ndarray):
+    voxel_size =1
     normalized_sphere_cords, mean_abs_vectors = normalize_atom_coordinates(expanded_sphere_voxels)
     sphere_cords_quantized  = np.round( np.array(normalized_sphere_cords / voxel_size) ).astype(int)
 
@@ -81,7 +82,7 @@ def index_grid(expanded_sphere_voxels:np.ndarray, voxel_size:int=1):
     __xyz_v_negative_ix = np.asarray( np.where(vox_grid != 1) )  
     __xyz_v_positive_ix = np.asarray( np.where(vox_grid == 1) )  # get back indexes of populated voxels
 
-    return  __xyz_v_positive_ix.T, __xyz_v_negative_ix.T, vox_grid, mean_abs_vectors
+    return  __xyz_v_positive_ix.T, __xyz_v_negative_ix.T, grid_dimensions, mean_abs_vectors
 
 def interior_capture_DBSCAN(xyz_v_negative:np.ndarray):
 
@@ -180,17 +181,21 @@ def estimate_normals(convex_hull_surface_pts:np.ndarray|None=None):
     print("Wrote surface with normals {}".format(surface_with_normals_path(RCSB_ID)))
 
 
-# from pydantic import BaseModel
-# class TunnelAtomEncoding(BaseModel): 
-#       atom_element                 : str
-#       chain_auth_asym_id           : str
-#       chain_nomenclature           : list[str]
-#       coord                        : list[float]
-#       residue_name                 : str
-#       residue_seqid                : int
-#       vdw_radius                   : float
+def move_cords_to_normalized_cord_frame(grid_dimensions:np.ndarray, translation_vectors:np.ndarray, original_cords:np.ndarray):
+    """this is a helper function for plotting to move additional atom coordinates into the cord frame of the mesh (vox grid indices)"""
+    normalized_original_cords           = original_cords - translation_vectors[0] + translation_vectors[1]
+    voxel_size                          = 1
+    normalized_original_cords_quantized = np.round( normalized_original_cords / voxel_size).astype(int)
+    vox_grid                            = np.zeros(grid_dimensions)
+    vox_grid[
+        normalized_original_cords_quantized[:, 0],
+        normalized_original_cords_quantized[:, 1],
+        normalized_original_cords_quantized[:, 2]
+        ] = 1 
+    __xyz_v_positive_ix = np.asarray( np.where(vox_grid == 1) )  # get back indexes of populated voxels
+    return  __xyz_v_positive_ix.T
 
-def plot_with_landmarks(rcsb_id:str, translation_vectors:np.ndarray):
+def plot_with_landmarks(rcsb_id:str, mesh_grid_dimensions:np.ndarray, translation_vectors:np.ndarray, ):
     """
     @translation_vectors is a np.ndarray of shape (2,3) where 
         - the first row is the means of the coordinate set 
@@ -209,6 +214,7 @@ def plot_with_landmarks(rcsb_id:str, translation_vectors:np.ndarray):
         if atom['chain_nomenclature'][0] not in atom_coordinates_by_chain:
             atom_coordinates_by_chain[ atom['chain_nomenclature'][0] ] = []
         atom_coordinates_by_chain[ atom['chain_nomenclature'][0] ].extend( [ atom['coord'] ])
+
     ptc_midpoint = np.array(ptc_data["midpoint_coordinates"])
     print("GOT TRANSLATION VECTORS ", translation_vectors)
     # pprint(atom_coordinates_by_chain)
@@ -219,11 +225,6 @@ def plot_with_landmarks(rcsb_id:str, translation_vectors:np.ndarray):
     #     atom_coordinates_by_chain[chain_name] = np.array(coords) - translation_vectors[0] + translation_vectors[1]
     # #!----- convert to the normalized coord frame
 
-
-
-
-    
-
     mesh      = pv.read(poisson_recon_path(rcsb_id))
     plotter   = pv.Plotter()
     plotter.add_mesh(mesh, opacity=0.5)
@@ -232,25 +233,20 @@ def plot_with_landmarks(rcsb_id:str, translation_vectors:np.ndarray):
 
     for i, ( chain_name, coords ) in enumerate(atom_coordinates_by_chain.items()):
         if chain_name == 'eL39':
-            chain_color = 'cyan'
-            # plotter.add_points(np.array(coords) - translation_vectors[0] + translation_vectors[1], point_size=4, color=chain_color, style='points_gaussian')
-            plotter.add_points(np.array(coords) , point_size=4, color=chain_color, style='points_gaussian')
-
+            chain_color = 'blue'
+            plotter.add_points( move_cords_to_normalized_cord_frame(mesh_grid_dimensions, translation_vectors, np.array(coords)),  point_size=4, color=chain_color, render_points_as_spheres=True)
         if chain_name == 'uL4':
             chain_color =  'green'
-            # plotter.add_points(np.array(coords)- translation_vectors[0] + translation_vectors[1], point_size=4, color=chain_color, style='points_gaussian')
-            plotter.add_points(np.array(coords), point_size=4, color=chain_color, style='points_gaussian')
+            plotter.add_points( move_cords_to_normalized_cord_frame(mesh_grid_dimensions, translation_vectors, np.array(coords)),  point_size=4, color=chain_color, render_points_as_spheres=True)
         if chain_name == 'uL22':
             chain_color =  'yellow'
-            # plotter.add_points(np.array(coords)- translation_vectors[0] + translation_vectors[1], point_size=4, color=chain_color, style='points_gaussian')
-            plotter.add_points(np.array(coords), point_size=4, color=chain_color, style='points_gaussian')
+            plotter.add_points( move_cords_to_normalized_cord_frame(mesh_grid_dimensions, translation_vectors, np.array(coords)),  point_size=4, color=chain_color, render_points_as_spheres=True)
         else:
             continue
         # chain_color =  'yellow'
 
-    plotter.add_points(np.array(ptc_midpoint)- translation_vectors[0] + translation_vectors[1], point_size=4, color='red', render_points_as_spheres=True)
+    plotter.add_points(move_cords_to_normalized_cord_frame(mesh_grid_dimensions, translation_vectors, np.array([ptc_midpoint])), point_size=6, color='red', render_points_as_spheres=True)
     plotter.add_text('Label Text', position='upper_left', font_size=18)
-
     plotter.show(auto_close=False)
 
 def main():
@@ -262,23 +258,16 @@ def main():
     else:
         with open( tunnel_atom_encoding_path(RCSB_ID), "r", ) as infile:
             bbox_atoms = json.load(infile)
-
         print("Opened tunnel atom encoding from file: {}.".format(tunnel_atom_encoding_path(RCSB_ID)))
         bbox_atoms_expanded = expand_bbox_atoms_to_spheres(bbox_atoms)
 
-    xyz_positive, xyz_negative, _, normalization_vectors = index_grid(bbox_atoms_expanded)
+    xyz_positive, xyz_negative, mesh_grid_dimensions, normalization_vectors = index_grid(bbox_atoms_expanded)
     np.save(normalization_vectors_path(RCSB_ID), normalization_vectors)
     db, clusters_container = interior_capture_DBSCAN(xyz_negative)
 
     surface_pts = surface_pts_via_convex_hull(clusters_container[DBSCAN_CLUSTER_ID])
-    # surface_pts = surface_pts_via_convex_hull()
     estimate_normals(surface_pts)
-    plot_with_landmarks(RCSB_ID, normalization_vectors)
-
-
-
-
-
+    plot_with_landmarks(RCSB_ID,mesh_grid_dimensions, normalization_vectors)
 
 
 if __name__ == "__main__":
