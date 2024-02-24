@@ -45,7 +45,7 @@ def extract_bbox_atoms(rcsb_id:str)->list:
     bbox                             = bounding_box(centerline_expansion_coordinates)
     bbox_interior_atoms              = parse_struct_via_bbox(rcsb_id, bbox)
 
-    return encode_atoms(rcsb_id, bbox_interior_atoms, write=True, writepath=tunnel_atom_encoding_path)
+    return encode_atoms(rcsb_id, bbox_interior_atoms, write=True, writepath=tunnel_atom_encoding_path(RCSB_ID))
 
 def expand_bbox_atoms_to_spheres(bbox_data:list|None ):
 
@@ -162,37 +162,33 @@ def surface_pts_via_convex_hull(selected_cluster:np.ndarray|None=None):
         grid        = cloud.delaunay_3d(alpha=2, tol=1.5,offset=2,progress_bar=True)
         convex_hull = grid.extract_surface().cast_to_pointset()
         np.save(convex_hull_cluster_path(RCSB_ID), convex_hull.points)
-        print("Saved generated convex hull to {}".format(convex_hull_cluster_path))
+        print("Saved generated convex hull to {}".format(convex_hull_cluster_path(RCSB_ID)))
         return convex_hull.points
     else:
         pts = np.load(convex_hull_cluster_path(RCSB_ID))
-        print("Loaded generated convex hull from {}".format(convex_hull_cluster_path))
+        print("Loaded generated convex hull from {}".format(convex_hull_cluster_path(RCSB_ID)))
         return pts
     # convex_hull.plot(show_edges=True)
 
-def estimate_normals(convex_hull_surface:np.ndarray|None=None):
-
-    point_cloud         = pv.PolyData(convex_hull_surface)
-    point_cloud.plot(notebook=False, show_bounds=True)
+def estimate_normals(convex_hull_surface_pts:np.ndarray|None=None):
     pcd        = o3d.geometry.PointCloud()
-    pcd.points = o3d.utility.Vector3dVector(surface_pts)
-
+    pcd.points = o3d.utility.Vector3dVector(convex_hull_surface_pts)
     pcd.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=5, max_nn=15))
     pcd.orient_normals_consistent_tangent_plane(k=10)
     o3d.visualization.draw_geometries([pcd], point_show_normal=True, window_name="Point Cloud with Normals")
-    o3d.io.write_point_cloud(surface_with_normals_path, pcd)
-    print("Wrote surface with normals {}".format(surface_with_normals_path))
+    o3d.io.write_point_cloud(surface_with_normals_path(RCSB_ID), pcd)
+    print("Wrote surface with normals {}".format(surface_with_normals_path(RCSB_ID)))
 
 
-from pydantic import BaseModel
-class TunnelAtomEncoding(BaseModel): 
-      atom_element                 : str
-      chain_auth_asym_id           : str
-      chain_nomenclature           : list[str]
-      coord                        : list[float]
-      residue_name                 : str
-      residue_seqid                : int
-      vdw_radius                   : float
+# from pydantic import BaseModel
+# class TunnelAtomEncoding(BaseModel): 
+#       atom_element                 : str
+#       chain_auth_asym_id           : str
+#       chain_nomenclature           : list[str]
+#       coord                        : list[float]
+#       residue_name                 : str
+#       residue_seqid                : int
+#       vdw_radius                   : float
 
 def plot_with_landmarks(rcsb_id:str, translation_vectors:np.ndarray):
     """
@@ -203,25 +199,25 @@ def plot_with_landmarks(rcsb_id:str, translation_vectors:np.ndarray):
 
     """
     with open( tunnel_atom_encoding_path(rcsb_id), "r", ) as infile:
-        tunnel_atoms_data:list[TunnelAtomEncoding] = json.load(infile)
+        tunnel_atoms_data:list[dict] = json.load(infile)
 
     with open( ptc_data_path(rcsb_id), "r", ) as infile:
         ptc_data = json.load(infile)
 
     atom_coordinates_by_chain:dict[str,list] = { }
     for atom in tunnel_atoms_data:
-        a = TunnelAtomEncoding.model_validate(atom)
-        if a.chain_nomenclature[0] not in atom_coordinates_by_chain:
-            atom_coordinates_by_chain[ a.chain_nomenclature[0] ] = []
-        atom_coordinates_by_chain[ a.chain_nomenclature[0] ].extend( [ a.coord ])
+        if atom['chain_nomenclature'][0] not in atom_coordinates_by_chain:
+            atom_coordinates_by_chain[ atom['chain_nomenclature'][0] ] = []
+        atom_coordinates_by_chain[ atom['chain_nomenclature'][0] ].extend( [ atom['coord'] ])
     ptc_midpoint = np.array(ptc_data["midpoint_coordinates"])
+    print("GOT TRANSLATION VECTORS ", translation_vectors)
     # pprint(atom_coordinates_by_chain)
     # pprint(ptc_midpoint)
     #!----- convert to the normalized coord frame
-    ptc_midpoint = ptc_midpoint - translation_vectors[0] + translation_vectors[1]
-    for chain_name, coords in atom_coordinates_by_chain.items():
-        atom_coordinates_by_chain[chain_name] = np.array(coords) - translation_vectors[0] + translation_vectors[1]
-    #!----- convert to the normalized coord frame
+    # ptc_midpoint = ptc_midpoint - translation_vectors[0] + translation_vectors[1]
+    # for chain_name, coords in atom_coordinates_by_chain.items():
+    #     atom_coordinates_by_chain[chain_name] = np.array(coords) - translation_vectors[0] + translation_vectors[1]
+    # #!----- convert to the normalized coord frame
 
 
 
@@ -237,19 +233,22 @@ def plot_with_landmarks(rcsb_id:str, translation_vectors:np.ndarray):
     for i, ( chain_name, coords ) in enumerate(atom_coordinates_by_chain.items()):
         if chain_name == 'eL39':
             chain_color = 'cyan'
-            plotter.add_points(np.array(coords), point_size=2, color=chain_color, style='points_gaussian')
+            # plotter.add_points(np.array(coords) - translation_vectors[0] + translation_vectors[1], point_size=4, color=chain_color, style='points_gaussian')
+            plotter.add_points(np.array(coords) , point_size=4, color=chain_color, style='points_gaussian')
 
         if chain_name == 'uL4':
             chain_color =  'green'
-            plotter.add_points(np.array(coords), point_size=2, color=chain_color, style='points_gaussian')
+            # plotter.add_points(np.array(coords)- translation_vectors[0] + translation_vectors[1], point_size=4, color=chain_color, style='points_gaussian')
+            plotter.add_points(np.array(coords), point_size=4, color=chain_color, style='points_gaussian')
         if chain_name == 'uL22':
             chain_color =  'yellow'
-            plotter.add_points(np.array(coords), point_size=2, color=chain_color, style='points_gaussian')
+            # plotter.add_points(np.array(coords)- translation_vectors[0] + translation_vectors[1], point_size=4, color=chain_color, style='points_gaussian')
+            plotter.add_points(np.array(coords), point_size=4, color=chain_color, style='points_gaussian')
         else:
             continue
         # chain_color =  'yellow'
 
-    plotter.add_points(np.array(ptc_midpoint), point_size=4, color='red', render_points_as_spheres=True)
+    plotter.add_points(np.array(ptc_midpoint)- translation_vectors[0] + translation_vectors[1], point_size=4, color='red', render_points_as_spheres=True)
     plotter.add_text('Label Text', position='upper_left', font_size=18)
 
     plotter.show(auto_close=False)
