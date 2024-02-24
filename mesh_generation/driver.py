@@ -1,3 +1,4 @@
+from pprint import pprint
 import typing
 from matplotlib import pyplot as plt
 import open3d as o3d
@@ -16,7 +17,8 @@ from mesh_generation.bbox_extraction import (
 
 from compas.geometry import bounding_box
 from mesh_generation.voxelize import expand_atomcenters_to_spheres_threadpool, get_sphere_indices_voxelized, normalize_atom_coordinates
-from ribctl import  EXIT_TUNNEL_WORK
+from ribctl import  EXIT_TUNNEL_WORK, RIBETL_DATA
+from ribctl.lib.ribosome_types.types_ribosome import PolymerClass, PolypeptideClass
 
 #? ---------- Params ------------
 RCSB_ID = "6Z6K"
@@ -27,11 +29,12 @@ u_METRIC      = "euclidean"
 
 DBSCAN_CLUSTER_ID = 3
 #? ---------- Paths ------------
-tunnel_atom_encoding_handle  = "{}_tunnel_atoms_bbox.json".format(RCSB_ID)
-tunnel_atom_encoding_path    = os.path.join(EXIT_TUNNEL_WORK,tunnel_atom_encoding_handle)
-selected_dbscan_cluster_path = os.path.join(EXIT_TUNNEL_WORK, "{}_dbscan_cluster.npy".format(RCSB_ID))
-convex_hull_cluster_path     = os.path.join(EXIT_TUNNEL_WORK, "{}_convex_hull.npy".format(RCSB_ID))
-surface_with_normals_path    = os.path.join(EXIT_TUNNEL_WORK, "{}_normal_estimated_surf.ply".format(RCSB_ID))
+tunnel_atom_encoding_path    = lambda rcsb_id : os.path.join(EXIT_TUNNEL_WORK, "{}_tunnel_atoms_bbox.json".format(rcsb_id))
+selected_dbscan_cluster_path = lambda rcsb_id : os.path.join(EXIT_TUNNEL_WORK, "{}_dbscan_cluster.npy".format(rcsb_id))
+convex_hull_cluster_path     = lambda rcsb_id : os.path.join(EXIT_TUNNEL_WORK, "{}_convex_hull.npy".format(rcsb_id))
+surface_with_normals_path    = lambda rcsb_id : os.path.join(EXIT_TUNNEL_WORK, "{}_normal_estimated_surf.ply".format(rcsb_id))
+poisson_recon_path           = lambda rcsb_id : os.path.join(EXIT_TUNNEL_WORK, "{}_poisson_recon.ply".format(rcsb_id))
+ptc_data_path                = lambda rcsb_id : os.path.join(RIBETL_DATA,rcsb_id, "{}_PTC_COORDINATES.json".format(rcsb_id))
 #? ------------------------------
 
 def extract_bbox_atoms(rcsb_id:str)->list:
@@ -180,22 +183,61 @@ def estimate_normals(convex_hull_surface:np.ndarray|None=None):
     print("Wrote surface with normals {}".format(surface_with_normals_path))
 
 
+from pydantic import BaseModel
+class TunnelAtomEncoding(BaseModel): 
+      atom_element                 : str
+      chain_auth_asym_id           : str
+      chain_nomenclature           : list[str]
+      coord                        : list[float]
+      residue_name                 : str
+      residue_seqid                : int
+      vdw_radius                   : float
 
-def plot_with_landmarks( surface_file_path:str, tunnel_atoms_encoding_file_path:str):
+def plot_with_landmarks(rcsb_id:str, translation_mxx):
+    with open( tunnel_atom_encoding_path(rcsb_id), "r", ) as infile:
+        tunnel_atoms_data:list[TunnelAtomEncoding] = json.load(infile)
 
-    RCSB_ID   = "6Z6K"
-    file_path = os.path.join(EXIT_TUNNEL_WORK,"{}_poisson_recon.ply".format(RCSB_ID))  # Update with your file path
-    mesh      = pv.read(file_path)
+    with open( ptc_data_path(rcsb_id), "r", ) as infile:
+        ptc_data = json.load(infile)
+
+    atom_coordinates_by_chain:dict[str,list] = { }
+    for atom in tunnel_atoms_data:
+        a = TunnelAtomEncoding.model_validate(atom)
+        if a.chain_nomenclature[0] not in atom_coordinates_by_chain:
+            atom_coordinates_by_chain[ a.chain_nomenclature[0] ] = []
+        atom_coordinates_by_chain[ a.chain_nomenclature[0] ].extend( [ a.coord ] )
+
+
+
+    ptc_midpoint = np.array(ptc_data["midpoint_coordinates"])
+    pprint(atom_coordinates_by_chain)
+    pprint(ptc_midpoint)
+
+
+    
+
+    mesh      = pv.read(poisson_recon_path(rcsb_id))
     plotter   = pv.Plotter()
     plotter.add_mesh(mesh, opacity=0.5)
     # plotter.show()
+    colors = ['green','yellow', 'blue', 'magenta','cyan', 'pink', 'orange', 'purple', 'brown', 'grey']
 
-    points1 = np.array([[40,40,40], [50,50,50]])
-    plotter.add_points(points1,  point_size=100.0, color='red', style='points_gaussian')
-    points2 = np.array([[10,10,10], [100,100,100]])
-    plotter.add_points(points2, render_points_as_spheres=True, point_size=30.0, color='blue')
+    for i, ( chain_name, coords ) in enumerate(atom_coordinates_by_chain.items()):
+        if chain_name == 'eL39':
+            chain_color = 'cyan'
+            plotter.add_points(np.array(coords), point_size=2, color=chain_color, style='points_gaussian')
 
-    # Add a text label
+        if chain_name == 'uL4':
+            chain_color =  'green'
+            plotter.add_points(np.array(coords), point_size=2, color=chain_color, style='points_gaussian')
+        if chain_name == 'uL22':
+            chain_color =  'yellow'
+            plotter.add_points(np.array(coords), point_size=2, color=chain_color, style='points_gaussian')
+        else:
+            continue
+        # chain_color =  'yellow'
+
+    plotter.add_points(np.array(ptc_midpoint), point_size=4, color='red', render_points_as_spheres=True)
     plotter.add_text('Label Text', position='upper_left', font_size=18)
 
     plotter.show(auto_close=False)
@@ -217,17 +259,15 @@ def main():
     # db, clusters_container = interior_capture_DBSCAN(xyz_negative)
 
     # surface_pts = surface_pts_via_convex_hull(clusters_container[DBSCAN_CLUSTER_ID])
-    surface_pts = surface_pts_via_convex_hull()
+    # surface_pts = surface_pts_via_convex_hull()
+    # estimate_normals(surface_pts)
+    plot_with_landmarks(RCSB_ID)
+
+
+
+
 
 
 
 if __name__ == "__main__":
     main()
-
-# DBSCAN_CLUSTERS_visualize_all(clusters_container)
-
-# while input("Enter to continue. 'q' to exit.") != "q":
-
-    # cluster_id = input("Inspect (another) cluster?")
-    # if int(cluster_id ) in clusters_container:
-        # DBSCAN_CLUSTERS_visualize_one(xyz_positive, clusters_container[int(cluster_id)])
