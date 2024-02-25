@@ -267,22 +267,61 @@ def plot_with_landmarks(rcsb_id:str, mesh_grid_dimensions:np.ndarray, translatio
     plotter.add_mesh(mesh, opacity=0.5)
     # plotter.show()
     colors = ['green','yellow', 'blue', 'magenta','cyan', 'pink', 'orange', 'purple', 'brown', 'grey']
+    CHAIN_PT_SIZE = 8
+    PTC_PT_SIZE = 20
 
     for i, ( chain_name, coords ) in enumerate(atom_coordinates_by_chain.items()):
         if chain_name == 'eL39':
             chain_color = 'blue'
-            plotter.add_points( move_cords_to_normalized_cord_frame(mesh_grid_dimensions, translation_vectors, np.array(coords)),  point_size=4, color=chain_color, render_points_as_spheres=True)
+            plotter.add_points( move_cords_to_normalized_cord_frame(mesh_grid_dimensions, translation_vectors, np.array(coords)),  point_size=CHAIN_PT_SIZE, color=chain_color, render_points_as_spheres=True)
         if chain_name == 'uL4':
             chain_color =  'green'
-            plotter.add_points( move_cords_to_normalized_cord_frame(mesh_grid_dimensions, translation_vectors, np.array(coords)),  point_size=4, color=chain_color, render_points_as_spheres=True)
+            plotter.add_points( move_cords_to_normalized_cord_frame(mesh_grid_dimensions, translation_vectors, np.array(coords)),  point_size=CHAIN_PT_SIZE, color=chain_color, render_points_as_spheres=True)
         if chain_name == 'uL22':
             chain_color =  'yellow'
-            plotter.add_points( move_cords_to_normalized_cord_frame(mesh_grid_dimensions, translation_vectors, np.array(coords)),  point_size=4, color=chain_color, render_points_as_spheres=True)
+            plotter.add_points( move_cords_to_normalized_cord_frame(mesh_grid_dimensions, translation_vectors, np.array(coords)),  point_size=CHAIN_PT_SIZE, color=chain_color, render_points_as_spheres=True)
         else:
             continue
 
-    plotter.add_points(move_cords_to_normalized_cord_frame(mesh_grid_dimensions, translation_vectors, np.array([ptc_midpoint])), point_size=6, color='red', render_points_as_spheres=True)
-    plotter.add_text('Label Text', position='upper_left', font_size=18)
+    plotter.add_points(move_cords_to_normalized_cord_frame(mesh_grid_dimensions, translation_vectors, np.array([ptc_midpoint])), point_size=PTC_PT_SIZE, color='red', render_points_as_spheres=True)
+
+
+
+
+    labels_colors = [('uL4', 'green'),('uL22','yellow'),('eL39','blue'), ('PTC','red')]
+
+    for ( i, ( label, color ) ) in enumerate(labels_colors):
+        offset = i * 30  # Adjust the offset as needed
+        position = (20, 200 - offset, 0)
+        
+        plotter.add_text(label,
+                     position             = position,
+                     font_size            = 20,
+                     color                = color,
+                     shadow               = True)
+
+
+    # plotter.add_text('Label Text', position='upper_left', font_size=18)
+    # plotter.add_text('uL4',
+    #                  position             = 'upper_left',
+    #                  font_size            = 10,
+    #                  color                = 'green',
+    #                  shadow               = True)
+    # plotter.add_text('uL22',
+    #                  position             = 'upper_left',
+    #                  font_size            = 10,
+    #                  color                = 'yellow',
+    #                  shadow               = True)
+    # plotter.add_text('eL39',
+    #                  position             = 'upper_left',
+    #                  font_size            = 10,
+    #                  color                = 'blue',
+    #                  shadow               = True)
+    # plotter.add_text('PTC',
+    #                  position             = 'upper_left',
+    #                  font_size            = 10,
+    #                  color                = 'red',
+    #                  shadow               = True)
     plotter.show(auto_close=False)
 
 def main():
