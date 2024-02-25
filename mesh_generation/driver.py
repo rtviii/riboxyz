@@ -16,9 +16,8 @@ from mesh_generation.bbox_extraction import (
 )
 
 from compas.geometry import bounding_box
-from mesh_generation.voxelize import expand_atomcenters_to_spheres_threadpool, get_sphere_indices_voxelized, normalize_atom_coordinates
+from mesh_generation.voxelize import expand_atomcenters_to_spheres_threadpool, normalize_atom_coordinates
 from ribctl import  EXIT_TUNNEL_WORK, RIBETL_DATA
-from ribctl.lib.ribosome_types.types_ribosome import PolymerClass, PolypeptideClass
 
 #? ---------- Params ------------
 RCSB_ID = "6Z6K"
@@ -37,6 +36,44 @@ surface_with_normals_path    = lambda rcsb_id : os.path.join(EXIT_TUNNEL_WORK, "
 poisson_recon_path           = lambda rcsb_id : os.path.join(EXIT_TUNNEL_WORK, "{}_poisson_recon.ply".format(rcsb_id))
 ptc_data_path                = lambda rcsb_id : os.path.join(RIBETL_DATA,rcsb_id, "{}_PTC_COORDINATES.json".format(rcsb_id))
 #? ------------------------------
+
+
+def bounding_box(points:np.ndarray):
+    """Computes the axis-aligned minimum bounding box of a list of points.
+
+    Parameters
+    ----------
+    points : sequence[point]
+        XYZ coordinates of the points.
+
+    Returns
+    -------
+    list[[float, float, float]]
+        XYZ coordinates of 8 points defining a box.
+
+    See Also
+    --------
+    :func:`compas.geometry.oriented_bounding_box_numpy`
+    :func:`compas.geometry.bounding_box_xy`
+
+    """
+    x, y, z = zip(*points)
+    min_x = min(x)
+    max_x = max(x)
+    min_y = min(y)
+    max_y = max(y)
+    min_z = min(z)
+    max_z = max(z)
+    return [
+        [min_x, min_y, min_z],
+        [max_x, min_y, min_z],
+        [max_x, max_y, min_z],
+        [min_x, max_y, min_z],
+        [min_x, min_y, max_z],
+        [max_x, min_y, max_z],
+        [max_x, max_y, max_z],
+        [min_x, max_y, max_z],
+    ]
 
 def extract_bbox_atoms(rcsb_id:str)->list:
 
@@ -243,18 +280,18 @@ def plot_with_landmarks(rcsb_id:str, mesh_grid_dimensions:np.ndarray, translatio
             plotter.add_points( move_cords_to_normalized_cord_frame(mesh_grid_dimensions, translation_vectors, np.array(coords)),  point_size=4, color=chain_color, render_points_as_spheres=True)
         else:
             continue
-        # chain_color =  'yellow'
 
     plotter.add_points(move_cords_to_normalized_cord_frame(mesh_grid_dimensions, translation_vectors, np.array([ptc_midpoint])), point_size=6, color='red', render_points_as_spheres=True)
     plotter.add_text('Label Text', position='upper_left', font_size=18)
     plotter.show(auto_close=False)
 
 def main():
+
+    "the data arrives here as atom coordinates extracted from the biopython model "
     if not os.path.exists(tunnel_atom_encoding_path(RCSB_ID)):
         bbox_atoms          = extract_bbox_atoms(RCSB_ID)
         bbox_atoms_expanded = expand_bbox_atoms_to_spheres(bbox_atoms)
         print("Extracted tunnel atom encoding from PDB: {}.".format(RCSB_ID))
-
     else:
         with open( tunnel_atom_encoding_path(RCSB_ID), "r", ) as infile:
             bbox_atoms = json.load(infile)
@@ -266,6 +303,8 @@ def main():
     db, clusters_container = interior_capture_DBSCAN(xyz_negative)
 
     surface_pts = surface_pts_via_convex_hull(clusters_container[DBSCAN_CLUSTER_ID])
+
+
     estimate_normals(surface_pts)
     plot_with_landmarks(RCSB_ID,mesh_grid_dimensions, normalization_vectors)
 

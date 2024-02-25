@@ -57,11 +57,12 @@ def parse_struct_via_centerline(
     parser = MMCIFParser()
 
     # struct_path = "{}/{}/{}.cif".format(RIBETL_DATA, rcsb_id, rcsb_id)
+
     struct_path = RibosomeAssets(rcsb_id)._cif_filepath()
-    structure = parser.get_structure(rcsb_id, struct_path)
-    atoms = Selection.unfold_entities(structure, "A")
-    ns = NeighborSearch(atoms)
-    nbhd = set()
+    structure   = parser.get_structure(rcsb_id, struct_path)
+    atoms       = Selection.unfold_entities(structure, "A")
+    ns          = NeighborSearch(atoms)
+    nbhd        = set()
 
     for [probe_radius, x, y, z] in centerline_data:
         nearby_atoms = ns.search([x, y, z], probe_radius + expansion_radius, "A")
