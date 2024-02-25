@@ -63,7 +63,9 @@ def normalize_atom_coordinates(coordinates: np.ndarray)->tuple[ np.ndarray, np.n
     """@param coordinates: numpy array of shape (N,3)"""
 
     C      = coordinates
-    mean_x = np.mean(C[:, 0]); mean_y = np.mean(C[:, 1]); mean_z = np.mean(C[:, 2])
+    mean_x = np.mean(C[:, 0])
+    mean_y = np.mean(C[:, 1])
+    mean_z = np.mean(C[:, 2])
 
     Cx = C[:, 0] - mean_x
     Cy = C[:, 1] - mean_y
@@ -79,7 +81,7 @@ def normalize_atom_coordinates(coordinates: np.ndarray)->tuple[ np.ndarray, np.n
 
     rescaled_coords = np.array(list(zip(Cx, Cy, Cz)))
 
-    return rescaled_coords, np.array([[mean_x,mean_y,mean_z], [dev_x, dev_y, dev_z]])
+    return rescaled_coords, np.array([[mean_x,mean_y,mean_z], [abs( dev_x ), abs( dev_y ), abs( dev_z )]])
 
 def visualize_source_coordinates(
     nulled_grid: np.ndarray,

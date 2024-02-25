@@ -90,17 +90,18 @@ def expand_bbox_atoms_to_spheres(bbox_data:list|None ):
     __radii = np.array(list(map(lambda x: x["vdw_radius"], bbox_data)))
 
     sphere_sources = zip(__cords, __radii)
-
     SINK     = []
     expanded = expand_atomcenters_to_spheres_threadpool(SINK, sphere_sources)
-
 
     return np.array(expanded)
 
 def index_grid(expanded_sphere_voxels:np.ndarray):
-    voxel_size =1
+
+
     normalized_sphere_cords, mean_abs_vectors = normalize_atom_coordinates(expanded_sphere_voxels)
-    sphere_cords_quantized  = np.round( np.array(normalized_sphere_cords / voxel_size) ).astype(int)
+
+    voxel_size             = 1
+    sphere_cords_quantized = np.round( np.array(normalized_sphere_cords / voxel_size) ).astype(int)
 
     max_values      = np.max(sphere_cords_quantized, axis=0)
     grid_dimensions = max_values + 1
@@ -166,17 +167,20 @@ def DBSCAN_CLUSTERS_visualize_all(dbscan_cluster_dict:dict[int, list]):
         print("Cluster {} has {} points.".format(k, len(v)))
 
     clusters_palette = dict(zip(range(-1, 40), plt.cm.terrain(np.linspace(0, 1, 40))))
+
     for k, v in clusters_palette.items():
         clusters_palette[k] = [*v[:3], 0.5]
 
     combined_cluster_colors = []
     combined_cluster_points = []
+
     for dbscan_label, coordinates in dbscan_cluster_dict.items():
         combined_cluster_points.extend(coordinates)
         combined_cluster_colors.extend([ clusters_palette[dbscan_label * 2] if dbscan_label != -1 else [0, 0, 0, 1]]*len(coordinates))
 
     point_cloud         = pv.PolyData(combined_cluster_points)
     point_cloud["rgba"] = combined_cluster_colors
+
     point_cloud.plot(scalars="rgba", rgb=True, notebook=False, show_bounds=True)
 
 def DBSCAN_CLUSTERS_visualize_one(positive_space:np.ndarray, selected_cluster:np.ndarray):

@@ -84,15 +84,18 @@ def parse_struct_via_bbox(rcsb_id: str, bbox: list) -> list:
     nbhd        = []
 
     def is_inside_box(point, box_coordinates):
+        
+        [
+            [min_x, min_y, min_z],
+            [max_x, min_y, min_z],
+            [max_x, max_y, min_z],
+            [min_x, max_y, min_z],
+            [min_x, min_y, max_z],
+            [max_x, min_y, max_z],
+            [max_x, max_y, max_z],
+            [min_x, max_y, max_z],
+                                    ] = box_coordinates
 
-        min_x = min(box_coordinates, key=lambda x: x[0])[0]
-        max_x = max(box_coordinates, key=lambda x: x[0])[0]
-
-        min_y = min(box_coordinates, key=lambda x: x[1])[1]
-        max_y = max(box_coordinates, key=lambda x: x[1])[1]
-
-        min_z = min(box_coordinates, key=lambda x: x[2])[2]
-        max_z = max(box_coordinates, key=lambda x: x[2])[2]
 
         if  ( min_x ) <= point[0] <= ( max_x ) and \
             ( min_y ) <= point[1] <= ( max_y ) and \
