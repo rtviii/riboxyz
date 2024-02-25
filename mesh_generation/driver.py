@@ -51,10 +51,6 @@ def bounding_box(points:np.ndarray):
     list[[float, float, float]]
         XYZ coordinates of 8 points defining a box.
 
-    See Also
-    --------
-    :func:`compas.geometry.oriented_bounding_box_numpy`
-    :func:`compas.geometry.bounding_box_xy`
 
     """
     x, y, z = zip(*points)
