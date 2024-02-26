@@ -11,9 +11,10 @@ LOGS_PATH              = os.path.join(pathlib.Path(__file__).parent, "logs")
 CLASSIFICATION_REPORTS = os.path.join(pathlib.Path(__file__).parent, "logs","hmm_classification_reports")
 
 #! ------------- assets ----------------
-ASSETS_PATH      = os.path.join(pathlib.Path(__file__).parent, "assets")
-MUSCLE_BIN       = os.path.join(ASSETS_PATH, "muscle3.8.1")
-EXIT_TUNNEL_WORK = os.path.join(ASSETS_PATH, "exit_tunnel_work")
+ASSETS_PATH       = os.path.join(pathlib.Path(__file__).parent, "assets")
+MUSCLE_BIN        = os.path.join(ASSETS_PATH, "muscle3.8.1")
+EXIT_TUNNEL_WORK  = os.path.join(ASSETS_PATH, "exit_tunnel_work")
+POISSON_RECON_BIN = os.path.join(EXIT_TUNNEL_WORK, "PoissonRecon")
 
 asset_type  = Literal[
     "subunit_map_lsu",

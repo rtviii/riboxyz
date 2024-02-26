@@ -1,4 +1,5 @@
 from pprint import pprint
+import subprocess
 import typing
 from matplotlib import pyplot as plt
 import open3d as o3d
@@ -17,7 +18,7 @@ from mesh_generation.bbox_extraction import (
 
 from compas.geometry import bounding_box
 from mesh_generation.voxelize import expand_atomcenters_to_spheres_threadpool, normalize_atom_coordinates
-from ribctl import  EXIT_TUNNEL_WORK, RIBETL_DATA
+from ribctl import  EXIT_TUNNEL_WORK, POISSON_RECON_BIN, RIBETL_DATA
 
 #? ---------- Params ------------
 RCSB_ID = "6Z6K"
@@ -217,7 +218,6 @@ def estimate_normals(convex_hull_surface_pts:np.ndarray|None=None):
     o3d.io.write_point_cloud(surface_with_normals_path(RCSB_ID), pcd)
     print("Wrote surface with normals {}".format(surface_with_normals_path(RCSB_ID)))
 
-
 def move_cords_to_normalized_cord_frame(grid_dimensions:np.ndarray, translation_vectors:np.ndarray, original_cords:np.ndarray):
     """this is a helper function for plotting to move additional atom coordinates into the cord frame of the mesh (vox grid indices)"""
     normalized_original_cords           = original_cords - translation_vectors[0] + translation_vectors[1]
@@ -233,6 +233,7 @@ def move_cords_to_normalized_cord_frame(grid_dimensions:np.ndarray, translation_
     return  __xyz_v_positive_ix.T
 
 def plot_with_landmarks(rcsb_id:str, mesh_grid_dimensions:np.ndarray, translation_vectors:np.ndarray, ):
+
     """
     @translation_vectors is a np.ndarray of shape (2,3) where 
         - the first row is the means of the coordinate set 
@@ -240,6 +241,7 @@ def plot_with_landmarks(rcsb_id:str, mesh_grid_dimensions:np.ndarray, translatio
         (to be used to reverse the normalization process or to travel to this coordinate frame)
 
     """
+
     with open( tunnel_atom_encoding_path(rcsb_id), "r", ) as infile:
         tunnel_atoms_data:list[dict] = json.load(infile)
 
@@ -253,22 +255,13 @@ def plot_with_landmarks(rcsb_id:str, mesh_grid_dimensions:np.ndarray, translatio
         atom_coordinates_by_chain[ atom['chain_nomenclature'][0] ].extend( [ atom['coord'] ])
 
     ptc_midpoint = np.array(ptc_data["midpoint_coordinates"])
-    print("GOT TRANSLATION VECTORS ", translation_vectors)
-    # pprint(atom_coordinates_by_chain)
-    # pprint(ptc_midpoint)
-    #!----- convert to the normalized coord frame
-    # ptc_midpoint = ptc_midpoint - translation_vectors[0] + translation_vectors[1]
-    # for chain_name, coords in atom_coordinates_by_chain.items():
-    #     atom_coordinates_by_chain[chain_name] = np.array(coords) - translation_vectors[0] + translation_vectors[1]
-    # #!----- convert to the normalized coord frame
 
     mesh      = pv.read(poisson_recon_path(rcsb_id))
     plotter   = pv.Plotter()
     plotter.add_mesh(mesh, opacity=0.5)
-    # plotter.show()
-    colors = ['green','yellow', 'blue', 'magenta','cyan', 'pink', 'orange', 'purple', 'brown', 'grey']
+
     CHAIN_PT_SIZE = 8
-    PTC_PT_SIZE = 20
+    PTC_PT_SIZE   = 20
 
     for i, ( chain_name, coords ) in enumerate(atom_coordinates_by_chain.items()):
         if chain_name == 'eL39':
@@ -284,45 +277,40 @@ def plot_with_landmarks(rcsb_id:str, mesh_grid_dimensions:np.ndarray, translatio
             continue
 
     plotter.add_points(move_cords_to_normalized_cord_frame(mesh_grid_dimensions, translation_vectors, np.array([ptc_midpoint])), point_size=PTC_PT_SIZE, color='red', render_points_as_spheres=True)
-
-
-
-
     labels_colors = [('uL4', 'green'),('uL22','yellow'),('eL39','blue'), ('PTC','red')]
 
     for ( i, ( label, color ) ) in enumerate(labels_colors):
         offset = i * 30  # Adjust the offset as needed
         position = (20, 200 - offset, 0)
-        
         plotter.add_text(label,
                      position             = position,
                      font_size            = 20,
                      color                = color,
                      shadow               = True)
-
-
-    # plotter.add_text('Label Text', position='upper_left', font_size=18)
-    # plotter.add_text('uL4',
-    #                  position             = 'upper_left',
-    #                  font_size            = 10,
-    #                  color                = 'green',
-    #                  shadow               = True)
-    # plotter.add_text('uL22',
-    #                  position             = 'upper_left',
-    #                  font_size            = 10,
-    #                  color                = 'yellow',
-    #                  shadow               = True)
-    # plotter.add_text('eL39',
-    #                  position             = 'upper_left',
-    #                  font_size            = 10,
-    #                  color                = 'blue',
-    #                  shadow               = True)
-    # plotter.add_text('PTC',
-    #                  position             = 'upper_left',
-    #                  font_size            = 10,
-    #                  color                = 'red',
-    #                  shadow               = True)
     plotter.show(auto_close=False)
+
+def apply_poisson_reconstruction(rcsb_id:str):
+    command = [
+        POISSON_RECON_BIN,
+        "--in",
+        surface_with_normals_path(rcsb_id),
+        "--out",
+        poisson_recon_path(rcsb_id),
+        "--depth",
+        "6",
+        "--pointWeight",
+        "3"
+    ]
+
+    process = subprocess.run(command, capture_output=True, text=True)
+    if process.returncode == 0:
+        print("PoissonRecon executed successfully.")
+        print("Saved to {}".format(poisson_recon_path(rcsb_id)))
+    else:
+        print("Error:", process.stderr)
+
+
+
 
 def main():
 
@@ -342,9 +330,8 @@ def main():
     db, clusters_container = interior_capture_DBSCAN(xyz_negative)
 
     surface_pts = surface_pts_via_convex_hull(clusters_container[DBSCAN_CLUSTER_ID])
-
-
     estimate_normals(surface_pts)
+    apply_poisson_reconstruction(RCSB_ID)
     plot_with_landmarks(RCSB_ID,mesh_grid_dimensions, normalization_vectors)
 
 

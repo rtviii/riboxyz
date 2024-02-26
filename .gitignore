@@ -1,6 +1,6 @@
 
 ribctl/assets/PoissonRecon
-
+**/PoissonRecon
 volume/**
 volume/
 **/volume/
