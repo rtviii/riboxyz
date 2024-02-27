@@ -22,7 +22,6 @@ from ribctl.logs.loggers import get_etl_logger
 logger = get_etl_logger()
 
 class Assetlist(BaseModel)   : 
-
       profile                : Optional[bool]
       ptc_coords             : Optional[bool]
       cif                    : Optional[bool]
@@ -32,10 +31,6 @@ class Assetlist(BaseModel)   :
 
 class RibosomeAssets():
     rcsb_id: str
-
-
-    @staticmethod
-
 
     def __init__(self, rcsb_id: str) -> None:
         self.rcsb_id = rcsb_id.upper()

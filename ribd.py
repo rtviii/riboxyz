@@ -84,10 +84,8 @@ def cmd_etl(args):
     #All structures
     if args.obtain_all_structures:
         obtain_assets_threadpool(
-            [],
             ASL,
             workers   = 4,
-            get_all   = True,
             overwrite = args.overwrite or False
         )
         exit("Exited")

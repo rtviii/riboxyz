@@ -18,7 +18,7 @@ import os
 
 from ribctl.logs.loggers import get_etl_logger
 
-async def obtain_assets(rcsb_id: str, assetlist: Assetlist, overwrite: bool = False):
+async def obtain_assets(rcsb_id: str, assetlist, overwrite: bool = False):
     """Obtain all assets for a given RCSB ID"""
 
     rcsb_id = rcsb_id.upper()
@@ -67,14 +67,10 @@ async def obtain_assets(rcsb_id: str, assetlist: Assetlist, overwrite: bool = Fa
 
     await asyncio.gather(*coroutines)
 
-def obtain_assets_threadpool(targets: list[str], assetlist: Assetlist, workers: int = 15, get_all: bool = False, overwrite=False):
+def obtain_assets_threadpool(assetlist: Assetlist, workers: int = 15,  overwrite=False):
     """Get all ribosome profiles from RCSB via a threadpool"""
     logger = get_etl_logger()
-
-    if get_all:
-        unsynced = sorted(current_rcsb_structs())
-    else:
-        unsynced = list(map(lambda _: _.upper(), targets))
+    unsynced = sorted(current_rcsb_structs())
         
     logger.info(f"Found {len(unsynced)} unsynced structures")
 
@@ -92,7 +88,6 @@ def obtain_assets_threadpool(targets: list[str], assetlist: Assetlist, workers: 
 
     with ThreadPoolExecutor(max_workers=workers) as executor:
 
-        print("Got unsynced structures")
         for rcsb_id in unsynced:
             fut = executor.submit(asyncio.run, obtain_assets(rcsb_id, assetlist, overwrite))
             fut.add_done_callback(log_commit_result(rcsb_id))
