@@ -35,7 +35,7 @@ class AssetFile:
     def ligand(self,ligand_id):
         return "{}/{}/LIGAND_{}.json".format(RIBETL_DATA,self.rcsb_id, ligand_id)
     
-    def status(self):
+    def status(self)->dict[str, bool]:
         return {
            AssetType.PTC.name    : os.path.exists(self.ptc_coords()),
            AssetType.PROFILE.name: os.path.exists(self.profile()),
@@ -48,8 +48,9 @@ class AssetFile:
         return os.listdir(RIBETL_DATA)
     
     @staticmethod
-    def status_all():
+    def status_all()->list[tuple[str, dict[str, bool]]]:
+        _ = []
         for struct in AssetFile.list_all_structs():
-            print(struct, AssetFile(struct).status())
+            _.append([struct, AssetFile(struct).status()])
+        return _
 
-# AssetFile.status_all()

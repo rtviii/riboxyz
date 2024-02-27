@@ -2,7 +2,6 @@ import math
 import os
 from fuzzysearch import find_near_matches
 import numpy as np
-from ribctl.etl.ribosome_assets import RibosomeAssets
 from ribctl.lib.ribosome_types.types_binding_site import (
     AMINO_ACIDS,
     NUCLEOTIDES,
@@ -15,6 +14,7 @@ from Bio.PDB.Atom import Atom
 from functools import reduce
 from Bio.PDB.Structure import Structure
 from ribctl.lib.ribosome_types.types_ribosome import RNA
+from fuzzysearch import find_near_matches
 
 
 # https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4574749/pdf/1719.pdf
@@ -48,7 +48,6 @@ def residue_labels(res: Residue | ResidueSummary) -> bool:
 def ptc_fuzzyfind_subseq_in_chain( biopython_struct, auth_asym_id: str, assembly_id: int = 0 )  \
     -> tuple[list[Residue], list[Residue], list[Residue], str]:
 
-    print("got biopytho nstruct: ", biopython_struct)
     chain3d       : Chain         = biopython_struct.child_dict[assembly_id].child_dict[auth_asym_id]
     ress          : list[Residue] = chain3d.child_list
     ress_sanitized: list[Residue] = [
@@ -98,7 +97,7 @@ def ptc_resdiues_get(
     biopython_structure: Structure, rnas: list[RNA], assembly_id: int = 0
 ) -> tuple[list[Residue], str]:
     """
-    Given a bacterial structure (assertion un_enforced):
+    Given a bacterial(?) structure (assertion un_enforced):
      - obtain the LSU rRNA chain
      - sanitze the sequence (canonicalize non-canonical residues)
      - locate the conserved subsequence (due to Doris et al.)
@@ -116,8 +115,7 @@ def ptc_resdiues_get(
     try:
         auth_asym_id, rRNA_fragment_matches = list( filter(lambda match_kv: len(match_kv[1][2]) > 0, list(matches.items())) )[0]
     except Exception as e:
-        print("Error:Could not identify PTC residues in {} : {} ".format(biopython_structure.id, e)   )
-        exit(1)
+        raise Exception("Error:Could not identify PTC residues in {} : {} ".format(biopython_structure.id, e)   )
 
     chain3d: Chain = struct_profile.child_dict[assembly_id].child_dict[auth_asym_id]
     ress: list[Residue] = chain3d.child_list
@@ -132,10 +130,9 @@ def ptc_resdiues_get(
 
     raw_seq = reduce(lambda x, y: x + y.resname, ress_sanitized, "")
 
-    from fuzzysearch import find_near_matches
 
-    matches = find_near_matches(DORIS_ET_AL["SITE_9"], raw_seq, max_l_dist=1)
-    m0 = pick_match(matches, len(raw_seq))
+    matches      = find_near_matches(DORIS_ET_AL["SITE_9"], raw_seq, max_l_dist=1)
+    m0           = pick_match(matches, len(raw_seq))
     PTC_residues = [ress_sanitized[i] for i in list(range(m0.start, m0.end))]
 
     return PTC_residues, auth_asym_id

@@ -6,6 +6,7 @@ from Bio.PDB.Structure import Structure
 from Bio.PDB.Chain import Chain
 from typing import Optional
 from ribctl import AMINO_ACIDS_3_TO_1_CODE
+from ribctl.etl import AssetFile
 from ribctl.etl.ribosome_assets import Assetlist, RibosomeAssets
 from ribctl.lib.tunnel import ptc_resdiues_get, ptc_residues_calculate_midpoint
 from ribctl.lib.ribosome_types.types_binding_site import BindingSite
@@ -13,9 +14,6 @@ from ribctl.lib.mod_extract_bsites import bsite_ligand, struct_ligand_ids, bsite
 from ribctl.lib.mod_split_rename import split_rename
 from ribctl.etl.etl_pipeline import current_rcsb_structs, ReannotationPipeline, rcsb_single_structure_graphql, query_rcsb_api
 from concurrent.futures import  Future, ThreadPoolExecutor
-
-import os
-
 from ribctl.logs.loggers import get_etl_logger
 
 async def obtain_assets(rcsb_id: str, assetlist, overwrite: bool = False):
@@ -27,10 +25,8 @@ async def obtain_assets(rcsb_id: str, assetlist, overwrite: bool = False):
 
     coroutines = []
 
-    print("Obtaining assets")
 
     if assetlist.profile:
-        print("Obtaining assets:profile")
         coroutines.append(assets._update_json_profile(overwrite))
 
     if assetlist.cif:
@@ -38,31 +34,13 @@ async def obtain_assets(rcsb_id: str, assetlist, overwrite: bool = False):
         coroutines.append(assets._update_cif(overwrite))
 
     if assetlist.ligands:
-        print("Obtaining assets:ligands")
         coroutines.append(assets._update_ligands(overwrite))
 
     if assetlist.ptc_coords:
-        print("Obtaining assets:ptc_coords")
-        asset_ptc_coords_path = os.path.join(assets._dir_path(),f'{assets.rcsb_id}_PTC_COORDINATES.json')
 
-        if os.path.exists(asset_ptc_coords_path) and not overwrite:
-            raise Exception(f'PTC coordinates already exist for {assets.rcsb_id} and overwrite is set to False')
-
-        ress, auth_asym_id = ptc_resdiues_get(assets.biopython_structure(),  assets.profile().rnas)
-        midpoint_coords = ptc_residues_calculate_midpoint(ress, auth_asym_id)
-
-        writeout = {
-            "site_9_residues"      : [(res.get_resname(), res.get_segid(), res.full_id) for res in ress],
-            "LSU_rRNA_auth_asym_id": auth_asym_id,
-            "midpoint_coordinates" : midpoint_coords,
-            'nomenclature_table'   : assets._nomenclature_table()
-        }
-
-        with open(asset_ptc_coords_path, 'w') as f:
-            json.dump(writeout, f)
+        coroutines.append(assets._update_ptc_coordinates(overwrite))
 
     if assetlist.cif_modified_and_chains:
-        print("Obtaining assets:cif modified and chains")
         coroutines.append(assets.upsert(overwrite))
 
     await asyncio.gather(*coroutines)
@@ -100,3 +78,24 @@ def obtain_assets_threadpool(assetlist: Assetlist, workers: int = 15,  overwrite
                 logger.error(future.exception())
 
     logger.info("Finished syncing with RCSB")
+
+
+def obtain_all_missing():
+    import asyncio
+
+    etllogger = get_etl_logger()
+    statuses = AssetFile.status_all()
+    print(statuses)
+    print("got all struct statust", len(statuses))
+    count = 0
+    for i,j in statuses:
+        if j['PTC'] == False:
+            count += 1
+    print("PTCs missing", count)
+
+    for struct, status in statuses:
+        if not status['PTC'] :
+            try:
+                asyncio.run(RibosomeAssets(struct)._update_ptc_coordinates())
+            except Exception as e:
+                etllogger.error(f"Error in {struct} : {e}")

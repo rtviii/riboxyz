@@ -10,6 +10,7 @@ from ribctl.lib.ribosome_types.types_binding_site import BindingSite
 from ribctl.lib.mod_extract_bsites import  struct_ligand_ids, bsite_ligand
 from ribctl.lib.mod_split_rename import split_rename
 from ribctl.etl.etl_pipeline import current_rcsb_structs, ReannotationPipeline, rcsb_single_structure_graphql, query_rcsb_api
+from ribctl.lib.tunnel import ptc_resdiues_get, ptc_residues_calculate_midpoint
 # from ribctl.lib.mod_render_thumbnail import render_thumbnail
 from ribctl.lib.utils import download_unpack_place, open_structure
 from ribctl.lib.ribosome_types.types_ribosome import RNA, LifecycleFactorClass, PolymerClass, PolynucleotideClass, Protein, CytosolicProteinClass, RibosomeStructure
@@ -307,6 +308,29 @@ class RibosomeAssets():
 
     async def _update_chains_dir(self):
         split_rename(self.rcsb_id)
+
+    async def _update_ptc_coordinates(self, overwrite:bool=False):
+
+        etllogger = get_etl_logger()
+        asset_ptc_coords_path = os.path.join(self._dir_path(),f'{self.rcsb_id}_PTC_COORDINATES.json')
+
+        if os.path.exists(asset_ptc_coords_path) and not overwrite:
+            raise Exception(f'PTC coordinates already exist for {self.rcsb_id} and overwrite is set to False')
+
+        ress, auth_asym_id = ptc_resdiues_get(self.biopython_structure(),  self.profile().rnas)
+        midpoint_coords = ptc_residues_calculate_midpoint(ress, auth_asym_id)
+
+        writeout = {
+            "site_9_residues"      : [(res.get_resname(), res.get_segid(), res.full_id) for res in ress],
+            "LSU_rRNA_auth_asym_id": auth_asym_id,
+            "midpoint_coordinates" : midpoint_coords,
+            'nomenclature_table'   : self._nomenclature_table()
+        }
+
+        with open(asset_ptc_coords_path, 'w') as f:
+            json.dump(writeout, f)
+            etllogger.info(f"Saved PTC coordinates for {self.rcsb_id} to {asset_ptc_coords_path}")
+
 
     async def _update_ligands(self, overwrite:bool=False):
 
