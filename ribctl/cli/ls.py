@@ -4,6 +4,7 @@ import os
 from pprint import pprint
 from ribctl import RIBETL_DATA
 from ribctl.etl.ribosome_assets import RibosomeAssets
+from ribctl.lib.libmsa import Taxid
 from ribctl.lib.ribosome_types.types_ribosome import PolynucleotideClass, PolypeptideClass, RibosomeStructure
 # from ribctl.lib.libmsa import  Taxid
 
@@ -33,11 +34,22 @@ def cmd_ls(args):
         all_structs = os.listdir(RIBETL_DATA)
         pdbid_taxid_tuples:list = []    
 
-        for struct in all_structs:
-            ribosome_Assets = RibosomeAssets(struct).profile()
-            pdbid_taxid_tuples.append(( ribosome_Assets.rcsb_id, ribosome_Assets.src_organism_ids[0] ))
 
-        pprint(Taxid.descendants_of_taxid( pdbid_taxid_tuples, int(args.taxid)))
+        for struct in all_structs:
+            try: 
+                ribosome_Assets = RibosomeAssets(struct).profile()
+                pdbid_taxid_tuples.append(( ribosome_Assets.rcsb_id, ribosome_Assets.src_organism_ids[0] ))
+            except:
+                continue
+
+        _ = []
+        for struct, taxids in pdbid_taxid_tuples:
+            if Taxid.is_descendant_of(int(args.taxid), taxids):
+                _.append(struct)
+               
+        print("Descendants of taxid {}(2=bact, 2157=arch, 2159=euk):".format( args.taxid))
+        print(list(sorted(_)))
+
 
     elif args.subelement != None:
         subelem = args.subelement

@@ -253,6 +253,10 @@ def plot_with_landmarks(rcsb_id:str, mesh_grid_dimensions:np.ndarray, translatio
 
     atom_coordinates_by_chain:dict[str,list] = { }
     for atom in tunnel_atoms_data:
+
+        if len( atom["chain_nomenclature"] )< 1: 
+            print("atom ", atom,"has no chain nomenclature",atom["chain_nomenclature"])
+            continue
         if atom['chain_nomenclature'][0] not in atom_coordinates_by_chain:
             atom_coordinates_by_chain[ atom['chain_nomenclature'][0] ] = []
         atom_coordinates_by_chain[ atom['chain_nomenclature'][0] ].extend( [ atom['coord'] ])
