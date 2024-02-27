@@ -132,19 +132,24 @@ def encode_atoms(rcsb_id: str, atoms_list: list[Atom], write=False, writepath=No
         parent_nomenclature = nomenclature[chain_auth_asym_id]
         a_element           = a.element
 
-        if a_element not in vdw_radii:
-            vdw_radii[a_element] = element(a_element).vdw_radius / 100
+        try: 
+            if a_element not in vdw_radii:
+                vdw_radii[a_element] = element(a_element).vdw_radius / 100
 
-        atom_dict = {
-            "coord"             : a.get_coord().tolist(),
-            "chain_auth_asym_id": chain_auth_asym_id,
-            "chain_nomenclature": parent_nomenclature,
-            "residue_name"      : residue_name,
-            "residue_seqid"     : residue_seqid,
-            "atom_element"      : a.element,
-            "vdw_radius"        : vdw_radii[a_element],
-        }
-        aggregate.append(atom_dict)
+            atom_dict = {
+                "coord"             : a.get_coord().tolist(),
+                "chain_auth_asym_id": chain_auth_asym_id,
+                "chain_nomenclature": parent_nomenclature,
+                "residue_name"      : residue_name,
+                "residue_seqid"     : residue_seqid,
+                "atom_element"      : a.element,
+                "vdw_radius"        : vdw_radii[a_element],
+            }
+            aggregate.append(atom_dict)
+        except Exception as e:
+            print(f"Couldn't figure out atom {a} :", e)
+            print("Skipping...")
+
 
     if write and writepath:
         with open( writepath, "w", ) as outfile:

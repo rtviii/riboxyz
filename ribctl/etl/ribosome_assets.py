@@ -33,6 +33,10 @@ class Assetlist(BaseModel)   :
 class RibosomeAssets():
     rcsb_id: str
 
+
+    @staticmethod
+
+
     def __init__(self, rcsb_id: str) -> None:
         self.rcsb_id = rcsb_id.upper()
 
@@ -308,7 +312,6 @@ class RibosomeAssets():
 
     async def _update_chains_dir(self):
         split_rename(self.rcsb_id)
-
 
     async def _update_ligands(self, overwrite:bool=False):
 

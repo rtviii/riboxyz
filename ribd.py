@@ -24,20 +24,7 @@ parser     = argparse.ArgumentParser(description="Command line interface for the
 parser.add_argument('--verify_schema', action='store_true', help="Verify the schema for every file in the database")
 
 subparsers = parser.add_subparsers(title='Subcommands', dest='command')
-
-#! -------------------------- --- -------------------------- #
-#! -------------------------- fasta -------------------------- #
-#! -------------------------- --- -------------------------- #
-
-
-
-
-#! -------------------------- --- -------------------------- #
-#! -------------------------- etl -------------------------- #
-#! -------------------------- --- -------------------------- #
-
 parser_cmd_etl = subparsers.add_parser('etl', help='Acquisition and processing of ribosomal structures and assets.')
-
 
 parser_lig = subparsers.add_parser('lig', help='ligands')
 parser_lig.add_argument('--chemid', type=str, required=True, help='Chemical identifier')
@@ -46,7 +33,7 @@ parser_lig.add_argument('--dest', type=str, required=True, help='Destination fil
 
 
 parser_cmd_etl.add_argument('-getall'      , '--obtain_all_structures', action='store_true')
-parser_cmd_etl.add_argument('-struct'               , dest   ='rcsb_id'    )
+parser_cmd_etl.add_argument('--rcsb_id'               , dest   ='rcsb_id'    )
 
 parser_cmd_etl.add_argument('-transpose_ligand', dest   ='transpose_ligand'    )
 parser_cmd_etl.add_argument('--profile'                 , action ='store_true' )
@@ -74,8 +61,6 @@ def cmd_etl(args):
         cif_modified_and_chains = False,
         ligands                 = False,
         png_thumbnail           = False,
-        
-
     )
 
     if args.profile:
@@ -101,10 +86,11 @@ def cmd_etl(args):
         obtain_assets_threadpool(
             [],
             ASL,
-            workers=4,
-            get_all=True,
-            overwrite=args.overwrite or False
+            workers   = 4,
+            get_all   = True,
+            overwrite = args.overwrite or False
         )
+        exit("Exited")
 
     if args.rcsb_id:
         RCSB_ID = str(args.rcsb_id)

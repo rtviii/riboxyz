@@ -1,5 +1,7 @@
+import argparse
 from pprint import pprint
 import subprocess
+import sys
 import typing
 from matplotlib import pyplot as plt
 import open3d as o3d
@@ -20,22 +22,22 @@ from compas.geometry import bounding_box
 from mesh_generation.voxelize import expand_atomcenters_to_spheres_threadpool, normalize_atom_coordinates
 from ribctl import  EXIT_TUNNEL_WORK, POISSON_RECON_BIN, RIBETL_DATA
 
-#? ---------- Params ------------
-RCSB_ID = "6Z6K"
 
-u_EPSILON     = 5.5
-u_MIN_SAMPLES = 600
-u_METRIC      = "euclidean"
 
-DBSCAN_CLUSTER_ID = 3
+# DBSCAN_CLUSTER_ID = 3
+
+DBSCAN_METRICS = [ "braycurtis", "canberra", "chebyshev", "correlation", "dice", 
+ "hamming", "jaccard", "kulsinski", "mahalanobis", "minkowski",
+  "rogerstanimoto", "russellrao", "seuclidean", "sokalmichener", 
+  "sokalsneath", "sqeuclidean", "yule","cityblock", "cosine", "euclidean", "l1", "l2", "manhattan" ]
 #? ---------- Paths ------------
-tunnel_atom_encoding_path    = lambda rcsb_id : os.path.join(EXIT_TUNNEL_WORK, "{}_tunnel_atoms_bbox.json".format(rcsb_id))
-normalization_vectors_path   = lambda rcsb_id : os.path.join(EXIT_TUNNEL_WORK, "{}_normalization_vectors.npy".format(rcsb_id))
-selected_dbscan_cluster_path = lambda rcsb_id : os.path.join(EXIT_TUNNEL_WORK, "{}_dbscan_cluster.npy".format(rcsb_id))
-convex_hull_cluster_path     = lambda rcsb_id : os.path.join(EXIT_TUNNEL_WORK, "{}_convex_hull.npy".format(rcsb_id))
-surface_with_normals_path    = lambda rcsb_id : os.path.join(EXIT_TUNNEL_WORK, "{}_normal_estimated_surf.ply".format(rcsb_id))
-poisson_recon_path           = lambda rcsb_id : os.path.join(EXIT_TUNNEL_WORK, "{}_poisson_recon.ply".format(rcsb_id))
-ptc_data_path                = lambda rcsb_id : os.path.join(RIBETL_DATA,rcsb_id, "{}_PTC_COORDINATES.json".format(rcsb_id))
+tunnel_atom_encoding_path    = lambda rcsb_id : os.path.join(EXIT_TUNNEL_WORK,    rcsb_id.upper(),"{}_tunnel_atoms_bbox.json".format(rcsb_id.upper()))
+normalization_vectors_path   = lambda rcsb_id : os.path.join(EXIT_TUNNEL_WORK,    rcsb_id.upper(),"{}_normalization_vectors.npy".format(rcsb_id.upper()))
+selected_dbscan_cluster_path = lambda rcsb_id : os.path.join(EXIT_TUNNEL_WORK,    rcsb_id.upper(),"{}_dbscan_cluster.npy".format(rcsb_id.upper()))
+convex_hull_cluster_path     = lambda rcsb_id : os.path.join(EXIT_TUNNEL_WORK,    rcsb_id.upper(),"{}_convex_hull.npy".format(rcsb_id.upper()))
+surface_with_normals_path    = lambda rcsb_id : os.path.join(EXIT_TUNNEL_WORK,    rcsb_id.upper(),"{}_normal_estimated_surf.ply".format(rcsb_id.upper()))
+poisson_recon_path           = lambda rcsb_id : os.path.join(EXIT_TUNNEL_WORK,    rcsb_id.upper(),"{}_poisson_recon.ply".format(rcsb_id.upper()))
+ptc_data_path                = lambda rcsb_id : os.path.join(RIBETL_DATA,rcsb_id, rcsb_id.upper(),"{}_PTC_COORDINATES.json".format(rcsb_id.upper()))
 #? ------------------------------
 
 
@@ -79,12 +81,12 @@ def extract_bbox_atoms(rcsb_id:str)->list:
     bbox                             = bounding_box(centerline_expansion_coordinates)
     bbox_interior_atoms              = parse_struct_via_bbox(rcsb_id, bbox)
 
-    return encode_atoms(rcsb_id, bbox_interior_atoms, write=True, writepath=tunnel_atom_encoding_path(RCSB_ID))
+    return encode_atoms(rcsb_id, bbox_interior_atoms, write=True, writepath=tunnel_atom_encoding_path(rcsb_id))
 
-def expand_bbox_atoms_to_spheres(bbox_data:list|None ):
+def expand_bbox_atoms_to_spheres(bbox_data:list|None, rcsb_id:str ):
 
     if bbox_data is None:
-        with open( tunnel_atom_encoding_path(RCSB_ID), "r", ) as infile:
+        with open( tunnel_atom_encoding_path(rcsb_id), "r", ) as infile:
             bbox_data = json.load(infile)
 
     __cords = np.array(list(map(lambda x: x["coord"], bbox_data)))
@@ -119,7 +121,7 @@ def index_grid(expanded_sphere_voxels:np.ndarray):
 
     return  __xyz_v_positive_ix.T, __xyz_v_negative_ix.T, grid_dimensions, mean_abs_vectors
 
-def interior_capture_DBSCAN(xyz_v_negative:np.ndarray):
+def interior_capture_DBSCAN(xyz_v_negative:np.ndarray, eps:float=5.5, min_samples:int=600, metric:str="euclidean"):
 
     attempts: list[typing.Tuple[float, int, str]] = [
         ( 2  , 60 , "euclidean"    ),
@@ -148,7 +150,7 @@ def interior_capture_DBSCAN(xyz_v_negative:np.ndarray):
     u_METRIC      = attempts[-1][2]
 
     print( "Running DBSCAN on {} points. eps={}, min_samples={}, distance_metric={}".format( len(xyz_v_negative), u_EPSILON, u_MIN_SAMPLES, u_METRIC ) )
-    db                 = DBSCAN(eps=u_EPSILON, min_samples=u_MIN_SAMPLES, metric=u_METRIC, n_jobs=5).fit( xyz_v_negative )
+    db                 = DBSCAN(eps=eps, min_samples=min_samples, metric=metric, n_jobs=5).fit( xyz_v_negative )
     labels             = db.labels_
 
     CLUSTERS_CONTAINER = {}
@@ -194,29 +196,30 @@ def DBSCAN_CLUSTERS_visualize_one(positive_space:np.ndarray, selected_cluster:np
     point_cloud["rgba"] = rgbas_combined
     point_cloud.plot(scalars="rgba", rgb=True, notebook=False, show_bounds=True)
 
-def surface_pts_via_convex_hull(selected_cluster:np.ndarray|None=None):
-    if not os.path.exists(convex_hull_cluster_path(RCSB_ID)):
+def surface_pts_via_convex_hull(rcsb_id:str,selected_cluster:np.ndarray|None=None):
+
+    if not os.path.exists(convex_hull_cluster_path(rcsb_id)):
         assert(selected_cluster is not None)
         cloud       = pv.PolyData(selected_cluster)
         grid        = cloud.delaunay_3d(alpha=2, tol=1.5,offset=2,progress_bar=True)
         convex_hull = grid.extract_surface().cast_to_pointset()
-        np.save(convex_hull_cluster_path(RCSB_ID), convex_hull.points)
-        print("Saved generated convex hull to {}".format(convex_hull_cluster_path(RCSB_ID)))
+        np.save(convex_hull_cluster_path(rcsb_id), convex_hull.points)
+        print("Saved generated convex hull to {}".format(convex_hull_cluster_path(rcsb_id)))
         return convex_hull.points
     else:
-        pts = np.load(convex_hull_cluster_path(RCSB_ID))
-        print("Loaded generated convex hull from {}".format(convex_hull_cluster_path(RCSB_ID)))
+        pts = np.load(convex_hull_cluster_path(rcsb_id))
+        print("Loaded generated convex hull from {}".format(convex_hull_cluster_path(rcsb_id)))
         return pts
     # convex_hull.plot(show_edges=True)
 
-def estimate_normals(convex_hull_surface_pts:np.ndarray|None=None):
+def estimate_normals(rcsb_id,convex_hull_surface_pts:np.ndarray|None=None):
     pcd        = o3d.geometry.PointCloud()
     pcd.points = o3d.utility.Vector3dVector(convex_hull_surface_pts)
     pcd.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=5, max_nn=15))
     pcd.orient_normals_consistent_tangent_plane(k=10)
     o3d.visualization.draw_geometries([pcd], point_show_normal=True, window_name="Point Cloud with Normals")
-    o3d.io.write_point_cloud(surface_with_normals_path(RCSB_ID), pcd)
-    print("Wrote surface with normals {}".format(surface_with_normals_path(RCSB_ID)))
+    o3d.io.write_point_cloud(surface_with_normals_path(rcsb_id), pcd)
+    print("Wrote surface with normals {}".format(surface_with_normals_path(rcsb_id)))
 
 def move_cords_to_normalized_cord_frame(grid_dimensions:np.ndarray, translation_vectors:np.ndarray, original_cords:np.ndarray):
     """this is a helper function for plotting to move additional atom coordinates into the cord frame of the mesh (vox grid indices)"""
@@ -310,29 +313,67 @@ def apply_poisson_reconstruction(rcsb_id:str):
         print("Error:", process.stderr)
 
 
-
-
 def main():
+
+    #? ---------- Params ------------
+    parser = argparse.ArgumentParser()
+    # Add command-line arguments
+    parser.add_argument("--rcsb_id"    , type   =str           , help="Specify the value for eps (float)"        , required=True)
+    parser.add_argument("--eps"        , type   =float         , help="Specify the value for eps (float)"        )
+    parser.add_argument("--min_samples", type   =int           , help="Specify the value for min_samples (int)"  )
+    parser.add_argument("--metric"     , choices=DBSCAN_METRICS, help="Choose a metric from the provided options")
+
+    # Parse the command-line arguments
+    args = parser.parse_args()
+
+
+    _u_EPSILON     = 5.5; _u_MIN_SAMPLES = 600; _u_METRIC      = "euclidean"
+
+    RCSB_ID       = args.rcsb_id.upper()
+    u_EPSILON     = args.eps if args.eps is not None else _u_EPSILON
+    u_MIN_SAMPLES = args.min_samples if args.min_samples is not None else _u_MIN_SAMPLES
+    u_METRIC      = args.metric if args.metric is not None else _u_METRIC
+
+    struct_tunnel_dir = os.path.join(EXIT_TUNNEL_WORK, RCSB_ID)
+    if not os.path.exists(struct_tunnel_dir):
+         os.mkdir(struct_tunnel_dir)
 
     "the data arrives here as atom coordinates extracted from the biopython model "
     if not os.path.exists(tunnel_atom_encoding_path(RCSB_ID)):
         bbox_atoms          = extract_bbox_atoms(RCSB_ID)
-        bbox_atoms_expanded = expand_bbox_atoms_to_spheres(bbox_atoms)
+        bbox_atoms_expanded = expand_bbox_atoms_to_spheres(bbox_atoms, RCSB_ID)
         print("Extracted tunnel atom encoding from PDB: {}.".format(RCSB_ID))
     else:
         with open( tunnel_atom_encoding_path(RCSB_ID), "r", ) as infile:
             bbox_atoms = json.load(infile)
         print("Opened tunnel atom encoding from file: {}.".format(tunnel_atom_encoding_path(RCSB_ID)))
-        bbox_atoms_expanded = expand_bbox_atoms_to_spheres(bbox_atoms)
+        bbox_atoms_expanded = expand_bbox_atoms_to_spheres(bbox_atoms, RCSB_ID)
 
     xyz_positive, xyz_negative, mesh_grid_dimensions, normalization_vectors = index_grid(bbox_atoms_expanded)
     np.save(normalization_vectors_path(RCSB_ID), normalization_vectors)
-    db, clusters_container = interior_capture_DBSCAN(xyz_negative)
+    db, clusters_container = interior_capture_DBSCAN(xyz_negative, u_EPSILON, u_MIN_SAMPLES, u_METRIC)
 
-    surface_pts = surface_pts_via_convex_hull(clusters_container[DBSCAN_CLUSTER_ID])
-    estimate_normals(surface_pts)
-    apply_poisson_reconstruction(RCSB_ID)
-    plot_with_landmarks(RCSB_ID,mesh_grid_dimensions, normalization_vectors)
+
+
+    DBSCAN_CLUSTERS_visualize_all(clusters_container)
+
+
+    while True:
+        user_input = input("Enter 'Q' to quit or a number between 1 and 20: ")
+        if user_input.upper() == 'Q':
+            break  # Exit the loop if the user enters 'Q'
+        elif user_input.isdigit() and 0 <= int(user_input) <= 20:
+            DBSCAN_CLUSTER_ID = int(user_input)
+            surface_pts       = surface_pts_via_convex_hull(RCSB_ID,clusters_container[DBSCAN_CLUSTER_ID])
+
+            estimate_normals(RCSB_ID,surface_pts)
+            apply_poisson_reconstruction(RCSB_ID)
+            plot_with_landmarks(RCSB_ID,mesh_grid_dimensions, normalization_vectors)
+        else:
+            print("Invalid input. Please enter 'Q' or a number between 1 and 20.")
+    
+
+
 
 
 if __name__ == "__main__":

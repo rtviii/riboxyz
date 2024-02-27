@@ -1,5 +1,6 @@
 import math
 import os
+from fuzzysearch import find_near_matches
 import numpy as np
 from ribctl.etl.ribosome_assets import RibosomeAssets
 from ribctl.lib.ribosome_types.types_binding_site import (
@@ -44,11 +45,12 @@ def residue_labels(res: Residue | ResidueSummary) -> bool:
     return res.resname in [*AMINO_ACIDS.keys(), *NUCLEOTIDES]
 
 
-def ptc_fuzzyfind_subseq_in_chain(
-    biopython_struct, auth_asym_id: str, assembly_id: int = 0
-) -> tuple[list[Residue], list[Residue], list[Residue], str]:
-    chain3d: Chain = biopython_struct.child_dict[assembly_id].child_dict[auth_asym_id]
-    ress: list[Residue] = chain3d.child_list
+def ptc_fuzzyfind_subseq_in_chain( biopython_struct, auth_asym_id: str, assembly_id: int = 0 )  \
+    -> tuple[list[Residue], list[Residue], list[Residue], str]:
+
+    print("got biopytho nstruct: ", biopython_struct)
+    chain3d       : Chain         = biopython_struct.child_dict[assembly_id].child_dict[auth_asym_id]
+    ress          : list[Residue] = chain3d.child_list
     ress_sanitized: list[Residue] = [
         *filter(lambda r: r.get_resname() in ["A", "C", "G", "U", "-", "PSU"], ress)
     ]
@@ -62,7 +64,6 @@ def ptc_fuzzyfind_subseq_in_chain(
     # find a subsequences that matches doris with max levenstein distance of 1
 
     # print("Raw seq is ", raw_seq)
-    from fuzzysearch import find_near_matches
 
     match9 = pick_match(
         find_near_matches(DORIS_ET_AL["SITE_9"], raw_seq, max_l_dist=1), len(raw_seq)
@@ -109,17 +110,13 @@ def ptc_resdiues_get(
 
     matches = {}
     for p_rna in rnas:
-        m6, m8, m9, auth_asym_id = ptc_fuzzyfind_subseq_in_chain(
-            struct_profile, p_rna.auth_asym_id
-        )
+        m6, m8, m9, auth_asym_id = ptc_fuzzyfind_subseq_in_chain( struct_profile, p_rna.auth_asym_id )
         matches = {**matches, auth_asym_id: [m6, m8, m9]}
 
     try:
-        auth_asym_id, rRNA_fragment_matches = list(
-            filter(lambda match_kv: len(match_kv[1][2]) > 0, list(matches.items()))
-        )[0]
-    except:
-        print("Error:Could not identify PTC residues in {}".format(biopython_structure.id)   )
+        auth_asym_id, rRNA_fragment_matches = list( filter(lambda match_kv: len(match_kv[1][2]) > 0, list(matches.items())) )[0]
+    except Exception as e:
+        print("Error:Could not identify PTC residues in {} : {} ".format(biopython_structure.id, e)   )
         exit(1)
 
     chain3d: Chain = struct_profile.child_dict[assembly_id].child_dict[auth_asym_id]

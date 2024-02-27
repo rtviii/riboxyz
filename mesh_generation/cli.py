@@ -1,8 +1,4 @@
 import argparse
-DBSCAN_METRICS = [ "braycurtis", "canberra", "chebyshev", "correlation", "dice", 
- "hamming", "jaccard", "kulsinski", "mahalanobis", "minkowski",
-  "rogerstanimoto", "russellrao", "seuclidean", "sokalmichener", 
-  "sokalsneath", "sqeuclidean", "yule","cityblock", "cosine", "euclidean", "l1", "l2", "manhattan" ]
 
 
 def main():
