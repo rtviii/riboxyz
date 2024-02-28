@@ -32,9 +32,7 @@ from typing import Literal, Union
 
 import more_itertools as mitt
 
-
 AUTO = object()
-
 
 class UnionEnumMeta(enum.EnumMeta):
     """
@@ -103,6 +101,7 @@ class UnionEnumMeta(enum.EnumMeta):
         >>> set(UnionAB).issubset(UnionABC)
         True
         """
+        
         subenums = mcs._normalize_subenums(subenums)
         mcs._check_duplicates(subenums)
 
@@ -153,6 +152,9 @@ class UnionEnumMeta(enum.EnumMeta):
 
         return union_enum
 
+    def __str__(self) -> str:
+        return super().__str__()
+
     def __repr__(cls):
         return f"<union enum of {cls._subenums_}>"
 
@@ -173,10 +175,8 @@ class UnionEnumMeta(enum.EnumMeta):
         """Remove duplicate subenums and flatten nested unions"""
         # we will need to collapse at most one level of nesting, with the inductive
         # hypothesis that any previous unions are already flat
-        subenums = mitt.collapse(
-            (e._subenums_ if isinstance(e, mcs) else e for e in subenums),
-            base_type=enum.EnumMeta,
-        )
+
+        subenums = mitt.collapse( (e._subenums_ if isinstance(e, mcs) else e for e in subenums), base_type=enum.EnumMeta )
         subenums = mitt.unique_everseen(subenums)
         return tuple(subenums)
 
@@ -216,9 +216,7 @@ def extend_enum(base_enum: enum.EnumMeta):
     ...     ALIAS = 1
     ...     B = 2
     >>> ExtendedEnum.__members__
-    mappingproxy({'A': <BaseEnum.A: 1>,
-                  'ALIAS': <BaseEnum.A: 1>,
-                  'B': <ExtendedEnum.B: 2>})
+    mappingproxy({'A': <BaseEnum.A: 1>, 'ALIAS': <BaseEnum.A: 1>, 'B': <ExtendedEnum.B: 2>})
     """
 
     def decorator(extension_enum: enumEnumMeta):

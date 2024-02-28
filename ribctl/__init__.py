@@ -6,10 +6,15 @@ from typing import Literal
 RIBETL_DATA = os.environ.get("RIBETL_DATA")
 
 # This amounts to "_assets folder is expected to exist in the root of `ribctl`(next to top-level __init__.py)"
-ASSETS_PATH            = os.path.join(pathlib.Path(__file__).parent, "assets")
+#! ------------- logs ----------------
 LOGS_PATH              = os.path.join(pathlib.Path(__file__).parent, "logs")
-CLASSIFICATION_REPORTS = os.path.join(pathlib.Path(__file__).parent, "assets","classification_reports")
-MUSCLE_BIN             = os.path.join(ASSETS_PATH, "muscle3.8.1")
+CLASSIFICATION_REPORTS = os.path.join(pathlib.Path(__file__).parent, "logs","hmm_classification_reports")
+
+#! ------------- assets ----------------
+ASSETS_PATH       = os.path.join(pathlib.Path(__file__).parent, "assets")
+MUSCLE_BIN        = os.path.join(ASSETS_PATH, "muscle3.8.1")
+EXIT_TUNNEL_WORK  = os.path.join(ASSETS_PATH, "exit_tunnel_work")
+POISSON_RECON_BIN = os.path.join(EXIT_TUNNEL_WORK, "PoissonRecon")
 
 asset_type  = Literal[
     "subunit_map_lsu",

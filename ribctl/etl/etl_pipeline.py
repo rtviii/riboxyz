@@ -1,15 +1,14 @@
 import functools
+
 import os
 import more_itertools as mitt
 import json
-import logging
-from pprint import pprint
 from typing import Any, Optional
 import pyhmmer
 from pyhmmer.plan7 import HMM
 import requests
 from ribctl import ASSETS, CLASSIFICATION_REPORTS, RIBETL_DATA
-from ribctl.lib.classification import (
+from ribctl.lib.libhmm import (
     HMMClassifier,
 )
 from ribctl.lib.ribosome_types.types_ribosome import (
@@ -20,7 +19,6 @@ from ribctl.lib.ribosome_types.types_ribosome import (
     MitochondrialRNAClass,
     NonpolymericLigand,
     Polymer,
-    LifecycleFactor,
     PolynucleotideClass,
     Protein,
     CytosolicProteinClass,
@@ -28,8 +26,9 @@ from ribctl.lib.ribosome_types.types_ribosome import (
     RibosomeStructure,
 )
 from ribctl.etl.gql_querystrings import single_structure_graphql_template
+from ribctl.logs.loggers import get_etl_logger
+logger = get_etl_logger()
 
-logging.getLogger("urllib3.connectionpool").setLevel(logging.CRITICAL)
 
 def current_rcsb_structs() -> list[str]:
     """Return all structures in the rcsb that contain the phrase RIBOSOME and have more than 25 protein entities"""
@@ -133,8 +132,7 @@ class ReannotationPipeline:
         # Given this state of affairs, if we want to be able to uniquely (coordinate-wise) identify each chain, we need to account for cases where PDB has provided two and sometimes four polymer collapsed into one representation.
         # We do this by counting assymetric_ids of each polymer and hold that as a
         self.polymers_target_count = functools.reduce(
-            lambda count, poly: count
-            + len(poly["rcsb_polymer_entity_container_identifiers"]["asym_ids"]),
+            lambda count, poly: count + len(poly["rcsb_polymer_entity_container_identifiers"]["asym_ids"]),
             self.rcsb_data_dict["polymer_entities"],
             0,
         )
@@ -197,7 +195,6 @@ class ReannotationPipeline:
         if len(host_id_tally.keys()) == 0:
             host_id = []
         else:
-            print(host_id_tally)
             for hkey in host_id_tally:
                 host_id_tally[hkey] = host_id_tally[hkey] / len(host_organism_ids)
             host_id = [max(host_id_tally, key=lambda k: host_id_tally[k])]
@@ -229,38 +226,14 @@ class ReannotationPipeline:
         return [externalRefIds, externalRefTypes, externalRefLinks]
 
     def nonpoly_reshape_to_ligand(self, nonpoly: dict) -> NonpolymericLigand:
-        # print("got a nonpoly elem")
-        # pprint(nonpoly)
-
-        # nonpoly["nonpolymer_comp"]["chem_comp"]["id"]
-        # nonpoly["nonpolymer_comp"]["chem_comp"]["name"]
-        # nonpoly["nonpolymer_comp"]["chem_comp"]["three_letter_code"]
-
-        # nonpoly["nonpolymer_comp"]["drugbank"]["drugbank_container_identifiers"][
-        #     "drugbank_id"
-        # ]
-        # nonpoly["nonpolymer_comp"]["drugbank"]["drugbank_info"]["cas_number"]
-        # nonpoly["nonpolymer_comp"]["drugbank"]["drugbank_info"]["description"]
-
-        # nonpoly["nonpolymer_comp"]["rcsb_chem_comp_target"]
-
-        # {
-        #     "interaction_type": "target",
-        #     "name": "Spermine synthase",
-        #     "provenance_source": "DrugBank",
-        #     "reference_database_accession_code": "P52788",
-        #     "reference_database_name": "UniProt",
-        # },
-
         return NonpolymericLigand(
-            nonpolymer_comp=nonpoly["nonpolymer_comp"],
-            chemicalId=nonpoly["pdbx_entity_nonpoly"]["comp_id"],
-            chemicalName=nonpoly["pdbx_entity_nonpoly"]["name"],
-            pdbx_description=nonpoly["rcsb_nonpolymer_entity"]["pdbx_description"],
-            formula_weight=nonpoly["rcsb_nonpolymer_entity"]["formula_weight"],
-            number_of_instances=nonpoly["rcsb_nonpolymer_entity"][
-                "pdbx_number_of_molecules"
-            ],
+            nonpolymer_comp     = nonpoly["nonpolymer_comp"],
+            chemicalId          = nonpoly["pdbx_entity_nonpoly"]["comp_id"],
+            chemicalName        = nonpoly["pdbx_entity_nonpoly"]["name"],
+            pdbx_description    = nonpoly["rcsb_nonpolymer_entity"]["pdbx_description"],
+            formula_weight      = nonpoly["rcsb_nonpolymer_entity"]["formula_weight"],
+            number_of_instances = nonpoly["rcsb_nonpolymer_entity"][ "pdbx_number_of_molecules" ],
+            
         )
 
     def asm_parse(self, dictionaries: list[dict]) -> list[AssemblyInstancesMap]:
@@ -281,11 +254,11 @@ class ReannotationPipeline:
                         return int(assembly_map.rcsb_id.split("-")[1]) - 1
             else: raise LookupError("Could not assign chain {} to any assembly".format(auth_asym_id))
 
-    def process_polypeptides(self) -> tuple[list[Protein], list[LifecycleFactor]]:
+    def process_polypeptides(self) -> tuple[list[Protein], list[Polymer]]:
         poly_entities = self.rcsb_data_dict["polymer_entities"]
 
         reshaped_proteins         : list[Protein]         = []
-        reshaped_polymeric_factors: list[LifecycleFactor] = []
+        reshaped_polymeric_factors: list[Polymer] = []
 
         def is_protein(poly):
             # ! According to RCSB schema, polymer_entites include "Protein", "RNA" but also "DNA", N"A-Hybrids" and "Other".
@@ -311,13 +284,13 @@ class ReannotationPipeline:
                     # TODO: MOVE TO HMM BASED CLASSIFICATION METHOD
                     reshaped_proteins.extend(self.poly_reshape_to_rprotein(poly))
             else:
-                # print("Filtered out a protein")
+                print("Filtered out a protein")
                 ...
 
         self.rProteins = reshaped_proteins
         return (reshaped_proteins, reshaped_polymeric_factors)
 
-    def process_polynucleotides(self) -> tuple[list[RNA], list[LifecycleFactor]]:
+    def process_polynucleotides(self) -> tuple[list[RNA], list[Polymer]]:
 
         poly_entities = self.rcsb_data_dict["polymer_entities"]
         rnas          = []
@@ -331,7 +304,7 @@ class ReannotationPipeline:
             rnas.append(poly) if is_rna(poly) else ...
 
         reshaped_rnas             : list[RNA]             = []
-        reshaped_polymeric_factors: list[LifecycleFactor] = []
+        reshaped_polymeric_factors: list[Polymer] = []
         for j, poly_rna in enumerate(rnas):
             if ( True!= None ):
                 # TODO: HMM WORKFLOW
@@ -347,8 +320,6 @@ class ReannotationPipeline:
         poly_entities = self.rcsb_data_dict["polymer_entities"]
         other = []
 
-        # print("Processing polypeptides :")
-        # print(len(poly_entities))
 
         def is_not_rna_protein_polymer(poly):
             # * According to RCSB schema, polymer_entites include Proteins, RNA but also DNA, NA-Hybrids and "Other".
@@ -583,7 +554,7 @@ class ReannotationPipeline:
             for auth_asym_id in rrna_polymer_obj[ "rcsb_polymer_entity_container_identifiers" ]["auth_asym_ids"]
         ]
 
-    def poly_reshape_to_factor(self, factor_polymer_obj) -> list[LifecycleFactor]:
+    def poly_reshape_to_factor(self, factor_polymer_obj) -> list[Protein]:
         host_organisms: list[Any] | None = factor_polymer_obj[ "rcsb_entity_host_organism" ]
         source_organisms: list[Any] | None = factor_polymer_obj[ "rcsb_entity_source_organism" ]
 
@@ -614,7 +585,7 @@ class ReannotationPipeline:
         nomenclature = [ ]
 
         return [
-            LifecycleFactor(
+            Protein(
                 assembly_id                         = self.poly_assign_to_asm(auth_asym_id) ,
                 nomenclature                        = nomenclature ,
                 asym_ids                            = factor_polymer_obj[ "rcsb_polymer_entity_container_identifiers" ]["asym_ids"] ,
@@ -630,6 +601,12 @@ class ReannotationPipeline:
                 entity_poly_seq_length              = factor_polymer_obj["entity_poly"][ "rcsb_sample_sequence_length" ] ,
                 entity_poly_entity_type             = factor_polymer_obj["entity_poly"]["type"] ,
                 entity_poly_polymer_type            = factor_polymer_obj["entity_poly"][ "rcsb_entity_polymer_type" ] ,
+                pfam_accessions= [],
+                pfam_comments= [],
+                pfam_descriptions= [],
+                uniprot_accession=[]
+
+
             ) for auth_asym_id in factor_polymer_obj[ "rcsb_polymer_entity_container_identifiers" ]["auth_asym_ids"]
         ]
 
@@ -701,8 +678,6 @@ class ReannotationPipeline:
         _rna_polynucleotides:list[RNA]     = []
         _other_polymers     :list[Polymer] = []
 
-
-
         for polymer_dict in poly_entities:
             polys = self.raw_to_polymer(polymer_dict)
             for poly in polys:
@@ -716,10 +691,13 @@ class ReannotationPipeline:
                     case _:
                         _other_polymers.append(poly)
 
+        logger.debug("Classifying {}: {} polypeptides, {} polynucleotides, {} other.".format(rcsb_id, len(_prot_polypeptides), len(_rna_polynucleotides), len(_other_polymers)))
+        # logger.debug("Classifying polymers: Proteins.")
         protein_alphabet      = pyhmmer.easel.Alphabet.amino()
         protein_classifier    = HMMClassifier( _prot_polypeptides, protein_alphabet, [p for p in [ *list(CytosolicProteinClass),*list(LifecycleFactorClass) , *list(MitochondrialProteinClass)] ])
         protein_classifier.classify_chains()
        
+        # logger.debug("Classifying polymers: RNA.")
         rna_alphabet             = pyhmmer.easel.Alphabet.rna()
         rna_classifier           = HMMClassifier(_rna_polynucleotides, rna_alphabet, [p for p in list(PolynucleotideClass)])
         rna_classifier.classify_chains()
@@ -729,14 +707,11 @@ class ReannotationPipeline:
 
         full_report      = { **rna_classifier.report, **protein_classifier.report }
         reported_classes = { k:v for ( k,v ) in [*prot_classification.items(), *rna_classification.items()] }
-
-        #! Saving results
         report_path      = os.path.join(CLASSIFICATION_REPORTS, f"{rcsb_id}.json")
         with open(report_path, "w") as outfile:
             json.dump(full_report, outfile, indent=4)
-            print("Saved classification report to : ", report_path)
+            logger.debug("Saved classification report to {}".format(report_path))
 
-        pprint(reported_classes)
 
         #! TODO : PROPAGATE NOMENCLATUERE
         for polymer_dict in _rna_polynucleotides:
@@ -757,7 +732,7 @@ class ReannotationPipeline:
         is_mitochondrial=False
         for rna_d in _rna_polynucleotides:
             if len( rna_d.nomenclature )>0 :
-               if ( rna_d.nomenclature[0].value in [k.value for k in list(MitochondrialRNAClass)] ):
+               if ( rna_d.nomenclature[0] in [k.value for k in list(MitochondrialRNAClass)] ):
                     is_mitochondrial=True
                     break
 

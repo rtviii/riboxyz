@@ -1,39 +1,28 @@
-import asyncio
 import json
-import logging
+import os
 from pprint import pprint
 import typing
 from Bio.PDB.Structure import Structure
 from Bio.PDB.Chain import Chain
 from typing import Optional
-from api.logs.loggers import get_updates_logger
 from ribctl import AMINO_ACIDS_3_TO_1_CODE
-from ribctl.lib.tunnel import ptc_resdiues_get, ptc_residues_calculate_midpoint
 from ribctl.lib.ribosome_types.types_binding_site import BindingSite
 from ribctl.lib.mod_extract_bsites import  struct_ligand_ids, bsite_ligand
 from ribctl.lib.mod_split_rename import split_rename
 from ribctl.etl.etl_pipeline import current_rcsb_structs, ReannotationPipeline, rcsb_single_structure_graphql, query_rcsb_api
-from ribctl.lib.mod_render_thumbnail import render_thumbnail
+from ribctl.lib.tunnel import ptc_resdiues_get, ptc_residues_calculate_midpoint
+# from ribctl.lib.mod_render_thumbnail import render_thumbnail
 from ribctl.lib.utils import download_unpack_place, open_structure
-from ribctl.lib.ribosome_types.types_ribosome import RNA, LifecycleFactorClass, PolymerClass, LifecycleFactor, PolynucleotideClass, Protein, CytosolicProteinClass, RibosomeStructure
+from ribctl.lib.ribosome_types.types_ribosome import RNA, LifecycleFactorClass, PolymerClass, PolynucleotideClass, Protein, CytosolicProteinClass, RibosomeStructure
 from ribctl import RIBETL_DATA
-from pydantic import BaseModel, parse_obj_as
+from pydantic import BaseModel
 from concurrent.futures import ALL_COMPLETED, Future, ProcessPoolExecutor, ThreadPoolExecutor, wait
+from ribctl.logs.loggers import get_etl_logger
 
-# Configure the logging settings
-logging.basicConfig(
-    level=logging.DEBUG,  # Set the logging level to DEBUG (you can adjust this)
-    format='%(asctime)s [%(levelname)s] [%(name)s] %(message)s',  # Define the log message format
-    handlers=[
-        logging.StreamHandler(),  # Log to the console
-        logging.FileHandler('etl.log')  # Log to a file named 'my_log_file.log'
-    ]
-)
 
-import os
+logger = get_etl_logger()
 
 class Assetlist(BaseModel)   : 
-
       profile                : Optional[bool]
       ptc_coords             : Optional[bool]
       cif                    : Optional[bool]
@@ -46,7 +35,6 @@ class RibosomeAssets():
 
     def __init__(self, rcsb_id: str) -> None:
         self.rcsb_id = rcsb_id.upper()
-
 
     def _envcheck(self):
         if not RIBETL_DATA:
@@ -80,8 +68,12 @@ class RibosomeAssets():
         return os.path.join(self._dir_path(),f"{self.rcsb_id}.json")
 
     def profile(self) -> RibosomeStructure:
-        with open(self._json_profile_filepath(), "r") as f:
-            return RibosomeStructure.parse_obj(json.load(f))
+        try:
+            with open(self._json_profile_filepath(), "r") as f:
+                return RibosomeStructure.model_validate(json.load(f))
+        except Exception as e:
+            print("Error loading profile for ", self.rcsb_id)
+            print(e)
 
     def _nomenclature_table(self) -> dict[str, dict]:
         #TODO: update getter
@@ -130,8 +122,7 @@ class RibosomeAssets():
         elif overwrite:
             with open(self._json_profile_filepath(), "w") as f:
                 json.dump(new_profile, f)
-                print("Wrote {}".format(self._json_profile_filepath()))
-             
+                logger.debug(f"Updated profile for {self.rcsb_id}")
 
     @staticmethod
     def list_all_structs():
@@ -167,7 +158,7 @@ class RibosomeAssets():
         return None
 
     def get_chain_by_auth_asym_id(self, auth_asym_id: str) -> tuple[
-            RNA | Protein | LifecycleFactor | None,
+            RNA | Protein  | None,
             typing.Literal["RNA", "Protein", "PolymericFactor"] | None]:
 
         profile = self.profile()
@@ -266,7 +257,7 @@ class RibosomeAssets():
             os.umask(0)
             os.makedirs(self._dir_path(), 0o777)
 
-    async def _verify_cif(self, overwrite: bool = False) -> bool:
+    async def _update_cif(self, overwrite: bool = False) -> bool:
         if not os.path.exists(self._cif_filepath()):
             await download_unpack_place(self.rcsb_id)
             print("Saved structure file:\t", self._cif_filepath())
@@ -279,8 +270,7 @@ class RibosomeAssets():
             else:
                 return False
 
-    async def _verify_cif_modified_and_chains(self, overwrite: bool = False) -> bool:
-        print("verifying chains")
+    async def _update_cif_modified_and_chains(self, overwrite: bool = False) -> bool:
         if not os.path.isdir(self.chains_dir()):
             os.makedirs(self.chains_dir())
             await split_rename(self.rcsb_id)
@@ -292,25 +282,24 @@ class RibosomeAssets():
             else:
                 return False
 
-    async def _verify_json_profile(self, overwrite: bool = False) -> bool:
-
+    async def _update_json_profile(self, overwrite: bool = False) -> bool:
         self._verify_dir_exists()
         if not os.path.isfile(self._json_profile_filepath()):
             ribosome = ReannotationPipeline(query_rcsb_api(rcsb_single_structure_graphql(self.rcsb_id.upper()))).process_structure()
-            if not parse_obj_as(RibosomeStructure, ribosome):
-                raise Exception("Invalid ribosome structure profile.")
-            self.write_own_json_profile( ribosome.dict(), overwrite=True)
+            if not RibosomeStructure.model_validate(ribosome):
+                raise Exception("Created invalid ribosome profile (Schema validation failed). Not writing")
+            self.write_own_json_profile( ribosome.model_dump(), overwrite=True)
+            logger.debug("Processing {} profile.".format(self.rcsb_id))
         else:
-            print("STRUCT EXISTS ",self._json_profile_filepath())
             if overwrite:
                 ribosome = ReannotationPipeline(query_rcsb_api(rcsb_single_structure_graphql(self.rcsb_id.upper()))).process_structure()
-                self.write_own_json_profile(ribosome.dict(),overwrite)
-                print("Overwrote {}".format(self.rcsb_id))
+                self.write_own_json_profile(ribosome.model_dump(),overwrite)
+                logger.debug("Processing {} profile: already exists for {}. Overwriting.".format(self.rcsb_id, self.rcsb_id))
             else:
-                print("Profile already exists for {}".format(self.rcsb_id))
+                logger.debug("Processing {} profile: already exists for {}.".format(self.rcsb_id, self.rcsb_id))
         return True
         
-    def _verify_png_thumbnail(self, overwrite: bool = False) -> bool:
+    def _update_png_thumbnail(self, overwrite: bool = False) -> bool:
         if overwrite:
             print("Obtaning thumbnail...")
             render_thumbnail(self.rcsb_id)
@@ -321,11 +310,33 @@ class RibosomeAssets():
             else:
                 return False
 
-    async def _verify_chains_dir(self):
+    async def _update_chains_dir(self):
         split_rename(self.rcsb_id)
 
+    async def _update_ptc_coordinates(self, overwrite:bool=False):
 
-    async def _verify_ligands(self, overwrite:bool=False):
+        etllogger = get_etl_logger()
+        asset_ptc_coords_path = os.path.join(self._dir_path(),f'{self.rcsb_id}_PTC_COORDINATES.json')
+
+        if os.path.exists(asset_ptc_coords_path) and not overwrite:
+            raise Exception(f'PTC coordinates already exist for {self.rcsb_id} and overwrite is set to False')
+
+        ress, auth_asym_id = ptc_resdiues_get(self.biopython_structure(),  self.profile().rnas)
+        midpoint_coords = ptc_residues_calculate_midpoint(ress, auth_asym_id)
+
+        writeout = {
+            "site_9_residues"      : [(res.get_resname(), res.get_segid(), res.full_id) for res in ress],
+            "LSU_rRNA_auth_asym_id": auth_asym_id,
+            "midpoint_coordinates" : midpoint_coords,
+            'nomenclature_table'   : self._nomenclature_table()
+        }
+
+        with open(asset_ptc_coords_path, 'w') as f:
+            json.dump(writeout, f)
+            etllogger.info(f"Saved PTC coordinates for {self.rcsb_id} to {asset_ptc_coords_path}")
+
+
+    async def _update_ligands(self, overwrite:bool=False):
 
         ligands           = struct_ligand_ids(self.rcsb_id, self.profile())
         
@@ -335,7 +346,6 @@ class RibosomeAssets():
                 bsite = bsite_ligand( ligand_chemid, self.biopython_structure())
                 bsite.save(bsite.path_nonpoly_ligand( self.rcsb_id, ligand_chemid))
             else:
-
                 if overwrite:
                     bsite = bsite_ligand( ligand_chemid, self.biopython_structure())
                     bsite.save(bsite.path_nonpoly_ligand( self.rcsb_id, ligand_chemid))

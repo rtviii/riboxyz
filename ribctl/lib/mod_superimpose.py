@@ -88,7 +88,6 @@ def ranged_align_by_polyclass(
             tgt_chain_path, 
             target_range)
 
-
 def ranged_align_by_auth_asym_id(
         src_struct      : str,
         src_auth_asym_id: str,
@@ -160,7 +159,6 @@ def ranged_align_by_auth_asym_id(
             seq_ids["tgt_auth_asym_id"],
             tgt_chain_path, 
             target_range)
-
 
 def pymol_super(
 

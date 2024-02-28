@@ -4,33 +4,52 @@ import os
 from pprint import pprint
 from ribctl import RIBETL_DATA
 from ribctl.etl.ribosome_assets import RibosomeAssets
+from ribctl.lib.libmsa import Taxid
 from ribctl.lib.ribosome_types.types_ribosome import PolynucleotideClass, PolypeptideClass, RibosomeStructure
-from ribctl.lib.util_taxonomy import  get_descendants_of, taxid_is_descendant_of,descendants_of_taxid
+# from ribctl.lib.libmsa import  Taxid
 
 
 def cmd_ls(args):
     all_structs = os.listdir(RIBETL_DATA)
 
     if args.struct != None:
+        rcsb_id, auth_asym_id = None,None
         if "." in args.struct:
             rcsb_id, auth_asym_id = args.struct.split(".")
-        rp = RibosomeAssets(rcsb_id)
-        if "." in args.struct:
-            chain, rp_class = rp.get_chain_by_auth_asym_id(auth_asym_id)
-            pprint(json.loads(chain.json()))
         else:
-            pprint(json.loads(RibosomeAssets(args.struct).profile().json()))
+            rcsb_id = args.struct
+
+
+        ribosome_Assets = RibosomeAssets(rcsb_id)
+
+        if "." in args.struct:
+            chain, rp_class = ribosome_Assets.get_chain_by_auth_asym_id(auth_asym_id)
+            if chain != None:
+                print(json.loads(chain.model_dump_json()))
+        else:
+            print(RibosomeAssets(args.struct).profile().model_dump_json())
 
     elif args.taxid != None:
         print("Listing species information for", args.taxid)
         all_structs = os.listdir(RIBETL_DATA)
         pdbid_taxid_tuples:list = []    
 
-        for struct in all_structs:
-            rp = RibosomeAssets(struct).profile()
-            pdbid_taxid_tuples.append(( rp.rcsb_id, rp.src_organism_ids[0] ))
 
-        pprint(descendants_of_taxid( pdbid_taxid_tuples, int(args.taxid)))
+        for struct in all_structs:
+            try: 
+                ribosome_Assets = RibosomeAssets(struct).profile()
+                pdbid_taxid_tuples.append(( ribosome_Assets.rcsb_id, ribosome_Assets.src_organism_ids[0] ))
+            except:
+                continue
+
+        _ = []
+        for struct, taxids in pdbid_taxid_tuples:
+            if Taxid.is_descendant_of(int(args.taxid), taxids):
+                _.append(struct)
+               
+        print("Descendants of taxid {}(2=bact, 2157=arch, 2159=euk):".format( args.taxid))
+        print(list(sorted(_)))
+
 
     elif args.subelement != None:
         subelem = args.subelement

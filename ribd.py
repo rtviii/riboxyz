@@ -1,6 +1,12 @@
+import sys
+
+from ribctl.lib.ribosome_types.types_ribosome import RibosomeStructure
+sys.dont_write_bytecode = True
 import argparse
 import json
 from pprint import pprint
+import warnings
+warnings.filterwarnings("ignore")
 
 # from ribctl.cli.etl import cmd_etl
 from ribctl.cli.ls import cmd_ls
@@ -12,20 +18,13 @@ def parse_comma_separated_list(value):
     return value.split(',')
 
 
-
-
-
-
 parser     = argparse.ArgumentParser(description="Command line interface for the `ribctl` package.")
+
+
+parser.add_argument('--verify_schema', action='store_true', help="Verify the schema for every file in the database")
+
 subparsers = parser.add_subparsers(title='Subcommands', dest='command')
-
-
-#! -------------------------- --- -------------------------- #
-#! -------------------------- etl -------------------------- #
-#! -------------------------- --- -------------------------- #
-
 parser_cmd_etl = subparsers.add_parser('etl', help='Acquisition and processing of ribosomal structures and assets.')
-
 
 parser_lig = subparsers.add_parser('lig', help='ligands')
 parser_lig.add_argument('--chemid', type=str, required=True, help='Chemical identifier')
@@ -33,10 +32,8 @@ parser_lig.add_argument('--src', type=str, required=True, help='Source file or p
 parser_lig.add_argument('--dest', type=str, required=True, help='Destination file or path')
 
 
-
-
 parser_cmd_etl.add_argument('-getall'      , '--obtain_all_structures', action='store_true')
-parser_cmd_etl.add_argument('-struct'               , dest   ='rcsb_id'    )
+parser_cmd_etl.add_argument('--rcsb_id'               , dest   ='rcsb_id'    )
 
 parser_cmd_etl.add_argument('-transpose_ligand', dest   ='transpose_ligand'    )
 parser_cmd_etl.add_argument('--profile'                 , action ='store_true' )
@@ -57,7 +54,14 @@ from ribctl.etl.ribosome_assets import Assetlist, RibosomeAssets
 
 def cmd_etl(args):
 
-    ASL = Assetlist()
+    ASL = Assetlist(
+        profile                 = False,
+        ptc_coords              = False,
+        cif                     = False,
+        cif_modified_and_chains = False,
+        ligands                 = False,
+        png_thumbnail           = False,
+    )
 
     if args.profile:
         ASL.profile=True
@@ -80,12 +84,11 @@ def cmd_etl(args):
     #All structures
     if args.obtain_all_structures:
         obtain_assets_threadpool(
-            [],
             ASL,
-            workers=4,
-            get_all=True,
-            overwrite=args.overwrite or False
+            workers   = 4,
+            overwrite = args.overwrite or False
         )
+        exit("Exited")
 
     if args.rcsb_id:
         RCSB_ID = str(args.rcsb_id)
@@ -110,9 +113,6 @@ parser_sync = subparsers.add_parser('sync_db', help='Syncronization with the PDB
 # parser_cmd2sub = parser_sync.add_subparsers(title='Subcommands', dest='subcommand2')
 # parser_cmd2sub.add_parser('db', help='Upload local structures to the neo4j database')
 parser_sync.set_defaults(func=cmd_sync)
-
-
-
 
 
 
@@ -158,22 +158,42 @@ parser.add_argument('--t', action='store_true')
 #?---------------------------------------------------------------------------------------------------------
 
 
+def verify_structure_profile_schema(rcsb_id:str):
+    s = RibosomeAssets(rcsb_id).profile().model_dump_json()
+    try:
+        RibosomeStructure.model_validate_json(s)
+        return True
+    except Exception as e:
+        print(e)
+        return False
 
 
-
-
-
-args = parser.parse_args()
-if args.t:
-    ...
-    # test()
-else:
+try:
+    args = parser.parse_args()
     if hasattr(args, 'func'):
         args.func(args)
 
+    elif args.verify_schema:
+        all_structs = os.listdir(RIBETL_DATA)
+        tally       = { "valid": [], "invalid": []}
+
+        for struct in all_structs:
+            if  not os.path.exists(RibosomeAssets(struct)._json_profile_filepath()):
+                continue
+            if not verify_structure_profile_schema(struct):
+                tally["invalid"].append(struct)
+            else:
+                tally["valid"].append(struct)
+        print("Valid:" , len(tally["valid"]))
+        print("Invalid:", len(tally["invalid"]))
     else:
         parser.print_help()
+except (BrokenPipeError, IOError) as e:
+    print("BrokenPipeError or IOError", e)
+    pass
+
+
+
 
 # Notes
-
 # `awk '/ERROR/ {print $3}' | sed 's/:.*$//'`  to get every structure in the log file that failed

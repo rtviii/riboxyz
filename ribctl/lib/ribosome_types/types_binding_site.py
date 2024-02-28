@@ -2,7 +2,7 @@ import json
 import os
 import typing
 import pydantic
-from pydantic import BaseModel
+from pydantic import BaseModel, RootModel
 from Bio.PDB.Residue import Residue
 from ribctl.lib.ribosome_types.types_ribosome import Polymer, PolymerClass
 
@@ -71,8 +71,8 @@ class ResidueSummary(BaseModel):
 class BindingSiteChain(Polymer):
     residues: list[ResidueSummary]
 
-class BindingSite(BaseModel):
-    __root__: typing.Dict[str, BindingSiteChain]
+class BindingSite(RootModel):
+    root: typing.Dict[str, BindingSiteChain]
 
     @staticmethod
     def path_nonpoly_ligand( rcsb_id: str, class_: str):
@@ -119,8 +119,8 @@ class PredictedResiduesPolymer(BaseModel):
     target: PredictionTarget
     alignment: PredictionAlignments
 
-class LigandPrediction(BaseModel):
-    __root__: typing.Dict[PolymerClass, PredictedResiduesPolymer]
+class LigandPrediction(RootModel):
+    root: typing.Dict[PolymerClass, PredictedResiduesPolymer]
 
 
     def save(self, filename: str):
@@ -138,4 +138,3 @@ class LigandPrediction(BaseModel):
     def dict(self,):
         return super().dict()['__root__']
 
-# So, optimal transport for types.

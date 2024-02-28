@@ -1,3 +1,6 @@
+
+ribctl/assets/PoissonRecon
+**/PoissonRecon
 volume/**
 volume/
 **/volume/
@@ -21,8 +24,8 @@ node_modules
 *.env
 **/*.env
 
-**.fa
-**.fasta
+# **.fa
+# **.fasta
 
 __pycache__
 __pycache__/**
@@ -33,13 +36,10 @@ __pycache__/**
 local_venv/**
 local_venv
 
-**/*venv**/**
-**/*venv**
+**/*venv*/**
+**/*venv*
 *venv*
 
-**/*venv**/**
-**/*venv
-*venv
 
 **/*.log
 *.log
