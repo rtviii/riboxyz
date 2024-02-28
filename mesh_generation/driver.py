@@ -1017,12 +1017,9 @@ def DBSCAN_CLUSTERS_visualize_all(dbscan_cluster_dict: dict[int, list]):
 
     for dbscan_label, coordinates in dbscan_cluster_dict.items():
         combined_cluster_points.extend(coordinates)
-        combined_cluster_colors.extend(
-            [clusters_palette[dbscan_label * 2] if dbscan_label != -1 else [0, 0, 0, 1]]
-            * len(coordinates)
-        )
+        combined_cluster_colors.extend( [clusters_palette[( dbscan_label * 5 )%len(clusters_palette)]   if dbscan_label != -1 else [0, 0, 0, 0.1]] * len(coordinates) )
 
-    point_cloud = pv.PolyData(combined_cluster_points)
+    point_cloud         = pv.PolyData(combined_cluster_points)
     point_cloud["rgba"] = combined_cluster_colors
 
     point_cloud.plot(scalars="rgba", rgb=True, notebook=False, show_bounds=True)
@@ -1196,6 +1193,7 @@ def ____pipeline(RCSB_ID):
     struct_tunnel_dir = os.path.join(EXIT_TUNNEL_WORK, RCSB_ID)
     if not os.path.exists(struct_tunnel_dir):
         os.mkdir(struct_tunnel_dir)
+
     if not os.path.exists(spheres_expanded_pointset_path(RCSB_ID)):
         "the data arrives here as atom coordinates extracted from the biopython model "
         if not os.path.exists(tunnel_atom_encoding_path(RCSB_ID)):
@@ -1204,15 +1202,19 @@ def ____pipeline(RCSB_ID):
             _atom_centers       = np.array(list(map(lambda x: x["coord"], bbox_atoms)))
             _vdw_radii          = np.array(list(map(lambda x: x["vdw_radius"], bbox_atoms)))
             bbox_atoms_expanded = expand_bbox_atoms_to_spheres(_atom_centers,_vdw_radii, RCSB_ID)
-            np.save(spheres_expanded_pointset_path(RCSB_ID), bbox_atoms_expanded)
+
         else:
             with open( tunnel_atom_encoding_path(RCSB_ID), "r", ) as infile: 
                 bbox_atoms = json.load(infile)
             _atom_centers       = np.array(list(map(lambda x: x["coord"], bbox_atoms)))
             _vdw_radii          = np.array(list(map(lambda x: x["vdw_radius"], bbox_atoms)))
             bbox_atoms_expanded = expand_bbox_atoms_to_spheres(_atom_centers, _vdw_radii, RCSB_ID)
+
+        np.save(spheres_expanded_pointset_path(RCSB_ID), bbox_atoms_expanded)
+        print("Saved expanded sphere pointset to {}".format(spheres_expanded_pointset_path(RCSB_ID)))
     else:
         bbox_atoms_expanded = np.load(spheres_expanded_pointset_path(RCSB_ID))
+
 
     xyz_positive, xyz_negative, _ , translation_vectors = index_grid(bbox_atoms_expanded) 
     np.save(translation_vectors_path(RCSB_ID), translation_vectors)
@@ -1246,8 +1248,6 @@ def main():
     parser.add_argument( "--metric", choices=DBSCAN_METRICS, help="Choose a metric from the provided options", )
     
 
-
-
     parser.add_argument( "--full_pipeline",   action='store_true')
     parser.add_argument( "--final",   action='store_true')
     parser.add_argument( "--dbscan",   action='store_true')
@@ -1257,11 +1257,11 @@ def main():
     
     if args.dbscan:
 
-
         # expand_bbox_atoms_to_spheres(atom_coordinates:np.ndarray, sphere_vdw_radii:np.ndarray, rcsb_id: str):
         expanded_sphere_voxels = np.load(spheres_expanded_pointset_path(RCSB_ID))
         xyz_pos, xyz_neg, _, _= index_grid(expanded_sphere_voxels)
-        interior_capture_DBSCAN( RCSB_ID, args.eps, args.min_samples, args.metric)
+        db,clusters_container = interior_capture_DBSCAN( xyz_neg,  args.eps, args.min_samples, args.metric)
+        DBSCAN_CLUSTERS_visualize_all( clusters_container )
 
 
     if args.full_pipeline:
