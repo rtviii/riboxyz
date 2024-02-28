@@ -861,7 +861,7 @@ tunnel_atom_encoding_path = lambda rcsb_id: os.path.join(
     rcsb_id.upper(),
     "{}_tunnel_atoms_bbox.json".format(rcsb_id.upper()),
 )
-normalization_vectors_path = lambda rcsb_id: os.path.join(
+translation_vectors_path = lambda rcsb_id: os.path.join(
     EXIT_TUNNEL_WORK,
     rcsb_id.upper(),
     "{}_normalization_vectors.npy".format(rcsb_id.upper()),
@@ -939,16 +939,10 @@ def extract_bbox_atoms(rcsb_id: str) -> list:
     )
 
 
-def expand_bbox_atoms_to_spheres(bbox_data: list | None, rcsb_id: str):
+def expand_bbox_atoms_to_spheres(atom_coordinates:np.ndarray, sphere_vdw_radii:np.ndarray, rcsb_id: str):
 
-    if bbox_data is None:
-        with open( tunnel_atom_encoding_path(rcsb_id), "r", ) as infile:
-            bbox_data = json.load(infile)
 
-    __cords = np.array(list(map(lambda x: x["coord"], bbox_data)))
-    __radii = np.array(list(map(lambda x: x["vdw_radius"], bbox_data)))
-
-    sphere_sources = zip(__cords, __radii)
+    sphere_sources = zip(atom_coordinates, sphere_vdw_radii)
     SINK = []
     expanded = expand_atomcenters_to_spheres_threadpool(SINK, sphere_sources)
 
@@ -960,7 +954,6 @@ def index_grid(expanded_sphere_voxels: np.ndarray):
     normalized_sphere_cords, mean_abs_vectors = normalize_atom_coordinates(expanded_sphere_voxels)
     voxel_size = 1
     sphere_cords_quantized = np.round( np.array(normalized_sphere_cords / voxel_size) ).astype(int)
-
     max_values      = np.max(sphere_cords_quantized, axis=0)
     grid_dimensions = max_values + 1
     vox_grid        = np.zeros(grid_dimensions)
@@ -1034,18 +1027,13 @@ def interior_capture_DBSCAN(
     for k, v in cluster_colors.items():
         cluster_colors[k] = [*v[:3], 0.5]
 
-    u_EPSILON = attempts[-1][0]
-    u_MIN_SAMPLES = attempts[-1][1]
-    u_METRIC = attempts[-1][2]
+    u_EPSILON = eps
+    u_MIN_SAMPLES = min_samples
+    u_METRIC = metric
 
-    print(
-        "Running DBSCAN on {} points. eps={}, min_samples={}, distance_metric={}".format(
-            len(xyz_v_negative), u_EPSILON, u_MIN_SAMPLES, u_METRIC
-        )
-    )
-    db = DBSCAN(eps=eps, min_samples=min_samples, metric=metric, n_jobs=5).fit(
-        xyz_v_negative
-    )
+    print( "Running DBSCAN on {} points. eps={}, min_samples={}, distance_metric={}".format( len(xyz_v_negative), u_EPSILON, u_MIN_SAMPLES, u_METRIC ) ) 
+
+    db     = DBSCAN(eps=eps, min_samples=min_samples, metric=metric, n_jobs=5).fit( xyz_v_negative )
     labels = db.labels_
 
     CLUSTERS_CONTAINER = {}
@@ -1160,11 +1148,7 @@ def move_cords_to_normalized_cord_frame(
     return __xyz_v_positive_ix.T
 
 
-def plot_with_landmarks(
-    rcsb_id: str,
-    mesh_grid_dimensions: np.ndarray,
-    translation_vectors: np.ndarray,
-):
+def plot_with_landmarks( rcsb_id: str):
     """
     @translation_vectors is a np.ndarray of shape (2,3) where
         - the first row is the means of the coordinate set
@@ -1178,13 +1162,22 @@ def plot_with_landmarks(
 
 
     with open( tunnel_atom_encoding_path(rcsb_id), "r", ) as infile:
-        tunnel_atoms_data: list[dict] = json.load(infile)
+        bbox_atoms: list[dict] = json.load(infile)
+
+        _atom_centers       = np.array(list(map(lambda x: x["coord"], bbox_atoms)))
+        _vdw_radii          = np.array(list(map(lambda x: x["vdw_radius"], bbox_atoms)))
+
+        normalized_sphere_cords, mean_abs_vectors = normalize_atom_coordinates(_atom_centers)
+        voxel_size = 1
+        sphere_cords_quantized = np.round( np.array(normalized_sphere_cords / voxel_size) ).astype(int)
+        max_values      = np.max(sphere_cords_quantized, axis=0)
+        grid_dimensions = max_values + 1
 
     with open( ptc_data_path(rcsb_id), "r", ) as infile:
         ptc_data = json.load(infile)
 
     atom_coordinates_by_chain: dict[str, list] = {}
-    for atom in tunnel_atoms_data:
+    for atom in bbox_atoms:
         if len(atom["chain_nomenclature"]) < 1:
             print( "atom ", atom, "has no chain nomenclature", atom["chain_nomenclature"] )
             continue
@@ -1200,9 +1193,10 @@ def plot_with_landmarks(
 
     for i, (chain_name, coords) in enumerate(atom_coordinates_by_chain.items()):
         if chain_name == "eL39":
+
             chain_color = "blue"
             plotter.add_points(
-                move_cords_to_normalized_cord_frame( mesh_grid_dimensions, translation_vectors, np.array(coords) ),
+                move_cords_to_normalized_cord_frame(grid_dimensions, mean_abs_vectors, np.array(coords)),
                 point_size               = CHAIN_PT_SIZE,
                 color                    = chain_color,
                 render_points_as_spheres = True,
@@ -1211,7 +1205,7 @@ def plot_with_landmarks(
         if chain_name == "uL4":
             chain_color = "green"
             plotter.add_points(
-                move_cords_to_normalized_cord_frame( mesh_grid_dimensions, translation_vectors, np.array(coords) ),
+                move_cords_to_normalized_cord_frame(grid_dimensions, mean_abs_vectors, np.array(coords)),
                 point_size               = CHAIN_PT_SIZE,
                 color                    = chain_color,
                 render_points_as_spheres = True,
@@ -1220,24 +1214,15 @@ def plot_with_landmarks(
         if chain_name == "uL22":
             chain_color = "yellow"
             plotter.add_points(
-                move_cords_to_normalized_cord_frame(
-                    mesh_grid_dimensions, translation_vectors, np.array(coords)
-                ),
-                point_size=CHAIN_PT_SIZE,
-                color=chain_color,
-                render_points_as_spheres=True,
+                move_cords_to_normalized_cord_frame(grid_dimensions, mean_abs_vectors, np.array(coords)),
+                point_size               = CHAIN_PT_SIZE,
+                color                    = chain_color,
+                render_points_as_spheres = True,
             )
         else:
             continue
 
-    plotter.add_points(
-        move_cords_to_normalized_cord_frame(
-            mesh_grid_dimensions, translation_vectors, np.array([ptc_midpoint])
-        ),
-        point_size=PTC_PT_SIZE,
-        color="red",
-        render_points_as_spheres=True,
-    )
+    plotter.add_points( move_cords_to_normalized_cord_frame( grid_dimensions, mean_abs_vectors, np.array([ptc_midpoint]) ), point_size=PTC_PT_SIZE, color="red", render_points_as_spheres=True, )
     labels_colors = [ ("uL4", "green"), ("uL22", "yellow"), ("eL39", "blue"), ("PTC", "red"), ]
 
     for i, (label, color) in enumerate(labels_colors):
@@ -1287,16 +1272,23 @@ def ____pipeline(RCSB_ID):
 
     "the data arrives here as atom coordinates extracted from the biopython model "
     if not os.path.exists(tunnel_atom_encoding_path(RCSB_ID)):
-        bbox_atoms = extract_bbox_atoms(RCSB_ID)
-        bbox_atoms_expanded = expand_bbox_atoms_to_spheres(bbox_atoms, RCSB_ID)
+        bbox_atoms          = extract_bbox_atoms(RCSB_ID)
+
+        _atom_centers       = np.array(list(map(lambda x: x["coord"], bbox_atoms)))
+        _vdw_radii          = np.array(list(map(lambda x: x["vdw_radius"], bbox_atoms)))
+        bbox_atoms_expanded = expand_bbox_atoms_to_spheres(_atom_centers,_vdw_radii, RCSB_ID)
+
         print("Extracted tunnel atom encoding from PDB: {}.".format(RCSB_ID))
     else:
-        with open( tunnel_atom_encoding_path(RCSB_ID), "r", ) as infile: bbox_atoms = json.load(infile)
-        print( "Opened tunnel atom encoding from file: {}.".format( tunnel_atom_encoding_path(RCSB_ID) ) )
-        bbox_atoms_expanded = expand_bbox_atoms_to_spheres(bbox_atoms, RCSB_ID)
+        with open( tunnel_atom_encoding_path(RCSB_ID), "r", ) as infile: 
+            bbox_atoms = json.load(infile)
 
-    xyz_positive, xyz_negative, mesh_grid_dimensions, normalization_vectors = index_grid(bbox_atoms_expanded) 
-    np.save(normalization_vectors_path(RCSB_ID), normalization_vectors)
+        _atom_centers       = np.array(list(map(lambda x: x["coord"], bbox_atoms)))
+        _vdw_radii          = np.array(list(map(lambda x: x["vdw_radius"], bbox_atoms)))
+        bbox_atoms_expanded = expand_bbox_atoms_to_spheres(_atom_centers, _vdw_radii, RCSB_ID)
+
+    xyz_positive, xyz_negative, _ , translation_vectors = index_grid(bbox_atoms_expanded) 
+    np.save(translation_vectors_path(RCSB_ID), translation_vectors)
     db, clusters_container = interior_capture_DBSCAN( xyz_negative, _u_EPSILON, _u_MIN_SAMPLES, _u_METRIC )
     
     
@@ -1311,7 +1303,7 @@ def ____pipeline(RCSB_ID):
     surface_pts = surface_pts_via_convex_hull( RCSB_ID, clusters_container[DBSCAN_CLUSTER_ID] )
     estimate_normals(RCSB_ID, surface_pts)
     apply_poisson_reconstruction(RCSB_ID)
-    plot_with_landmarks(RCSB_ID, mesh_grid_dimensions, normalization_vectors)
+    plot_with_landmarks(RCSB_ID)
 
 def main():
 
@@ -1377,8 +1369,8 @@ def main():
 
 
     if args.final:
-        normalization_vectors = np.load(normalization_vectors_path(RCSB_ID))
-        plot_with_landmarks(RCSB_ID, mesh_grid_dimensions, normalization_vectors)
+        # normalization_vectors = np.load(translation_vectors_path(RCSB_ID))
+        plot_with_landmarks(RCSB_ID)
 
 if __name__ == "__main__":
     main()
