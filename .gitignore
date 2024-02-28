@@ -41,7 +41,6 @@ local_venv
 *venv*
 
 
-
 **/*.log
 *.log
 
