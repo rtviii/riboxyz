@@ -830,6 +830,16 @@ diagram_tunnels = {
     "arch": ["4V6U", "4V9F"],
 }
 
+dbscan_pairs = [
+    (2,33),
+    (2.3, 57),
+    (3, 123),
+    (3.2, 145),
+    (3.5, 175),
+    (4.2, 280),
+    (5, 490)
+]
+
 DBSCAN_METRICS = [
     "braycurtis",
     "canberra",
@@ -839,14 +849,14 @@ DBSCAN_METRICS = [
     "hamming",
     "jaccard",
     "kulsinski",
-    "mahalanobis",
-    "minkowski",
+    "mahalanobis", # ?
+    "minkowski",   # ?
     "rogerstanimoto",
     "russellrao",
     "seuclidean",
     "sokalmichener",
     "sokalsneath",
-    "sqeuclidean",
+    "sqeuclidean", #?
     "yule",
     "cityblock",
     "cosine",
@@ -988,7 +998,7 @@ metric        : str = "euclidean",
 
     print( "Running DBSCAN on {} points. eps={}, min_samples={}, distance_metric={}".format( len(xyz_v_negative), u_EPSILON, u_MIN_SAMPLES, u_METRIC ) ) 
 
-    db     = DBSCAN(eps=eps, min_samples=min_samples, metric=metric, n_jobs=5).fit( xyz_v_negative )
+    db     = DBSCAN(eps=eps, min_samples=min_samples, metric=metric, n_jobs=14).fit( xyz_v_negative )
     labels = db.labels_
 
     CLUSTERS_CONTAINER = {}
