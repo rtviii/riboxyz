@@ -107,8 +107,6 @@ def parse_struct_via_bbox(rcsb_id: str, bbox: list) -> list:
     for atom in atoms:
         if is_inside_box(atom.get_coord(), bbox):
             nbhd.append(atom)
-        
-
     return list(nbhd)
 
 def encode_atoms(rcsb_id: str, atoms_list: list[Atom], write=False, writepath=None) -> list:

@@ -928,7 +928,7 @@ def extract_bbox_atoms(rcsb_id: str) -> list:
     centerline_expansion_coordinates = np.array(
         [a.get_coord() for a in centerline_expansion_atoms]
     )
-    bbox = bounding_box(centerline_expansion_coordinates)
+    bbox                = bounding_box(centerline_expansion_coordinates)
     bbox_interior_atoms = parse_struct_via_bbox(rcsb_id, bbox)
 
     return encode_atoms(
@@ -942,10 +942,7 @@ def extract_bbox_atoms(rcsb_id: str) -> list:
 def expand_bbox_atoms_to_spheres(bbox_data: list | None, rcsb_id: str):
 
     if bbox_data is None:
-        with open(
-            tunnel_atom_encoding_path(rcsb_id),
-            "r",
-        ) as infile:
+        with open( tunnel_atom_encoding_path(rcsb_id), "r", ) as infile:
             bbox_data = json.load(infile)
 
     __cords = np.array(list(map(lambda x: x["coord"], bbox_data)))
@@ -960,18 +957,13 @@ def expand_bbox_atoms_to_spheres(bbox_data: list | None, rcsb_id: str):
 
 def index_grid(expanded_sphere_voxels: np.ndarray):
 
-    normalized_sphere_cords, mean_abs_vectors = normalize_atom_coordinates(
-        expanded_sphere_voxels
-    )
-
+    normalized_sphere_cords, mean_abs_vectors = normalize_atom_coordinates(expanded_sphere_voxels)
     voxel_size = 1
-    sphere_cords_quantized = np.round(
-        np.array(normalized_sphere_cords / voxel_size)
-    ).astype(int)
+    sphere_cords_quantized = np.round( np.array(normalized_sphere_cords / voxel_size) ).astype(int)
 
-    max_values = np.max(sphere_cords_quantized, axis=0)
+    max_values      = np.max(sphere_cords_quantized, axis=0)
     grid_dimensions = max_values + 1
-    vox_grid = np.zeros(grid_dimensions)
+    vox_grid        = np.zeros(grid_dimensions)
 
     vox_grid[
         sphere_cords_quantized[:, 0],
@@ -980,9 +972,7 @@ def index_grid(expanded_sphere_voxels: np.ndarray):
     ] = 1
 
     __xyz_v_negative_ix = np.asarray(np.where(vox_grid != 1))
-    __xyz_v_positive_ix = np.asarray(
-        np.where(vox_grid == 1)
-    )  # get back indexes of populated voxels
+    __xyz_v_positive_ix = np.asarray(np.where(vox_grid == 1))
 
     return (
         __xyz_v_positive_ix.T,
@@ -1138,13 +1128,9 @@ def surface_pts_via_convex_hull(
 def estimate_normals(rcsb_id, convex_hull_surface_pts: np.ndarray | None = None):
     pcd = o3d.geometry.PointCloud()
     pcd.points = o3d.utility.Vector3dVector(convex_hull_surface_pts)
-    pcd.estimate_normals(
-        search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=5, max_nn=15)
-    )
+    pcd.estimate_normals( search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=5, max_nn=15) )
     pcd.orient_normals_consistent_tangent_plane(k=10)
-    o3d.visualization.draw_geometries(
-        [pcd], point_show_normal=True, window_name="Point Cloud with Normals"
-    )
+    o3d.visualization.draw_geometries( [pcd], point_show_normal=True, window_name="Point Cloud with Normals" )
     o3d.io.write_point_cloud(surface_with_normals_path(rcsb_id), pcd)
     print("Wrote surface with normals {}".format(surface_with_normals_path(rcsb_id)))
 
@@ -1186,60 +1172,51 @@ def plot_with_landmarks(
         (to be used to reverse the normalization process or to travel to this coordinate frame)
 
     """
+    FONT          = 'courier'
+    CHAIN_PT_SIZE = 8
+    PTC_PT_SIZE   = 20
 
-    with open(
-        tunnel_atom_encoding_path(rcsb_id),
-        "r",
-    ) as infile:
+
+    with open( tunnel_atom_encoding_path(rcsb_id), "r", ) as infile:
         tunnel_atoms_data: list[dict] = json.load(infile)
 
-    with open(
-        ptc_data_path(rcsb_id),
-        "r",
-    ) as infile:
+    with open( ptc_data_path(rcsb_id), "r", ) as infile:
         ptc_data = json.load(infile)
 
     atom_coordinates_by_chain: dict[str, list] = {}
     for atom in tunnel_atoms_data:
         if len(atom["chain_nomenclature"]) < 1:
-            print(
-                "atom ", atom, "has no chain nomenclature", atom["chain_nomenclature"]
-            )
+            print( "atom ", atom, "has no chain nomenclature", atom["chain_nomenclature"] )
             continue
         if atom["chain_nomenclature"][0] not in atom_coordinates_by_chain:
             atom_coordinates_by_chain[atom["chain_nomenclature"][0]] = []
         atom_coordinates_by_chain[atom["chain_nomenclature"][0]].extend([atom["coord"]])
 
     ptc_midpoint = np.array(ptc_data["midpoint_coordinates"])
-
-    mesh = pv.read(poisson_recon_path(rcsb_id))
+    mesh    = pv.read(poisson_recon_path(rcsb_id))
     plotter = pv.Plotter()
     plotter.add_mesh(mesh, opacity=0.5)
 
-    CHAIN_PT_SIZE = 8
-    PTC_PT_SIZE = 20
 
     for i, (chain_name, coords) in enumerate(atom_coordinates_by_chain.items()):
         if chain_name == "eL39":
             chain_color = "blue"
             plotter.add_points(
-                move_cords_to_normalized_cord_frame(
-                    mesh_grid_dimensions, translation_vectors, np.array(coords)
-                ),
-                point_size=CHAIN_PT_SIZE,
-                color=chain_color,
-                render_points_as_spheres=True,
+                move_cords_to_normalized_cord_frame( mesh_grid_dimensions, translation_vectors, np.array(coords) ),
+                point_size               = CHAIN_PT_SIZE,
+                color                    = chain_color,
+                render_points_as_spheres = True,
             )
+
         if chain_name == "uL4":
             chain_color = "green"
             plotter.add_points(
-                move_cords_to_normalized_cord_frame(
-                    mesh_grid_dimensions, translation_vectors, np.array(coords)
-                ),
-                point_size=CHAIN_PT_SIZE,
-                color=chain_color,
-                render_points_as_spheres=True,
+                move_cords_to_normalized_cord_frame( mesh_grid_dimensions, translation_vectors, np.array(coords) ),
+                point_size               = CHAIN_PT_SIZE,
+                color                    = chain_color,
+                render_points_as_spheres = True,
             )
+
         if chain_name == "uL22":
             chain_color = "yellow"
             plotter.add_points(
@@ -1261,19 +1238,14 @@ def plot_with_landmarks(
         color="red",
         render_points_as_spheres=True,
     )
-    labels_colors = [
-        ("uL4", "green"),
-        ("uL22", "yellow"),
-        ("eL39", "blue"),
-        ("PTC", "red"),
-    ]
+    labels_colors = [ ("uL4", "green"), ("uL22", "yellow"), ("eL39", "blue"), ("PTC", "red"), ]
 
     for i, (label, color) in enumerate(labels_colors):
-        offset = i * 30  # Adjust the offset as needed
+        offset   = i * 50  # Adjust the offset as needed
         position = (20, 200 - offset, 0)
-        plotter.add_text(
-            label, position=position, font_size=20, color=color, shadow=True
-        )
+        plotter.add_text( label, position=position, font_size=20, font=FONT,color=color, shadow=True )
+
+    plotter.add_text('RCSB_ID: {}'.format(rcsb_id), position='upper_right', font_size=24, shadow=True, font=FONT, color='black')
     plotter.show(auto_close=False)
 
 
@@ -1298,35 +1270,16 @@ def apply_poisson_reconstruction(rcsb_id: str):
         print("Error:", process.stderr)
 
 
-def main():
 
-    # ? ---------- Params ------------
-    parser = argparse.ArgumentParser()
-    # Add command-line arguments
-    parser.add_argument(
-        "--rcsb_id", type=str, help="Specify the value for eps (float)", required=True
-    )
-    parser.add_argument("--eps", type=float, help="Specify the value for eps (float)")
-    parser.add_argument(
-        "--min_samples", type=int, help="Specify the value for min_samples (int)"
-    )
-    parser.add_argument(
-        "--metric",
-        choices=DBSCAN_METRICS,
-        help="Choose a metric from the provided options",
-    )
-
-    # Parse the command-line arguments
-    args = parser.parse_args()
-
+def ____pipeline(RCSB_ID):
     _u_EPSILON     = 5.5
     _u_MIN_SAMPLES = 600
     _u_METRIC      = "euclidean"
 
-    RCSB_ID       = args.rcsb_id.upper()
-    u_EPSILON     = args.eps if args.eps is not None else _u_EPSILON
-    u_MIN_SAMPLES = args.min_samples if args.min_samples is not None else _u_MIN_SAMPLES
-    u_METRIC      = args.metric if args.metric is not None else _u_METRIC
+    # RCSB_ID       = args.rcsb_id.upper()
+    # u_EPSILON     = args.eps if args.eps is not None else _u_EPSILON
+    # u_MIN_SAMPLES = args.min_samples if args.min_samples is not None else _u_MIN_SAMPLES
+    # u_METRIC      = args.metric if args.metric is not None else _u_METRIC
 
     struct_tunnel_dir = os.path.join(EXIT_TUNNEL_WORK, RCSB_ID)
     if not os.path.exists(struct_tunnel_dir):
@@ -1338,44 +1291,94 @@ def main():
         bbox_atoms_expanded = expand_bbox_atoms_to_spheres(bbox_atoms, RCSB_ID)
         print("Extracted tunnel atom encoding from PDB: {}.".format(RCSB_ID))
     else:
-        with open(
-            tunnel_atom_encoding_path(RCSB_ID),
-            "r",
-        ) as infile:
-            bbox_atoms = json.load(infile)
-        print(
-            "Opened tunnel atom encoding from file: {}.".format(
-                tunnel_atom_encoding_path(RCSB_ID)
-            )
-        )
+        with open( tunnel_atom_encoding_path(RCSB_ID), "r", ) as infile: bbox_atoms = json.load(infile)
+        print( "Opened tunnel atom encoding from file: {}.".format( tunnel_atom_encoding_path(RCSB_ID) ) )
         bbox_atoms_expanded = expand_bbox_atoms_to_spheres(bbox_atoms, RCSB_ID)
 
-    xyz_positive, xyz_negative, mesh_grid_dimensions, normalization_vectors = (
-        index_grid(bbox_atoms_expanded)
-    )
+    xyz_positive, xyz_negative, mesh_grid_dimensions, normalization_vectors = index_grid(bbox_atoms_expanded) 
     np.save(normalization_vectors_path(RCSB_ID), normalization_vectors)
-    db, clusters_container = interior_capture_DBSCAN(
-        xyz_negative, u_EPSILON, u_MIN_SAMPLES, u_METRIC
-    )
+    db, clusters_container = interior_capture_DBSCAN( xyz_negative, _u_EPSILON, _u_MIN_SAMPLES, _u_METRIC )
+    
+    
+    DBSCAN_CLUSTER_ID = 1
+    for k, v in clusters_container.items():
+        if int(k) == 0:
+            continue
+        elif len(v) > len(clusters_container[DBSCAN_CLUSTER_ID]):
+            DBSCAN_CLUSTER_ID = int(k)
+        print("Picked cluster {} because it has more points({})".format(DBSCAN_CLUSTER_ID, len(clusters_container[DBSCAN_CLUSTER_ID])))
 
-    DBSCAN_CLUSTERS_visualize_all(clusters_container)
+    surface_pts = surface_pts_via_convex_hull( RCSB_ID, clusters_container[DBSCAN_CLUSTER_ID] )
+    estimate_normals(RCSB_ID, surface_pts)
+    apply_poisson_reconstruction(RCSB_ID)
+    plot_with_landmarks(RCSB_ID, mesh_grid_dimensions, normalization_vectors)
 
-    while True:
-        user_input = input("Enter 'Q' to quit or a number between 1 and 20: ")
-        if user_input.upper() == "Q":
-            break  # Exit the loop if the user enters 'Q'
-        elif user_input.isdigit() and 0 <= int(user_input) <= 20:
-            DBSCAN_CLUSTER_ID = int(user_input)
-            surface_pts = surface_pts_via_convex_hull(
-                RCSB_ID, clusters_container[DBSCAN_CLUSTER_ID]
-            )
+def main():
 
-            estimate_normals(RCSB_ID, surface_pts)
-            apply_poisson_reconstruction(RCSB_ID)
-            plot_with_landmarks(RCSB_ID, mesh_grid_dimensions, normalization_vectors)
-        else:
-            print("Invalid input. Please enter 'Q' or a number between 1 and 20.")
+    # ? ---------- Params ------------
+    parser = argparse.ArgumentParser()
+    # Add command-line arguments
+    parser.add_argument( "--rcsb_id", type=str, help="Specify the value for eps (float)", required=True )
+    parser.add_argument("--eps", type=float, help="Specify the value for eps (float)")
+    parser.add_argument( "--min_samples", type=int, help="Specify the value for min_samples (int)" )
+    parser.add_argument( "--metric", choices=DBSCAN_METRICS, help="Choose a metric from the provided options", )
 
+    parser.add_argument( "--fresh",  help="Rerun the whole pipeline", action='store_true')
+    parser.add_argument( "--final",  help="Specify the value for final (bool)", action='store_true')
+
+    # Parse the command-line arguments
+    args = parser.parse_args()
+
+    # _u_EPSILON     = 5.5
+    # _u_MIN_SAMPLES = 600
+    # _u_METRIC      = "euclidean"
+
+    RCSB_ID       = args.rcsb_id.upper()
+    # u_EPSILON     = args.eps if args.eps is not None else _u_EPSILON
+    # u_MIN_SAMPLES = args.min_samples if args.min_samples is not None else _u_MIN_SAMPLES
+    # u_METRIC      = args.metric if args.metric is not None else _u_METRIC
+
+    # struct_tunnel_dir = os.path.join(EXIT_TUNNEL_WORK, RCSB_ID)
+    # if not os.path.exists(struct_tunnel_dir):
+    #     os.mkdir(struct_tunnel_dir)
+
+    # "the data arrives here as atom coordinates extracted from the biopython model "
+    # if not os.path.exists(tunnel_atom_encoding_path(RCSB_ID)):
+    #     bbox_atoms = extract_bbox_atoms(RCSB_ID)
+    #     bbox_atoms_expanded = expand_bbox_atoms_to_spheres(bbox_atoms, RCSB_ID)
+    #     print("Extracted tunnel atom encoding from PDB: {}.".format(RCSB_ID))
+    # else:
+    #     with open( tunnel_atom_encoding_path(RCSB_ID), "r", ) as infile: bbox_atoms = json.load(infile)
+    #     print( "Opened tunnel atom encoding from file: {}.".format( tunnel_atom_encoding_path(RCSB_ID) ) )
+    #     bbox_atoms_expanded = expand_bbox_atoms_to_spheres(bbox_atoms, RCSB_ID)
+
+    # xyz_positive, xyz_negative, mesh_grid_dimensions, normalization_vectors = index_grid(bbox_atoms_expanded) 
+    # np.save(normalization_vectors_path(RCSB_ID), normalization_vectors)
+    # db, clusters_container = interior_capture_DBSCAN( xyz_negative, u_EPSILON, u_MIN_SAMPLES, u_METRIC )
+
+
+    if args.fresh:
+        ____pipeline(RCSB_ID)
+    # DBSCAN_CLUSTERS_visualize_all(clusters_container)
+
+    # while True:
+    #     user_input = input("Enter 'Q' to quit or a number between 1 and 20: ")
+
+    #     if user_input.upper() == "Q":
+    #         break  # Exit the loop if the user enters 'Q'
+    #     elif user_input.isdigit() and 0 <= int(user_input) <= 20:
+    #         DBSCAN_CLUSTER_ID = int(user_input)
+    #         surface_pts = surface_pts_via_convex_hull( RCSB_ID, clusters_container[DBSCAN_CLUSTER_ID] )
+    #         estimate_normals(RCSB_ID, surface_pts)
+    #         apply_poisson_reconstruction(RCSB_ID)
+    #         plot_with_landmarks(RCSB_ID, mesh_grid_dimensions, normalization_vectors)
+    #     else:
+    #         print("Invalid input. Please enter 'Q' or a number between 1 and 20.")
+
+
+    if args.final:
+        normalization_vectors = np.load(normalization_vectors_path(RCSB_ID))
+        plot_with_landmarks(RCSB_ID, mesh_grid_dimensions, normalization_vectors)
 
 if __name__ == "__main__":
     main()
