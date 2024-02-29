@@ -15,8 +15,9 @@ RCSB_ID = "4W29"
 ra = RibosomeAssets(RCSB_ID)
 
 c         = ra.get_chain_by_polymer_class("23SrRNA")
+seq_c = c.to_SeqRecord()
 src_taxid = ra.get_taxids()[0][0]
 seqs      = list(fasta_phylogenetic_correction(PolymerClass("23SrRNA"), src_taxid))
 
-seqs_a = muscle_align_N_seq(seqs,vvv=True)
+seqs_a = muscle_align_N_seq([ seq_c, *seqs ],vvv=True)
 Fasta.write_fasta(list(seqs_a), "23SrRNA_neighbors_of_{}.fasta".format(RCSB_ID))
