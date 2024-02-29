@@ -879,9 +879,7 @@ translation_vectors_path = lambda rcsb_id: os.path.join(
 selected_dbscan_cluster_path = lambda rcsb_id: os.path.join(
     EXIT_TUNNEL_WORK, rcsb_id.upper(), "{}_dbscan_cluster.npy".format(rcsb_id.upper())
 )
-convex_hull_cluster_path = lambda rcsb_id: os.path.join(
-    EXIT_TUNNEL_WORK, rcsb_id.upper(), "{}_convex_hull.npy".format(rcsb_id.upper())
-)
+convex_hull_cluster_path = lambda rcsb_id: os.path.join( EXIT_TUNNEL_WORK, rcsb_id.upper(), "{}_convex_hull.npy".format(rcsb_id.upper()) )
 surface_with_normals_path = lambda rcsb_id: os.path.join( EXIT_TUNNEL_WORK, rcsb_id.upper(), "{}_normal_estimated_surf.ply".format(rcsb_id.upper()), )
 poisson_recon_path        = lambda rcsb_id: os.path.join( EXIT_TUNNEL_WORK, rcsb_id.upper(), "{}_poisson_recon.ply".format(rcsb_id.upper()) )
 ptc_data_path             = lambda rcsb_id: os.path.join( RIBETL_DATA, rcsb_id.upper(), "{}_PTC_COORDINATES.json".format(rcsb_id.upper()) )
@@ -1093,7 +1091,7 @@ def move_cords_to_normalized_cord_frame(
     return __xyz_v_positive_ix.T
 
 
-def plot_with_landmarks( rcsb_id: str):
+def plot_with_landmarks( rcsb_id: str, dbscan_eps, dbscan_min_nbrs,poisson_recon_custom_path:str|None=None, ):
     """
     @translation_vectors is a np.ndarray of shape (2,3) where
         - the first row is the means of the coordinate set
@@ -1129,9 +1127,16 @@ def plot_with_landmarks( rcsb_id: str):
         if atom["chain_nomenclature"][0] not in atom_coordinates_by_chain:
             atom_coordinates_by_chain[atom["chain_nomenclature"][0]] = []
         atom_coordinates_by_chain[atom["chain_nomenclature"][0]].extend([atom["coord"]])
-
     ptc_midpoint = np.array(ptc_data["midpoint_coordinates"])
-    mesh    = pv.read(poisson_recon_path(rcsb_id))
+
+
+    if poisson_recon_custom_path == None:
+        poisson_recon = poisson_recon_path(rcsb_id)
+    else:
+        poisson_recon = poisson_recon_custom_path
+
+
+    mesh    = pv.read(poisson_recon)
     plotter = pv.Plotter()
     plotter.add_mesh(mesh, opacity=0.5)
 
@@ -1176,16 +1181,33 @@ def plot_with_landmarks( rcsb_id: str):
         plotter.add_text( label, position=position, font_size=20, font=FONT,color=color, shadow=True )
 
     plotter.add_text('RCSB_ID: {}'.format(rcsb_id), position='upper_right', font_size=24, shadow=True, font=FONT, color='black')
+    plotter.add_text('DBSCAN.epsilon: {}\nDBSCAN.min_nbrs: {}'.format(dbscan_eps, dbscan_min_nbrs), position='upper_left', font_size=14, shadow=True, font=FONT, color='black')
+
     plotter.show(auto_close=False)
 
+def pick_largest_poisson_cluster(clusters_container)->np.ndarray:
+    DBSCAN_CLUSTER_ID = 1
+    for k, v in clusters_container.items():
+        if int(k) == -1:
+            continue
+        elif len(v) > len(clusters_container[DBSCAN_CLUSTER_ID]):
+            DBSCAN_CLUSTER_ID = int(k)
+        # print("Picked cluster {} because it has more points({})".format(DBSCAN_CLUSTER_ID, len(clusters_container[DBSCAN_CLUSTER_ID])))
+    return np.array(clusters_container[DBSCAN_CLUSTER_ID])
 
-def apply_poisson_reconstruction(rcsb_id: str):
-    command = [ POISSON_RECON_BIN, "--in", surface_with_normals_path(rcsb_id), "--out", poisson_recon_path(rcsb_id), "--depth", "7", "--pointWeight", "3", ]
+def apply_poisson_reconstruction(rcsb_id: str, poisson_recon_custom_path:str|None=None):
+
+    if poisson_recon_custom_path == None:
+        poisson_recon = poisson_recon_path(rcsb_id)
+    else:
+        poisson_recon = poisson_recon_custom_path
+
+    command = [ POISSON_RECON_BIN, "--in", surface_with_normals_path(rcsb_id), "--out", poisson_recon, "--depth", "6", "--pointWeight", "3", ]
 
     process = subprocess.run(command, capture_output=True, text=True)
     if process.returncode == 0:
         print("PoissonRecon executed successfully.")
-        print("Saved to {}".format(poisson_recon_path(rcsb_id)))
+        print("Saved to {}".format(poisson_recon))
     else:
         print("Error:", process.stderr)
 
@@ -1226,29 +1248,24 @@ def ____pipeline(RCSB_ID):
     db, clusters_container = interior_capture_DBSCAN( xyz_negative, _u_EPSILON, _u_MIN_SAMPLES, _u_METRIC )
     
     
-    DBSCAN_CLUSTER_ID = 1
-    for k, v in clusters_container.items():
-        if int(k) == 0:
-            continue
-        elif len(v) > len(clusters_container[DBSCAN_CLUSTER_ID]):
-            DBSCAN_CLUSTER_ID = int(k)
-        print("Picked cluster {} because it has more points({})".format(DBSCAN_CLUSTER_ID, len(clusters_container[DBSCAN_CLUSTER_ID])))
-
-    surface_pts = surface_pts_via_convex_hull( RCSB_ID, clusters_container[DBSCAN_CLUSTER_ID] )
+    largest_cluster = pick_largest_poisson_cluster(clusters_container)
+    surface_pts     = surface_pts_via_convex_hull( RCSB_ID, largest_cluster )
     np.save(convex_hull_cluster_path(RCSB_ID), surface_pts)
     print("Saved convex hull surface points to {}".format(convex_hull_cluster_path(RCSB_ID)))
 
     estimate_normals(RCSB_ID, surface_pts)
     apply_poisson_reconstruction(RCSB_ID)
-    plot_with_landmarks(RCSB_ID)
+    plot_with_landmarks(RCSB_ID,0,0)
 
+def custom_cluster_recon_path(rcsb_id, eps, min_nbrs):
+    return os.path.join( EXIT_TUNNEL_WORK, rcsb_id.upper(), "{}_poisson_recon-eps{}_minnbrs{}.ply".format(rcsb_id.upper(), eps, min_nbrs) )
 def main():
 
     # ? ---------- Params ------------
     parser = argparse.ArgumentParser()
     # Add command-line arguments
     parser.add_argument( "--rcsb_id", type=str, help="Specify the value for eps (float)", required=True )
-    parser.add_argument("--eps", type=float, help="Specify the value for eps (float)")
+    parser.add_argument( "--eps", type=float, help="Specify the value for eps (float)")
     parser.add_argument( "--min_samples", type=int, help="Specify the value for min_samples (int)" )
     parser.add_argument( "--metric", choices=DBSCAN_METRICS, help="Choose a metric from the provided options", )
     
@@ -1256,29 +1273,37 @@ def main():
     parser.add_argument( "--full_pipeline",   action='store_true')
     parser.add_argument( "--final",   action='store_true')
     parser.add_argument( "--dbscan",   action='store_true')
-    parser.add_argument( "-dbscan_tuple",   type=str)
+    parser.add_argument( "--dbscan_tuple",   type=str)
 
 
     args = parser.parse_args()
+    eps,min_nbrs       =  args.dbscan_tuple.split(",")
     RCSB_ID       = args.rcsb_id.upper()
     
     if args.dbscan:
 
-        eps,min_nbs       = map(lambda x,y: [ float(x), int(y) ], args.dbscan_tuple.split(","))
-        print(eps,min_nbs)
-        exit()
-        # expand_bbox_atoms_to_spheres(atom_coordinates:np.ndarray, sphere_vdw_radii:np.ndarray, rcsb_id: str):
-        expanded_sphere_voxels = np.load(spheres_expanded_pointset_path(RCSB_ID))
-        xyz_pos, xyz_neg, _, _= index_grid(expanded_sphere_voxels)
-        db,clusters_container = interior_capture_DBSCAN( xyz_neg,  args.eps, args.min_samples, args.metric)
-        DBSCAN_CLUSTERS_visualize_all( clusters_container )
+        if args.dbscan_tuple is not None:
+            eps,min_nbrs       =  args.dbscan_tuple.split(",")
+            metric= 'euclidean'
+            # expand_bbox_atoms_to_spheres(atom_coordinates:np.ndarray, sphere_vdw_radii:np.ndarray, rcsb_id: str):
+            expanded_sphere_voxels = np.load(spheres_expanded_pointset_path(RCSB_ID))
+            xyz_pos, xyz_neg, _, _= index_grid(expanded_sphere_voxels)
+            db,clusters_container = interior_capture_DBSCAN( xyz_neg,  float(eps), int(min_nbrs), metric)
+
+
+            largest_cluster = pick_largest_poisson_cluster(clusters_container)
+            surface_pts     = surface_pts_via_convex_hull( RCSB_ID, largest_cluster )
+            np.save(convex_hull_cluster_path(RCSB_ID), surface_pts)
+            apply_poisson_reconstruction(RCSB_ID, custom_cluster_recon_path(RCSB_ID, eps, min_nbrs))
+
+        # DBSCAN_CLUSTERS_visualize_all( clusters_container )
 
 
     if args.full_pipeline:
         ____pipeline(RCSB_ID)
 
     if args.final:
-        plot_with_landmarks(RCSB_ID)
+        plot_with_landmarks(RCSB_ID, float(eps),int(min_nbrs),custom_cluster_recon_path(RCSB_ID, float(eps), int(min_nbrs)))
 
 if __name__ == "__main__":
     main()
