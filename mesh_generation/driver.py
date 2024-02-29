@@ -1267,7 +1267,7 @@ def plot_multiple_surfaces(rcsb_id:str):
     FONT                  = 'courier'
     CHAIN_PT_SIZE         = 8
     PTC_PT_SIZE           = 20
-    CHAIN_LANDMARK_COLORS = ["yellow","green","blue","magenta","cyan","purple","orange", "cornflowerblue", "cornsilk", "crimson", "darkblue", "darkcyan", "darkgoldenrod", "darkgray", "darkgreen", "darkkhaki", "darkmagenta", "darkolivegreen", "darkorange", "darkorchid", "darkred"]
+    CHAIN_LANDMARK_COLORS = ["magenta","cyan","purple","orange", "cornflowerblue", "cornsilk", "crimson", "darkblue", "darkcyan", "darkgoldenrod", "darkgray", "darkgreen", "darkkhaki", "darkmagenta", "darkolivegreen", "darkorange", "darkorchid", "darkred"]
 
 
     with open( tunnel_atom_encoding_path(rcsb_id), "r", ) as infile:
@@ -1315,7 +1315,7 @@ def plot_multiple_surfaces(rcsb_id:str):
             plotter.add_points(
                 move_cords_to_normalized_cord_frame(grid_dimensions, mean_abs_vectors, np.array(coords)),
                 point_size               = 2 if chain_name not in ["eL39","uL4","uL22"] else 8,
-                color                    = CHAIN_LANDMARK_COLORS[i],
+                color                    = CHAIN_LANDMARK_COLORS[i] if chain_name not in ["eL39","uL4","uL22"] else "blue" if chain_name == "eL39" else "green" if chain_name == "uL4" else "yellow",
                 opacity=0.05 if chain_name not in ["eL39","uL4","uL22"] else 1,
                 render_points_as_spheres = True,
             )
@@ -1324,8 +1324,9 @@ def plot_multiple_surfaces(rcsb_id:str):
         plotter.add_points( move_cords_to_normalized_cord_frame( grid_dimensions, mean_abs_vectors, np.array([ptc_midpoint]) ), point_size=PTC_PT_SIZE, color="red", render_points_as_spheres=True, )
 
         #? Add text labels to the plotter
-        plotter.add_text('RCSB_ID: {}'.format(rcsb_id), position='upper_right', font_size=14, shadow=True, font=FONT, color='black')
+        plotter.add_text('{}'.format(rcsb_id), position='upper_right', font_size=14, shadow=True, font=FONT, color='black')
         plotter.add_text('eps: {} \nmin_nbrs: {}'.format(eps, min_nbrs), position='upper_left', font_size=8, shadow=True, font=FONT, color='black')
+        plotter.add_text('Volume: {}'.format(round(mesh_.volume, 3)), position='lower_left', font_size=8, shadow=True, font=FONT, color='black')
 
     plotter.show()
 
@@ -1349,6 +1350,7 @@ def main():
     parser.add_argument( "--dbscan",   action='store_true')
     parser.add_argument( "--dbscan_tuple",   type=str)
 
+    parser.add_argument( "--multisurf",   action='store_true')
 
     args = parser.parse_args()
     RCSB_ID       = args.rcsb_id.upper()
@@ -1376,10 +1378,11 @@ def main():
 
     if args.final:
         plot_with_landmarks(RCSB_ID, float(eps),int(min_nbrs),custom_cluster_recon_path(RCSB_ID, float(eps), int(min_nbrs)))
+    if args.multisurf:
+        plot_multiple_surfaces(RCSB_ID)
 
 if __name__ == "__main__":
-    plot_multiple_surfaces("4v9f")
-    # main()
+    main()
 
     # _={"bacteria":[],
     #    "archaea"  : [],
