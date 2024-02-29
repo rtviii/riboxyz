@@ -20,9 +20,7 @@ TAXID_BACTERIA = 2
 TAXID_EUKARYOTA = 2759
 TAXID_ARCHAEA = 2157
 
-PhylogenyRank = Literal[
-    "superkingdom", "phylum", "class", "order", "family", "genus", "species", "strain"
-]
+PhylogenyRank = Literal[ "superkingdom", "phylum", "class", "order", "family", "genus", "species", "strain" ]
 ncbi = NCBITaxa()
 
 
@@ -259,7 +257,6 @@ def seq_to_fasta(rcsb_id: str, _seq: str, outfile: str):
     seq_record = SeqRecord(Seq(_seq).upper())
     seq_record.id = seq_record.description = rcsb_id
     SeqIO.write(seq_record, outfile, "fasta")
-
 
 def phylogenetic_neighborhood(
     taxids_base: list[str], taxid_target: str, n_neighbors: int = 10

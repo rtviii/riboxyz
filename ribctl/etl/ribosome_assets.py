@@ -138,6 +138,7 @@ class RibosomeAssets():
         return self.biopython_structure(), self.profile()
 
     def get_chain_by_polymer_class(self, poly_class: PolymerClass , assembly: int = 0) -> PolymerClass | None:
+        print("Got poly class {}".format(poly_class))
         profile = self.profile()
         # print("Got provfile for ", profile.rcsb_id)
         # print("searching for ", poly_class)
@@ -148,6 +149,7 @@ class RibosomeAssets():
 
         if profile.rnas is not None:
             for rna in profile.rnas:
+                print("Comparing against ", [r.value for r in rna.nomenclature])
                 if poly_class in [r.value for r in rna.nomenclature] and rna.assembly_id == assembly:
                     return rna
 

@@ -851,7 +851,7 @@ FONT                  = 'courier'
 CHAIN_PT_SIZE         = 8
 PTC_PT_SIZE           = 20
 CHAIN_LANDMARK_COLORS = ["magenta","cyan","purple","orange", "cornflowerblue", "cornsilk", "crimson", "darkblue", "darkcyan", "darkgoldenrod", "darkgray", "darkgreen", "darkkhaki", "darkmagenta", "darkolivegreen", "darkorange", "darkorchid", "darkred"]
-DBSCAN_METRICS = [
+DBSCAN_METRICS        = [
     "braycurtis",
     "canberra",
     "chebyshev",
@@ -904,7 +904,6 @@ def custom_cluster_recon_path(rcsb_id, eps, min_nbrs):
     return os.path.join( EXIT_TUNNEL_WORK, rcsb_id.upper(), "{}_poisson_recon-eps{}_minnbrs{}.ply".format(rcsb_id.upper(), eps, min_nbrs) )
 # ? ------------------------------
 
-
 def bounding_box(points: np.ndarray):
     """Computes the axis-aligned minimum bounding box of a list of points.
 
@@ -938,7 +937,6 @@ def bounding_box(points: np.ndarray):
         [min_x, max_y, max_z],
     ]
 
-
 def extract_bbox_atoms(rcsb_id: str) -> list:
 
     centerline_expansion_atoms = parse_struct_via_centerline(
@@ -957,7 +955,6 @@ def extract_bbox_atoms(rcsb_id: str) -> list:
         writepath=tunnel_atom_encoding_path(rcsb_id),
     )
 
-
 def expand_bbox_atoms_to_spheres(atom_coordinates:np.ndarray, sphere_vdw_radii:np.ndarray, rcsb_id: str):
 
     sphere_sources = zip(atom_coordinates, sphere_vdw_radii)
@@ -965,7 +962,6 @@ def expand_bbox_atoms_to_spheres(atom_coordinates:np.ndarray, sphere_vdw_radii:n
     expanded = expand_atomcenters_to_spheres_threadpool(SINK, sphere_sources)
 
     return np.array(expanded)
-
 
 def index_grid(expanded_sphere_voxels: np.ndarray):
 
@@ -991,7 +987,6 @@ def index_grid(expanded_sphere_voxels: np.ndarray):
         grid_dimensions,
         mean_abs_vectors,
     )
-
 
 def interior_capture_DBSCAN(
 xyz_v_negative: np.ndarray,
@@ -1022,41 +1017,6 @@ metric        : str = "euclidean",
     CLUSTERS_CONTAINER = dict(sorted(CLUSTERS_CONTAINER.items()))
 
     return db, CLUSTERS_CONTAINER
-
-
-# def DBSCAN_CLUSTERS_visualize_all(dbscan_cluster_dict: dict[int, list]):
-
-#     for k, v in dbscan_cluster_dict.items():
-#         print("Cluster {} has {} points.".format(k, len(v)))
-
-#     clusters_palette = dict(zip(range(-1, 60), plt.cm.terrain(np.linspace(0, 1, 60))))
-
-#     for k, v in clusters_palette.items():
-#         clusters_palette[k] = [*v[:3], 0.5]
-
-#     combined_cluster_colors = []
-#     combined_cluster_points = []
-
-#     for dbscan_label, coordinates in dbscan_cluster_dict.items():
-#         combined_cluster_points.extend(coordinates)
-#         combined_cluster_colors.extend( [clusters_palette[( dbscan_label * 5 )%len(clusters_palette)]   if dbscan_label != -1 else [0, 0, 0, 0.1]] * len(coordinates) )
-
-#     point_cloud         = pv.PolyData(combined_cluster_points)
-#     point_cloud["rgba"] = combined_cluster_colors
-
-#     point_cloud.plot(scalars="rgba", rgb=True, notebook=False, show_bounds=True)
-
-# def DBSCAN_CLUSTERS_visualize_one(
-#     positive_space: np.ndarray, selected_cluster: np.ndarray
-# ):
-#     rgbas_cluster = [[15, 10, 221, 1] for datapoint in selected_cluster]
-#     rgbas_positive = np.array([[205, 209, 228, 0.2] for _ in positive_space])
-#     combined = np.concatenate([selected_cluster, positive_space])
-#     rgbas_combined = np.concatenate([rgbas_cluster, rgbas_positive])
-
-#     point_cloud = pv.PolyData(combined)
-#     point_cloud["rgba"] = rgbas_combined
-#     point_cloud.plot(scalars="rgba", rgb=True, notebook=False, show_bounds=True)
 
 def DBSCAN_CLUSTERS_visualize_largest(positive_space: np.ndarray, dbscan_cluster_dict: dict[int, list], selected_cluster: np.ndarray):
     plotter               = pv.Plotter(shape=(1, 2))
@@ -1094,7 +1054,6 @@ def DBSCAN_CLUSTERS_visualize_largest(positive_space: np.ndarray, dbscan_cluster
 
     plotter.show()
 
-
 def surface_pts_via_convex_hull(
     rcsb_id: str, selected_cluster: np.ndarray | None = None
 )->np.ndarray:
@@ -1108,7 +1067,6 @@ def surface_pts_via_convex_hull(
     else:
         pts = np.load(convex_hull_cluster_path(rcsb_id))
         return pts
-
 
 def estimate_normals(rcsb_id, convex_hull_surface_pts: np.ndarray | None = None):
     pcd = o3d.geometry.PointCloud()
@@ -1398,7 +1356,6 @@ def main():
     parser.add_argument( "--eps", type=float, help="Specify the value for eps (float)")
     parser.add_argument( "--min_samples", type=int, help="Specify the value for min_samples (int)" )
     parser.add_argument( "--metric", choices=DBSCAN_METRICS, help="Choose a metric from the provided options", )
-    
 
     parser.add_argument( "--full_pipeline",   action='store_true')
     parser.add_argument( "--final",   action='store_true')
