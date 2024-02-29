@@ -830,9 +830,11 @@ dbscan_pairs = [
     (2.3, 57),
     (3, 123),
     (3.2, 145),
+
     (3.5, 175),
     (4.2, 280),
-    (5, 490)
+    (5, 490),
+    (5.5,600)
 ]
 
 DBSCAN_METRICS = [
@@ -883,6 +885,9 @@ convex_hull_cluster_path = lambda rcsb_id: os.path.join( EXIT_TUNNEL_WORK, rcsb_
 surface_with_normals_path = lambda rcsb_id: os.path.join( EXIT_TUNNEL_WORK, rcsb_id.upper(), "{}_normal_estimated_surf.ply".format(rcsb_id.upper()), )
 poisson_recon_path        = lambda rcsb_id: os.path.join( EXIT_TUNNEL_WORK, rcsb_id.upper(), "{}_poisson_recon.ply".format(rcsb_id.upper()) )
 ptc_data_path             = lambda rcsb_id: os.path.join( RIBETL_DATA, rcsb_id.upper(), "{}_PTC_COORDINATES.json".format(rcsb_id.upper()) )
+
+def custom_cluster_recon_path(rcsb_id, eps, min_nbrs):
+    return os.path.join( EXIT_TUNNEL_WORK, rcsb_id.upper(), "{}_poisson_recon-eps{}_minnbrs{}.ply".format(rcsb_id.upper(), eps, min_nbrs) )
 # ? ------------------------------
 
 
@@ -991,7 +996,7 @@ metric        : str = "euclidean",
 
     print( "Running DBSCAN on {} points. eps={}, min_samples={}, distance_metric={}".format( len(xyz_v_negative), u_EPSILON, u_MIN_SAMPLES, u_METRIC ) ) 
 
-    db     = DBSCAN(eps=eps, min_samples=min_samples, metric=metric, n_jobs=14).fit( xyz_v_negative )
+    db     = DBSCAN(eps=eps, min_samples=min_samples, metric=metric).fit( xyz_v_negative )
     labels = db.labels_
 
     CLUSTERS_CONTAINER = {}
@@ -1040,7 +1045,6 @@ def DBSCAN_CLUSTERS_visualize_one(
     point_cloud["rgba"] = rgbas_combined
     point_cloud.plot(scalars="rgba", rgb=True, notebook=False, show_bounds=True)
 
-
 def surface_pts_via_convex_hull(
     rcsb_id: str, selected_cluster: np.ndarray | None = None
 )->np.ndarray:
@@ -1061,10 +1065,9 @@ def estimate_normals(rcsb_id, convex_hull_surface_pts: np.ndarray | None = None)
     pcd.points = o3d.utility.Vector3dVector(convex_hull_surface_pts)
     pcd.estimate_normals( search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=5, max_nn=15) )
     pcd.orient_normals_consistent_tangent_plane(k=10)
-    o3d.visualization.draw_geometries( [pcd], point_show_normal=True, window_name="Point Cloud with Normals" )
+    # o3d.visualization.draw_geometries( [pcd], point_show_normal=True, window_name="Point Cloud with Normals" )
     o3d.io.write_point_cloud(surface_with_normals_path(rcsb_id), pcd)
     print("Wrote surface with normals {}".format(surface_with_normals_path(rcsb_id)))
-
 
 def move_cords_to_normalized_cord_frame(
     grid_dimensions: np.ndarray,
@@ -1089,7 +1092,6 @@ def move_cords_to_normalized_cord_frame(
         np.where(vox_grid == 1)
     )  # get back indexes of populated voxels
     return __xyz_v_positive_ix.T
-
 
 def plot_with_landmarks( rcsb_id: str, dbscan_eps, dbscan_min_nbrs,poisson_recon_custom_path:str|None=None, ):
     """
@@ -1127,6 +1129,7 @@ def plot_with_landmarks( rcsb_id: str, dbscan_eps, dbscan_min_nbrs,poisson_recon
         if atom["chain_nomenclature"][0] not in atom_coordinates_by_chain:
             atom_coordinates_by_chain[atom["chain_nomenclature"][0]] = []
         atom_coordinates_by_chain[atom["chain_nomenclature"][0]].extend([atom["coord"]])
+
     ptc_midpoint = np.array(ptc_data["midpoint_coordinates"])
 
 
@@ -1135,7 +1138,7 @@ def plot_with_landmarks( rcsb_id: str, dbscan_eps, dbscan_min_nbrs,poisson_recon
     else:
         poisson_recon = poisson_recon_custom_path
 
-
+    print("Opened poisson recon file at \033[32m{}\033[0m".format(poisson_recon))
     mesh    = pv.read(poisson_recon)
     plotter = pv.Plotter()
     plotter.add_mesh(mesh, opacity=0.5)
@@ -1143,7 +1146,6 @@ def plot_with_landmarks( rcsb_id: str, dbscan_eps, dbscan_min_nbrs,poisson_recon
 
     for i, (chain_name, coords) in enumerate(atom_coordinates_by_chain.items()):
         if chain_name == "eL39":
-
             chain_color = "blue"
             plotter.add_points(
                 move_cords_to_normalized_cord_frame(grid_dimensions, mean_abs_vectors, np.array(coords)),
@@ -1211,7 +1213,6 @@ def apply_poisson_reconstruction(rcsb_id: str, poisson_recon_custom_path:str|Non
     else:
         print("Error:", process.stderr)
 
-
 def ____pipeline(RCSB_ID):
     _u_EPSILON     = 5.5
     _u_MIN_SAMPLES = 600
@@ -1255,10 +1256,83 @@ def ____pipeline(RCSB_ID):
 
     estimate_normals(RCSB_ID, surface_pts)
     apply_poisson_reconstruction(RCSB_ID)
-    plot_with_landmarks(RCSB_ID,0,0)
+    # plot_with_landmarks(RCSB_ID,0,0)
 
-def custom_cluster_recon_path(rcsb_id, eps, min_nbrs):
-    return os.path.join( EXIT_TUNNEL_WORK, rcsb_id.upper(), "{}_poisson_recon-eps{}_minnbrs{}.ply".format(rcsb_id.upper(), eps, min_nbrs) )
+
+
+def plot_multiple_surfaces(rcsb_id:str):
+
+    rcsb_id               = rcsb_id.upper()
+    plotter               = pv.Plotter(shape=(2, 4))
+    FONT                  = 'courier'
+    CHAIN_PT_SIZE         = 8
+    PTC_PT_SIZE           = 20
+    CHAIN_LANDMARK_COLORS = ["yellow","green","blue","magenta","cyan","purple","orange", "cornflowerblue", "cornsilk", "crimson", "darkblue", "darkcyan", "darkgoldenrod", "darkgray", "darkgreen", "darkkhaki", "darkmagenta", "darkolivegreen", "darkorange", "darkorchid", "darkred"]
+
+
+    with open( tunnel_atom_encoding_path(rcsb_id), "r", ) as infile:
+        bbox_atoms: list[dict] = json.load(infile)
+        _atom_centers       = np.array(list(map(lambda x: x["coord"], bbox_atoms)))
+        _vdw_radii          = np.array(list(map(lambda x: x["vdw_radius"], bbox_atoms)))
+
+        normalized_sphere_cords, mean_abs_vectors = normalize_atom_coordinates(_atom_centers)
+        voxel_size = 1
+        sphere_cords_quantized = np.round( np.array(normalized_sphere_cords / voxel_size) ).astype(int)
+        max_values      = np.max(sphere_cords_quantized, axis=0)
+        grid_dimensions = max_values + 1
+
+    with open( ptc_data_path(rcsb_id), "r", ) as infile:
+        ptc_data = json.load(infile)
+
+    atom_coordinates_by_chain: dict[str, list] = {}
+    for atom in bbox_atoms:
+        if len(atom["chain_nomenclature"]) < 1:
+            print( "atom ", atom, "has no chain nomenclature", atom["chain_nomenclature"] )
+            continue
+        if atom["chain_nomenclature"][0] not in atom_coordinates_by_chain:
+            atom_coordinates_by_chain[atom["chain_nomenclature"][0]] = []
+        atom_coordinates_by_chain[atom["chain_nomenclature"][0]].extend([atom["coord"]])
+
+    ptc_midpoint = np.array(ptc_data["midpoint_coordinates"])
+
+
+
+    #! * FOR EACH SUBPLOT *
+    for (i,j) in [(0,0),(0,1),(0,2),(0,3),(1,0),(1,1),(1,2),(1,3)]:
+        plotter.subplot(i,j)
+
+        eps, min_nbrs = dbscan_pairs[i*4+j]
+
+        # ? Add mesh to the plotter
+        mesh_  = pv.read(custom_cluster_recon_path(rcsb_id, eps, min_nbrs))
+        plotter.add_mesh(mesh_, opacity=0.5)
+
+
+
+        for i, ( chain_name, coords ) in enumerate(atom_coordinates_by_chain.items()):
+            print("Plotting " + chain_name, "with index", i ,)
+            # ? Adding coordinates to the plotter for each chain( coordinates and color )
+            plotter.add_points(
+                move_cords_to_normalized_cord_frame(grid_dimensions, mean_abs_vectors, np.array(coords)),
+                point_size               = 2 if chain_name not in ["eL39","uL4","uL22"] else 8,
+                color                    = CHAIN_LANDMARK_COLORS[i],
+                opacity=0.05 if chain_name not in ["eL39","uL4","uL22"] else 1,
+                render_points_as_spheres = True,
+            )
+
+        # ? Adding PTC coordinatesfor each chain( coordinates and color )
+        plotter.add_points( move_cords_to_normalized_cord_frame( grid_dimensions, mean_abs_vectors, np.array([ptc_midpoint]) ), point_size=PTC_PT_SIZE, color="red", render_points_as_spheres=True, )
+
+        #? Add text labels to the plotter
+        plotter.add_text('RCSB_ID: {}'.format(rcsb_id), position='upper_right', font_size=14, shadow=True, font=FONT, color='black')
+        plotter.add_text('eps: {} \nmin_nbrs: {}'.format(eps, min_nbrs), position='upper_left', font_size=8, shadow=True, font=FONT, color='black')
+
+    plotter.show()
+
+
+        
+        
+
 def main():
 
     # ? ---------- Params ------------
@@ -1277,9 +1351,7 @@ def main():
 
 
     args = parser.parse_args()
-    eps,min_nbrs       =  args.dbscan_tuple.split(",")
     RCSB_ID       = args.rcsb_id.upper()
-    
     if args.dbscan:
 
         if args.dbscan_tuple is not None:
@@ -1306,7 +1378,8 @@ def main():
         plot_with_landmarks(RCSB_ID, float(eps),int(min_nbrs),custom_cluster_recon_path(RCSB_ID, float(eps), int(min_nbrs)))
 
 if __name__ == "__main__":
-    main()
+    plot_multiple_surfaces("4v9f")
+    # main()
 
     # _={"bacteria":[],
     #    "archaea"  : [],
