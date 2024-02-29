@@ -26,32 +26,6 @@ def expand_atomcenters_to_spheres_threadpool(sink_container:list, sphere_sources
 
   return sink_container
 
-DBSCAN_METRICS = [
-    "braycurtis",
-    "canberra",
-    "chebyshev",
-    "correlation",
-    "dice",
-    "hamming",
-    "jaccard",
-    "kulsinski",
-    "mahalanobis",
-    "minkowski",
-    "rogerstanimoto",
-    "russellrao",
-    "seuclidean",
-    "sokalmichener",
-    "sokalsneath",
-    "sqeuclidean",
-    "yule",
-    "cityblock",
-    "cosine",
-    "euclidean",
-    "l1",
-    "l2",
-    "manhattan",
-]
-
 def midpoints(x):
     sl = ()
     for _ in range(x.ndim):

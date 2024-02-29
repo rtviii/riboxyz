@@ -1,9 +1,6 @@
 import argparse
 from pprint import pprint
-
-
 import subprocess
-import typing
 from matplotlib import pyplot as plt
 import open3d as o3d
 import pyvista as pv
@@ -24,8 +21,6 @@ from mesh_generation.voxelize import (
     normalize_atom_coordinates,
 )
 from ribctl import EXIT_TUNNEL_WORK, POISSON_RECON_BIN, RIBETL_DATA
-from ribctl.etl.ribosome_assets import RibosomeAssets
-from ribctl.lib.libmsa import Taxid
 
 
 available_tunnels = {
@@ -888,8 +883,8 @@ convex_hull_cluster_path = lambda rcsb_id: os.path.join(
     EXIT_TUNNEL_WORK, rcsb_id.upper(), "{}_convex_hull.npy".format(rcsb_id.upper())
 )
 surface_with_normals_path = lambda rcsb_id: os.path.join( EXIT_TUNNEL_WORK, rcsb_id.upper(), "{}_normal_estimated_surf.ply".format(rcsb_id.upper()), )
-poisson_recon_path = lambda rcsb_id: os.path.join( EXIT_TUNNEL_WORK, rcsb_id.upper(), "{}_poisson_recon.ply".format(rcsb_id.upper()) )
-ptc_data_path = lambda rcsb_id: os.path.join( RIBETL_DATA, rcsb_id.upper(), "{}_PTC_COORDINATES.json".format(rcsb_id.upper()) )
+poisson_recon_path        = lambda rcsb_id: os.path.join( EXIT_TUNNEL_WORK, rcsb_id.upper(), "{}_poisson_recon.ply".format(rcsb_id.upper()) )
+ptc_data_path             = lambda rcsb_id: os.path.join( RIBETL_DATA, rcsb_id.upper(), "{}_PTC_COORDINATES.json".format(rcsb_id.upper()) )
 # ? ------------------------------
 
 
@@ -1261,12 +1256,17 @@ def main():
     parser.add_argument( "--full_pipeline",   action='store_true')
     parser.add_argument( "--final",   action='store_true')
     parser.add_argument( "--dbscan",   action='store_true')
+    parser.add_argument( "-dbscan_tuple",   type=str)
+
 
     args = parser.parse_args()
     RCSB_ID       = args.rcsb_id.upper()
     
     if args.dbscan:
 
+        eps,min_nbs       = map(lambda x,y: [ float(x), int(y) ], args.dbscan_tuple.split(","))
+        print(eps,min_nbs)
+        exit()
         # expand_bbox_atoms_to_spheres(atom_coordinates:np.ndarray, sphere_vdw_radii:np.ndarray, rcsb_id: str):
         expanded_sphere_voxels = np.load(spheres_expanded_pointset_path(RCSB_ID))
         xyz_pos, xyz_neg, _, _= index_grid(expanded_sphere_voxels)

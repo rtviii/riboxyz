@@ -1,34 +1,18 @@
 #! ------------------------------ MESH GENERATION
-import pyvista as pv
 import json
 import os
 from pprint import pprint
-import sys
-from typing import Tuple
 import numpy as np
 import open3d as o3d
-from open3d import core as o3c
 from mendeleev import element
 import pandas as pd
 from ribctl.etl.ribosome_assets import RibosomeAssets
-from ribctl.lib.ribosome_types.types_binding_site import (
-    AMINO_ACIDS,
-    NUCLEOTIDES,
-    ResidueSummary,
-)
 from Bio.PDB.Atom import Atom
-from Bio.PDB.Residue import Residue
-from Bio.PDB.Chain import Chain
-from Bio.PDB.Atom import Atom
-from functools import reduce
-from Bio.PDB.Structure import Structure
-from ribctl.lib.ribosome_types.types_ribosome import RNA
 
 # Tunnel refinement:
 # - using the centerline and dynamic probe radius, extract the atoms within 15A radius of the centerline
 # - when processing atoms, encode their vdw radius, atom type and residue and chain id
-from ribctl import ASSETS_PATH, EXIT_TUNNEL_WORK, RIBETL_DATA
-
+from ribctl import  EXIT_TUNNEL_WORK, RIBETL_DATA
 
 def open_tunnel_csv(rcsb_id: str) -> list[list]:
     TUNNEL_PATH = os.path.join(
