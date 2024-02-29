@@ -1,6 +1,7 @@
 import argparse
 from pprint import pprint
 import subprocess
+import typing
 from matplotlib import pyplot as plt
 import open3d as o3d
 import pyvista as pv
@@ -21,6 +22,8 @@ from mesh_generation.voxelize import (
     normalize_atom_coordinates,
 )
 from ribctl import EXIT_TUNNEL_WORK, POISSON_RECON_BIN, RIBETL_DATA
+from ribctl.etl.ribosome_assets import RibosomeAssets
+from ribctl.lib.libmsa import Taxid
 
 
 available_tunnels = {
@@ -786,43 +789,49 @@ available_tunnels = {
 }
 
 diagram_tunnels = {
-    "bact": [
+    "bacteria": [
         "4W29",
         "6WD4",
         "7UNV",
         "5DM6",
+
         "5O60",
         "8BUU",
         "6HMA",
         "7RYH",
+
         "7MSZ",
         "7P7T",
         "5MYJ",
         "7JIL",
     ],
-    "euk": [
+    "eukaryota": [
         "6P5N",
         "7QGG",
         "4UG0",
         "4U3M",
+
         "7OYB",
         "7OLC",
         "8EUI",
         "5XXB",
+
         "4V91",
         "6XU8",
         "4V7E",
         "8P5D",
+
         "8BTR",
         "3JBO",
         "7CPU",
         "7Q08",
         "6AZ3",
+
         "5T5H",
         "5XY3",
         "7QEP",
     ],
-    "arch": ["4V6U", "4V9F"],
+    "archaea": ["4V6U", "4V9F"],
 }
 
 dbscan_pairs = [
@@ -1259,6 +1268,33 @@ def ____pipeline(RCSB_ID):
     # plot_with_landmarks(RCSB_ID,0,0)
 
 
+def retrieve_ptc_and_chain_atoms(rcsb_id):
+        with open( tunnel_atom_encoding_path(rcsb_id), "r", ) as infile:
+            bbox_atoms: list[dict] = json.load(infile)
+            _atom_centers       = np.array(list(map(lambda x: x["coord"], bbox_atoms)))
+            _vdw_radii          = np.array(list(map(lambda x: x["vdw_radius"], bbox_atoms)))
+
+            normalized_sphere_cords, translation_vectors = normalize_atom_coordinates(_atom_centers)
+            voxel_size = 1
+            sphere_cords_quantized = np.round( np.array(normalized_sphere_cords / voxel_size) ).astype(int)
+            max_values      = np.max(sphere_cords_quantized, axis=0)
+            grid_dimensions = max_values + 1
+
+        with open( ptc_data_path(rcsb_id), "r", ) as infile:
+            ptc_data = json.load(infile)
+
+        atom_coordinates_by_chain: dict[str, list] = {}
+        for atom in bbox_atoms:
+            if len(atom["chain_nomenclature"]) < 1:
+                # print( "atom ", atom, "has no chain nomenclature", atom["chain_nomenclature"] )
+                continue
+            if atom["chain_nomenclature"][0] not in atom_coordinates_by_chain:
+                atom_coordinates_by_chain[atom["chain_nomenclature"][0]] = []
+            atom_coordinates_by_chain[atom["chain_nomenclature"][0]].extend([atom["coord"]])
+
+        ptc_midpoint = np.array(ptc_data["midpoint_coordinates"])
+
+        return ptc_midpoint, atom_coordinates_by_chain, grid_dimensions, translation_vectors
 
 def plot_multiple_surfaces(rcsb_id:str):
 
@@ -1270,32 +1306,7 @@ def plot_multiple_surfaces(rcsb_id:str):
     CHAIN_LANDMARK_COLORS = ["magenta","cyan","purple","orange", "cornflowerblue", "cornsilk", "crimson", "darkblue", "darkcyan", "darkgoldenrod", "darkgray", "darkgreen", "darkkhaki", "darkmagenta", "darkolivegreen", "darkorange", "darkorchid", "darkred"]
 
 
-    with open( tunnel_atom_encoding_path(rcsb_id), "r", ) as infile:
-        bbox_atoms: list[dict] = json.load(infile)
-        _atom_centers       = np.array(list(map(lambda x: x["coord"], bbox_atoms)))
-        _vdw_radii          = np.array(list(map(lambda x: x["vdw_radius"], bbox_atoms)))
-
-        normalized_sphere_cords, mean_abs_vectors = normalize_atom_coordinates(_atom_centers)
-        voxel_size = 1
-        sphere_cords_quantized = np.round( np.array(normalized_sphere_cords / voxel_size) ).astype(int)
-        max_values      = np.max(sphere_cords_quantized, axis=0)
-        grid_dimensions = max_values + 1
-
-    with open( ptc_data_path(rcsb_id), "r", ) as infile:
-        ptc_data = json.load(infile)
-
-    atom_coordinates_by_chain: dict[str, list] = {}
-    for atom in bbox_atoms:
-        if len(atom["chain_nomenclature"]) < 1:
-            print( "atom ", atom, "has no chain nomenclature", atom["chain_nomenclature"] )
-            continue
-        if atom["chain_nomenclature"][0] not in atom_coordinates_by_chain:
-            atom_coordinates_by_chain[atom["chain_nomenclature"][0]] = []
-        atom_coordinates_by_chain[atom["chain_nomenclature"][0]].extend([atom["coord"]])
-
-    ptc_midpoint = np.array(ptc_data["midpoint_coordinates"])
-
-
+    ptc_midpoint, atom_coordinates_by_chain, grid_dimensions, mean_abs_vectors = retrieve_ptc_and_chain_atoms(rcsb_id)
 
     #! * FOR EACH SUBPLOT *
     for (i,j) in [(0,0),(0,1),(0,2),(0,3),(1,0),(1,1),(1,2),(1,3)]:
@@ -1303,14 +1314,14 @@ def plot_multiple_surfaces(rcsb_id:str):
 
         eps, min_nbrs = dbscan_pairs[i*4+j]
 
+
         # ? Add mesh to the plotter
         mesh_  = pv.read(custom_cluster_recon_path(rcsb_id, eps, min_nbrs))
-        plotter.add_mesh(mesh_, opacity=0.5)
-
+        plotter.add_mesh(mesh_, opacity=0.3, color="cyan")
 
 
         for i, ( chain_name, coords ) in enumerate(atom_coordinates_by_chain.items()):
-            print("Plotting " + chain_name, "with index", i ,)
+            # print("Plotting " + chain_name, "with index", i ,)
             # ? Adding coordinates to the plotter for each chain( coordinates and color )
             plotter.add_points(
                 move_cords_to_normalized_cord_frame(grid_dimensions, mean_abs_vectors, np.array(coords)),
@@ -1327,11 +1338,63 @@ def plot_multiple_surfaces(rcsb_id:str):
         plotter.add_text('{}'.format(rcsb_id), position='upper_right', font_size=14, shadow=True, font=FONT, color='black')
         plotter.add_text('eps: {} \nmin_nbrs: {}'.format(eps, min_nbrs), position='upper_left', font_size=8, shadow=True, font=FONT, color='black')
         plotter.add_text('Volume: {}'.format(round(mesh_.volume, 3)), position='lower_left', font_size=8, shadow=True, font=FONT, color='black')
+        
 
     plotter.show()
 
 
-        
+
+def plot_multiple_by_kingdom(kingdom:typing.Literal['bacteria','archaea','eukaryota'], eps:float, min_nbrs:int):
+
+    plotter               = pv.Plotter(shape=(2, 4))
+    FONT                  = 'courier'
+    CHAIN_PT_SIZE         = 8
+    PTC_PT_SIZE           = 20
+    CHAIN_LANDMARK_COLORS = ["magenta","cyan","purple","orange", "cornflowerblue", "cornsilk", "crimson", "darkblue", "darkcyan", "darkgoldenrod", "darkgray", "darkgreen", "darkkhaki", "darkmagenta", "darkolivegreen", "darkorange", "darkorchid", "darkred"]
+
+
+    for (i,j) in [(0,0),(0,1),(0,2),(0,3),(1,0),(1,1),(1,2),(1,3)]:
+        try:
+            plotter.subplot(i,j)
+            rcsb_id = diagram_tunnels[kingdom][i*4+j]
+            src_taxid = RibosomeAssets(rcsb_id).get_taxids()[0][0]
+            taxname = list( Taxid.get_name(str(src_taxid)).items() )[0][1]
+            # print("Got taxids :", RibosomeAssets(rcsb_id).get_taxids())
+            # print(f"Got name { Taxid.get_name() } for struct {rcsb_id}")
+
+            ptc_midpoint, atom_chains_dict, grid_dimensions, translation_vectors = retrieve_ptc_and_chain_atoms(rcsb_id)
+
+
+            # ? Add mesh to the plotter
+            mesh_  = pv.read(custom_cluster_recon_path(rcsb_id, eps, min_nbrs))
+            plotter.add_mesh(mesh_, opacity=0.5)
+
+
+            for i, ( chain_name, coords ) in enumerate(atom_chains_dict.items()):
+                # print("Plotting " + chain_name, "with index", i ,)
+                # ? Adding coordinates to the plotter for each chain( coordinates and color )
+                plotter.add_points(
+                    move_cords_to_normalized_cord_frame(grid_dimensions, translation_vectors, np.array(coords)),
+                      point_size               = 8 if chain_name in ["eL39","uL4","uL22"] else 2 if "rRNA" in chain_name else 4 ,
+                      color                    =  'gray' if "rRNA" in chain_name else "cyan" if chain_name == "eL39" else "lightgreen" if chain_name == "uL4" else "gold" if chain_name =="uL22" else CHAIN_LANDMARK_COLORS[i],
+                      opacity                  = 0.1 if chain_name not in ["eL39","uL4","uL22"] else 1 ,
+                      render_points_as_spheres = True ,
+                )
+
+            # ? Adding PTC coordinatesfor each chain( coordinates and color )
+            plotter.add_points( move_cords_to_normalized_cord_frame( grid_dimensions, translation_vectors, np.array([ptc_midpoint]) ), point_size=PTC_PT_SIZE, color="red", render_points_as_spheres=True, )
+
+            #? Add text labels to the plotter
+            plotter.add_text('RCSB_ID:{}'.format(rcsb_id), position='upper_right', font_size=14, shadow=True, font=FONT, color='black')
+            plotter.add_text('eps: {} \nmin_nbrs: {}'.format(eps, min_nbrs), position='upper_left', font_size=8, shadow=True, font=FONT, color='black')
+            plotter.add_text('Volume: {}'.format(round(mesh_.volume, 3)), position='lower_left', font_size=8, shadow=True, font=FONT, color='black')
+            plotter.add_text('{}'.format(taxname), position='lower_right', font_size=8, shadow=True, font=FONT, color='black') 
+        except Exception as e:
+            print(e)
+            continue
+            
+
+    plotter.show()
         
 
 def main():
@@ -1348,9 +1411,10 @@ def main():
     parser.add_argument( "--full_pipeline",   action='store_true')
     parser.add_argument( "--final",   action='store_true')
     parser.add_argument( "--dbscan",   action='store_true')
-    parser.add_argument( "--dbscan_tuple",   type=str)
+    parser.add_argument( "--dbscan_tuple",  type=str)
 
     parser.add_argument( "--multisurf",   action='store_true')
+    parser.add_argument( "--kingdom",   choices=['bacteria','archaea','eukaryota'])
 
     args = parser.parse_args()
     RCSB_ID       = args.rcsb_id.upper()
@@ -1370,8 +1434,6 @@ def main():
             np.save(convex_hull_cluster_path(RCSB_ID), surface_pts)
             apply_poisson_reconstruction(RCSB_ID, custom_cluster_recon_path(RCSB_ID, eps, min_nbrs))
 
-        # DBSCAN_CLUSTERS_visualize_all( clusters_container )
-
 
     if args.full_pipeline:
         ____pipeline(RCSB_ID)
@@ -1381,6 +1443,11 @@ def main():
     if args.multisurf:
         plot_multiple_surfaces(RCSB_ID)
 
+    if args.kingdom:
+        eps,min_nbrs =  args.dbscan_tuple.split(",")
+        eps = float(eps)
+        min_nbrs = int(min_nbrs)
+        plot_multiple_by_kingdom(args.kingdom, eps, min_nbrs)
 if __name__ == "__main__":
     main()
 
