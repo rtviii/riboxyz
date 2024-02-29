@@ -1024,32 +1024,65 @@ metric        : str = "euclidean",
     return db, CLUSTERS_CONTAINER
 
 
-def DBSCAN_CLUSTERS_visualize_all(dbscan_cluster_dict: dict[int, list]):
+# def DBSCAN_CLUSTERS_visualize_all(dbscan_cluster_dict: dict[int, list]):
 
+#     for k, v in dbscan_cluster_dict.items():
+#         print("Cluster {} has {} points.".format(k, len(v)))
+
+#     clusters_palette = dict(zip(range(-1, 60), plt.cm.terrain(np.linspace(0, 1, 60))))
+
+#     for k, v in clusters_palette.items():
+#         clusters_palette[k] = [*v[:3], 0.5]
+
+#     combined_cluster_colors = []
+#     combined_cluster_points = []
+
+#     for dbscan_label, coordinates in dbscan_cluster_dict.items():
+#         combined_cluster_points.extend(coordinates)
+#         combined_cluster_colors.extend( [clusters_palette[( dbscan_label * 5 )%len(clusters_palette)]   if dbscan_label != -1 else [0, 0, 0, 0.1]] * len(coordinates) )
+
+#     point_cloud         = pv.PolyData(combined_cluster_points)
+#     point_cloud["rgba"] = combined_cluster_colors
+
+#     point_cloud.plot(scalars="rgba", rgb=True, notebook=False, show_bounds=True)
+
+# def DBSCAN_CLUSTERS_visualize_one(
+#     positive_space: np.ndarray, selected_cluster: np.ndarray
+# ):
+#     rgbas_cluster = [[15, 10, 221, 1] for datapoint in selected_cluster]
+#     rgbas_positive = np.array([[205, 209, 228, 0.2] for _ in positive_space])
+#     combined = np.concatenate([selected_cluster, positive_space])
+#     rgbas_combined = np.concatenate([rgbas_cluster, rgbas_positive])
+
+#     point_cloud = pv.PolyData(combined)
+#     point_cloud["rgba"] = rgbas_combined
+#     point_cloud.plot(scalars="rgba", rgb=True, notebook=False, show_bounds=True)
+
+def DBSCAN_CLUSTERS_visualize_largest(positive_space: np.ndarray, dbscan_cluster_dict: dict[int, list], selected_cluster: np.ndarray):
+    plotter               = pv.Plotter(shape=(1, 2))
+
+    plotter.subplot(0,0)
+    #? Visualize all clusters
     for k, v in dbscan_cluster_dict.items():
         print("Cluster {} has {} points.".format(k, len(v)))
-
     clusters_palette = dict(zip(range(-1, 60), plt.cm.terrain(np.linspace(0, 1, 60))))
-
     for k, v in clusters_palette.items():
         clusters_palette[k] = [*v[:3], 0.5]
-
     combined_cluster_colors = []
     combined_cluster_points = []
-
     for dbscan_label, coordinates in dbscan_cluster_dict.items():
         combined_cluster_points.extend(coordinates)
         combined_cluster_colors.extend( [clusters_palette[( dbscan_label * 5 )%len(clusters_palette)]   if dbscan_label != -1 else [0, 0, 0, 0.1]] * len(coordinates) )
+    ptcloud_all_clusters         = pv.PolyData(combined_cluster_points)
+    ptcloud_all_clusters["rgba"] = combined_cluster_colors
 
-    point_cloud         = pv.PolyData(combined_cluster_points)
-    point_cloud["rgba"] = combined_cluster_colors
-
-    point_cloud.plot(scalars="rgba", rgb=True, notebook=False, show_bounds=True)
+    plotter.add_mesh(ptcloud_all_clusters, scalars="rgba", rgb=True, show_scalar_bar=False)
 
 
-def DBSCAN_CLUSTERS_visualize_one(
-    positive_space: np.ndarray, selected_cluster: np.ndarray
-):
+
+
+    #? Visualize selected cluster
+    plotter.subplot(0,1)
     rgbas_cluster = [[15, 10, 221, 1] for datapoint in selected_cluster]
     rgbas_positive = np.array([[205, 209, 228, 0.2] for _ in positive_space])
     combined = np.concatenate([selected_cluster, positive_space])
@@ -1057,7 +1090,10 @@ def DBSCAN_CLUSTERS_visualize_one(
 
     point_cloud = pv.PolyData(combined)
     point_cloud["rgba"] = rgbas_combined
-    point_cloud.plot(scalars="rgba", rgb=True, notebook=False, show_bounds=True)
+    plotter.add_mesh(point_cloud, scalars="rgba", rgb=True, show_scalar_bar=False)
+
+    plotter.show()
+
 
 def surface_pts_via_convex_hull(
     rcsb_id: str, selected_cluster: np.ndarray | None = None
@@ -1229,7 +1265,6 @@ def ____pipeline(RCSB_ID):
     apply_poisson_reconstruction(RCSB_ID)
     # plot_with_landmarks(RCSB_ID,0,0)
 
-
 def retrieve_ptc_and_chain_atoms(rcsb_id):
         with open( tunnel_atom_encoding_path(rcsb_id), "r", ) as infile:
             bbox_atoms: list[dict] = json.load(infile)
@@ -1304,8 +1339,6 @@ def plot_multiple_surfaces(rcsb_id:str):
         
 
     plotter.show()
-
-
 
 def plot_multiple_by_kingdom(kingdom:typing.Literal['bacteria','archaea','eukaryota'], eps:float, min_nbrs:int):
 
@@ -1392,6 +1425,9 @@ def main():
             surface_pts     = surface_pts_via_convex_hull( RCSB_ID, largest_cluster )
             np.save(convex_hull_cluster_path(RCSB_ID), surface_pts)
             apply_poisson_reconstruction(RCSB_ID, custom_cluster_recon_path(RCSB_ID, eps, min_nbrs))
+            # DBSCAN_CLUSTERS_visualize_all(clusters_container)
+            # DBSCAN_CLUSTERS_visualize_one(xyz_pos, largest_cluster)
+            DBSCAN_CLUSTERS_visualize_largest(xyz_pos, clusters_container, largest_cluster)
 
 
     if args.full_pipeline:
