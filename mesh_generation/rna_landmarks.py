@@ -4,14 +4,19 @@
 
 
 
+from pprint import pprint
 from ribctl.etl.ribosome_assets import RibosomeAssets
-from ribctl.lib.libmsa import muscle_align_N_seq
+from ribctl.lib.libhmm import fasta_phylogenetic_correction
+from ribctl.lib.libmsa import Fasta, muscle_align_N_seq
+from ribctl.lib.ribosome_types.types_ribosome import PolymerClass
 
 
 RCSB_ID = "4W29"
 ra = RibosomeAssets(RCSB_ID)
 
-c = ra.get_chain_by_polymer_class("23SrRNA")
-print(c)
+c         = ra.get_chain_by_polymer_class("23SrRNA")
+src_taxid = ra.get_taxids()[0][0]
+seqs      = list(fasta_phylogenetic_correction(PolymerClass("23SrRNA"), src_taxid))
 
-# muscle_align_N_seq()
+seqs_a = muscle_align_N_seq(seqs,vvv=True)
+Fasta.write_fasta(list(seqs_a), "23SrRNA_neighbors_of_{}.fasta".format(RCSB_ID))
