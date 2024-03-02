@@ -10,23 +10,12 @@ import os
 import numpy as np
 import numpy as np
 from sklearn.cluster import DBSCAN
-from mesh_generation.bbox_extraction import (
-    encode_atoms,
-    open_tunnel_csv,
-    parse_struct_via_bbox,
-    parse_struct_via_centerline,
-)
+from mesh_generation.bbox_extraction import ( encode_atoms, open_tunnel_csv, parse_struct_via_bbox, parse_struct_via_centerline)
 from compas.geometry import bounding_box
 from mesh_generation.visualization import DBSCAN_CLUSTERS_visualize_largest, custom_cluster_recon_path, plot_multiple_by_kingdom, plot_multiple_surfaces, plot_with_landmarks
 from mesh_generation.paths import *
-
-from mesh_generation.voxelize import (
-    expand_atomcenters_to_spheres_threadpool,
-    normalize_atom_coordinates,
-)
+from mesh_generation.voxelize import (expand_atomcenters_to_spheres_threadpool, normalize_atom_coordinates)
 from ribctl import EXIT_TUNNEL_WORK, POISSON_RECON_BIN, RIBETL_DATA
-from ribctl.etl.ribosome_assets import RibosomeAssets
-from ribctl.lib.libmsa import Taxid
 
 
 DBSCAN_METRICS        = [
@@ -191,7 +180,6 @@ def estimate_normals(rcsb_id, convex_hull_surface_pts: np.ndarray | None = None)
     o3d.io.write_point_cloud(surface_with_normals_path(rcsb_id), pcd)
     print("Wrote surface with normals {}".format(surface_with_normals_path(rcsb_id)))
 
-
 def pick_largest_poisson_cluster(clusters_container)->np.ndarray:
     DBSCAN_CLUSTER_ID = 1
     for k, v in clusters_container.items():
@@ -263,7 +251,6 @@ def ____pipeline(RCSB_ID):
     estimate_normals(RCSB_ID, surface_pts)
     apply_poisson_reconstruction(RCSB_ID)
     # plot_with_landmarks(RCSB_ID,0,0)
-
         
 
 def main():
