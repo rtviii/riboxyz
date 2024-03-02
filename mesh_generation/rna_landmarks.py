@@ -14,6 +14,7 @@ from ribctl.lib.ribosome_types.types_ribosome import PolymerClass
 RCSB_ID = "4W29"
 ra = RibosomeAssets(RCSB_ID)
 
+# !
 c         = ra.get_chain_by_polymer_class("23SrRNA")
 seq_c = c.to_SeqRecord()
 src_taxid = ra.get_taxids()[0][0]

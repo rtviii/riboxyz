@@ -346,11 +346,10 @@ class Polymer(BaseModel):
 
     def to_SeqRecord(self) -> SeqRecord:
         return SeqRecord(
-            Seq(self.entity_poly_seq_one_letter_code_can),
-            id=f"{self.src_organism_ids[0] if len(self.src_organism_ids)>0 else self.parent_rcsb_id  + self.auth_asym_id}",
-            description="{}|{}".format( self.src_organism_ids[0], self.rcsb_pdbx_description,
-            name='{}.{}'.format(self.parent_rcsb_id,self.auth_asym_id)
-            ),
+            seq         = Seq(self.entity_poly_seq_one_letter_code_can),
+            id          = f"{self.src_organism_ids[0]}",
+            description = '{}.{}'.format(self.parent_rcsb_id,self.auth_asym_id),
+            name        = '{}.{}'.format(self.parent_rcsb_id,self.auth_asym_id)
         )
 
     assembly_id: int
