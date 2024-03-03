@@ -50,7 +50,7 @@ for atom in encoding_data:
         if 'RNA' in atom['chain_nomenclature'][0]:
             rna_residues.append(atom)
 
-rna_residue_seqids = sorted(list(set([a['residue_seqid'] for a  in rna_residues])))
+vicinity_residues_seqids = sorted(list(set([a['residue_seqid'] for a  in rna_residues])))
 
 rna_record_a = None
 
@@ -58,9 +58,38 @@ for record in msa.records:
     if RCSB_ID in record.description:
        rna_record_a = record
 
+aligned_column_ix = []
+for res_seqid in vicinity_residues_seqids:
+    ix = util__forwards_match(rna_record_a._seq, res_seqid)
+    aligned_column_ix.append(ix)
+
+def nucleotides_at_columns(msa: Fasta, columns_indices: list[int]) -> list[list[str]]:
+    _ = []
+    for index in columns_indices:
+        col_ =[]
+        for record in msa.records:
+                col_.append(record[index])
+        _.append([index,col_])
+        
+    return _
+
+
+pprint(nucleotides_at_columns(msa, aligned_column_ix))
+pprint(len(nucleotides_at_columns(msa, aligned_column_ix)))
 
 
 
+# pprint(aligned_column_ix)
+# pprint(vicinity_residues_seqids)
+
+#TODO: "Get column" from the alignment (msa)
+#TODO: visualize conserved
+#TODO: calculate conservation for every column
+#TODO: assign distance from centerline to every column
+#TODO: HMM shit
+
+
+# looking at the structure
 
 if False: # VIA CONSTRICTION SITE
     ul4     = ra.get_chain_by_polymer_class('uL4')
