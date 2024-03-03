@@ -147,6 +147,7 @@ def get_markerspath(struct: str):
     return _path
 
 def create_marker_at_atom(selection_name:str, posn:List[float], color_:str="red", repr="spheres", label=''):
+
     cmd.pseudoatom(selection_name, pos=posn, vdw=1, color=color_,  label=label)
     cmd.show(repr, selection_name)
 

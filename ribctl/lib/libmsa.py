@@ -150,9 +150,9 @@ class Fasta:
 
     @staticmethod
     def fasta_display_species(taxids: list[int]):
-        ncbi = NCBITaxa()
+        ncbi   = NCBITaxa()
         taxids = Taxid.coerce_all_to_rank(taxids, "species")
-        tree = ncbi.get_topology(taxids)
+        tree   = ncbi.get_topology(taxids)
         for node in tree.traverse():
             taxid = int(node.name)
             scientific_name = ncbi.get_taxid_translator([taxid]).get(taxid, "Unknown")
