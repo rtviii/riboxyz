@@ -549,7 +549,6 @@ def load_dots(filename, color="white", name='ply', dotSize=0.2, lineSize = 0.5, 
         cmd.load_cgo(obj,name, 1.0)
     # Draw normals
 
-
 cmd.extend('loadply', load_ply)
 cmd.extend('loaddots', load_dots)
 cmd.extend('loadgiface', load_giface)

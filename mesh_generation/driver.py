@@ -159,28 +159,25 @@ metric        : str = "euclidean",
     return db, CLUSTERS_CONTAINER
 
 def surface_pts_via_convex_hull(
-    rcsb_id: str, selected_cluster: np.ndarray | None = None
+    rcsb_id: str, 
+    selected_cluster: np.ndarray 
 )->np.ndarray:
+    assert selected_cluster is not None
+    cloud       = pv.PolyData(selected_cluster)
+    grid        = cloud.delaunay_3d(alpha=2, tol=1.5, offset=2, progress_bar=True)
+    convex_hull = grid.extract_surface().cast_to_pointset()
+    return convex_hull.points
 
-    if not os.path.exists(convex_hull_cluster_path(rcsb_id)):
-        assert selected_cluster is not None
-        cloud       = pv.PolyData(selected_cluster)
-        grid        = cloud.delaunay_3d(alpha=2, tol=1.5, offset=2, progress_bar=True)
-        convex_hull = grid.extract_surface().cast_to_pointset()
-        return convex_hull.points
-    else:
-        pts = np.load(convex_hull_cluster_path(rcsb_id))
-        return pts
-
-def estimate_normals(rcsb_id, convex_hull_surface_pts: np.ndarray | None = None):
+def estimate_normals(rcsb_id, convex_hull_surface_pts: np.ndarray):
     pcd = o3d.geometry.PointCloud()
     pcd.points = o3d.utility.Vector3dVector(convex_hull_surface_pts)
     pcd.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=5, max_nn=15) )
     pcd.orient_normals_consistent_tangent_plane(k=10)
     o3d.io.write_point_cloud(surface_with_normals_path(rcsb_id), pcd)
+
     print("Wrote surface with normals {}".format(surface_with_normals_path(rcsb_id)))
 
-def pick_largest_poisson_cluster(clusters_container)->np.ndarray:
+def pick_largest_poisson_cluster(clusters_container:dict[int,list])->np.ndarray:
     DBSCAN_CLUSTER_ID = 1
     for k, v in clusters_container.items():
         if int(k) == -1:
@@ -191,19 +188,20 @@ def pick_largest_poisson_cluster(clusters_container)->np.ndarray:
         # print("Picked cluster {} because it has more points({})".format(DBSCAN_CLUSTER_ID, len(clusters_container[DBSCAN_CLUSTER_ID])))
     return np.array(clusters_container[DBSCAN_CLUSTER_ID])
 
-def apply_poisson_reconstruction(rcsb_id: str, poisson_recon_custom_path:str|None=None):
+def apply_poisson_reconstruction(rcsb_id: str, poisson_recon_path:str):
+    import plyfile
 
-    if poisson_recon_custom_path == None:
-        poisson_recon = poisson_recon_path(rcsb_id)
-    else:
-        poisson_recon = poisson_recon_custom_path
+    command   = [ POISSON_RECON_BIN, "--in", surface_with_normals_path(rcsb_id), "--out", poisson_recon_path, "--depth", "6", "--pointWeight", "3", ]
+    process   = subprocess.run(command, capture_output=True, text=True)
 
-    command = [ POISSON_RECON_BIN, "--in", surface_with_normals_path(rcsb_id), "--out", poisson_recon, "--depth", "6", "--pointWeight", "3", ]
-
-    process = subprocess.run(command, capture_output=True, text=True)
     if process.returncode == 0:
         print("PoissonRecon executed successfully.")
-        print("Saved to {}".format(poisson_recon))
+        print("WRote {}".format(poisson_recon_path))
+        # Convert the plyfile to asciii
+        data      = plyfile.PlyData.read(poisson_recon_path)
+        data.text = True
+        data.write(poisson_recon_path + ".txt")
+        print("Wrote {}".format(poisson_recon_path + ".txt"))
     else:
         print("Error:", process.stderr)
 
@@ -234,23 +232,24 @@ def ____pipeline(RCSB_ID):
 
         np.save(spheres_expanded_pointset_path(RCSB_ID), bbox_atoms_expanded)
         print("Saved expanded sphere pointset to {}".format(spheres_expanded_pointset_path(RCSB_ID)))
+
     else:
         bbox_atoms_expanded = np.load(spheres_expanded_pointset_path(RCSB_ID))
-
 
     xyz_positive, xyz_negative, _ , translation_vectors = index_grid(bbox_atoms_expanded) 
     np.save(translation_vectors_path(RCSB_ID), translation_vectors)
     db, clusters_container = interior_capture_DBSCAN( xyz_negative, _u_EPSILON, _u_MIN_SAMPLES, _u_METRIC )
-    
-    
     largest_cluster = pick_largest_poisson_cluster(clusters_container)
-    surface_pts     = surface_pts_via_convex_hull( RCSB_ID, largest_cluster )
-    np.save(convex_hull_cluster_path(RCSB_ID), surface_pts)
-    print("Saved convex hull surface points to {}".format(convex_hull_cluster_path(RCSB_ID)))
 
+    #! Transform the cluster back into original coordinate frame
+    print("Converting back to original coords")
+    pprint(largest_cluster)
+    coordinates_in_the_original_frame =  largest_cluster  - translation_vectors[1] + translation_vectors[0]
+    pprint(coordinates_in_the_original_frame)
+    surface_pts     = surface_pts_via_convex_hull( RCSB_ID, coordinates_in_the_original_frame )
+    np.save(convex_hull_cluster_path(RCSB_ID), surface_pts)
     estimate_normals(RCSB_ID, surface_pts)
-    apply_poisson_reconstruction(RCSB_ID)
-    # plot_with_landmarks(RCSB_ID,0,0)
+    apply_poisson_reconstruction(RCSB_ID, poisson_recon_path(RCSB_ID))
         
 
 def main():
