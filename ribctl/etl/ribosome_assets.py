@@ -107,6 +107,7 @@ class RibosomeAssets():
     def biopython_structure(self):
         return open_structure(self.rcsb_id, 'cif')
 
+
     def chains_dir(self):
         self._envcheck()
         return f"{self._dir_path()}/CHAINS"
@@ -138,7 +139,6 @@ class RibosomeAssets():
         return self.biopython_structure(), self.profile()
 
     def get_chain_by_polymer_class(self, poly_class: PolymerClass , assembly: int = 0) -> Polymer | None:
-        print("Got poly class {}".format(poly_class))
         profile = self.profile()
         # print("Got provfile for ", profile.rcsb_id)
         # print("searching for ", poly_class)
@@ -211,11 +211,11 @@ class RibosomeAssets():
         @returns (seq, auth_asym_id, rna_type)
         """
 
-        rna = self.get_rna_by_nomclass(RNAClass("23SrRNA"), assembly);
+        rna = self.get_rna_by_nomclass(PolymerClass("23SrRNA"), assembly);
         if rna == None:
-            rna = self.get_rna_by_nomclass(RNAClass("25SrRNA"), assembly)
+            rna = self.get_rna_by_nomclass(PolymerClass("25SrRNA"), assembly)
         if rna == None:
-            rna = self.get_rna_by_nomclass(RNAClass("28SrRNA"), assembly)
+            rna = self.get_rna_by_nomclass(PolymerClass("28SrRNA"), assembly)
         if rna == None:
             raise Exception("No LSU rRNA found in structure")
         else:
