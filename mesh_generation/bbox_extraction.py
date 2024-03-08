@@ -143,9 +143,7 @@ def encode_atoms(rcsb_id: str, atoms_list: list[Atom], write=False, writepath=No
 
     return aggregate
 
-def create_pcd_from_atoms(
-    positions: np.ndarray, atom_types: np.ndarray, save_path: str
-):
+def create_pcd_from_atoms( positions: np.ndarray, atom_types: np.ndarray, save_path: str ):
     pcd        = o3d.geometry.PointCloud(o3d.utility.Vector3dVector(positions))
     pcd.colors = o3d.utility.Vector3dVector(atom_types)
     o3d.io.write_point_cloud(save_path, pcd)

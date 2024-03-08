@@ -12,7 +12,7 @@ import numpy as np
 from sklearn.cluster import DBSCAN
 from mesh_generation.bbox_extraction import ( encode_atoms, open_tunnel_csv, parse_struct_via_bbox, parse_struct_via_centerline)
 from compas.geometry import bounding_box
-from mesh_generation.visualization import DBSCAN_CLUSTERS_visualize_largest, custom_cluster_recon_path, plot_multiple_by_kingdom, plot_multiple_surfaces, plot_with_landmarks
+from mesh_generation.visualization import DBSCAN_CLUSTERS_visualize_largest, custom_cluster_recon_path, plot_multiple_by_kingdom, plot_multiple_surfaces, plot_with_landmarks, DBSCAN_CLUSTERS_particular_eps_minnbrs
 from mesh_generation.paths import *
 from mesh_generation.voxelize import (expand_atomcenters_to_spheres_threadpool, normalize_atom_coordinates)
 from ribctl import EXIT_TUNNEL_WORK, POISSON_RECON_BIN, RIBETL_DATA
@@ -130,8 +130,8 @@ def index_grid(expanded_sphere_voxels: np.ndarray):
 
 def interior_capture_DBSCAN(
 xyz_v_negative: np.ndarray,
-eps           : float = 5.5,
-min_samples   : int = 600,
+eps           ,
+min_samples   ,
 metric        : str = "euclidean",
 ): 
 
@@ -139,9 +139,9 @@ metric        : str = "euclidean",
     for k, v in cluster_colors.items():
         cluster_colors[k] = [*v[:3], 0.5]
 
-    u_EPSILON = eps
+    u_EPSILON     = eps
     u_MIN_SAMPLES = min_samples
-    u_METRIC = metric
+    u_METRIC      = metric
 
     print( "Running DBSCAN on {} points. eps={}, min_samples={}, distance_metric={}".format( len(xyz_v_negative), u_EPSILON, u_MIN_SAMPLES, u_METRIC ) ) 
 
@@ -269,12 +269,16 @@ def main():
     parser.add_argument( "--dbscan_tuple",  type=str)
 
     parser.add_argument( "--multisurf",   action='store_true')
+    parser.add_argument( "--fig",   action='store_true')
     parser.add_argument( "--kingdom",   choices=['bacteria','archaea','eukaryota'])
 
-    args = parser.parse_args()
+    args          = parser.parse_args()
     RCSB_ID       = args.rcsb_id.upper()
-    if args.dbscan:
 
+
+    # if args.fig:
+
+    if args.dbscan:
         if args.dbscan_tuple is not None:
             eps,min_nbrs       =  args.dbscan_tuple.split(",")
             metric= 'euclidean'
@@ -283,15 +287,13 @@ def main():
             xyz_pos, xyz_neg, _, _= index_grid(expanded_sphere_voxels)
             db,clusters_container = interior_capture_DBSCAN( xyz_neg,  float(eps), int(min_nbrs), metric)
 
-
             largest_cluster = pick_largest_poisson_cluster(clusters_container)
             surface_pts     = surface_pts_via_convex_hull( RCSB_ID, largest_cluster )
             np.save(convex_hull_cluster_path(RCSB_ID), surface_pts)
             apply_poisson_reconstruction(RCSB_ID, custom_cluster_recon_path(RCSB_ID, eps, min_nbrs))
-            # DBSCAN_CLUSTERS_visualize_all(clusters_container)
-            # DBSCAN_CLUSTERS_visualize_one(xyz_pos, largest_cluster)
-            DBSCAN_CLUSTERS_visualize_largest(xyz_pos, clusters_container, largest_cluster)
-
+            # DBSCAN_CLUSTERS_visualize_largest(xyz_pos, clusters_container, largest_cluster)
+            # DBSCAN_CLUSTERS_visualize_largest(xyz_pos, clusters_container, largest_cluster)
+            DBSCAN_CLUSTERS_particular_eps_minnbrs(clusters_container, float(eps),int(min_nbrs))
 
     if args.full_pipeline:
         ____pipeline(RCSB_ID)

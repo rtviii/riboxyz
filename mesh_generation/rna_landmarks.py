@@ -89,6 +89,7 @@ pprint(len(nucleotides_at_columns(msa, aligned_column_ix)))
 #TODO: HMM shit
 
 
+
 # looking at the structure
 
 if False: # VIA CONSTRICTION SITE

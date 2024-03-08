@@ -1,15 +1,10 @@
 from pprint import pprint
-import subprocess
 import typing
 from matplotlib import pyplot as plt
-import open3d as o3d
 import pyvista as pv
 import json
-import os
 import numpy as np
 import numpy as np
-from sklearn.cluster import DBSCAN
-from compas.geometry import bounding_box
 from mesh_generation.paths import *
 from mesh_generation.voxelize import (
     expand_atomcenters_to_spheres_threadpool,
@@ -30,7 +25,6 @@ CHAIN_LANDMARK_COLORS = ["purple","orange", "cornflowerblue", "cornsilk", "crims
 "salmon",
 "sandybrown",
 "seagreen"]
-
 
 available_tunnels = {
     "archaea": ["1W2B", "4V6U", "4V9F"],
@@ -853,12 +847,11 @@ dbscan_pairs = [
 ]
 
 
-
 def move_cords_to_normalized_cord_frame(
-    grid_dimensions: np.ndarray,
-    translation_vectors: np.ndarray,
-    original_cords: np.ndarray,
-):
+grid_dimensions    : np.ndarray,
+translation_vectors: np.ndarray,
+original_cords     : np.ndarray,
+)                  : 
     """this is a helper function for plotting to move additional atom coordinates into the cord frame of the mesh (vox grid indices)"""
     normalized_original_cords = (
         original_cords - translation_vectors[0] + translation_vectors[1]
@@ -906,7 +899,56 @@ def retrieve_ptc_and_chain_atoms(rcsb_id):
 
         return ptc_midpoint, atom_coordinates_by_chain, grid_dimensions, translation_vectors
 
+
+#! For figure only
+def DBSCAN_CLUSTERS_particular_eps_minnbrs( dbscan_cluster_dict: dict[int, list], eps, min_nbrs):
+    plotter               = pv.Plotter()
+    # plotter               = pv.Plotter(shape=(1, 2))
+
+    plotter.subplot(0,0)
+    #? Visualize all clusters
+    for k, v in dbscan_cluster_dict.items():
+        print("Cluster {} has {} points.".format(k, len(v)))
+    clusters_palette = dict(zip(range(-1, 60), plt.cm.terrain(np.linspace(0, 1, 60))))
+    for k, v in clusters_palette.items():
+        clusters_palette[k] = [*v[:3], 0.5]
+
+    combined_cluster_colors = []
+    combined_cluster_points = []
+
+    for dbscan_label, coordinates in dbscan_cluster_dict.items():
+        combined_cluster_points.extend(coordinates)
+        combined_cluster_colors.extend( [clusters_palette[( dbscan_label * 5 )%len(clusters_palette)]   if dbscan_label != -1 else [0, 0, 0, 0.1]] * len(coordinates) )
+
+    ptcloud_all_clusters         = pv.PolyData(combined_cluster_points)
+    ptcloud_all_clusters["rgba"] = combined_cluster_colors
+
+    plotter.add_mesh(ptcloud_all_clusters, scalars="rgba", rgb=True, show_scalar_bar=False)
+
+    plotter.add_text('eps: {} \nmin_nbrs: {}'.format(eps, min_nbrs), position='upper_left', font_size=20, shadow=True, font=FONT, color='black')
+    # plotter.add_text('Volume: {}'.format(round(mesh_.volume, 3)), position='lower_left', font_size=8, shadow=True, font=FONT, color='black')
+
+    # # ? Visualize selected cluster
+    # plotter.subplot(0,1)
+    # rgbas_cluster = [[15, 10, 221, 1] for datapoint in selected_cluster]
+    # rgbas_positive = np.array([[205, 209, 228, 0.2] for _ in positive_space])
+    # combined = np.concatenate([selected_cluster, positive_space])
+    # rgbas_combined = np.concatenate([rgbas_cluster, rgbas_positive])
+
+    # point_cloud = pv.PolyData(combined)
+    # point_cloud["rgba"] = rgbas_combined
+    # plotter.add_mesh(point_cloud, scalars="rgba", rgb=True, show_scalar_bar=False)
+
+
+    plotter.open_gif("dbscan.gif")
+    viewup = [0, 0, 1]
+    orbit  = plotter.generate_orbital_path( factor=2.0, n_points=48, shift=0.0, viewup=viewup )
+    plotter.orbit_on_path( orbit, write_frames=True, viewup=viewup, step=0.02 )
+
+    plotter.show()
+
 def DBSCAN_CLUSTERS_visualize_largest(positive_space: np.ndarray, dbscan_cluster_dict: dict[int, list], selected_cluster: np.ndarray):
+    # plotter               = pv.Plotter()
     plotter               = pv.Plotter(shape=(1, 2))
 
     plotter.subplot(0,0)
@@ -921,15 +963,13 @@ def DBSCAN_CLUSTERS_visualize_largest(positive_space: np.ndarray, dbscan_cluster
     for dbscan_label, coordinates in dbscan_cluster_dict.items():
         combined_cluster_points.extend(coordinates)
         combined_cluster_colors.extend( [clusters_palette[( dbscan_label * 5 )%len(clusters_palette)]   if dbscan_label != -1 else [0, 0, 0, 0.1]] * len(coordinates) )
+
     ptcloud_all_clusters         = pv.PolyData(combined_cluster_points)
     ptcloud_all_clusters["rgba"] = combined_cluster_colors
 
     plotter.add_mesh(ptcloud_all_clusters, scalars="rgba", rgb=True, show_scalar_bar=False)
 
-
-
-
-    #? Visualize selected cluster
+    # ? Visualize selected cluster
     plotter.subplot(0,1)
     rgbas_cluster = [[15, 10, 221, 1] for datapoint in selected_cluster]
     rgbas_positive = np.array([[205, 209, 228, 0.2] for _ in positive_space])
@@ -940,11 +980,13 @@ def DBSCAN_CLUSTERS_visualize_largest(positive_space: np.ndarray, dbscan_cluster
     point_cloud["rgba"] = rgbas_combined
     plotter.add_mesh(point_cloud, scalars="rgba", rgb=True, show_scalar_bar=False)
 
+
+
     plotter.show()
 
 def plot_multiple_surfaces(rcsb_id:str):
 
-    rcsb_id               = rcsb_id.upper()
+    rcsb_id   = rcsb_id.upper()
     src_taxid = RibosomeAssets(rcsb_id).get_taxids()[0][0]
     taxname   = list( Taxid.get_name(str(src_taxid)).items() )[0][1]
 
@@ -1017,9 +1059,9 @@ def plot_multiple_by_kingdom(kingdom:typing.Literal['bacteria','archaea','eukary
                 # ? Adding coordinates to the plotter for each chain( coordinates and color )
                 plotter.add_points(
                     move_cords_to_normalized_cord_frame(grid_dimensions, translation_vectors, np.array(coords)),
-                      point_size               = 8 if chain_name in ["eL39","uL4","uL22"] else 2 if "rRNA" in chain_name else 4 ,
-                      color                    =  'gray' if "rRNA" in chain_name else "cyan" if chain_name == "eL39" else "lightgreen" if chain_name == "uL4" else "gold" if chain_name =="uL22" else CHAIN_LANDMARK_COLORS[i],
-                      opacity                  = 0.1 if chain_name not in ["eL39","uL4","uL22"] else 1 ,
+                      point_size               = 8 if chain_name in ["eL39","uL4","uL22", "uL23"] else 2 if "rRNA" in chain_name else 4 ,
+                      color                    =  'gray' if "rRNA" in chain_name else 'pink' if chain_name =="uL23" else "cyan" if chain_name == "eL39" else "lightgreen" if chain_name == "uL4" else "gold" if chain_name =="uL22" else CHAIN_LANDMARK_COLORS[i],
+                      opacity                  = 0.1 if chain_name not in ["eL39","uL4","uL22", "uL23"] else 1 ,
                       render_points_as_spheres = True ,
                 )
 
@@ -1062,7 +1104,7 @@ def plot_with_landmarks( rcsb_id: str, eps, min_nbrs,poisson_recon_custom_path:s
     print("Opened poisson recon file at \033[32m{}\033[0m".format(poisson_recon))
     mesh_    = pv.read(poisson_recon)
     plotter = pv.Plotter()
-    plotter.add_mesh(mesh_, opacity=0.5)
+    plotter.add_mesh(mesh_, opacity=1)
 
 
     for i, ( chain_name, coords ) in enumerate(atom_coordinates_by_chain.items()):
@@ -1070,11 +1112,28 @@ def plot_with_landmarks( rcsb_id: str, eps, min_nbrs,poisson_recon_custom_path:s
         # ? Adding coordinates to the plotter for each chain( coordinates and color )
         plotter.add_points(
             move_cords_to_normalized_cord_frame(grid_dimensions, mean_abs_vectors, np.array(coords)),
-              point_size               = 8 if chain_name in ["eL39","uL4","uL22"] else 2 if "rRNA" in chain_name else 4 ,
-              color                    =  'gray' if "rRNA" in chain_name else "cyan" if chain_name == "eL39" else "lightgreen" if chain_name == "uL4" else "gold" if chain_name =="uL22" else CHAIN_LANDMARK_COLORS[i],
-              opacity                  = 0.1 if chain_name not in ["eL39","uL4","uL22"] else 1 ,
+              point_size               = 8 if chain_name in ["eL39","uL4","uL22", "uL23"] else 2 if "rRNA" in chain_name else 4 ,
+              color                    =  'gray' if "rRNA" in chain_name else "cyan" if chain_name == "eL39" else 'pink' if chain_name=='uL23' else "lightgreen" if chain_name == "uL4" else "gold" if chain_name =="uL22" else CHAIN_LANDMARK_COLORS[i],
+              opacity                  = 0.1 if chain_name not in ["eL39","uL4","uL22", 'uL23'] else 1 ,
               render_points_as_spheres = True ,
         )
+        #!ALL CHAINS
+        # plotter.add_points(
+        #     move_cords_to_normalized_cord_frame(grid_dimensions, mean_abs_vectors, np.array(coords)),
+        #       point_size               = 7,
+        #       color                    =  'gray' if "rRNA" in chain_name else "cyan" if chain_name == "eL39" else "lightgreen" if chain_name == "uL4" else "gold" if chain_name =="uL22" else CHAIN_LANDMARK_COLORS[i],
+        #       opacity                  = 0.9,
+        #       render_points_as_spheres = True ,
+        # )
+        # #! RNA ONLY
+        # if "rRNA" in chain_name:
+        #     plotter.add_points(
+        #         move_cords_to_normalized_cord_frame(grid_dimensions, mean_abs_vectors, np.array(coords)),
+        #           point_size               = 8 ,
+        #           color                    =  'blue' ,
+        #           opacity                  = 1,
+        #           render_points_as_spheres = True ,
+        #     )
 
     for i, (label, color) in enumerate([( 'eL39','cyan' ),( 'uL4','lightgreen' ),( 'uL22','gold' )]):
         offset   = i * 50  # Adjust the offset as needed
@@ -1086,5 +1145,10 @@ def plot_with_landmarks( rcsb_id: str, eps, min_nbrs,poisson_recon_custom_path:s
     plotter.add_text('eps: {} \nmin_nbrs: {}'.format(eps, min_nbrs), position='upper_left', font_size=8, shadow=True, font=FONT, color='black')
     plotter.add_text('Volume: {}'.format(round(mesh_.volume, 3)), position='lower_left', font_size=8, shadow=True, font=FONT, color='black')
     plotter.add_text('{}'.format(taxname), position='lower_right', font_size=8, shadow=True, font=FONT, color='black') 
+
+    plotter.open_gif("just_chains.gif")
+    viewup = [1, 0, 0]
+    orbit  = plotter.generate_orbital_path( factor=4.0, n_points=72, shift=2.0, viewup=viewup )
+    plotter.orbit_on_path( orbit, write_frames=True, viewup=viewup, step=0.02 )
 
     plotter.show(auto_close=False)

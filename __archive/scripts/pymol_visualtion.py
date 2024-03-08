@@ -6,7 +6,7 @@ import sys
 from typing import List
 from pymol import cmd
 from ribctl.etl.ribosome_assets import RibosomeAssets
-sys.path.append('/home/rtviii/dev/riboxyz')       #! hack until ribctl is a separate pypi project
+sys.path.append('/home/rtviii/dev/riboxyz')       #! hack until ribctl is a separate pypi project (after that just pip install ribctl)
 from ribctl.lib.tunnel import ptc_residues_calculate_midpoint, ptc_resdiues_get
 from ribctl import RIBETL_DATA
 
@@ -251,6 +251,19 @@ def ray_picture(pdbid:str):
 def test_():
     print("Extended scripts loaded correctly")
 
+def extract_chains(list_auth_asym_ids:str) :
+    #! the argument is whitespace separated because pymol doesn't support lists apparently intuitively? 
+    #! I.e. extract_chains LC L5
+
+    chains_names   = list_auth_asym_ids.split(" ")
+    selection_name = "Chains_{}".format(",".join(chains_names))
+
+    cmd.extract(selection_name,  "c. {}".format("+".join(chains_names)) )
+    return selection_name
+
+
+
+cmd.extend("extract_chains", extract_chains)
 cmd.extend("sload"            , sload                  )
 cmd.extend("by_chain"         , by_chain    )
 cmd.extend("ptc"              , pseudoatom_ptc         )
