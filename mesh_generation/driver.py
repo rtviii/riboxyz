@@ -173,6 +173,14 @@ def surface_pts_via_convex_hull(
     convex_hull = grid.extract_surface().cast_to_pointset()
     return convex_hull.points
 
+
+def save_mesh_point_cloud_as_ply( point_cloud: np.ndarray, save_path: str):
+    pcd = o3d.geometry.PointCloud()
+    pcd.points = o3d.utility.Vector3dVector(point_cloud)
+    o3d.io.write_point_cloud(save_path, pcd)
+    print("Wrote {}".format(save_path))
+
+
 def estimate_normals(rcsb_id, convex_hull_surface_pts: np.ndarray):
     pcd = o3d.geometry.PointCloud()
     pcd.points = o3d.utility.Vector3dVector(convex_hull_surface_pts)
@@ -246,14 +254,14 @@ def save_lsu_alpha_chains(rcsb_id:str, reconstructed_tunnel_ply:str, outpath:str
     return outpath
 
 
-def construct_trimming_alphashape(rcsb_id:str, lsu_chains_file:str):
+def construct_trimming_alphashape(rcsb_id:str, lsu_chains_file:str, alpha,tol):
     mmcif_parser = MMCIFParser(QUIET=True)
     structure    = mmcif_parser.get_structure(rcsb_id+"alpha", lsu_chains_file)
     atoms        = np.array([a.get_coord() for a in list(structure.get_atoms())])
     cloud        = pv.PolyData(atoms)
-    grid         = cloud.delaunay_3d(alpha=5, tol=2, offset=2, progress_bar=True)
-    convex_hull = grid.extract_surface().cast_to_pointset()
-    return convex_hull.points
+    delaunay_shape         = cloud.delaunay_3d(alpha=alpha, tol=tol, offset=2, progress_bar=True)
+    convex_hull = delaunay_shape.extract_surface().cast_to_pointset()
+    return delaunay_shape,convex_hull.points
 
 #TODO
 def trim_with_alphasurface(rcsb_id:str,reconstruction_pcl:np.ndarray, alpha:float)->np.ndarray:
@@ -337,15 +345,25 @@ def main():
     if args.trim:
         import pyvista as pv
 
-        outpath = '{}/{}/{}_lsu_alphashape.mmcif'.format(EXIT_TUNNEL_WORK, RCSB_ID, RCSB_ID)
+        outpath           = '{}/{}/{}_lsu_alphashape.mmcif'.format(EXIT_TUNNEL_WORK, RCSB_ID, RCSB_ID)
+        alpha_chains_path = '{}/{}/{}_lsu_alphashape.ply'.format(EXIT_TUNNEL_WORK, RCSB_ID, RCSB_ID)
+
         if not os.path.exists(outpath):
             save_lsu_alpha_chains(RCSB_ID, poisson_recon_path(RCSB_ID), outpath)
         else:
             ...
            
-        point_cloud = construct_trimming_alphashape(RCSB_ID, outpath)
-        plotter     = pv.Plotter()
-        plotter.add_mesh(point_cloud, scalars="rgba", rgb=True, show_scalar_bar=False)
+        delaunay, point_cloud = construct_trimming_alphashape(RCSB_ID, outpath, alpha=4, tol=2)
+        poisson_recon_mesh    = pv.read(poisson_recon_path(RCSB_ID))
+
+        plotter     = pv.Plotter(shape=(1,2))
+        plotter.subplot(0,0)
+        plotter.add_mesh(poisson_recon_mesh, opacity=1)
+        plotter.add_mesh(delaunay, opacity=0.4, color="blue")
+        # plotter.add_mesh(point_cloud, opacity=0.5, color="red")
+        plotter.subplot(0,1)
+        plotter.add_mesh(delaunay, opacity=1, color="blue")
+        plotter.show()
 
     if args.dbscan:
         if args.dbscan_tuple is not None:
