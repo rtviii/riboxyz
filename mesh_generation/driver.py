@@ -4,6 +4,8 @@ import subprocess
 import typing
 from matplotlib import pyplot as plt
 import open3d as o3d
+from Bio.PDB import MMCIFParser
+from Bio.PDB import NeighborSearch
 import pyvista as pv
 import json
 import os
@@ -16,6 +18,7 @@ from mesh_generation.visualization import DBSCAN_CLUSTERS_visualize_largest, cus
 from mesh_generation.paths import *
 from mesh_generation.voxelize import (expand_atomcenters_to_spheres_threadpool, normalize_atom_coordinates)
 from ribctl import EXIT_TUNNEL_WORK, POISSON_RECON_BIN, RIBETL_DATA
+from ribctl.etl.ribosome_assets import RibosomeAssets
 
 
 DBSCAN_METRICS        = [
@@ -205,6 +208,58 @@ def apply_poisson_reconstruction(rcsb_id: str, poisson_recon_path:str):
     else:
         print("Error:", process.stderr)
 
+
+#TODO
+def retrieve_lsu_chains(rcsb_id:str, reconstructed_tunnel_ply:str)->list:
+    # open tunnel ply
+    # grab all the chains that are within the NeighborSearch of the tunnel 5 angstrom
+    # extract them from the structure with pymol, save to disc
+
+    import pyvista as pv
+    import numpy as np
+
+    # Load the PLY file using PyVista
+    mesh = pv.read(reconstructed_tunnel_ply)
+
+    # Extract points as a NumPy array
+    points_array = np.array(mesh.points)
+
+    mmcif_parser = MMCIFParser(QUIET=True)
+    structure    = mmcif_parser.get_structure(rcsb_id, os.path.join(RIBETL_DATA,rcsb_id,rcsb_id + ".cif"))
+    atoms        = list(structure.get_atoms())
+    ns           = NeighborSearch(atoms)
+
+    # Define a distance threshold for the neighbor search
+    distance_threshold = 5.0
+
+    neighbors = set()
+    # Perform the neighbor search
+    for point in points_array:
+        _ = ns.search(point, distance_threshold)
+        [neighbors.add(chain_name) for chain_name in [ a.get_full_id()[2] for a in _]]
+
+
+    
+
+    print(neighbors)
+
+    
+
+
+#TODO
+def construct_trimming_alphashape(rcsb_id:str, lsu_chains_file:str)->np.ndarray:
+    # construct an alpha shape of the LSU
+    ...
+
+
+#TODO
+def trim_with_alphasurface(rcsb_id:str,reconstruction_pcl:np.ndarray, alpha:float)->np.ndarray:
+    """
+    Trim the poisson reconstruction with the alpha shape surface
+    """
+    pass
+
+
 def ____pipeline(RCSB_ID):
     _u_EPSILON     = 5.5
     _u_MIN_SAMPLES = 600
@@ -251,7 +306,6 @@ def ____pipeline(RCSB_ID):
     estimate_normals(RCSB_ID, surface_pts)
     apply_poisson_reconstruction(RCSB_ID, poisson_recon_path(RCSB_ID))
         
-
 def main():
 
     # ? ---------- Params ------------
@@ -271,11 +325,15 @@ def main():
     parser.add_argument( "--fig",   action='store_true')
     parser.add_argument( "--kingdom",   choices=['bacteria','archaea','eukaryota'])
 
+    parser.add_argument( "--trim",   action='store_true')
+
     args          = parser.parse_args()
     RCSB_ID       = args.rcsb_id.upper()
 
 
-    # if args.fig:
+    if args.trim:
+        # testing alpha shape trimming
+        retrieve_lsu_chains(RCSB_ID, poisson_recon_path(RCSB_ID))
 
     if args.dbscan:
         if args.dbscan_tuple is not None:
