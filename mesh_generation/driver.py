@@ -16,6 +16,7 @@ from __archive.scripts.pymol_visualtion import extract_chains
 from mesh_generation.bbox_extraction import ( encode_atoms, open_tunnel_csv, parse_struct_via_bbox, parse_struct_via_centerline)
 from compas.geometry import bounding_box
 from mesh_generation.libsurf import apply_poisson_reconstruction, estimate_normals, ptcloud_convex_hull_points
+from mesh_generation.lsu_alpha_surface import lsu_ensemble_convex_hull, lsu_ensemble_get_chains
 from mesh_generation.visualization import DBSCAN_CLUSTERS_visualize_largest, custom_cluster_recon_path, plot_multiple_by_kingdom, plot_multiple_surfaces, plot_with_landmarks, DBSCAN_CLUSTERS_particular_eps_minnbrs
 from mesh_generation.paths import *
 from mesh_generation.voxelize import (expand_atomcenters_to_spheres_threadpool, normalize_atom_coordinates)
@@ -164,7 +165,6 @@ metric        : str = "euclidean",
 
     return db, CLUSTERS_CONTAINER
 
-
 def pick_largest_poisson_cluster(clusters_container:dict[int,list])->np.ndarray:
     DBSCAN_CLUSTER_ID = 1
     for k, v in clusters_container.items():
@@ -219,7 +219,7 @@ def ____pipeline(RCSB_ID):
 
     surface_pts     = ptcloud_convex_hull_points(coordinates_in_the_original_frame)
     np.save(convex_hull_cluster_path(RCSB_ID), surface_pts)
-    estimate_normals(surface_pts, surface_with_normals_path(RCSB_ID))
+    estimate_normals(surface_pts, surface_with_normals_path(RCSB_ID), 5, 15,10)
     apply_poisson_reconstruction(surface_with_normals_path(RCSB_ID), poisson_recon_path(RCSB_ID) )
         
 def main():
@@ -241,35 +241,30 @@ def main():
     parser.add_argument( "--fig",   action='store_true')
     parser.add_argument( "--kingdom",   choices=['bacteria','archaea','eukaryota'])
 
-    parser.add_argument( "--trim",   action='store_true')
+    parser.add_argument( "--lsu_alpha",   action='store_true')
 
     args          = parser.parse_args()
     RCSB_ID       = args.rcsb_id.upper()
 
 
-    if args.trim:
-        import pyvista as pv
+    if args.lsu_alpha:
 
-        outpath           = '{}/{}/{}_lsu_alphashape.mmcif'.format(EXIT_TUNNEL_WORK, RCSB_ID, RCSB_ID)
-        alpha_chains_path = '{}/{}/{}_lsu_alphashape.ply'.format(EXIT_TUNNEL_WORK, RCSB_ID, RCSB_ID)
 
-        if not os.path.exists(outpath):
-            save_lsu_alpha_chains(RCSB_ID, poisson_recon_path(RCSB_ID), outpath)
+        if not os.path.exists(mmcif_ensemble_LSU(RCSB_ID)):
+            lsu_ensemble_get_chains(RCSB_ID, poisson_recon_path(RCSB_ID), mmcif_ensemble_LSU(RCSB_ID))
         else:
             ...
            
-        delaunay, point_cloud = construct_trimming_alphashape(RCSB_ID, outpath, alpha=8, tol=3)
-        delaunay.save(alpha_shape_LSU(RCSB_ID))
-        poisson_recon_mesh    = pv.read(poisson_recon_path(RCSB_ID))
+        convex_hull = lsu_ensemble_convex_hull(RCSB_ID, mmcif_ensemble_LSU(RCSB_ID), alpha=7, tol=1.5)
+        estimate_normals(convex_hull.points, convex_hull_ensemble_LSU(RCSB_ID), kdtree_radius=10, kdtree_max_nn=20,correction_tangent_planes_n= 15)
+        apply_poisson_reconstruction(convex_hull_ensemble_LSU(RCSB_ID), alphashape_ensemble_LSU(RCSB_ID))
 
-        # plotter     = pv.Plotter(shape=(1,2))
-        # plotter.subplot(0,0)
-        # plotter.add_mesh(poisson_recon_mesh, opacity=1)
-        # plotter.add_mesh(delaunay, opacity=0.4, color="blue")
-        # # plotter.add_mesh(point_cloud, opacity=0.5, color="red")
-        # plotter.subplot(0,1)
-        # plotter.add_mesh(delaunay, opacity=1, color="blue")
-        # plotter.show()
+        RCSB_ID="6Z6K"
+        plotter               = pv.Plotter()
+        mesh_  = pv.read(alphashape_ensemble_LSU(RCSB_ID))
+        plotter.add_mesh(mesh_, opacity=0.5)
+        plotter.show()
+
 
     if args.dbscan:
         if args.dbscan_tuple is not None:
