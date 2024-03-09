@@ -174,9 +174,9 @@ def surface_pts_via_convex_hull(
     return convex_hull.points
 
 
-def save_mesh_point_cloud_as_ply( point_cloud: np.ndarray, save_path: str):
-    pcd = o3d.geometry.PointCloud()
-    pcd.points = o3d.utility.Vector3dVector(point_cloud)
+def save_mesh_point_cloud_as_ply( mesh, save_path: str):
+    pcd        = o3d.geometry.PointCloud()
+    pcd.points = o3d.utility.Vector3dVector(mesh)
     o3d.io.write_point_cloud(save_path, pcd)
     print("Wrote {}".format(save_path))
 
@@ -260,8 +260,9 @@ def construct_trimming_alphashape(rcsb_id:str, lsu_chains_file:str, alpha,tol):
     atoms        = np.array([a.get_coord() for a in list(structure.get_atoms())])
     cloud        = pv.PolyData(atoms)
     delaunay_shape         = cloud.delaunay_3d(alpha=alpha, tol=tol, offset=2, progress_bar=True)
+    surface_polydata = delaunay_shape.extract_surface()
     convex_hull = delaunay_shape.extract_surface().cast_to_pointset()
-    return delaunay_shape,convex_hull.points
+    return delaunay_shape,convex_hull.points, surface_polydata
 
 #TODO
 def trim_with_alphasurface(rcsb_id:str,reconstruction_pcl:np.ndarray, alpha:float)->np.ndarray:
@@ -308,10 +309,25 @@ def ____pipeline(RCSB_ID):
     largest_cluster = pick_largest_poisson_cluster(clusters_container)
 
     #! Transform the cluster back into original coordinate frame
-    print("Converting back to original coords")
-    pprint(largest_cluster)
     coordinates_in_the_original_frame =  largest_cluster  - translation_vectors[1] + translation_vectors[0]
-    pprint(coordinates_in_the_original_frame)
+    main_cluster = pv.PolyData(coordinates_in_the_original_frame)
+
+    
+    delaunay, ptcloud, surface_polydata = construct_trimming_alphashape(RCSB_ID, mmcif_ensemble_LSU(RCSB_ID), alpha=8, tol=3)
+    selected = main_cluster.select_enclosed_points(surface_polydata)
+    pts      = main_cluster.extract_points(selected['SelectedPoints'].view(bool),adjacent_cells=False)
+
+    print(pts)
+    print(np.shape(pts.points))
+
+    pl = pv.Plotter()
+    _ = pl.add_mesh(main_cluster, style='wireframe')
+    _ = pl.add_mesh(LSU_alpha_shape, style='wireframe')
+    _ = pl.add_points(pts, color='r')
+    pl.show()
+
+    exit(1)
+
     surface_pts     = surface_pts_via_convex_hull( RCSB_ID, coordinates_in_the_original_frame )
     np.save(convex_hull_cluster_path(RCSB_ID), surface_pts)
     estimate_normals(RCSB_ID, surface_pts)
@@ -353,17 +369,18 @@ def main():
         else:
             ...
            
-        delaunay, point_cloud = construct_trimming_alphashape(RCSB_ID, outpath, alpha=4, tol=2)
+        delaunay, point_cloud = construct_trimming_alphashape(RCSB_ID, outpath, alpha=8, tol=3)
+        delaunay.save(alpha_shape_LSU(RCSB_ID))
         poisson_recon_mesh    = pv.read(poisson_recon_path(RCSB_ID))
 
-        plotter     = pv.Plotter(shape=(1,2))
-        plotter.subplot(0,0)
-        plotter.add_mesh(poisson_recon_mesh, opacity=1)
-        plotter.add_mesh(delaunay, opacity=0.4, color="blue")
-        # plotter.add_mesh(point_cloud, opacity=0.5, color="red")
-        plotter.subplot(0,1)
-        plotter.add_mesh(delaunay, opacity=1, color="blue")
-        plotter.show()
+        # plotter     = pv.Plotter(shape=(1,2))
+        # plotter.subplot(0,0)
+        # plotter.add_mesh(poisson_recon_mesh, opacity=1)
+        # plotter.add_mesh(delaunay, opacity=0.4, color="blue")
+        # # plotter.add_mesh(point_cloud, opacity=0.5, color="red")
+        # plotter.subplot(0,1)
+        # plotter.add_mesh(delaunay, opacity=1, color="blue")
+        # plotter.show()
 
     if args.dbscan:
         if args.dbscan_tuple is not None:
