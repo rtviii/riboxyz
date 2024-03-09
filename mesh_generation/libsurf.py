@@ -35,7 +35,7 @@ from mesh_generation.voxelize import (
 )
 from ribctl import EXIT_TUNNEL_WORK, POISSON_RECON_BIN, RIBETL_DATA
 from ribctl.etl.ribosome_assets import RibosomeAssets
-from ribctl.lib.libpdb import extract_chains_by_auth_asym_id
+from ribctl.lib.libpdb import extract_lsu_ensemble_tunnel_vicinity
 
 
 def apply_poisson_reconstruction(surf_estimated_ptcloud_path: str, output_path: str, recon_depth:int=6, recon_pt_weight:int=3):

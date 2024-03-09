@@ -16,13 +16,13 @@ from __archive.scripts.pymol_visualtion import extract_chains
 from mesh_generation.bbox_extraction import ( encode_atoms, open_tunnel_csv, parse_struct_via_bbox, parse_struct_via_centerline)
 from compas.geometry import bounding_box
 from mesh_generation.libsurf import apply_poisson_reconstruction, estimate_normals, ptcloud_convex_hull_points
-from mesh_generation.lsu_alpha_surface import lsu_ensemble_convex_hull, lsu_ensemble_get_chains
+from mesh_generation.lsu_alpha_surface import lsu_ensemble_convex_hull, lsu_ensemble_get_chains, vestibule_sphere_expansion
 from mesh_generation.visualization import DBSCAN_CLUSTERS_visualize_largest, custom_cluster_recon_path, plot_multiple_by_kingdom, plot_multiple_surfaces, plot_with_landmarks, DBSCAN_CLUSTERS_particular_eps_minnbrs
 from mesh_generation.paths import *
 from mesh_generation.voxelize import (expand_atomcenters_to_spheres_threadpool, normalize_atom_coordinates)
 from ribctl import EXIT_TUNNEL_WORK, POISSON_RECON_BIN, RIBETL_DATA
 from ribctl.etl.ribosome_assets import RibosomeAssets
-from ribctl.lib.libpdb import extract_chains_by_auth_asym_id
+from ribctl.lib.libpdb import extract_lsu_ensemble_tunnel_vicinity
 
 
 DBSCAN_METRICS        = [
@@ -250,6 +250,9 @@ def main():
     if args.lsu_alpha:
 
 
+        x = vestibule_sphere_expansion(RCSB_ID)
+       
+        exit()
         if not os.path.exists(mmcif_ensemble_LSU(RCSB_ID)):
             lsu_ensemble_get_chains(RCSB_ID, poisson_recon_path(RCSB_ID), mmcif_ensemble_LSU(RCSB_ID))
         else:

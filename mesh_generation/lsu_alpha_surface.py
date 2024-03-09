@@ -21,9 +21,31 @@ from mesh_generation.paths import *
 from mesh_generation.voxelize import (expand_atomcenters_to_spheres_threadpool, normalize_atom_coordinates)
 from ribctl import RIBETL_DATA
 from ribctl.etl.ribosome_assets import RibosomeAssets
-from ribctl.lib.libpdb import extract_chains_by_auth_asym_id
+from ribctl.lib.libpdb import extract_lsu_ensemble_tunnel_vicinity
 import pyvista as pv
 import numpy as np
+
+
+
+
+def vestibule_sphere_expansion(rcsb_id:str, radius=50):
+    """We want to construct a shape with which to trim the solvent space from obtained tunnel
+    Grab the last coordinate in the MOLE centerline and expand to 50 angstrom (captures the vestibule + some interior of the LSU)
+    This is an alternative to just constructing a surface from the whole LSU ensemble (LSU rRNA + uL22, uL4, eL39, eL32, uL24) 
+    that i'm trying because the guiding arms on the side of the rRNA are tricky to capture with a-shape/normal estimation/poisson recon.(can't obtain a watertight surface)
+    """
+    [_,x,y,z] = open_tunnel_csv(rcsb_id)
+
+    mmcif_parser = MMCIFParser(QUIET=True)
+    structure    = mmcif_parser.get_structure(rcsb_id, os.path.join(RIBETL_DATA,rcsb_id,rcsb_id + ".cif"))
+    atoms        = list(structure.get_atoms())
+    ns           = NeighborSearch(atoms)
+    _ = ns.search(np.array([x,y,z,]), radius)
+    [neighbor_chains_auth_asym_ids.add(chain_name) for chain_name in [ a.get_full_id()[2] for a in _]]
+
+
+    return print(data[-1])
+
 
 def lsu_ensemble_get_chains(rcsb_id:str, reconstructed_tunnel_ply:str, outpath:str)->str:
     mesh         = pv.read(reconstructed_tunnel_ply)
@@ -38,7 +60,7 @@ def lsu_ensemble_get_chains(rcsb_id:str, reconstructed_tunnel_ply:str, outpath:s
         _ = ns.search(point, distance_threshold)
         [neighbor_chains_auth_asym_ids.add(chain_name) for chain_name in [ a.get_full_id()[2] for a in _]]
 
-    extract_chains_by_auth_asym_id(rcsb_id,list( neighbor_chains_auth_asym_ids ), outpath)
+    extract_lsu_ensemble_tunnel_vicinity(rcsb_id,list( neighbor_chains_auth_asym_ids ), outpath)
     return outpath
 
 def lsu_ensemble_convex_hull(rcsb_id:str, mmcif_ensemble_lsu:str, alpha,tol):

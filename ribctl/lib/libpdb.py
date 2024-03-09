@@ -11,7 +11,14 @@ from pymol import cmd
 
 
 
-def extract_chains_by_auth_asym_id(rcsb_id: str, chain_auth_asym_ids:list, outpath:str):
+# def extract_lsu_ensemble_tunnel_vicinity(rcsb_id: str, chain_auth_asym_ids:list, outpath:str):
+#     path    = os.path.join(RIBETL_DATA, rcsb_id, "{}.cif".format(rcsb_id))
+#     cmd.load(path)
+#     cmd.extract('crown', 'c. {}'.format('+'.join(chain_auth_asym_ids)))
+#     cmd.save(outpath, 'crown')
+#     print("Wrote ", outpath)
+
+def extract_lsu_ensemble_tunnel_vicinity(rcsb_id: str, chain_auth_asym_ids:list, outpath:str):
     path    = os.path.join(RIBETL_DATA, rcsb_id, "{}.cif".format(rcsb_id))
     cmd.load(path)
     cmd.extract('crown', 'c. {}'.format('+'.join(chain_auth_asym_ids)))
