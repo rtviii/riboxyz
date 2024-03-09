@@ -2,6 +2,7 @@
 import os
 from Bio.PDB.MMCIFParser import MMCIFParser
 from Bio.PDB import PDBIO, Select
+import numpy as np
 from __archive.scripts.pymol_visualtion import extract_chains
 from ribctl import EXIT_TUNNEL_WORK, RIBETL_DATA
 from ribctl.etl.ribosome_assets import RibosomeAssets
@@ -27,15 +28,12 @@ RCSB_ID   = "4UG0"
 #     return auth_asym_ids
 
 
-def extract_chains(rcsb_id: str, chain_auth_asym_ids:list ):
-
-    path      = os.path.join(RIBETL_DATA, RCSB_ID, "{}.cif".format(RCSB_ID))
-    outpath           = '{}/{}/{}_lsu_alphashape.mmcif'.format(EXIT_TUNNEL_WORK, RCSB_ID,RCSB_ID)
+def extract_chains_by_auth_asym_id(rcsb_id: str, chain_auth_asym_ids:list, outpath:str):
+    path    = os.path.join(RIBETL_DATA, rcsb_id, "{}.cif".format(rcsb_id))
     cmd.load(path)
-    cmd.extract('crown', 'c. {}'.format('+'.join(auth_asym_ids)))
+    cmd.extract('crown', 'c. {}'.format('+'.join(chain_auth_asym_ids)))
     cmd.save(outpath, 'crown')
     print("Wrote ", outpath)
-    return auth_asym_ids
 
 
 # 

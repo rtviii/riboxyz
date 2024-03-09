@@ -12,6 +12,7 @@ import os
 import numpy as np
 import numpy as np
 from sklearn.cluster import DBSCAN
+from __archive.scripts.pymol_visualtion import extract_chains
 from mesh_generation.bbox_extraction import ( encode_atoms, open_tunnel_csv, parse_struct_via_bbox, parse_struct_via_centerline)
 from compas.geometry import bounding_box
 from mesh_generation.visualization import DBSCAN_CLUSTERS_visualize_largest, custom_cluster_recon_path, plot_multiple_by_kingdom, plot_multiple_surfaces, plot_with_landmarks, DBSCAN_CLUSTERS_particular_eps_minnbrs
@@ -19,6 +20,7 @@ from mesh_generation.paths import *
 from mesh_generation.voxelize import (expand_atomcenters_to_spheres_threadpool, normalize_atom_coordinates)
 from ribctl import EXIT_TUNNEL_WORK, POISSON_RECON_BIN, RIBETL_DATA
 from ribctl.etl.ribosome_assets import RibosomeAssets
+from ribctl.lib.libpdb import extract_chains_by_auth_asym_id
 
 
 DBSCAN_METRICS        = [
@@ -210,8 +212,8 @@ def apply_poisson_reconstruction(rcsb_id: str, poisson_recon_path:str):
 
 
 #TODO
-def retrieve_lsu_chains(rcsb_id:str, reconstructed_tunnel_ply:str)->list:
-    # open tunnel ply
+def save_lsu_alpha_chains(rcsb_id:str, reconstructed_tunnel_ply:str, outpath:str)->str:
+    
     # grab all the chains that are within the NeighborSearch of the tunnel 5 angstrom
     # extract them from the structure with pymol, save to disc
 
@@ -232,25 +234,26 @@ def retrieve_lsu_chains(rcsb_id:str, reconstructed_tunnel_ply:str)->list:
     # Define a distance threshold for the neighbor search
     distance_threshold = 5.0
 
-    neighbors = set()
+    neighbor_chains_auth_asym_ids = set()
     # Perform the neighbor search
     for point in points_array:
         _ = ns.search(point, distance_threshold)
-        [neighbors.add(chain_name) for chain_name in [ a.get_full_id()[2] for a in _]]
+        [neighbor_chains_auth_asym_ids.add(chain_name) for chain_name in [ a.get_full_id()[2] for a in _]]
 
 
-    
 
-    print(neighbors)
-
-    
+    extract_chains_by_auth_asym_id(rcsb_id,list( neighbor_chains_auth_asym_ids ), outpath)
+    return outpath
 
 
-#TODO
-def construct_trimming_alphashape(rcsb_id:str, lsu_chains_file:str)->np.ndarray:
-    # construct an alpha shape of the LSU
-    ...
-
+def construct_trimming_alphashape(rcsb_id:str, lsu_chains_file:str):
+    mmcif_parser = MMCIFParser(QUIET=True)
+    structure    = mmcif_parser.get_structure(rcsb_id+"alpha", lsu_chains_file)
+    atoms        = np.array([a.get_coord() for a in list(structure.get_atoms())])
+    cloud        = pv.PolyData(atoms)
+    grid         = cloud.delaunay_3d(alpha=5, tol=2, offset=2, progress_bar=True)
+    convex_hull = grid.extract_surface().cast_to_pointset()
+    return convex_hull.points
 
 #TODO
 def trim_with_alphasurface(rcsb_id:str,reconstruction_pcl:np.ndarray, alpha:float)->np.ndarray:
@@ -332,8 +335,17 @@ def main():
 
 
     if args.trim:
-        # testing alpha shape trimming
-        retrieve_lsu_chains(RCSB_ID, poisson_recon_path(RCSB_ID))
+        import pyvista as pv
+
+        outpath = '{}/{}/{}_lsu_alphashape.mmcif'.format(EXIT_TUNNEL_WORK, RCSB_ID, RCSB_ID)
+        if not os.path.exists(outpath):
+            save_lsu_alpha_chains(RCSB_ID, poisson_recon_path(RCSB_ID), outpath)
+        else:
+            ...
+           
+        point_cloud = construct_trimming_alphashape(RCSB_ID, outpath)
+        plotter     = pv.Plotter()
+        plotter.add_mesh(point_cloud, scalars="rgba", rgb=True, show_scalar_bar=False)
 
     if args.dbscan:
         if args.dbscan_tuple is not None:
