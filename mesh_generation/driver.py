@@ -219,7 +219,6 @@ def apply_poisson_reconstruction(rcsb_id: str, poisson_recon_path:str):
         print("Error:", process.stderr)
 
 
-#TODO
 def save_lsu_alpha_chains(rcsb_id:str, reconstructed_tunnel_ply:str, outpath:str)->str:
     
     # grab all the chains that are within the NeighborSearch of the tunnel 5 angstrom
@@ -264,13 +263,11 @@ def construct_trimming_alphashape(rcsb_id:str, lsu_chains_file:str, alpha,tol):
     convex_hull = delaunay_shape.extract_surface().cast_to_pointset()
     return delaunay_shape,convex_hull.points, surface_polydata
 
-#TODO
 def trim_with_alphasurface(rcsb_id:str,reconstruction_pcl:np.ndarray, alpha:float)->np.ndarray:
     """
     Trim the poisson reconstruction with the alpha shape surface
     """
     pass
-
 
 def ____pipeline(RCSB_ID):
     _u_EPSILON     = 5.5
