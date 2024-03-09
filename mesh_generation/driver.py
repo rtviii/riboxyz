@@ -15,6 +15,7 @@ from sklearn.cluster import DBSCAN
 from __archive.scripts.pymol_visualtion import extract_chains
 from mesh_generation.bbox_extraction import ( encode_atoms, open_tunnel_csv, parse_struct_via_bbox, parse_struct_via_centerline)
 from compas.geometry import bounding_box
+from mesh_generation.libsurf import apply_poisson_reconstruction, estimate_normals, ptcloud_convex_hull_points
 from mesh_generation.visualization import DBSCAN_CLUSTERS_visualize_largest, custom_cluster_recon_path, plot_multiple_by_kingdom, plot_multiple_surfaces, plot_with_landmarks, DBSCAN_CLUSTERS_particular_eps_minnbrs
 from mesh_generation.paths import *
 from mesh_generation.voxelize import (expand_atomcenters_to_spheres_threadpool, normalize_atom_coordinates)
@@ -163,32 +164,6 @@ metric        : str = "euclidean",
 
     return db, CLUSTERS_CONTAINER
 
-def surface_pts_via_convex_hull(
-    rcsb_id: str, 
-    selected_cluster: np.ndarray 
-)->np.ndarray:
-    assert selected_cluster is not None
-    cloud       = pv.PolyData(selected_cluster)
-    grid        = cloud.delaunay_3d(alpha=2, tol=1.5, offset=2, progress_bar=True)
-    convex_hull = grid.extract_surface().cast_to_pointset()
-    return convex_hull.points
-
-
-def save_mesh_point_cloud_as_ply( mesh, save_path: str):
-    pcd        = o3d.geometry.PointCloud()
-    pcd.points = o3d.utility.Vector3dVector(mesh)
-    o3d.io.write_point_cloud(save_path, pcd)
-    print("Wrote {}".format(save_path))
-
-
-def estimate_normals(rcsb_id, convex_hull_surface_pts: np.ndarray):
-    pcd = o3d.geometry.PointCloud()
-    pcd.points = o3d.utility.Vector3dVector(convex_hull_surface_pts)
-    pcd.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=5, max_nn=15) )
-    pcd.orient_normals_consistent_tangent_plane(k=10)
-    o3d.io.write_point_cloud(surface_with_normals_path(rcsb_id), pcd)
-
-    print("Wrote surface with normals {}".format(surface_with_normals_path(rcsb_id)))
 
 def pick_largest_poisson_cluster(clusters_container:dict[int,list])->np.ndarray:
     DBSCAN_CLUSTER_ID = 1
@@ -201,73 +176,6 @@ def pick_largest_poisson_cluster(clusters_container:dict[int,list])->np.ndarray:
         # print("Picked cluster {} because it has more points({})".format(DBSCAN_CLUSTER_ID, len(clusters_container[DBSCAN_CLUSTER_ID])))
     return np.array(clusters_container[DBSCAN_CLUSTER_ID])
 
-def apply_poisson_reconstruction(rcsb_id: str, poisson_recon_path:str):
-    import plyfile
-
-    command   = [ POISSON_RECON_BIN, "--in", surface_with_normals_path(rcsb_id), "--out", poisson_recon_path, "--depth", "6", "--pointWeight", "3", ]
-    process   = subprocess.run(command, capture_output=True, text=True)
-
-    if process.returncode == 0:
-        print("PoissonRecon executed successfully.")
-        print("WRote {}".format(poisson_recon_path))
-        # Convert the plyfile to asciii
-        data      = plyfile.PlyData.read(poisson_recon_path)
-        data.text = True
-        data.write(poisson_recon_path + ".txt")
-        print("Wrote {}".format(poisson_recon_path + ".txt"))
-    else:
-        print("Error:", process.stderr)
-
-
-def save_lsu_alpha_chains(rcsb_id:str, reconstructed_tunnel_ply:str, outpath:str)->str:
-    
-    # grab all the chains that are within the NeighborSearch of the tunnel 5 angstrom
-    # extract them from the structure with pymol, save to disc
-
-    import pyvista as pv
-    import numpy as np
-
-    # Load the PLY file using PyVista
-    mesh = pv.read(reconstructed_tunnel_ply)
-
-    # Extract points as a NumPy array
-    points_array = np.array(mesh.points)
-
-    mmcif_parser = MMCIFParser(QUIET=True)
-    structure    = mmcif_parser.get_structure(rcsb_id, os.path.join(RIBETL_DATA,rcsb_id,rcsb_id + ".cif"))
-    atoms        = list(structure.get_atoms())
-    ns           = NeighborSearch(atoms)
-
-    # Define a distance threshold for the neighbor search
-    distance_threshold = 5.0
-
-    neighbor_chains_auth_asym_ids = set()
-    # Perform the neighbor search
-    for point in points_array:
-        _ = ns.search(point, distance_threshold)
-        [neighbor_chains_auth_asym_ids.add(chain_name) for chain_name in [ a.get_full_id()[2] for a in _]]
-
-
-
-    extract_chains_by_auth_asym_id(rcsb_id,list( neighbor_chains_auth_asym_ids ), outpath)
-    return outpath
-
-
-def construct_trimming_alphashape(rcsb_id:str, lsu_chains_file:str, alpha,tol):
-    mmcif_parser = MMCIFParser(QUIET=True)
-    structure    = mmcif_parser.get_structure(rcsb_id+"alpha", lsu_chains_file)
-    atoms        = np.array([a.get_coord() for a in list(structure.get_atoms())])
-    cloud        = pv.PolyData(atoms)
-    delaunay_shape         = cloud.delaunay_3d(alpha=alpha, tol=tol, offset=2, progress_bar=True)
-    surface_polydata = delaunay_shape.extract_surface()
-    convex_hull = delaunay_shape.extract_surface().cast_to_pointset()
-    return delaunay_shape,convex_hull.points, surface_polydata
-
-def trim_with_alphasurface(rcsb_id:str,reconstruction_pcl:np.ndarray, alpha:float)->np.ndarray:
-    """
-    Trim the poisson reconstruction with the alpha shape surface
-    """
-    pass
 
 def ____pipeline(RCSB_ID):
     _u_EPSILON     = 5.5
@@ -307,28 +215,12 @@ def ____pipeline(RCSB_ID):
 
     #! Transform the cluster back into original coordinate frame
     coordinates_in_the_original_frame =  largest_cluster  - translation_vectors[1] + translation_vectors[0]
-    main_cluster = pv.PolyData(coordinates_in_the_original_frame)
+    # main_cluster = pv.PolyData(coordinates_in_the_original_frame)
 
-    
-    delaunay, ptcloud, surface_polydata = construct_trimming_alphashape(RCSB_ID, mmcif_ensemble_LSU(RCSB_ID), alpha=8, tol=3)
-    selected = main_cluster.select_enclosed_points(surface_polydata)
-    pts      = main_cluster.extract_points(selected['SelectedPoints'].view(bool),adjacent_cells=False)
-
-    print(pts)
-    print(np.shape(pts.points))
-
-    pl = pv.Plotter()
-    _ = pl.add_mesh(main_cluster, style='wireframe')
-    _ = pl.add_mesh(LSU_alpha_shape, style='wireframe')
-    _ = pl.add_points(pts, color='r')
-    pl.show()
-
-    exit(1)
-
-    surface_pts     = surface_pts_via_convex_hull( RCSB_ID, coordinates_in_the_original_frame )
+    surface_pts     = ptcloud_convex_hull_points(coordinates_in_the_original_frame)
     np.save(convex_hull_cluster_path(RCSB_ID), surface_pts)
-    estimate_normals(RCSB_ID, surface_pts)
-    apply_poisson_reconstruction(RCSB_ID, poisson_recon_path(RCSB_ID))
+    estimate_normals(surface_pts, surface_with_normals_path(RCSB_ID))
+    apply_poisson_reconstruction(surface_with_normals_path(RCSB_ID), poisson_recon_path(RCSB_ID) )
         
 def main():
 
