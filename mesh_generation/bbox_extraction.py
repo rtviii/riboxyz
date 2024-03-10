@@ -18,16 +18,14 @@ def open_tunnel_csv(rcsb_id: str) -> list[list]:
     TUNNEL_PATH = os.path.join(
         EXIT_TUNNEL_WORK, "mole_tunnels", "tunnel_{}.csv".format(rcsb_id)
     )
-    df = pd.read_csv(TUNNEL_PATH)
+    df   = pd.read_csv(TUNNEL_PATH)
     data = []
-
     for index, row in df.iterrows():
         radius = row["Radius"]
         x_coordinate = row["X"]
         y_coordinate = row["Y"]
         z_coordinate = row["Z"]
         data.append([radius, x_coordinate, y_coordinate, z_coordinate])
-
     return data
 
 def parse_struct_via_centerline(
@@ -38,10 +36,7 @@ def parse_struct_via_centerline(
     from Bio.PDB.NeighborSearch import NeighborSearch
     from Bio.PDB import Selection
 
-    parser = MMCIFParser()
-
-    # struct_path = "{}/{}/{}.cif".format(RIBETL_DATA, rcsb_id, rcsb_id)
-
+    parser      = MMCIFParser()
     struct_path = RibosomeAssets(rcsb_id)._cif_filepath()
     structure   = parser.get_structure(rcsb_id, struct_path)
     atoms       = Selection.unfold_entities(structure, "A")
