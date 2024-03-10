@@ -848,14 +848,12 @@ dbscan_pairs = [
 
 
 def move_cords_to_normalized_cord_frame(
-grid_dimensions    : np.ndarray,
-translation_vectors: np.ndarray,
-original_cords     : np.ndarray,
+    grid_dimensions    : np.ndarray,
+    translation_vectors: np.ndarray,
+    original_cords     : np.ndarray,
 )                  : 
     """this is a helper function for plotting to move additional atom coordinates into the cord frame of the mesh (vox grid indices)"""
-    normalized_original_cords = (
-        original_cords - translation_vectors[0] + translation_vectors[1]
-    )
+    normalized_original_cords = ( original_cords - translation_vectors[0] + translation_vectors[1] )
     voxel_size = 1
     normalized_original_cords_quantized = np.round(
         normalized_original_cords / voxel_size
@@ -866,9 +864,7 @@ original_cords     : np.ndarray,
         normalized_original_cords_quantized[:, 1],
         normalized_original_cords_quantized[:, 2],
     ] = 1
-    __xyz_v_positive_ix = np.asarray(
-        np.where(vox_grid == 1)
-    )  # get back indexes of populated voxels
+    __xyz_v_positive_ix = np.asarray( np.where(vox_grid == 1) )
     return __xyz_v_positive_ix.T
 
 def retrieve_ptc_and_chain_atoms(rcsb_id):
@@ -975,8 +971,7 @@ def DBSCAN_CLUSTERS_visualize_largest(positive_space: np.ndarray, dbscan_cluster
     rgbas_positive = np.array([[205, 209, 228, 0.2] for _ in positive_space])
     combined = np.concatenate([selected_cluster, positive_space])
     rgbas_combined = np.concatenate([rgbas_cluster, rgbas_positive])
-
-    point_cloud = pv.PolyData(combined)
+    point_cloud         = pv.PolyData(combined)
     point_cloud["rgba"] = rgbas_combined
     plotter.add_mesh(point_cloud, scalars="rgba", rgb=True, show_scalar_bar=False)
 
@@ -989,7 +984,6 @@ def plot_multiple_surfaces(rcsb_id:str):
     rcsb_id   = rcsb_id.upper()
     src_taxid = RibosomeAssets(rcsb_id).get_taxids()[0][0]
     taxname   = list( Taxid.get_name(str(src_taxid)).items() )[0][1]
-
     plotter               = pv.Plotter(shape=(2, 4))
 
 
