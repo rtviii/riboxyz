@@ -149,7 +149,6 @@ class RibosomeAssets():
 
         if profile.rnas is not None:
             for rna in profile.rnas:
-                print("Comparing against ", [r.value for r in rna.nomenclature])
                 if poly_class in [r.value for r in rna.nomenclature] and rna.assembly_id == assembly:
                     return rna
 
