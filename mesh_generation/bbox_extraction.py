@@ -1,49 +1,31 @@
 #! ------------------------------ MESH GENERATION
-import pyvista as pv
 import json
 import os
 from pprint import pprint
-import sys
-from typing import Tuple
 import numpy as np
 import open3d as o3d
-from open3d import core as o3c
 from mendeleev import element
 import pandas as pd
 from ribctl.etl.ribosome_assets import RibosomeAssets
-from ribctl.lib.ribosome_types.types_binding_site import (
-    AMINO_ACIDS,
-    NUCLEOTIDES,
-    ResidueSummary,
-)
 from Bio.PDB.Atom import Atom
-from Bio.PDB.Residue import Residue
-from Bio.PDB.Chain import Chain
-from Bio.PDB.Atom import Atom
-from functools import reduce
-from Bio.PDB.Structure import Structure
-from ribctl.lib.ribosome_types.types_ribosome import RNA
 
 # Tunnel refinement:
 # - using the centerline and dynamic probe radius, extract the atoms within 15A radius of the centerline
 # - when processing atoms, encode their vdw radius, atom type and residue and chain id
-from ribctl import ASSETS_PATH, EXIT_TUNNEL_WORK, RIBETL_DATA
-
+from ribctl import  EXIT_TUNNEL_WORK, RIBETL_DATA
 
 def open_tunnel_csv(rcsb_id: str) -> list[list]:
     TUNNEL_PATH = os.path.join(
         EXIT_TUNNEL_WORK, "mole_tunnels", "tunnel_{}.csv".format(rcsb_id)
     )
-    df = pd.read_csv(TUNNEL_PATH)
+    df   = pd.read_csv(TUNNEL_PATH)
     data = []
-
     for index, row in df.iterrows():
         radius = row["Radius"]
         x_coordinate = row["X"]
         y_coordinate = row["Y"]
         z_coordinate = row["Z"]
         data.append([radius, x_coordinate, y_coordinate, z_coordinate])
-
     return data
 
 def parse_struct_via_centerline(
@@ -54,10 +36,7 @@ def parse_struct_via_centerline(
     from Bio.PDB.NeighborSearch import NeighborSearch
     from Bio.PDB import Selection
 
-    parser = MMCIFParser()
-
-    # struct_path = "{}/{}/{}.cif".format(RIBETL_DATA, rcsb_id, rcsb_id)
-
+    parser      = MMCIFParser()
     struct_path = RibosomeAssets(rcsb_id)._cif_filepath()
     structure   = parser.get_structure(rcsb_id, struct_path)
     atoms       = Selection.unfold_entities(structure, "A")
@@ -159,9 +138,7 @@ def encode_atoms(rcsb_id: str, atoms_list: list[Atom], write=False, writepath=No
 
     return aggregate
 
-def create_pcd_from_atoms(
-    positions: np.ndarray, atom_types: np.ndarray, save_path: str
-):
+def create_pcd_from_atoms( positions: np.ndarray, atom_types: np.ndarray, save_path: str ):
     pcd        = o3d.geometry.PointCloud(o3d.utility.Vector3dVector(positions))
     pcd.colors = o3d.utility.Vector3dVector(atom_types)
     o3d.io.write_point_cloud(save_path, pcd)

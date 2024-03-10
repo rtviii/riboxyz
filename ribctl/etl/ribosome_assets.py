@@ -13,7 +13,7 @@ from ribctl.etl.etl_pipeline import current_rcsb_structs, ReannotationPipeline, 
 from ribctl.lib.tunnel import ptc_resdiues_get, ptc_residues_calculate_midpoint
 # from ribctl.lib.mod_render_thumbnail import render_thumbnail
 from ribctl.lib.utils import download_unpack_place, open_structure
-from ribctl.lib.ribosome_types.types_ribosome import RNA, LifecycleFactorClass, PolymerClass, PolynucleotideClass, Protein, CytosolicProteinClass, RibosomeStructure
+from ribctl.lib.ribosome_types.types_ribosome import RNA, LifecycleFactorClass, Polymer, PolymerClass, PolynucleotideClass, Protein, CytosolicProteinClass, RibosomeStructure
 from ribctl import RIBETL_DATA
 from pydantic import BaseModel
 from concurrent.futures import ALL_COMPLETED, Future, ProcessPoolExecutor, ThreadPoolExecutor, wait
@@ -107,6 +107,7 @@ class RibosomeAssets():
     def biopython_structure(self):
         return open_structure(self.rcsb_id, 'cif')
 
+
     def chains_dir(self):
         self._envcheck()
         return f"{self._dir_path()}/CHAINS"
@@ -137,7 +138,7 @@ class RibosomeAssets():
     def get_struct_and_profile(self) -> tuple[Structure, RibosomeStructure]:
         return self.biopython_structure(), self.profile()
 
-    def get_chain_by_polymer_class(self, poly_class: PolymerClass , assembly: int = 0) -> PolymerClass | None:
+    def get_chain_by_polymer_class(self, poly_class: PolymerClass , assembly: int = 0) -> Polymer | None:
         profile = self.profile()
         # print("Got provfile for ", profile.rcsb_id)
         # print("searching for ", poly_class)
@@ -148,6 +149,7 @@ class RibosomeAssets():
 
         if profile.rnas is not None:
             for rna in profile.rnas:
+                print("Comparing against ", [r.value for r in rna.nomenclature])
                 if poly_class in [r.value for r in rna.nomenclature] and rna.assembly_id == assembly:
                     return rna
 
@@ -209,11 +211,11 @@ class RibosomeAssets():
         @returns (seq, auth_asym_id, rna_type)
         """
 
-        rna = self.get_rna_by_nomclass(RNAClass("23SrRNA"), assembly);
+        rna = self.get_rna_by_nomclass(PolymerClass("23SrRNA"), assembly);
         if rna == None:
-            rna = self.get_rna_by_nomclass(RNAClass("25SrRNA"), assembly)
+            rna = self.get_rna_by_nomclass(PolymerClass("25SrRNA"), assembly)
         if rna == None:
-            rna = self.get_rna_by_nomclass(RNAClass("28SrRNA"), assembly)
+            rna = self.get_rna_by_nomclass(PolymerClass("28SrRNA"), assembly)
         if rna == None:
             raise Exception("No LSU rRNA found in structure")
         else:

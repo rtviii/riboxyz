@@ -24,6 +24,7 @@ import concurrent.futures
 hmm_cachedir = ASSETS['__hmm_cache']
 
 #? Constructon
+#! This ought to be in libmsa
 def fasta_phylogenetic_correction(candidate_class:PolymerClass, organism_taxid:int, max_n_neighbors:int=10)->Iterator[SeqRecord]:
     """Given a candidate class and an organism taxid, retrieve the corresponding fasta file, and perform phylogenetic correction on it."""
 
@@ -59,7 +60,9 @@ def fasta_phylogenetic_correction(candidate_class:PolymerClass, organism_taxid:i
 
     ids        = records.all_taxids()
     phylo_nbhd = phylogenetic_neighborhood(list(map(lambda x: str(x),ids)), str(organism_taxid), max_n_neighbors)
+    print("Got neighorhood:", len(phylo_nbhd))
     seqs       = records.pick_taxids(phylo_nbhd)
+    print("picked correspondign seqs", len(seqs))
 
     return iter(seqs)
 

@@ -107,7 +107,6 @@ def cmd_etl(args):
 parser_cmd_etl.set_defaults(func=cmd_etl)
 # parser_cmd_etl.print_help()
 
-
 #! -------------------------- sync     -------------------------- #
 parser_sync = subparsers.add_parser('sync_db', help='Syncronization with the PDB, updates and database uploads')
 # parser_cmd2sub = parser_sync.add_subparsers(title='Subcommands', dest='subcommand2')

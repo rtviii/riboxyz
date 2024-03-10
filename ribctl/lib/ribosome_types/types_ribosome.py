@@ -3,6 +3,7 @@ from pprint import pprint
 from typing import Any, Optional
 from enum import Enum
 from Bio.SeqRecord import SeqRecord
+from Bio.Seq import Seq
 from pydantic import BaseModel
 from ribctl.lib.enumunion import enum_union
 
@@ -345,11 +346,10 @@ class Polymer(BaseModel):
 
     def to_SeqRecord(self) -> SeqRecord:
         return SeqRecord(
-            self.entity_poly_seq_one_letter_code_can,
-            id=f"{self.parent_rcsb_id}.{self.auth_asym_id}",
-            description="{}|{}".format(
-                self.src_organism_ids[0], self.rcsb_pdbx_description
-            ),
+            seq         = Seq(self.entity_poly_seq_one_letter_code_can),
+            id          = f"{self.src_organism_ids[0]}",
+            description = '{}.{}'.format(self.parent_rcsb_id,self.auth_asym_id),
+            name        = '{}.{}'.format(self.parent_rcsb_id,self.auth_asym_id)
         )
 
     assembly_id: int
