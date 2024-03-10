@@ -1,7 +1,7 @@
 from ninja import NinjaAPI
-from .api_v0_router import apiv0
-from .api_structure_router import structure_router
+from api.routers.router_struct import structure_router
+from api.routers.router_classes import classification_router
 
-root_api = NinjaAPI(docs_url='/docs', openapi_url='/openapi.json', title='riboxyz-api', description='A programming interface for ribosome data.')
-root_api.add_router('/', apiv0)
+root_api = NinjaAPI(docs_url='/', openapi_url='/openapi.json', title='ribxz API', description='A programming interface for ribosome data.', version='0.1.0')
 root_api.add_router('/structure', structure_router)
+root_api.add_router('/polymer_class', classification_router)

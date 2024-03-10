@@ -11,10 +11,11 @@ from schema.v0 import BanClassMetadata, ExogenousRNAByStruct,LigandInstance, Lig
 from wsgiref.util import FileWrapper
 
 structure_router = Router()
-TAG              = "STRUCTURE"
+TAG              = "Structure"
 
 @structure_router.get('/profile', response=RibosomeStructure, tags=[TAG])
 def structure_profile(request,rcsb_id:str):
+    """Return a `.json` profile of the given RCSB_ID structure."""
     params      = dict(request.GET)
     rcsb_id     = str.upper(params['rcsb_id'][0])
     try:
@@ -25,6 +26,8 @@ def structure_profile(request,rcsb_id:str):
 
 
 
+#TODO
+"""map (just stream from emdb), mmcif"""
 @structure_router.get('/mmcif',  tags=[TAG])
 def structure_mmcif(request, rcsb_id:str):
     params      = dict(request.GET)
@@ -36,16 +39,11 @@ def structure_mmcif(request, rcsb_id:str):
     response['Content-Disposition'] = 'attachment; filename="{}.cif"'.format(rcsb_id)
     return response
 
-#TODO
-@structure_router.get('/ptc', response=list[RibosomeStructure], tags=[TAG])
-def structure_ptc(request,rcsb_id:str):
-    ...
+# @structure_router.get('/ptc', response=list[RibosomeStructure], tags=[TAG])
+# def structure_ptc(request,rcsb_id:str):
+#     ...
         
-#TODO
-@structure_router.get('/ligands', response=list[RibosomeStructure], tags=[TAG])
-def structure_ligands(request,rcsb_id:str):
-    ...
+# @structure_router.get('/ligands', response=list[RibosomeStructure], tags=[TAG])
+# def structure_ligands(request,rcsb_id:str):
+#     ...
 
-
-#TODO
-"""map (just stream from emdb), mmcif"""

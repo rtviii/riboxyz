@@ -45,7 +45,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'ninja',
-    'mod_comp',
+    # 'mod_comp',
     # 'mod_db',
     ]
 
