@@ -141,21 +141,22 @@ class RibosomeAssets():
     def get_chain_by_polymer_class(self, poly_class: PolymerClass , assembly: int = 0) -> Polymer | None:
         profile = self.profile()
 
-
         if poly_class in [v.value for v in PolynucleotideClass]:
+            if profile.rnas is not None:
+                for rna in profile.rnas:
+                    if poly_class in [r.value for r in rna.nomenclature] and rna.assembly_id == assembly:
+                        return rna
+            else:
+                return None
 
         elif poly_class in [v.value for v in PolypeptideClass]:
+            for prot in profile.proteins:
+                if poly_class in [v.value for v in prot.nomenclature] and prot.assembly_id == assembly:
+                    return prot
+            else:
+                return None
 
-        for prot in profile.proteins:
-            if poly_class in [v.value for v in prot.nomenclature] and prot.assembly_id == assembly:
-                return prot
-
-        if profile.rnas is not None:
-            for rna in profile.rnas:
-                if poly_class in [r.value for r in rna.nomenclature] and rna.assembly_id == assembly:
-                    return rna
-
-        if profile.other_polymers:
+        else profile.other_polymers:
             for polyf in profile.other_polymers:
                 if poly_class in [ p.value for p in polyf.nomenclature ] and polyf.assembly_id == assembly:
                     return polyf
