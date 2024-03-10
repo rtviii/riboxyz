@@ -10,13 +10,12 @@ import pyvista as pv
 import json
 import os
 import numpy as np
-import numpy as np
 from sklearn.cluster import DBSCAN
 from __archive.scripts.pymol_visualtion import extract_chains
 from mesh_generation.bbox_extraction import ( encode_atoms, open_tunnel_csv, parse_struct_via_bbox, parse_struct_via_centerline)
 from compas.geometry import bounding_box
 from mesh_generation.libsurf import apply_poisson_reconstruction, estimate_normals, ptcloud_convex_hull_points
-from mesh_generation.lsu_alpha_surface import lsu_ensemble_convex_hull, lsu_ensemble_get_chains, vestibule_sphere_expansion
+from mesh_generation.lsu_alpha_surface import lsu_ensemble_convex_hull, lsu_ensemble_get_chains, ptcloud_convex_hull, vestibule_sphere_expansion
 from mesh_generation.visualization import DBSCAN_CLUSTERS_visualize_largest, custom_cluster_recon_path, plot_multiple_by_kingdom, plot_multiple_surfaces, plot_with_landmarks, DBSCAN_CLUSTERS_particular_eps_minnbrs
 from mesh_generation.paths import *
 from mesh_generation.voxelize import (expand_atomcenters_to_spheres_threadpool, normalize_atom_coordinates)
@@ -136,10 +135,10 @@ def index_grid(expanded_sphere_voxels: np.ndarray):
     )
 
 def interior_capture_DBSCAN(
-xyz_v_negative: np.ndarray,
-eps           ,
-min_samples   ,
-metric        : str = "euclidean",
+    xyz_v_negative: np.ndarray,
+    eps           ,
+    min_samples   ,
+    metric        : str = "euclidean",
 ): 
 
     cluster_colors = dict(zip(range(-1, 40), plt.cm.terrain(np.linspace(0, 1, 40))))
@@ -215,7 +214,20 @@ def ____pipeline(RCSB_ID):
 
     #! Transform the cluster back into original coordinate frame
     coordinates_in_the_original_frame =  largest_cluster  - translation_vectors[1] + translation_vectors[0]
-    # main_cluster = pv.PolyData(coordinates_in_the_original_frame)
+
+    main_cluster = pv.PolyData(coordinates_in_the_original_frame)
+
+    vestibule_expansion_mesh_  = pv.read(alphashape_ensemble_LSU(RCSB_ID))
+    selected = main_cluster.select_enclosed_points(vestibule_expansion_mesh_, check_surface=True)
+    pts = main_cluster.extract_points( selected['SelectedPoints'].view(bool), adjacent_cells=False, )
+    pl = pv.Plotter()
+    _ = pl.add_mesh(vestibule_expansion_mesh_, style='wireframe')
+    _ = pl.add_points(pts, color='r', point_size=4)
+    _ = pl.add_points(main_cluster, opacity=0.5, color='b' ,point_size=2)
+    # pl.add_text('ALPHA VAL: {}'.format(8), position='upper_left', font_size=20, shadow=True, font='courier', color='black')
+    pl.show()
+
+    exit()
 
     surface_pts     = ptcloud_convex_hull_points(coordinates_in_the_original_frame)
     np.save(convex_hull_cluster_path(RCSB_ID), surface_pts)
@@ -250,22 +262,30 @@ def main():
     if args.lsu_alpha:
 
 
-        x = vestibule_sphere_expansion(RCSB_ID)
+        ALPHA_VAL = 7.9
+        ALPHA_TOL = 2
        
-        exit()
-        if not os.path.exists(mmcif_ensemble_LSU(RCSB_ID)):
-            lsu_ensemble_get_chains(RCSB_ID, poisson_recon_path(RCSB_ID), mmcif_ensemble_LSU(RCSB_ID))
-        else:
-            ...
-           
-        convex_hull = lsu_ensemble_convex_hull(RCSB_ID, mmcif_ensemble_LSU(RCSB_ID), alpha=7, tol=1.5)
-        estimate_normals(convex_hull.points, convex_hull_ensemble_LSU(RCSB_ID), kdtree_radius=10, kdtree_max_nn=20,correction_tangent_planes_n= 15)
-        apply_poisson_reconstruction(convex_hull_ensemble_LSU(RCSB_ID), alphashape_ensemble_LSU(RCSB_ID))
+        vestibule_sphere_ptcloud = vestibule_sphere_expansion(RCSB_ID, 50)
+        convex_hull = ptcloud_convex_hull(vestibule_sphere_ptcloud, ALPHA_VAL, ALPHA_TOL, offset=2)
 
+        pcd = estimate_normals(convex_hull.points, convex_hull_ensemble_LSU(RCSB_ID), kdtree_radius=10, kdtree_max_nn=15,correction_tangent_planes_n=15)
+
+        # pcd        = o3d.geometry.PointCloud(o3d.utility.Vector3dVector(convex_hull.points))
+        o3d.visualization.draw_geometries([pcd])
+        radii=[2    ,8]
+        rec_mesh = o3d.geometry.TriangleMesh.create_from_point_cloud_ball_pivoting( pcd, o3d.utility.DoubleVector(radii))
+        o3d.visualization.draw_geometries([pcd, rec_mesh])
+
+
+        apply_poisson_reconstruction(convex_hull_ensemble_LSU(RCSB_ID), alphashape_ensemble_LSU(RCSB_ID), recon_depth=6, recon_pt_weight=7)
+
+
+        FONT                  = 'courier'
         RCSB_ID="6Z6K"
         plotter               = pv.Plotter()
         mesh_  = pv.read(alphashape_ensemble_LSU(RCSB_ID))
         plotter.add_mesh(mesh_, opacity=0.5)
+        plotter.add_text('ALPHA VAL: {}'.format(ALPHA_VAL), position='upper_left', font_size=20, shadow=True, font=FONT, color='black')
         plotter.show()
 
 

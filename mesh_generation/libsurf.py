@@ -81,4 +81,5 @@ def estimate_normals(convex_hull_surface_pts: np.ndarray, output_path: str, kdtr
     pcd.orient_normals_consistent_tangent_plane(k=correction_tangent_planes_n)
     o3d.visualization.draw_geometries([pcd], point_show_normal=True)
     o3d.io.write_point_cloud(output_path, pcd)
+    return pcd
     print("Wrote surface with normals {}".format(output_path))

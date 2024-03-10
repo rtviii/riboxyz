@@ -34,17 +34,14 @@ def vestibule_sphere_expansion(rcsb_id:str, radius=50):
     This is an alternative to just constructing a surface from the whole LSU ensemble (LSU rRNA + uL22, uL4, eL39, eL32, uL24) 
     that i'm trying because the guiding arms on the side of the rRNA are tricky to capture with a-shape/normal estimation/poisson recon.(can't obtain a watertight surface)
     """
-    [_,x,y,z] = open_tunnel_csv(rcsb_id)
+    [_,x,y,z] = open_tunnel_csv(rcsb_id)[-1]
 
     mmcif_parser = MMCIFParser(QUIET=True)
     structure    = mmcif_parser.get_structure(rcsb_id, os.path.join(RIBETL_DATA,rcsb_id,rcsb_id + ".cif"))
     atoms        = list(structure.get_atoms())
     ns           = NeighborSearch(atoms)
     _ = ns.search(np.array([x,y,z,]), radius)
-    [neighbor_chains_auth_asym_ids.add(chain_name) for chain_name in [ a.get_full_id()[2] for a in _]]
-
-
-    return print(data[-1])
+    return np.array([a.get_coord() for a in _])
 
 
 def lsu_ensemble_get_chains(rcsb_id:str, reconstructed_tunnel_ply:str, outpath:str)->str:
@@ -69,5 +66,11 @@ def lsu_ensemble_convex_hull(rcsb_id:str, mmcif_ensemble_lsu:str, alpha,tol):
     atoms            = np.array([a.get_coord() for a in list(structure.get_atoms())])
     cloud            = pv.PolyData(atoms)
     delaunay_shape   = cloud.delaunay_3d(alpha=alpha, tol=tol, progress_bar=True)
+    convex_hull      = delaunay_shape.extract_surface().cast_to_pointset()
+    return convex_hull
+
+def ptcloud_convex_hull( ptcloud:np.ndarray, alpha,tol, offset):
+    cloud            = pv.PolyData(ptcloud)
+    delaunay_shape   = cloud.delaunay_3d(alpha=alpha, tol=tol, offset=offset,progress_bar=True)
     convex_hull      = delaunay_shape.extract_surface().cast_to_pointset()
     return convex_hull
