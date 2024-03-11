@@ -13,7 +13,7 @@ from wsgiref.util import FileWrapper
 structure_router = Router()
 TAG              = "Structure"
 
-@structure_router.get('/profile', response=RibosomeStructure, tags=[TAG])
+@structure_router.get('/profile', response=RibosomeStructure, tags=[TAG],)
 def structure_profile(request,rcsb_id:str):
     """Return a `.json` profile of the given RCSB_ID structure."""
     params      = dict(request.GET)

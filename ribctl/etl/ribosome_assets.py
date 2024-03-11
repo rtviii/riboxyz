@@ -160,7 +160,7 @@ class RibosomeAssets():
             for polyf in profile.other_polymers:
                 if poly_class in [ p.value for p in polyf.nomenclature ] and polyf.assembly_id == assembly:
                     return polyf
-            return None
+        return None
 
     def get_chain_by_auth_asym_id(self, auth_asym_id: str) -> tuple[
             RNA | Protein  | None,

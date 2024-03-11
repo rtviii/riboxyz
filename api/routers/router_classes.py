@@ -28,7 +28,7 @@ def polynucleotide_class(request,rna_class:PolynucleotideClass):
         if x is not None:
             agg.append(x.model_dump_json())
 
-    return HttpResponse(agg, content_type='application/json')
+    return HttpResponse(agg)
 
 @classification_router.get('/polypeptide',  tags=[TAG], response=list[Protein])
 def polypeptide_class(request,protein_class:ProteinClass):
@@ -62,4 +62,4 @@ def lifecycle_factor_class(request,factor_class:LifecycleFactorClass):
         if x is not None:
             agg.append(x.model_dump_json())
 
-    return HttpResponse(agg, content_type='application/json')
+    return HttpResponse(agg)
