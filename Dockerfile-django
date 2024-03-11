@@ -12,7 +12,7 @@ ENV RIBETL_DATA=/home/backend/RIBETL_DATA
 RUN mkdir -p $API
 RUN mkdir -p $RIBCTL
 RUN mkdir -p $RIBETL_DATA
-RUN mkdir -p $PYMOL_SOURCE
+# RUN mkdir -p $PYMOL_SOURCE
 
 # ----- LIBS -------------------------------------------
 RUN apt-get update -y && apt-get install curl git vim \
@@ -25,17 +25,17 @@ apt-transport-https ca-certificates libssl-dev wget  -y
 
 
 # --- NEO4J --------------------------------------------------------------------------------
-RUN add-apt-repository -y ppa:openjdk-r/ppa
-RUN apt-get update
+# RUN add-apt-repository -y ppa:openjdk-r/ppa
+# RUN apt-get update
 
-RUN add-apt-repository -y universe
+# RUN add-apt-repository -y universe
 
-RUN wget -O neo.gpg.key https://debian.neo4j.com/neotechnology.gpg.key && apt-key add --no-tty neo.gpg.key
-RUN echo 'deb https://debian.neo4j.com stable latest' | tee -a /etc/apt/sources.list.d/neo4j.list
-RUN apt-get update
-RUN mkdir /etc/ssl/certs/java/
-RUN apt install -y --reinstall -o Dpkg::Options::="--force-confask,confnew,confmiss" --reinstall ca-certificates-java ssl-cert openssl ca-certificates
-RUN apt-get install -y neo4j
+# RUN wget -O neo.gpg.key https://debian.neo4j.com/neotechnology.gpg.key && apt-key add --no-tty neo.gpg.key
+# RUN echo 'deb https://debian.neo4j.com stable latest' | tee -a /etc/apt/sources.list.d/neo4j.list
+# RUN apt-get update
+# RUN mkdir /etc/ssl/certs/java/
+# RUN apt install -y --reinstall -o Dpkg::Options::="--force-confask,confnew,confmiss" --reinstall ca-certificates-java ssl-cert openssl ca-certificates
+# RUN apt-get install -y neo4j
 # --- NEO4J ---------------------------------------------------------------------------------
 
 # ----- PYMOL_INSTALLATION -------------
@@ -65,18 +65,18 @@ RUN pip3 install gunicorn
 # port where the Django app runs
 EXPOSE 8000 8001 8002
 
-ENV NODE_VERSION=18.12.1
-RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
-ENV NVM_DIR=/root/.nvm
-RUN . "$NVM_DIR/nvm.sh" && nvm install ${NODE_VERSION}
-RUN . "$NVM_DIR/nvm.sh" && nvm use v${NODE_VERSION}
-RUN . "$NVM_DIR/nvm.sh" && nvm alias default v${NODE_VERSION}
-ENV PATH="/root/.nvm/versions/node/v${NODE_VERSION}/bin/:${PATH}"
+# ENV NODE_VERSION=18.12.1
+# RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+# ENV NVM_DIR=/root/.nvm
+# RUN . "$NVM_DIR/nvm.sh" && nvm install ${NODE_VERSION}
+# RUN . "$NVM_DIR/nvm.sh" && nvm use v${NODE_VERSION}
+# RUN . "$NVM_DIR/nvm.sh" && nvm alias default v${NODE_VERSION}
+# ENV PATH="/root/.nvm/versions/node/v${NODE_VERSION}/bin/:${PATH}"
 
 # -------------------------------------- NODE AND MODULES INSTALLATION
 # RUN npm install --no-optional && npm cache clean --force
-RUN npm install -g ts-node
-RUN npm i -g json-schema-to-typescript
+# RUN npm install -g ts-node
+# RUN npm i -g json-schema-to-typescript
 # RUN npm i -g ribxzcli
 # --- CLI INSTALLATION ---------------------------------------------------------------------------------
 # --- 

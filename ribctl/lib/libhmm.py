@@ -287,8 +287,6 @@ class HMMClassifier():
 
                 self.report[chain.auth_asym_id] = []
                 seq_record                      = chain.to_SeqRecord()
-                print("Submitting as seq:",  seq_record)
-                print("Submitting as seq:", str( seq_record.seq ))
                 query_seq                       = pyhmmer.easel.TextSequence(name=bytes(seq_record.id,'utf-8'), sequence=str( seq_record.seq )).digitize(self.alphabet)
                 for ( candidate_class, tophits ) in hmmscanner.classify_seq(self.alphabet, query_seq):
                     for hit in tophits:
