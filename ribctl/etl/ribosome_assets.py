@@ -23,12 +23,12 @@ from ribctl.logs.loggers import get_etl_logger
 logger = get_etl_logger()
 
 class Assetlist(BaseModel)   : 
-      profile                : Optional[bool]
-      ptc_coords             : Optional[bool]
-      cif                    : Optional[bool]
-      cif_modified_and_chains: Optional[bool]
-      ligands                : Optional[bool]
-      png_thumbnail          : Optional[bool]
+      profile                : Optional[bool]=None
+      ptc_coords             : Optional[bool]=None
+      cif                    : Optional[bool]=None
+      cif_modified_and_chains: Optional[bool]=None
+      ligands                : Optional[bool]=None
+      png_thumbnail          : Optional[bool]=None
 
 class RibosomeAssets():
     rcsb_id: str
@@ -396,7 +396,6 @@ class RibosomeAssets():
         #                 ...
 
         # return all_verified_flag
-
 
 def classify_struct_by_proportions(ribosome: RibosomeStructure) -> int:
     ids = []
