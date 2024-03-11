@@ -26,18 +26,18 @@ def structure_profile(request,rcsb_id:str):
 
 
 
-#TODO
-"""map (just stream from emdb), mmcif"""
-@structure_router.get('/mmcif',  tags=[TAG])
-def structure_mmcif(request, rcsb_id:str):
-    params      = dict(request.GET)
-    rcsb_id     = str.upper(params['rcsb_id'][0])
+# #TODO
+# """map (just stream from emdb), mmcif"""
+# @structure_router.get('/mmcif',  tags=[TAG])
+# def structure_mmcif(request, rcsb_id:str):
+#     params      = dict(request.GET)
+#     rcsb_id     = str.upper(params['rcsb_id'][0])
     
 
-    document = open(RibosomeAssets(rcsb_id)._cif_filepath(), 'rb')
-    response = HttpResponse(FileWrapper(document), content_type='chemical/x-mmcif')
-    response['Content-Disposition'] = 'attachment; filename="{}.cif"'.format(rcsb_id)
-    return response
+#     document = open(RibosomeAssets(rcsb_id)._cif_filepath(), 'rb')
+#     response = HttpResponse(FileWrapper(document), content_type='chemical/x-mmcif')
+#     response['Content-Disposition'] = 'attachment; filename="{}.cif"'.format(rcsb_id)
+#     return response
 
 # @structure_router.get('/ptc', response=list[RibosomeStructure], tags=[TAG])
 # def structure_ptc(request,rcsb_id:str):
