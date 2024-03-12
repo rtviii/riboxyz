@@ -1,20 +1,24 @@
 import os
+from pathlib import Path
 from dotenv import load_dotenv
-from pprint import pprint
 import sys
+# import ribctl.logs as logs
 load_dotenv(".env")
 
 SECRET_KEY = 'ju=n4om3z00jd1+y2(ufn)g^@w-dj*&-45&4yd1_aiun50b6by'
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR   = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+RIBCTL     = os.path.abspath(os.path.join(Path(BASE_DIR).parent.absolute()))
+# RIBCTL     = os.path.abspath(os.path.join(Path(BASE_DIR).parent.absolute(),'ribctl'))
+# print("Sourced RIBCTL: {}".format(RIBCTL))
+# sys.path.append(RIBCTL)       #! hack until ribctl is a separate pypi project
 
-sys.path.append(os.path.abspath(os.path.join(BASE_DIR,'ribctl')))       #! hack until ribctl is a separate pypi project
-# sys.path.append(os.path.abspath(os.path.join(BASE_DIR,'ribctl','lib'))) 
 
         
 
 # SECURITY WARNING: keep the secret key used in production secret!
 # this should be either docker-mounted or populated through the utils module
 RIBETL_DATA = os.environ["RIBETL_DATA"] if os.environ["RIBETL_DATA"] else os.path.join(BASE_DIR, "ribetldata")
+
 # ※ Dont' forget to export pymol path ( we want to ship a built pymol, but python needs to be aware of it)
 # export PYMOL_PATH=/home/rxz/dev/pymol3.11 && export PYTHONPATH="$PYTHONPATH:$PYMOL_PATH/modules/:"
 
@@ -69,7 +73,7 @@ CORS_ALLOW_CREDENTIALS = True
 # ]
 
 
-ROOT_URLCONF = 'rbxz_bend.urls'
+ROOT_URLCONF = 'ribxz_api.urls'
 
 TEMPLATES = [
     {
@@ -87,7 +91,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'rbxz_bend.wsgi.application'
+WSGI_APPLICATION = 'ribxz_api.wsgi.application'
 
 DATABASES = {}
 

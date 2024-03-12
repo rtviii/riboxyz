@@ -4,7 +4,7 @@ import sys
 sys.dont_write_bytecode = True
 
 if __name__ == "__main__":
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "rbxz_bend.settings")
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ribxz_api.settings")
     try:
         from django.core.management import execute_from_command_line
     except ImportError:

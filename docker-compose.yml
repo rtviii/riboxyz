@@ -11,9 +11,10 @@ services:
     volumes:
       - type: bind
         source: ${RIBETL_DATA:?err}
-        target: /home/backend/api/ribetldata
+        target: /home/RIBETL_DATA
+
       # FOR LIVE DEVELOPMENT -----------------------|
-      - ./api:/home/backend/api                    #|  <--- DEV ONLY
+      - ./ribxz:/home/ribxz                    #|  <--- DEV ONLY
       # --------------------------------------------|
     # environment:
     #   - NEO4J_URI=bolt://neo:7687

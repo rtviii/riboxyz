@@ -1,28 +1,42 @@
 # base image
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 
 # ----- SETUP -------------------
 # vars inside the container
-ENV API=/home/backend/api
-ENV RIBCTL=/home/backend/ribctl
-ENV PYMOL_SOURCE=/home/backend/pymol
-ENV RIBETL_DATA=/home/backend/RIBETL_DATA
+ENV RIBXZ_API=/home/ribxz_api
+ENV RIBCTL=/home/ribctl
+ENV PYMOL_SOURCE=/home/pymol
+ENV RIBETL_DATA=/home/RIBETL_DATA
 
 # set work directory
-RUN mkdir -p $API
+RUN mkdir -p $RIBXZ_API
 RUN mkdir -p $RIBCTL
-RUN mkdir -p $RIBETL_DATA
-# RUN mkdir -p $PYMOL_SOURCE
+RUN mkdir -p $PYMOL_SOURCE
+# RUN mkdir -p $RIBETL_DATA
 
 # ----- LIBS -------------------------------------------
-RUN apt-get update -y && apt-get install curl git vim \
-software-properties-common apt-transport-https python3 \
+RUN apt-get update -y && apt-get -y install curl 
+RUN apt-get install software-properties-common -y
+RUN add-apt-repository --remove ppa:ondrej/php
+
+RUN apt-get install git vim apt-transport-https python3 \
 build-essential python3-dev python3-pip python3-venv \
 libglew-dev libpng-dev libfreetype6-dev libxml2-dev \
 libmsgpack-dev python3-pyqt5.qtopengl libglm-dev libnetcdf-dev \
 apt-transport-https ca-certificates libssl-dev wget  -y 
 # -------------------------------------------------------------
 
+# ----- PYMOL_INSTALLATION -------------
+RUN pip3 install virtualenv netCDF4
+#  the following pathing is elaborated on here: https://sourceforge.net/p/pymol/mailman/message/35988916/
+#  be mindful of the OS dependencies 
+COPY pymol_source $PYMOL_SOURCE
+ADD pymol_source $PYMOL_SOURCE
+ENV PYMOL_PATH="${PYMOL_SOURCE}/__pymol_lib"
+ENV PYTHONPATH="${PYMOL_PATH}/modules" 
+RUN mkdir -p $PYMOL_PATH
+WORKDIR $PYMOL_SOURCE
+RUN python3 setup.py build install --home="${PYMOL_PATH}" --install-lib="${PYMOL_PATH}/modules/" --install-scripts="${PYMOL_PATH}"
 
 # --- NEO4J --------------------------------------------------------------------------------
 # RUN add-apt-repository -y ppa:openjdk-r/ppa
@@ -38,54 +52,31 @@ apt-transport-https ca-certificates libssl-dev wget  -y
 # RUN apt-get install -y neo4j
 # --- NEO4J ---------------------------------------------------------------------------------
 
-# ----- PYMOL_INSTALLATION -------------
-RUN pip3 install virtualenv netCDF4
-#  the following pathing is elaborated on here: https://sourceforge.net/p/pymol/mailman/message/35988916/
-#  be mindful of the OS dependencies 
-COPY pymol_source $PYMOL_SOURCE
-ADD pymol_source $PYMOL_SOURCE
-ENV PYMOL_PATH="${PYMOL_SOURCE}/__pymol_lib"
-ENV PYTHONPATH="${PYMOL_PATH}/modules" 
-RUN mkdir -p $PYMOL_PATH
-WORKDIR $PYMOL_SOURCE
-RUN python3 setup.py build install --home="${PYMOL_PATH}" --install-lib="${PYMOL_PATH}/modules/" --install-scripts="${PYMOL_PATH}"
 
 
 
 
 # ------- WORKDIR $DJANGO ---------------
-ADD api/reqs.txt $API
-RUN python3 -m venv /opt/venv
+ADD ribxz_api/reqs.txt $RIBXZ_API
+RUN python3 -m venv "/opt/venv"
 ENV PATH="/opt/venv/bin:$PATH"
-RUN pip3 install -r ${API}/reqs.txt
+RUN pip3 install -r ${RIBXZ_API}/reqs.txt
 RUN pip3 install pytz   --upgrade
 RUN pip3 install tzdata --upgrade
 RUN pip3 install gunicorn
 
-# port where the Django app runs
+# Django ports
 EXPOSE 8000 8001 8002
 
-# ENV NODE_VERSION=18.12.1
-# RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
-# ENV NVM_DIR=/root/.nvm
-# RUN . "$NVM_DIR/nvm.sh" && nvm install ${NODE_VERSION}
-# RUN . "$NVM_DIR/nvm.sh" && nvm use v${NODE_VERSION}
-# RUN . "$NVM_DIR/nvm.sh" && nvm alias default v${NODE_VERSION}
-# ENV PATH="/root/.nvm/versions/node/v${NODE_VERSION}/bin/:${PATH}"
 
-# -------------------------------------- NODE AND MODULES INSTALLATION
-# RUN npm install --no-optional && npm cache clean --force
-# RUN npm install -g ts-node
-# RUN npm i -g json-schema-to-typescript
-# RUN npm i -g ribxzcli
-# --- CLI INSTALLATION ---------------------------------------------------------------------------------
-# --- 
 
 # Be careful given that both the whole django project and the main module are called `rbxz_bend`. (hence not using the $DJANGO here)
-COPY api ${API}
+COPY ribxz_api ${RIBXZ_API}
+
 # Be careful given that both the whole django project and the main module are called `rbxz_bend`. (hence not using the $DJANGO here)
 COPY ribctl ${RIBCTL}
-RUN pip3 install -r ${API}/reqs.txt
-# start server
-WORKDIR ${API}
-ENTRYPOINT ["gunicorn", "--bind", ":8000", "--workers", "3", "rbxz_bend.wsgi:application","--reload"]
+
+RUN pip3 install -r ${RIBXZ_API}/reqs.txt
+
+WORKDIR ${RIBXZ_API}
+ENTRYPOINT ["gunicorn", "--bind", ":8000", "--workers", "3", "ribxz_api.wsgi:application","--reload"]

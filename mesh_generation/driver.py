@@ -219,11 +219,11 @@ def ____pipeline(RCSB_ID):
 
     vestibule_expansion_mesh_  = pv.read(alphashape_ensemble_LSU(RCSB_ID))
     selected = main_cluster.select_enclosed_points(vestibule_expansion_mesh_, check_surface=True)
-    pts = main_cluster.extract_points( selected['SelectedPoints'].view(bool), adjacent_cells=False, )
+    main_cluster_masked = main_cluster.extract_points( selected['SelectedPoints'].view(bool), adjacent_cells=False, )
     pl = pv.Plotter()
-    _ = pl.add_mesh(vestibule_expansion_mesh_, style='wireframe')
-    _ = pl.add_points(pts, color='r', point_size=4)
-    _ = pl.add_points(main_cluster, opacity=0.5, color='b' ,point_size=2)
+    # _ = pl.add_mesh(vestibule_expansion_mesh_, style='wireframe')
+    _ = pl.add_points(main_cluster_masked, color='r', point_size=4)
+    # _ = pl.add_points(main_cluster, opacity=0.5, color='b' ,point_size=2)
     # pl.add_text('ALPHA VAL: {}'.format(8), position='upper_left', font_size=20, shadow=True, font='courier', color='black')
     pl.show()
 
@@ -271,14 +271,13 @@ def main():
         pcd = estimate_normals(convex_hull.points, convex_hull_ensemble_LSU(RCSB_ID), kdtree_radius=10, kdtree_max_nn=15,correction_tangent_planes_n=15)
 
         # pcd        = o3d.geometry.PointCloud(o3d.utility.Vector3dVector(convex_hull.points))
-        o3d.visualization.draw_geometries([pcd])
-        radii=[2    ,8]
-        rec_mesh = o3d.geometry.TriangleMesh.create_from_point_cloud_ball_pivoting( pcd, o3d.utility.DoubleVector(radii))
-        o3d.visualization.draw_geometries([pcd, rec_mesh])
+        # o3d.visualization.draw_geometries([pcd])
+        # radii=[2    ,8]
+        # rec_mesh = o3d.geometry.TriangleMesh.create_from_point_cloud_ball_pivoting( pcd, o3d.utility.DoubleVector(radii))
+        # o3d.visualization.draw_geometries([pcd, rec_mesh])
 
 
         apply_poisson_reconstruction(convex_hull_ensemble_LSU(RCSB_ID), alphashape_ensemble_LSU(RCSB_ID), recon_depth=6, recon_pt_weight=7)
-
 
         FONT                  = 'courier'
         RCSB_ID="6Z6K"
