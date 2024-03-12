@@ -3,7 +3,6 @@ import json
 import os
 from django.http import HttpResponse, JsonResponse, HttpResponseServerError
 from ninja import Router
-from ribctl import RIBETL_DATA
 from ribctl.etl.ribosome_assets import RibosomeAssets
 # from ribctl.lib.mod_superimpose import pymol_super, ranged_align_by_auth_asym_id, ranged_align_by_polyclass
 from ribctl.lib.ribosome_types.types_ribosome import PolymerClass, CytosolicProteinClass, PolynucleotideClass, RibosomeStructure

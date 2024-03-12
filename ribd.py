@@ -8,7 +8,6 @@ from pprint import pprint
 import warnings
 warnings.filterwarnings("ignore")
 
-# from ribctl.cli.etl import cmd_etl
 from ribctl.cli.ls import cmd_ls
 from ribctl.cli.sync import cmd_sync
 from ribctl.lib.mod_transpose_bsites import init_transpose_ligand
@@ -23,7 +22,7 @@ parser     = argparse.ArgumentParser(description="Command line interface for the
 
 parser.add_argument('--verify_schema', action='store_true', help="Verify the schema for every file in the database")
 
-subparsers = parser.add_subparsers(title='Subcommands', dest='command')
+subparsers     = parser.add_subparsers(title='Subcommands', dest='command')
 parser_cmd_etl = subparsers.add_parser('etl', help='Acquisition and processing of ribosomal structures and assets.')
 
 parser_lig = subparsers.add_parser('lig', help='ligands')
