@@ -10,7 +10,7 @@ BASE_DIR   = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RIBCTL     = os.path.abspath(os.path.join(Path(BASE_DIR).parent.absolute()))
 # RIBCTL     = os.path.abspath(os.path.join(Path(BASE_DIR).parent.absolute(),'ribctl'))
 # print("Sourced RIBCTL: {}".format(RIBCTL))
-# sys.path.append(RIBCTL)       #! hack until ribctl is a separate pypi project
+sys.path.append(RIBCTL)       #! hack until ribctl is a separate pypi project
 
 
         

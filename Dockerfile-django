@@ -1,5 +1,5 @@
 # base image
-FROM ubuntu:24.04
+FROM ubuntu:22.04
 
 # ----- SETUP -------------------
 # vars inside the container
@@ -28,6 +28,7 @@ apt-transport-https ca-certificates libssl-dev wget  -y
 
 # ----- PYMOL_INSTALLATION -------------
 RUN pip3 install virtualenv netCDF4
+
 #  the following pathing is elaborated on here: https://sourceforge.net/p/pymol/mailman/message/35988916/
 #  be mindful of the OS dependencies 
 COPY pymol_source $PYMOL_SOURCE
@@ -79,4 +80,4 @@ COPY ribctl ${RIBCTL}
 RUN pip3 install -r ${RIBXZ_API}/reqs.txt
 
 WORKDIR ${RIBXZ_API}
-ENTRYPOINT ["gunicorn", "--bind", ":8000", "--workers", "3", "ribxz_api.wsgi:application","--reload"]
+ENTRYPOINT ["gunicorn", "--bind", ":8000", "--workers", "20", "ribxz_api.wsgi:application","--reload"]
