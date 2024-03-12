@@ -109,14 +109,16 @@ def expand_bbox_atoms_to_spheres(atom_coordinates:np.ndarray, sphere_vdw_radii:n
 
     return np.array(expanded)
 
-def index_grid(expanded_sphere_voxels: np.ndarray):
+def index_grid(expanded_sphere_voxels: np.ndarray, TRUNCATION_FACTOR:int|None=None ):
+
 
     normalized_sphere_cords, mean_abs_vectors = normalize_atom_coordinates(expanded_sphere_voxels)
     voxel_size = 1
+
     sphere_cords_quantized = np.round( np.array(normalized_sphere_cords / voxel_size) ).astype(int)
-    max_values      = np.max(sphere_cords_quantized, axis=0)
-    grid_dimensions = max_values + 1
-    vox_grid        = np.zeros(grid_dimensions)
+    max_values             = np.max(sphere_cords_quantized, axis=0)
+    grid_dimensions        = max_values + 1
+    vox_grid               = np.zeros(grid_dimensions)
 
     vox_grid[
         sphere_cords_quantized[:, 0],
@@ -124,8 +126,12 @@ def index_grid(expanded_sphere_voxels: np.ndarray):
         sphere_cords_quantized[:, 2],
     ] = 1
 
+    if TRUNCATION_FACTOR is not None:
+        vox_grid = vox_grid[:,:-TRUNCATION_FACTOR, :]
+
     __xyz_v_negative_ix = np.asarray(np.where(vox_grid != 1))
     __xyz_v_positive_ix = np.asarray(np.where(vox_grid == 1))
+
 
     return (
         __xyz_v_positive_ix.T,
@@ -177,6 +183,7 @@ def pick_largest_poisson_cluster(clusters_container:dict[int,list])->np.ndarray:
 
 
 def ____pipeline(RCSB_ID):
+
     _u_EPSILON     = 5.5
     _u_MIN_SAMPLES = 600
     _u_METRIC      = "euclidean"
@@ -207,27 +214,36 @@ def ____pipeline(RCSB_ID):
     else:
         bbox_atoms_expanded = np.load(spheres_expanded_pointset_path(RCSB_ID))
 
-    xyz_positive, xyz_negative, _ , translation_vectors = index_grid(bbox_atoms_expanded) 
+    xyz_positive, xyz_negative, _ , translation_vectors = index_grid(bbox_atoms_expanded, 20) 
     np.save(translation_vectors_path(RCSB_ID), translation_vectors)
+
+    #! truncate the bounding box:
+    # pl=  pv.Plotter()
+    # pl.add_points(xyz_negative, color='r', point_size=2)
+    # pl.show()
+
+
+
     db, clusters_container = interior_capture_DBSCAN( xyz_negative, _u_EPSILON, _u_MIN_SAMPLES, _u_METRIC )
     largest_cluster = pick_largest_poisson_cluster(clusters_container)
 
     #! Transform the cluster back into original coordinate frame
     coordinates_in_the_original_frame =  largest_cluster  - translation_vectors[1] + translation_vectors[0]
 
-    main_cluster = pv.PolyData(coordinates_in_the_original_frame)
 
-    vestibule_expansion_mesh_  = pv.read(alphashape_ensemble_LSU(RCSB_ID))
-    selected = main_cluster.select_enclosed_points(vestibule_expansion_mesh_, check_surface=True)
-    pts = main_cluster.extract_points( selected['SelectedPoints'].view(bool), adjacent_cells=False, )
-    pl = pv.Plotter()
-    _ = pl.add_mesh(vestibule_expansion_mesh_, style='wireframe')
-    _ = pl.add_points(pts, color='r', point_size=4)
-    _ = pl.add_points(main_cluster, opacity=0.5, color='b' ,point_size=2)
-    # pl.add_text('ALPHA VAL: {}'.format(8), position='upper_left', font_size=20, shadow=True, font='courier', color='black')
-    pl.show()
 
-    exit()
+    # #! Vestibule truncation via surface
+    # main_cluster              = pv.PolyData(coordinates_in_the_original_frame)
+    # vestibule_expansion_mesh_ = pv.read(alphashape_ensemble_LSU(RCSB_ID))
+    # selected                  = main_cluster.select_enclosed_points(vestibule_expansion_mesh_, check_surface=True)
+    # pts                       = main_cluster.extract_points( selected['SelectedPoints'].view(bool), adjacent_cells=False, )
+    # pl                        = pv.Plotter()
+    # _                         = pl.add_mesh(vestibule_expansion_mesh_, style='wireframe')
+    # _                         = pl.add_points(pts, color='r', point_size=4)
+    # _                         = pl.add_points(main_cluster, opacity=0.5, color='b' ,point_size=2)
+    # # pl.add_text('ALPHA VAL: {}'.format(8), position='upper_left', font_size=20, shadow=True, font='courier', color='black')
+    # pl.show()
+    # exit()
 
     surface_pts     = ptcloud_convex_hull_points(coordinates_in_the_original_frame)
     np.save(convex_hull_cluster_path(RCSB_ID), surface_pts)
@@ -250,9 +266,11 @@ def main():
     parser.add_argument( "--dbscan_tuple",  type=str)
 
     parser.add_argument( "--multisurf",   action='store_true')
-    parser.add_argument( "--fig",   action='store_true')
+    # parser.add_argument( "--fig",   action='store_true')
     parser.add_argument( "--kingdom",   choices=['bacteria','archaea','eukaryota'])
 
+
+    # Truncation
     parser.add_argument( "--lsu_alpha",   action='store_true')
 
     args          = parser.parse_args()
@@ -314,7 +332,7 @@ def main():
         eps,min_nbrs =  args.dbscan_tuple.split(",")
         eps = float(eps)
         min_nbrs = int(min_nbrs)
-        plot_with_landmarks(RCSB_ID, float(eps),int(min_nbrs),custom_cluster_recon_path(RCSB_ID, float(eps), int(min_nbrs)))
+        plot_with_landmarks(RCSB_ID, float(eps),int(min_nbrs),poisson_recon_path(RCSB_ID))
 
     if args.multisurf:
         plot_multiple_surfaces(RCSB_ID)

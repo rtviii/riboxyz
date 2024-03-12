@@ -16,7 +16,7 @@ from __archive.scripts.pymol_visualtion import extract_chains
 from mesh_generation.bbox_extraction import ( encode_atoms, open_tunnel_csv, parse_struct_via_bbox, parse_struct_via_centerline)
 from compas.geometry import bounding_box
 from mesh_generation.libsurf import estimate_normals
-from mesh_generation.visualization import DBSCAN_CLUSTERS_visualize_largest, custom_cluster_recon_path, plot_multiple_by_kingdom, plot_multiple_surfaces, plot_with_landmarks, DBSCAN_CLUSTERS_particular_eps_minnbrs
+from mesh_generation.visualization import DBSCAN_CLUSTERS_visualize_largest, plot_multiple_by_kingdom, plot_multiple_surfaces, plot_with_landmarks, DBSCAN_CLUSTERS_particular_eps_minnbrs
 from mesh_generation.paths import *
 from mesh_generation.voxelize import (expand_atomcenters_to_spheres_threadpool, normalize_atom_coordinates)
 from ribctl import RIBETL_DATA
@@ -42,7 +42,6 @@ def vestibule_sphere_expansion(rcsb_id:str, radius=50):
     ns           = NeighborSearch(atoms)
     _ = ns.search(np.array([x,y,z,]), radius)
     return np.array([a.get_coord() for a in _])
-
 
 def lsu_ensemble_get_chains(rcsb_id:str, reconstructed_tunnel_ply:str, outpath:str)->str:
     mesh         = pv.read(reconstructed_tunnel_ply)
@@ -74,3 +73,5 @@ def ptcloud_convex_hull( ptcloud:np.ndarray, alpha,tol, offset):
     delaunay_shape   = cloud.delaunay_3d(alpha=alpha, tol=tol, offset=offset,progress_bar=True)
     convex_hull      = delaunay_shape.extract_surface().cast_to_pointset()
     return convex_hull
+
+

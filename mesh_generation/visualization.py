@@ -1140,9 +1140,9 @@ def plot_with_landmarks( rcsb_id: str, eps, min_nbrs,poisson_recon_custom_path:s
     plotter.add_text('Volume: {}'.format(round(mesh_.volume, 3)), position='lower_left', font_size=8, shadow=True, font=FONT, color='black')
     plotter.add_text('{}'.format(taxname), position='lower_right', font_size=8, shadow=True, font=FONT, color='black') 
 
-    plotter.open_gif("just_chains.gif")
-    viewup = [1, 0, 0]
-    orbit  = plotter.generate_orbital_path( factor=4.0, n_points=72, shift=2.0, viewup=viewup )
-    plotter.orbit_on_path( orbit, write_frames=True, viewup=viewup, step=0.02 )
+    # plotter.open_gif("just_chains.gif")
+    # viewup = [1, 0, 0]
+    # orbit  = plotter.generate_orbital_path( factor=4.0, n_points=72, shift=2.0, viewup=viewup )
+    # plotter.orbit_on_path( orbit, write_frames=True, viewup=viewup, step=0.02 )
 
     plotter.show(auto_close=False)
