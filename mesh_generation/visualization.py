@@ -1096,7 +1096,7 @@ def plot_with_landmarks( rcsb_id: str, eps, min_nbrs,poisson_recon_custom_path:s
         poisson_recon = poisson_recon_custom_path
 
     print("Opened poisson recon file at \033[32m{}\033[0m".format(poisson_recon))
-    mesh_    = pv.read(poisson_recon)
+    mesh_   = pv.read(poisson_recon)
     plotter = pv.Plotter()
     plotter.add_mesh(mesh_, opacity=1)
 
@@ -1105,7 +1105,8 @@ def plot_with_landmarks( rcsb_id: str, eps, min_nbrs,poisson_recon_custom_path:s
         # print("Plotting " + chain_name, "with index", i ,)
         # ? Adding coordinates to the plotter for each chain( coordinates and color )
         plotter.add_points(
-            move_cords_to_normalized_cord_frame(grid_dimensions, mean_abs_vectors, np.array(coords)),
+            # move_cords_to_normalized_cord_frame(grid_dimensions, mean_abs_vectors, np.array(coords)),
+                np.array(coords),
               point_size               = 8 if chain_name in ["eL39","uL4","uL22", "uL23"] else 2 if "rRNA" in chain_name else 4 ,
               color                    =  'gray' if "rRNA" in chain_name else "cyan" if chain_name == "eL39" else 'pink' if chain_name=='uL23' else "lightgreen" if chain_name == "uL4" else "gold" if chain_name =="uL22" else CHAIN_LANDMARK_COLORS[i],
               opacity                  = 0.1 if chain_name not in ["eL39","uL4","uL22", 'uL23'] else 1 ,
@@ -1134,7 +1135,12 @@ def plot_with_landmarks( rcsb_id: str, eps, min_nbrs,poisson_recon_custom_path:s
         position = (20, 200 - offset, 0)
         plotter.add_text( label, position=position, font_size=20, font=FONT,color=color, shadow=True )
 
-    plotter.add_points( move_cords_to_normalized_cord_frame( grid_dimensions, mean_abs_vectors, np.array([ptc_midpoint]) ), point_size=PTC_PT_SIZE, color="red", render_points_as_spheres=True, )
+    plotter.add_points( 
+        # move_cords_to_normalized_cord_frame( grid_dimensions, mean_abs_vectors, np.array([ptc_midpoint]) ),
+        np.array([ptc_midpoint]),
+                        point_size=PTC_PT_SIZE, color="red", render_points_as_spheres=True )
+
+    #!--- Labels ----
     plotter.add_text('RCSB_ID:{}'.format(rcsb_id), position='upper_right', font_size=14, shadow=True, font=FONT, color='black')
     plotter.add_text('eps: {} \nmin_nbrs: {}'.format(eps, min_nbrs), position='upper_left', font_size=8, shadow=True, font=FONT, color='black')
     plotter.add_text('Volume: {}'.format(round(mesh_.volume, 3)), position='lower_left', font_size=8, shadow=True, font=FONT, color='black')

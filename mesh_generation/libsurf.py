@@ -18,6 +18,8 @@ from mesh_generation.bbox_extraction import (
 from compas.geometry import bounding_box
 from mesh_generation.paths import *
 from ribctl import EXIT_TUNNEL_WORK, POISSON_RECON_BIN, RIBETL_DATA
+import warnings
+warnings.filterwarnings("ignore")
 
 
 def apply_poisson_reconstruction(surf_estimated_ptcloud_path: str, output_path: str, recon_depth:int=6, recon_pt_weight:int=3):
@@ -34,24 +36,43 @@ def apply_poisson_reconstruction(surf_estimated_ptcloud_path: str, output_path: 
         str(recon_depth),
         "--pointWeight",
         str(recon_pt_weight),
+        # "--polygonMesh"
     ]
     process = subprocess.run(command, capture_output=True, text=True)
+
     if process.returncode == 0:
         print("PoissonRecon executed successfully.")
         print("Wrote {}".format(output_path))
         # Convert the plyfile to asciii
-        data = plyfile.PlyData.read(surf_estimated_ptcloud_path)
+        data = plyfile.PlyData.read(output_path)
         data.text = True
-        data.write(output_path + ".txt")
-        print("Wrote {}".format(output_path + ".txt"))
+        ascii_duplicate =output_path.split(".")[0] + "_ascii.ply"
+        data.write(ascii_duplicate)
+        print("Wrote {}".format(ascii_duplicate))
     else:
         print("Error:", process.stderr)
 
-def ptcloud_convex_hull_points(pointcloud: np.ndarray) -> np.ndarray:
+def ptcloud_convex_hull_points(pointcloud: np.ndarray, ALPHA:float, TOLERANCE:float) -> np.ndarray:
+
     assert pointcloud is not None
     cloud = pv.PolyData(pointcloud)
-    grid = cloud.delaunay_3d(alpha=2, tol=1.5, offset=2, progress_bar=True)
+    grid = cloud.delaunay_3d(alpha=ALPHA, tol=TOLERANCE, offset=2, progress_bar=True)
+
+    # print(grid.)
+    print("Delaunay 3d")
+    # exit()
     convex_hull = grid.extract_surface().cast_to_pointset()
+    # print(np.array(convex_hull).shape)
+    print("Extracted convex hull")
+
+    # pl                        = pv.Plotter()
+    # _                         = pl.add_mesh(convex_hull, style='wireframe')
+    # # _                         = pl.add_points(pts, color='r', point_size=4)
+    # # _                         = pl.add_points(main_cluster, opacity=0.5, color='b' ,point_size=2)
+    # # pl.add_text('ALPHA VAL: {}'.format(8), position='upper_left', font_size=20, shadow=True, font='courier', color='black')
+    # pl.show()
+
+
     return convex_hull.points
 
 def estimate_normals(convex_hull_surface_pts: np.ndarray, output_path: str, kdtree_radius=None, kdtree_max_nn=None, correction_tangent_planes_n=None): 

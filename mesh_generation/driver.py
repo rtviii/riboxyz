@@ -127,7 +127,7 @@ def index_grid(expanded_sphere_voxels: np.ndarray, TRUNCATION_FACTOR:int|None=No
     ] = 1
 
     if TRUNCATION_FACTOR is not None:
-        vox_grid = vox_grid[:,:-TRUNCATION_FACTOR, :]
+        vox_grid = vox_grid[:-TRUNCATION_FACTOR,:-TRUNCATION_FACTOR, :-TRUNCATION_FACTOR]
 
     __xyz_v_negative_ix = np.asarray(np.where(vox_grid != 1))
     __xyz_v_positive_ix = np.asarray(np.where(vox_grid == 1))
@@ -182,7 +182,7 @@ def pick_largest_poisson_cluster(clusters_container:dict[int,list])->np.ndarray:
     return np.array(clusters_container[DBSCAN_CLUSTER_ID])
 
 
-def ____pipeline(RCSB_ID):
+def ____pipeline(RCSB_ID,args):
 
     _u_EPSILON     = 5.5
     _u_MIN_SAMPLES = 600
@@ -214,7 +214,7 @@ def ____pipeline(RCSB_ID):
     else:
         bbox_atoms_expanded = np.load(spheres_expanded_pointset_path(RCSB_ID))
 
-    xyz_positive, xyz_negative, _ , translation_vectors = index_grid(bbox_atoms_expanded, 20) 
+    xyz_positive, xyz_negative, _ , translation_vectors = index_grid(bbox_atoms_expanded, None if args.truncation_factor is None else args.truncation_factor) 
     np.save(translation_vectors_path(RCSB_ID), translation_vectors)
 
     #! truncate the bounding box:
@@ -237,18 +237,25 @@ def ____pipeline(RCSB_ID):
     # vestibule_expansion_mesh_ = pv.read(alphashape_ensemble_LSU(RCSB_ID))
     # selected                  = main_cluster.select_enclosed_points(vestibule_expansion_mesh_, check_surface=True)
     # pts                       = main_cluster.extract_points( selected['SelectedPoints'].view(bool), adjacent_cells=False, )
-    # pl                        = pv.Plotter()
-    # _                         = pl.add_mesh(vestibule_expansion_mesh_, style='wireframe')
-    # _                         = pl.add_points(pts, color='r', point_size=4)
-    # _                         = pl.add_points(main_cluster, opacity=0.5, color='b' ,point_size=2)
-    # # pl.add_text('ALPHA VAL: {}'.format(8), position='upper_left', font_size=20, shadow=True, font='courier', color='black')
-    # pl.show()
     # exit()
 
-    surface_pts     = ptcloud_convex_hull_points(coordinates_in_the_original_frame)
+    surface_pts     = ptcloud_convex_hull_points(coordinates_in_the_original_frame, 2.5,0.001)
+    print(np.array(surface_pts).shape)
+    # exit()
+    print("Extracted surface points from cluster")
     np.save(convex_hull_cluster_path(RCSB_ID), surface_pts)
-    estimate_normals(surface_pts, surface_with_normals_path(RCSB_ID), 5, 15,10)
-    apply_poisson_reconstruction(surface_with_normals_path(RCSB_ID), poisson_recon_path(RCSB_ID) )
+    estimate_normals(surface_pts, surface_with_normals_path(RCSB_ID), kdtree_radius=10, kdtree_max_nn=15, correction_tangent_planes_n=10)
+    print("Estimated normals")
+    apply_poisson_reconstruction(surface_with_normals_path(RCSB_ID), poisson_recon_path(RCSB_ID), recon_depth=6, recon_pt_weight=3)
+    
+    print("Reconstructed surf")
+    
+    pl                        = pv.Plotter()
+    _                         = pl.add_mesh(pv.read(poisson_recon_path(RCSB_ID)), opacity=0.8)
+    pl.show()
+    # _                         = pl.add_points(pts, color='r', point_size=4)
+    # _                         = pl.add_points(main_cluster, opacity=0.5, color='b' ,point_size=2)
+    # pl.add_text('ALPHA VAL: {}'.format(8), position='upper_left', font_size=20, shadow=True, font='courier', color='black')
         
 def main():
 
@@ -256,8 +263,9 @@ def main():
     parser = argparse.ArgumentParser()
     # Add command-line arguments
     parser.add_argument( "--rcsb_id", type=str, help="Specify the value for eps (float)", required=True )
-    parser.add_argument( "--eps", type=float, help="Specify the value for eps (float)")
-    parser.add_argument( "--min_samples", type=int, help="Specify the value for min_samples (int)" )
+    # parser.add_argument( "--eps", type=float, help="Specify the value for eps (float)")
+    # parser.add_argument( "--min_samples", type=int, help="Specify the value for min_samples (int)" )
+    parser.add_argument( "--truncation_factor", type=int, help="How many voxels (A) to leave trim on the vestibule side.")
     parser.add_argument( "--metric", choices=DBSCAN_METRICS, help="Choose a metric from the provided options", )
 
     parser.add_argument( "--full_pipeline",   action='store_true')
@@ -325,7 +333,7 @@ def main():
             DBSCAN_CLUSTERS_particular_eps_minnbrs(clusters_container, float(eps),int(min_nbrs))
 
     if args.full_pipeline:
-        ____pipeline(RCSB_ID)
+        ____pipeline(RCSB_ID, args)
 
     if args.final:
 
