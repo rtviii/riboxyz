@@ -131,7 +131,7 @@ def index_grid(expanded_sphere_voxels: np.ndarray, TRUNCATION_FACTOR:int|None=No
 
         # vox_grid_truncated = vox_grid[:-TRUNCATION_FACTOR,:,:]
         # vox_grid_truncated = vox_grid[:,:,:-TRUNCATION_FACTOR]
-        vox_grid_truncated = vox_grid[TRUNCATION_FACTOR:,:,:]
+        vox_grid_truncated = vox_grid[:,:-TRUNCATION_FACTOR,:]
 
         print("Truncated with factor: {}".format(TRUNCATION_FACTOR))
         print("Resulting vox grid is of shape:", vox_grid_truncated.shape)
@@ -197,7 +197,6 @@ def pick_largest_poisson_cluster(clusters_container:dict[int,list])->np.ndarray:
 
         # print("Picked cluster {} because it has more points({})".format(DBSCAN_CLUSTER_ID, len(clusters_container[DBSCAN_CLUSTER_ID])))
     return np.array(clusters_container[DBSCAN_CLUSTER_ID])
-
 
 def ____pipeline(RCSB_ID,args):
 
@@ -267,6 +266,8 @@ def ____pipeline(RCSB_ID,args):
     
     pl                        = pv.Plotter()
     _                         = pl.add_mesh(pv.read(poisson_recon_path(RCSB_ID)), opacity=0.8)
+
+    pl.add_axes(line_width=5,cone_radius=0.6, shaft_length=0.7, tip_length=0.3, ambient=0.5, label_size=(0.4, 0.16),)
     pl.show()
     # _                         = pl.add_points(pts, color='r', point_size=4)
     # _                         = pl.add_points(main_cluster, opacity=0.5, color='b' ,point_size=2)
