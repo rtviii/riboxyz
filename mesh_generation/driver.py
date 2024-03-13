@@ -111,7 +111,6 @@ def expand_bbox_atoms_to_spheres(atom_coordinates:np.ndarray, sphere_vdw_radii:n
 
 def index_grid(expanded_sphere_voxels: np.ndarray, TRUNCATION_FACTOR:int|None=None ):
 
-
     normalized_sphere_cords, mean_abs_vectors = normalize_atom_coordinates(expanded_sphere_voxels)
     voxel_size = 1
 
@@ -126,8 +125,26 @@ def index_grid(expanded_sphere_voxels: np.ndarray, TRUNCATION_FACTOR:int|None=No
         sphere_cords_quantized[:, 2],
     ] = 1
 
+
+    print("Voxel grid shape: ", vox_grid.shape)
     if TRUNCATION_FACTOR is not None:
-        vox_grid = vox_grid[:-TRUNCATION_FACTOR,:-TRUNCATION_FACTOR, :-TRUNCATION_FACTOR]
+
+        # vox_grid_truncated = vox_grid[:-TRUNCATION_FACTOR,:,:]
+        # vox_grid_truncated = vox_grid[:,:,:-TRUNCATION_FACTOR]
+        vox_grid_truncated = vox_grid[TRUNCATION_FACTOR:,:,:]
+
+        print("Truncated with factor: {}".format(TRUNCATION_FACTOR))
+        print("Resulting vox grid is of shape:", vox_grid_truncated.shape)
+
+        xyz_positive_indices = np.asarray(np.where(vox_grid_truncated == 1))
+        xyz_negative_indices = np.asarray(np.where(vox_grid_truncated != 1))
+        return (
+        xyz_positive_indices.T,
+        xyz_negative_indices.T,
+        grid_dimensions,
+        mean_abs_vectors,
+    )
+
 
     __xyz_v_negative_ix = np.asarray(np.where(vox_grid != 1))
     __xyz_v_positive_ix = np.asarray(np.where(vox_grid == 1))
@@ -214,15 +231,13 @@ def ____pipeline(RCSB_ID,args):
     else:
         bbox_atoms_expanded = np.load(spheres_expanded_pointset_path(RCSB_ID))
 
-    xyz_positive, xyz_negative, _ , translation_vectors = index_grid(bbox_atoms_expanded, None if args.truncation_factor is None else args.truncation_factor) 
-    np.save(translation_vectors_path(RCSB_ID), translation_vectors)
+    _, xyz_negative, _ , translation_vectors = index_grid(bbox_atoms_expanded, None if args.truncation_factor is None else args.truncation_factor) 
+    # np.save(translation_vectors_path(RCSB_ID), translation_vectors)
 
     #! truncate the bounding box:
-    # pl=  pv.Plotter()
+    # pl =  pv.Plotter()
     # pl.add_points(xyz_negative, color='r', point_size=2)
     # pl.show()
-
-
 
     db, clusters_container = interior_capture_DBSCAN( xyz_negative, _u_EPSILON, _u_MIN_SAMPLES, _u_METRIC )
     largest_cluster = pick_largest_poisson_cluster(clusters_container)
