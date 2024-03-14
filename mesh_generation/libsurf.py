@@ -53,8 +53,8 @@ def apply_poisson_reconstruction(surf_estimated_ptcloud_path: str, output_path: 
         print(">>Error:", process.stderr)
 
 def ptcloud_convex_hull_points(pointcloud: np.ndarray, ALPHA:float, TOLERANCE:float) -> np.ndarray:
-
     assert pointcloud is not None
+
     cloud = pv.PolyData(pointcloud)
     grid = cloud.delaunay_3d(alpha=ALPHA, tol=TOLERANCE, offset=2, progress_bar=True)
     convex_hull = grid.extract_surface().cast_to_pointset()

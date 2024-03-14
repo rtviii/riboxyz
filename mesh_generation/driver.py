@@ -109,7 +109,7 @@ def expand_bbox_atoms_to_spheres(atom_coordinates:np.ndarray, sphere_vdw_radii:n
 
     return np.array(expanded)
 
-def index_grid(expanded_sphere_voxels: np.ndarray, TRUNCATION_FACTOR:int|None=None, TRUNCATION_AXIS:str|None=None) :
+def index_grid(expanded_sphere_voxels: np.ndarray, TRUNCATION_TUPLES:list[tuple[str, int]]|None = None) :
 
     normalized_sphere_cords, mean_abs_vectors = normalize_atom_coordinates(expanded_sphere_voxels)
     voxel_size = 1
@@ -126,28 +126,26 @@ def index_grid(expanded_sphere_voxels: np.ndarray, TRUNCATION_FACTOR:int|None=No
     ] = 1
 
 
-    print("Voxel grid shape: ", vox_grid.shape)
-    if TRUNCATION_FACTOR is not None:
-        assert(TRUNCATION_AXIS is not None)
+    if TRUNCATION_TUPLES is not None:
+        for ( TRUNCATION_AXIS, TRUNCATION_FACTOR) in TRUNCATION_TUPLES:
+            match TRUNCATION_AXIS: 
+                case "x":
+                    vox_grid = vox_grid[:-TRUNCATION_FACTOR,:,:]
+                case "X":
+                    vox_grid = vox_grid[TRUNCATION_FACTOR:,:,:]
+                case "y":
+                    vox_grid = vox_grid[:,:-TRUNCATION_FACTOR,:]
+                case "Y":
+                    vox_grid = vox_grid[:,TRUNCATION_FACTOR:,:]
+                case "z":
+                    vox_grid = vox_grid[:,:,:-TRUNCATION_FACTOR]
+                case "Z":
+                    vox_grid = vox_grid[:,:,TRUNCATION_FACTOR:]
+                case _:
+                    print("Invalid truncation axis. Please use 'x', 'X', 'y', 'Y', 'z', 'Z'.")
+        print("Truncated {} by {}".format(TRUNCATION_AXIS, TRUNCATION_FACTOR))
 
-        # vox_grid_truncated = vox_grid[:-TRUNCATION_FACTOR,:,:]
-        # vox_grid_truncated = vox_grid[:,:,:-TRUNCATION_FACTOR]
-        vox_grid = vox_grid[:,:-TRUNCATION_FACTOR,:]
-
-        print("Truncated with factor: {}".format(TRUNCATION_FACTOR))
-        print("Resulting vox grid is of shape:", vox_grid.shape)
-
-        xyz_positive_indices = np.asarray(np.where(vox_grid == 1))
-        xyz_negative_indices = np.asarray(np.where(vox_grid != 1))
-
-        return (
-        xyz_positive_indices.T,
-        xyz_negative_indices.T,
-        grid_dimensions,
-        mean_abs_vectors,
-        )
-
-
+    print("Voxel grid shape(post truncation if applied): ", vox_grid.shape)
     __xyz_v_negative_ix = np.asarray(np.where(vox_grid != 1))
     __xyz_v_positive_ix = np.asarray(np.where(vox_grid == 1))
 
@@ -235,50 +233,36 @@ def ____pipeline(RCSB_ID,args):
 
     # ! index grid
 
-    _, xyz_negative, _ , translation_vectors = index_grid(bbox_atoms_expanded, None if args.truncation_factor is None else args.truncation_factor) 
+    _, xyz_negative, _ , translation_vectors = index_grid(bbox_atoms_expanded)
     # np.save(translation_vectors_path(RCSB_ID), translation_vectors)
 
     #! truncate the bounding box:
-    # pl =  pv.Plotter()
-    # pl.add_points(xyz_negative, color='r', point_size=2)
-    # pl.show()
-
     db, clusters_container = interior_capture_DBSCAN( xyz_negative, _u_EPSILON, _u_MIN_SAMPLES, _u_METRIC )
-    largest_cluster = pick_largest_poisson_cluster(clusters_container)
+    largest_cluster        = pick_largest_poisson_cluster(clusters_container)
 
-    #! Transform the cluster back into original coordinate frame
-    coordinates_in_the_original_frame =  largest_cluster  - translation_vectors[1] + translation_vectors[0]
-
-    # #! Vestibule truncation via surface
-    # main_cluster              = pv.PolyData(coordinates_in_the_original_frame)
-    # vestibule_expansion_mesh_ = pv.read(alphashape_ensemble_LSU(RCSB_ID))
-    # selected                  = main_cluster.select_enclosed_points(vestibule_expansion_mesh_, check_surface=True)
-    # pts                       = main_cluster.extract_points( selected['SelectedPoints'].view(bool), adjacent_cells=False, )
-    # exit()
-
-    surface_pts     = ptcloud_convex_hull_points(coordinates_in_the_original_frame, 2.5,1)
-    print(">>Extracted convex hull points.")
-    print(np.array(surface_pts).shape)
-    np.save(convex_hull_cluster_path(RCSB_ID), surface_pts)
-    estimate_normals(surface_pts, surface_with_normals_path(RCSB_ID), kdtree_radius=10, kdtree_max_nn=15, correction_tangent_planes_n=10)
-    print(">>Estimated normals")
-    apply_poisson_reconstruction(surface_with_normals_path(RCSB_ID), poisson_recon_path(RCSB_ID), recon_depth=6, recon_pt_weight=3)
-    
-    pl                        = pv.Plotter()
-    _                         = pl.add_mesh(pv.read(poisson_recon_path(RCSB_ID)), opacity=0.8)
-    pl.add_axes(line_width=5,cone_radius=0.6, shaft_length=0.7, tip_length=0.3, ambient=0.5, label_size=(0.4, 0.16),)
+    pl =  pv.Plotter()
+    pl.add_points(largest_cluster, color='r', point_size=2, render_points_as_spheres=True)
+    pl.add_axes(line_width=2,cone_radius=0.3, shaft_length=2, tip_length=0.3, ambient=0.5, label_size=(0.4, 0.16),)
     pl.add_text('RCSB_ID:{}'.format(RCSB_ID), position='upper_right', font_size=14, shadow=True, font='courier', color='black')
+    pl.show_grid()
     pl.show()
 
+
+
+    #! Visualize the cluster to establish whether trimming is required
+
+
     if args.trim:
-        user_input = input("Truncate bbox? Enter tuple of the format ['x,20','X,20', 'y,15'] or 'Q' to quit: ")
+        user_input = input("Truncate bbox? Enter tuples of the format 'x,20:z,40:Y,20' or 'Q' to quit: ")
         if user_input.lower() == 'q':
             print("Exiting the program.")
             exit(0)
         try:
-            axis, number = [ str( user_input.split(",")[0] ) , int( user_input.split(",")[1] )]
 
-            _, xyz_negative, _ , translation_vectors = index_grid(bbox_atoms_expanded, None if args.truncation_factor is None else args.truncation_factor) 
+            truncation_string = user_input.split(":")
+            truncation_params = [( str( pair.split(",")[0] ) , int( pair.split(",")[1] )) for pair in truncation_string]
+
+            _, xyz_negative, _ , translation_vectors = index_grid(bbox_atoms_expanded,TRUNCATION_TUPLES=truncation_params) 
             # np.save(translation_vectors_path(RCSB_ID), translation_vectors)
 
             #! truncate the bounding box:
@@ -311,16 +295,42 @@ def ____pipeline(RCSB_ID,args):
             _                         = pl.add_mesh(pv.read(poisson_recon_path(RCSB_ID)), opacity=0.8)
             pl.add_axes(line_width=5,cone_radius=0.6, shaft_length=0.7, tip_length=0.3, ambient=0.5, label_size=(0.4, 0.16),)
             pl.add_text('RCSB_ID:{}'.format(RCSB_ID), position='upper_right', font_size=14, shadow=True, font='courier', color='black')
+            pl.show_grid()
             pl.show()
-            print(f"You truncation parameters: {number}, {axis}")
+            print(f"You truncation parameters: {stepsize}, {axis}")
 
-        except ValueError:
-            print("Invalid input. Please enter an integer or 'Q' to quit.")
+        except Exception as e:
+            print("Invalid input. Please enter an integer or 'Q' to quit.: ", e)
+
+
+    #! Transform the cluster back into original coordinate frame
+    coordinates_in_the_original_frame =  largest_cluster  - translation_vectors[1] + translation_vectors[0]
+
+
+    # #! Vestibule truncation via surface
+    # main_cluster              = pv.PolyData(coordinates_in_the_original_frame)
+    # vestibule_expansion_mesh_ = pv.read(alphashape_ensemble_LSU(RCSB_ID))
+    # selected                  = main_cluster.select_enclosed_points(vestibule_expansion_mesh_, check_surface=True)
+    # pts                       = main_cluster.extract_points( selected['SelectedPoints'].view(bool), adjacent_cells=False, )
+    # exit()
+
+    surface_pts     = ptcloud_convex_hull_points(coordinates_in_the_original_frame, 3,2)
+    print(">>Extracted convex hull points.")
+    print(np.array(surface_pts).shape)
+    np.save(convex_hull_cluster_path(RCSB_ID), surface_pts)
+    estimate_normals(surface_pts, surface_with_normals_path(RCSB_ID), kdtree_radius=10, kdtree_max_nn=15, correction_tangent_planes_n=10)
+    print(">>Estimated normals")
+    apply_poisson_reconstruction(surface_with_normals_path(RCSB_ID), poisson_recon_path(RCSB_ID), recon_depth=6, recon_pt_weight=3)
+    
+    pl                        = pv.Plotter()
+    _                         = pl.add_mesh(pv.read(poisson_recon_path(RCSB_ID)), opacity=0.8)
+    pl.add_axes(line_width=5,cone_radius=0.6, shaft_length=0.7, tip_length=0.3, ambient=0.5, label_size=(0.4, 0.16),)
+    pl.add_text('RCSB_ID:{}'.format(RCSB_ID), position='upper_right', font_size=14, shadow=True, font='courier', color='black')
+    pl.show_grid()
+    pl.show()
+
         
 
-    # _                         = pl.add_points(pts, color='r', point_size=4)
-    # _                         = pl.add_points(main_cluster, opacity=0.5, color='b' ,point_size=2)
-    # pl.add_text('ALPHA VAL: {}'.format(8), position='upper_left', font_size=20, shadow=True, font='courier', color='black')
         
 def main():
 

@@ -14,6 +14,54 @@ from ribctl import EXIT_TUNNEL_WORK, POISSON_RECON_BIN, RIBETL_DATA
 from ribctl.etl.ribosome_assets import RibosomeAssets
 from ribctl.lib.libmsa import Taxid
 
+
+diagram_tunnels = {
+    "bacteria": [
+        "4W29", # GOOD
+        "6WD4", # GOOD
+        "7UNV",
+        "5DM6",
+
+        "5O60",
+        "8BUU",
+        "6HMA",
+        "7RYH",
+
+        "7MSZ",
+        "7P7T",
+        "5MYJ",
+        "7JIL",
+    ],
+    "eukaryota": [
+        "6P5N",
+        "7QGG",
+        "4UG0",
+        "4U3M",
+
+        "7OYB",
+        "7OLC",
+        "8EUI",
+        "5XXB",
+
+        "4V91",
+        "6XU8",
+        "4V7E",
+        "8P5D",
+
+        "8BTR",
+        "3JBO",
+        "7CPU",
+        "7Q08",
+        "6AZ3",
+
+        "5T5H",
+        "5XY3",
+        "7QEP",
+    ],
+    "archaea": ["4V6U",  # Degenerate triangles
+                "4V9F",] # OK
+}
+
 FONT                  = 'courier'
 CHAIN_PT_SIZE         = 8
 PTC_PT_SIZE           = 20
@@ -788,58 +836,11 @@ available_tunnels = {
     ],
 }
 
-diagram_tunnels = {
-    "bacteria": [
-        "4W29",
-        "6WD4",
-        "7UNV",
-        "5DM6",
-
-        "5O60",
-        "8BUU",
-        "6HMA",
-        "7RYH",
-
-        "7MSZ",
-        "7P7T",
-        "5MYJ",
-        "7JIL",
-    ],
-    "eukaryota": [
-        "6P5N",
-        "7QGG",
-        "4UG0",
-        "4U3M",
-
-        "7OYB",
-        "7OLC",
-        "8EUI",
-        "5XXB",
-
-        "4V91",
-        "6XU8",
-        "4V7E",
-        "8P5D",
-
-        "8BTR",
-        "3JBO",
-        "7CPU",
-        "7Q08",
-        "6AZ3",
-
-        "5T5H",
-        "5XY3",
-        "7QEP",
-    ],
-    "archaea": ["4V6U", "4V9F"],
-}
-
 dbscan_pairs = [
     (2,33),
     (2.3, 57),
     (3, 123),
     (3.2, 145),
-
     (3.5, 175),
     (4.2, 280),
     (5, 490),

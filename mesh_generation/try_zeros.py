@@ -15,9 +15,7 @@ grid[
 indices = np.asanyarray(np.where(grid==1))
 
 pl                        = pv.Plotter()
-_                         = pl.add_points(grid[:,:-1,2:], color='blue', point_size=10, 
-                                        #   render_points_as_spheres=True,
-                                          show_edges=True)
+_                         = pl.add_points(grid[:,:-1,2:], color='blue', point_size=10, show_edges=True)
 _ = pl.add_axes(line_width=5,     
     cone_radius=0.6,
     shaft_length=0.7,
