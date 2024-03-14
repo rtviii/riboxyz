@@ -25,17 +25,18 @@ diagram_tunnels = {
         "5O60",
         "8BUU",
         "6HMA",
-        "7RYH",
+        "7RYH", #GOOD
 
         "7MSZ",
         "7P7T",
-        "5MYJ",
+        "5MYJ", # GOOD, weird structure
         "7JIL",
+        # 3j9y -- good
     ],
     "eukaryota": [
         "6P5N",
         "7QGG",
-        "4UG0",
+        "4UG0", # GOOD
         "4U3M",
 
         "7OYB",
@@ -52,14 +53,14 @@ diagram_tunnels = {
         "3JBO",
         "7CPU",
         "7Q08",
-        "6AZ3",
+        "6AZ3", #GOOD
 
         "5T5H",
         "5XY3",
         "7QEP",
     ],
-    "archaea": ["4V6U",  # Degenerate triangles
-                "4V9F",] # OK
+    "archaea": ["4V6U",  # GOOD
+                "4V9F",] # GOOD
 }
 
 FONT                  = 'courier'

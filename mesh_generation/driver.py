@@ -104,8 +104,8 @@ def extract_bbox_atoms(rcsb_id: str) -> list:
 def expand_bbox_atoms_to_spheres(atom_coordinates:np.ndarray, sphere_vdw_radii:np.ndarray, rcsb_id: str):
 
     sphere_sources = zip(atom_coordinates, sphere_vdw_radii)
-    SINK = []
-    expanded = expand_atomcenters_to_spheres_threadpool(SINK, sphere_sources)
+    SINK           = []
+    expanded       = expand_atomcenters_to_spheres_threadpool(SINK, sphere_sources)
 
     return np.array(expanded)
 
@@ -143,7 +143,7 @@ def index_grid(expanded_sphere_voxels: np.ndarray, TRUNCATION_TUPLES:list[tuple[
                     vox_grid = vox_grid[:,:,TRUNCATION_FACTOR:]
                 case _:
                     print("Invalid truncation axis. Please use 'x', 'X', 'y', 'Y', 'z', 'Z'.")
-        print("Truncated {} by {}".format(TRUNCATION_AXIS, TRUNCATION_FACTOR))
+            print("Truncated {} by {}".format(TRUNCATION_AXIS, TRUNCATION_FACTOR))
 
     print("Voxel grid shape(post truncation if applied): ", vox_grid.shape)
     __xyz_v_negative_ix = np.asarray(np.where(vox_grid != 1))
@@ -204,6 +204,13 @@ def ____pipeline(RCSB_ID,args):
     _u_MIN_SAMPLES = 600 if args.dbscan_tuple is None else int(args.dbscan_tuple.split(",")[1])
     _u_METRIC      = "euclidean"
 
+
+    d3d_alpha   = args.D3D_alpha if args.D3D_alpha is not None else 2
+    d3d_tol     = args.D3D_tol if args.D3D_tol is not None else 1
+    PR_depth    = args.PR_depth if args.PR_depth is not None else 6
+    PR_ptweight = args.PR_ptweight if args.PR_ptweight is not None else 3
+
+
     struct_tunnel_dir = os.path.join(EXIT_TUNNEL_WORK, RCSB_ID)
     if not os.path.exists(struct_tunnel_dir):
         os.mkdir(struct_tunnel_dir)
@@ -242,9 +249,14 @@ def ____pipeline(RCSB_ID,args):
 
     pl =  pv.Plotter()
     pl.add_points(largest_cluster, color='r', point_size=2, render_points_as_spheres=True)
-    pl.add_axes(line_width=2,cone_radius=0.3, shaft_length=2, tip_length=0.3, ambient=0.5, label_size=(0.4, 0.16),)
+    pl.add_axes(line_width=4,cone_radius=0.7, shaft_length=2, tip_length=0.9, ambient=0.5, label_size=(0.4, 0.16),)
     pl.add_text('RCSB_ID:{}'.format(RCSB_ID), position='upper_right', font_size=14, shadow=True, font='courier', color='black')
-    pl.show_grid()
+    pl.show_grid(
+         n_xlabels=6,
+        n_ylabels=6,
+        n_zlabels=6,
+    )
+   
     pl.show()
 
 
@@ -263,12 +275,7 @@ def ____pipeline(RCSB_ID,args):
             truncation_params = [( str( pair.split(",")[0] ) , int( pair.split(",")[1] )) for pair in truncation_string]
 
             _, xyz_negative, _ , translation_vectors = index_grid(bbox_atoms_expanded,TRUNCATION_TUPLES=truncation_params) 
-            # np.save(translation_vectors_path(RCSB_ID), translation_vectors)
-
-            #! truncate the bounding box:
-            # pl =  pv.Plotter()
-            # pl.add_points(xyz_negative, color='r', point_size=2)
-            # pl.show()
+            np.save(translation_vectors_path(RCSB_ID), translation_vectors)
 
             db, clusters_container = interior_capture_DBSCAN( xyz_negative, _u_EPSILON, _u_MIN_SAMPLES, _u_METRIC )
             largest_cluster = pick_largest_poisson_cluster(clusters_container)
@@ -276,28 +283,25 @@ def ____pipeline(RCSB_ID,args):
             #! Transform the cluster back into original coordinate frame
             coordinates_in_the_original_frame =  largest_cluster  - translation_vectors[1] + translation_vectors[0]
 
-            # #! Vestibule truncation via surface
-            # main_cluster              = pv.PolyData(coordinates_in_the_original_frame)
-            # vestibule_expansion_mesh_ = pv.read(alphashape_ensemble_LSU(RCSB_ID))
-            # selected                  = main_cluster.select_enclosed_points(vestibule_expansion_mesh_, check_surface=True)
-            # pts                       = main_cluster.extract_points( selected['SelectedPoints'].view(bool), adjacent_cells=False, )
-            # exit()
-
-            surface_pts     = ptcloud_convex_hull_points(coordinates_in_the_original_frame, 2.5,1)
+            surface_pts     = ptcloud_convex_hull_points(coordinates_in_the_original_frame, d3d_alpha ,d3d_tol)
             print(">>Extracted convex hull points.")
             print(np.array(surface_pts).shape)
             np.save(convex_hull_cluster_path(RCSB_ID), surface_pts)
             estimate_normals(surface_pts, surface_with_normals_path(RCSB_ID), kdtree_radius=10, kdtree_max_nn=15, correction_tangent_planes_n=10)
             print(">>Estimated normals")
-            apply_poisson_reconstruction(surface_with_normals_path(RCSB_ID), poisson_recon_path(RCSB_ID), recon_depth=6, recon_pt_weight=3)
+            apply_poisson_reconstruction(surface_with_normals_path(RCSB_ID), poisson_recon_path(RCSB_ID), recon_depth=PR_depth, recon_pt_weight=PR_ptweight)
             
             pl                        = pv.Plotter()
             _                         = pl.add_mesh(pv.read(poisson_recon_path(RCSB_ID)), opacity=0.8)
             pl.add_axes(line_width=5,cone_radius=0.6, shaft_length=0.7, tip_length=0.3, ambient=0.5, label_size=(0.4, 0.16),)
             pl.add_text('RCSB_ID:{}'.format(RCSB_ID), position='upper_right', font_size=14, shadow=True, font='courier', color='black')
-            pl.show_grid()
+            pl.show_grid(
+                n_xlabels = 10,
+                n_ylabels = 10,
+                n_zlabels = 10,
+            )
             pl.show()
-            print(f"You truncation parameters: {stepsize}, {axis}")
+            exit(0)
 
         except Exception as e:
             print("Invalid input. Please enter an integer or 'Q' to quit.: ", e)
@@ -326,7 +330,7 @@ def ____pipeline(RCSB_ID,args):
     _                         = pl.add_mesh(pv.read(poisson_recon_path(RCSB_ID)), opacity=0.8)
     pl.add_axes(line_width=5,cone_radius=0.6, shaft_length=0.7, tip_length=0.3, ambient=0.5, label_size=(0.4, 0.16),)
     pl.add_text('RCSB_ID:{}'.format(RCSB_ID), position='upper_right', font_size=14, shadow=True, font='courier', color='black')
-    pl.show_grid()
+    pl.show_bounds( n_xlabels=6, n_ylabels=6, n_zlabels=6, )
     pl.show()
 
         
@@ -355,8 +359,12 @@ def main():
     parser.add_argument( "--metric", choices=DBSCAN_METRICS, help="Choose a metric from the provided options", )
     parser.add_argument( "--bbox_radius",  type=int, help="The radius of the bbox expansion", required=False)
     parser.add_argument( "--trim",  action='store_true',required=False)
-    parser.add_argument( "--truncation_factor", type=int, help="How many voxels (A) to leave trim on the vestibule side.")
     parser.add_argument( "--dbscan_tuple",  type=str)
+
+    parser.add_argument( "--D3D_alpha",  type=float)
+    parser.add_argument( "--D3D_tol",  type=float)
+    parser.add_argument( "--PR_depth",  type=int)
+    parser.add_argument( "--PR_ptweight",  type=int)
 
 
     args          = parser.parse_args()
