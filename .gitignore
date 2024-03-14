@@ -5,6 +5,11 @@ volume/**
 volume/
 **/volume/
 
+
+**/*.ply
+**.ply
+*.ply
+
 **/*.hmm
 *.hmm
 

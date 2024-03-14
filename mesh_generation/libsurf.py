@@ -41,38 +41,23 @@ def apply_poisson_reconstruction(surf_estimated_ptcloud_path: str, output_path: 
     process = subprocess.run(command, capture_output=True, text=True)
 
     if process.returncode == 0:
-        print("PoissonRecon executed successfully.")
-        print("Wrote {}".format(output_path))
+        print(">>PoissonRecon executed successfully.")
+        print(">>Wrote {}".format(output_path))
         # Convert the plyfile to asciii
         data = plyfile.PlyData.read(output_path)
         data.text = True
         ascii_duplicate =output_path.split(".")[0] + "_ascii.ply"
         data.write(ascii_duplicate)
-        print("Wrote {}".format(ascii_duplicate))
+        print(">>Wrote {}".format(ascii_duplicate))
     else:
-        print("Error:", process.stderr)
+        print(">>Error:", process.stderr)
 
 def ptcloud_convex_hull_points(pointcloud: np.ndarray, ALPHA:float, TOLERANCE:float) -> np.ndarray:
 
     assert pointcloud is not None
     cloud = pv.PolyData(pointcloud)
     grid = cloud.delaunay_3d(alpha=ALPHA, tol=TOLERANCE, offset=2, progress_bar=True)
-
-    # print(grid.)
-    print("Delaunay 3d")
-    # exit()
     convex_hull = grid.extract_surface().cast_to_pointset()
-    # print(np.array(convex_hull).shape)
-    print("Extracted convex hull")
-
-    # pl                        = pv.Plotter()
-    # _                         = pl.add_mesh(convex_hull, style='wireframe')
-    # # _                         = pl.add_points(pts, color='r', point_size=4)
-    # # _                         = pl.add_points(main_cluster, opacity=0.5, color='b' ,point_size=2)
-    # # pl.add_text('ALPHA VAL: {}'.format(8), position='upper_left', font_size=20, shadow=True, font='courier', color='black')
-    # pl.show()
-
-
     return convex_hull.points
 
 def estimate_normals(convex_hull_surface_pts: np.ndarray, output_path: str, kdtree_radius=None, kdtree_max_nn=None, correction_tangent_planes_n=None): 
@@ -83,4 +68,3 @@ def estimate_normals(convex_hull_surface_pts: np.ndarray, output_path: str, kdtr
     o3d.visualization.draw_geometries([pcd], point_show_normal=True)
     o3d.io.write_point_cloud(output_path, pcd)
     return pcd
-    print("Wrote surface with normals {}".format(output_path))
