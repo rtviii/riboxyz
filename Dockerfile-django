@@ -1,6 +1,12 @@
 # base image
 FROM ubuntu:22.04
 
+
+
+# Disable bytecode writing: Python
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
 # ----- SETUP -------------------
 # vars inside the container
 ENV RIBXZ_API=/home/ribxz_api
