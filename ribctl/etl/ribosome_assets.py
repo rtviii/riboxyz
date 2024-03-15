@@ -13,7 +13,7 @@ from ribctl.etl.etl_pipeline import current_rcsb_structs, ReannotationPipeline, 
 from ribctl.lib.tunnel import ptc_resdiues_get, ptc_residues_calculate_midpoint
 # from ribctl.lib.mod_render_thumbnail import render_thumbnail
 from ribctl.lib.utils import download_unpack_place, open_structure
-from ribctl.lib.ribosome_types.types_ribosome import RNA, LifecycleFactorClass, Polymer, PolymerClass, PolynucleotideClass, Protein, CytosolicProteinClass, RibosomeStructure
+from ribctl.lib.ribosome_types.types_ribosome import RNA, LifecycleFactorClass, Polymer, PolymerClass, PolynucleotideClass, PolypeptideClass, Protein, CytosolicProteinClass, RibosomeStructure
 from ribctl import RIBETL_DATA
 from pydantic import BaseModel
 from concurrent.futures import ALL_COMPLETED, Future, ProcessPoolExecutor, ThreadPoolExecutor, wait
@@ -23,12 +23,12 @@ from ribctl.logs.loggers import get_etl_logger
 logger = get_etl_logger()
 
 class Assetlist(BaseModel)   : 
-      profile                : Optional[bool]
-      ptc_coords             : Optional[bool]
-      cif                    : Optional[bool]
-      cif_modified_and_chains: Optional[bool]
-      ligands                : Optional[bool]
-      png_thumbnail          : Optional[bool]
+      profile                : Optional[bool]=None
+      ptc_coords             : Optional[bool]=None
+      cif                    : Optional[bool]=None
+      cif_modified_and_chains: Optional[bool]=None
+      ligands                : Optional[bool]=None
+      png_thumbnail          : Optional[bool]=None
 
 class RibosomeAssets():
     rcsb_id: str
@@ -140,20 +140,23 @@ class RibosomeAssets():
 
     def get_chain_by_polymer_class(self, poly_class: PolymerClass , assembly: int = 0) -> Polymer | None:
         profile = self.profile()
-        # print("Got provfile for ", profile.rcsb_id)
-        # print("searching for ", poly_class)
-        for prot in profile.proteins:
-            # print(prot.nomenclature)
-            if poly_class in [v.value for v in prot.nomenclature] and prot.assembly_id == assembly:
-                return prot
 
-        if profile.rnas is not None:
-            for rna in profile.rnas:
-                print("Comparing against ", [r.value for r in rna.nomenclature])
-                if poly_class in [r.value for r in rna.nomenclature] and rna.assembly_id == assembly:
-                    return rna
+        if poly_class in [v.value for v in PolynucleotideClass]:
+            if profile.rnas is not None:
+                for rna in profile.rnas:
+                    if poly_class in [r.value for r in rna.nomenclature] and rna.assembly_id == assembly:
+                        return rna
+            else:
+                return None
 
-        if profile.other_polymers:
+        elif poly_class in [v.value for v in PolypeptideClass]:
+            for prot in profile.proteins:
+                if poly_class in [v.value for v in prot.nomenclature] and prot.assembly_id == assembly:
+                    return prot
+            else:
+                return None
+
+        else:
             for polyf in profile.other_polymers:
                 if poly_class in [ p.value for p in polyf.nomenclature ] and polyf.assembly_id == assembly:
                     return polyf
@@ -393,7 +396,6 @@ class RibosomeAssets():
         #                 ...
 
         # return all_verified_flag
-
 
 def classify_struct_by_proportions(ribosome: RibosomeStructure) -> int:
     ids = []

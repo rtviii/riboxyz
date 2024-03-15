@@ -2,6 +2,7 @@
 
 rnacentral*
 
+**/logs/**
 
 ribctl/assets/PoissonRecon
 **/PoissonRecon

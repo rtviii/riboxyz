@@ -315,24 +315,23 @@ class InitiationFactorClass(Enum):
     IF3 = "IF3"
 
     #!Archaeal
-    aIF_1A = "aIF1A"
-    aIF_2_alpha = "aIF2_alpha"
-    aIF_2_beta = "aIF2_beta"
-    aIF_2_gamma = "aIF2_gamma"
+    aIF_1A       = "aIF1A"
+    aIF_2_alpha  = "aIF2_alpha"
+    aIF_2_beta   = "aIF2_beta"
+    aIF_2_gamma  = "aIF2_gamma"
     aIF_2B_alpha = "aIF2B_alpha"
-    aIF_2B_beta = "aIF2B_beta"
+    aIF_2B_beta  = "aIF2B_beta"
     aIF_2B_delta = "aIF2B_delta"
-    aIF5A = "aIF5A"
-    aIF5B = "aIF5B"
+    aIF5A        = "aIF5A"
+    aIF5B        = "aIF5B"
 
 
 # LifecycleFactorClass = typing.Union[ElongationFactorClass, InitiationFactorClass]
 LifecycleFactorClass = enum_union(ElongationFactorClass, InitiationFactorClass)
-PolypeptideClass = enum_union(
-    CytosolicProteinClass, LifecycleFactorClass, MitochondrialProteinClass
-)
-PolynucleotideClass = enum_union(CytosolicRNAClass, MitochondrialRNAClass, tRNA)
-PolymerClass = enum_union(PolynucleotideClass, PolypeptideClass)
+ProteinClass         = enum_union(CytosolicProteinClass,MitochondrialProteinClass )
+PolypeptideClass     = enum_union( LifecycleFactorClass, ProteinClass)
+PolynucleotideClass  = enum_union(CytosolicRNAClass, MitochondrialRNAClass, tRNA)
+PolymerClass         = enum_union(PolynucleotideClass, PolypeptideClass)
 
 
 # ? ----------------------------------------------{ Object Types }------------------------------------------------

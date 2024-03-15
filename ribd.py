@@ -8,7 +8,6 @@ from pprint import pprint
 import warnings
 warnings.filterwarnings("ignore")
 
-# from ribctl.cli.etl import cmd_etl
 from ribctl.cli.ls import cmd_ls
 from ribctl.cli.sync import cmd_sync
 from ribctl.lib.mod_transpose_bsites import init_transpose_ligand
@@ -23,7 +22,7 @@ parser     = argparse.ArgumentParser(description="Command line interface for the
 
 parser.add_argument('--verify_schema', action='store_true', help="Verify the schema for every file in the database")
 
-subparsers = parser.add_subparsers(title='Subcommands', dest='command')
+subparsers     = parser.add_subparsers(title='Subcommands', dest='command')
 parser_cmd_etl = subparsers.add_parser('etl', help='Acquisition and processing of ribosomal structures and assets.')
 
 parser_lig = subparsers.add_parser('lig', help='ligands')
@@ -151,6 +150,7 @@ parser_lig.set_defaults(func=cmd_lig)
 #! -------------------------- Filerts and options -------------------------- #
 parser.add_argument('--has_protein', type=parse_comma_separated_list, help="Global option description")
 parser.add_argument('--taxid')
+parser.add_argument('--verify', action='store_true')
 parser.add_argument('--t', action='store_true')
 #?---------------------------------------------------------------------------------------------------------
 #?---------------------------------------------------------------------------------------------------------
@@ -166,9 +166,22 @@ def verify_structure_profile_schema(rcsb_id:str):
         print(e)
         return False
 
+def verify_profile_exists(rcsb_id:str):
+    return os.path.exists(RibosomeAssets(rcsb_id)._json_profile_filepath())
 
 try:
     args = parser.parse_args()
+
+    if args.verify:
+        for struct in os.listdir(RIBETL_DATA):
+            print(struct, verify_profile_exists(struct))
+            if not verify_profile_exists(struct):
+                asyncio.run(obtain_assets(struct, Assetlist(profile=True), overwrite=True))
+
+                
+
+        exit(0)
+
     if hasattr(args, 'func'):
         args.func(args)
 

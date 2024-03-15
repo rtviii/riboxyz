@@ -18,7 +18,7 @@ def expand_atomcenters_to_spheres_threadpool(sink_container:list, sphere_sources
 
         futures = []
         for (center_coordinate, vdw_R) in sphere_sources:
-            partial_task = partial(sphere_task, sink_container, center_coordinate, vdw_R)
+            partial_task = partial(sphere_task, sink_container, center_coodinate, vdw_R)
             future = executor.submit(partial_task)
             futures.append(future)
 

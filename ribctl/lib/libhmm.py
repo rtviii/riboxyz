@@ -60,9 +60,7 @@ def fasta_phylogenetic_correction(candidate_class:PolymerClass, organism_taxid:i
 
     ids        = records.all_taxids()
     phylo_nbhd = phylogenetic_neighborhood(list(map(lambda x: str(x),ids)), str(organism_taxid), max_n_neighbors)
-    print("Got neighorhood:", len(phylo_nbhd))
     seqs       = records.pick_taxids(phylo_nbhd)
-    print("picked correspondign seqs", len(seqs))
 
     return iter(seqs)
 
@@ -289,7 +287,7 @@ class HMMClassifier():
 
                 self.report[chain.auth_asym_id] = []
                 seq_record                      = chain.to_SeqRecord()
-                query_seq                       = pyhmmer.easel.TextSequence(name=bytes(seq_record.id,'utf-8'), sequence=seq_record.seq).digitize(self.alphabet)
+                query_seq                       = pyhmmer.easel.TextSequence(name=bytes(seq_record.id,'utf-8'), sequence=str( seq_record.seq )).digitize(self.alphabet)
                 for ( candidate_class, tophits ) in hmmscanner.classify_seq(self.alphabet, query_seq):
                     for hit in tophits:
                            d_hit = {
