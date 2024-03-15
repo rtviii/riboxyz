@@ -14,6 +14,8 @@ ENV RIBCTL=/home/ribctl
 ENV PYMOL_SOURCE=/home/pymol
 ENV RIBETL_DATA=/home/RIBETL_DATA
 
+
+
 # set work directory
 RUN mkdir -p $RIBXZ_API
 RUN mkdir -p $RIBCTL
@@ -86,4 +88,4 @@ COPY ribctl ${RIBCTL}
 RUN pip3 install -r ${RIBXZ_API}/reqs.txt
 
 WORKDIR ${RIBXZ_API}
-ENTRYPOINT ["gunicorn", "--bind", ":8000", "--workers", "20", "ribxz_api.wsgi:application","--reload"]
+ENTRYPOINT ["gunicorn", "--bind", ":8000", "--workers", "20", "ribxz_api.wsgi:application","--reload", "--timeout" "500"]
