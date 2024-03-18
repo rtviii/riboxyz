@@ -13,6 +13,8 @@ ENV RIBXZ_API=/home/ribxz_api
 ENV RIBCTL=/home/ribctl
 ENV PYMOL_SOURCE=/home/pymol
 ENV RIBETL_DATA=/home/RIBETL_DATA
+ENV NCBI_TAXDUMP_GZ=/home/taxdump.tar.gz
+
 
 
 

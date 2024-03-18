@@ -21,7 +21,7 @@ from Bio import SeqIO
 from Bio.Align import MultipleSeqAlignment, Seq, SeqRecord
 from pyhmmer import phmmer
 import pyhmmer
-from ribctl import ASSETS, LOGS_PATH, RIBETL_DATA
+from ribctl import ASSETS, LOGS_PATH, NCBI_TAXA_SQLITE, RIBETL_DATA
 from ribctl.etl.etl_pipeline import (
     ReannotationPipeline,
     query_rcsb_api,
@@ -41,13 +41,13 @@ from ribctl.lib.ribosome_types.types_ribosome import (
     PolymerClass,
 )
 from ribctl import model_subgenuses
-from ete3 import NCBITaxa
 
 from ribctl.lib.taxlib import (
     descendants_of_taxid,
     taxid_superkingdom,
     taxid_is_descendant_of,
 )
+from ete3 import NCBITaxa
 
 hmm_cachedir = ASSETS["__hmm_cache"]
 
@@ -69,7 +69,7 @@ if sys.argv[1] == "tunnel":
 elif sys.argv[1] == "spec":
 
     def get_taxonomic_id(organism_name):
-        ncbi = NCBITaxa()
+        ncbi = NCBITaxa(dbfile=NCBI_TAXA_SQLITE)
         try:
             # Get the taxonomic ID for the given organism name
             taxid = ncbi.get_name_translator([organism_name])[organism_name]

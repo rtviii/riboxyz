@@ -8,6 +8,8 @@ rnacentral*
 **/*.ply
 *.ply
 
+*.gz
+*.sqlite
 
 ribctl/assets/PoissonRecon
 **/PoissonRecon

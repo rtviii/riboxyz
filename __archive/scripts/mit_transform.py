@@ -1,7 +1,6 @@
 from pprint import pprint
 import re
 from Bio import SeqIO
-from ete3 import NCBITaxa
 from Bio.SeqRecord import SeqRecord
 from Bio.Seq import Seq
 

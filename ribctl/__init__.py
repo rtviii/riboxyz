@@ -3,7 +3,7 @@ import pathlib
 from typing import Literal
 
 
-RIBETL_DATA = os.environ.get("RIBETL_DATA")
+RIBETL_DATA     = os.environ.get("RIBETL_DATA")
 
 # This amounts to "_assets folder is expected to exist in the root of `ribctl`(next to top-level __init__.py)"
 #! ------------- logs ----------------
@@ -13,6 +13,10 @@ CLASSIFICATION_REPORTS = os.path.join(pathlib.Path(__file__).parent, "logs","hmm
 #! ------------- assets ----------------
 ASSETS_PATH       = os.path.join(pathlib.Path(__file__).parent, "assets")
 MUSCLE_BIN        = os.path.join(ASSETS_PATH, "muscle3.8.1")
+NCBI_TAXDUMP_GZ   = os.path.join(ASSETS_PATH, "taxdump.tar.gz")
+NCBI_TAXA_SQLITE  = os.path.join(ASSETS_PATH, "taxa.sqlite")
+
+#! -------------- locations
 EXIT_TUNNEL_WORK  = os.path.join(ASSETS_PATH, "exit_tunnel_work")
 POISSON_RECON_BIN = os.path.join(EXIT_TUNNEL_WORK, "PoissonRecon")
 
@@ -42,6 +46,12 @@ asset_type  = Literal[
 if os.environ.get("RIBETL_DATA") == "" or not os.path.exists(ASSETS_PATH):
     raise KeyError(
         "Repostiry of static PDB files should be defined as $RIBETL_DATA environment variable."
+    )
+
+if os.environ.get(NCBI_TAXDUMP_GZ) == "" or not os.path.exists(NCBI_TAXDUMP_GZ):
+    raise FileNotFoundError(
+        """NCBI taxonomy dump file should be available at $NCBI_TAXDUMP_GZ environment variable. 
+        Download it here: https://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz """
     )
 
 ASSETS: dict[asset_type, pathlib.Path] = {

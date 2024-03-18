@@ -12,7 +12,7 @@ from io import StringIO
 import os
 import subprocess
 from typing import Callable, Iterator, Literal, Optional
-from ribctl import MUSCLE_BIN, TAXID_ARCHAEA, TAXID_BACTERIA, TAXID_EUKARYOTA
+from ribctl import MUSCLE_BIN, NCBI_TAXA_SQLITE, TAXID_ARCHAEA, TAXID_BACTERIA, TAXID_EUKARYOTA
 from ete3 import NCBITaxa
 import os
 
@@ -22,12 +22,11 @@ TAXID_EUKARYOTA = 2759
 TAXID_ARCHAEA   = 2157
 
 PhylogenyRank = Literal[ "superkingdom", "phylum", "class", "order", "family", "genus", "species", "strain" ]
-ncbi          = NCBITaxa()
+ncbi          = NCBITaxa(dbfile=NCBI_TAXA_SQLITE)
 
 class Taxid:
     @staticmethod
     def is_descendant_of(parent_taxid: int, target_taxid: int) -> bool:
-        ncbi = NCBITaxa()
         lineage = ncbi.get_lineage(target_taxid)
         if lineage is None:
             raise LookupError("Lineage is None. Check if taxid is NCBI-valid.")
@@ -40,7 +39,6 @@ class Taxid:
     @staticmethod
     def rank(taxid: int) -> str:
         """Given a @taxid, return the rank of the taxid"""
-        ncbi = NCBITaxa()
         lineage = ncbi.get_lineage(taxid)
         return ncbi.get_rank(lineage)[taxid]
 
@@ -97,7 +95,6 @@ class Taxid:
     @staticmethod
     def get_descendants_of(parent: int, targets: list[int]):
         """Given a @parent taxid and a list of @taxids, return the subset of @taxids that are descendants of @parent"""
-        ncbi = NCBITaxa()
         descendants = set()
         for tax_id in targets:
             lineage = ncbi.get_lineage(tax_id)
@@ -148,7 +145,6 @@ class Fasta:
 
     @staticmethod
     def fasta_display_species(taxids: list[int]):
-        ncbi   = NCBITaxa()
         taxids = Taxid.coerce_all_to_rank(taxids, "species")
         tree   = ncbi.get_topology(taxids)
         for node in tree.traverse():
@@ -259,7 +255,6 @@ def phylogenetic_neighborhood(
 ) -> list[str]:
     """Given a set of taxids and a target taxid, return a list of the [n_neighbors] phylogenetically closest to the target."""
 
-    ncbi_ = NCBITaxa()
     tree = ncbi_.get_topology(list(set([*taxids_base, str(taxid_target)])))
     target_node = tree.search_nodes(name=str(taxid_target))[0]
     phylo_all_nodes = [(node.name, tree.get_distance(target_node, node)) for node in tree.traverse()]
