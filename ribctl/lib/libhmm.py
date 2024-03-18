@@ -1,14 +1,7 @@
 import json
 import os
-import pickle
-import subprocess
-from tempfile import NamedTemporaryFile
 from typing import Generic, Iterator, Literal, Optional, Tuple, Type, TypeVar
-import typing
-from Bio.Align import MultipleSeqAlignment
-from Bio.Seq import Seq 
 from Bio.SeqRecord import SeqRecord
-import re
 import pyhmmer
 from ribctl import ASSETS, MUSCLE_BIN
 from ribctl.lib.libmsa import Fasta, muscle_align_N_seq, phylogenetic_neighborhood

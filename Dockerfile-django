@@ -88,4 +88,4 @@ COPY ribctl ${RIBCTL}
 RUN pip3 install -r ${RIBXZ_API}/reqs.txt
 
 WORKDIR ${RIBXZ_API}
-ENTRYPOINT ["gunicorn", "--bind", ":8000", "--workers", "20", "ribxz_api.wsgi:application","--reload", "--timeout" "500"]
+ENTRYPOINT ["gunicorn", "--bind", ":8000", "--workers", "20", "ribxz_api.wsgi:application","--reload", "--timeout", "500"]

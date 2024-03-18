@@ -21,7 +21,7 @@ services:
       # So instead of just a static mounted version inside the container,
       # the changes made to the local ribxz folder will be reflected inside the container 
       # while it is running. 
-      - ./ribxz:/home/ribxz                    #|  <--- DEV ONLY
+      - ./ribxz_api:/home/ribxz_api                    #|  <--- DEV ONLY
       #* --------------------------------------------|
 
     # environment:

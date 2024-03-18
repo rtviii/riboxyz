@@ -4,6 +4,11 @@ rnacentral*
 
 **/logs/**
 
+
+**/*.ply
+*.ply
+
+
 ribctl/assets/PoissonRecon
 **/PoissonRecon
 volume/**
