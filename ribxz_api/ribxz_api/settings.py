@@ -2,41 +2,20 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 import sys
-# import ribctl.logs as logs
 load_dotenv(".env")
 
-SECRET_KEY = 'ju=n4om3z00jd1+y2(ufn)g^@w-dj*&-45&4yd1_aiun50b6by'
+SECRET_KEY = os.environ.get("SECRET_KEY")
+DEBUG      = bool(os.environ.get("DEBUG", default=0))
 BASE_DIR   = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RIBCTL     = os.path.abspath(os.path.join(Path(BASE_DIR).parent.absolute()))
 # RIBCTL     = os.path.abspath(os.path.join(Path(BASE_DIR).parent.absolute(),'ribctl'))
 # print("Sourced RIBCTL: {}".format(RIBCTL))
 sys.path.append(RIBCTL)       #! hack until ribctl is a separate pypi project
 
-
-        
-
-# SECURITY WARNING: keep the secret key used in production secret!
-# this should be either docker-mounted or populated through the utils module
 RIBETL_DATA = os.environ["RIBETL_DATA"] if os.environ["RIBETL_DATA"] else os.path.join(BASE_DIR, "ribetldata")
 
 # ※ Dont' forget to export pymol path ( we want to ship a built pymol, but python needs to be aware of it)
 # export PYMOL_PATH=/home/rxz/dev/pymol3.11 && export PYTHONPATH="$PYTHONPATH:$PYMOL_PATH/modules/:"
-
-
-# vars          = ["NEO4J_URI", "NEO4J_USER", "NEO4J_PASSWORD","NEO4J_CURRENTDB", "RIBETL_DATA"]
-# NEO4J_URI       :str= os.getenv("NEO4J_URI")
-# NEO4J_PASSWORD  :str= os.getenv("NEO4J_PASSWORD")
-# NEO4J_USER      :str= os.getenv("NEO4J_USER")
-# NEO4J_CURRENTDB :str= os.getenv("NEO4J_CURRENTDB")
-
-# for var in vars:
-#     print(var,":",os.getenv(var))
-#     if var not in os.environ:
-#         print("Environment variable {} not set".format(var))
-#         exit(1)
-
-
-DEBUG = True
 ALLOWED_HOSTS = ["*"]
 
 INSTALLED_APPS = [
@@ -49,8 +28,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'ninja',
-    # 'mod_comp',
-    # 'mod_db',
     ]
 
 MIDDLEWARE = [

@@ -20,7 +20,6 @@ ENV RIBETL_DATA=/home/RIBETL_DATA
 RUN mkdir -p $RIBXZ_API
 RUN mkdir -p $RIBCTL
 RUN mkdir -p $PYMOL_SOURCE
-# RUN mkdir -p $RIBETL_DATA
 
 # ----- LIBS -------------------------------------------
 RUN apt-get update -y && apt-get -y install curl 

@@ -16,12 +16,11 @@ services:
         target: /home/RIBETL_DATA
 
       # *FOR LIVE DEVELOPMENT -----------------------|
-      # - What this does is it mounts the local version
-      #   of the ribxz folder to the container's /home/ribxz
+      # - What this does is it mounts the local version of the ribxz_api folder to the container's /home/ribxz_api
       # So instead of just a static mounted version inside the container,
       # the changes made to the local ribxz folder will be reflected inside the container 
       # while it is running. 
-      - ./ribxz_api:/home/ribxz_api                    #|  <--- DEV ONLY
+      # - ./ribxz_api:/home/ribxz_api                    #|  <--- DEV ONLY
       #* --------------------------------------------|
 
     # environment:
