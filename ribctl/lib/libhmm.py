@@ -8,7 +8,6 @@ import typing
 from Bio.Align import MultipleSeqAlignment
 from Bio.Seq import Seq 
 from Bio.SeqRecord import SeqRecord
-from Bio.Align.Applications import MuscleCommandline
 import re
 import pyhmmer
 from ribctl import ASSETS, MUSCLE_BIN

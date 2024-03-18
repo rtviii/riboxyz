@@ -1,8 +1,16 @@
-from Bio import pairwise2
+import warnings
+from Bio import BiopythonExperimentalWarning, BiopythonWarning, BiopythonDeprecationWarning
+with warnings.catch_warnings():
+    warnings.simplefilter('ignore', BiopythonExperimentalWarning)
+
+with warnings.catch_warnings():
+    warnings.simplefilter('ignore', BiopythonDeprecationWarning)
 from Bio.pairwise2 import format_alignment
+# from Bio import pairwise2
 
 
-alignment = pairwise2.align.globalxx("AABBCC","AABBCC")
+
+# alignment = pairwise2.align.globalxx("AABBCC","AABBCC")
 # print(format_alignment(*alignment[0]))
 
 

@@ -1,12 +1,17 @@
 import sys
+import warnings
+from Bio import BiopythonExperimentalWarning, BiopythonWarning, BiopythonDeprecationWarning
+with warnings.catch_warnings():
+    warnings.simplefilter('ignore', BiopythonExperimentalWarning)
+
+with warnings.catch_warnings():
+    warnings.simplefilter('ignore', BiopythonDeprecationWarning)
 
 from ribctl.lib.ribosome_types.types_ribosome import RibosomeStructure
 sys.dont_write_bytecode = True
 import argparse
 import json
 from pprint import pprint
-import warnings
-warnings.filterwarnings("ignore")
 
 from ribctl.cli.ls import cmd_ls
 from ribctl.cli.sync import cmd_sync

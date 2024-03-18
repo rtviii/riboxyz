@@ -6,7 +6,13 @@ import os
 from typing import List
 import sys
 import typing
-from Bio import pairwise2
+import warnings
+
+from Bio import BiopythonExperimentalWarning, BiopythonWarning, BiopythonDeprecationWarning
+with warnings.catch_warnings():
+	warnings.simplefilter('ignore', BiopythonDeprecationWarning)
+	from Bio import pairwise2
+
 from ribctl.lib.ribosome_types.types_binding_site import LigandPrediction, PredictedResiduesPolymer
 from ribctl.lib.ribosome_types.types_ribosome import PolymerClass, RibosomeStructure
 from ribctl.lib.mod_extract_bsites import  BindingSite, struct_ligand_ids, bsite_extrarbx_polymer

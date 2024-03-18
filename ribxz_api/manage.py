@@ -1,7 +1,13 @@
 #!/usr/bin/env python
 import os
 import sys
+import warnings
 sys.dont_write_bytecode = True
+
+from Bio import BiopythonExperimentalWarning, BiopythonWarning, BiopythonDeprecationWarning
+with warnings.catch_warnings():
+    warnings.simplefilter('ignore', BiopythonExperimentalWarning)
+    warnings.simplefilter('ignore', BiopythonDeprecationWarning)
 
 if __name__ == "__main__":
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ribxz_api.settings")

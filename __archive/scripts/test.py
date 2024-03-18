@@ -19,7 +19,6 @@ from tempfile import NamedTemporaryFile
 from typing import Iterator
 from Bio import SeqIO
 from Bio.Align import MultipleSeqAlignment, Seq, SeqRecord
-from Bio.Align.Applications import MuscleCommandline
 from pyhmmer import phmmer
 import pyhmmer
 from ribctl import ASSETS, LOGS_PATH, RIBETL_DATA
