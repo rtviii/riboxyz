@@ -77,7 +77,6 @@ with open(dest, "w") as output_handle:
 
 exit()
 
-# ncbi    = NCBITaxa()
 # dest    = "./m_12SrRNA.fasta"
 # to_keep = []
 # i       = 0
@@ -88,7 +87,7 @@ exit()
 #         if "12S" in record.description and ( len(record.seq) < 1200 and len(record.seq) > 600 ):
 #             try:
 #                 taxname_huh = " ".join(record.description.split(" ")[1:3])
-#                 taxid       = str(ncbi.get_name_translator([taxname_huh])[taxname_huh][0])
+#                 taxid       = str(ncbiget_name_translator([taxname_huh])[taxname_huh][0])
 #                 record.id = str(taxid)
 
 #                 if taxid not in specs:

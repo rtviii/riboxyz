@@ -17,7 +17,6 @@ ENV NCBI_TAXDUMP_GZ=/home/taxdump.tar.gz
 
 
 
-
 # set work directory
 RUN mkdir -p $RIBXZ_API
 RUN mkdir -p $RIBCTL

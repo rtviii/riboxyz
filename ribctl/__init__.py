@@ -47,12 +47,18 @@ if os.environ.get("RIBETL_DATA") == "" or not os.path.exists(ASSETS_PATH):
     raise KeyError(
         "Repostiry of static PDB files should be defined as $RIBETL_DATA environment variable."
     )
+if os.environ.get(NCBI_TAXA_SQLITE) == "" or not os.path.exists(NCBI_TAXA_SQLITE):
+    import warnings
+    warnings.warn("""NCBI taxonomy sqlite file should be available at NCBI_TAXA_SQLITE environment variable. 
+        The dump will be downloaded and unpacked by ete3 automatically (from https://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz).
+                   """)
 
-if os.environ.get(NCBI_TAXDUMP_GZ) == "" or not os.path.exists(NCBI_TAXDUMP_GZ):
-    raise FileNotFoundError(
-        """NCBI taxonomy dump file should be available at $NCBI_TAXDUMP_GZ environment variable. 
-        Download it here: https://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz """
-    )
+
+# if os.environ.get(NCBI_TAXDUMP_GZ) == "" or not os.path.exists(NCBI_TAXDUMP_GZ):
+#     raise FileNotFoundError(
+#         """NCBI taxonomy dump file should be available at $NCBI_TAXDUMP_GZ environment variable. 
+#         Download it here: https://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz """
+#     )
 
 ASSETS: dict[asset_type, pathlib.Path] = {
     "subunit_map_lsu"         : pathlib.Path(os.path.join(ASSETS_PATH, "subunit_map_LSU.json")),
