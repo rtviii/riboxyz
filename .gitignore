@@ -17,10 +17,21 @@ volume/**
 volume/
 **/volume/
 
+
+**/*.ply
+**.ply
+*.ply
+
+*.tar.gz
+*.sqlite
+
+
 **/*.hmm
 *.hmm
+**/f_**
 
 nomv2/**
+
 
 *.cif
 **/*.cif

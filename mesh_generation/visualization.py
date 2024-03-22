@@ -14,6 +14,55 @@ from ribctl import EXIT_TUNNEL_WORK, POISSON_RECON_BIN, RIBETL_DATA
 from ribctl.etl.ribosome_assets import RibosomeAssets
 from ribctl.lib.libmsa import Taxid
 
+
+diagram_tunnels = {
+    "bacteria": [
+        "4W29", # GOOD
+        "6WD4", # GOOD
+        "7UNV",
+        "5DM6",
+
+        "5O60",
+        "8BUU",
+        "6HMA",
+        "7RYH", #GOOD
+
+        "7MSZ",
+        "7P7T",
+        "5MYJ", # GOOD, weird structure
+        "7JIL",
+        # 3j9y -- good
+    ],
+    "eukaryota": [
+        "6P5N",
+        "7QGG",
+        "4UG0", # GOOD
+        "4U3M",
+
+        "7OYB",
+        "7OLC",
+        "8EUI",
+        "5XXB",
+
+        "4V91",
+        "6XU8",
+        "4V7E",
+        "8P5D",
+
+        "8BTR",
+        "3JBO",
+        "7CPU",
+        "7Q08",
+        "6AZ3", #GOOD
+
+        "5T5H",
+        "5XY3",
+        "7QEP",
+    ],
+    "archaea": ["4V6U",  # GOOD
+                "4V9F",] # GOOD
+}
+
 FONT                  = 'courier'
 CHAIN_PT_SIZE         = 8
 PTC_PT_SIZE           = 20
@@ -788,58 +837,11 @@ available_tunnels = {
     ],
 }
 
-diagram_tunnels = {
-    "bacteria": [
-        "4W29",
-        "6WD4",
-        "7UNV",
-        "5DM6",
-
-        "5O60",
-        "8BUU",
-        "6HMA",
-        "7RYH",
-
-        "7MSZ",
-        "7P7T",
-        "5MYJ",
-        "7JIL",
-    ],
-    "eukaryota": [
-        "6P5N",
-        "7QGG",
-        "4UG0",
-        "4U3M",
-
-        "7OYB",
-        "7OLC",
-        "8EUI",
-        "5XXB",
-
-        "4V91",
-        "6XU8",
-        "4V7E",
-        "8P5D",
-
-        "8BTR",
-        "3JBO",
-        "7CPU",
-        "7Q08",
-        "6AZ3",
-
-        "5T5H",
-        "5XY3",
-        "7QEP",
-    ],
-    "archaea": ["4V6U", "4V9F"],
-}
-
 dbscan_pairs = [
     (2,33),
     (2.3, 57),
     (3, 123),
     (3.2, 145),
-
     (3.5, 175),
     (4.2, 280),
     (5, 490),
@@ -1096,7 +1098,7 @@ def plot_with_landmarks( rcsb_id: str, eps, min_nbrs,poisson_recon_custom_path:s
         poisson_recon = poisson_recon_custom_path
 
     print("Opened poisson recon file at \033[32m{}\033[0m".format(poisson_recon))
-    mesh_    = pv.read(poisson_recon)
+    mesh_   = pv.read(poisson_recon)
     plotter = pv.Plotter()
     plotter.add_mesh(mesh_, opacity=1)
 
@@ -1105,7 +1107,8 @@ def plot_with_landmarks( rcsb_id: str, eps, min_nbrs,poisson_recon_custom_path:s
         # print("Plotting " + chain_name, "with index", i ,)
         # ? Adding coordinates to the plotter for each chain( coordinates and color )
         plotter.add_points(
-            move_cords_to_normalized_cord_frame(grid_dimensions, mean_abs_vectors, np.array(coords)),
+            # move_cords_to_normalized_cord_frame(grid_dimensions, mean_abs_vectors, np.array(coords)),
+                np.array(coords),
               point_size               = 8 if chain_name in ["eL39","uL4","uL22", "uL23"] else 2 if "rRNA" in chain_name else 4 ,
               color                    =  'gray' if "rRNA" in chain_name else "cyan" if chain_name == "eL39" else 'pink' if chain_name=='uL23' else "lightgreen" if chain_name == "uL4" else "gold" if chain_name =="uL22" else CHAIN_LANDMARK_COLORS[i],
               opacity                  = 0.1 if chain_name not in ["eL39","uL4","uL22", 'uL23'] else 1 ,
@@ -1134,15 +1137,20 @@ def plot_with_landmarks( rcsb_id: str, eps, min_nbrs,poisson_recon_custom_path:s
         position = (20, 200 - offset, 0)
         plotter.add_text( label, position=position, font_size=20, font=FONT,color=color, shadow=True )
 
-    plotter.add_points( move_cords_to_normalized_cord_frame( grid_dimensions, mean_abs_vectors, np.array([ptc_midpoint]) ), point_size=PTC_PT_SIZE, color="red", render_points_as_spheres=True, )
+    plotter.add_points( 
+        # move_cords_to_normalized_cord_frame( grid_dimensions, mean_abs_vectors, np.array([ptc_midpoint]) ),
+        np.array([ptc_midpoint]),
+                        point_size=PTC_PT_SIZE, color="red", render_points_as_spheres=True )
+
+    #!--- Labels ----
     plotter.add_text('RCSB_ID:{}'.format(rcsb_id), position='upper_right', font_size=14, shadow=True, font=FONT, color='black')
     plotter.add_text('eps: {} \nmin_nbrs: {}'.format(eps, min_nbrs), position='upper_left', font_size=8, shadow=True, font=FONT, color='black')
     plotter.add_text('Volume: {}'.format(round(mesh_.volume, 3)), position='lower_left', font_size=8, shadow=True, font=FONT, color='black')
     plotter.add_text('{}'.format(taxname), position='lower_right', font_size=8, shadow=True, font=FONT, color='black') 
 
-    plotter.open_gif("just_chains.gif")
-    viewup = [1, 0, 0]
-    orbit  = plotter.generate_orbital_path( factor=4.0, n_points=72, shift=2.0, viewup=viewup )
-    plotter.orbit_on_path( orbit, write_frames=True, viewup=viewup, step=0.02 )
+    # plotter.open_gif("just_chains.gif")
+    # viewup = [1, 0, 0]
+    # orbit  = plotter.generate_orbital_path( factor=4.0, n_points=72, shift=2.0, viewup=viewup )
+    # plotter.orbit_on_path( orbit, write_frames=True, viewup=viewup, step=0.02 )
 
     plotter.show(auto_close=False)
