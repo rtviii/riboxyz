@@ -14,12 +14,8 @@ rnacentral*
 ribctl/assets/PoissonRecon
 **/PoissonRecon
 volume/**
-volume/
 **/volume/
 
-
-**/*.ply
-**.ply
 *.ply
 
 *.tar.gz
