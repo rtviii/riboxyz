@@ -7,7 +7,7 @@ from ribctl import EXIT_TUNNEL_WORK, RIBETL_DATA
 tunnel_atom_encoding_path = lambda rcsb_id: os.path.join(
     EXIT_TUNNEL_WORK,
     rcsb_id.upper(),
-    "{}_tunnel_atoms_bbox.json".format(rcsb_id.upper()),
+    "{}_tunnel_atoms_bbox.json".format(rcsb_id.upper())
 )
 spheres_expanded_pointset_path = lambda rcsb_id: os.path.join(
     EXIT_TUNNEL_WORK,

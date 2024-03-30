@@ -1,16 +1,13 @@
 from functools import partial
-from pprint import pprint
-from time import time
-from typing import Tuple
 from matplotlib import pyplot as plt
 import numpy as np
 import concurrent.futures
 
 
-# Function to be executed by each worker
 def sphere_task(container_sink:list, atom_center_coordinate:np.ndarray, vdw_R=2):
     #TODO: Differentiate between atoms sizes
-    result = get_sphere_indices_voxelized(atom_center_coordinate, 2)
+
+    result  = get_sphere_indices_voxelized(atom_center_coordinate, 2)
     container_sink.extend(result)
     return result
 
@@ -26,13 +23,6 @@ def expand_atomcenters_to_spheres_threadpool(sink_container:list, sphere_sources
         concurrent.futures.wait(futures)
 
   return sink_container
-
-def midpoints(x):
-    sl = ()
-    for _ in range(x.ndim):
-        x = (x[sl + np.index_exp[:-1]] + x[sl + np.index_exp[1:]]) / 2.0
-        sl += np.index_exp[:]
-    return x
 
 def normalize_atom_coordinates(coordinates: np.ndarray)->tuple[ np.ndarray, np.ndarray ]:
     """@param coordinates: numpy array of shape (N,3)"""
