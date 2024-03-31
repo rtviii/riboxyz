@@ -6,7 +6,6 @@ import concurrent.futures
 
 def sphere_task(container_sink:list, atom_center_coordinate:np.ndarray, vdw_R=2):
     #TODO: Differentiate between atoms sizes
-
     result  = get_sphere_indices_voxelized(atom_center_coordinate, 2)
     container_sink.extend(result)
     return result

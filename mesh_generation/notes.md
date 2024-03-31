@@ -12,7 +12,13 @@ uL24
 
 of which uL4, uL22, eL32, uL24 form a "crown" around the exit site
 
-
 # In Bacteria:
 
 uL4, uL22, uL23, uL24
+
+
+# TODO:
+
+- pymol-open function to vis results
+- pin down quantization displacement
+- refine the local protrusions per Khanh (average surface points)
