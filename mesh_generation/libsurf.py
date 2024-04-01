@@ -24,8 +24,7 @@ warnings.filterwarnings("ignore")
 
 def apply_poisson_reconstruction(surf_estimated_ptcloud_path: str, output_path: str, recon_depth:int=6, recon_pt_weight:int=3):
     import plyfile
-
-    # command   = [ POISSON_RECON_BIN, "--in", surface_with_normals_path(rcsb_id), "--out", poisson_recon_path, "--depth", "6", "--pointWeight", "3", ]
+    # The documentation can be found at https://www.cs.jhu.edu/~misha/Code/PoissonRecon/Version16.04/ in "PoissonRecon" binary
     command = [
         POISSON_RECON_BIN,
         "--in",
@@ -44,6 +43,7 @@ def apply_poisson_reconstruction(surf_estimated_ptcloud_path: str, output_path: 
         print(">>PoissonRecon executed successfully.")
         print(">>Wrote {}".format(output_path))
         # Convert the plyfile to asciii
+
         data = plyfile.PlyData.read(output_path)
         data.text = True
         ascii_duplicate =output_path.split(".")[0] + "_ascii.ply"

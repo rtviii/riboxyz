@@ -36,5 +36,3 @@ def convex_hull_ensemble_LSU(rcsb_id):
 
 def alphashape_ensemble_LSU(rcsb_id):
     return os.path.join(EXIT_TUNNEL_WORK, rcsb_id, '{}_lsu_alphashape.ply'.format(rcsb_id))
-
-# ? ------------------------------

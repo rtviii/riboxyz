@@ -85,24 +85,19 @@ def bounding_box(points: np.ndarray):
 
 def extract_bbox_atoms(rcsb_id: str) -> list:
 
-    centerline_expansion_atoms = parse_struct_via_centerline(
-        rcsb_id, open_tunnel_csv(rcsb_id)
-    )
-    centerline_expansion_coordinates = np.array(
-        [a.get_coord() for a in centerline_expansion_atoms]
-    )
-    bbox                = bounding_box(centerline_expansion_coordinates)
-    bbox_interior_atoms = parse_struct_via_bbox(rcsb_id, bbox)
+    centerline_expansion_atoms       = parse_struct_via_centerline( rcsb_id, open_tunnel_csv(rcsb_id) )
+    centerline_expansion_coordinates = np.array( [a.get_coord() for a in centerline_expansion_atoms] )
+
+    bbox                             = bounding_box(centerline_expansion_coordinates)
+    bbox_interior_atoms              = parse_struct_via_bbox(rcsb_id, bbox)
 
     return encode_atoms(
         rcsb_id,
         bbox_interior_atoms,
-        write=True,
-        writepath=tunnel_atom_encoding_path(rcsb_id),
-    )
+        write     = True,
+        writepath = tunnel_atom_encoding_path(rcsb_id) )
 
 def expand_bbox_atoms_to_spheres(atom_coordinates:np.ndarray, sphere_vdw_radii:np.ndarray, rcsb_id: str):
-
     sphere_sources = zip(atom_coordinates, sphere_vdw_radii)
     SINK           = []
     expanded       = expand_atomcenters_to_spheres_threadpool(SINK, sphere_sources)
@@ -154,8 +149,7 @@ def index_grid(expanded_sphere_voxels: np.ndarray, TRUNCATION_TUPLES:list[tuple[
         __xyz_v_positive_ix.T,
         __xyz_v_negative_ix.T,
         grid_dimensions,
-        mean_abs_vectors,
-    )
+        mean_abs_vectors )
 
 def interior_capture_DBSCAN(
     xyz_v_negative: np.ndarray,
@@ -350,9 +344,8 @@ def main():
     parser.add_argument( "--multisurf",   action='store_true')
     parser.add_argument( "--kingdom",   choices=['bacteria','archaea','eukaryota'])
 
-        # truncation
+    # truncation
     parser.add_argument( "--lsu_alpha",   action='store_true')
-
 
     # pipeline parameters
     parser.add_argument( "--rcsb_id", type=str, help="Specify the value for eps (float)", required=True )
@@ -378,9 +371,8 @@ def main():
         ALPHA_TOL = 2
        
         vestibule_sphere_ptcloud = vestibule_sphere_expansion(RCSB_ID, 50)
-        convex_hull = ptcloud_convex_hull(vestibule_sphere_ptcloud, ALPHA_VAL, ALPHA_TOL, offset=2)
-
-        pcd = estimate_normals(convex_hull.points, convex_hull_ensemble_LSU(RCSB_ID), kdtree_radius=10, kdtree_max_nn=15,correction_tangent_planes_n=15)
+        convex_hull              = ptcloud_convex_hull(vestibule_sphere_ptcloud, ALPHA_VAL, ALPHA_TOL, offset=2)
+        pcd                      = estimate_normals(convex_hull.points, convex_hull_ensemble_LSU(RCSB_ID), kdtree_radius=10, kdtree_max_nn=15,correction_tangent_planes_n=15)
 
         # pcd        = o3d.geometry.PointCloud(o3d.utility.Vector3dVector(convex_hull.points))
         # o3d.visualization.draw_geometries([pcd])

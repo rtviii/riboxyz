@@ -14,19 +14,16 @@ import numpy as np
 from sklearn.cluster import DBSCAN
 from __archive.scripts.pymol_visualtion import extract_chains
 from mesh_generation.bbox_extraction import ( encode_atoms, open_tunnel_csv, parse_struct_via_bbox, parse_struct_via_centerline)
-from compas.geometry import bounding_box
-from mesh_generation.libsurf import estimate_normals
-from mesh_generation.visualization import DBSCAN_CLUSTERS_visualize_largest, plot_multiple_by_kingdom, plot_multiple_surfaces, plot_with_landmarks, DBSCAN_CLUSTERS_particular_eps_minnbrs
 from mesh_generation.paths import *
-from mesh_generation.voxelize import (expand_atomcenters_to_spheres_threadpool, normalize_atom_coordinates)
 from ribctl import RIBETL_DATA
-from ribctl.etl.ribosome_assets import RibosomeAssets
 from ribctl.lib.libpdb import extract_lsu_ensemble_tunnel_vicinity
 import pyvista as pv
 import numpy as np
 
 
-
+"""These methods are for extracting the LSU (or its subset) and clipping the resulting tunnel shape with 
+the alphashape of the LSU. I chose to trim manually instead given the complexity of the intersection shapes.
+"""
 
 def vestibule_sphere_expansion(rcsb_id:str, radius=50):
     """We want to construct a shape with which to trim the solvent space from obtained tunnel
