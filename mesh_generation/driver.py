@@ -231,12 +231,8 @@ def main():
 
     if args.full_pipeline:
         pipeline(RCSB_ID, args)
+        exit(0)
 
-    if args.final:
-        eps,min_nbrs =  args.dbscan_tuple.split(",")
-        eps = float(eps)
-        min_nbrs = int(min_nbrs)
-        plot_with_landmarks(RCSB_ID, float(eps),int(min_nbrs),poisson_recon_path(RCSB_ID))
 
 if __name__ == "__main__":
     main()

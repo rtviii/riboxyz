@@ -172,11 +172,8 @@ def pipeline(RCSB_ID,args):
 
     struct_tunnel_dir = os.path.join(EXIT_TUNNEL_WORK, RCSB_ID)
 
-    #! [ Pipeline Parameters ]
     if not os.path.exists(struct_tunnel_dir):
         os.mkdir(struct_tunnel_dir)
-
-
 
     #! [ Bounding Box Atoms ]
     if not os.path.exists(spheres_expanded_pointset_path(RCSB_ID)):
@@ -207,7 +204,7 @@ def pipeline(RCSB_ID,args):
     db, clusters_container = interior_capture_DBSCAN( xyz_negative, _u_EPSILON, _u_MIN_SAMPLES, _u_METRIC )
     largest_cluster = pick_largest_poisson_cluster(clusters_container)
 
-    #! [ Visualize DBSCAN result]
+    #! [ Visualize the largest DBSCAN cluster to establish whether trimming is required ]
 
     pl              = pv.Plotter()
     pl.add_points(largest_cluster, color='b', point_size=2, render_points_as_spheres=True)
@@ -216,7 +213,7 @@ def pipeline(RCSB_ID,args):
     pl.show_grid( n_xlabels=8, n_ylabels=8, n_zlabels=8, font_size = 8)
     pl.show()
 
-    #! [ Visualize the cluster to establish whether trimming is required ]
+
 
     if args.trim:
         user_input = input("Truncate bbox? Enter tuples of the format 'x,20 : z,40 : y,15 : Y,20' (lowercase for truncation from origin, uppercase for truncation from end of axis) or 'Q' to quit: ")
@@ -226,56 +223,37 @@ def pipeline(RCSB_ID,args):
         try:
             truncation_string = user_input.replace(" ", '').split(":")
             truncation_params = [( str( pair.split(",")[0] ) , int( pair.split(",")[1] )) for pair in truncation_string]
-
-            _, xyz_negative, _ , translation_vectors = index_grid(bbox_atoms_expanded,TRUNCATION_TUPLES=truncation_params) 
-
-
-            # if TRUNCATION_TUPLES is not None:
-            #     for ( TRUNCATION_AXIS, TRUNCATION_FACTOR) in TRUNCATION_TUPLES:
-            #         match TRUNCATION_AXIS: 
-            #             case "x":
-            #                 vox_grid = vox_grid[:-TRUNCATION_FACTOR,:,:]
-            #             case "X":
-            #                 vox_grid = vox_grid[TRUNCATION_FACTOR:,:,:]
-            #             case "y":
-            #                 vox_grid = vox_grid[:,:-TRUNCATION_FACTOR,:]
-            #             case "Y":
-            #                 vox_grid = vox_grid[:,TRUNCATION_FACTOR:,:]
-            #             case "z":
-            #                 vox_grid = vox_grid[:,:,:-TRUNCATION_FACTOR]
-            #             case "Z":
-            #                 vox_grid = vox_grid[:,:,TRUNCATION_FACTOR:]
-            #             case _:
-            #                 print("Invalid truncation axis. Please use 'x', 'X', 'y', 'Y', 'z', 'Z'.")
-            #         print("Truncated {} by {}".format(TRUNCATION_AXIS, TRUNCATION_FACTOR))
-
-
-
-            db, clusters_container = interior_capture_DBSCAN( xyz_negative, _u_EPSILON, _u_MIN_SAMPLES, _u_METRIC )
-            largest_cluster = pick_largest_poisson_cluster(clusters_container)
-
-            #! [ Transform the cluster back into Original Coordinate Frame ]
-            coordinates_in_the_original_frame =  largest_cluster  - translation_vectors[1] + translation_vectors[0]
-
-            surface_pts     = ptcloud_convex_hull_points(coordinates_in_the_original_frame, d3d_alpha ,d3d_tol)
-            np.save(convex_hull_cluster_path(RCSB_ID), surface_pts)
-            estimate_normals(surface_pts, surface_with_normals_path(RCSB_ID), kdtree_radius=10, kdtree_max_nn=15, correction_tangent_planes_n=10)
-            apply_poisson_reconstruction(surface_with_normals_path(RCSB_ID), poisson_recon_path(RCSB_ID), recon_depth=PR_depth, recon_pt_weight=PR_ptweight)
-            
-            pl                        = pv.Plotter()
-            _                         = pl.add_mesh(pv.read(poisson_recon_path(RCSB_ID)), opacity=0.8)
-            pl.add_axes(line_width=5,cone_radius=0.6, shaft_length=0.7, tip_length=0.3, ambient=0.5, label_size=(0.2, 0.8),)
-            pl.add_text('RCSB_ID:{}'.format(RCSB_ID), position='upper_right', font_size=14, shadow=True, font='courier', color='black')
-            pl.show_grid(
-                n_xlabels = 10,
-                n_ylabels = 10,
-                n_zlabels = 10,
-            )
-            pl.show()
-            exit(0)
-
         except Exception as e:
-            print("Invalid input. Please enter an integer or 'Q' to quit.: ", e)
+            print("Failed to parse trim parameters:" , e)
+            exit(1)
+    
+    xyz_positive, xyz_negative, grid_dimensions , translation_vectors = index_grid(bbox_atoms_expanded, TRUNCATION_TUPLES=truncation_params)
+
+    db, clusters_container = interior_capture_DBSCAN( xyz_negative, _u_EPSILON, _u_MIN_SAMPLES, _u_METRIC )
+    largest_cluster = pick_largest_poisson_cluster(clusters_container)
+
+        #     #! [ Transform the cluster back into Original Coordinate Frame ]
+        #     coordinates_in_the_original_frame =  largest_cluster  - translation_vectors[1] + translation_vectors[0]
+
+        #     surface_pts     = ptcloud_convex_hull_points(coordinates_in_the_original_frame, d3d_alpha ,d3d_tol)
+        #     np.save(convex_hull_cluster_path(RCSB_ID), surface_pts)
+        #     estimate_normals(surface_pts, surface_with_normals_path(RCSB_ID), kdtree_radius=10, kdtree_max_nn=15, correction_tangent_planes_n=10)
+        #     apply_poisson_reconstruction(surface_with_normals_path(RCSB_ID), poisson_recon_path(RCSB_ID), recon_depth=PR_depth, recon_pt_weight=PR_ptweight)
+            
+        #     pl                        = pv.Plotter()
+        #     _                         = pl.add_mesh(pv.read(poisson_recon_path(RCSB_ID)), opacity=0.8)
+        #     pl.add_axes(line_width=5,cone_radius=0.6, shaft_length=0.7, tip_length=0.3, ambient=0.5, label_size=(0.2, 0.8),)
+        #     pl.add_text('RCSB_ID:{}'.format(RCSB_ID), position='upper_right', font_size=14, shadow=True, font='courier', color='black')
+        #     pl.show_grid(
+        #         n_xlabels = 10,
+        #         n_ylabels = 10,
+        #         n_zlabels = 10,
+        #     )
+        #     pl.show()
+        #     exit(0)
+
+        # except Exception as e:
+        #     print("Invalid input. Please enter an integer or 'Q' to quit.: ", e)
 
 
     #! [ Transform the cluster back into Original Coordinate Frame ]
