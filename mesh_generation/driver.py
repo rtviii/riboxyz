@@ -18,7 +18,6 @@ from mesh_generation.libsurf import apply_poisson_reconstruction, estimate_norma
 from mesh_generation.lsu_alpha_surface import lsu_ensemble_convex_hull, lsu_ensemble_get_chains, ptcloud_convex_hull, vestibule_sphere_expansion
 from mesh_generation.visualization import DBSCAN_CLUSTERS_visualize_largest, custom_cluster_recon_path, plot_multiple_by_kingdom, plot_multiple_surfaces, plot_with_landmarks, DBSCAN_CLUSTERS_particular_eps_minnbrs
 from mesh_generation.paths import *
-from mesh_generation.voxelize import (expand_atomcenters_to_spheres_threadpool, normalize_atom_coordinates)
 from mesh_generation.full_pipeline import pipeline
 from ribctl import EXIT_TUNNEL_WORK, POISSON_RECON_BIN, RIBETL_DATA
 from ribctl.etl.ribosome_assets import RibosomeAssets
@@ -209,6 +208,7 @@ def main():
 
     # pipeline parameters
     parser.add_argument( "--rcsb_id", type=str, help="Specify the value for eps (float)", required=True )
+    parser.add_argument( "--bbox",  action='store_true', help="Extract the bounding box atoms and save them to a file")
     parser.add_argument( "--bbox_radius",  type=int, help="The radius of the bbox expansion", required=False)
 
     #! Reconstruction Parameters

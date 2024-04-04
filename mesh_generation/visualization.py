@@ -6,10 +6,6 @@ import json
 import numpy as np
 import numpy as np
 from mesh_generation.paths import *
-from mesh_generation.voxelize import (
-    expand_atomcenters_to_spheres_threadpool,
-    normalize_atom_coordinates,
-)
 from ribctl import EXIT_TUNNEL_WORK, POISSON_RECON_BIN, RIBETL_DATA
 from ribctl.etl.ribosome_assets import RibosomeAssets
 from ribctl.lib.libmsa import Taxid
@@ -848,53 +844,53 @@ dbscan_pairs = [
 ]
 
 
-def move_cords_to_normalized_cord_frame(
-    grid_dimensions    : np.ndarray,
-    translation_vectors: np.ndarray,
-    original_cords     : np.ndarray,
-)                  : 
-    """this is a helper function for plotting to move additional atom coordinates into the cord frame of the mesh (vox grid indices)"""
-    normalized_original_cords = ( original_cords - translation_vectors[0] + translation_vectors[1] )
-    voxel_size = 1
-    normalized_original_cords_quantized = np.round(
-        normalized_original_cords / voxel_size
-    ).astype(int)
-    vox_grid = np.zeros(grid_dimensions)
-    vox_grid[
-        normalized_original_cords_quantized[:, 0],
-        normalized_original_cords_quantized[:, 1],
-        normalized_original_cords_quantized[:, 2],
-    ] = 1
-    __xyz_v_positive_ix = np.asarray( np.where(vox_grid == 1) )
-    return __xyz_v_positive_ix.T
+# def move_cords_to_normalized_cord_frame(
+#     grid_dimensions    : np.ndarray,
+#     translation_vectors: np.ndarray,
+#     original_cords     : np.ndarray,
+# )                  : 
+#     """this is a helper function for plotting to move additional atom coordinates into the cord frame of the mesh (vox grid indices)"""
+#     normalized_original_cords = ( original_cords - translation_vectors[0] + translation_vectors[1] )
+#     voxel_size = 1
+#     normalized_original_cords_quantized = np.round(
+#         normalized_original_cords / voxel_size
+#     ).astype(int)
+#     vox_grid = np.zeros(grid_dimensions)
+#     vox_grid[
+#         normalized_original_cords_quantized[:, 0],
+#         normalized_original_cords_quantized[:, 1],
+#         normalized_original_cords_quantized[:, 2],
+#     ] = 1
+#     __xyz_v_positive_ix = np.asarray( np.where(vox_grid == 1) )
+#     return __xyz_v_positive_ix.T
 
-def retrieve_ptc_and_chain_atoms(rcsb_id):
-        with open( tunnel_atom_encoding_path(rcsb_id), "r", ) as infile:
-            bbox_atoms: list[dict] = json.load(infile)
-            _atom_centers       = np.array(list(map(lambda x: x["coord"], bbox_atoms)))
-            _vdw_radii          = np.array(list(map(lambda x: x["vdw_radius"], bbox_atoms)))
+# def retrieve_ptc_and_chain_atoms(rcsb_id):
+#         with open( tunnel_atom_encoding_path(rcsb_id), "r", ) as infile:
+#             bbox_atoms: list[dict] = json.load(infile)
+#             _atom_centers       = np.array(list(map(lambda x: x["coord"], bbox_atoms)))
+#             _vdw_radii          = np.array(list(map(lambda x: x["vdw_radius"], bbox_atoms)))
 
-            normalized_sphere_cords, translation_vectors = normalize_atom_coordinates(_atom_centers)
-            voxel_size = 1
-            sphere_cords_quantized = np.round( np.array(normalized_sphere_cords / voxel_size) ).astype(int)
-            max_values      = np.max(sphere_cords_quantized, axis=0)
-            grid_dimensions = max_values + 1
+#             normalized_sphere_cords, translation_vectors = normalize_atom_coordinates(_atom_centers)
+#             voxel_size = 1
+#             sphere_cords_quantized = np.round( np.array(normalized_sphere_cords / voxel_size) ).astype(int)
+#             max_values      = np.max(sphere_cords_quantized, axis=0)
+#             grid_dimensions = max_values + 1
 
-        with open( ptc_data_path(rcsb_id), "r", ) as infile:
-            ptc_data = json.load(infile)
+#         with open( ptc_data_path(rcsb_id), "r", ) as infile:
+#             ptc_data = json.load(infile)
 
-        atom_coordinates_by_chain: dict[str, list] = {}
-        for atom in bbox_atoms:
-            if len(atom["chain_nomenclature"]) < 1:
-                # print( "atom ", atom, "has no chain nomenclature", atom["chain_nomenclature"] )
-                continue
-            if atom["chain_nomenclature"][0] not in atom_coordinates_by_chain:
-                atom_coordinates_by_chain[atom["chain_nomenclature"][0]] = []
-            atom_coordinates_by_chain[atom["chain_nomenclature"][0]].extend([atom["coord"]])
+#         atom_coordinates_by_chain: dict[str, list] = {}
+#         for atom in bbox_atoms:
+#             if len(atom["chain_nomenclature"]) < 1:
+#                 # print( "atom ", atom, "has no chain nomenclature", atom["chain_nomenclature"] )
+#                 continue
+#             if atom["chain_nomenclature"][0] not in atom_coordinates_by_chain:
+#                 atom_coordinates_by_chain[atom["chain_nomenclature"][0]] = []
+#             atom_coordinates_by_chain[atom["chain_nomenclature"][0]].extend([atom["coord"]])
 
-        ptc_midpoint = np.array(ptc_data["midpoint_coordinates"])
+#         ptc_midpoint = np.array(ptc_data["midpoint_coordinates"])
 
-        return ptc_midpoint, atom_coordinates_by_chain, grid_dimensions, translation_vectors
+#         return ptc_midpoint, atom_coordinates_by_chain, grid_dimensions, translation_vectors
 
 
 #! For figure only
@@ -975,8 +971,6 @@ def DBSCAN_CLUSTERS_visualize_largest(positive_space: np.ndarray, dbscan_cluster
     point_cloud         = pv.PolyData(combined)
     point_cloud["rgba"] = rgbas_combined
     plotter.add_mesh(point_cloud, scalars="rgba", rgb=True, show_scalar_bar=False)
-
-
 
     plotter.show()
 
@@ -1076,7 +1070,6 @@ def plot_multiple_by_kingdom(kingdom:typing.Literal['bacteria','archaea','eukary
 
     plotter.show()
 
-
 def visualize_mesh(mesh, rcsb_id:str|None=None):
     pl                        = pv.Plotter()
     _ = pl.add_mesh(mesh, opacity=0.8)
@@ -1085,7 +1078,6 @@ def visualize_mesh(mesh, rcsb_id:str|None=None):
     pl.show_grid( n_xlabels=8, n_ylabels=8, n_zlabels=8, font_size = 8)
     pl.show()
 
-
 def visualize_pointcloud(ptcloud, rcsb_id:str|None=None):
     pl              = pv.Plotter()
     pl.add_points(ptcloud, color='b', point_size=2, render_points_as_spheres=True)
@@ -1093,7 +1085,6 @@ def visualize_pointcloud(ptcloud, rcsb_id:str|None=None):
     pl.add_text('RCSB_ID:{}'.format(rcsb_id if rcsb_id is not None else "" ), position='upper_right', font_size=14, shadow=True, font='courier', color='black')
     pl.show_grid( n_xlabels=8, n_ylabels=8, n_zlabels=8, font_size = 8)
     pl.show()
-
 
 def plot_with_landmarks( rcsb_id: str, eps, min_nbrs,poisson_recon_custom_path:str|None=None, ):
     """
