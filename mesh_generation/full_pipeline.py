@@ -10,7 +10,7 @@ from mesh_generation.bbox_extraction import ( encode_atoms, open_tunnel_csv, par
 from compas.geometry import bounding_box
 from mesh_generation.libsurf import apply_poisson_reconstruction, estimate_normals, ptcloud_convex_hull_points
 from mesh_generation.lsu_alpha_surface import lsu_ensemble_convex_hull, lsu_ensemble_get_chains, ptcloud_convex_hull, vestibule_sphere_expansion
-from mesh_generation.visualization import DBSCAN_CLUSTERS_visualize_largest, custom_cluster_recon_path, plot_multiple_by_kingdom, plot_multiple_surfaces, plot_with_landmarks, DBSCAN_CLUSTERS_particular_eps_minnbrs
+from mesh_generation.visualization import DBSCAN_CLUSTERS_visualize_largest, custom_cluster_recon_path, plot_multiple_by_kingdom, plot_multiple_surfaces, plot_with_landmarks, DBSCAN_CLUSTERS_particular_eps_minnbrs, visualize_mesh, visualize_pointcloud
 from mesh_generation.paths import *
 from mesh_generation.voxelize import (expand_atomcenters_to_spheres_threadpool, normalize_atom_coordinates)
 from ribctl import EXIT_TUNNEL_WORK
@@ -157,6 +157,9 @@ def pick_largest_poisson_cluster(clusters_container:dict[int,list])->np.ndarray:
             DBSCAN_CLUSTER_ID = int(k)
     return np.array(clusters_container[DBSCAN_CLUSTER_ID])
 
+
+
+
 def pipeline(RCSB_ID,args):
 
     #! [ Pipeline Parameters ]
@@ -206,12 +209,7 @@ def pipeline(RCSB_ID,args):
 
     #! [ Visualize the largest DBSCAN cluster to establish whether trimming is required ]
 
-    pl              = pv.Plotter()
-    pl.add_points(largest_cluster, color='b', point_size=2, render_points_as_spheres=True)
-    pl.add_axes(line_width=2,cone_radius=0.7, shaft_length=2, tip_length=0.9, ambient=0.5, label_size=(0.2, 0.8))
-    pl.add_text('RCSB_ID:{}'.format(RCSB_ID), position='upper_right', font_size=14, shadow=True, font='courier', color='black')
-    pl.show_grid( n_xlabels=8, n_ylabels=8, n_zlabels=8, font_size = 8)
-    pl.show()
+    visualize_pointcloud(largest_cluster, RCSB_ID)
 
 
 
@@ -226,52 +224,21 @@ def pipeline(RCSB_ID,args):
         except Exception as e:
             print("Failed to parse trim parameters:" , e)
             exit(1)
+    else:
+        truncation_params = None
     
     xyz_positive, xyz_negative, grid_dimensions , translation_vectors = index_grid(bbox_atoms_expanded, TRUNCATION_TUPLES=truncation_params)
 
     db, clusters_container = interior_capture_DBSCAN( xyz_negative, _u_EPSILON, _u_MIN_SAMPLES, _u_METRIC )
     largest_cluster = pick_largest_poisson_cluster(clusters_container)
 
-        #     #! [ Transform the cluster back into Original Coordinate Frame ]
-        #     coordinates_in_the_original_frame =  largest_cluster  - translation_vectors[1] + translation_vectors[0]
-
-        #     surface_pts     = ptcloud_convex_hull_points(coordinates_in_the_original_frame, d3d_alpha ,d3d_tol)
-        #     np.save(convex_hull_cluster_path(RCSB_ID), surface_pts)
-        #     estimate_normals(surface_pts, surface_with_normals_path(RCSB_ID), kdtree_radius=10, kdtree_max_nn=15, correction_tangent_planes_n=10)
-        #     apply_poisson_reconstruction(surface_with_normals_path(RCSB_ID), poisson_recon_path(RCSB_ID), recon_depth=PR_depth, recon_pt_weight=PR_ptweight)
-            
-        #     pl                        = pv.Plotter()
-        #     _                         = pl.add_mesh(pv.read(poisson_recon_path(RCSB_ID)), opacity=0.8)
-        #     pl.add_axes(line_width=5,cone_radius=0.6, shaft_length=0.7, tip_length=0.3, ambient=0.5, label_size=(0.2, 0.8),)
-        #     pl.add_text('RCSB_ID:{}'.format(RCSB_ID), position='upper_right', font_size=14, shadow=True, font='courier', color='black')
-        #     pl.show_grid(
-        #         n_xlabels = 10,
-        #         n_ylabels = 10,
-        #         n_zlabels = 10,
-        #     )
-        #     pl.show()
-        #     exit(0)
-
-        # except Exception as e:
-        #     print("Invalid input. Please enter an integer or 'Q' to quit.: ", e)
-
-
     #! [ Transform the cluster back into Original Coordinate Frame ]
 
     coordinates_in_the_original_frame =  largest_cluster  - translation_vectors[1] + translation_vectors[0]
     surface_pts     = ptcloud_convex_hull_points(coordinates_in_the_original_frame, 3,2)
 
-    print(">>Extracted convex hull points.")
-    print(np.array(surface_pts).shape)
     np.save(convex_hull_cluster_path(RCSB_ID), surface_pts)
     estimate_normals(surface_pts, surface_with_normals_path(RCSB_ID), kdtree_radius=10, kdtree_max_nn=15, correction_tangent_planes_n=10)
-    print(">>Estimated normals")
     apply_poisson_reconstruction(surface_with_normals_path(RCSB_ID), poisson_recon_path(RCSB_ID), recon_depth=6, recon_pt_weight=3)
     
-    pl                        = pv.Plotter()
-    _                         = pl.add_mesh(pv.read(poisson_recon_path(RCSB_ID)), opacity=0.8)
-    pl.add_axes(line_width=5,cone_radius=0.6, shaft_length=0.7, tip_length=0.3, ambient=0.5, label_size=(0.4, 0.16),)
-    pl.add_text('RCSB_ID:{}'.format(RCSB_ID), position='upper_right', font_size=14, shadow=True, font='courier', color='black')
-    pl.show_bounds( n_xlabels=6, n_ylabels=6, n_zlabels=6, )
-    pl.show()
-
+    visualize_mesh(pv.read(poisson_recon_path(RCSB_ID)), RCSB_ID)
