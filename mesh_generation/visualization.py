@@ -1076,6 +1076,25 @@ def plot_multiple_by_kingdom(kingdom:typing.Literal['bacteria','archaea','eukary
 
     plotter.show()
 
+
+def visualize_mesh(mesh, rcsb_id:str|None=None):
+    pl                        = pv.Plotter()
+    _ = pl.add_mesh(mesh, opacity=0.8)
+    pl.add_axes(line_width=2,cone_radius=0.7, shaft_length=0.7, tip_length=0.3, ambient=0.5, label_size=(0.2, 0.8))
+    pl.add_text('RCSB_ID:{}'.format(rcsb_id if rcsb_id is not None else "" ), position='upper_right', font_size=14, shadow=True, font='courier', color='black')
+    pl.show_grid( n_xlabels=8, n_ylabels=8, n_zlabels=8, font_size = 8)
+    pl.show()
+
+
+def visualize_pointcloud(ptcloud, rcsb_id:str|None=None):
+    pl              = pv.Plotter()
+    pl.add_points(ptcloud, color='b', point_size=2, render_points_as_spheres=True)
+    pl.add_axes(line_width=2,cone_radius=0.7, shaft_length=2, tip_length=0.9, ambient=0.5, label_size=(0.2, 0.8))
+    pl.add_text('RCSB_ID:{}'.format(rcsb_id if rcsb_id is not None else "" ), position='upper_right', font_size=14, shadow=True, font='courier', color='black')
+    pl.show_grid( n_xlabels=8, n_ylabels=8, n_zlabels=8, font_size = 8)
+    pl.show()
+
+
 def plot_with_landmarks( rcsb_id: str, eps, min_nbrs,poisson_recon_custom_path:str|None=None, ):
     """
     @translation_vectors is a np.ndarray of shape (2,3) where
