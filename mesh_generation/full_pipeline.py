@@ -158,15 +158,25 @@ def pipeline(RCSB_ID,args):
 
     # ! [ Bounding Box Atoms are transformed into an Index Grid ]
     # _, xyz_negative, _ , translation_vectors = index_grid(bbox_atoms_expanded)
-    voxel_grid, grid_dimensions, translation_vectors = index_grid(bbox_atoms_expanded)
+    initial_grid, grid_dimensions, translation_vectors = index_grid(bbox_atoms_expanded)
+    # ? Here no trimming has beenmade.
 
 
     #! [ Extract the largest cluster from the DBSCAN clustering ]
-    db, clusters_container = interior_capture_DBSCAN(np.asarray(np.where(voxel_grid != 1)).T, _u_EPSILON, _u_MIN_SAMPLES, _u_METRIC )
+    db, clusters_container = interior_capture_DBSCAN(np.asarray(np.where(initial_grid != 1)).T, _u_EPSILON, _u_MIN_SAMPLES, _u_METRIC )
     largest_cluster        = pick_largest_poisson_cluster(clusters_container)
+    DBSCAN_CLUSTERS_visualize_largest(np.asarray(np.where(initial_grid == 1)).T, clusters_container, largest_cluster)
 
-    #! [ Visualize the largest DBSCAN cluster to establish whether trimming is required ]
-    visualize_pointcloud(largest_cluster, RCSB_ID)
+    # #! [ Visualize the largest DBSCAN cluster to establish whether trimming is required ]
+    # visualize_pointcloud(largest_cluster, "Largest cluster")
+    # visualize_pointcloud(initial_grid, "Whole grid")
+
+    # #* It's probably incorrect to look at the largest cluster's indices, yet trim the full grid with them
+    # #* Threre is no gurantee that the shapes are congruent in most cases, i think
+    # print(largest_cluster.shape)
+    # print(initial_grid.shape)
+
+
 
 
 
@@ -198,37 +208,40 @@ def pipeline(RCSB_ID,args):
 
         if TRUNCATION_TUPLES[0] is not None:
             if TRUNCATION_TUPLES[0][0] is not None:
-                voxel_grid[:TRUNCATION_TUPLES[0][0],:,:]  = 1
+                initial_grid[:TRUNCATION_TUPLES[0][0],:,:]  = 1
 
             if TRUNCATION_TUPLES[0][1] is not None:
-                 voxel_grid[TRUNCATION_TUPLES[0][1]:,:,:] = 1
+                 initial_grid[TRUNCATION_TUPLES[0][1]:,:,:] = 1
 
 
         if TRUNCATION_TUPLES[1] is not None:
             if TRUNCATION_TUPLES[1][0] is not None:
-                voxel_grid[:,:TRUNCATION_TUPLES[1][0],:]  = 1
+                initial_grid[:,:TRUNCATION_TUPLES[1][0],:]  = 1
 
             if TRUNCATION_TUPLES[1][1] is not None:
-                 voxel_grid[:,TRUNCATION_TUPLES[1][1]:,:] = 1
+                 initial_grid[:,TRUNCATION_TUPLES[1][1]:,:] = 1
 
 
 
         if TRUNCATION_TUPLES[2] is not None:
 
             if TRUNCATION_TUPLES[2][0] is not None:
-                voxel_grid[:,:,:TRUNCATION_TUPLES[2][0]]  = 1
+                initial_grid[:,:,:TRUNCATION_TUPLES[2][0]]  = 1
 
             if TRUNCATION_TUPLES[2][1] is not None:
-                 voxel_grid[:,:,TRUNCATION_TUPLES[2][1]:] = 1
+                 initial_grid[:,:,TRUNCATION_TUPLES[2][1]:] = 1
 
     # xyz_positive, xyz_negative, grid_dimensions , translation_vectors = index_grid(bbox_atoms_expanded, TRUNCATION_TUPLES=[x_tuple, y_tuple, z_tuple] if args.trim else None)
     print("Truncated pointcloud")
-    visualize_pointcloud(np.asarray(np.where(voxel_grid != 1)).T, RCSB_ID)
-    visualize_pointcloud(np.asarray(np.where(voxel_grid == 1)).T, RCSB_ID)
+    visualize_pointcloud(np.asarray(np.where(initial_grid != 1)).T, RCSB_ID)
+    visualize_pointcloud(np.asarray(np.where(initial_grid == 1)).T, RCSB_ID)
 
-    db, clusters_container = interior_capture_DBSCAN( np.asarray(np.where(voxel_grid != 1)).T, _u_EPSILON, _u_MIN_SAMPLES, _u_METRIC )
+
+    #* OK, it totally doesn't work to use dbscan twice because the truncated grid is smaller and hence min_samples param probably looks different,
+
+    db, clusters_container = interior_capture_DBSCAN( np.asarray(np.where(initial_grid != 1)).T, _u_EPSILON, _u_MIN_SAMPLES, _u_METRIC )
     largest_cluster = pick_largest_poisson_cluster(clusters_container)
-    DBSCAN_CLUSTERS_visualize_largest(np.asarray(np.where(voxel_grid == 1)).T, clusters_container, largest_cluster)
+    DBSCAN_CLUSTERS_visualize_largest(np.asarray(np.where(initial_grid == 1)).T, clusters_container, largest_cluster)
 
     #! [ Transform the cluster back into Original Coordinate Frame ]
     coordinates_in_the_original_frame = largest_cluster  - translation_vectors[1] + translation_vectors[0]

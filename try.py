@@ -1,3 +1,4 @@
+from pprint import pprint
 import numpy as np
 
 from mesh_generation.visualization import visualize_pointcloud
@@ -28,14 +29,15 @@ grid[
 ] = 1
 
 
+pprint(grid)
 
 
 positive = np.array(np.where(grid==1)).T
 negative = np.array(np.where(grid!=1)).T
 
-visualize_pointcloud(grid, "XXXX")
-visualize_pointcloud(positive, "XXXX")
-visualize_pointcloud(negative, "XXXX")
+# visualize_pointcloud(grid, "XXXX")
+# visualize_pointcloud(positive, "XXXX")
+# visualize_pointcloud(positive, "XXXX")
 
 
 

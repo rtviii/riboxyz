@@ -941,10 +941,12 @@ def DBSCAN_CLUSTERS_particular_eps_minnbrs( dbscan_cluster_dict: dict[int, list]
     plotter.show()
 
 def DBSCAN_CLUSTERS_visualize_largest(positive_space: np.ndarray, dbscan_cluster_dict: dict[int, list], selected_cluster: np.ndarray):
-    # plotter               = pv.Plotter()
     plotter               = pv.Plotter(shape=(1, 2))
-
     plotter.subplot(0,0)
+
+    n_labels = 7
+    plotter.add_axes(line_width=2,cone_radius=0.3, shaft_length=2, tip_length=1, ambient=1, label_size=(0.2, 0.6))
+    plotter.show_grid( n_xlabels=n_labels, n_ylabels=n_labels, n_zlabels=n_labels, font_size = 12)
     #? Visualize all clusters
     for k, v in dbscan_cluster_dict.items():
         print("Cluster {} has {} points.".format(k, len(v)))
@@ -964,6 +966,12 @@ def DBSCAN_CLUSTERS_visualize_largest(positive_space: np.ndarray, dbscan_cluster
 
     # ? Visualize selected cluster
     plotter.subplot(0,1)
+
+
+    n_labels = 7
+    plotter.add_axes(line_width=2,cone_radius=0.3, shaft_length=2, tip_length=1, ambient=1, label_size=(0.2, 0.6))
+    plotter.show_grid( n_xlabels=n_labels, n_ylabels=n_labels, n_zlabels=n_labels, font_size = 12)
+
     rgbas_cluster = [[15, 10, 221, 1] for datapoint in selected_cluster]
     rgbas_positive = np.array([[205, 209, 228, 0.2] for _ in positive_space])
     combined = np.concatenate([selected_cluster, positive_space])

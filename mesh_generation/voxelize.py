@@ -79,7 +79,7 @@ def get_sphere_indices_voxelized(center: np.ndarray, radius: int):
 
     return np.array(sphere_active_ix)
 
-def index_grid(expanded_sphere_voxels: np.ndarray, TRUNCATION_TUPLES:list[list|None]|None = None, normalize:bool = True) :
+def index_grid(expanded_sphere_voxels: np.ndarray) :
 
     def normalize_atom_coordinates(coordinates: np.ndarray)->tuple[ np.ndarray, np.ndarray ]:
         """@param coordinates: numpy array of shape (N,3)"""
@@ -123,41 +123,3 @@ def index_grid(expanded_sphere_voxels: np.ndarray, TRUNCATION_TUPLES:list[list|N
 
     return ( vox_grid, grid_dimensions, mean_abs_vectors )
 
-
-    if TRUNCATION_TUPLES is not None:
-        if len(TRUNCATION_TUPLES) != 3:
-            raise IndexError("You have to enter three truncation parameters for x, y, and z axes. (ex. ||20:50 to skip x and y axes )")
-
-        if TRUNCATION_TUPLES[0] is not None:
-            if TRUNCATION_TUPLES[0][0] is not None:
-                vox_grid[:TRUNCATION_TUPLES[0][0],:,:]  = 1
-
-            if TRUNCATION_TUPLES[0][1] is not None:
-                 vox_grid[TRUNCATION_TUPLES[0][1]:,:,:] = 1
-
-        if TRUNCATION_TUPLES[1] is not None:
-            if TRUNCATION_TUPLES[1][0] is not None:
-                vox_grid[:,:TRUNCATION_TUPLES[1][0],:]  = 1
-
-            if TRUNCATION_TUPLES[1][1] is not None:
-                 vox_grid[:,TRUNCATION_TUPLES[1][1]:,:] = 1
-
-        if TRUNCATION_TUPLES[2] is not None:
-
-            if TRUNCATION_TUPLES[2][0] is not None:
-                vox_grid[:,:,:TRUNCATION_TUPLES[2][0]]  = 1
-
-            if TRUNCATION_TUPLES[2][1] is not None:
-                 vox_grid[:,:,TRUNCATION_TUPLES[2][1]:] = 1
-
-
-    print("Voxel grid shape(post truncation if applied): ", vox_grid.shape)
-    __xyz_v_negative_ix = np.asarray(np.where(vox_grid != 1))
-    __xyz_v_positive_ix = np.asarray(np.where(vox_grid == 1))
-
-
-    return (
-        __xyz_v_positive_ix.T,
-        __xyz_v_negative_ix.T,
-        grid_dimensions,
-        mean_abs_vectors )
