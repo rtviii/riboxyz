@@ -108,16 +108,20 @@ def index_grid(expanded_sphere_voxels: np.ndarray, TRUNCATION_TUPLES:list[list|N
     normalized_sphere_cords, mean_abs_vectors = normalize_atom_coordinates(expanded_sphere_voxels)
     voxel_size = 1
 
-    sphere_cords_quantized = np.round( np.array(normalized_sphere_cords / voxel_size) ).astype(int)
+    sphere_cords_quantized = np.round(np.array(normalized_sphere_cords / voxel_size) ).astype(int)
     max_values             = np.max(sphere_cords_quantized, axis=0)
     grid_dimensions        = max_values + 1
     vox_grid               = np.zeros(grid_dimensions)
+
+    print("Dimension of the voxel grid is ", vox_grid.shape)
 
     vox_grid[
         sphere_cords_quantized[:, 0],
         sphere_cords_quantized[:, 1],
         sphere_cords_quantized[:, 2]  ] = 1
 
+
+    return ( vox_grid, grid_dimensions, mean_abs_vectors )
 
 
     if TRUNCATION_TUPLES is not None:

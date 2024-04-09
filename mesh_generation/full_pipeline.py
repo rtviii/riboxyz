@@ -17,6 +17,8 @@ from ribctl import EXIT_TUNNEL_WORK
 from ribctl.etl.ribosome_assets import RibosomeAssets
 from ribctl.lib.libpdb import extract_lsu_ensemble_tunnel_vicinity
 
+
+
 def bounding_box(points: np.ndarray):
     """Computes the axis-aligned minimum bounding box of a list of points.
 
@@ -155,10 +157,12 @@ def pipeline(RCSB_ID,args):
 
 
     # ! [ Bounding Box Atoms are transformed into an Index Grid ]
-    _, xyz_negative, _ , translation_vectors = index_grid(bbox_atoms_expanded)
+    # _, xyz_negative, _ , translation_vectors = index_grid(bbox_atoms_expanded)
+    voxel_grid, grid_dimensions, translation_vectors = index_grid(bbox_atoms_expanded)
+
 
     #! [ Extract the largest cluster from the DBSCAN clustering ]
-    db, clusters_container = interior_capture_DBSCAN(xyz_negative, _u_EPSILON, _u_MIN_SAMPLES, _u_METRIC )
+    db, clusters_container = interior_capture_DBSCAN(np.asarray(np.where(voxel_grid != 1)).T, _u_EPSILON, _u_MIN_SAMPLES, _u_METRIC )
     largest_cluster        = pick_largest_poisson_cluster(clusters_container)
 
     #! [ Visualize the largest DBSCAN cluster to establish whether trimming is required ]
@@ -175,7 +179,8 @@ def pipeline(RCSB_ID,args):
         try:
             truncation_strings = user_input.replace(" ", '').split("|")
             if len(truncation_strings) != 3:
-                print("You have to enter three truncation parameters for x, y, and z axes. (ex. ||20:50 to skip x and y axes )")
+                print("You have to enter three truncation parameters for x, y, and z axes. (ex. ||20:50 or to skip x and y axes,  or |40:-| to cut y from 40 to the 'end' np style)")
+
             x_tuple = [ int(c) if c != '' else None for c  in truncation_strings[0].split(":") ] if ":" in truncation_strings[0] else None
             y_tuple = [ int(c) if c != '' else None for c  in truncation_strings[1].split(":") ] if ":" in truncation_strings[1] else None
             z_tuple = [ int(c) if c != '' else None for c  in truncation_strings[2].split(":") ] if ":" in truncation_strings[2] else None
@@ -184,17 +189,50 @@ def pipeline(RCSB_ID,args):
             print("Failed to parse trim parameters:" , e)
             exit(1)
 
+    TRUNCATION_TUPLES = [x_tuple, y_tuple, z_tuple]
+    print("Got truncation_tuples:", TRUNCATION_TUPLES)
 
-    xyz_positive, xyz_negative, grid_dimensions , translation_vectors = index_grid(bbox_atoms_expanded, TRUNCATION_TUPLES=[x_tuple, y_tuple, z_tuple] if args.trim else None)
+    if TRUNCATION_TUPLES is not None:
+        if len(TRUNCATION_TUPLES) != 3:
+            raise IndexError("You have to enter three truncation parameters for x, y, and z axes. (ex. ||20:50 to skip x and y axes )")
 
-    db, clusters_container = interior_capture_DBSCAN( xyz_negative, _u_EPSILON, _u_MIN_SAMPLES, _u_METRIC )
+        if TRUNCATION_TUPLES[0] is not None:
+            if TRUNCATION_TUPLES[0][0] is not None:
+                voxel_grid[:TRUNCATION_TUPLES[0][0],:,:]  = 1
+
+            if TRUNCATION_TUPLES[0][1] is not None:
+                 voxel_grid[TRUNCATION_TUPLES[0][1]:,:,:] = 1
+
+
+        if TRUNCATION_TUPLES[1] is not None:
+            if TRUNCATION_TUPLES[1][0] is not None:
+                voxel_grid[:,:TRUNCATION_TUPLES[1][0],:]  = 1
+
+            if TRUNCATION_TUPLES[1][1] is not None:
+                 voxel_grid[:,TRUNCATION_TUPLES[1][1]:,:] = 1
+
+
+
+        if TRUNCATION_TUPLES[2] is not None:
+
+            if TRUNCATION_TUPLES[2][0] is not None:
+                voxel_grid[:,:,:TRUNCATION_TUPLES[2][0]]  = 1
+
+            if TRUNCATION_TUPLES[2][1] is not None:
+                 voxel_grid[:,:,TRUNCATION_TUPLES[2][1]:] = 1
+
+    # xyz_positive, xyz_negative, grid_dimensions , translation_vectors = index_grid(bbox_atoms_expanded, TRUNCATION_TUPLES=[x_tuple, y_tuple, z_tuple] if args.trim else None)
+    print("Truncated pointcloud")
+    visualize_pointcloud(np.asarray(np.where(voxel_grid != 1)).T, RCSB_ID)
+    visualize_pointcloud(np.asarray(np.where(voxel_grid == 1)).T, RCSB_ID)
+
+    db, clusters_container = interior_capture_DBSCAN( np.asarray(np.where(voxel_grid != 1)).T, _u_EPSILON, _u_MIN_SAMPLES, _u_METRIC )
     largest_cluster = pick_largest_poisson_cluster(clusters_container)
-
+    DBSCAN_CLUSTERS_visualize_largest(np.asarray(np.where(voxel_grid == 1)).T, clusters_container, largest_cluster)
 
     #! [ Transform the cluster back into Original Coordinate Frame ]
-
-    coordinates_in_the_original_frame =  largest_cluster  - translation_vectors[1] + translation_vectors[0]
-    surface_pts     = ptcloud_convex_hull_points(coordinates_in_the_original_frame, 3,2)
+    coordinates_in_the_original_frame = largest_cluster  - translation_vectors[1] + translation_vectors[0]
+    surface_pts                       = ptcloud_convex_hull_points(coordinates_in_the_original_frame, 3,2)
     np.save(convex_hull_cluster_path(RCSB_ID), surface_pts)
     estimate_normals(surface_pts, surface_with_normals_path(RCSB_ID), kdtree_radius=10, kdtree_max_nn=15, correction_tangent_planes_n=10)
     apply_poisson_reconstruction(surface_with_normals_path(RCSB_ID), poisson_recon_path(RCSB_ID), recon_depth=6, recon_pt_weight=3)
