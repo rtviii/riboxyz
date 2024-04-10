@@ -49,6 +49,7 @@ parser_cmd_etl.add_argument('--png_thumbnail'           , action ='store_true' )
 parser_cmd_etl.add_argument('--overwrite'               , action ='store_true' )
 
 
+parser_cmd_etl.add_argument('--ncbi_init' , action ='store_true' )
 
 import asyncio
 import os
@@ -182,9 +183,14 @@ try:
             print(struct, verify_profile_exists(struct))
             if not verify_profile_exists(struct):
                 asyncio.run(obtain_assets(struct, Assetlist(profile=True), overwrite=True))
+        exit(0)
 
-                
+    if args.ncbi_init:
 
+        for struct in os.listdir(RIBETL_DATA):
+            print(struct, verify_profile_exists(struct))
+            if not verify_profile_exists(struct):
+                asyncio.run(obtain_assets(struct, Assetlist(profile=True), overwrite=True))
         exit(0)
 
     if hasattr(args, 'func'):
