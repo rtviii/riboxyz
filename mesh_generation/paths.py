@@ -25,6 +25,9 @@ surface_with_normals_path    = lambda rcsb_id: os.path.join( EXIT_TUNNEL_WORK, r
 poisson_recon_path           = lambda rcsb_id: os.path.join( EXIT_TUNNEL_WORK, rcsb_id.upper(), "{}_poisson_recon.ply".format(rcsb_id.upper()) )
 ptc_data_path                = lambda rcsb_id: os.path.join( RIBETL_DATA, rcsb_id.upper(), "{}_PTC_COORDINATES.json".format(rcsb_id.upper()) )
 
+TRIMMING_PARAMS_DICT_PATH = os.path.join( EXIT_TUNNEL_WORK, "trimming_params_dict.json" )
+
+
 def custom_cluster_recon_path(rcsb_id, eps, min_nbrs):
     return os.path.join( EXIT_TUNNEL_WORK, rcsb_id.upper(), "{}_poisson_recon-eps{}_minnbrs{}.ply".format(rcsb_id.upper(), eps, min_nbrs) )
 
@@ -36,3 +39,4 @@ def convex_hull_ensemble_LSU(rcsb_id):
 
 def alphashape_ensemble_LSU(rcsb_id):
     return os.path.join(EXIT_TUNNEL_WORK, rcsb_id, '{}_lsu_alphashape.ply'.format(rcsb_id))
+

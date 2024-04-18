@@ -943,7 +943,6 @@ def DBSCAN_CLUSTERS_particular_eps_minnbrs( dbscan_cluster_dict: dict[int, list]
 def DBSCAN_CLUSTERS_visualize_largest(positive_space: np.ndarray, dbscan_cluster_dict: dict[int, list], selected_cluster: np.ndarray):
     plotter               = pv.Plotter(shape=(1, 2))
     plotter.subplot(0,0)
-
     n_labels = 7
     plotter.add_axes(line_width=2,cone_radius=0.3, shaft_length=2, tip_length=1, ambient=1, label_size=(0.2, 0.6))
     plotter.show_grid( n_xlabels=n_labels, n_ylabels=n_labels, n_zlabels=n_labels, font_size = 12)

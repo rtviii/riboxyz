@@ -69,7 +69,6 @@ def expand_bbox_atoms_to_spheres(atom_coordinates:np.ndarray, sphere_vdw_radii:n
 
     return np.array(expanded)
 
-
 def interior_capture_DBSCAN(
     xyz_v_negative: np.ndarray,
     eps           ,
@@ -108,6 +107,23 @@ def pick_largest_poisson_cluster(clusters_container:dict[int,list])->np.ndarray:
         elif len(v) > len(clusters_container[DBSCAN_CLUSTER_ID]):
             DBSCAN_CLUSTER_ID = int(k)
     return np.array(clusters_container[DBSCAN_CLUSTER_ID])
+
+
+
+
+def cache_trimming_parameters( RCSB_ID:str, trim_tuple:list, file_path=TRIMMING_PARAMS_DICT_PATH):
+    if not os.path.exists(file_path):
+        raise FileNotFoundError(f"File {file_path} not found.")
+    with open(file_path, 'r') as file:
+        data = json.load(file)
+
+    if RCSB_ID not in data:
+        data[RCSB_ID] = trim_tuple
+        with open(file_path, 'w') as file:
+            json.dump(data, file, indent=4)
+            print(f"Entry '{RCSB_ID}' added to {file_path}")
+    else:
+        print(f"Entry '{RCSB_ID}' already exists in {file_path}")
 
 
 
@@ -193,6 +209,7 @@ def pipeline(RCSB_ID,args):
 
     TRUNCATION_TUPLES = [x_tuple, y_tuple, z_tuple]
     print("Got truncation_tuples:", TRUNCATION_TUPLES)
+    cache_trimming_parameters(RCSB_ID, TRUNCATION_TUPLES)
 
     if TRUNCATION_TUPLES is not None:
         if len(TRUNCATION_TUPLES) != 3:
