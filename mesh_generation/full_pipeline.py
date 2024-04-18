@@ -114,8 +114,11 @@ def pick_largest_poisson_cluster(clusters_container:dict[int,list])->np.ndarray:
 def cache_trimming_parameters( RCSB_ID:str, trim_tuple:list, file_path=TRIMMING_PARAMS_DICT_PATH):
     if not os.path.exists(file_path):
         raise FileNotFoundError(f"File {file_path} not found.")
+
     with open(file_path, 'r') as file:
         data = json.load(file)
+
+    print(data)
 
     if RCSB_ID not in data:
         data[RCSB_ID] = trim_tuple
@@ -174,9 +177,9 @@ def pipeline(RCSB_ID,args):
     # ? Here no trimming has beenmade.
 
     #! [ Extract the largest cluster from the DBSCAN clustering ]
-    db, clusters_container = interior_capture_DBSCAN(np.asarray(np.where(initial_grid != 1)).T, _u_EPSILON, _u_MIN_SAMPLES, _u_METRIC )
-    largest_cluster        = pick_largest_poisson_cluster(clusters_container)
-    DBSCAN_CLUSTERS_visualize_largest(np.asarray(np.where(initial_grid == 1)).T, clusters_container, largest_cluster)
+    # db, clusters_container = interior_capture_DBSCAN(np.asarray(np.where(initial_grid != 1)).T, _u_EPSILON, _u_MIN_SAMPLES, _u_METRIC )
+    # largest_cluster        = pick_largest_poisson_cluster(clusters_container)
+    # DBSCAN_CLUSTERS_visualize_largest(np.asarray(np.where(initial_grid == 1)).T, clusters_container, largest_cluster)
 
     # #! [ Visualize the largest DBSCAN cluster to establish whether trimming is required ]
     # visualize_pointcloud(largest_cluster, "Largest cluster")
