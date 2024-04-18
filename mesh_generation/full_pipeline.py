@@ -5,17 +5,13 @@ import json
 import os
 import numpy as np
 from sklearn.cluster import DBSCAN
-from __archive.scripts.pymol_visualtion import extract_chains
 from mesh_generation.bbox_extraction import ( encode_atoms, open_tunnel_csv, parse_struct_via_bbox, parse_struct_via_centerline)
 from compas.geometry import bounding_box
 from mesh_generation.libsurf import apply_poisson_reconstruction, estimate_normals, ptcloud_convex_hull_points
-from mesh_generation.lsu_alpha_surface import lsu_ensemble_convex_hull, lsu_ensemble_get_chains, ptcloud_convex_hull, vestibule_sphere_expansion
 from mesh_generation.visualization import DBSCAN_CLUSTERS_visualize_largest, custom_cluster_recon_path, plot_multiple_by_kingdom, plot_multiple_surfaces, plot_with_landmarks, DBSCAN_CLUSTERS_particular_eps_minnbrs, visualize_mesh, visualize_pointcloud
 from mesh_generation.paths import *
 from mesh_generation.voxelize import (expand_atomcenters_to_spheres_threadpool, index_grid)
 from ribctl import EXIT_TUNNEL_WORK
-from ribctl.etl.ribosome_assets import RibosomeAssets
-from ribctl.lib.libpdb import extract_lsu_ensemble_tunnel_vicinity
 
 
 
@@ -161,7 +157,6 @@ def pipeline(RCSB_ID,args):
     initial_grid, grid_dimensions, translation_vectors = index_grid(bbox_atoms_expanded)
     # ? Here no trimming has beenmade.
 
-
     #! [ Extract the largest cluster from the DBSCAN clustering ]
     db, clusters_container = interior_capture_DBSCAN(np.asarray(np.where(initial_grid != 1)).T, _u_EPSILON, _u_MIN_SAMPLES, _u_METRIC )
     largest_cluster        = pick_largest_poisson_cluster(clusters_container)
@@ -175,9 +170,6 @@ def pipeline(RCSB_ID,args):
     # #* Threre is no gurantee that the shapes are congruent in most cases, i think
     # print(largest_cluster.shape)
     # print(initial_grid.shape)
-
-
-
 
 
     if args.trim:
@@ -220,8 +212,6 @@ def pipeline(RCSB_ID,args):
 
             if TRUNCATION_TUPLES[1][1] is not None:
                  initial_grid[:,TRUNCATION_TUPLES[1][1]:,:] = 1
-
-
 
         if TRUNCATION_TUPLES[2] is not None:
 
