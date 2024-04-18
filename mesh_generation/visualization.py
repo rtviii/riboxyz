@@ -940,6 +940,11 @@ def DBSCAN_CLUSTERS_particular_eps_minnbrs( dbscan_cluster_dict: dict[int, list]
 
     plotter.show()
 
+
+def visualize_pointclouds(ptcloud1:np.ndarray, ptcloud2:np.ndarray):
+
+
+
 def DBSCAN_CLUSTERS_visualize_largest(positive_space: np.ndarray, dbscan_cluster_dict: dict[int, list], selected_cluster: np.ndarray):
     plotter               = pv.Plotter(shape=(1, 2))
     plotter.subplot(0,0)

@@ -174,12 +174,12 @@ def pipeline(RCSB_ID,args):
     # ! [ Bounding Box Atoms are transformed into an Index Grid ]
     # _, xyz_negative, _ , translation_vectors = index_grid(bbox_atoms_expanded)
     initial_grid, grid_dimensions, translation_vectors = index_grid(bbox_atoms_expanded)
-    # ? Here no trimming has beenmade.
+    # ? Here no trimming has yet occurred.
 
     #! [ Extract the largest cluster from the DBSCAN clustering ]
-    # db, clusters_container = interior_capture_DBSCAN(np.asarray(np.where(initial_grid != 1)).T, _u_EPSILON, _u_MIN_SAMPLES, _u_METRIC )
-    # largest_cluster        = pick_largest_poisson_cluster(clusters_container)
-    # DBSCAN_CLUSTERS_visualize_largest(np.asarray(np.where(initial_grid == 1)).T, clusters_container, largest_cluster)
+    db, clusters_container = interior_capture_DBSCAN(np.asarray(np.where(initial_grid != 1)).T, _u_EPSILON, _u_MIN_SAMPLES, _u_METRIC )
+    largest_cluster        = pick_largest_poisson_cluster(clusters_container)
+    DBSCAN_CLUSTERS_visualize_largest(np.asarray(np.where(initial_grid == 1)).T, clusters_container, largest_cluster)
 
     # #! [ Visualize the largest DBSCAN cluster to establish whether trimming is required ]
     # visualize_pointcloud(largest_cluster, "Largest cluster")
@@ -202,59 +202,94 @@ def pipeline(RCSB_ID,args):
             if len(truncation_strings) != 3:
                 print("You have to enter three truncation parameters for x, y, and z axes. (ex. ||20:50 or to skip x and y axes,  or |40:-| to cut y from 40 to the 'end' np style)")
 
-            x_tuple = [ int(c) if c != '' else None for c  in truncation_strings[0].split(":") ] if ":" in truncation_strings[0] else None
-            y_tuple = [ int(c) if c != '' else None for c  in truncation_strings[1].split(":") ] if ":" in truncation_strings[1] else None
-            z_tuple = [ int(c) if c != '' else None for c  in truncation_strings[2].split(":") ] if ":" in truncation_strings[2] else None
+            x_tuple = [ int(xx) if xx != '' else None for xx  in truncation_strings[0].split(":") ] if ":" in truncation_strings[0] else None
+            y_tuple = [ int(yy) if yy != '' else None for yy  in truncation_strings[1].split(":") ] if ":" in truncation_strings[1] else None
+            z_tuple = [ int(zz) if zz != '' else None for zz  in truncation_strings[2].split(":") ] if ":" in truncation_strings[2] else None
             
         except Exception as e:
             print("Failed to parse trim parameters:" , e)
             exit(1)
 
     TRUNCATION_TUPLES = [x_tuple, y_tuple, z_tuple]
-    print("Got truncation_tuples:", TRUNCATION_TUPLES)
     cache_trimming_parameters(RCSB_ID, TRUNCATION_TUPLES)
+    print("Received truncation parameters:>>>> ", TRUNCATION_TUPLES)
 
     if TRUNCATION_TUPLES is not None:
         if len(TRUNCATION_TUPLES) != 3:
             raise IndexError("You have to enter three truncation parameters for x, y, and z axes. (ex. ||20:50 to skip x and y axes )")
 
-        if TRUNCATION_TUPLES[0] is not None:
-            if TRUNCATION_TUPLES[0][0] is not None:
-                initial_grid[:TRUNCATION_TUPLES[0][0],:,:]  = 1
+        def trim_pt_filter(pt:np.ndarray):
+            if TRUNCATION_TUPLES[0] is not None:
+                x,X = TRUNCATION_TUPLES[0]
 
-            if TRUNCATION_TUPLES[0][1] is not None:
-                 initial_grid[TRUNCATION_TUPLES[0][1]:,:,:] = 1
+                if x is not None:
+                    if pt[0] <= x:
+                        return False
+
+                if X is not None:
+                    if pt[0] >= X:
+                        return False
+            if TRUNCATION_TUPLES[1] is not None:
+                y,Y = TRUNCATION_TUPLES[1]
+                if y is not None:
+                    if pt[1] <= y:
+                        return False
+                if Y is not None:
+                    if pt[1] >= Y:
+                        return False
+            if TRUNCATION_TUPLES[2] is not None:
+                z,Z = TRUNCATION_TUPLES[2]
+                if z is not None:
+                    if pt[2] <= z:
+                        return False
+                elif Z is not None:
+                    if pt[2] >= Z:
+                        return False
+
+            return True
 
 
-        if TRUNCATION_TUPLES[1] is not None:
-            if TRUNCATION_TUPLES[1][0] is not None:
-                initial_grid[:,:TRUNCATION_TUPLES[1][0],:]  = 1
+        print("before filter", largest_cluster.shape)
+        trimmed_cluster = np.array(list(filter(trim_pt_filter,list(largest_cluster))))
+        print("after filter", trimmed_cluster.shape)
 
-            if TRUNCATION_TUPLES[1][1] is not None:
-                 initial_grid[:,TRUNCATION_TUPLES[1][1]:,:] = 1
+        print("Visualizing trimmed cluster")
+        DBSCAN_CLUSTERS_visualize_largest(np.asarray(np.where(initial_grid == 1)).T, clusters_container, trimmed_cluster)
+        # if TRUNCATION_TUPLES[0] is not None:
+        #     if TRUNCATION_TUPLES[0][0] is not None:
+        #         initial_grid[:TRUNCATION_TUPLES[0][0],:,:]  = 1
 
-        if TRUNCATION_TUPLES[2] is not None:
+        #     if TRUNCATION_TUPLES[0][1] is not None:
+        #          initial_grid[TRUNCATION_TUPLES[0][1]:,:,:] = 1
 
-            if TRUNCATION_TUPLES[2][0] is not None:
-                initial_grid[:,:,:TRUNCATION_TUPLES[2][0]]  = 1
+        # if TRUNCATION_TUPLES[1] is not None:
+        #     if TRUNCATION_TUPLES[1][0] is not None:
+        #         initial_grid[:,:TRUNCATION_TUPLES[1][0],:]  = 1
 
-            if TRUNCATION_TUPLES[2][1] is not None:
-                 initial_grid[:,:,TRUNCATION_TUPLES[2][1]:] = 1
+        #     if TRUNCATION_TUPLES[1][1] is not None:
+        #          initial_grid[:,TRUNCATION_TUPLES[1][1]:,:] = 1
+
+        # if TRUNCATION_TUPLES[2] is not None:
+
+        #     if TRUNCATION_TUPLES[2][0] is not None:
+        #         initial_grid[:,:,:TRUNCATION_TUPLES[2][0]]  = 1
+
+        #     if TRUNCATION_TUPLES[2][1] is not None:
+        #          initial_grid[:,:,TRUNCATION_TUPLES[2][1]:] = 1
 
     # xyz_positive, xyz_negative, grid_dimensions , translation_vectors = index_grid(bbox_atoms_expanded, TRUNCATION_TUPLES=[x_tuple, y_tuple, z_tuple] if args.trim else None)
-    print("Truncated pointcloud")
-    visualize_pointcloud(np.asarray(np.where(initial_grid != 1)).T, RCSB_ID)
-    visualize_pointcloud(np.asarray(np.where(initial_grid == 1)).T, RCSB_ID)
+    # print("Truncated pointcloud")
+    # visualize_pointcloud(np.asarray(np.where(initial_grid != 1)).T, RCSB_ID)
+    # visualize_pointcloud(np.asarray(np.where(initial_grid == 1)).T, RCSB_ID)
 
 
-    #* OK, it totally doesn't work to use dbscan twice because the truncated grid is smaller and hence min_samples param probably looks different,
-
-    db, clusters_container = interior_capture_DBSCAN( np.asarray(np.where(initial_grid != 1)).T, _u_EPSILON, _u_MIN_SAMPLES, _u_METRIC )
-    largest_cluster = pick_largest_poisson_cluster(clusters_container)
-    DBSCAN_CLUSTERS_visualize_largest(np.asarray(np.where(initial_grid == 1)).T, clusters_container, largest_cluster)
+    # #* OK, it totally doesn't work to use dbscan twice because the truncated grid is smaller and hence min_samples param probably looks different,
+    # db, clusters_container = interior_capture_DBSCAN( np.asarray(np.where(initial_grid != 1)).T, _u_EPSILON, _u_MIN_SAMPLES, _u_METRIC )
+    # largest_cluster = pick_largest_poisson_cluster(clusters_container)
+    # DBSCAN_CLUSTERS_visualize_largest(np.asarray(np.where(initial_grid == 1)).T, clusters_container, largest_cluster)
 
     #! [ Transform the cluster back into Original Coordinate Frame ]
-    coordinates_in_the_original_frame = largest_cluster  - translation_vectors[1] + translation_vectors[0]
+    coordinates_in_the_original_frame = trimmed_cluster  - translation_vectors[1] + translation_vectors[0]
     surface_pts                       = ptcloud_convex_hull_points(coordinates_in_the_original_frame, 3,2)
     np.save(convex_hull_cluster_path(RCSB_ID), surface_pts)
     estimate_normals(surface_pts, surface_with_normals_path(RCSB_ID), kdtree_radius=10, kdtree_max_nn=15, correction_tangent_planes_n=10)
