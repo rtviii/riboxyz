@@ -979,13 +979,21 @@ def DBSCAN_CLUSTERS_visualize_largest(positive_space: np.ndarray, dbscan_cluster
     combined            = np.concatenate([selected_cluster, positive_space])
     rgbas_combined      = np.concatenate([rgbas_cluster, rgbas_positive])
 
-    list(selected_cluster).extend(list(positive_space))
-    list(rgbas_cluster).extend(list(rgbas_positive))
-    # combined            = selected_cluster.extend(positive_space)
-    # rgbas_combined      = np.concatenate([rgbas_cluster, rgbas_positive])
+    # list(selected_cluster).extend(list(positive_space))
+    # list(rgbas_cluster).extend(list(rgbas_positive))
+    # combined         = selected_cluster.extend(positive_space)
+    # rgbas_combined   = np.concatenate([rgbas_cluster, rgbas_positie])
+    container_points = [*list(selected_cluster),*list(positive_space)]
+    # container_rgbas  = [*list(rgbas_cluster),*list(rgbas_positive)]
+
+    np.save("selected_cluster.npy", selected_cluster)
+    np.save("positive_space.npy", positive_space)
     point_cloud         = pv.PolyData(selected_cluster)
     point_cloud["rgba"] = rgbas_cluster
-    plotter.add_points(point_cloud, scalars="rgba", rgb=True, show_scalar_bar=True)
+
+    point_cloud         = pv.PolyData(container_points)
+    # point_cloud["rgba"] = container_rgbas
+    plotter.add_points(point_cloud, rgb=True, show_scalar_bar=True)
     plotter.show()
 
 def plot_multiple_surfaces(rcsb_id:str):
@@ -1101,7 +1109,6 @@ def visualize_pointcloud(ptcloud, rcsb_id:str|None=None):
     n_labels = 7
     pl.show_grid( n_xlabels=n_labels, n_ylabels=n_labels, n_zlabels=n_labels, font_size = 12)
     pl.show()
-
 
 def visualize_pointclouds(ptcloud1:np.ndarray, ptcloud2:np.ndarray, background_positive:np.ndarray):
     plotter               = pv.Plotter(shape=(1, 2))
