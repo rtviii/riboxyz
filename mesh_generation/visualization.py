@@ -940,49 +940,12 @@ def DBSCAN_CLUSTERS_particular_eps_minnbrs( dbscan_cluster_dict: dict[int, list]
 
     plotter.show()
 
-
-def visualize_pointclouds(ptcloud1:np.ndarray, ptcloud2:np.ndarray, background_positive:np.ndarray):
-    plotter               = pv.Plotter(shape=(1, 2))
-    plotter.subplot(0,0)
-    n_labels = 7
-    plotter.add_axes(line_width=2,cone_radius=0.3, shaft_length=2, tip_length=1, ambient=1, label_size=(0.2, 0.6))
-    plotter.show_grid( n_xlabels=n_labels, n_ylabels=n_labels, n_zlabels=n_labels, font_size = 12)
-
-    rgbas_cluster1       = [[15, 100, 21, 1] for datapoint in ptcloud1]
-    rgbas_positive1      = np.array([[205, 209, 228, 0.2] for _ in background_positive])
-
-    combined1            = np.concatenate([ptcloud1, background_positive])
-    rgbas_combined1      = np.concatenate([rgbas_cluster1, rgbas_positive1])
-
-    point_cloud1         = pv.PolyData(combined1)
-    point_cloud1["rgba"] = rgbas_combined1
-
-    plotter.add_mesh(point_cloud1, scalars="rgba", rgb=True, show_scalar_bar=False)
-
-
-    # ? Visualize selected cluster
-    plotter.subplot(0,1)
-    n_labels = 7
-    plotter.add_axes(line_width=2,cone_radius=0.3, shaft_length=2, tip_length=1, ambient=1, label_size=(0.2, 0.6))
-    plotter.show_grid( n_xlabels=n_labels, n_ylabels=n_labels, n_zlabels=n_labels, font_size = 12)
-
-    rgbas_cluster2       = [[15, 10, 221, 1] for datapoint in ptcloud2]
-    rgbas_positive2      = np.array([[205, 160, 200, 0.2] for _ in background_positive])
-    combined2            = np.concatenate([ptcloud2, background_positive])
-    rgbas_combined2      = np.concatenate([rgbas_cluster2, rgbas_positive2])
-    point_cloud2         = pv.PolyData(combined2)
-    point_cloud2["rgba"] = rgbas_combined2
-    plotter.add_mesh(point_cloud2, scalars="rgba", rgb=True, show_scalar_bar=False)
-
-    plotter.show()
-
-
 def DBSCAN_CLUSTERS_visualize_largest(positive_space: np.ndarray, dbscan_cluster_dict: dict[int, list], selected_cluster: np.ndarray):
     plotter               = pv.Plotter(shape=(1, 2))
     plotter.subplot(0,0)
     n_labels = 7
     plotter.add_axes(line_width=2,cone_radius=0.3, shaft_length=2, tip_length=1, ambient=1, label_size=(0.2, 0.6))
-    plotter.show_grid( n_xlabels=n_labels, n_ylabels=n_labels, n_zlabels=n_labels, font_size = 12)
+    plotter.show_grid( n_xlabels=n_labels, n_ylabels=n_labels, n_zlabels=n_labels, font_size = 8)
     #? Visualize all clusters
     for k, v in dbscan_cluster_dict.items():
         print("Cluster {} has {} points.".format(k, len(v)))
@@ -991,9 +954,10 @@ def DBSCAN_CLUSTERS_visualize_largest(positive_space: np.ndarray, dbscan_cluster
         clusters_palette[k] = [*v[:3], 0.5]
     combined_cluster_colors = []
     combined_cluster_points = []
+
     for dbscan_label, coordinates in dbscan_cluster_dict.items():
         combined_cluster_points.extend(coordinates)
-        combined_cluster_colors.extend( [clusters_palette[( dbscan_label * 5 )%len(clusters_palette)]   if dbscan_label != -1 else [0, 0, 0, 0.1]] * len(coordinates) )
+        combined_cluster_colors.extend([clusters_palette[( dbscan_label * 5 )%len(clusters_palette)]   if dbscan_label != -1 else [0, 0, 0, 0.1]] * len(coordinates) )
 
     ptcloud_all_clusters         = pv.PolyData(combined_cluster_points)
     ptcloud_all_clusters["rgba"] = combined_cluster_colors
@@ -1003,19 +967,25 @@ def DBSCAN_CLUSTERS_visualize_largest(positive_space: np.ndarray, dbscan_cluster
     # ? Visualize selected cluster
     plotter.subplot(0,1)
 
+    lc = selected_cluster
+    print("Max vals in selected cluster:", [[np.min(lc[:,0]), np.max(lc[:,0])], [np.min(lc[:,1]), np.max(lc[:,1])],[np.min(lc[:,2]), np.max(lc[:,2])] ])
 
     n_labels = 7
     plotter.add_axes(line_width=2,cone_radius=0.3, shaft_length=2, tip_length=1, ambient=1, label_size=(0.2, 0.6))
     plotter.show_grid( n_xlabels=n_labels, n_ylabels=n_labels, n_zlabels=n_labels, font_size = 12)
 
-    rgbas_cluster = [[15, 10, 221, 1] for datapoint in selected_cluster]
-    rgbas_positive = np.array([[205, 209, 228, 0.2] for _ in positive_space])
-    combined = np.concatenate([selected_cluster, positive_space])
-    rgbas_combined = np.concatenate([rgbas_cluster, rgbas_positive])
-    point_cloud         = pv.PolyData(combined)
-    point_cloud["rgba"] = rgbas_combined
-    plotter.add_mesh(point_cloud, scalars="rgba", rgb=True, show_scalar_bar=False)
+    rgbas_cluster       = [[15, 10, 221, 1] for datapoint in selected_cluster]
+    rgbas_positive      = np.array([[205, 209, 228, 0.2] for _ in positive_space])
+    combined            = np.concatenate([selected_cluster, positive_space])
+    rgbas_combined      = np.concatenate([rgbas_cluster, rgbas_positive])
 
+    list(selected_cluster).extend(list(positive_space))
+    list(rgbas_cluster).extend(list(rgbas_positive))
+    # combined            = selected_cluster.extend(positive_space)
+    # rgbas_combined      = np.concatenate([rgbas_cluster, rgbas_positive])
+    point_cloud         = pv.PolyData(selected_cluster)
+    point_cloud["rgba"] = rgbas_cluster
+    plotter.add_points(point_cloud, scalars="rgba", rgb=True, show_scalar_bar=True)
     plotter.show()
 
 def plot_multiple_surfaces(rcsb_id:str):
@@ -1131,6 +1101,47 @@ def visualize_pointcloud(ptcloud, rcsb_id:str|None=None):
     n_labels = 7
     pl.show_grid( n_xlabels=n_labels, n_ylabels=n_labels, n_zlabels=n_labels, font_size = 12)
     pl.show()
+
+
+def visualize_pointclouds(ptcloud1:np.ndarray, ptcloud2:np.ndarray, background_positive:np.ndarray):
+    plotter               = pv.Plotter(shape=(1, 2))
+    plotter.subplot(0,0)
+    n_labels = 7
+    plotter.add_axes(line_width=2,cone_radius=0.3, shaft_length=2, tip_length=1, ambient=1, label_size=(0.2, 0.6))
+    plotter.show_grid( n_xlabels=n_labels, n_ylabels=n_labels, n_zlabels=n_labels, font_size = 12)
+
+    rgbas_cluster1       = [[15, 100, 21, 1] for datapoint in ptcloud1]
+    rgbas_positive1      = np.array([[205, 209, 228, 0.2] for _ in background_positive])
+
+    combined1            = np.concatenate([ptcloud1, background_positive])
+    rgbas_combined1      = np.concatenate([rgbas_cluster1, rgbas_positive1])
+
+    point_cloud1         = pv.PolyData(combined1)
+    point_cloud1["rgba"] = rgbas_combined1
+
+    plotter.add_points(point_cloud1, scalars="rgba", rgb=True, show_scalar_bar=False)
+
+
+    # ? Visualize selected cluster
+    plotter.subplot(0,1)
+    n_labels = 7
+    plotter.add_axes(line_width=2,cone_radius=0.3, shaft_length=2, tip_length=1, ambient=1, label_size=(0.2, 0.6))
+    plotter.show_grid( n_xlabels=n_labels, n_ylabels=n_labels, n_zlabels=n_labels, font_size = 12)
+
+    rgbas_cluster2       = [[15, 10, 221, 1] for datapoint in ptcloud2]
+    rgbas_positive2      = np.array([[205, 160, 200, 0.2] for _ in background_positive])
+    combined2            = np.concatenate([ptcloud2, background_positive])
+    rgbas_combined2      = np.concatenate([rgbas_cluster2, rgbas_positive2])
+    point_cloud2         = pv.PolyData(combined2)
+    point_cloud2["rgba"] = rgbas_combined2
+    plotter.add_points(point_cloud2, scalars="rgba", rgb=True, show_scalar_bar=False)
+
+    plotter.show()
+
+
+
+
+
 
 def plot_with_landmarks( rcsb_id: str, eps, min_nbrs,poisson_recon_custom_path:str|None=None, ):
     """

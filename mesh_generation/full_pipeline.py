@@ -266,7 +266,18 @@ def pipeline(RCSB_ID,args):
 
         print("Visualizing trimmed cluster")
         # DBSCAN_CLUSTERS_visualize_largest(np.asarray(np.where(initial_grid == 1)).T, clusters_container, trimmed_cluster)
+        lc = largest_cluster
+        tc = trimmed_cluster
+
+        for pt in tc:
+            if 55 < pt[1] < 65:
+                print("band pt: ", pt)
+
+        print("Max vals in largest cluster:", [[np.min(lc[:,0]), np.max(lc[:,0])], [np.min(lc[:,1]), np.max(lc[:,1])],[np.min(lc[:,2]), np.max(lc[:,2])] ])
+        print("Max vals in trim cluster:", [[np.min(tc[:,0]), np.max(tc[:,0])], [np.min(tc[:,1]), np.max(tc[:,1])],[np.min(tc[:,2]), np.max(tc[:,2])] ])
+
         visualize_pointclouds(largest_cluster, trimmed_cluster, np.asarray(np.where(initial_grid == 1)).T)
+
 
         # if TRUNCATION_TUPLES[0] is not None:
         #     if TRUNCATION_TUPLES[0][0] is not None:
