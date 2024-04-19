@@ -1,5 +1,6 @@
 from pprint import pprint
 from matplotlib import pyplot as plt
+import matplotlib
 import pyvista as pv
 import json
 import os
@@ -12,6 +13,8 @@ from mesh_generation.visualization import DBSCAN_CLUSTERS_visualize_largest, cus
 from mesh_generation.paths import *
 from mesh_generation.voxelize import (expand_atomcenters_to_spheres_threadpool, index_grid)
 from ribctl import EXIT_TUNNEL_WORK
+import numpy as np
+import matplotlib.pyplot as plt
 
 
 
@@ -179,16 +182,11 @@ def pipeline(RCSB_ID,args):
     #! [ Extract the largest cluster from the DBSCAN clustering ]
     db, clusters_container = interior_capture_DBSCAN(np.asarray(np.where(initial_grid != 1)).T, _u_EPSILON, _u_MIN_SAMPLES, _u_METRIC )
     largest_cluster        = pick_largest_poisson_cluster(clusters_container)
-    DBSCAN_CLUSTERS_visualize_largest(np.asarray(np.where(initial_grid == 1)).T, clusters_container, largest_cluster)
-
     # #! [ Visualize the largest DBSCAN cluster to establish whether trimming is required ]
-    # visualize_pointcloud(largest_cluster, "Largest cluster")
-    # visualize_pointcloud(initial_grid, "Whole grid")
+    DBSCAN_CLUSTERS_visualize_largest(np.asarray(np.where(initial_grid == 1)).T, clusters_container, largest_cluster)
 
     # #* It's probably incorrect to look at the largest cluster's indices, yet trim the full grid with them
     # #* Threre is no gurantee that the shapes are congruent in most cases, i think
-    # print(largest_cluster.shape)
-    # print(initial_grid.shape)
 
 
     if args.trim:
@@ -204,7 +202,9 @@ def pipeline(RCSB_ID,args):
                 print("You have to enter three truncation parameters for x, y, and z axes. (ex. ||20:50 or to skip x and y axes,  or |40:-| to cut y from 40 to the 'end' np style)")
 
             x_tuple = [ int(xx) if xx != '' else None for xx  in truncation_strings[0].split(":") ] if ":" in truncation_strings[0] else None
+
             y_tuple = [ int(yy) if yy != '' else None for yy  in truncation_strings[1].split(":") ] if ":" in truncation_strings[1] else None
+
             z_tuple = [ int(zz) if zz != '' else None for zz  in truncation_strings[2].split(":") ] if ":" in truncation_strings[2] else None
             
         except Exception as e:
@@ -221,44 +221,53 @@ def pipeline(RCSB_ID,args):
 
         def trim_pt_filter(pt:np.ndarray):
             if TRUNCATION_TUPLES[0] is not None:
-                x,X = TRUNCATION_TUPLES[0]
-                if x is not None:
-                    if pt[0] <= x:
+                assert(len(TRUNCATION_TUPLES[0]) == 2)
+                x_start,x_end = TRUNCATION_TUPLES[0]
+                if x_start is not None:
+                    if pt[0] <= x_start:
                         return False
-                if X is not None:
-                    if pt[0] >= X:
+                if x_end is not None:
+                    if pt[0] >= x_end:
                         return False
 
             if TRUNCATION_TUPLES[1] is not None:
-                y,Y = TRUNCATION_TUPLES[1]
-                if y is not None:
-                    if pt[1] <= y:
+                assert(len(TRUNCATION_TUPLES[1]) == 2)
+                y_start,y_end = TRUNCATION_TUPLES[1]
+
+                if y_start is not None:
+                    if pt[1] <= y_start:
                         return False
-                if Y is not None:
-                    if pt[1] >= Y:
+
+                if y_end is not None:
+                    if pt[1] >= y_end:
                         return False
 
             if TRUNCATION_TUPLES[2] is not None:
-                z,Z = TRUNCATION_TUPLES[2]
-                if z is not None:
-                    if pt[2] <= z:
-                        return False
-                elif Z is not None:
-                    if pt[2] >= Z:
+                assert(len(TRUNCATION_TUPLES[2]) == 2)
+                z_start,z_end = TRUNCATION_TUPLES[2]
+
+                if z_start is not None:
+                    if pt[2] <= z_start:
                         return False
 
+                elif z_end is not None:
+                    if pt[2] >= z_end:
+                        return False
 
-            print("Returning point ", pt, " as valid in ", TRUNCATION_TUPLES)
             return True
 
 
-        print("before filter", largest_cluster.shape)
         trimmed_cluster = np.array(list(filter(trim_pt_filter,list(largest_cluster))))
-        print("after filter", trimmed_cluster.shape)
+        
+        with open("trimmed.json", "w") as file:
+            json.dump(sorted(trimmed_cluster.tolist()), file, indent=4)
+        with open("largest.json", "w") as file:
+            json.dump(sorted(largest_cluster.tolist()), file, indent=4)
 
         print("Visualizing trimmed cluster")
         # DBSCAN_CLUSTERS_visualize_largest(np.asarray(np.where(initial_grid == 1)).T, clusters_container, trimmed_cluster)
         visualize_pointclouds(largest_cluster, trimmed_cluster, np.asarray(np.where(initial_grid == 1)).T)
+
         # if TRUNCATION_TUPLES[0] is not None:
         #     if TRUNCATION_TUPLES[0][0] is not None:
         #         initial_grid[:TRUNCATION_TUPLES[0][0],:,:]  = 1
