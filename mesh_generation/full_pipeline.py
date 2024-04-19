@@ -258,14 +258,14 @@ def pipeline(RCSB_ID,args):
     if args.trim:
         trimmed_cluster = np.array(list(filter(trim_pt_filter,list(largest_cluster))))
     visualize_pointcloud(trimmed_cluster, RCSB_ID)
-    _, dbscan_container= DBSCAN_capture(trimmed_cluster, 6, 100, _u_METRIC)
+    _, dbscan_container= DBSCAN_capture(trimmed_cluster, 3.2, 50, _u_METRIC)
     main_cluster = DBSCAN_pick_largest_cluster(dbscan_container)
     visualize_pointcloud(main_cluster)
 
     #! [ Transform the cluster back into Original Coordinate Frame ]
     coordinates_in_the_original_frame = main_cluster  - translation_vectors[1] + translation_vectors[0]
-    surface_pts                       = ptcloud_convex_hull_points(coordinates_in_the_original_frame, 3,2)
+    surface_pts                       = ptcloud_convex_hull_points(coordinates_in_the_original_frame, d3d_alpha,d3d_tol)
     np.save(convex_hull_cluster_path(RCSB_ID), surface_pts)
     estimate_normals(surface_pts, surface_with_normals_path(RCSB_ID), kdtree_radius=10, kdtree_max_nn=15, correction_tangent_planes_n=10)
-    apply_poisson_reconstruction(surface_with_normals_path(RCSB_ID), poisson_recon_path(RCSB_ID), recon_depth=8, recon_pt_weight=3)
+    apply_poisson_reconstruction(surface_with_normals_path(RCSB_ID), poisson_recon_path(RCSB_ID), recon_depth=PR_depth, recon_pt_weight=PR_ptweight)
     visualize_mesh(pv.read(poisson_recon_path(RCSB_ID)), RCSB_ID)
