@@ -261,6 +261,10 @@ def extract_chains(list_auth_asym_ids:str) :
     cmd.extract(selection_name,  "c. {}".format("+".join(chains_names)) )
     return selection_name
 
+def visualize_tunnel_mesh(rcsb_id: str):
+    
+
+    cmd.loadply("")
 
 
 cmd.extend("extract_chains", extract_chains)
