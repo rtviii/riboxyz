@@ -941,8 +941,41 @@ def DBSCAN_CLUSTERS_particular_eps_minnbrs( dbscan_cluster_dict: dict[int, list]
     plotter.show()
 
 
-def visualize_pointclouds(ptcloud1:np.ndarray, ptcloud2:np.ndarray):
+def visualize_pointclouds(ptcloud1:np.ndarray, ptcloud2:np.ndarray, background_positive:np.ndarray):
+    plotter               = pv.Plotter(shape=(1, 2))
+    plotter.subplot(0,0)
 
+
+    n_labels = 7
+    plotter.add_axes(line_width=2,cone_radius=0.3, shaft_length=2, tip_length=1, ambient=1, label_size=(0.2, 0.6))
+    plotter.show_grid( n_xlabels=n_labels, n_ylabels=n_labels, n_zlabels=n_labels, font_size = 12)
+
+    rgbas_cluster       = [[15, 100, 21, 1] for datapoint in ptcloud1]
+    rgbas_positive      = np.array([[205, 209, 228, 0.2] for _ in background_positive])
+    combined            = np.concatenate([ptcloud1, background_positive])
+    rgbas_combined      = np.concatenate([rgbas_cluster, rgbas_positive])
+    point_cloud         = pv.PolyData(combined)
+    point_cloud["rgba"] = rgbas_combined
+    plotter.add_mesh(point_cloud, scalars="rgba", rgb=True, show_scalar_bar=False)
+
+
+    # ? Visualize selected cluster
+    plotter.subplot(0,1)
+
+
+    n_labels = 7
+    plotter.add_axes(line_width=2,cone_radius=0.3, shaft_length=2, tip_length=1, ambient=1, label_size=(0.2, 0.6))
+    plotter.show_grid( n_xlabels=n_labels, n_ylabels=n_labels, n_zlabels=n_labels, font_size = 12)
+
+    rgbas_cluster       = [[15, 10, 221, 1] for datapoint in ptcloud2]
+    rgbas_positive      = np.array([[205, 209, 228, 0.2] for _ in background_positive])
+    combined            = np.concatenate([ptcloud2, background_positive])
+    rgbas_combined      = np.concatenate([rgbas_cluster, rgbas_positive])
+    point_cloud         = pv.PolyData(combined)
+    point_cloud["rgba"] = rgbas_combined
+    plotter.add_mesh(point_cloud, scalars="rgba", rgb=True, show_scalar_bar=False)
+
+    plotter.show()
 
 
 def DBSCAN_CLUSTERS_visualize_largest(positive_space: np.ndarray, dbscan_cluster_dict: dict[int, list], selected_cluster: np.ndarray):

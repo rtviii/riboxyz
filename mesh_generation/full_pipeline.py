@@ -8,7 +8,7 @@ from sklearn.cluster import DBSCAN
 from mesh_generation.bbox_extraction import ( encode_atoms, open_tunnel_csv, parse_struct_via_bbox, parse_struct_via_centerline)
 from compas.geometry import bounding_box
 from mesh_generation.libsurf import apply_poisson_reconstruction, estimate_normals, ptcloud_convex_hull_points
-from mesh_generation.visualization import DBSCAN_CLUSTERS_visualize_largest, custom_cluster_recon_path, plot_multiple_by_kingdom, plot_multiple_surfaces, plot_with_landmarks, DBSCAN_CLUSTERS_particular_eps_minnbrs, visualize_mesh, visualize_pointcloud
+from mesh_generation.visualization import DBSCAN_CLUSTERS_visualize_largest, custom_cluster_recon_path, plot_multiple_by_kingdom, plot_multiple_surfaces, plot_with_landmarks, DBSCAN_CLUSTERS_particular_eps_minnbrs, visualize_mesh, visualize_pointcloud, visualize_pointclouds
 from mesh_generation.paths import *
 from mesh_generation.voxelize import (expand_atomcenters_to_spheres_threadpool, index_grid)
 from ribctl import EXIT_TUNNEL_WORK
@@ -199,6 +199,7 @@ def pipeline(RCSB_ID,args):
             exit(0)
         try:
             truncation_strings = user_input.replace(" ", '').split("|")
+
             if len(truncation_strings) != 3:
                 print("You have to enter three truncation parameters for x, y, and z axes. (ex. ||20:50 or to skip x and y axes,  or |40:-| to cut y from 40 to the 'end' np style)")
 
@@ -221,14 +222,13 @@ def pipeline(RCSB_ID,args):
         def trim_pt_filter(pt:np.ndarray):
             if TRUNCATION_TUPLES[0] is not None:
                 x,X = TRUNCATION_TUPLES[0]
-
                 if x is not None:
                     if pt[0] <= x:
                         return False
-
                 if X is not None:
                     if pt[0] >= X:
                         return False
+
             if TRUNCATION_TUPLES[1] is not None:
                 y,Y = TRUNCATION_TUPLES[1]
                 if y is not None:
@@ -237,6 +237,7 @@ def pipeline(RCSB_ID,args):
                 if Y is not None:
                     if pt[1] >= Y:
                         return False
+
             if TRUNCATION_TUPLES[2] is not None:
                 z,Z = TRUNCATION_TUPLES[2]
                 if z is not None:
@@ -246,6 +247,8 @@ def pipeline(RCSB_ID,args):
                     if pt[2] >= Z:
                         return False
 
+
+            print("Returning point ", pt, " as valid in ", TRUNCATION_TUPLES)
             return True
 
 
@@ -254,7 +257,8 @@ def pipeline(RCSB_ID,args):
         print("after filter", trimmed_cluster.shape)
 
         print("Visualizing trimmed cluster")
-        DBSCAN_CLUSTERS_visualize_largest(np.asarray(np.where(initial_grid == 1)).T, clusters_container, trimmed_cluster)
+        # DBSCAN_CLUSTERS_visualize_largest(np.asarray(np.where(initial_grid == 1)).T, clusters_container, trimmed_cluster)
+        visualize_pointclouds(largest_cluster, trimmed_cluster, np.asarray(np.where(initial_grid == 1)).T)
         # if TRUNCATION_TUPLES[0] is not None:
         #     if TRUNCATION_TUPLES[0][0] is not None:
         #         initial_grid[:TRUNCATION_TUPLES[0][0],:,:]  = 1
