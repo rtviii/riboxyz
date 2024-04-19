@@ -123,13 +123,10 @@ def cache_trimming_parameters( RCSB_ID:str, trim_tuple:list, file_path=TRIMMING_
 
     print(data)
 
-    if RCSB_ID not in data:
-        data[RCSB_ID] = trim_tuple
-        with open(file_path, 'w') as file:
-            json.dump(data, file, indent=4)
-            print(f"Entry '{RCSB_ID}' added to {file_path}")
-    else:
-        print(f"Entry '{RCSB_ID}' already exists in {file_path}")
+    data[RCSB_ID] = trim_tuple
+    with open(file_path, 'w') as file:
+        json.dump(data, file, indent=4)
+        print(f"Entry '{RCSB_ID}' added to {file_path}")
 
 
 
@@ -153,6 +150,7 @@ def pipeline(RCSB_ID,args):
 
     #! [ Bounding Box Atoms ]
     if args.bbox or ( not os.path.exists(spheres_expanded_pointset_path(RCSB_ID)) ) :
+
         "the data arrives here as atom coordinates extracted from the biopython model "
         if not os.path.exists(tunnel_atom_encoding_path(RCSB_ID)) and args.bbox_radius != None:
             bbox_atoms          = extract_bbox_atoms(RCSB_ID)
@@ -189,7 +187,7 @@ def pipeline(RCSB_ID,args):
     # #* It's probably incorrect to look at the largest cluster's indices, yet trim the full grid with them
     # #* Threre is no gurantee that the shapes are congruent in most cases, i think
 
-
+    # TODO : refactor this trimming logic out
     if args.trim:
         # user_input = input("Truncate bbox? Enter tuples of the format 'x,20 : z,40 : y,15 : Y,20' (lowercase for truncation from origin, uppercase for truncation from end of axis) or 'Q' to quit: ")
         user_input = input("Truncate bbox? Enter tuples of the format ' 10:69|20:80|5:70' (for x|y|z axis truncation, ||20:50 to skip axis) or 'Q' to quit: ")
@@ -214,7 +212,6 @@ def pipeline(RCSB_ID,args):
 
     TRUNCATION_TUPLES = [x_tuple, y_tuple, z_tuple]
     cache_trimming_parameters(RCSB_ID, TRUNCATION_TUPLES)
-    print("Received truncation parameters:>>>> ", TRUNCATION_TUPLES)
 
     if TRUNCATION_TUPLES is not None:
         if len(TRUNCATION_TUPLES) != 3:
@@ -256,57 +253,9 @@ def pipeline(RCSB_ID,args):
                         return False
 
             return True
-
+    if args.trim:
         trimmed_cluster = np.array(list(filter(trim_pt_filter,list(largest_cluster))))
-        visualize_pointcloud(trimmed_cluster, RCSB_ID)
-        
-        with open("trimmed.json", "w") as file:
-            json.dump(sorted(trimmed_cluster.tolist()), file, indent=4)
-        with open("largest.json", "w") as file:
-            json.dump(sorted(largest_cluster.tolist()), file, indent=4)
-
-        print("Visualizing trimmed cluster")
-        # DBSCAN_CLUSTERS_visualize_largest(np.asarray(np.where(initial_grid == 1)).T, clusters_container, trimmed_cluster)
-        lc = largest_cluster
-        tc = trimmed_cluster
-
-        # for pt in tc:
-        #     if 55 < pt[1] < 65:
-        #         print("band pt: ", pt)
-
-        print("Max vals in largest cluster:", [[np.min(lc[:,0]), np.max(lc[:,0])], [np.min(lc[:,1]), np.max(lc[:,1])],[np.min(lc[:,2]), np.max(lc[:,2])] ])
-        print("Max vals in trim cluster:", [[np.min(tc[:,0]), np.max(tc[:,0])], [np.min(tc[:,1]), np.max(tc[:,1])],[np.min(tc[:,2]), np.max(tc[:,2])] ])
-
-        # visualize_pointclouds(largest_cluster, trimmed_cluster, np.asarray(np.where(initial_grid == 1)).T)
-
-
-        # if TRUNCATION_TUPLES[0] is not None:
-        #     if TRUNCATION_TUPLES[0][0] is not None:
-        #         initial_grid[:TRUNCATION_TUPLES[0][0],:,:]  = 1
-
-        #     if TRUNCATION_TUPLES[0][1] is not None:
-        #          initial_grid[TRUNCATION_TUPLES[0][1]:,:,:] = 1
-
-        # if TRUNCATION_TUPLES[1] is not None:
-        #     if TRUNCATION_TUPLES[1][0] is not None:
-        #         initial_grid[:,:TRUNCATION_TUPLES[1][0],:]  = 1
-
-        #     if TRUNCATION_TUPLES[1][1] is not None:
-        #          initial_grid[:,TRUNCATION_TUPLES[1][1]:,:] = 1
-
-        # if TRUNCATION_TUPLES[2] is not None:
-
-        #     if TRUNCATION_TUPLES[2][0] is not None:
-        #         initial_grid[:,:,:TRUNCATION_TUPLES[2][0]]  = 1
-
-        #     if TRUNCATION_TUPLES[2][1] is not None:
-        #          initial_grid[:,:,TRUNCATION_TUPLES[2][1]:] = 1
-
-    # xyz_positive, xyz_negative, grid_dimensions , translation_vectors = index_grid(bbox_atoms_expanded, TRUNCATION_TUPLES=[x_tuple, y_tuple, z_tuple] if args.trim else None)
-    # print("Truncated pointcloud")
-    # visualize_pointcloud(np.asarray(np.where(initial_grid != 1)).T, RCSB_ID)
-    # visualize_pointcloud(np.asarray(np.where(initial_grid == 1)).T, RCSB_ID)
-
+    visualize_pointcloud(trimmed_cluster, RCSB_ID)
 
     # #* OK, it totally doesn't work to use dbscan twice because the truncated grid is smaller and hence min_samples param probably looks different,
     # db, clusters_container = interior_capture_DBSCAN( np.asarray(np.where(initial_grid != 1)).T, _u_EPSILON, _u_MIN_SAMPLES, _u_METRIC )

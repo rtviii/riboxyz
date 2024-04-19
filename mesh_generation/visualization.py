@@ -1103,11 +1103,12 @@ def visualize_mesh(mesh, rcsb_id:str|None=None):
 def visualize_pointcloud(ptcloud, rcsb_id:str|None=None):
     pl              = pv.Plotter()
     # pl.x_axis.tick_count = 20
-    pl.add_points(ptcloud, color='b', point_size=2, render_points_as_spheres=True)
     pl.add_axes(line_width=2,cone_radius=0.3, shaft_length=2, tip_length=1, ambient=1, label_size=(0.2, 0.6))
     pl.add_text('RCSB_ID:{}'.format(rcsb_id if rcsb_id is not None else "" ), position='upper_right', font_size=14, shadow=True, font='courier', color='black')
     n_labels = 7
-    pl.show_grid( n_xlabels=n_labels, n_ylabels=n_labels, n_zlabels=n_labels, font_size = 12)
+    pl.show_grid( n_xlabels=n_labels, n_ylabels=n_labels, n_zlabels=n_labels, font_size = 8)
+
+    pl.add_points(ptcloud, color='b', point_size=5, render_points_as_spheres=True)
     pl.show()
 
 def visualize_pointclouds(ptcloud1:np.ndarray, ptcloud2:np.ndarray, background_positive:np.ndarray):
