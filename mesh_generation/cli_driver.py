@@ -1,27 +1,11 @@
 import argparse
 from pprint import pprint
-import subprocess
-import typing
 from matplotlib import pyplot as plt
-import open3d as o3d
-from Bio.PDB import MMCIFParser
-from Bio.PDB import NeighborSearch
-import pyvista as pv
-import json
-import os
 import numpy as np
 from sklearn.cluster import DBSCAN
-from __archive.scripts.pymol_visualtion import extract_chains
 from mesh_generation.bbox_extraction import ( encode_atoms, open_tunnel_csv, parse_struct_via_bbox, parse_struct_via_centerline)
-from compas.geometry import bounding_box
-from mesh_generation.libsurf import apply_poisson_reconstruction, estimate_normals, ptcloud_convex_hull_points
-from mesh_generation.lsu_alpha_surface import lsu_ensemble_convex_hull, lsu_ensemble_get_chains, ptcloud_convex_hull, vestibule_sphere_expansion
-from mesh_generation.visualization import DBSCAN_CLUSTERS_visualize_largest, custom_cluster_recon_path, plot_multiple_by_kingdom, plot_multiple_surfaces, plot_with_landmarks, DBSCAN_CLUSTERS_particular_eps_minnbrs
 from mesh_generation.paths import *
 from mesh_generation.full_pipeline import pipeline
-from ribctl import EXIT_TUNNEL_WORK, POISSON_RECON_BIN, RIBETL_DATA
-from ribctl.etl.ribosome_assets import RibosomeAssets
-from ribctl.lib.libpdb import extract_lsu_ensemble_tunnel_vicinity
 
 
 DBSCAN_METRICS        = [

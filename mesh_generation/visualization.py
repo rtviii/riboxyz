@@ -1146,11 +1146,6 @@ def visualize_pointclouds(ptcloud1:np.ndarray, ptcloud2:np.ndarray, background_p
 
     plotter.show()
 
-
-
-
-
-
 def plot_with_landmarks( rcsb_id: str, eps, min_nbrs,poisson_recon_custom_path:str|None=None, ):
     """
     @translation_vectors is a np.ndarray of shape (2,3) where

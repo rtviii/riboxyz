@@ -131,11 +131,9 @@ def load_trimming_parameters( RCSB_ID:str, file_path=TRIMMING_PARAMS_DICT_PATH):
 
 
 
-
 def pipeline(RCSB_ID,args):
 
     #! [ Pipeline Parameters ]
-    
     _u_EPSILON     = 5.5 if args.dbscan_tuple is None else float(args.dbscan_tuple.split(",")[0])
     _u_MIN_SAMPLES = 600 if args.dbscan_tuple is None else int(args.dbscan_tuple.split(",")[1])
     _u_METRIC      = "euclidean"
@@ -269,5 +267,5 @@ def pipeline(RCSB_ID,args):
     surface_pts                       = ptcloud_convex_hull_points(coordinates_in_the_original_frame, 3,2)
     np.save(convex_hull_cluster_path(RCSB_ID), surface_pts)
     estimate_normals(surface_pts, surface_with_normals_path(RCSB_ID), kdtree_radius=10, kdtree_max_nn=15, correction_tangent_planes_n=10)
-    apply_poisson_reconstruction(surface_with_normals_path(RCSB_ID), poisson_recon_path(RCSB_ID), recon_depth=6, recon_pt_weight=3)
+    apply_poisson_reconstruction(surface_with_normals_path(RCSB_ID), poisson_recon_path(RCSB_ID), recon_depth=8, recon_pt_weight=3)
     visualize_mesh(pv.read(poisson_recon_path(RCSB_ID)), RCSB_ID)
