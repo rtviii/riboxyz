@@ -72,28 +72,29 @@ def expand_bbox_atoms_to_spheres(atom_coordinates:np.ndarray, sphere_vdw_radii:n
 
     return np.array(expanded)
 
-def interior_capture_DBSCAN(
-    xyz_v_negative: np.ndarray,
+def DBSCAN_capture(
+    ptcloud: np.ndarray,
     eps           ,
     min_samples   ,
     metric        : str = "euclidean",
 ): 
 
-    cluster_colors = dict(zip(range(-1, 40), plt.cm.terrain(np.linspace(0, 1, 40))))
-    for k, v in cluster_colors.items():
-        cluster_colors[k] = [*v[:3], 0.5]
+    # cluster_colors = dict(zip(range(-1, 40), plt.cm.terrain(np.linspace(0, 1, 40))))
+
+    # for k, v in cluster_colors.items():
+    #     cluster_colors[k] = [*v[:3], 0.5]
 
     u_EPSILON     = eps
     u_MIN_SAMPLES = min_samples
     u_METRIC      = metric
 
-    print( "Running DBSCAN on {} points. eps={}, min_samples={}, distance_metric={}".format( len(xyz_v_negative), u_EPSILON, u_MIN_SAMPLES, u_METRIC ) ) 
+    print( "Running DBSCAN on {} points. eps={}, min_samples={}, distance_metric={}".format( len(ptcloud), u_EPSILON, u_MIN_SAMPLES, u_METRIC ) ) 
 
-    db     = DBSCAN(eps=eps, min_samples=min_samples, metric=metric).fit( xyz_v_negative )
+    db     = DBSCAN(eps=eps, min_samples=min_samples, metric=metric).fit( ptcloud )
     labels = db.labels_
 
     CLUSTERS_CONTAINER = {}
-    for point, label in zip(xyz_v_negative, labels):
+    for point, label in zip(ptcloud, labels):
         if label not in CLUSTERS_CONTAINER:
             CLUSTERS_CONTAINER[label] = []
         CLUSTERS_CONTAINER[label].append(point)
@@ -102,7 +103,7 @@ def interior_capture_DBSCAN(
 
     return db, CLUSTERS_CONTAINER
 
-def pick_largest_poisson_cluster(clusters_container:dict[int,list])->np.ndarray:
+def DBSCAN_pick_largest_cluster(clusters_container:dict[int,list])->np.ndarray:
     DBSCAN_CLUSTER_ID = 1
     for k, v in clusters_container.items():
         if int(k) == -1:
@@ -111,9 +112,6 @@ def pick_largest_poisson_cluster(clusters_container:dict[int,list])->np.ndarray:
             DBSCAN_CLUSTER_ID = int(k)
     return np.array(clusters_container[DBSCAN_CLUSTER_ID])
 
-
-
-
 def cache_trimming_parameters( RCSB_ID:str, trim_tuple:list, file_path=TRIMMING_PARAMS_DICT_PATH):
     if not os.path.exists(file_path):
         raise FileNotFoundError(f"File {file_path} not found.")
@@ -121,12 +119,16 @@ def cache_trimming_parameters( RCSB_ID:str, trim_tuple:list, file_path=TRIMMING_
     with open(file_path, 'r') as file:
         data = json.load(file)
 
-    print(data)
-
     data[RCSB_ID] = trim_tuple
     with open(file_path, 'w') as file:
         json.dump(data, file, indent=4)
         print(f"Entry '{RCSB_ID}' added to {file_path}")
+
+def load_trimming_parameters( RCSB_ID:str, file_path=TRIMMING_PARAMS_DICT_PATH):
+    with open(file_path, 'r') as file:
+        data = json.load(file)
+    return data[RCSB_ID] if RCSB_ID in data else None
+
 
 
 
@@ -178,8 +180,8 @@ def pipeline(RCSB_ID,args):
     # ? Here no trimming has yet occurred.
 
     #! [ Extract the largest cluster from the DBSCAN clustering ]
-    db, clusters_container = interior_capture_DBSCAN(np.asarray(np.where(initial_grid != 1)).T, _u_EPSILON, _u_MIN_SAMPLES, _u_METRIC )
-    largest_cluster        = pick_largest_poisson_cluster(clusters_container)
+    db, clusters_container = DBSCAN_capture(np.asarray(np.where(initial_grid != 1)).T, _u_EPSILON, _u_MIN_SAMPLES, _u_METRIC )
+    largest_cluster        = DBSCAN_pick_largest_cluster(clusters_container)
     # #! [ Visualize the largest DBSCAN cluster to establish whether trimming is required ]
     # DBSCAN_CLUSTERS_visualize_largest(np.asarray(np.where(initial_grid == 1)).T, clusters_container, largest_cluster)
     visualize_pointcloud(largest_cluster, RCSB_ID)
@@ -188,7 +190,8 @@ def pipeline(RCSB_ID,args):
     # #* Threre is no gurantee that the shapes are congruent in most cases, i think
 
     # TODO : refactor this trimming logic out
-    if args.trim:
+    TRUNCATION_TUPLES = load_trimming_parameters(RCSB_ID)
+    if args.trim and TRUNCATION_TUPLES is None:
         # user_input = input("Truncate bbox? Enter tuples of the format 'x,20 : z,40 : y,15 : Y,20' (lowercase for truncation from origin, uppercase for truncation from end of axis) or 'Q' to quit: ")
         user_input = input("Truncate bbox? Enter tuples of the format ' 10:69|20:80|5:70' (for x|y|z axis truncation, ||20:50 to skip axis) or 'Q' to quit: ")
         if user_input.lower() == 'q':
@@ -210,8 +213,9 @@ def pipeline(RCSB_ID,args):
             print("Failed to parse trim parameters:" , e)
             exit(1)
 
-    TRUNCATION_TUPLES = [x_tuple, y_tuple, z_tuple]
-    cache_trimming_parameters(RCSB_ID, TRUNCATION_TUPLES)
+        TRUNCATION_TUPLES = [x_tuple, y_tuple, z_tuple]
+        cache_trimming_parameters(RCSB_ID, TRUNCATION_TUPLES)
+    
 
     if TRUNCATION_TUPLES is not None:
         if len(TRUNCATION_TUPLES) != 3:
@@ -256,14 +260,12 @@ def pipeline(RCSB_ID,args):
     if args.trim:
         trimmed_cluster = np.array(list(filter(trim_pt_filter,list(largest_cluster))))
     visualize_pointcloud(trimmed_cluster, RCSB_ID)
-
-    # #* OK, it totally doesn't work to use dbscan twice because the truncated grid is smaller and hence min_samples param probably looks different,
-    # db, clusters_container = interior_capture_DBSCAN( np.asarray(np.where(initial_grid != 1)).T, _u_EPSILON, _u_MIN_SAMPLES, _u_METRIC )
-    # largest_cluster = pick_largest_poisson_cluster(clusters_container)
-    # DBSCAN_CLUSTERS_visualize_largest(np.asarray(np.where(initial_grid == 1)).T, clusters_container, largest_cluster)
+    _, dbscan_container= DBSCAN_capture(trimmed_cluster, 6, 100, _u_METRIC)
+    main_cluster = DBSCAN_pick_largest_cluster(dbscan_container)
+    visualize_pointcloud(main_cluster)
 
     #! [ Transform the cluster back into Original Coordinate Frame ]
-    coordinates_in_the_original_frame = trimmed_cluster  - translation_vectors[1] + translation_vectors[0]
+    coordinates_in_the_original_frame = main_cluster  - translation_vectors[1] + translation_vectors[0]
     surface_pts                       = ptcloud_convex_hull_points(coordinates_in_the_original_frame, 3,2)
     np.save(convex_hull_cluster_path(RCSB_ID), surface_pts)
     estimate_normals(surface_pts, surface_with_normals_path(RCSB_ID), kdtree_radius=10, kdtree_max_nn=15, correction_tangent_planes_n=10)
