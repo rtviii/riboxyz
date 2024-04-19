@@ -79,10 +79,6 @@ def DBSCAN_capture(
     metric        : str = "euclidean",
 ): 
 
-    # cluster_colors = dict(zip(range(-1, 40), plt.cm.terrain(np.linspace(0, 1, 40))))
-
-    # for k, v in cluster_colors.items():
-    #     cluster_colors[k] = [*v[:3], 0.5]
 
     u_EPSILON     = eps
     u_MIN_SAMPLES = min_samples
@@ -258,7 +254,12 @@ def pipeline(RCSB_ID,args):
     if args.trim:
         trimmed_cluster = np.array(list(filter(trim_pt_filter,list(largest_cluster))))
     visualize_pointcloud(trimmed_cluster, RCSB_ID)
-    _, dbscan_container= DBSCAN_capture(trimmed_cluster, 3.2, 50, _u_METRIC)
+    _, dbscan_container= DBSCAN_capture(trimmed_cluster, 3  , 123, _u_METRIC)
+    print("DBSCAN Clusters: ")
+    for (k,v) in dbscan_container.items():
+        print(k, len(v))
+    # for k,v in dbscan_container:
+    #     print(k, len(v))
     main_cluster = DBSCAN_pick_largest_cluster(dbscan_container)
     visualize_pointcloud(main_cluster)
 
