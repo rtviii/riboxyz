@@ -125,8 +125,6 @@ def load_trimming_parameters( RCSB_ID:str, file_path=TRIMMING_PARAMS_DICT_PATH):
         data = json.load(file)
     return data[RCSB_ID] if RCSB_ID in data else None
 
-
-
 def pipeline(RCSB_ID,args):
 
     #! [ Pipeline Parameters ]
@@ -164,8 +162,6 @@ def pipeline(RCSB_ID,args):
     else:
         print("Opened atoms in the bounding box")
         bbox_atoms_expanded = np.load(spheres_expanded_pointset_path(RCSB_ID))
-
-
 
 
     # ! [ Bounding Box Atoms are transformed into an Index Grid ]
@@ -258,8 +254,7 @@ def pipeline(RCSB_ID,args):
     print("DBSCAN Clusters: ")
     for (k,v) in dbscan_container.items():
         print(k, len(v))
-    # for k,v in dbscan_container:
-    #     print(k, len(v))
+        
     main_cluster = DBSCAN_pick_largest_cluster(dbscan_container)
     visualize_pointcloud(main_cluster)
 

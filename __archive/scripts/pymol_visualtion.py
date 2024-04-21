@@ -279,14 +279,18 @@ def addAtom(model, name, vdw, x, y, z, partialCharge = 0.0):
   a.partial_charge = partialCharge
   model.atom.append(a)
 
-def create_centerline(rcsb_id):
+def create_centerline(rcsb_id:str):
+
+    rcsb_id = rcsb_id.upper()
     
     def open_tunnel_csv(rcsb_id: str) -> list[list]:
+
         TUNNEL_PATH = os.path.join( EXIT_TUNNEL_WORK, "mole_tunnels", "tunnel_{}.csv".format(rcsb_id) )
         df          = pd.read_csv(TUNNEL_PATH)
         data        = []
+
         for index, row in df.iterrows():
-            radius = row["Radius"]
+            radius       = row["Radius"]
             x_coordinate = row["X"]
             y_coordinate = row["Y"]
             z_coordinate = row["Z"]
@@ -294,6 +298,8 @@ def create_centerline(rcsb_id):
         return data
 
     import chempy
+    object_name = "centerline_{}".format(rcsb_id)
+
     data = open_tunnel_csv(rcsb_id)
     model = chempy.models.Indexed() 
     for i, ( r,x,y,z ) in enumerate(data):
@@ -305,10 +311,19 @@ def create_centerline(rcsb_id):
     cmd.set('surface_mode', 1)
     cmd.set('sphere_mode', 5)
     cmd.set('mesh_mode', 1)
-    cmd.load_model(model, 'Tunnel1')
-    cmd.hide('everything', 'Tunnel1')
-    cmd.set('sphere_color', 'red', 'Tunnel1')
-    cmd.show('spheres', 'Tunnel1')
+    cmd.load_model(model, object_name)
+    cmd.hide('everything', object_name)
+    cmd.set('sphere_color', 'red', object_name)
+    cmd.show('spheres', object_name)
+
+    cmd.select("_surf25", "select {} within 25 of {}".format(rcsb_id,object_name))
+    cmd.create("surf25", "_surf25")
+    cmd.select("surf15", "select {} within 15 of {}".format(rcsb_id,object_name))
+    cmd.create("surf15", "_surf15")
+    cmd.deselect()
+
+
+
 
 
 cmd.extend("extract_chains"    , extract_chains        )
