@@ -181,10 +181,11 @@ def by_chain(pdbid: str):
         profile = json.load(infile)
 
     if profile['rnas'] != None:
-        for rna in profile['rnas']:
+        for rna in list(sorted(profile['rnas'], key=lambda d: d['nomenclature'][0])):
 
-            if len( rna['nomenclature'] )>0:
+            if len( rna['nomenclature'])>0:
                 nomclass = rna['nomenclature'][0]
+
             else:
                 nomclass = random.choice(list(colormap__RNA.keys()))
             prot_tmp = f"{nomclass}.{rna['auth_asym_id']}"
@@ -206,17 +207,19 @@ def by_chain(pdbid: str):
             cmd.color(colormap__RNA[nomclass], f"chain {rna['auth_asym_id']}")
             cmd.set('transparency', 0.5, f"chain {rna['auth_asym_id']}")
 
-    for protein in profile['proteins']:
+    for protein in list(sorted(profile['proteins'], key=lambda d: d['nomenclature'][0])):
         if len( protein['nomenclature'] )>0:
             nomclass = protein['nomenclature'][0]
         else:
             nomclass = random.choice([ *list(colormap__LSU_Proteins.keys()), *list(colormap__SSU_Proteins.keys()) ])
 
         if nomclass in colormap__LSU_Proteins:
-            CLR = colormap__LSU_Proteins[nomclass]
+            CHAIN_COLOR = colormap__LSU_Proteins[nomclass]
 
         elif nomclass in colormap__SSU_Proteins:
-            CLR = colormap__SSU_Proteins[nomclass]
+            CHAIN_COLOR = colormap__SSU_Proteins[nomclass]
+        else:
+            CHAIN_COLOR = 'gray70'
 
         prot_tmp = f"{nomclass}.{protein['auth_asym_id']}"
 
@@ -235,7 +238,7 @@ def by_chain(pdbid: str):
         cmd.hide ('everything'           ,      f"chain {protein['auth_asym_id']}")
         cmd.show ('surface'                 ,      f"chain {protein['auth_asym_id']}")
         cmd.show ('cartoon'              ,      f"chain {protein['auth_asym_id']}")
-        cmd.color(CLR                    ,      f"chain {protein['auth_asym_id']}")
+        cmd.color(CHAIN_COLOR                    ,      f"chain {protein['auth_asym_id']}")
         cmd.set  ('transparency' , 0.5, f"chain {protein['auth_asym_id']}")
 
     cmd.reset()
@@ -316,10 +319,17 @@ def create_centerline(rcsb_id:str):
     cmd.set('sphere_color', 'red', object_name)
     cmd.show('spheres', object_name)
 
-    cmd.select("_surf25", "select {} within 25 of {}".format(rcsb_id,object_name))
+    cmd.select(name="_surf25", selection="{} within 25 of {}".format(rcsb_id,object_name))
     cmd.create("surf25", "_surf25")
-    cmd.select("surf15", "select {} within 15 of {}".format(rcsb_id,object_name))
+
+    cmd.select(name="_surf15", selection="{} within 15 of {}".format(rcsb_id,object_name))
     cmd.create("surf15", "_surf15")
+
+
+    cmd.hide("everything", "surf25")
+    cmd.hide("everything", "surf15")
+    cmd.show("sticks", "surf25")
+    cmd.show("sticks", "surf15")
     cmd.deselect()
 
 
