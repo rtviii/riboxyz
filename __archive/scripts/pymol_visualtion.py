@@ -333,9 +333,6 @@ def create_centerline(rcsb_id:str):
     cmd.deselect()
 
 
-
-
-
 cmd.extend("extract_chains"    , extract_chains        )
 cmd.extend("sload"             , sload                 )
 cmd.extend("by_chain"          , by_chain              )

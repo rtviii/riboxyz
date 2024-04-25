@@ -1,6 +1,7 @@
 import sys
 import warnings
 from Bio import BiopythonExperimentalWarning, BiopythonWarning, BiopythonDeprecationWarning
+
 with warnings.catch_warnings():
     warnings.simplefilter('ignore', BiopythonExperimentalWarning)
 
