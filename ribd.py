@@ -23,7 +23,7 @@ def parse_comma_separated_list(value):
     return value.split(',')
 
 
-parser     = argparse.ArgumentParser(description="Command line interface for the `ribctl` package.")
+parser = argparse.ArgumentParser(description="Command line interface for the `ribctl` package.")
 
 
 parser.add_argument('--verify_schema', action='store_true', help="Verify the schema for every file in the database")

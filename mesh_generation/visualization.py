@@ -864,33 +864,33 @@ dbscan_pairs = [
 #     __xyz_v_positive_ix = np.asarray( np.where(vox_grid == 1) )
 #     return __xyz_v_positive_ix.T
 
-# def retrieve_ptc_and_chain_atoms(rcsb_id):
-#         with open( tunnel_atom_encoding_path(rcsb_id), "r", ) as infile:
-#             bbox_atoms: list[dict] = json.load(infile)
-#             _atom_centers       = np.array(list(map(lambda x: x["coord"], bbox_atoms)))
-#             _vdw_radii          = np.array(list(map(lambda x: x["vdw_radius"], bbox_atoms)))
+def retrieve_ptc_and_chain_atoms(rcsb_id):
+        with open( tunnel_atom_encoding_path(rcsb_id), "r", ) as infile:
+            bbox_atoms: list[dict] = json.load(infile)
+            _atom_centers       = np.array(list(map(lambda x: x["coord"], bbox_atoms)))
+            _vdw_radii          = np.array(list(map(lambda x: x["vdw_radius"], bbox_atoms)))
 
-#             normalized_sphere_cords, translation_vectors = normalize_atom_coordinates(_atom_centers)
-#             voxel_size = 1
-#             sphere_cords_quantized = np.round( np.array(normalized_sphere_cords / voxel_size) ).astype(int)
-#             max_values      = np.max(sphere_cords_quantized, axis=0)
-#             grid_dimensions = max_values + 1
+            # normalized_sphere_cords, translation_vectors = normalize_atom_coordinates(_atom_centers)
+            # voxel_size = 1
+            # sphere_cords_quantized = np.round( np.array(normalized_sphere_cords / voxel_size) ).astype(int)
+            # max_values      = np.max(sphere_cords_quantized, axis=0)
+            # grid_dimensions = max_values + 1
 
-#         with open( ptc_data_path(rcsb_id), "r", ) as infile:
-#             ptc_data = json.load(infile)
+        with open( ptc_data_path(rcsb_id), "r", ) as infile:
+            ptc_data = json.load(infile)
 
-#         atom_coordinates_by_chain: dict[str, list] = {}
-#         for atom in bbox_atoms:
-#             if len(atom["chain_nomenclature"]) < 1:
-#                 # print( "atom ", atom, "has no chain nomenclature", atom["chain_nomenclature"] )
-#                 continue
-#             if atom["chain_nomenclature"][0] not in atom_coordinates_by_chain:
-#                 atom_coordinates_by_chain[atom["chain_nomenclature"][0]] = []
-#             atom_coordinates_by_chain[atom["chain_nomenclature"][0]].extend([atom["coord"]])
+        atom_coordinates_by_chain: dict[str, list] = {}
+        for atom in bbox_atoms:
+            if len(atom["chain_nomenclature"]) < 1:
+                # print( "atom ", atom, "has no chain nomenclature", atom["chain_nomenclature"] )
+                continue
+            if atom["chain_nomenclature"][0] not in atom_coordinates_by_chain:
+                atom_coordinates_by_chain[atom["chain_nomenclature"][0]] = []
+            atom_coordinates_by_chain[atom["chain_nomenclature"][0]].extend([atom["coord"]])
 
-#         ptc_midpoint = np.array(ptc_data["midpoint_coordinates"])
+        ptc_midpoint = np.array(ptc_data["midpoint_coordinates"])
 
-#         return ptc_midpoint, atom_coordinates_by_chain, grid_dimensions, translation_vectors
+        return ptc_midpoint, atom_coordinates_by_chain
 
 
 #! For figure only
@@ -1146,20 +1146,19 @@ def visualize_pointclouds(ptcloud1:np.ndarray, ptcloud2:np.ndarray, background_p
 
     plotter.show()
 
-def plot_with_landmarks( rcsb_id: str, eps, min_nbrs,poisson_recon_custom_path:str|None=None, ):
+def plot_with_landmarks( rcsb_id: str, poisson_recon_custom_path:str|None=None, ):
     """
     @translation_vectors is a np.ndarray of shape (2,3) where
         - the first row is the means of the coordinate set
         - the second row is the deviations of the normalized coordinate set
         (to be used to reverse the normalization process or to travel to this coordinate frame)
-
     """
 
     src_taxid = RibosomeAssets(rcsb_id).get_taxids()[0][0]
     taxname   = list( Taxid.get_name(str(src_taxid)).items() )[0][1]
 
 
-    ptc_midpoint,atom_coordinates_by_chain, grid_dimensions, mean_abs_vectors= retrieve_ptc_and_chain_atoms(rcsb_id)
+    ptc_midpoint,atom_coordinates_by_chain= retrieve_ptc_and_chain_atoms(rcsb_id)
 
     if poisson_recon_custom_path == None:
         poisson_recon = poisson_recon_path(rcsb_id)
@@ -1213,8 +1212,8 @@ def plot_with_landmarks( rcsb_id: str, eps, min_nbrs,poisson_recon_custom_path:s
 
     #!--- Labels ----
     plotter.add_text('RCSB_ID:{}'.format(rcsb_id), position='upper_right', font_size=14, shadow=True, font=FONT, color='black')
-    plotter.add_text('eps: {} \nmin_nbrs: {}'.format(eps, min_nbrs), position='upper_left', font_size=8, shadow=True, font=FONT, color='black')
-    plotter.add_text('Volume: {}'.format(round(mesh_.volume, 3)), position='lower_left', font_size=8, shadow=True, font=FONT, color='black')
+    # plotter.add_text('eps: {} \nmin_nbrs: {}'.format(eps, min_nbrs), position='upper_left', font_size=8, shadow=True, font=FONT, color='black')
+    plotter.add_text('Tunnel Mesh Volume: {}'.format(round(mesh_.volume, 3)), position='lower_left', font_size=8, shadow=True, font=FONT, color='black')
     plotter.add_text('{}'.format(taxname), position='lower_right', font_size=8, shadow=True, font=FONT, color='black') 
 
     # plotter.open_gif("just_chains.gif")

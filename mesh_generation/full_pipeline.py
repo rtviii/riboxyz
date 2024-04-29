@@ -100,7 +100,7 @@ def DBSCAN_capture(
     return db, CLUSTERS_CONTAINER
 
 def DBSCAN_pick_largest_cluster(clusters_container:dict[int,list])->np.ndarray:
-    DBSCAN_CLUSTER_ID = 1
+    DBSCAN_CLUSTER_ID = 0
     for k, v in clusters_container.items():
         if int(k) == -1:
             continue

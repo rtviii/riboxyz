@@ -6,6 +6,7 @@ from sklearn.cluster import DBSCAN
 from mesh_generation.bbox_extraction import ( encode_atoms, open_tunnel_csv, parse_struct_via_bbox, parse_struct_via_centerline)
 from mesh_generation.paths import *
 from mesh_generation.full_pipeline import pipeline
+from mesh_generation.visualization import plot_with_landmarks
 
 
 DBSCAN_METRICS        = [
@@ -181,7 +182,7 @@ def main():
     parser.add_argument( "--full_pipeline",   action='store_true')
 
     # visualization options
-    # parser.add_argument( "--final",   action='store_true')
+    parser.add_argument( "--result",   action='store_true')
     # parser.add_argument( "--dbscan",   action='store_true')
     # parser.add_argument( "--multisurf",   action='store_true')
     # parser.add_argument( "--kingdom",   choices=['bacteria','archaea','eukaryota'])
@@ -216,6 +217,9 @@ def main():
     if args.full_pipeline:
         pipeline(RCSB_ID, args)
         exit(0)
+    if args.result:
+        plot_with_landmarks(RCSB_ID)
+
 
 
 if __name__ == "__main__":
