@@ -15,11 +15,9 @@ from Bio.PDB.Atom import Atom
 from ribctl import  EXIT_TUNNEL_WORK, RIBETL_DATA
 
 def open_tunnel_csv(rcsb_id: str) -> list[list]:
-    TUNNEL_PATH = os.path.join(
-        EXIT_TUNNEL_WORK, "mole_tunnels", "tunnel_{}.csv".format(rcsb_id)
-    )
-    df   = pd.read_csv(TUNNEL_PATH)
-    data = []
+    TUNNEL_PATH = os.path.join( EXIT_TUNNEL_WORK, "mole_tunnels", "tunnel_{}.csv".format(rcsb_id) )
+    df          = pd.read_csv(TUNNEL_PATH)
+    data        = []
     for index, row in df.iterrows():
         radius = row["Radius"]
         x_coordinate = row["X"]

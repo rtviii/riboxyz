@@ -35,6 +35,8 @@ def apply_poisson_reconstruction(surf_estimated_ptcloud_path: str, output_path: 
         str(recon_depth),
         "--pointWeight",
         str(recon_pt_weight),
+        "--threads 8"
+
         # "--polygonMesh"
     ]
     process = subprocess.run(command, capture_output=True, text=True)

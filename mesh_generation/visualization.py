@@ -6,10 +6,6 @@ import json
 import numpy as np
 import numpy as np
 from mesh_generation.paths import *
-from mesh_generation.voxelize import (
-    expand_atomcenters_to_spheres_threadpool,
-    normalize_atom_coordinates,
-)
 from ribctl import EXIT_TUNNEL_WORK, POISSON_RECON_BIN, RIBETL_DATA
 from ribctl.etl.ribosome_assets import RibosomeAssets
 from ribctl.lib.libmsa import Taxid
@@ -848,25 +844,25 @@ dbscan_pairs = [
 ]
 
 
-def move_cords_to_normalized_cord_frame(
-    grid_dimensions    : np.ndarray,
-    translation_vectors: np.ndarray,
-    original_cords     : np.ndarray,
-)                  : 
-    """this is a helper function for plotting to move additional atom coordinates into the cord frame of the mesh (vox grid indices)"""
-    normalized_original_cords = ( original_cords - translation_vectors[0] + translation_vectors[1] )
-    voxel_size = 1
-    normalized_original_cords_quantized = np.round(
-        normalized_original_cords / voxel_size
-    ).astype(int)
-    vox_grid = np.zeros(grid_dimensions)
-    vox_grid[
-        normalized_original_cords_quantized[:, 0],
-        normalized_original_cords_quantized[:, 1],
-        normalized_original_cords_quantized[:, 2],
-    ] = 1
-    __xyz_v_positive_ix = np.asarray( np.where(vox_grid == 1) )
-    return __xyz_v_positive_ix.T
+# def move_cords_to_normalized_cord_frame(
+#     grid_dimensions    : np.ndarray,
+#     translation_vectors: np.ndarray,
+#     original_cords     : np.ndarray,
+# )                  : 
+#     """this is a helper function for plotting to move additional atom coordinates into the cord frame of the mesh (vox grid indices)"""
+#     normalized_original_cords = ( original_cords - translation_vectors[0] + translation_vectors[1] )
+#     voxel_size = 1
+#     normalized_original_cords_quantized = np.round(
+#         normalized_original_cords / voxel_size
+#     ).astype(int)
+#     vox_grid = np.zeros(grid_dimensions)
+#     vox_grid[
+#         normalized_original_cords_quantized[:, 0],
+#         normalized_original_cords_quantized[:, 1],
+#         normalized_original_cords_quantized[:, 2],
+#     ] = 1
+#     __xyz_v_positive_ix = np.asarray( np.where(vox_grid == 1) )
+#     return __xyz_v_positive_ix.T
 
 def retrieve_ptc_and_chain_atoms(rcsb_id):
         with open( tunnel_atom_encoding_path(rcsb_id), "r", ) as infile:
@@ -874,11 +870,11 @@ def retrieve_ptc_and_chain_atoms(rcsb_id):
             _atom_centers       = np.array(list(map(lambda x: x["coord"], bbox_atoms)))
             _vdw_radii          = np.array(list(map(lambda x: x["vdw_radius"], bbox_atoms)))
 
-            normalized_sphere_cords, translation_vectors = normalize_atom_coordinates(_atom_centers)
-            voxel_size = 1
-            sphere_cords_quantized = np.round( np.array(normalized_sphere_cords / voxel_size) ).astype(int)
-            max_values      = np.max(sphere_cords_quantized, axis=0)
-            grid_dimensions = max_values + 1
+            # normalized_sphere_cords, translation_vectors = normalize_atom_coordinates(_atom_centers)
+            # voxel_size = 1
+            # sphere_cords_quantized = np.round( np.array(normalized_sphere_cords / voxel_size) ).astype(int)
+            # max_values      = np.max(sphere_cords_quantized, axis=0)
+            # grid_dimensions = max_values + 1
 
         with open( ptc_data_path(rcsb_id), "r", ) as infile:
             ptc_data = json.load(infile)
@@ -894,7 +890,7 @@ def retrieve_ptc_and_chain_atoms(rcsb_id):
 
         ptc_midpoint = np.array(ptc_data["midpoint_coordinates"])
 
-        return ptc_midpoint, atom_coordinates_by_chain, grid_dimensions, translation_vectors
+        return ptc_midpoint, atom_coordinates_by_chain
 
 
 #! For figure only
@@ -945,10 +941,11 @@ def DBSCAN_CLUSTERS_particular_eps_minnbrs( dbscan_cluster_dict: dict[int, list]
     plotter.show()
 
 def DBSCAN_CLUSTERS_visualize_largest(positive_space: np.ndarray, dbscan_cluster_dict: dict[int, list], selected_cluster: np.ndarray):
-    # plotter               = pv.Plotter()
     plotter               = pv.Plotter(shape=(1, 2))
-
     plotter.subplot(0,0)
+    n_labels = 7
+    plotter.add_axes(line_width=2,cone_radius=0.3, shaft_length=2, tip_length=1, ambient=1, label_size=(0.2, 0.6))
+    plotter.show_grid( n_xlabels=n_labels, n_ylabels=n_labels, n_zlabels=n_labels, font_size = 8)
     #? Visualize all clusters
     for k, v in dbscan_cluster_dict.items():
         print("Cluster {} has {} points.".format(k, len(v)))
@@ -957,9 +954,10 @@ def DBSCAN_CLUSTERS_visualize_largest(positive_space: np.ndarray, dbscan_cluster
         clusters_palette[k] = [*v[:3], 0.5]
     combined_cluster_colors = []
     combined_cluster_points = []
+
     for dbscan_label, coordinates in dbscan_cluster_dict.items():
         combined_cluster_points.extend(coordinates)
-        combined_cluster_colors.extend( [clusters_palette[( dbscan_label * 5 )%len(clusters_palette)]   if dbscan_label != -1 else [0, 0, 0, 0.1]] * len(coordinates) )
+        combined_cluster_colors.extend([clusters_palette[( dbscan_label * 5 )%len(clusters_palette)]   if dbscan_label != -1 else [0, 0, 0, 0.1]] * len(coordinates) )
 
     ptcloud_all_clusters         = pv.PolyData(combined_cluster_points)
     ptcloud_all_clusters["rgba"] = combined_cluster_colors
@@ -968,16 +966,34 @@ def DBSCAN_CLUSTERS_visualize_largest(positive_space: np.ndarray, dbscan_cluster
 
     # ? Visualize selected cluster
     plotter.subplot(0,1)
-    rgbas_cluster = [[15, 10, 221, 1] for datapoint in selected_cluster]
-    rgbas_positive = np.array([[205, 209, 228, 0.2] for _ in positive_space])
-    combined = np.concatenate([selected_cluster, positive_space])
-    rgbas_combined = np.concatenate([rgbas_cluster, rgbas_positive])
-    point_cloud         = pv.PolyData(combined)
-    point_cloud["rgba"] = rgbas_combined
-    plotter.add_mesh(point_cloud, scalars="rgba", rgb=True, show_scalar_bar=False)
 
+    lc = selected_cluster
+    print("Max vals in selected cluster:", [[np.min(lc[:,0]), np.max(lc[:,0])], [np.min(lc[:,1]), np.max(lc[:,1])],[np.min(lc[:,2]), np.max(lc[:,2])] ])
 
+    n_labels = 7
+    plotter.add_axes(line_width=2,cone_radius=0.3, shaft_length=2, tip_length=1, ambient=1, label_size=(0.2, 0.6))
+    plotter.show_grid( n_xlabels=n_labels, n_ylabels=n_labels, n_zlabels=n_labels, font_size = 12)
 
+    rgbas_cluster       = [[15, 10, 221, 1] for datapoint in selected_cluster]
+    rgbas_positive      = np.array([[205, 209, 228, 0.2] for _ in positive_space])
+    combined            = np.concatenate([selected_cluster, positive_space])
+    rgbas_combined      = np.concatenate([rgbas_cluster, rgbas_positive])
+
+    # list(selected_cluster).extend(list(positive_space))
+    # list(rgbas_cluster).extend(list(rgbas_positive))
+    # combined         = selected_cluster.extend(positive_space)
+    # rgbas_combined   = np.concatenate([rgbas_cluster, rgbas_positie])
+    container_points = [*list(selected_cluster),*list(positive_space)]
+    # container_rgbas  = [*list(rgbas_cluster),*list(rgbas_positive)]
+
+    np.save("selected_cluster.npy", selected_cluster)
+    np.save("positive_space.npy", positive_space)
+    point_cloud         = pv.PolyData(selected_cluster)
+    point_cloud["rgba"] = rgbas_cluster
+
+    point_cloud         = pv.PolyData(container_points)
+    # point_cloud["rgba"] = container_rgbas
+    plotter.add_points(point_cloud, rgb=True, show_scalar_bar=True)
     plotter.show()
 
 def plot_multiple_surfaces(rcsb_id:str):
@@ -1076,7 +1092,6 @@ def plot_multiple_by_kingdom(kingdom:typing.Literal['bacteria','archaea','eukary
 
     plotter.show()
 
-
 def visualize_mesh(mesh, rcsb_id:str|None=None):
     pl                        = pv.Plotter()
     _ = pl.add_mesh(mesh, opacity=0.8)
@@ -1085,30 +1100,65 @@ def visualize_mesh(mesh, rcsb_id:str|None=None):
     pl.show_grid( n_xlabels=8, n_ylabels=8, n_zlabels=8, font_size = 8)
     pl.show()
 
-
 def visualize_pointcloud(ptcloud, rcsb_id:str|None=None):
     pl              = pv.Plotter()
-    pl.add_points(ptcloud, color='b', point_size=2, render_points_as_spheres=True)
-    pl.add_axes(line_width=2,cone_radius=0.7, shaft_length=2, tip_length=0.9, ambient=0.5, label_size=(0.2, 0.8))
+    # pl.x_axis.tick_count = 20
+    pl.add_axes(line_width=2,cone_radius=0.3, shaft_length=2, tip_length=1, ambient=1, label_size=(0.2, 0.6))
     pl.add_text('RCSB_ID:{}'.format(rcsb_id if rcsb_id is not None else "" ), position='upper_right', font_size=14, shadow=True, font='courier', color='black')
-    pl.show_grid( n_xlabels=8, n_ylabels=8, n_zlabels=8, font_size = 8)
+    n_labels = 7
+    pl.show_grid( n_xlabels=n_labels, n_ylabels=n_labels, n_zlabels=n_labels, font_size = 8)
+
+    pl.add_points(ptcloud, color='b', point_size=5, render_points_as_spheres=True)
     pl.show()
 
+def visualize_pointclouds(ptcloud1:np.ndarray, ptcloud2:np.ndarray, background_positive:np.ndarray):
+    plotter               = pv.Plotter(shape=(1, 2))
+    plotter.subplot(0,0)
+    n_labels = 7
+    plotter.add_axes(line_width=2,cone_radius=0.3, shaft_length=2, tip_length=1, ambient=1, label_size=(0.2, 0.6))
+    plotter.show_grid( n_xlabels=n_labels, n_ylabels=n_labels, n_zlabels=n_labels, font_size = 12)
 
-def plot_with_landmarks( rcsb_id: str, eps, min_nbrs,poisson_recon_custom_path:str|None=None, ):
+    rgbas_cluster1       = [[15, 100, 21, 1] for datapoint in ptcloud1]
+    rgbas_positive1      = np.array([[205, 209, 228, 0.2] for _ in background_positive])
+
+    combined1            = np.concatenate([ptcloud1, background_positive])
+    rgbas_combined1      = np.concatenate([rgbas_cluster1, rgbas_positive1])
+
+    point_cloud1         = pv.PolyData(combined1)
+    point_cloud1["rgba"] = rgbas_combined1
+
+    plotter.add_points(point_cloud1, scalars="rgba", rgb=True, show_scalar_bar=False)
+
+
+    # ? Visualize selected cluster
+    plotter.subplot(0,1)
+    n_labels = 7
+    plotter.add_axes(line_width=2,cone_radius=0.3, shaft_length=2, tip_length=1, ambient=1, label_size=(0.2, 0.6))
+    plotter.show_grid( n_xlabels=n_labels, n_ylabels=n_labels, n_zlabels=n_labels, font_size = 12)
+
+    rgbas_cluster2       = [[15, 10, 221, 1] for datapoint in ptcloud2]
+    rgbas_positive2      = np.array([[205, 160, 200, 0.2] for _ in background_positive])
+    combined2            = np.concatenate([ptcloud2, background_positive])
+    rgbas_combined2      = np.concatenate([rgbas_cluster2, rgbas_positive2])
+    point_cloud2         = pv.PolyData(combined2)
+    point_cloud2["rgba"] = rgbas_combined2
+    plotter.add_points(point_cloud2, scalars="rgba", rgb=True, show_scalar_bar=False)
+
+    plotter.show()
+
+def plot_with_landmarks( rcsb_id: str, poisson_recon_custom_path:str|None=None, ):
     """
     @translation_vectors is a np.ndarray of shape (2,3) where
         - the first row is the means of the coordinate set
         - the second row is the deviations of the normalized coordinate set
         (to be used to reverse the normalization process or to travel to this coordinate frame)
-
     """
 
     src_taxid = RibosomeAssets(rcsb_id).get_taxids()[0][0]
     taxname   = list( Taxid.get_name(str(src_taxid)).items() )[0][1]
 
 
-    ptc_midpoint,atom_coordinates_by_chain, grid_dimensions, mean_abs_vectors= retrieve_ptc_and_chain_atoms(rcsb_id)
+    ptc_midpoint,atom_coordinates_by_chain= retrieve_ptc_and_chain_atoms(rcsb_id)
 
     if poisson_recon_custom_path == None:
         poisson_recon = poisson_recon_path(rcsb_id)
@@ -1162,8 +1212,8 @@ def plot_with_landmarks( rcsb_id: str, eps, min_nbrs,poisson_recon_custom_path:s
 
     #!--- Labels ----
     plotter.add_text('RCSB_ID:{}'.format(rcsb_id), position='upper_right', font_size=14, shadow=True, font=FONT, color='black')
-    plotter.add_text('eps: {} \nmin_nbrs: {}'.format(eps, min_nbrs), position='upper_left', font_size=8, shadow=True, font=FONT, color='black')
-    plotter.add_text('Volume: {}'.format(round(mesh_.volume, 3)), position='lower_left', font_size=8, shadow=True, font=FONT, color='black')
+    # plotter.add_text('eps: {} \nmin_nbrs: {}'.format(eps, min_nbrs), position='upper_left', font_size=8, shadow=True, font=FONT, color='black')
+    plotter.add_text('Tunnel Mesh Volume: {}'.format(round(mesh_.volume, 3)), position='lower_left', font_size=8, shadow=True, font=FONT, color='black')
     plotter.add_text('{}'.format(taxname), position='lower_right', font_size=8, shadow=True, font=FONT, color='black') 
 
     # plotter.open_gif("just_chains.gif")

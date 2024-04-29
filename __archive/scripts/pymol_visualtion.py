@@ -4,11 +4,15 @@ from pprint import pprint
 import random
 import sys
 from typing import List
+import chempy
+import pandas as pd
 from pymol import cmd
 from ribctl.etl.ribosome_assets import RibosomeAssets
+from mesh_generation.paths import TUNNEL_PATH, poisson_recon_ascii_path
 sys.path.append('/home/rtviii/dev/riboxyz')       #! hack until ribctl is a separate pypi project (after that just pip install ribctl)
 from ribctl.lib.tunnel import ptc_residues_calculate_midpoint, ptc_resdiues_get
-from ribctl import RIBETL_DATA
+from ribctl import EXIT_TUNNEL_WORK, RIBETL_DATA
+from masif_plugin import load_ply
 
 colormap__RNA = {
     "23SrRNA"  : "gray70",    # plants
@@ -177,10 +181,11 @@ def by_chain(pdbid: str):
         profile = json.load(infile)
 
     if profile['rnas'] != None:
-        for rna in profile['rnas']:
+        for rna in list(sorted(profile['rnas'], key=lambda d: d['nomenclature'][0])):
 
-            if len( rna['nomenclature'] )>0:
+            if len( rna['nomenclature'])>0:
                 nomclass = rna['nomenclature'][0]
+
             else:
                 nomclass = random.choice(list(colormap__RNA.keys()))
             prot_tmp = f"{nomclass}.{rna['auth_asym_id']}"
@@ -202,17 +207,19 @@ def by_chain(pdbid: str):
             cmd.color(colormap__RNA[nomclass], f"chain {rna['auth_asym_id']}")
             cmd.set('transparency', 0.5, f"chain {rna['auth_asym_id']}")
 
-    for protein in profile['proteins']:
+    for protein in list(sorted(profile['proteins'], key=lambda d: d['nomenclature'][0])):
         if len( protein['nomenclature'] )>0:
             nomclass = protein['nomenclature'][0]
         else:
             nomclass = random.choice([ *list(colormap__LSU_Proteins.keys()), *list(colormap__SSU_Proteins.keys()) ])
 
         if nomclass in colormap__LSU_Proteins:
-            CLR = colormap__LSU_Proteins[nomclass]
+            CHAIN_COLOR = colormap__LSU_Proteins[nomclass]
 
         elif nomclass in colormap__SSU_Proteins:
-            CLR = colormap__SSU_Proteins[nomclass]
+            CHAIN_COLOR = colormap__SSU_Proteins[nomclass]
+        else:
+            CHAIN_COLOR = 'gray70'
 
         prot_tmp = f"{nomclass}.{protein['auth_asym_id']}"
 
@@ -231,7 +238,7 @@ def by_chain(pdbid: str):
         cmd.hide ('everything'           ,      f"chain {protein['auth_asym_id']}")
         cmd.show ('surface'                 ,      f"chain {protein['auth_asym_id']}")
         cmd.show ('cartoon'              ,      f"chain {protein['auth_asym_id']}")
-        cmd.color(CLR                    ,      f"chain {protein['auth_asym_id']}")
+        cmd.color(CHAIN_COLOR                    ,      f"chain {protein['auth_asym_id']}")
         cmd.set  ('transparency' , 0.5, f"chain {protein['auth_asym_id']}")
 
     cmd.reset()
@@ -261,15 +268,80 @@ def extract_chains(list_auth_asym_ids:str) :
     cmd.extract(selection_name,  "c. {}".format("+".join(chains_names)) )
     return selection_name
 
+def visualize_tunnel_mesh(rcsb_id: str):
+    load_ply(poisson_recon_ascii_path(rcsb_id))
+
+def centerline_expand(rcsb_id:str):
+    print(centerline_expand)
+    
+def addAtom(model, name, vdw, x, y, z, partialCharge = 0.0):
+  a = chempy.Atom()
+  a.name = name
+  a.vdw = vdw
+  a.coord = [x, y, z]
+  a.partial_charge = partialCharge
+  model.atom.append(a)
+
+def create_centerline(rcsb_id:str):
+
+    rcsb_id = rcsb_id.upper()
+    
+    def open_tunnel_csv(rcsb_id: str) -> list[list]:
+
+        TUNNEL_PATH = os.path.join( EXIT_TUNNEL_WORK, "mole_tunnels", "tunnel_{}.csv".format(rcsb_id) )
+        df          = pd.read_csv(TUNNEL_PATH)
+        data        = []
+
+        for index, row in df.iterrows():
+            radius       = row["Radius"]
+            x_coordinate = row["X"]
+            y_coordinate = row["Y"]
+            z_coordinate = row["Z"]
+            data.append([radius, x_coordinate, y_coordinate, z_coordinate])
+        return data
+
+    import chempy
+    object_name = "centerline_{}".format(rcsb_id)
+
+    data = open_tunnel_csv(rcsb_id)
+    model = chempy.models.Indexed() 
+    for i, ( r,x,y,z ) in enumerate(data):
+          addAtom(model,str(i),r,x,y,z)
+    for a in range(len(model.atom)-1):
+        b = chempy.Bond()
+        b.index = [a,a+1]
+        model.bond.append(b)
+    cmd.set('surface_mode', 1)
+    cmd.set('sphere_mode', 5)
+    cmd.set('mesh_mode', 1)
+    cmd.load_model(model, object_name)
+    cmd.hide('everything', object_name)
+    cmd.set('sphere_color', 'red', object_name)
+    cmd.show('spheres', object_name)
+
+    cmd.select(name="_surf25", selection="{} within 25 of {}".format(rcsb_id,object_name))
+    cmd.create("surf25", "_surf25")
+
+    cmd.select(name="_surf15", selection="{} within 15 of {}".format(rcsb_id,object_name))
+    cmd.create("surf15", "_surf15")
 
 
-cmd.extend("extract_chains", extract_chains)
-cmd.extend("sload"            , sload                  )
-cmd.extend("by_chain"         , by_chain    )
-cmd.extend("ptc"              , pseudoatom_ptc         )
-cmd.extend("list_bacteria"    , list_bacteria          )
-cmd.extend("test_"    , test_          )
-cmd.extend("ray_picture"    , ray_picture          )
+    cmd.hide("everything", "surf25")
+    cmd.hide("everything", "surf15")
+    cmd.show("sticks", "surf25")
+    cmd.show("sticks", "surf15")
+    cmd.deselect()
+
+
+cmd.extend("extract_chains"    , extract_chains        )
+cmd.extend("sload"             , sload                 )
+cmd.extend("by_chain"          , by_chain              )
+cmd.extend("ptc"               , pseudoatom_ptc        )
+cmd.extend("list_bacteria"     , list_bacteria         )
+cmd.extend("test_"             , test_                 )
+cmd.extend("ray_picture"       , ray_picture           )
+cmd.extend("tunnel_mesh"       , visualize_tunnel_mesh )
+cmd.extend("create_centerline" , create_centerline     )
 
 
 # cmd.extend("tun_obstructions" , visualize_obstructions )
