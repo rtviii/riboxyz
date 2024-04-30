@@ -83,24 +83,14 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
-USE_I18N = True
-USE_L10N = True
-USE_TZ = True
+TIME_ZONE     = 'UTC'
+USE_I18N      = True
+USE_L10N      = True
+USE_TZ        = True
 
-
-
-# def ready():
-#     logs_dir = os.path.join(BASE_DIR, 'logs')
-#     if not os.path.exists(logs_dir):
-#         os.makedirs(logs_dir)
-
-# ready()
 
 
 NINJA_DOCS_VIEW  = 'swagger'
 STATIC_URL       = '/static/'
 STATIC_ROOT      = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
-]
+STATICFILES_DIRS = [ os.path.join(BASE_DIR, 'static'), ]
