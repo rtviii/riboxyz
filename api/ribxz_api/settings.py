@@ -91,6 +91,13 @@ USE_TZ        = True
 
 
 NINJA_DOCS_VIEW  = 'swagger'
+
+# STATIC_URL       = '/static/'
+# STATIC_ROOT      = os.path.join(BASE_DIR, 'staticfiles')
+# STATICFILES_DIRS = [ os.path.join(BASE_DIR, 'static'), ]
+
+# STATIC_URL lets you namespace your static files to avoid url conflicts and make them inaccessible from the browser
 STATIC_URL       = '/static/'
-STATIC_ROOT      = os.path.join(BASE_DIR, 'staticfiles')
+# STATIC_ROOT is where all the static files are collected by manage.py collectstatic
+STATIC_ROOT      = '/srv/www/static'
 STATICFILES_DIRS = [ os.path.join(BASE_DIR, 'static'), ]
