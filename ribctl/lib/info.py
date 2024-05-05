@@ -39,9 +39,9 @@ def struct_stats(ra:RibosomeAssets):
 
         for rna in rnas:
             if profile.mitochondrial :
-                if  MitochondrialRNAClass.mt_rRNA_12S in rna.nomenclature:
+                if  MitochondrialRNAClass.mtrRNA12S in rna.nomenclature:
                     has_ssu = 1
-                elif  MitochondrialRNAClass.mt_rRNA_16S in rna.nomenclature:
+                elif  MitochondrialRNAClass.mtrRNA16S in rna.nomenclature:
                     has_lsu = 2
             else:
                 if  ( CytosolicRNAClass.rRNA_5_8S in rna.nomenclature )or ( CytosolicRNAClass.rRNA_5S in rna.nomenclature ) or( CytosolicRNAClass.rRNA_28S in rna.nomenclature ) or ( CytosolicRNAClass.rRNA_25S in rna.nomenclature ) or ( CytosolicRNAClass.rRNA_23S in rna.nomenclature ):

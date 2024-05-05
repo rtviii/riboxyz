@@ -232,19 +232,18 @@ class CytosolicProteinClass(Enum):
 
 
 class MitochondrialRNAClass(Enum):
-    mt_rRNA_12S = "mt12SrRNA"  # mitochondrial
-    mt_rRNA_16S = "mt16SrRNA"  # mitochondrial
+    mtrRNA12S = "mt12SrRNA"  # mitochondrial
+    mtrRNA16S = "mt16SrRNA"  # mitochondrial
 
 
 class CytosolicRNAClass(Enum):
-    rRNA_5S = "5SrRNA"  #  bacterial or eykaryotic
-    rRNA_16S = "16SrRNA"  #  c-bacterial or mitochondrial
-    rRNA_23S = "23SrRNA"  # bacterial
-    rRNA_25S = "25SrRNA"  # plants
-
+    rRNA_5S   = "5SrRNA"  #  bacterial or eykaryotic
+    rRNA_16S  = "16SrRNA"  #  c-bacterial or mitochondrial
+    rRNA_23S  = "23SrRNA"  # bacterial
+    rRNA_25S  = "25SrRNA"  # plants
     rRNA_5_8S = "5.8SrRNA"  # eukaryotic
-    rRNA_18S = "18SrRNA"  # eukaryotic
-    rRNA_28S = "28SrRNA"  # eukaryotic
+    rRNA_18S  = "18SrRNA"  # eukaryotic
+    rRNA_28S  = "28SrRNA"  # eukaryotic
 
 
 class ElongationFactorClass(Enum):
@@ -252,39 +251,39 @@ class ElongationFactorClass(Enum):
     eEF1A = "eEF1A"
     eEF1B = "eEF1B"
     eFSec = "eFSec"
-    eEF2 = "eEF2"
+    eEF2  = "eEF2"
     mtEF4 = "mtEF4"
     eIF5A = "eIF5A"
-    eEF3 = "eEF3"
+    eEF3  = "eEF3"
     # Bacterial
     EF_Tu = "EF-Tu"
     EF_Ts = "EF-Ts"
-    SelB = "SelB"
-    EF_G = "EF-G"
-    EF4 = "EF4"
-    EF_P = "EF-P"
+    SelB  = "SelB"
+    EF_G  = "EF-G"
+    EF4   = "EF4"
+    EF_P  = "EF-P"
     Tet_O = "Tet_O"
     Tet_M = "Tet_M"
-    RelA = "RelA"
-    BipA = "BipA"
+    RelA  = "RelA"
+    BipA  = "BipA"
     # Archaeal
     aEF1A = "aEF1A"
-    aEF2 = "aEF2"
+    aEF2  = "aEF2"
 
 
 class InitiationFactorClass(Enum):
     #!Eukaryotic
-    eIF1 = "eIF1"
+    eIF1  = "eIF1"
     eIF1A = "eIF1A"
 
     eIF2_alpha = "eIF2_alpha"
-    eIF2_beta = "eIF2_beta"
+    eIF2_beta  = "eIF2_beta"
     eIF2_gamma = "eIF2_gamma"
 
-    eIF2B_alpha = "eIF2B_alpha"
-    eIF2B_beta = "eIF2B_beta"
-    eIF2B_gamma = "eIF2B_gamma"
-    eIF2B_delta = "eIF2B_delta"
+    eIF2B_alpha   = "eIF2B_alpha"
+    eIF2B_beta    = "eIF2B_beta"
+    eIF2B_gamma   = "eIF2B_gamma"
+    eIF2B_delta   = "eIF2B_delta"
     eIF2B_epsilon = "eIF2B_epsilon"
 
     eIF3_subunitA = "eIF3_subunitA"
@@ -307,7 +306,7 @@ class InitiationFactorClass(Enum):
 
     eIF4B = "eIF4B"
     eIF5B = "eIF5B"
-    eIF5 = "eIF5"
+    eIF5  = "eIF5"
 
     #!Bacterial
     IF1 = "IF1"
@@ -342,6 +341,7 @@ class PolymerMetadatum(BaseModel):
     auth_asym_id          : str
     entity_poly_seq_length: int
     nomenclature          : list[PolymerClass]
+
     @field_serializer('nomenclature')
     def serialize_dt(self, ncl: list[PolymerClass], _info):
         return [x.value for x in ncl]
