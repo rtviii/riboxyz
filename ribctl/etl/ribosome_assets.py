@@ -67,7 +67,7 @@ class RibosomeAssets():
         self._envcheck()
         return os.path.join(self._dir_path(),f"{self.rcsb_id}.json")
 
-    def profile(self) -> RibosomeStructure:
+    def profile(self) -> RibosomeStructure | None:
         try:
             with open(self._json_profile_filepath(), "r") as f:
                 return RibosomeStructure.model_validate(json.load(f))

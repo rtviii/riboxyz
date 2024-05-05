@@ -489,13 +489,6 @@ class NonpolymericLigand(BaseModel):
     # },
 
 
-# TODO: Is this needed? I don't think so (handle protein differences at the level of the nomenclature)
-# class LifecycleFactor(Polymer):
-#     def __hash__(self) -> int:
-#         return hash(self.auth_asym_id + self.parent_rcsb_id)
-#     nomenclature: list[LifecycleFactorClass]
-
-
 class AssemblyInstancesMap(BaseModel):
     """
     This basically specifies which assembly an instnace of a polymer or a nonpolymer belongs to.
