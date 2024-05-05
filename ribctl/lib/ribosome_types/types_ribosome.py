@@ -4,7 +4,7 @@ from typing import Any, Optional
 from enum import Enum
 from Bio.SeqRecord import SeqRecord
 from Bio.Seq import Seq
-from pydantic import BaseModel
+from pydantic import BaseModel, field_serializer
 from ribctl.lib.enumunion import enum_union
 
 # TODO:
@@ -20,15 +20,15 @@ class tRNA(Enum):
 
 class MitochondrialProteinClass(Enum):
     # mSSU
-    bS1m = "bS1m"
-    uS2m = "uS2m"
-    uS3m = "uS3m"
-    uS4m = "uS4m"
-    uS5m = "uS5m"
-    bS6m = "bS6m"
-    uS7m = "uS7m"
-    uS8m = "uS8m"
-    uS9m = "uS9m"
+    bS1m  = "bS1m"
+    uS2m  = "uS2m"
+    uS3m  = "uS3m"
+    uS4m  = "uS4m"
+    uS5m  = "uS5m"
+    bS6m  = "bS6m"
+    uS7m  = "uS7m"
+    uS8m  = "uS8m"
+    uS9m  = "uS9m"
     uS10m = "uS10m"
     uS11m = "uS11m"
     uS12m = "uS12m"
@@ -40,36 +40,36 @@ class MitochondrialProteinClass(Enum):
     bS18m = "bS18m"
     uS19m = "uS19m"
     bS21m = "bS21m"
-    mS22 = "mS22"
-    mS23 = "mS23"
-    mS25 = "mS25"
-    mS26 = "mS26"
-    mS27 = "mS27"
-    mS29 = "mS29"
-    mS31 = "mS31"
-    mS33 = "mS33"
-    mS34 = "mS34"
-    mS35 = "mS35"
-    mS37 = "mS37"
-    mS38 = "mS38"
-    mS39 = "mS39"
-    mS40 = "mS40"
-    mS41 = "mS41"
-    mS42 = "mS42"
-    mS43 = "mS43"
-    mS44 = "mS44"
-    mS45 = "mS45"
-    mS46 = "mS46"
-    mS47 = "mS47"
+    mS22  = "mS22"
+    mS23  = "mS23"
+    mS25  = "mS25"
+    mS26  = "mS26"
+    mS27  = "mS27"
+    mS29  = "mS29"
+    mS31  = "mS31"
+    mS33  = "mS33"
+    mS34  = "mS34"
+    mS35  = "mS35"
+    mS37  = "mS37"
+    mS38  = "mS38"
+    mS39  = "mS39"
+    mS40  = "mS40"
+    mS41  = "mS41"
+    mS42  = "mS42"
+    mS43  = "mS43"
+    mS44  = "mS44"
+    mS45  = "mS45"
+    mS46  = "mS46"
+    mS47  = "mS47"
 
     # mLSU
-    uL1m = "uL1m"
-    uL2m = "uL2m"
-    uL3m = "uL3m"
-    uL4m = "uL4m"
-    uL5m = "uL5m"
-    uL6m = "uL6m"
-    bL9m = "bL9m"
+    uL1m  = "uL1m"
+    uL2m  = "uL2m"
+    uL3m  = "uL3m"
+    uL4m  = "uL4m"
+    uL5m  = "uL5m"
+    uL6m  = "uL6m"
+    bL9m  = "bL9m"
     uL10m = "uL10m"
     uL11m = "uL11m"
     bL12m = "bL12m"
@@ -95,88 +95,88 @@ class MitochondrialProteinClass(Enum):
     bL34m = "bL34m"
     bL35m = "bL35m"
     bL36m = "bL36m"
-    mL37 = "mL37"
-    mL38 = "mL38"
-    mL39 = "mL39"
-    mL40 = "mL40"
-    mL41 = "mL41"
-    mL42 = "mL42"
-    mL43 = "mL43"
-    mL44 = "mL44"
-    mL45 = "mL45"
-    mL46 = "mL46"
-    mL48 = "mL48"
-    mL49 = "mL49"
-    mL50 = "mL50"
-    mL51 = "mL51"
-    mL52 = "mL52"
-    mL53 = "mL53"
-    mL54 = "mL54"
-    mL57 = "mL57"
-    mL58 = "mL58"
-    mL59 = "mL59"
-    mL60 = "mL60"
-    mL61 = "mL61"
-    mL62 = "mL62"
-    mL63 = "mL63"
-    mL64 = "mL64"
-    mL65 = "mL65"
-    mL66 = "mL66"
-    mL67 = "mL67"
+    mL37  = "mL37"
+    mL38  = "mL38"
+    mL39  = "mL39"
+    mL40  = "mL40"
+    mL41  = "mL41"
+    mL42  = "mL42"
+    mL43  = "mL43"
+    mL44  = "mL44"
+    mL45  = "mL45"
+    mL46  = "mL46"
+    mL48  = "mL48"
+    mL49  = "mL49"
+    mL50  = "mL50"
+    mL51  = "mL51"
+    mL52  = "mL52"
+    mL53  = "mL53"
+    mL54  = "mL54"
+    mL57  = "mL57"
+    mL58  = "mL58"
+    mL59  = "mL59"
+    mL60  = "mL60"
+    mL61  = "mL61"
+    mL62  = "mL62"
+    mL63  = "mL63"
+    mL64  = "mL64"
+    mL65  = "mL65"
+    mL66  = "mL66"
+    mL67  = "mL67"
 
 
 class CytosolicProteinClass(Enum):
     # SSU
-    bS1 = "bS1"
-    eS1 = "eS1"
-    uS2 = "uS2"
-    uS3 = "uS3"
-    uS4 = "uS4"
-    eS4 = "eS4"
-    uS5 = "uS5"
-    bS6 = "bS6"
-    eS6 = "eS6"
-    uS7 = "uS7"
-    eS7 = "eS7"
-    uS8 = "uS8"
-    eS8 = "eS8"
-    uS9 = "uS9"
-    uS10 = "uS10"
-    eS10 = "eS10"
-    uS11 = "uS11"
-    uS12 = "uS12"
-    eS12 = "eS12"
-    uS13 = "uS13"
-    uS14 = "uS14"
-    uS15 = "uS15"
-    bS16 = "bS16"
-    uS17 = "uS17"
-    eS17 = "eS17"
-    bS18 = "bS18"
-    uS19 = "uS19"
-    eS19 = "eS19"
-    bS20 = "bS20"
-    bS21 = "bS21"
-    bTHX = "bTHX"
-    eS21 = "eS21"
-    eS24 = "eS24"
-    eS25 = "eS25"
-    eS26 = "eS26"
-    eS27 = "eS27"
-    eS28 = "eS28"
-    eS30 = "eS30"
-    eS31 = "eS31"
+    bS1   = "bS1"
+    eS1   = "eS1"
+    uS2   = "uS2"
+    uS3   = "uS3"
+    uS4   = "uS4"
+    eS4   = "eS4"
+    uS5   = "uS5"
+    bS6   = "bS6"
+    eS6   = "eS6"
+    uS7   = "uS7"
+    eS7   = "eS7"
+    uS8   = "uS8"
+    eS8   = "eS8"
+    uS9   = "uS9"
+    uS10  = "uS10"
+    eS10  = "eS10"
+    uS11  = "uS11"
+    uS12  = "uS12"
+    eS12  = "eS12"
+    uS13  = "uS13"
+    uS14  = "uS14"
+    uS15  = "uS15"
+    bS16  = "bS16"
+    uS17  = "uS17"
+    eS17  = "eS17"
+    bS18  = "bS18"
+    uS19  = "uS19"
+    eS19  = "eS19"
+    bS20  = "bS20"
+    bS21  = "bS21"
+    bTHX  = "bTHX"
+    eS21  = "eS21"
+    eS24  = "eS24"
+    eS25  = "eS25"
+    eS26  = "eS26"
+    eS27  = "eS27"
+    eS28  = "eS28"
+    eS30  = "eS30"
+    eS31  = "eS31"
     RACK1 = "RACK1"
     # LSU
-    uL1 = "uL1"
-    uL2 = "uL2"
-    uL3 = "uL3"
-    uL4 = "uL4"
-    uL5 = "uL5"
-    uL6 = "uL6"
-    eL6 = "eL6"
-    eL8 = "eL8"
-    bL9 = "bL9"
+    uL1  = "uL1"
+    uL2  = "uL2"
+    uL3  = "uL3"
+    uL4  = "uL4"
+    uL5  = "uL5"
+    uL6  = "uL6"
+    eL6  = "eL6"
+    eL8  = "eL8"
+    bL9  = "bL9"
     uL10 = "uL10"
     uL11 = "uL11"
     bL12 = "bL12"
@@ -335,10 +335,23 @@ PolymerClass         = enum_union(PolynucleotideClass, PolypeptideClass)
 
 
 # ? ----------------------------------------------{ Object Types }------------------------------------------------
+
+class PolymerMetadatum(BaseModel):
+    assembly_id           : int
+    asym_ids              : list[str]
+    auth_asym_id          : str
+    entity_poly_seq_length: int
+    nomenclature          : list[PolymerClass]
+    @field_serializer('nomenclature')
+    def serialize_dt(self, ncl: list[PolymerClass], _info):
+        return [x.value for x in ncl]
+
 class Polymer(BaseModel):
     def __hash__(self):
         return hash(self.auth_asym_id + self.parent_rcsb_id)
 
+    def enum_union_fix(_):
+        return _
     def to_dict(self):
         """A hack for enum.union to work with pydantic BaseModel. Otherwise EnumUnion instances are represented as <MitochondrialProteinClass.mL64: 'mL64'> etc.(Correct is "mL64")"""
         return json.loads(self.model_dump_json())
@@ -351,30 +364,40 @@ class Polymer(BaseModel):
             name        = '{}.{}'.format(self.parent_rcsb_id,self.auth_asym_id)
         )
 
+    def metadatum(self) -> PolymerMetadatum:
+
+        return PolymerMetadatum(
+            assembly_id            = self.assembly_id,
+            asym_ids               = self.asym_ids,
+            auth_asym_id           = self.auth_asym_id,
+            entity_poly_seq_length = self.entity_poly_seq_length,
+            nomenclature           = [x.value for x in self.nomenclature])
+
     assembly_id: int
 
-    asym_ids: list[str]
+    asym_ids    : list[str]
     auth_asym_id: str
 
     parent_rcsb_id: str
 
-    src_organism_names: list[str]
+    src_organism_names : list[str]
     host_organism_names: list[str]
 
-    src_organism_ids: list[int]
-    host_organism_ids: list[int]
+    src_organism_ids   : list[int]
+    host_organism_ids  : list[int]
 
-    rcsb_pdbx_description: Optional[str] = None
+    rcsb_pdbx_description              : Optional[str] = None
 
-    entity_poly_strand_id: str
-    entity_poly_seq_one_letter_code: str
+    entity_poly_strand_id              : str
+    entity_poly_seq_one_letter_code    : str
     entity_poly_seq_one_letter_code_can: str
-    entity_poly_seq_length: int
-    entity_poly_polymer_type: str
-    entity_poly_entity_type: str
-
-    nomenclature: list[PolymerClass]
-
+    entity_poly_seq_length             : int
+    entity_poly_polymer_type           : str
+    entity_poly_entity_type            : str
+    nomenclature                       : list[PolymerClass]
+    @field_serializer('nomenclature')
+    def serialize_dt(self, ncl: list[PolymerClass], _info):
+        return [x.value for x in ncl]
 
 class Protein(Polymer):
     def __hash__(self):
@@ -410,14 +433,13 @@ class Protein(Polymer):
             }
         )
 
-    pfam_accessions: list[str]
-    pfam_comments: list[str]
+    pfam_accessions  : list[str]
+    pfam_comments    : list[str]
     pfam_descriptions: list[str]
     uniprot_accession: list[str]
 
     def to_polymer(self) -> Polymer:
         return Polymer(**self.model_dump())
-
 
 class RNA(Polymer):
     def __hash__(self):
@@ -425,8 +447,14 @@ class RNA(Polymer):
 
     # pass
 
+class NonpolymericLigandMetadatum(BaseModel):
+    chemicalId: str
+    chemicalName: str
+    number_of_instances: int
 
 class NonpolymericLigand(BaseModel):
+    def metadatum(self) -> NonpolymericLigandMetadatum:
+        return NonpolymericLigandMetadatum(**self.model_dump())
 
     class NonpolymerComp(BaseModel):
         class ChemComp(BaseModel):
@@ -488,7 +516,6 @@ class NonpolymericLigand(BaseModel):
     #     "reference_database_name": "UniProt",
     # },
 
-
 class AssemblyInstancesMap(BaseModel):
     """
     This basically specifies which assembly an instnace of a polymer or a nonpolymer belongs to.
@@ -540,21 +567,82 @@ class AssemblyInstancesMap(BaseModel):
     nonpolymer_entity_instances: Optional[list[NonpolymerEntityInstance]] =None
     polymer_entity_instances: list[PolymerEntityInstance]
 
+class RibosomeStructureMetadatum(BaseModel):
+
+    rcsb_id   : str
+    expMethod : str
+    resolution: float
+
+    pdbx_keywords     : Optional[str] =None
+    pdbx_keywords_text: Optional[str] = None
+
+    rcsb_external_ref_id: list[str]
+    rcsb_external_ref_type: list[str]
+    rcsb_external_ref_link: list[str]
+
+    citation_year        : Optional[int] = None
+    citation_rcsb_authors: Optional[list[str]] = None
+    citation_title       : Optional[str] = None
+    citation_pdbx_doi    : Optional[str] = None
+
+    src_organism_ids  : list[int]
+    src_organism_names: list[str]
+
+    host_organism_ids  : list[int]
+    host_organism_names: list[str]
+
+    # assembly_map: list[AssemblyInstancesMap]
+    mitochondrial: bool
+
+
+    proteins_metadata: list[PolymerMetadatum]
+    rnas_metadata    : list[PolymerMetadatum]
+    # ? This includes DNA-RNA hybrid strands, DNA and all other polymers
+    other_polymers_metadata: list[PolymerMetadatum]
+    nonpolymeric_ligands   : list[NonpolymericLigandMetadatum]
 
 class RibosomeStructure(BaseModel):
+
     def get_nomenclature_map(self) -> dict[str, list[Polymer]]:
         "Return a map from auth_asym_id to nomenclatures of all polymers in the structure"
         _ = {}
 
         for prp in self.proteins:
             _[prp.auth_asym_id] = [ x.name for x in  prp.nomenclature]
+
         for prna in self.rnas:
             _[prna.auth_asym_id] =[ y.name for y in  prna.nomenclature]
 
         return _
 
-    rcsb_id: str
-    expMethod: str
+    def metadata(self) -> RibosomeStructureMetadatum:
+
+        return RibosomeStructureMetadatum(
+
+                                         rcsb_id                 = self.rcsb_id,
+                                         expMethod               = self.expMethod,
+                                         resolution              = self.resolution,
+                                         pdbx_keywords           = self.pdbx_keywords,
+                                         pdbx_keywords_text      = self.pdbx_keywords_text,
+                                         rcsb_external_ref_id    = self.rcsb_external_ref_id,
+                                         rcsb_external_ref_type  = self.rcsb_external_ref_type,
+                                         rcsb_external_ref_link  = self.rcsb_external_ref_link,
+                                         citation_year           = self.citation_year,
+                                         citation_rcsb_authors   = self.citation_rcsb_authors,
+                                         citation_title          = self.citation_title,
+                                         citation_pdbx_doi       = self.citation_pdbx_doi,
+                                         src_organism_ids        = self.src_organism_ids,
+                                         src_organism_names      = self.src_organism_names,
+                                         host_organism_ids       = self.host_organism_ids,
+                                         host_organism_names     = self.host_organism_names,
+                                         mitochondrial           = self.mitochondrial,
+                                         proteins_metadata       = [x.metadatum() for x in self.proteins            ],
+                                         rnas_metadata           = [x.metadatum() for x in self.rnas                ],
+                                         other_polymers_metadata = [x.metadatum() for x in self.other_polymers      ],
+                                         nonpolymeric_ligands    = [x.metadatum() for x in self.nonpolymeric_ligands])
+
+    rcsb_id   : str
+    expMethod : str
     resolution: float
 
     pdbx_keywords     : Optional[str] =None

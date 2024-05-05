@@ -10,7 +10,7 @@ from ninja import Router
 from pydantic import BaseModel
 from ribctl.etl.ribosome_assets import RibosomeAssets
 # from ribctl.lib.mod_superimpose import pymol_super, ranged_align_by_auth_asym_id, ranged_align_by_polyclass
-from ribctl.lib.ribosome_types.types_ribosome import PolymerClass, CytosolicProteinClass, PolynucleotideClass, RibosomeStructure
+from ribctl.lib.ribosome_types.types_ribosome import PolymerClass, CytosolicProteinClass, PolynucleotideClass, RibosomeStructure, RibosomeStructureMetadatum
 from schema.v0 import BanClassMetadata, ExogenousRNAByStruct,LigandInstance, LigandlikeInstance, NeoStruct, NomenclatureClass, NomenclatureClassMember
 import concurrent.futures
 from wsgiref.util import FileWrapper
@@ -54,34 +54,37 @@ class StructurePagination(PaginationBase):
     class Output(Schema):
         items: list[RibosomeStructure] # `items` is a default attribute
         total: int
-        per_page: int = 20
+        per_page: int = 5
 
     def paginate_queryset(self, queryset, pagination: Input, **params):
         skip = pagination.skip
         print("Got queryset", queryset.count)
         return {
-            'items': queryset[skip : skip + 20],
-            'total': queryset.count(),
-            'per_page': 20,
+            'items'   : queryset[skip : skip + 5],
+            'total'   : queryset.count(),
+            'per_page': 5,
         }
 
 
 
 
-@structure_router.post('/list_structures', response=list[RibosomeStructure], tags=[TAG])
+@structure_router.post('/list_structures', response=list[RibosomeStructureMetadatum], tags=[TAG])
 @paginate(pagination=StructurePagination)
 def list_structures(request):
-    # def load_struct(rcsb_id:str):
-    #     return RibosomeAssets(rcsb_id).profile()
-    # def read_parallel(rcsb_ids:list[str]):
-    #     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-    #         futures = [executor.submit(load_struct, f) for f in rcsb_ids]
-    #         return [fut.result() for fut in futures]
-    # try:
+    def load_struct(rcsb_id:str):
+        return RibosomeAssets(rcsb_id).profile().metadata()
 
-    struct_ids      = RibosomeAssets.list_all_structs()[:100]
-    struct_profiles = [RibosomeAssets(rcsb_id).profile() for rcsb_id in struct_ids]
-    return struct_profiles
+    def read_parallel(rcsb_ids:list[str]):
+        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+            futures = [executor.submit(load_struct, f) for f in rcsb_ids]
+            return [fut.result() for fut in futures]
+
+    # try:
+    # struct_ids      = RibosomeAssets.list_all_structs()[:10]
+    # struct_profiles = [RibosomeAssets(rcsb_id).profile() for rcsb_id in struct_ids]
+
+    structure_profiles = read_parallel(RibosomeAssets.list_all_structs()[:10])
+    return structure_profiles
 
     # except Exception as e:
     #     return HttpResponseServerError("Failed to return structure profiles list :", e)

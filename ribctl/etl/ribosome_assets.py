@@ -67,14 +67,9 @@ class RibosomeAssets():
         self._envcheck()
         return os.path.join(self._dir_path(),f"{self.rcsb_id}.json")
 
-    def profile(self) -> RibosomeStructure | None:
-        try:
-            with open(self._json_profile_filepath(), "r") as f:
-                return RibosomeStructure.model_validate(json.load(f))
-        except Exception as e:
-            print("Error loading profile for ", self.rcsb_id)
-            print(e)
-
+    def profile(self) -> RibosomeStructure:
+        with open(self._json_profile_filepath(), "r") as f:
+            return RibosomeStructure.model_validate(json.load(f))
     def _nomenclature_table(self) -> dict[str, dict]:
         #TODO: update getter
         prof = self.profile()
