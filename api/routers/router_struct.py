@@ -68,22 +68,20 @@ class StructurePagination(PaginationBase):
 
 
 
+
 @structure_router.post('/list_structures', response=list[RibosomeStructureMetadatum], tags=[TAG])
-@paginate(pagination=StructurePagination)
-def list_structures(request):
-    def load_struct(rcsb_id:str):
-        return RibosomeAssets(rcsb_id).profile().metadata()
+def list_structures(request, page:int, filters=StructureFilters):
+    PAGE_SIZE = 20 
+    def load_metadata(rcsb_id:str):
+        with open(RibosomeAssets(rcsb_id)._json_profile_filepath(), 'r') as infile:
+            return RibosomeStructure.model_validate_json(infile.read()).metadata()
 
     def read_parallel(rcsb_ids:list[str]):
         with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-            futures = [executor.submit(load_struct, f) for f in rcsb_ids]
+            futures = [executor.submit(load_metadata, f) for f in rcsb_ids]
             return [fut.result() for fut in futures]
 
-    # try:
-    # struct_ids      = RibosomeAssets.list_all_structs()[:10]
-    # struct_profiles = [RibosomeAssets(rcsb_id).profile() for rcsb_id in struct_ids]
-
-    structure_profiles = read_parallel(RibosomeAssets.list_all_structs()[:10])
+    structure_profiles = read_parallel(RibosomeAssets.list_all_structs()[:20])
     return structure_profiles
 
     # except Exception as e:

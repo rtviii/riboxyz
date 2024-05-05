@@ -70,6 +70,7 @@ class RibosomeAssets():
     def profile(self) -> RibosomeStructure:
         with open(self._json_profile_filepath(), "r") as f:
             return RibosomeStructure.model_validate(json.load(f))
+
     def _nomenclature_table(self) -> dict[str, dict]:
         #TODO: update getter
         prof = self.profile()

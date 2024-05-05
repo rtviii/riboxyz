@@ -567,6 +567,7 @@ class AssemblyInstancesMap(BaseModel):
     nonpolymer_entity_instances: Optional[list[NonpolymerEntityInstance]] =None
     polymer_entity_instances: list[PolymerEntityInstance]
 
+
 class RibosomeStructureMetadatum(BaseModel):
 
     rcsb_id   : str
