@@ -7,7 +7,6 @@ from ribctl import RIBETL_DATA
 from ribctl.etl.ribosome_assets import RibosomeAssets
 from ribctl.lib.ribosome_types.types_ribosome import RNA, LifecycleFactorClass, MitochondrialProteinClass, Polymer, PolymerClass, CytosolicProteinClass, PolynucleotideClass, PolypeptideClass, Protein, ProteinClass, RibosomeStructure
 from schema.v0 import BanClassMetadata, ExogenousRNAByStruct,LigandInstance, LigandlikeInstance, NeoStruct, NomenclatureClass, NomenclatureClassMember
-from wsgiref.util import FileWrapper
 
 classification_router = Router()
 TAG              = "Polymer Classes"
