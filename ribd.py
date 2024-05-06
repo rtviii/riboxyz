@@ -8,7 +8,7 @@ with warnings.catch_warnings():
 with warnings.catch_warnings():
     warnings.simplefilter('ignore', BiopythonDeprecationWarning)
 
-from ribctl.lib.ribosome_types.types_ribosome import RibosomeStructure
+from ribctl.lib.schema.types_ribosome import RibosomeStructure
 sys.dont_write_bytecode = True
 import argparse
 import json
@@ -17,7 +17,7 @@ from pprint import pprint
 from ribctl.cli.ls import cmd_ls
 from ribctl.cli.sync import cmd_sync
 from ribctl.lib.mod_transpose_bsites import init_transpose_ligand
-from ribctl.lib.ribosome_types.types_binding_site import BindingSite
+from ribctl.lib.schema.types_binding_site import BindingSite
 
 def parse_comma_separated_list(value):
     return value.split(',')

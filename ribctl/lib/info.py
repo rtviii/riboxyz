@@ -3,7 +3,7 @@ from pprint import pprint
 import sys
 from typing import Literal
 from ribctl.etl.ribosome_assets import RibosomeAssets
-from ribctl.lib.ribosome_types.types_ribosome import RNA, CytosolicRNAClass, LifecycleFactorClass, MitochondrialRNAClass, Polymer, tRNA
+from ribctl.lib.schema.types_ribosome import RNA, CytosolicRNAClass, LifecycleFactorClass, MitochondrialRNAClass, Polymer, tRNA
 
 
 

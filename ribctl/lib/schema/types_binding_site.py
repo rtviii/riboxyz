@@ -4,7 +4,7 @@ import typing
 import pydantic
 from pydantic import BaseModel, RootModel
 from Bio.PDB.Residue import Residue
-from ribctl.lib.ribosome_types.types_ribosome import Polymer, PolymerClass
+from ribctl.lib.schema.types_ribosome import Polymer, PolymerClass
 
 AMINO_ACIDS = {
     "ALA": 0,

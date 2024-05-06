@@ -6,14 +6,14 @@ from Bio.PDB.Structure import Structure
 from Bio.PDB.Chain import Chain
 from typing import Optional
 from ribctl import AMINO_ACIDS_3_TO_1_CODE
-from ribctl.lib.ribosome_types.types_binding_site import BindingSite
+from ribctl.lib.schema.types_binding_site import BindingSite
 from ribctl.lib.mod_extract_bsites import  struct_ligand_ids, bsite_ligand
 from ribctl.lib.mod_split_rename import split_rename
 from ribctl.etl.etl_pipeline import current_rcsb_structs, ReannotationPipeline, rcsb_single_structure_graphql, query_rcsb_api
 from ribctl.lib.tunnel import ptc_resdiues_get, ptc_residues_calculate_midpoint
 # from ribctl.lib.mod_render_thumbnail import render_thumbnail
 from ribctl.lib.utils import download_unpack_place, open_structure
-from ribctl.lib.ribosome_types.types_ribosome import RNA, LifecycleFactorClass, Polymer, PolymerClass, PolynucleotideClass, PolypeptideClass, Protein, CytosolicProteinClass, RibosomeStructure
+from ribctl.lib.schema.types_ribosome import RNA, LifecycleFactorClass, Polymer, PolymerClass, PolynucleotideClass, PolypeptideClass, Protein, CytosolicProteinClass, RibosomeStructure
 from ribctl import RIBETL_DATA
 from pydantic import BaseModel
 from concurrent.futures import ALL_COMPLETED, Future, ProcessPoolExecutor, ThreadPoolExecutor, wait

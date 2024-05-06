@@ -35,7 +35,7 @@ from ribctl.lib.libhmm import (
     hmm_produce,
 )
 from ribctl.etl.ribosome_assets import Assetlist, RibosomeAssets
-from ribctl.lib.ribosome_types.types_ribosome import (
+from ribctl.lib.schema.types_ribosome import (
     LifecycleFactorClass,
     Polymer,
     PolymerClass,

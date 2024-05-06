@@ -4,10 +4,10 @@ import typing
 from neo4j.exceptions import AuthError
 from neo4j import Driver, GraphDatabase
 from ribctl.etl.etl_pipeline import current_rcsb_structs
-from ribctl.lib.ribosome_types.types_ribosome import MitochondrialProteinClass, PolynucleotideClass, RibosomeStructure
+from ribctl.lib.schema.types_ribosome import MitochondrialProteinClass, PolynucleotideClass, RibosomeStructure
 from ribctl.etl.ribosome_assets import RibosomeAssets
 from neo4j import GraphDatabase, Driver, ManagedTransaction, Transaction
-from ribctl.lib.ribosome_types.types_ribosome import  NonpolymericLigand,  CytosolicProteinClass, RibosomeStructure
+from ribctl.lib.schema.types_ribosome import  NonpolymericLigand,  CytosolicProteinClass, RibosomeStructure
 from schema.data_requests import LigandsByStruct
 from schema.v0 import ExogenousRNAByStruct,BanClassMetadata, LigandInstance, NeoStruct, NomenclatureClass, NomenclatureClassMember
 

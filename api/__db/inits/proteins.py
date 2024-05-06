@@ -3,7 +3,7 @@ from typing import Callable
 from neo4j import Driver, ManagedTransaction, Transaction
 from neo4j.graph import Node, Relationship
 from neo4j import ManagedTransaction, Transaction
-from ribctl.lib.ribosome_types.types_ribosome import Protein
+from ribctl.lib.schema.types_ribosome import Protein
 
 def node__protein(_prot:Protein)->Callable[[Transaction | ManagedTransaction], Node ]:
     P = _prot.dict()

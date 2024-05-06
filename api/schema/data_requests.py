@@ -1,5 +1,5 @@
 from ninja import Schema
-from ribctl.lib.ribosome_types.types_ribosome import PolynucleotideClass, Protein, CytosolicProteinClass
+from ribctl.lib.schema.types_ribosome import PolynucleotideClass, Protein, CytosolicProteinClass
 """This file documents the possible requests that the API can receive."""
 
 

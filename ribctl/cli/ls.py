@@ -5,7 +5,7 @@ from pprint import pprint
 from ribctl import RIBETL_DATA
 from ribctl.etl.ribosome_assets import RibosomeAssets
 from ribctl.lib.libmsa import Taxid
-from ribctl.lib.ribosome_types.types_ribosome import PolynucleotideClass, PolypeptideClass, RibosomeStructure
+from ribctl.lib.schema.types_ribosome import PolynucleotideClass, PolypeptideClass, RibosomeStructure
 # from ribctl.lib.libmsa import  Taxid
 
 

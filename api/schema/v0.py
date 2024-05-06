@@ -1,6 +1,6 @@
 import typing
 from ninja import Schema
-from ribctl.lib.ribosome_types.types_ribosome import NonpolymericLigand, PolynucleotideClass, Protein, CytosolicProteinClass, RibosomeStructure
+from ribctl.lib.schema.types_ribosome import NonpolymericLigand, PolynucleotideClass, Protein, CytosolicProteinClass, RibosomeStructure
 """This file documents the possible requests that the API can receive."""
 
 class ExogenousRNAByStruct(Schema):

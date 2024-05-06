@@ -567,7 +567,6 @@ class AssemblyInstancesMap(BaseModel):
     nonpolymer_entity_instances: Optional[list[NonpolymerEntityInstance]] =None
     polymer_entity_instances: list[PolymerEntityInstance]
 
-
 class RibosomeStructureMetadatum(BaseModel):
 
     rcsb_id   : str
@@ -581,10 +580,10 @@ class RibosomeStructureMetadatum(BaseModel):
     rcsb_external_ref_type: list[str]
     rcsb_external_ref_link: list[str]
 
-    citation_year        : Optional[int] = None
+    citation_year         : Optional[int]      = None
     citation_rcsb_authors: Optional[list[str]] = None
-    citation_title       : Optional[str] = None
-    citation_pdbx_doi    : Optional[str] = None
+    citation_title        : Optional[str]      = None
+    citation_pdbx_doi     : Optional[str]      = None
 
     src_organism_ids  : list[int]
     src_organism_names: list[str]
@@ -594,7 +593,6 @@ class RibosomeStructureMetadatum(BaseModel):
 
     # assembly_map: list[AssemblyInstancesMap]
     mitochondrial: bool
-
 
     proteins_metadata: list[PolymerMetadatum]
     rnas_metadata    : list[PolymerMetadatum]
