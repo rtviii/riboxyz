@@ -594,11 +594,11 @@ class RibosomeStructureMetadatum(BaseModel):
     # assembly_map: list[AssemblyInstancesMap]
     mitochondrial: bool
 
-    proteins_metadata: list[PolymerMetadatum]
-    rnas_metadata    : list[PolymerMetadatum]
-    # ? This includes DNA-RNA hybrid strands, DNA and all other polymers
-    other_polymers_metadata: list[PolymerMetadatum]
-    nonpolymeric_ligands   : list[NonpolymericLigandMetadatum]
+    # proteins_metadata: list[PolymerMetadatum]
+    # rnas_metadata    : list[PolymerMetadatum]
+    # # ? This includes DNA-RNA hybrid strands, DNA and all other polymers
+    # other_polymers_metadata: list[PolymerMetadatum]
+    # nonpolymeric_ligands   : list[NonpolymericLigandMetadatum]
 
 class RibosomeStructure(BaseModel):
 

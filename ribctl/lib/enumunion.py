@@ -153,7 +153,7 @@ class UnionEnumMeta(enum.EnumMeta):
         return union_enum
 
     def __str__(self) -> str:
-        return super().__str__()
+        return str(self.__name__)
 
     def __repr__(cls):
         return f"<union enum of {cls._subenums_}>"
