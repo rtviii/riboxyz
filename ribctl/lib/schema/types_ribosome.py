@@ -581,7 +581,7 @@ class RibosomeStructureMetadatum(BaseModel):
     rcsb_external_ref_link: list[str]
 
     citation_year         : Optional[int]      = None
-    citation_rcsb_authors: Optional[list[str]] = None
+    citation_rcsb_authors : Optional[list[str]] = None
     citation_title        : Optional[str]      = None
     citation_pdbx_doi     : Optional[str]      = None
 

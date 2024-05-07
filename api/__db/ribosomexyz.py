@@ -374,7 +374,7 @@ class ribosomexyzDB():
 
                 fstring = flag_into_filter(subunit)
                 return tx.run("""//
-                        match (n:ProteinClass)-[]-(rp:Protein)-[]-(s:RibosomeStructure) where  toLower(n.class_id) contains "{FAMILY}" and {SUBUNIT} 
+                        match (n:ProteinClass)-[]-(rp:Protein)-[]-(s:RibosomeStructure) where toLower(n.class_id) contains "{FAMILY}" and {SUBUNIT} 
                         unwind s.`src_organism_ids` as orgid
                         with collect(distinct orgid) as organisms, n.class_id as banClass, collect(s.rcsb_id) as structs, collect(distinct rp.pfam_comments) as comments
                         return  banClass, organisms, comments, structs""".format_map({"FAMILY": family, "SUBUNIT": fstring})).data()  # type: ignore
