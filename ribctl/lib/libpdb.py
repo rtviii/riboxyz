@@ -6,7 +6,7 @@ import numpy as np
 from __archive.scripts.pymol_visualtion import extract_chains
 from ribctl import EXIT_TUNNEL_WORK, RIBETL_DATA
 from ribctl.etl.ribosome_assets import RibosomeAssets
-from ribctl.lib.ribosome_types.types_ribosome import PolymerClass
+from ribctl.lib.schema.types_ribosome import PolymerClass
 from pymol import cmd
 
 

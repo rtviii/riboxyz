@@ -3,7 +3,7 @@ import json
 from typing import List, Literal, Optional, Union
 from pydantic import BaseModel, field_serializer
 
-from ribctl.lib.ribosome_types.types_ribosome import CytosolicProteinClass, MitochondrialProteinClass, PolymerClass
+from ribctl.lib.schema.types_ribosome import CytosolicProteinClass, MitochondrialProteinClass, PolymerClass
 
 raw_chain = {
             "assembly_id": 1,

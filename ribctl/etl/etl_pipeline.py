@@ -10,7 +10,7 @@ from ribctl import ASSETS, CLASSIFICATION_REPORTS, RIBETL_DATA
 from ribctl.lib.libhmm import (
     HMMClassifier,
 )
-from ribctl.lib.ribosome_types.types_ribosome import (
+from ribctl.lib.schema.types_ribosome import (
     RNA,
     AssemblyInstancesMap,
     LifecycleFactorClass,

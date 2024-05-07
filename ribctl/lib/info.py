@@ -3,7 +3,7 @@ from pprint import pprint
 import sys
 from typing import Literal
 from ribctl.etl.ribosome_assets import RibosomeAssets
-from ribctl.lib.ribosome_types.types_ribosome import RNA, CytosolicRNAClass, LifecycleFactorClass, MitochondrialRNAClass, Polymer, tRNA
+from ribctl.lib.schema.types_ribosome import RNA, CytosolicRNAClass, LifecycleFactorClass, MitochondrialRNAClass, Polymer, tRNA
 
 
 
@@ -39,9 +39,9 @@ def struct_stats(ra:RibosomeAssets):
 
         for rna in rnas:
             if profile.mitochondrial :
-                if  MitochondrialRNAClass.mt_rRNA_12S in rna.nomenclature:
+                if  MitochondrialRNAClass.mtrRNA12S in rna.nomenclature:
                     has_ssu = 1
-                elif  MitochondrialRNAClass.mt_rRNA_16S in rna.nomenclature:
+                elif  MitochondrialRNAClass.mtrRNA16S in rna.nomenclature:
                     has_lsu = 2
             else:
                 if  ( CytosolicRNAClass.rRNA_5_8S in rna.nomenclature )or ( CytosolicRNAClass.rRNA_5S in rna.nomenclature ) or( CytosolicRNAClass.rRNA_28S in rna.nomenclature ) or ( CytosolicRNAClass.rRNA_25S in rna.nomenclature ) or ( CytosolicRNAClass.rRNA_23S in rna.nomenclature ):

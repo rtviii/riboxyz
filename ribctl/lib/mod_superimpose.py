@@ -2,7 +2,7 @@ import argparse
 import itertools
 import os
 from typing import Tuple
-from ribctl.lib.ribosome_types.types_ribosome import RibosomeStructure
+from ribctl.lib.schema.types_ribosome import RibosomeStructure
 from pymol import cmd
 from ribctl.lib.mod_transpose_bsites import SeqMatch
 from ribctl.lib.utils import open_structure

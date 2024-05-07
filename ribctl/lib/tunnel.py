@@ -2,7 +2,7 @@ import math
 import os
 from fuzzysearch import find_near_matches
 import numpy as np
-from ribctl.lib.ribosome_types.types_binding_site import (
+from ribctl.lib.schema.types_binding_site import (
     AMINO_ACIDS,
     NUCLEOTIDES,
     ResidueSummary,
@@ -13,7 +13,7 @@ from Bio.PDB.Chain import Chain
 from Bio.PDB.Atom import Atom
 from functools import reduce
 from Bio.PDB.Structure import Structure
-from ribctl.lib.ribosome_types.types_ribosome import RNA
+from ribctl.lib.schema.types_ribosome import RNA
 from fuzzysearch import find_near_matches
 
 

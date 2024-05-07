@@ -13,8 +13,8 @@ with warnings.catch_warnings():
 	warnings.simplefilter('ignore', BiopythonDeprecationWarning)
 	from Bio import pairwise2
 
-from ribctl.lib.ribosome_types.types_binding_site import LigandPrediction, PredictedResiduesPolymer
-from ribctl.lib.ribosome_types.types_ribosome import PolymerClass, RibosomeStructure
+from ribctl.lib.schema.types_binding_site import LigandPrediction, PredictedResiduesPolymer
+from ribctl.lib.schema.types_ribosome import PolymerClass, RibosomeStructure
 from ribctl.lib.mod_extract_bsites import  BindingSite, struct_ligand_ids, bsite_extrarbx_polymer
 from ribctl.lib.utils import open_structure
 import numpy as np

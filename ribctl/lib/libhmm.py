@@ -5,7 +5,7 @@ from Bio.SeqRecord import SeqRecord
 import pyhmmer
 from ribctl import ASSETS, MUSCLE_BIN
 from ribctl.lib.libmsa import Fasta, muscle_align_N_seq, phylogenetic_neighborhood
-from ribctl.lib.ribosome_types.types_ribosome import RNA, ElongationFactorClass, InitiationFactorClass, LifecycleFactorClass, MitochondrialProteinClass, Polymer, PolymerClass, PolynucleotideClass, PolypeptideClass, Protein, CytosolicProteinClass, CytosolicProteinClass, tRNA
+from ribctl.lib.schema.types_ribosome import RNA, ElongationFactorClass, InitiationFactorClass, LifecycleFactorClass, MitochondrialProteinClass, Polymer, PolymerClass, PolynucleotideClass, PolypeptideClass, Protein, CytosolicProteinClass, CytosolicProteinClass, tRNA
 # from ribctl.etl.ribosome_assets import RibosomeAssets
 from pyhmmer.easel import Alphabet, DigitalSequenceBlock, TextSequence, SequenceFile, SequenceBlock, TextSequenceBlock, DigitalSequence
 from pyhmmer.plan7 import Pipeline, HMM , TopHits

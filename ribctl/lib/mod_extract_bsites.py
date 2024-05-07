@@ -6,8 +6,8 @@ from Bio.PDB.NeighborSearch import NeighborSearch
 from Bio.PDB.Residue import Residue
 from Bio.PDB.Structure import Structure
 from Bio.PDB.Chain import Chain
-from ribctl.lib.ribosome_types.types_ribosome import NonpolymericLigand, Polymer, RibosomeStructure
-from ribctl.lib.ribosome_types.types_binding_site import AMINO_ACIDS, NUCLEOTIDES, BindingSite, BindingSiteChain, ResidueSummary 
+from ribctl.lib.schema.types_ribosome import NonpolymericLigand, Polymer, RibosomeStructure
+from ribctl.lib.schema.types_binding_site import AMINO_ACIDS, NUCLEOTIDES, BindingSite, BindingSiteChain, ResidueSummary 
 from ribctl.lib import utils
 
 

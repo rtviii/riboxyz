@@ -9,7 +9,7 @@ from ribctl import AMINO_ACIDS_3_TO_1_CODE
 from ribctl.etl import AssetFile
 from ribctl.etl.ribosome_assets import Assetlist, RibosomeAssets
 from ribctl.lib.tunnel import ptc_resdiues_get, ptc_residues_calculate_midpoint
-from ribctl.lib.ribosome_types.types_binding_site import BindingSite
+from ribctl.lib.schema.types_binding_site import BindingSite
 from ribctl.lib.mod_extract_bsites import bsite_ligand, struct_ligand_ids, bsite_extrarbx_polymer, bsite_extrarbx_polymer
 from ribctl.lib.mod_split_rename import split_rename
 from ribctl.etl.etl_pipeline import current_rcsb_structs, ReannotationPipeline, rcsb_single_structure_graphql, query_rcsb_api
@@ -80,22 +80,21 @@ def obtain_assets_threadpool(assetlist: Assetlist, workers: int = 15,  overwrite
     logger.info("Finished syncing with RCSB")
 
 
-def obtain_all_missing():
-    import asyncio
+# def obtain_all_missing():
+#     import asyncio
+#     etllogger = get_etl_logger()
+#     statuses = AssetFile.status_all()
+#     print(statuses)
+#     print("got all struct statust", len(statuses))
+#     count = 0
+#     for i,j in statuses:
+#         if j['PTC'] == False:
+#             count += 1
+#     print("PTCs missing", count)
 
-    etllogger = get_etl_logger()
-    statuses = AssetFile.status_all()
-    print(statuses)
-    print("got all struct statust", len(statuses))
-    count = 0
-    for i,j in statuses:
-        if j['PTC'] == False:
-            count += 1
-    print("PTCs missing", count)
-
-    for struct, status in statuses:
-        if not status['PTC'] :
-            try:
-                asyncio.run(RibosomeAssets(struct)._update_ptc_coordinates())
-            except Exception as e:
-                etllogger.error(f"Error in {struct} : {e}")
+#     for struct, status in statuses:
+#         if not status['PTC'] :
+#             try:
+#                 asyncio.run(RibosomeAssets(struct)._update_ptc_coordinates())
+#             except Exception as e:
+#                 etllogger.error(f"Error in {struct} : {e}")
