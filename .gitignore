@@ -5,7 +5,6 @@ rnacentral*
 
 **/logs/**
 
-
 **/*.ply
 *.ply
 
@@ -17,17 +16,10 @@ ribctl/assets/PoissonRecon
 volume/**
 **/volume/
 
-*.ply
-
-*.tar.gz
-*.sqlite
-
 
 **/*.hmm
 *.hmm
 **/f_**
-
-nomv2/**
 
 
 *.cif
@@ -35,31 +27,14 @@ nomv2/**
 **/volume
 volume/*
 
-**/node_modules
-node_modules/**
-node_modules
-
 **/classification_reports/**
 
 *.env
 **/*.env
 
-# **.fa
-# **.fasta
-
-__pycache__
-__pycache__/**
-**/__pycache__/
-
-
-**/local_venv
-local_venv/**
-local_venv
-
 **/*venv*/**
 **/*venv*
 *venv*
-
 
 **/*.log
 *.log
