@@ -99,10 +99,6 @@ class ribosomexyzDB():
                   """)
             return r.data()
 
-
-    #※----------------------------------------------------------------------------------------
-
-
     def get_all_structs(self):
         with self.driver.session() as s:
             struct_ids = []

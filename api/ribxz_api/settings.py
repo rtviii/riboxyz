@@ -49,6 +49,7 @@ CORS_ALLOW_CREDENTIALS = True
 #     'localhost',
 # ]
 
+ALLOWED_HOSTS=['*']
 
 ROOT_URLCONF = 'ribxz_api.urls'
 
