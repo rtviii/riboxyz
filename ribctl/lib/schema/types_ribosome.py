@@ -17,7 +17,6 @@ from ribctl.lib.enumunion import enum_union
 class tRNA(Enum):
     tRNA = "tRNA"
 
-
 class MitochondrialProteinClass(Enum):
     # mSSU
     bS1m  = "bS1m"
@@ -124,7 +123,6 @@ class MitochondrialProteinClass(Enum):
     mL66  = "mL66"
     mL67  = "mL67"
 
-
 class CytosolicProteinClass(Enum):
     # SSU
     bS1   = "bS1"
@@ -230,11 +228,9 @@ class CytosolicProteinClass(Enum):
     eL43 = "eL43"
     P1P2 = "P1P2"
 
-
 class MitochondrialRNAClass(Enum):
     mtrRNA12S = "mt12SrRNA"  # mitochondrial
     mtrRNA16S = "mt16SrRNA"  # mitochondrial
-
 
 class CytosolicRNAClass(Enum):
     rRNA_5S   = "5SrRNA"  #  bacterial or eykaryotic
@@ -244,7 +240,6 @@ class CytosolicRNAClass(Enum):
     rRNA_5_8S = "5.8SrRNA"  # eukaryotic
     rRNA_18S  = "18SrRNA"  # eukaryotic
     rRNA_28S  = "28SrRNA"  # eukaryotic
-
 
 class ElongationFactorClass(Enum):
     # Eukaryotic
@@ -269,7 +264,6 @@ class ElongationFactorClass(Enum):
     # Archaeal
     aEF1A = "aEF1A"
     aEF2  = "aEF2"
-
 
 class InitiationFactorClass(Enum):
     #!Eukaryotic
@@ -328,7 +322,7 @@ class InitiationFactorClass(Enum):
 # LifecycleFactorClass = typing.Union[ElongationFactorClass, InitiationFactorClass]
 LifecycleFactorClass = enum_union(ElongationFactorClass, InitiationFactorClass)
 ProteinClass         = enum_union(CytosolicProteinClass,MitochondrialProteinClass )
-PolypeptideClass     = enum_union( LifecycleFactorClass, ProteinClass)
+PolypeptideClass     = enum_union(LifecycleFactorClass, ProteinClass)
 PolynucleotideClass  = enum_union(CytosolicRNAClass, MitochondrialRNAClass, tRNA)
 PolymerClass         = enum_union(PolynucleotideClass, PolypeptideClass)
 
@@ -395,6 +389,7 @@ class Polymer(BaseModel):
     entity_poly_polymer_type           : str
     entity_poly_entity_type            : str
     nomenclature                       : list[PolymerClass]
+
     @field_serializer('nomenclature')
     def serialize_dt(self, ncl: list[PolymerClass], _info):
         return [x.value for x in ncl]

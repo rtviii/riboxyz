@@ -1,15 +1,16 @@
 from concurrent.futures import ALL_COMPLETED, Future, ThreadPoolExecutor, wait
-# from api.logs.loggers import get_updates_logger
 import typing
 from neo4j.exceptions import AuthError
 from neo4j import Driver, GraphDatabase
+from api.mod_db.db.inits.proteins import add_protein, node__protein_class
+from api.mod_db.db.inits.rna import add_rna, node__rna_class
+from api.mod_db.db.inits.structure import node__structure
 from ribctl.etl.etl_pipeline import current_rcsb_structs
 from ribctl.lib.schema.types_ribosome import MitochondrialProteinClass, PolynucleotideClass, RibosomeStructure
 from ribctl.etl.ribosome_assets import RibosomeAssets
 from neo4j import GraphDatabase, Driver, ManagedTransaction, Transaction
 from ribctl.lib.schema.types_ribosome import  NonpolymericLigand,  CytosolicProteinClass, RibosomeStructure
-from schema.data_requests import LigandsByStruct
-from schema.v0 import ExogenousRNAByStruct,BanClassMetadata, LigandInstance, NeoStruct, NomenclatureClass, NomenclatureClassMember
+from api.schema.v0 import ExogenousRNAByStruct,BanClassMetadata, LigandInstance, NeoStruct, NomenclatureClass, NomenclatureClassMember, LigandsByStruct
 
 
 # ※ ----------------[ 0.Database  inits: constraints & nomenclature classes]
@@ -17,7 +18,6 @@ NODE_CONSTRAINTS = [
     """CREATE CONSTRAINT IF NOT EXISTS ON (ipro:InterProFamily) ASSERT ipro.family_id  IS UNIQUE;""",
     """CREATE CONSTRAINT IF NOT EXISTS ON (go:GOClass) ASSERT go.class_id IS UNIQUE;""",
     """CREATE CONSTRAINT IF NOT EXISTS ON (ribosome:RibosomeStructure) Assert q.rcsb_id IS UNIQUE;""",
-    # """CREATE CONSTRAINT IF NOT EXISTS ON (lig:Ligand) assert lig.chemicalId is unique;""",
     """CREATE CONSTRAINT IF NOT EXISTS ON (nc:NomenclatureClass) assert nc.class_id is unique;""",
 ]
 
@@ -52,15 +52,14 @@ class ribosomexyzDB():
     def initialize_new_instance(self):
 
         self.__init_constraints()
-        print("[INIT]: Initialized constraints.")
    
         self.__init_protein_classes()
-        print("[INIT]: Initialized protein classes.")
 
         self.__init_rna_classes()
-        print("[INIT]: Initialized rna classes.")
 
-        print("[INIT]: Done with constraints and classes. >>>Sync with RCSB PDB is manual<<<")
+        print("[INIT]: Initialized constraints.")
+        print("[INIT]: Initialized protein classes.")
+        print("[INIT]: Initialized rna classes.")
 
     def __init__(self, uri: str, user: str, password: str) -> None:
         self.uri      = uri
@@ -71,6 +70,7 @@ class ribosomexyzDB():
             print(self.uri)
             self.driver = GraphDatabase.driver(uri, auth=(user, password))
         except AuthError as ae:
+            print(ae)
             self.change_default_pass()
             self.initialize_new_instance()
 
@@ -78,13 +78,6 @@ class ribosomexyzDB():
         print("see_current_auth")
         print(f"NEO4J_VAR: {NEO4J_URI} {NEO4J_USER} {NEO4J_PASSWORD}")
         with self.driver.session(database='system') as s:
-            # {
-            #   "user": "neo4j",
-            #   "roles": null,
-            #   "passwordChangeRequired": false,
-            #   "suspended": null,
-            #   "home": null
-            # }
             r = s.run("""show users""")
             users_array = r.data()
             return users_array
@@ -106,10 +99,6 @@ class ribosomexyzDB():
                   """)
             return r.data()
 
-
-    #※----------------------------------------------------------------------------------------
-
-
     def get_all_structs(self):
         with self.driver.session() as s:
             struct_ids = []
@@ -124,13 +113,6 @@ class ribosomexyzDB():
             return s.execute_read(lambda tx: tx.run("""//
             match (n) return n limit 10;
             """).data())
-
-    # def init_db(self,driver):
-    #     self.__init_constraints(di)
-    #     self.__init_protein_classes()
-    #     self.__init_rna_classes()
-
-        # TODO : Ligand classes
 
     def add_structure(self, struct_assets: RibosomeAssets):
 
@@ -477,7 +459,7 @@ with n.rcsb_id as struct, collect(r.rcsb_pdbx_description) as rnas
         with self.driver.session() as session:
             def _(tx: Transaction | ManagedTransaction):
                 return [ rna[0] for rna in tx.run("""//
-                    match (c:RNAClass { class_id:$RNA_CLASS })-[]-(n)-[]-(rib:RibosomeStructure)
+            match (c:RNAClass { class_id:$RNA_CLASS })-[]-(n)-[]-(rib:RibosomeStructure)
             with {
             parent_year                         : rib.citation_year                    ,
             parent_resolution                   : rib.resolution                       ,
@@ -510,8 +492,8 @@ with n.rcsb_id as struct, collect(r.rcsb_pdbx_description) as rnas
             nomenclature                        : [c.class_id]                         ,
             ligand_like                         : n.ligand_like                        
         } as rna
-        return rna""", {"RNA_CLASS": class_id}).values('rna')]
 
+        return rna""", {"RNA_CLASS": class_id}).values('rna')]
             return session.execute_read(_)
 
     def sync_with_rcsb(self, workers:int)->None:
@@ -552,7 +534,6 @@ with n.rcsb_id as struct, collect(r.rcsb_pdbx_description) as rnas
     def __init_protein_classes(self):
         with self.driver.session() as session:
             for protein_class in [*list(CytosolicProteinClass), *list(MitochondrialProteinClass)]:
-                
                 session.execute_write(node__protein_class(protein_class))
 
     def __init_rna_classes(self):

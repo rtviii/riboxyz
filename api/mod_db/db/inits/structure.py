@@ -1,9 +1,8 @@
 from typing import Callable
-from neo4j import GraphDatabase, Driver, ManagedTransaction, Record, Result, Transaction
+from neo4j import Driver, ManagedTransaction, Record, Result, Transaction
 from neo4j.graph import Node, Relationship
 from neo4j import ManagedTransaction, Transaction
 from ribctl.lib.schema.types_ribosome import RNA, NonpolymericLigand, Protein, RibosomeStructure
-
 
 def node__structure(_rib: RibosomeStructure) -> Callable[[Transaction | ManagedTransaction], Record | None]:
     R = _rib.dict()
