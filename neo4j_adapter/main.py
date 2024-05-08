@@ -2,15 +2,16 @@ from concurrent.futures import ALL_COMPLETED, Future, ThreadPoolExecutor, wait
 import typing
 from neo4j.exceptions import AuthError
 from neo4j import Driver, GraphDatabase
-from api.mod_db.db.inits.proteins import add_protein, node__protein_class
-from api.mod_db.db.inits.rna import add_rna, node__rna_class
-from api.mod_db.db.inits.structure import node__structure
+from neo4j_adapter.inits.proteins import add_protein, node__protein_class
+from neo4j_adapter.inits.rna import add_rna, node__rna_class
+from neo4j_adapter.inits.structure import add_ligand, node__structure
 from ribctl.etl.etl_pipeline import current_rcsb_structs
 from ribctl.lib.schema.types_ribosome import MitochondrialProteinClass, PolynucleotideClass, RibosomeStructure
 from ribctl.etl.ribosome_assets import RibosomeAssets
 from neo4j import GraphDatabase, Driver, ManagedTransaction, Transaction
 from ribctl.lib.schema.types_ribosome import  NonpolymericLigand,  CytosolicProteinClass, RibosomeStructure
-from api.schema.v0 import ExogenousRNAByStruct,BanClassMetadata, LigandInstance, NeoStruct, NomenclatureClass, NomenclatureClassMember, LigandsByStruct
+
+# from api.schema.v0 import ExogenousRNAByStruct,BanClassMetadata, LigandInstance, NeoStruct, NomenclatureClass, NomenclatureClassMember, LigandsByStruct
 
 
 # ※ ----------------[ 0.Database  inits: constraints & nomenclature classes]
@@ -36,7 +37,7 @@ NODE_CONSTRAINTS = [
 # just issue a `ALTER CURRENT USER SET PASSWORD FROM 'current password' TO 'new password'` statement against
 # the system database in the current session, and then restart your driver with the new password configured.
 
-class ribosomexyzDB():
+class Neo4jAdapter():
     driver: Driver
     uri      : str
     password : str
