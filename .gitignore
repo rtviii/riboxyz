@@ -67,5 +67,7 @@ local_venv
 **/*.pickle
 *.pickle
 
+**/*.key
+*.gpg.key
 
-
+neotechnology.gpg.key
