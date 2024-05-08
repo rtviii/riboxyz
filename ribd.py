@@ -15,7 +15,7 @@ import json
 from pprint import pprint
 
 from ribctl.cli.ls import cmd_ls
-from ribctl.cli.sync import cmd_sync
+from ribctl.cli.sync import cmd_db
 from ribctl.lib.mod_transpose_bsites import init_transpose_ligand
 from ribctl.lib.schema.types_binding_site import BindingSite
 
@@ -114,10 +114,9 @@ parser_cmd_etl.set_defaults(func=cmd_etl)
 # parser_cmd_etl.print_help()
 
 #! -------------------------- sync     -------------------------- #
-parser_sync = subparsers.add_parser('sync_db', help='Syncronization with the PDB, updates and database uploads')
-# parser_cmd2sub = parser_sync.add_subparsers(title='Subcommands', dest='subcommand2')
-# parser_cmd2sub.add_parser('db', help='Upload local structures to the neo4j database')
-parser_sync.set_defaults(func=cmd_sync)
+parser_sync = subparsers.add_parser('db', help='Syncronization with the PDB, updates and database uploads')
+parser_sync.set_defaults(func=cmd_db)
+
 
 
 

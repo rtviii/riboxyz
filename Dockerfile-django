@@ -64,7 +64,7 @@ RUN python3 setup.py build install --home="${PYMOL_PATH}" --install-lib="${PYMOL
 
 
 # ------- WORKDIR $DJANGO ---------------
-ADD ribxz_api/reqs.txt $RIBXZ_API
+ADD api/reqs.txt $RIBXZ_API
 RUN python3 -m venv "/opt/venv"
 ENV PATH="/opt/venv/bin:$PATH"
 RUN pip3 install -r ${RIBXZ_API}/reqs.txt
@@ -78,7 +78,7 @@ EXPOSE 8000 8001 8002
 
 
 # Be careful given that both the whole django project and the main module are called `rbxz_bend`. (hence not using the $DJANGO here)
-COPY ribxz_api ${RIBXZ_API}
+COPY api ${RIBXZ_API}
 
 # Be careful given that both the whole django project and the main module are called `rbxz_bend`. (hence not using the $DJANGO here)
 COPY ribctl ${RIBCTL}
