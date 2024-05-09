@@ -34,8 +34,6 @@ class Neo4jAdapter():
     user     : str
     databases: list[str]
 
-   
-
     def init_constraints(self) -> None:
         with self.driver.session() as session:
             for c in NODE_CONSTRAINTS:
@@ -55,6 +53,7 @@ class Neo4jAdapter():
         self.uri      = uri
         self.user     = user
         self.password = password 
+
         try:
             self.driver = GraphDatabase.driver(uri, auth=(user, password))
             print("Established connection to ", self.uri)
@@ -91,7 +90,6 @@ class Neo4jAdapter():
 
         print(wait(futures, return_when=ALL_COMPLETED))
         # logger.info("Finished syncing with RCSB")
-
 
     def get_all_structs(self):
         with self.driver.session() as s:

@@ -1,4 +1,3 @@
-
     def get_all_ligands(self) -> list[LigandInstance]:
         """this is used by "request all ligands" in the frontend, binding sites action types."""
 
@@ -26,11 +25,8 @@
                 """).value()[0]
             return session.execute_read(_)
 
-
     def get_struct(self, rcsb_id: str) -> NeoStruct:
-
         with self.driver.session() as session:
-
             def _(tx: Transaction | ManagedTransaction):
                 return tx.run("""//
                     match (struct:RibosomeStructure{rcsb_id:$RCSB_ID})
@@ -44,9 +40,6 @@
                                         """, {"RCSB_ID": rcsb_id.upper()}).data()[0]
 
             return session.execute_read(_)
-
-
-
 
     def get_all_structures(self) -> list[NeoStruct]:
 
@@ -78,7 +71,6 @@
                                         """).data()
 
             return session.execute_read(_)
-
 
     def get_rnas_by_struct(self) -> list[ExogenousRNAByStruct]:
         with self.driver.session() as session:
