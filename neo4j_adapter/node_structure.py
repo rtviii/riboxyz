@@ -1,5 +1,5 @@
 from typing import Callable
-from neo4j import  ManagedTransaction, Record, Transaction
+from neo4j import  Driver, ManagedTransaction, Record, Transaction
 from neo4j.graph import Node, Relationship
 from neo4j import ManagedTransaction, Transaction
 from ribctl.lib.schema.types_ribosome import  NonpolymericLigand, RibosomeStructure
@@ -8,11 +8,11 @@ from ribctl.lib.schema.types_ribosome import  NonpolymericLigand, RibosomeStruct
 
 def struct_exists(rcsb_id:str) -> Callable[[Transaction | ManagedTransaction], bool]:
     def _(tx: Transaction | ManagedTransaction):
-        return tx.run("""
+        return tx.run("""//
                 MATCH (u:RibosomeStructure {rcsb_id: $rcsb_id})
-        WITH COUNT(u) > 0  as node_exists
-        RETURN node_exists
-        """, parameters={"rcsb_id":rcsb_id}).single()['node_exists']
+                WITH COUNT(u) > 0  as node_exists
+                RETURN node_exists
+                """, parameters={"rcsb_id":rcsb_id}).single()['node_exists'] 
     return _
 
 # Transaction
@@ -78,3 +78,12 @@ def link__ligand_to_struct(prot: Node, parent_rcsb_id: str) -> Callable[[Transac
     return _
 
 
+def add_structure(driver:Driver, rib:RibosomeStructure):
+    with driver.session() as s:
+        node = s.execute_write(node__structure(rib))
+        return node
+
+def add_ligand(driver:Driver,lig:NonpolymericLigand, parent_rcsb_id:str):
+    with driver.session() as s:
+        node = s.execute_write(node__ligand(lig))
+        s.execute_write(link__ligand_to_struct(node, parent_rcsb_id))

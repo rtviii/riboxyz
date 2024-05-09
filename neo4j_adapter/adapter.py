@@ -2,9 +2,10 @@ from concurrent.futures import ALL_COMPLETED, Future, ThreadPoolExecutor, wait
 import typing
 from neo4j.exceptions import AuthError
 from neo4j import Driver, GraphDatabase
+from neo4j_adapter.node_polymer import add_polymer
 from neo4j_adapter.node_protein import add_protein, node__polymer_class
 from neo4j_adapter.node_rna import add_rna
-from neo4j_adapter.node_structure import  link__ligand_to_struct, node__ligand, node__structure, struct_exists
+from neo4j_adapter.node_structure import  add_ligand, add_structure, link__ligand_to_struct, node__ligand, node__structure, struct_exists
 from ribctl.etl.etl_pipeline import current_rcsb_structs
 from ribctl.lib.schema.types_ribosome import MitochondrialProteinClass, PolymerClass, PolynucleotideClass, RibosomeStructure
 from ribctl.etl.ribosome_assets import RibosomeAssets
@@ -60,6 +61,41 @@ class Neo4jAdapter():
         except Exception as ae:
             print(ae)
 
+
+
+
+    def add_structure(self, rcsb_id:str):
+
+        if self.check_structure_exists(rcsb_id):
+            print("Struct node {} already exists.".format(rcsb_id))
+            return
+
+        R:RibosomeStructure = RibosomeAssets(rcsb_id).profile()
+
+        add_structure(self.driver,R)
+
+        for protein in R.proteins:
+            add_polymer(self.driver, protein)
+            # add_protein(self.driver, protein)
+
+        if R.rnas is not None:
+            for rna in R.rnas:
+                add_polymer(self.driver, rna)
+                # add_rna(self.driver, rna)
+
+        if R.other_polymers is not None:
+            for polymer in R.other_polymers:
+                add_polymer(self.driver, polymer)
+
+
+        if R.nonpolymeric_ligands is not None:
+            for ligand in R.nonpolymeric_ligands:
+                add_ligand(self.driver,ligand, R.rcsb_id)
+
+        print("Sucessfully added struct node {}".format(rcsb_id))
+        return struct_node_result.data()
+
+
     def see_current_auth(self):
         with self.driver.session(database='system') as s:
             r = s.run("""show users""")
@@ -111,34 +147,6 @@ class Neo4jAdapter():
         with self.driver.session() as session:
             return session.execute_read(struct_exists(rcsb_id))
 
-    def add_structure(self, rcsb_id:str):
-
-        if self.check_structure_exists(rcsb_id):
-            return
-
-        R:RibosomeStructure = RibosomeAssets(rcsb_id).profile()
-
-        with self.driver.session() as s:
-            struct_node_result = s.execute_write(node__structure(R))
-
-        for protein in R.proteins:
-            add_protein(self.driver, protein)
-
-        if R.rnas is not None:
-            for rna in R.rnas:
-                add_rna(self.driver, rna)
-
-        if R.nonpolymeric_ligands is not None:
-            for ligand in R.nonpolymeric_ligands:
-                self.add_ligand(ligand, R.rcsb_id)
-
-        print("Sucessfully added struct node {}".format(rcsb_id))
-        return struct_node_result.data()
-
-    def add_ligand(self,lig:NonpolymericLigand, parent_rcsb_id:str):
-        with self.driver.session() as s:
-            node = s.execute_write(node__ligand(lig))
-            s.execute_write(link__ligand_to_struct(node, parent_rcsb_id))
 
     def get_RibosomeStructure(self, rcsb_id: str) -> RibosomeStructure:
         with self.driver.session() as session:

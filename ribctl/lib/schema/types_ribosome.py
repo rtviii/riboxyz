@@ -388,6 +388,7 @@ class Polymer(BaseModel):
     entity_poly_seq_length             : int
     entity_poly_polymer_type           : str
     entity_poly_entity_type            : str
+
     nomenclature                       : list[PolymerClass]
 
     @field_serializer('nomenclature')

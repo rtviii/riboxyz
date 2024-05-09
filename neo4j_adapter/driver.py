@@ -11,17 +11,17 @@ load_dotenv('.env')
 
 
 
-with open('./neo4j_adapter/3J7Z.json') as f:
-    rs = RibosomeStructure.model_validate(json.load(f))
-    pprint(rs)
+# with open('./neo4j_adapter/3J7Z.json') as f:
+#     rs = RibosomeStructure.model_validate(json.load(f))
+#     pprint(rs)
 
 
-# adapter = Neo4jAdapter('bolt://localhost:7687', 'neo4j')
+adapter = Neo4jAdapter('bolt://localhost:7687', 'neo4j')
 
 # # print(adapter.see_current_auth())
 # # adapter.init_polymer_classes()
 # # print(adapter.get_any())
-# adapter.add_structure('3j7z')
+adapter.add_structure('3j7z')
 # # adapter.sync_with_rcsb(10)
 
 

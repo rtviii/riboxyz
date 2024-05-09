@@ -59,17 +59,6 @@ return prot, protof, struct
                        "PARENT": parent_rcsb_id}).values('prot', 'protof', 'struct')
     return _
 
-# Transaction
-def link__prot_to_polymer_class(prot: Node) -> Callable[[Transaction | ManagedTransaction], list[list[Node | Relationship]]]:
-    def _(tx: Transaction | ManagedTransaction):
-        return tx.run("""//
-   match (prot:Protein) WHERE ELEMENTID(prot)=$ELEM_ID and prot.nomenclature[0] IS NOT NULL
-   match (polymer_class:PolymerClass {class_id:prot.nomenclature[0]})
-   merge (prot)-[member:member_of]->(polymer_class)
-   return prot, member,polymer_class
-    """,
-                      {"ELEM_ID": prot.element_id}).values('prot', 'member', 'polymer_class')
-    return _
 
 def node__polymer_class(polymer_class:str):
     def _(tx:Transaction | ManagedTransaction):
@@ -83,4 +72,3 @@ def add_protein(driver:Driver,prot:Protein):
     with driver.session() as s:
         node = s.execute_write(node__protein(prot))
         s.execute_write(link__prot_to_struct(node, prot.parent_rcsb_id))
-        s.execute_write(link__prot_to_polymer_class(node))
