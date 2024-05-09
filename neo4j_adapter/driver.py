@@ -1,10 +1,9 @@
+import sys
+sys.dont_write_bytecode = True
 import json
 from pprint import pprint
 from neo4j_adapter.adapter import Neo4jAdapter
-import sys
-
 from ribctl.lib.schema.types_ribosome import RibosomeStructure
-sys.dont_write_bytecode = True
 
 from dotenv import load_dotenv
 

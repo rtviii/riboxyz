@@ -1,4 +1,7 @@
 
+**/__pycache__/**
+*/__pycache__/
+
 neo4j
 !neo4j/conf/neo4j.conf
 rnacentral*
