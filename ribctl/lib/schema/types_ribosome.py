@@ -329,16 +329,16 @@ PolymerClass         = enum_union(PolynucleotideClass, PolypeptideClass)
 
 # ? ----------------------------------------------{ Object Types }------------------------------------------------
 
-class PolymerMetadatum(BaseModel):
-    assembly_id           : int
-    asym_ids              : list[str]
-    auth_asym_id          : str
-    entity_poly_seq_length: int
-    nomenclature          : list[PolymerClass]
+# class PolymerMetadatum(BaseModel):
+#     assembly_id           : int
+#     asym_ids              : list[str]
+#     auth_asym_id          : str
+#     entity_poly_seq_length: int
+#     nomenclature          : list[PolymerClass]
 
-    @field_serializer('nomenclature')
-    def serialize_dt(self, ncl: list[PolymerClass], _info):
-        return [x.value for x in ncl]
+#     @field_serializer('nomenclature')
+#     def serialize_dt(self, ncl: list[PolymerClass], _info):
+#         return [x.value for x in ncl]
 
 class Polymer(BaseModel):
     def __hash__(self):
@@ -358,14 +358,14 @@ class Polymer(BaseModel):
             name        = '{}.{}'.format(self.parent_rcsb_id,self.auth_asym_id)
         )
 
-    def metadatum(self) -> PolymerMetadatum:
+    # def metadatum(self) -> PolymerMetadatum:
 
-        return PolymerMetadatum(
-            assembly_id            = self.assembly_id,
-            asym_ids               = self.asym_ids,
-            auth_asym_id           = self.auth_asym_id,
-            entity_poly_seq_length = self.entity_poly_seq_length,
-            nomenclature           = [x.value for x in self.nomenclature])
+    #     return PolymerMetadatum(
+    #         assembly_id            = self.assembly_id,
+    #         asym_ids               = self.asym_ids,
+    #         auth_asym_id           = self.auth_asym_id,
+    #         entity_poly_seq_length = self.entity_poly_seq_length,
+    #         nomenclature           = [x.value for x in self.nomenclature])
 
     assembly_id: int
 
@@ -442,14 +442,14 @@ class RNA(Polymer):
 
     # pass
 
-class NonpolymericLigandMetadatum(BaseModel):
-    chemicalId: str
-    chemicalName: str
-    number_of_instances: int
+# class NonpolymericLigandMetadatum(BaseModel):
+#     chemicalId: str
+#     chemicalName: str
+#     number_of_instances: int
 
 class NonpolymericLigand(BaseModel):
-    def metadatum(self) -> NonpolymericLigandMetadatum:
-        return NonpolymericLigandMetadatum(**self.model_dump())
+    # def metadatum(self) -> NonpolymericLigandMetadatum:
+    #     return NonpolymericLigandMetadatum(**self.model_dump())
 
     class NonpolymerComp(BaseModel):
         class ChemComp(BaseModel):
@@ -482,8 +482,8 @@ class NonpolymericLigand(BaseModel):
         drugbank             : Optional[Drugbank]=None
         rcsb_chem_comp_target: Optional[list[RcsbChemCompTarget]]=None
 
-    chemicalId: str
-    chemicalName: str
+    chemicalId    : str
+    chemicalName  : str
     formula_weight: Optional[float] =None
 
     pdbx_description: str
@@ -562,38 +562,38 @@ class AssemblyInstancesMap(BaseModel):
     nonpolymer_entity_instances: Optional[list[NonpolymerEntityInstance]] =None
     polymer_entity_instances: list[PolymerEntityInstance]
 
-class RibosomeStructureMetadatum(BaseModel):
+# class RibosomeStructureMetadatum(BaseModel):
 
-    rcsb_id   : str
-    expMethod : str
-    resolution: float
+#     rcsb_id   : str
+#     expMethod : str
+#     resolution: float
 
-    pdbx_keywords     : Optional[str] =None
-    pdbx_keywords_text: Optional[str] = None
+#     pdbx_keywords     : Optional[str] =None
+#     pdbx_keywords_text: Optional[str] = None
 
-    rcsb_external_ref_id: list[str]
-    rcsb_external_ref_type: list[str]
-    rcsb_external_ref_link: list[str]
+#     rcsb_external_ref_id: list[str]
+#     rcsb_external_ref_type: list[str]
+#     rcsb_external_ref_link: list[str]
 
-    citation_year         : Optional[int]      = None
-    citation_rcsb_authors : Optional[list[str]] = None
-    citation_title        : Optional[str]      = None
-    citation_pdbx_doi     : Optional[str]      = None
+#     citation_year         : Optional[int]      = None
+#     citation_rcsb_authors : Optional[list[str]] = None
+#     citation_title        : Optional[str]      = None
+#     citation_pdbx_doi     : Optional[str]      = None
 
-    src_organism_ids  : list[int]
-    src_organism_names: list[str]
+#     src_organism_ids  : list[int]
+#     src_organism_names: list[str]
 
-    host_organism_ids  : list[int]
-    host_organism_names: list[str]
+#     host_organism_ids  : list[int]
+#     host_organism_names: list[str]
 
-    # assembly_map: list[AssemblyInstancesMap]
-    mitochondrial: bool
+#     # assembly_map: list[AssemblyInstancesMap]
+#     mitochondrial: bool
 
-    # proteins_metadata: list[PolymerMetadatum]
-    # rnas_metadata    : list[PolymerMetadatum]
-    # # ? This includes DNA-RNA hybrid strands, DNA and all other polymers
-    # other_polymers_metadata: list[PolymerMetadatum]
-    # nonpolymeric_ligands   : list[NonpolymericLigandMetadatum]
+#     # proteins_metadata: list[PolymerMetadatum]
+#     # rnas_metadata    : list[PolymerMetadatum]
+#     # # ? This includes DNA-RNA hybrid strands, DNA and all other polymers
+#     # other_polymers_metadata: list[PolymerMetadatum]
+#     # nonpolymeric_ligands   : list[NonpolymericLigandMetadatum]
 
 class RibosomeStructure(BaseModel):
 
@@ -609,31 +609,31 @@ class RibosomeStructure(BaseModel):
 
         return _
 
-    def metadata(self) -> RibosomeStructureMetadatum:
+    # def metadata(self) -> RibosomeStructureMetadatum:
 
-        return RibosomeStructureMetadatum(
+    #     return RibosomeStructureMetadatum(
 
-                                         rcsb_id                 = self.rcsb_id,
-                                         expMethod               = self.expMethod,
-                                         resolution              = self.resolution,
-                                         pdbx_keywords           = self.pdbx_keywords,
-                                         pdbx_keywords_text      = self.pdbx_keywords_text,
-                                         rcsb_external_ref_id    = self.rcsb_external_ref_id,
-                                         rcsb_external_ref_type  = self.rcsb_external_ref_type,
-                                         rcsb_external_ref_link  = self.rcsb_external_ref_link,
-                                         citation_year           = self.citation_year,
-                                         citation_rcsb_authors   = self.citation_rcsb_authors,
-                                         citation_title          = self.citation_title,
-                                         citation_pdbx_doi       = self.citation_pdbx_doi,
-                                         src_organism_ids        = self.src_organism_ids,
-                                         src_organism_names      = self.src_organism_names,
-                                         host_organism_ids       = self.host_organism_ids,
-                                         host_organism_names     = self.host_organism_names,
-                                         mitochondrial           = self.mitochondrial,
-                                         proteins_metadata       = [x.metadatum() for x in self.proteins            ],
-                                         rnas_metadata           = [x.metadatum() for x in self.rnas                ],
-                                         other_polymers_metadata = [x.metadatum() for x in self.other_polymers      ],
-                                         nonpolymeric_ligands    = [x.metadatum() for x in self.nonpolymeric_ligands])
+    #                                      rcsb_id                 = self.rcsb_id,
+    #                                      expMethod               = self.expMethod,
+    #                                      resolution              = self.resolution,
+    #                                      pdbx_keywords           = self.pdbx_keywords,
+    #                                      pdbx_keywords_text      = self.pdbx_keywords_text,
+    #                                      rcsb_external_ref_id    = self.rcsb_external_ref_id,
+    #                                      rcsb_external_ref_type  = self.rcsb_external_ref_type,
+    #                                      rcsb_external_ref_link  = self.rcsb_external_ref_link,
+    #                                      citation_year           = self.citation_year,
+    #                                      citation_rcsb_authors   = self.citation_rcsb_authors,
+    #                                      citation_title          = self.citation_title,
+    #                                      citation_pdbx_doi       = self.citation_pdbx_doi,
+    #                                      src_organism_ids        = self.src_organism_ids,
+    #                                      src_organism_names      = self.src_organism_names,
+    #                                      host_organism_ids       = self.host_organism_ids,
+    #                                      host_organism_names     = self.host_organism_names,
+    #                                      mitochondrial           = self.mitochondrial,
+    #                                      proteins_metadata       = [x.metadatum() for x in self.proteins            ],
+    #                                      rnas_metadata           = [x.metadatum() for x in self.rnas                ],
+    #                                      other_polymers_metadata = [x.metadatum() for x in self.other_polymers      ],
+    #                                      nonpolymeric_ligands    = [x.metadatum() for x in self.nonpolymeric_ligands])
 
     rcsb_id   : str
     expMethod : str

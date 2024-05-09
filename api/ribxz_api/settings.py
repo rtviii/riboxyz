@@ -17,7 +17,6 @@ RIBETL_DATA = os.environ["RIBETL_DATA"] if os.environ["RIBETL_DATA"] else os.pat
 # ※ Dont' forget to export pymol path ( we want to ship a built pymol, but python needs to be aware of it)
 # export PYMOL_PATH=/home/rxz/dev/pymol3.11 && export PYTHONPATH="$PYTHONPATH:$PYMOL_PATH/modules/:"
 ALLOWED_HOSTS = ["*"]
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -27,8 +26,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'corsheaders',
-    'ninja',
-    ]
+    'ninja']
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -48,8 +46,6 @@ CORS_ALLOW_CREDENTIALS = True
 #     'http://*',
 #     'localhost',
 # ]
-
-ALLOWED_HOSTS=['*']
 
 ROOT_URLCONF = 'ribxz_api.urls'
 
