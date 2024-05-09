@@ -17,6 +17,7 @@ def node__protein(_prot:Protein)->Callable[[Transaction | ManagedTransaction], N
 
           
       parent_rcsb_id                      : $parent_rcsb_id,
+
       pfam_comments                       : $pfam_comments,
       pfam_descriptions                   : $pfam_descriptions,
       pfam_accessions                     : $pfam_accessions,

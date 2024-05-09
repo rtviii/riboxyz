@@ -9,7 +9,7 @@ def node__rna(_rna: RNA) -> Callable[[Transaction | ManagedTransaction], Node]:
     RNA_dict = _rna.model_dump()
     def _(tx: Transaction | ManagedTransaction):
         return tx.run("""//
-merge (rna:RNA {
+    merge (rna:RNA {
       asym_ids:     $asym_ids,
       auth_asym_id: $auth_asym_id,
       assembly_id: $assembly_id,

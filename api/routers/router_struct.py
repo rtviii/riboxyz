@@ -1,16 +1,10 @@
-from io import BytesIO
 import json
-from django.http import HttpResponse, JsonResponse, HttpResponseServerError
-from ninja import FilterSchema,Field
+from pprint import pprint
+from django.http import  JsonResponse, HttpResponseServerError
 from ninja import Router
-from api.ribxz_api.driver import  dbqueries
-from neo4j_adapter.adapter import Neo4jAdapter
+from api.ribxz_api.db_queries import dbqueries
 from ribctl.etl.ribosome_assets import RibosomeAssets
-from ribctl.lib.schema.types_ribosome import  RibosomeStructure, RibosomeStructureMetadatum
-from schema.v0 import BanClassMetadata, ExogenousRNAByStruct,LigandInstance, LigandlikeInstance, NeoStruct, NomenclatureClass, NomenclatureClassMember
-from wsgiref.util import FileWrapper
-from ninja.pagination import paginate
-from time import time
+from ribctl.lib.schema.types_ribosome import  RibosomeStructure
 
 structure_router = Router()
 TAG              = "Structure"
@@ -18,6 +12,7 @@ TAG              = "Structure"
 @structure_router.get('/profile', response=RibosomeStructure, tags=[TAG],)
 def structure_profile(request,rcsb_id:str):
     """Return a `.json` profile of the given RCSB_ID structure."""
+
     params      = dict(request.GET)
     rcsb_id     = str.upper(params['rcsb_id'][0])
     try:
@@ -26,12 +21,13 @@ def structure_profile(request,rcsb_id:str):
     except Exception as e:
         return HttpResponseServerError("Failed to find structure profile {}:\n\n{}".format(rcsb_id, e))
 
-from ninja.pagination import paginate, PaginationBase
-from ninja import Schema
 
-@structure_router.post('/list_structures', response=list[RibosomeStructureMetadatum], tags=[TAG])
-def list_structures(request, page:int):
-    print(dbqueries.list_structs())
+@structure_router.post('/list_structures', response=list[RibosomeStructure], tags=[TAG])
+def list_structures(request):
+    structs = dbqueries.list_structs()
+    pprint(len(structs))
+    pprint(structs[0])
+    RibosomeStructure.model_validate(structs[0])
 
     # def load_metadata(rcsb_id:str):
     #     with open(RibosomeAssets(rcsb_id)._json_profile_filepath(), 'r') as infile:
