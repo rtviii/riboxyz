@@ -4,6 +4,18 @@ from neo4j.graph import Node, Relationship
 from neo4j import ManagedTransaction, Transaction
 from ribctl.lib.schema.types_ribosome import  NonpolymericLigand, RibosomeStructure
 
+
+
+def struct_exists(rcsb_id:str) -> Callable[[Transaction | ManagedTransaction], bool]:
+    def _(tx: Transaction | ManagedTransaction):
+        return tx.run("""
+                MATCH (u:RibosomeStructure {rcsb_id: $rcsb_id})
+        WITH COUNT(u) > 0  as node_exists
+        RETURN node_exists
+        """, parameters={"rcsb_id":rcsb_id}).single()['node_exists']
+    return _
+
+# Transaction
 def node__structure(_rib: RibosomeStructure) -> Callable[[Transaction | ManagedTransaction], Record | None]:
     R = _rib.model_dump()
     def _(tx: Transaction | ManagedTransaction):
@@ -37,6 +49,7 @@ def node__structure(_rib: RibosomeStructure) -> Callable[[Transaction | ManagedT
         """, **R).single()
     return _
 
+# Transaction
 def node__ligand(_ligand:NonpolymericLigand)->Callable[[Transaction | ManagedTransaction], Node ]:
     L = _ligand.model_dump()
     def _(tx: Transaction | ManagedTransaction):
@@ -51,6 +64,7 @@ MERGE (ligand:Ligand {chemicalId:
         """, **L).single(strict=True)['ligand']
     return _
 
+# Transaction
 def link__ligand_to_struct(prot: Node, parent_rcsb_id: str) -> Callable[[Transaction | ManagedTransaction], list[list[Node | Relationship]]]: 
     parent_rcsb_id = parent_rcsb_id.upper()
     def _(tx: Transaction | ManagedTransaction):

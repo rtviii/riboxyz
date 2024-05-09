@@ -4,7 +4,7 @@ from neo4j.exceptions import AuthError
 from neo4j import Driver, GraphDatabase
 from neo4j_adapter.inits.proteins import add_protein, node__polymer_class
 from neo4j_adapter.inits.rna import add_rna
-from neo4j_adapter.inits.structure import  link__ligand_to_struct, node__ligand, node__structure
+from neo4j_adapter.inits.structure import  link__ligand_to_struct, node__ligand, node__structure, struct_exists
 from ribctl.etl.etl_pipeline import current_rcsb_structs
 from ribctl.lib.schema.types_ribosome import MitochondrialProteinClass, PolymerClass, PolynucleotideClass, RibosomeStructure
 from ribctl.etl.ribosome_assets import RibosomeAssets
@@ -72,6 +72,7 @@ class Neo4jAdapter():
         synced   = self.get_all_structs()
         unsynced = sorted(current_rcsb_structs())
         futures:list[Future] =  []
+        print("Syncing over the following structs:", unsynced)
 
         # logger.info("Started syncing with RCSB") 
 
@@ -83,16 +84,12 @@ class Neo4jAdapter():
         #             logger.debug(rcsb_id + ":" + f.result().__str__())
         #     return _
 
-
         with ThreadPoolExecutor(max_workers=workers) as executor:
             for rcsb_id in list(set(unsynced ) - set(synced)):
-
-                assets = RibosomeAssets(rcsb_id)
-                fut = executor.submit(self.add_structure, assets)
-                # fut.add_done_callback(log_commit_result(rcsb_id))
+                fut    = executor.submit(self.add_structure, rcsb_id)
                 futures.append(fut)
 
-        wait(futures, return_when=ALL_COMPLETED)
+        print(wait(futures, return_when=ALL_COMPLETED))
         # logger.info("Finished syncing with RCSB")
 
 
@@ -111,10 +108,17 @@ class Neo4jAdapter():
                 return tx.run("""match (ligand:Ligand{chemicalId: $CHEM_ID}) return ligand""", {"CHEM_ID": chemId}).data()[0]['ligand']
             return session.execute_read(_)
 
+    def check_structure_exists(self, rcsb_id:str)->bool:
+        rcsb_id = rcsb_id.upper()
+        with self.driver.session() as session:
+            return session.execute_read(struct_exists(rcsb_id))
+
     def add_structure(self, rcsb_id:str):
 
-        R = RibosomeAssets(rcsb_id).profile()
+        if self.check_structure_exists(rcsb_id):
+            return
 
+        R = RibosomeAssets(rcsb_id).profile()
         with self.driver.session() as s:
             struct_node_result = s.execute_write(node__structure(R))
 
@@ -129,8 +133,8 @@ class Neo4jAdapter():
             for ligand in R.nonpolymeric_ligands:
                 self.add_ligand(ligand, R.rcsb_id)
 
+        print("Sucessfully added struct node {}".format(rcsb_id))
         return struct_node_result.data()
-
 
     def add_ligand(self,lig:NonpolymericLigand, parent_rcsb_id:str):
         with self.driver.session() as s:

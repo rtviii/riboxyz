@@ -4,6 +4,8 @@ from neo4j.graph import Node, Relationship
 from neo4j import ManagedTransaction, Transaction
 from ribctl.lib.schema.types_ribosome import Protein
 
+
+# Transaction
 def node__protein(_prot:Protein)->Callable[[Transaction | ManagedTransaction], Node ]:
     P = _prot.model_dump()
     def _(tx: Transaction | ManagedTransaction):
@@ -42,11 +44,9 @@ def node__protein(_prot:Protein)->Callable[[Transaction | ManagedTransaction], N
         """, **P).single(strict=True)['rp']
     return _
 
+# Transaction
 def link__prot_to_struct(prot: Node, parent_rcsb_id: str) -> Callable[[Transaction | ManagedTransaction], list[list[Node | Relationship]]]:
 
-    print("Got protein node :", prot._element_id)
-    print("Got protein node :", prot.element_id)
-    print("Attemptint ot link to parent structure with rcsb_id:", parent_rcsb_id)
     def _(tx: Transaction | ManagedTransaction):
         return tx.run("""//
 match (prot:Protein) where ELEMENTID(prot)=$ELEM_ID
@@ -58,17 +58,15 @@ return prot, protof, struct
                        "PARENT": parent_rcsb_id}).values('prot', 'protof', 'struct')
     return _
 
+# Transaction
 def link__prot_to_polymer_class(prot: Node) -> Callable[[Transaction | ManagedTransaction], list[list[Node | Relationship]]]:
-    print("Attempting to link to polymer class")
-    print("Got node id", prot.id)
-    print("Got node element_id", prot.element_id)
     def _(tx: Transaction | ManagedTransaction):
         return tx.run("""//
    match (prot:Protein) WHERE ELEMENTID(prot)=$ELEM_ID and prot.nomenclature[0] IS NOT NULL
    match (polymer_class:PolymerClass {class_id:prot.nomenclature[0]})
    merge (prot)-[member:member_of]->(polymer_class)
    return prot, member,polymer_class
-""",
+    """,
                       {"ELEM_ID": prot.element_id}).values('prot', 'member', 'polymer_class')
     return _
 

@@ -4,6 +4,7 @@ from neo4j.graph import Node, Relationship
 from neo4j import ManagedTransaction, Transaction
 from ribctl.lib.schema.types_ribosome import RNA
 
+# Transaction
 def node__rna(_rna: RNA) -> Callable[[Transaction | ManagedTransaction], Node]:
     RNA_dict = _rna.model_dump()
     def _(tx: Transaction | ManagedTransaction):
@@ -33,6 +34,7 @@ merge (rna:RNA {
 """, **RNA_dict).single(strict=True)['rna']
     return _
 
+# Transaction
 def link__rna_to_polymer_class(rna: Node) -> Callable[[Transaction | ManagedTransaction], list[list[Node | Relationship]]]:
     def _(tx: Transaction | ManagedTransaction):
         return tx.run("""//
@@ -44,6 +46,7 @@ return rna, b, rna_class""",
                       {"ELEM_ID": rna.element_id}).values('rna', 'b', 'rna_class')
     return _
 
+# Transaction
 def link__rna_to_struct(rna: Node, parent_rcsb_id: str) -> Callable[[Transaction | ManagedTransaction], list[list[Node | Relationship]]]:
 
     def _(tx: Transaction | ManagedTransaction):
@@ -55,14 +58,6 @@ return rna, rnaof, struct""",
                       {"ELEM_ID": rna.element_id,
                        "PARENT": parent_rcsb_id}).values('rna', 'rnaof', 'struct')
     return _
-
-# def node__rna_class(rna_class:str):
-#     def _(tx:Transaction | ManagedTransaction):
-#         return tx.run("""//
-#             merge (rna_class:RNAClass {class_id:$CLASS_ID})
-#             return rna_class
-#         """, {"CLASS_ID":rna_class}).single(strict=True)['rna_class']
-#     return _
 
 def add_rna(driver:Driver,rna:RNA):
     with driver.session() as s:
