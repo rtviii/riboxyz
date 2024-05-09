@@ -60,8 +60,7 @@ def link__ligand_to_struct(prot: Node, parent_rcsb_id: str) -> Callable[[Transac
   merge (ligand)<-[contains:contains]-(struct)
   return struct, ligand, contains
 """,
-                      {"ELEM_ID": prot.element_id,
-                       "PARENT": parent_rcsb_id}).values('struct', 'ligand', 'contains')
+                      {"ELEM_ID": prot.element_id, "PARENT": parent_rcsb_id}).values('struct', 'ligand', 'contains')
     return _
 
 
