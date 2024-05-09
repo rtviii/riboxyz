@@ -5,12 +5,14 @@ from neo4j import ManagedTransaction, Transaction
 from ribctl.lib.schema.types_ribosome import Protein
 
 def node__protein(_prot:Protein)->Callable[[Transaction | ManagedTransaction], Node ]:
-    P = _prot.dict()
+    P = _prot.model_dump()
     def _(tx: Transaction | ManagedTransaction):
         return tx.run("""//
         merge (rp:Protein {
       asym_ids    : $asym_ids,
       auth_asym_id: $auth_asym_id,
+      assembly_id: $assembly_id,
+
           
       parent_rcsb_id                      : $parent_rcsb_id,
       pfam_comments                       : $pfam_comments,
@@ -22,7 +24,6 @@ def node__protein(_prot:Protein)->Callable[[Transaction | ManagedTransaction], N
       host_organism_ids  : $host_organism_ids,
       host_organism_names: $host_organism_names,
       
-      ligand_like          : $ligand_like,
       uniprot_accession    : $uniprot_accession,
       rcsb_pdbx_description: $rcsb_pdbx_description,
 
@@ -32,6 +33,7 @@ def node__protein(_prot:Protein)->Callable[[Transaction | ManagedTransaction], N
       entity_poly_seq_length             : $entity_poly_seq_length,
       entity_poly_polymer_type           : $entity_poly_polymer_type,
       entity_poly_entity_type            : $entity_poly_entity_type,
+
       nomenclature                       : $nomenclature
   })
   on create set
@@ -49,31 +51,31 @@ match (struct:RibosomeStructure {rcsb_id:$PARENT})
 merge (prot)-[protof:protein_of]-(struct)
 return prot, protof, struct
 """,
-                      {"ELEM_ID": int(prot.element_id),
+                      {"ELEM_ID": prot.element_id,
                        "PARENT": parent_rcsb_id}).values('prot', 'protof', 'struct')
     return _
 
-def link__prot_to_nomclass(prot: Node) -> Callable[[Transaction | ManagedTransaction], list[list[Node | Relationship]]]:
+def link__prot_to_polymer_class(prot: Node) -> Callable[[Transaction | ManagedTransaction], list[list[Node | Relationship]]]:
     def _(tx: Transaction | ManagedTransaction):
         return tx.run("""//
    match (prot:Protein) WHERE ID(prot)=$ELEM_ID and prot.nomenclature[0] IS NOT NULL
-   merge (prot_class:ProteinClass {class_id:prot.nomenclature[0]})
-   merge (prot)-[member:member_of]->(prot_class)
-   return prot, member,prot_class
+   merge (polymer_class:PolymerClass {class_id:prot.nomenclature[0]})
+   merge (prot)-[member:member_of]->(polymer_class)
+   return prot, member,polymer_class
 """,
-                      {"ELEM_ID": int(prot.element_id)}).values('prot', 'member', 'prot_class')
+                      {"ELEM_ID": prot.element_id}).values('prot', 'member', 'polymer_class')
     return _
 
-def node__protein_class(protein_class:str):
+def node__polymer_class(polymer_class:str):
     def _(tx:Transaction | ManagedTransaction):
         return tx.run("""//
-            merge (protein_class:NomenclatureClass {class_id:$CLASS_ID})
-            return protein_class
-        """, {"CLASS_ID":protein_class}).single(strict=True)['protein_class']
+            merge (polymer_class:PolymerClass {class_id:$CLASS_ID})
+            return polymer_class
+        """, {"CLASS_ID":polymer_class}).single(strict=True)['polymer_class']
     return _
 
 def add_protein(driver:Driver,prot:Protein):
     with driver.session() as s:
         node = s.execute_write(node__protein(prot))
         s.execute_write(link__prot_to_struct(node, prot.parent_rcsb_id))
-        s.execute_write(link__prot_to_nomclass(node))
+        s.execute_write(link__prot_to_polymer_class(node))

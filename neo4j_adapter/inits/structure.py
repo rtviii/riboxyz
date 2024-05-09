@@ -1,11 +1,11 @@
 from typing import Callable
-from neo4j import Driver, ManagedTransaction, Record, Result, Transaction
+from neo4j import  ManagedTransaction, Record, Transaction
 from neo4j.graph import Node, Relationship
 from neo4j import ManagedTransaction, Transaction
-from ribctl.lib.schema.types_ribosome import RNA, NonpolymericLigand, Protein, RibosomeStructure
+from ribctl.lib.schema.types_ribosome import  NonpolymericLigand, RibosomeStructure
 
 def node__structure(_rib: RibosomeStructure) -> Callable[[Transaction | ManagedTransaction], Record | None]:
-    R = _rib.dict()
+    R = _rib.model_dump()
     def _(tx: Transaction | ManagedTransaction):
         return tx.run("""//
         merge ( struct:RibosomeStructure{
@@ -15,14 +15,16 @@ def node__structure(_rib: RibosomeStructure) -> Callable[[Transaction | ManagedT
                   citation_rcsb_authors : $citation_rcsb_authors,
                   citation_title        : $citation_title,
 
-                  pdbx_keywords     : $pdbx_keywords     ,
+                  pdbx_keywords     : $pdbx_keywords,
                   pdbx_keywords_text: $pdbx_keywords_text,
 
                   src_organism_ids           : $src_organism_ids,
                   src_organism_names         : $src_organism_names,
 
                   host_organism_ids           : $host_organism_ids,
-                  host_organism_names          : $host_organism_names
+                  host_organism_names          : $host_organism_names,
+                  
+                  mitochondrial: $mitochondrial
               })
 
               on create set
@@ -36,7 +38,7 @@ def node__structure(_rib: RibosomeStructure) -> Callable[[Transaction | ManagedT
     return _
 
 def node__ligand(_ligand:NonpolymericLigand)->Callable[[Transaction | ManagedTransaction], Node ]:
-    L = _ligand.dict()
+    L = _ligand.model_dump()
     def _(tx: Transaction | ManagedTransaction):
      return tx.run("""//
 MERGE (ligand:Ligand {chemicalId: 
@@ -58,13 +60,8 @@ def link__ligand_to_struct(prot: Node, parent_rcsb_id: str) -> Callable[[Transac
   merge (ligand)<-[contains:contains]-(struct)
   return struct, ligand, contains
 """,
-                      {"ELEM_ID": int(prot.element_id),
+                      {"ELEM_ID": prot.element_id,
                        "PARENT": parent_rcsb_id}).values('struct', 'ligand', 'contains')
     return _
-
-def add_ligand(driver:Driver,lig:NonpolymericLigand, parent_rcsb_id:str):
-    with driver.session() as s:
-        node = s.execute_write(node__ligand(lig))
-        s.execute_write(link__ligand_to_struct(node, parent_rcsb_id))
 
 
