@@ -55,7 +55,7 @@ def link__ligand_to_struct(prot: Node, parent_rcsb_id: str) -> Callable[[Transac
     parent_rcsb_id = parent_rcsb_id.upper()
     def _(tx: Transaction | ManagedTransaction):
         return tx.run("""//
-  match (ligand:Ligand) where ID(ligand)=$ELEM_ID
+  match (ligand:Ligand) where ELEMENTID(ligand)=$ELEM_ID
   match (struct:RibosomeStructure {rcsb_id: $PARENT})
   merge (ligand)<-[contains:contains]-(struct)
   return struct, ligand, contains

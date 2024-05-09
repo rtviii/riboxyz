@@ -36,7 +36,7 @@ merge (rna:RNA {
 def link__rna_to_polymer_class(rna: Node) -> Callable[[Transaction | ManagedTransaction], list[list[Node | Relationship]]]:
     def _(tx: Transaction | ManagedTransaction):
         return tx.run("""//
-MATCH (r:RNA) WHERE ID(r)=$ELEM_ID and r.nomenclature[0] IS NOT NULL with r as rna
+MATCH (r:RNA) WHERE ELEMENTID(r)=$ELEM_ID and r.nomenclature[0] IS NOT NULL with r as rna
 MATCH (rna_class:PolymerClass {class_id:rna.nomenclature[0]}) 
 with rna, rna_class 
 merge (rna)-[b:belongs_to]-(rna_class)
@@ -48,7 +48,7 @@ def link__rna_to_struct(rna: Node, parent_rcsb_id: str) -> Callable[[Transaction
 
     def _(tx: Transaction | ManagedTransaction):
         return tx.run("""//
-match (rna:RNA) where ID(rna)=$ELEM_ID
+match (rna:RNA) where ELEMENTID(rna)=$ELEM_ID
 match (struct:RibosomeStructure {rcsb_id:$PARENT})
 merge (rna)-[rnaof:rna_of]-(struct)
 return rna, rnaof, struct""",
