@@ -1,16 +1,28 @@
+import json
+from pprint import pprint
 from neo4j_adapter.adapter import Neo4jAdapter
+import sys
+
+from ribctl.lib.schema.types_ribosome import RibosomeStructure
+sys.dont_write_bytecode = True
+
 from dotenv import load_dotenv
 
 load_dotenv('.env')
 
 
-adapter = Neo4jAdapter('bolt://localhost:7687', 'neo4j')
-# print(adapter.see_current_auth())
-# adapter.init_polymer_classes()
 
-# print(adapter.get_any())
-adapter.add_structure('3j7z')
-    
-# adapter.sync_with_rcsb(10)
+with open('./neo4j_adapter/3J7Z.json') as f:
+    rs = RibosomeStructure.model_validate(json.load(f))
+    pprint(rs)
+
+
+# adapter = Neo4jAdapter('bolt://localhost:7687', 'neo4j')
+
+# # print(adapter.see_current_auth())
+# # adapter.init_polymer_classes()
+# # print(adapter.get_any())
+# adapter.add_structure('3j7z')
+# # adapter.sync_with_rcsb(10)
 
 

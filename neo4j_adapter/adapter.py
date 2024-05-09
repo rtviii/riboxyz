@@ -2,9 +2,9 @@ from concurrent.futures import ALL_COMPLETED, Future, ThreadPoolExecutor, wait
 import typing
 from neo4j.exceptions import AuthError
 from neo4j import Driver, GraphDatabase
-from neo4j_adapter.inits.proteins import add_protein, node__polymer_class
-from neo4j_adapter.inits.rna import add_rna
-from neo4j_adapter.inits.structure import  link__ligand_to_struct, node__ligand, node__structure, struct_exists
+from neo4j_adapter.node_protein import add_protein, node__polymer_class
+from neo4j_adapter.node_rna import add_rna
+from neo4j_adapter.node_structure import  link__ligand_to_struct, node__ligand, node__structure, struct_exists
 from ribctl.etl.etl_pipeline import current_rcsb_structs
 from ribctl.lib.schema.types_ribosome import MitochondrialProteinClass, PolymerClass, PolynucleotideClass, RibosomeStructure
 from ribctl.etl.ribosome_assets import RibosomeAssets
@@ -116,7 +116,8 @@ class Neo4jAdapter():
         if self.check_structure_exists(rcsb_id):
             return
 
-        R = RibosomeAssets(rcsb_id).profile()
+        R:RibosomeStructure = RibosomeAssets(rcsb_id).profile()
+
         with self.driver.session() as s:
             struct_node_result = s.execute_write(node__structure(R))
 

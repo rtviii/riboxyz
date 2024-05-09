@@ -609,31 +609,6 @@ class RibosomeStructure(BaseModel):
 
         return _
 
-    # def metadata(self) -> RibosomeStructureMetadatum:
-
-    #     return RibosomeStructureMetadatum(
-
-    #                                      rcsb_id                 = self.rcsb_id,
-    #                                      expMethod               = self.expMethod,
-    #                                      resolution              = self.resolution,
-    #                                      pdbx_keywords           = self.pdbx_keywords,
-    #                                      pdbx_keywords_text      = self.pdbx_keywords_text,
-    #                                      rcsb_external_ref_id    = self.rcsb_external_ref_id,
-    #                                      rcsb_external_ref_type  = self.rcsb_external_ref_type,
-    #                                      rcsb_external_ref_link  = self.rcsb_external_ref_link,
-    #                                      citation_year           = self.citation_year,
-    #                                      citation_rcsb_authors   = self.citation_rcsb_authors,
-    #                                      citation_title          = self.citation_title,
-    #                                      citation_pdbx_doi       = self.citation_pdbx_doi,
-    #                                      src_organism_ids        = self.src_organism_ids,
-    #                                      src_organism_names      = self.src_organism_names,
-    #                                      host_organism_ids       = self.host_organism_ids,
-    #                                      host_organism_names     = self.host_organism_names,
-    #                                      mitochondrial           = self.mitochondrial,
-    #                                      proteins_metadata       = [x.metadatum() for x in self.proteins            ],
-    #                                      rnas_metadata           = [x.metadatum() for x in self.rnas                ],
-    #                                      other_polymers_metadata = [x.metadatum() for x in self.other_polymers      ],
-    #                                      nonpolymeric_ligands    = [x.metadatum() for x in self.nonpolymeric_ligands])
 
     rcsb_id   : str
     expMethod : str
@@ -651,13 +626,13 @@ class RibosomeStructure(BaseModel):
     citation_title       : Optional[str] = None
     citation_pdbx_doi    : Optional[str] = None
 
-    src_organism_ids: list[int]
+    src_organism_ids  : list[int]
     src_organism_names: list[str]
 
     host_organism_ids: list[int]
     host_organism_names: list[str]
 
-    assembly_map: list[AssemblyInstancesMap]
+    assembly_map: Optional[list[AssemblyInstancesMap]] = None
     mitochondrial: bool
 
     # proteins            : list[Any]
@@ -666,12 +641,11 @@ class RibosomeStructure(BaseModel):
     # polymeric_factors   : list[Any]
 
     proteins: list[Protein]
-    rnas: list[RNA]
+    rnas    : list[RNA]
 
     # polymeric_factors   : list[LifecycleFactor]
     # ? This includes DNA-RNA hybrid strands, DNA and all other polymers
-    other_polymers: list[Polymer]
-
+    other_polymers      : list[Polymer]
     nonpolymeric_ligands: list[NonpolymericLigand]
 
     # TODO: Deprecate this
