@@ -13,28 +13,21 @@ class DBQuery():
         with self.adapter.driver.session() as session:
             def _(tx: Transaction | ManagedTransaction):
                 return tx.run("""//
-                        match (ribs:RibosomeStructure) unwind ribs as struct
 
-                                optional match (l:Ligand)-[]-(struct)
-                                with collect(l.chemicalId) as ligands, struct
+        match (rib:RibosomeStructure) 
+        with rib order by rib.rcsb_id limit 1
 
-                                match (rps:Protein)-[]-(struct)
-                                with ligands, struct, collect({
-                                    auth_asym_id                   : rps.auth_asym_id,
-                                    nomenclature                   : rps.nomenclature,
-                                    entity_poly_seq_one_letter_code: rps.entity_poly_seq_one_letter_code
-                                    }) as rps
+        optional match (l:Ligand)-[]-(rib) 
+        with collect(PROPERTIES(l)) as ligands, rib
 
+        match (rps:Protein)-[]-(rib) 
+        with collect(PROPERTIES(rps)) as proteins, ligands, rib
 
-                                optional match (rnas:RNA)-[]-(struct)
-                                with ligands, struct, rps, collect({
-                                    auth_asym_id                   : rnas.auth_asym_id,
-                                    nomenclature                   : rnas.nomenclature,
-                                    entity_poly_seq_one_letter_code: rnas.entity_poly_seq_one_letter_code
-                                    }) as rnas
-
-                                with ligands, rps, rnas, keys(struct) as keys, struct 
-                                return struct,ligands,rps,rnas
+        optional match (rna:RNA)-[]-(rib) 
+        with collect(PROPERTIES(rna)) as rnas, proteins, ligands, rib
+        
+        with  apoc.map.mergeList([{proteins:proteins},{ligands:ligands},{rnas:rnas}]) as rest, rib
+        return apoc.map.merge(rib, rest)
                                         """).data()
 
             return session.execute_read(_)
