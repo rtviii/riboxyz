@@ -4,37 +4,31 @@ from neo4j_adapter.adapter import Neo4jAdapter
 
 class DBQuery():
 
-
     adapter: Neo4jAdapter 
     def __init__(self) -> None:
         self.adapter = Neo4jAdapter('bolt://localhost:7687', 'neo4j')
         pass
+
     def list_structs(self, filters=None, limit=None, offset=None):
         with self.adapter.driver.session() as session:
             def _(tx: Transaction | ManagedTransaction):
                 return tx.run("""//
-                        match (ribs:RibosomeStructure) unwind ribs as struct
 
-                                optional match (l:Ligand)-[]-(struct)
-                                with collect(l.chemicalId) as ligands, struct
+        match (rib:RibosomeStructure) 
+        with rib order by rib.rcsb_id limit 10
 
-                                match (rps:Protein)-[]-(struct)
-                                with ligands, struct, collect({
-                                    auth_asym_id                   : rps.auth_asym_id,
-                                    nomenclature                   : rps.nomenclature,
-                                    entity_poly_seq_one_letter_code: rps.entity_poly_seq_one_letter_code
-                                    }) as rps
+        optional match (l:Ligand)-[]-(rib) 
+        with collect(PROPERTIES(l)) as ligands, rib
 
-                                optional match (struct_rnas:RNA)-[]-(struct)
-                                with ligands, struct, rps, collect({
-                                    auth_asym_id                   : struct_rnas.auth_asym_id,
-                                    nomenclature                   : struct_rnas.nomenclature,
-                                    entity_poly_seq_one_letter_code: struct_rnas.entity_poly_seq_one_letter_code
-                                    }) as rnas
+        match (rps:Protein)-[]-(rib) 
+        with collect(PROPERTIES(rps)) as proteins, ligands, rib
 
-                                with ligands, rps, rnas, keys(struct) as keys, struct 
-                                return struct,ligands,rps,rnas
-                                        """).data()
+        optional match (rna:RNA)-[]-(rib) 
+        with collect(PROPERTIES(rna)) as rnas, proteins, ligands, rib
+        
+        with  apoc.map.mergeList([{proteins:proteins},{nonpolymeric_ligands:ligands},{rnas:rnas},{other_polymers:[]}]) as rest, rib
+        return apoc.map.merge(rib, rest)
+                                        """).value()
 
             return session.execute_read(_)
 

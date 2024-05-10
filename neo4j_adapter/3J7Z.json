@@ -1,0 +1,1455 @@
+{
+    "rcsb_id": "3J7Z",
+    "expMethod": "ELECTRON MICROSCOPY",
+    "resolution": 3.9,
+    "pdbx_keywords": "RIBOSOME/ANTIBIOTIC",
+    "pdbx_keywords_text": "erythromycin, stalling, RIBOSOME-ANTIBIOTIC complex",
+    "rcsb_external_ref_id": [
+        "EMD-6057",
+        "3J7Z"
+    ],
+    "rcsb_external_ref_type": [
+        "EM DATA RESOURCE",
+        "NAKB"
+    ],
+    "rcsb_external_ref_link": [
+        "https://www.emdataresource.org/EMD-6057",
+        "https://nakb.org/atlas=3J7Z"
+    ],
+    "citation_year": 2014,
+    "citation_rcsb_authors": [
+        "Arenz, S.",
+        "Meydan, S.",
+        "Starosta, A.L.",
+        "Berninghausen, O.",
+        "Beckmann, R.",
+        "Vazquez-Laslop, N.",
+        "Wilson, D.N."
+    ],
+    "citation_title": "Drug Sensing by the Ribosome Induces Translational Arrest via Active Site Perturbation.",
+    "citation_pdbx_doi": "10.1016/j.molcel.2014.09.014",
+    "src_organism_ids": [
+        83333
+    ],
+    "src_organism_names": [
+        "Escherichia coli K-12",
+        "Staphylococcus aureus"
+    ],
+    "host_organism_ids": [],
+    "host_organism_names": [],
+    "mitochondrial": false,
+    "proteins": [
+        {
+            "assembly_id": 0,
+            "asym_ids": [
+                "A"
+            ],
+            "auth_asym_id": "0",
+
+            "parent_rcsb_id": "3J7Z",
+            "src_organism_names": [
+                "Escherichia coli K-12"
+            ],
+            "host_organism_names": [],
+            "src_organism_ids": [
+                83333
+            ],
+            "host_organism_ids": [],
+            "rcsb_pdbx_description": "50S ribosomal protein L32",
+            "entity_poly_strand_id": "0",
+            "entity_poly_seq_one_letter_code": "MAVQQNKPTRSKRGMRRSHDALTAVTSLSVDKTSGEKHLRHHITADGYYRGRKVIAK",
+            "entity_poly_seq_one_letter_code_can": "MAVQQNKPTRSKRGMRRSHDALTAVTSLSVDKTSGEKHLRHHITADGYYRGRKVIAK",
+            "entity_poly_seq_length": 57,
+            "entity_poly_polymer_type": "Protein",
+            "entity_poly_entity_type": "polypeptide(L)",
+            "nomenclature": [
+                "bL32"
+            ],
+            "pfam_accessions": [
+                "PF01783"
+            ],
+            "pfam_comments": [
+                "NULL"
+            ],
+            "pfam_descriptions": [
+                "Ribosomal L32p protein family"
+            ],
+            "uniprot_accession": [
+                "P0A7N4"
+            ]
+        },
+        {
+            "assembly_id": 0,
+            "asym_ids": [
+                "K"
+            ],
+            "auth_asym_id": "C",
+            "parent_rcsb_id": "3J7Z",
+            "src_organism_names": [
+                "Escherichia coli K-12"
+            ],
+            "host_organism_names": [],
+            "src_organism_ids": [
+                83333
+            ],
+            "host_organism_ids": [],
+            "rcsb_pdbx_description": "50S ribosomal protein L2",
+            "entity_poly_strand_id": "C",
+            "entity_poly_seq_one_letter_code": "MAVVKCKPTSPGRRHVVKVVNPELHKGKPFAPLLEKNSKSGGRNNNGRITTRHIGGGHKQAYRIVDFKRNKDGIPAVVERLEYDPNRSANIALVLYKDGERRYILAPKGLKAGDQIQSGVDAAIKPGNTLPMRNIPVGSTVHNVEMKPGKGGQLARSAGTYVQIVARDGAYVTLRLRSGEMRKVEADCRATLGEVGNAEHMLRVLGKAGAARWRGVRPTVRGTAMNPVDHPHGGGEGRNFGKHPVTPWGVQTKGKKTRSNKRTDKFIVRRRSK",
+            "entity_poly_seq_one_letter_code_can": "MAVVKCKPTSPGRRHVVKVVNPELHKGKPFAPLLEKNSKSGGRNNNGRITTRHIGGGHKQAYRIVDFKRNKDGIPAVVERLEYDPNRSANIALVLYKDGERRYILAPKGLKAGDQIQSGVDAAIKPGNTLPMRNIPVGSTVHNVEMKPGKGGQLARSAGTYVQIVARDGAYVTLRLRSGEMRKVEADCRATLGEVGNAEHMLRVLGKAGAARWRGVRPTVRGTAMNPVDHPHGGGEGRNFGKHPVTPWGVQTKGKKTRSNKRTDKFIVRRRSK",
+            "entity_poly_seq_length": 273,
+            "entity_poly_polymer_type": "Protein",
+            "entity_poly_entity_type": "polypeptide(L)",
+            "nomenclature": [
+                "uL2"
+            ],
+            "pfam_accessions": [
+                "PF00181",
+                "PF03947"
+            ],
+            "pfam_comments": [
+                "NULL"
+            ],
+            "pfam_descriptions": [
+                "Ribosomal Proteins L2, RNA binding domain",
+                "Ribosomal Proteins L2, C-terminal domain"
+            ],
+            "uniprot_accession": [
+                "P60422"
+            ]
+        },
+        {
+            "assembly_id": 0,
+            "asym_ids": [
+                "L"
+            ],
+            "auth_asym_id": "D",
+            "parent_rcsb_id": "3J7Z",
+            "src_organism_names": [
+                "Escherichia coli K-12"
+            ],
+            "host_organism_names": [],
+            "src_organism_ids": [
+                83333
+            ],
+            "host_organism_ids": [],
+            "rcsb_pdbx_description": "50S ribosomal protein L3",
+            "entity_poly_strand_id": "D",
+            "entity_poly_seq_one_letter_code": "MIGLVGKKVGMTRIFTEDGVSIPVTVIEVEANRVTQVKDLANDGYRAIQVTTGAKKANRVTKPEAGHFAKAGVEAGRGLWEFRLAEGEEFTVGQSISVELFADVKKVDVTGTSKGKGFAGTVKRWNFRTQDATHGNSLSHRVPGSIGQNQTPGKVFKGKKMAGQMGNERVTVQSLDVVRVDAERNLLLVKGAVPGATGSDLIVKPAVKA",
+            "entity_poly_seq_one_letter_code_can": "MIGLVGKKVGMTRIFTEDGVSIPVTVIEVEANRVTQVKDLANDGYRAIQVTTGAKKANRVTKPEAGHFAKAGVEAGRGLWEFRLAEGEEFTVGQSISVELFADVKKVDVTGTSKGKGFAGTVKRWNFRTQDATHGNSLSHRVPGSIGQNQTPGKVFKGKKMAGQMGNERVTVQSLDVVRVDAERNLLLVKGAVPGATGSDLIVKPAVKA",
+            "entity_poly_seq_length": 209,
+            "entity_poly_polymer_type": "Protein",
+            "entity_poly_entity_type": "polypeptide(L)",
+            "nomenclature": [
+                "uL3"
+            ],
+            "pfam_accessions": [
+                "PF00297"
+            ],
+            "pfam_comments": [
+                "NULL"
+            ],
+            "pfam_descriptions": [
+                "Ribosomal protein L3"
+            ],
+            "uniprot_accession": [
+                "P60438"
+            ]
+        },
+        {
+            "assembly_id": 0,
+            "asym_ids": [
+                "M"
+            ],
+            "auth_asym_id": "E",
+            "parent_rcsb_id": "3J7Z",
+            "src_organism_names": [
+                "Escherichia coli K-12"
+            ],
+            "host_organism_names": [],
+            "src_organism_ids": [
+                83333
+            ],
+            "host_organism_ids": [],
+            "rcsb_pdbx_description": "50S ribosomal protein L4",
+            "entity_poly_strand_id": "E",
+            "entity_poly_seq_one_letter_code": "MELVLKDAQSALTVSETTFGRDFNEALVHQVVVAYAAGARQGTRAQKTRAEVTGSGKKPWRQKGTGRARSGSIKSPIWRSGGVTFAARPQDHSQKVNKKMYRGALKSILSELVRQDRLIVVEKFSVEAPKTKLLAQKLKDMALEDVLIITGELDENLFLAARNLHKVDVRDATGIDPVSLIAFDKVVMTADAVKQVEEMLA",
+            "entity_poly_seq_one_letter_code_can": "MELVLKDAQSALTVSETTFGRDFNEALVHQVVVAYAAGARQGTRAQKTRAEVTGSGKKPWRQKGTGRARSGSIKSPIWRSGGVTFAARPQDHSQKVNKKMYRGALKSILSELVRQDRLIVVEKFSVEAPKTKLLAQKLKDMALEDVLIITGELDENLFLAARNLHKVDVRDATGIDPVSLIAFDKVVMTADAVKQVEEMLA",
+            "entity_poly_seq_length": 201,
+            "entity_poly_polymer_type": "Protein",
+            "entity_poly_entity_type": "polypeptide(L)",
+            "nomenclature": [
+                "uL4"
+            ],
+            "pfam_accessions": [
+                "PF00573"
+            ],
+            "pfam_comments": [
+                "This family includes Ribosomal L4/L1 from eukaryotes and archaebacteria and L4 from eubacteria. L4 from yeast has been shown to bind rRNA [1]."
+            ],
+            "pfam_descriptions": [
+                "Ribosomal protein L4/L1 family"
+            ],
+            "uniprot_accession": [
+                "P60723"
+            ]
+        },
+        {
+            "assembly_id": 0,
+            "asym_ids": [
+                "N"
+            ],
+            "auth_asym_id": "F",
+            "parent_rcsb_id": "3J7Z",
+            "src_organism_names": [
+                "Escherichia coli K-12"
+            ],
+            "host_organism_names": [],
+            "src_organism_ids": [
+                83333
+            ],
+            "host_organism_ids": [],
+            "rcsb_pdbx_description": "50S ribosomal protein L5",
+            "entity_poly_strand_id": "F",
+            "entity_poly_seq_one_letter_code": "MAKLHDYYKDEVVKKLMTEFNYNSVMQVPRVEKITLNMGVGEAIADKKLLDNAAADLAAISGQKPLITKARKSVAGFKIRQGYPIGCKVTLRGERMWEFFERLITIAVPRIRDFRGLSAKSFDGRGNYSMGVREQIIFPEIDYDKVDRVRGLDITITTTAKSDEEGRALLAAFDFPFRK",
+            "entity_poly_seq_one_letter_code_can": "MAKLHDYYKDEVVKKLMTEFNYNSVMQVPRVEKITLNMGVGEAIADKKLLDNAAADLAAISGQKPLITKARKSVAGFKIRQGYPIGCKVTLRGERMWEFFERLITIAVPRIRDFRGLSAKSFDGRGNYSMGVREQIIFPEIDYDKVDRVRGLDITITTTAKSDEEGRALLAAFDFPFRK",
+            "entity_poly_seq_length": 179,
+            "entity_poly_polymer_type": "Protein",
+            "entity_poly_entity_type": "polypeptide(L)",
+            "nomenclature": [
+                "uL5"
+            ],
+            "pfam_accessions": [
+                "PF00673",
+                "PF00281"
+            ],
+            "pfam_comments": [
+                "NULL",
+                "This region is found associated with Pfam:PF00281."
+            ],
+            "pfam_descriptions": [
+                "ribosomal L5P family C-terminus",
+                "Ribosomal protein L5"
+            ],
+            "uniprot_accession": [
+                "P62399"
+            ]
+        },
+        {
+            "assembly_id": 0,
+            "asym_ids": [
+                "O"
+            ],
+            "auth_asym_id": "G",
+            "parent_rcsb_id": "3J7Z",
+            "src_organism_names": [
+                "Escherichia coli K-12"
+            ],
+            "host_organism_names": [],
+            "src_organism_ids": [
+                83333
+            ],
+            "host_organism_ids": [],
+            "rcsb_pdbx_description": "50S ribosomal protein L6",
+            "entity_poly_strand_id": "G",
+            "entity_poly_seq_one_letter_code": "MSRVAKAPVVVPAGVDVKINGQVITIKGKNGELTRTLNDAVEVKHADNTLTFGPRDGYADGWAQAGTARALLNSMVIGVTEGFTKKLQLVGVGYRAAVKGNVINLSLGFSHPVDHQLPAGITAECPTQTEIVLKGADKQVIGQVAADLRAYRRPEPYKGKGVRYADEVVRTKEAKKK",
+            "entity_poly_seq_one_letter_code_can": "MSRVAKAPVVVPAGVDVKINGQVITIKGKNGELTRTLNDAVEVKHADNTLTFGPRDGYADGWAQAGTARALLNSMVIGVTEGFTKKLQLVGVGYRAAVKGNVINLSLGFSHPVDHQLPAGITAECPTQTEIVLKGADKQVIGQVAADLRAYRRPEPYKGKGVRYADEVVRTKEAKKK",
+            "entity_poly_seq_length": 177,
+            "entity_poly_polymer_type": "Protein",
+            "entity_poly_entity_type": "polypeptide(L)",
+            "nomenclature": [
+                "uL6"
+            ],
+            "pfam_accessions": [
+                "PF00347"
+            ],
+            "pfam_comments": [
+                "NULL"
+            ],
+            "pfam_descriptions": [
+                "Ribosomal protein L6"
+            ],
+            "uniprot_accession": [
+                "P0AG55"
+            ]
+        },
+        {
+            "assembly_id": 0,
+            "asym_ids": [
+                "P"
+            ],
+            "auth_asym_id": "H",
+            "parent_rcsb_id": "3J7Z",
+            "src_organism_names": [
+                "Escherichia coli K-12"
+            ],
+            "host_organism_names": [],
+            "src_organism_ids": [
+                83333
+            ],
+            "host_organism_ids": [],
+            "rcsb_pdbx_description": "50S ribosomal protein L9",
+            "entity_poly_strand_id": "H",
+            "entity_poly_seq_one_letter_code": "MQVILLDKVANLGSLGDQVNVKAGYARNFLVPQGKAVPATKKNIEFFEARRAELEAKLAEVLAAANARAEKINALETVTIASKAGDEGKLFGSIGTRDIADAVTAAGVEVAKSEVRLPNGVLRTTGEHEVSFQVHSEVFAKVIVNVVAE",
+            "entity_poly_seq_one_letter_code_can": "MQVILLDKVANLGSLGDQVNVKAGYARNFLVPQGKAVPATKKNIEFFEARRAELEAKLAEVLAAANARAEKINALETVTIASKAGDEGKLFGSIGTRDIADAVTAAGVEVAKSEVRLPNGVLRTTGEHEVSFQVHSEVFAKVIVNVVAE",
+            "entity_poly_seq_length": 149,
+            "entity_poly_polymer_type": "Protein",
+            "entity_poly_entity_type": "polypeptide(L)",
+            "nomenclature": [
+                "bL9"
+            ],
+            "pfam_accessions": [
+                "PF01281"
+            ],
+            "pfam_comments": [
+                "NULL"
+            ],
+            "pfam_descriptions": [
+                "Ribosomal protein L9, N-terminal domain"
+            ],
+            "uniprot_accession": [
+                "P0A7R1"
+            ]
+        },
+        {
+            "assembly_id": 0,
+            "asym_ids": [
+                "Q"
+            ],
+            "auth_asym_id": "I",
+            "parent_rcsb_id": "3J7Z",
+            "src_organism_names": [
+                "Escherichia coli K-12"
+            ],
+            "host_organism_names": [],
+            "src_organism_ids": [
+                83333
+            ],
+            "host_organism_ids": [],
+            "rcsb_pdbx_description": "50S ribosomal protein L11",
+            "entity_poly_strand_id": "I",
+            "entity_poly_seq_one_letter_code": "MAKKVQAYVKLQVAAGMANPSPPVGPALGQQGVNIMEFCKAFNAKTDSIEKGLPIPVVITVYADRSFTFVTKTPPAAVLLKKAAGIKSGSGKPNKDKVGKISRAQLQEIAQTKAADMTGADIEAMTRSIEGTARSMGLVVED",
+            "entity_poly_seq_one_letter_code_can": "MAKKVQAYVKLQVAAGMANPSPPVGPALGQQGVNIMEFCKAFNAKTDSIEKGLPIPVVITVYADRSFTFVTKTPPAAVLLKKAAGIKSGSGKPNKDKVGKISRAQLQEIAQTKAADMTGADIEAMTRSIEGTARSMGLVVED",
+            "entity_poly_seq_length": 142,
+            "entity_poly_polymer_type": "Protein",
+            "entity_poly_entity_type": "polypeptide(L)",
+            "nomenclature": [
+                "uL11"
+            ],
+            "pfam_accessions": [
+                "PF00298",
+                "PF03946"
+            ],
+            "pfam_comments": [
+                "NULL",
+                "The N-terminal domain of Ribosomal protein L11 adopts an  alpha/beta fold and is followed by the RNA binding C-terminal domain."
+            ],
+            "pfam_descriptions": [
+                "Ribosomal protein L11, RNA binding domain",
+                "Ribosomal protein L11, N-terminal domain"
+            ],
+            "uniprot_accession": [
+                "P0A7J7"
+            ]
+        },
+        {
+            "assembly_id": 0,
+            "asym_ids": [
+                "R"
+            ],
+            "auth_asym_id": "J",
+            "parent_rcsb_id": "3J7Z",
+            "src_organism_names": [
+                "Escherichia coli K-12"
+            ],
+            "host_organism_names": [],
+            "src_organism_ids": [
+                83333
+            ],
+            "host_organism_ids": [],
+            "rcsb_pdbx_description": "50S ribosomal protein L13",
+            "entity_poly_strand_id": "J",
+            "entity_poly_seq_one_letter_code": "MKTFTAKPETVKRDWYVVDATGKTLGRLATELARRLRGKHKAEYTPHVDTGDYIIVLNADKVAVTGNKRTDKVYYHHTGHIGGIKQATFEEMIARRPERVIEIAVKGMLPKGPLGRAMFRKLKVYAGNEHNHAAQQPQVLDI",
+            "entity_poly_seq_one_letter_code_can": "MKTFTAKPETVKRDWYVVDATGKTLGRLATELARRLRGKHKAEYTPHVDTGDYIIVLNADKVAVTGNKRTDKVYYHHTGHIGGIKQATFEEMIARRPERVIEIAVKGMLPKGPLGRAMFRKLKVYAGNEHNHAAQQPQVLDI",
+            "entity_poly_seq_length": 142,
+            "entity_poly_polymer_type": "Protein",
+            "entity_poly_entity_type": "polypeptide(L)",
+            "nomenclature": [
+                "uL13"
+            ],
+            "pfam_accessions": [
+                "PF00572"
+            ],
+            "pfam_comments": [
+                "NULL"
+            ],
+            "pfam_descriptions": [
+                "Ribosomal protein L13"
+            ],
+            "uniprot_accession": [
+                "P0AA10"
+            ]
+        },
+        {
+            "assembly_id": 0,
+            "asym_ids": [
+                "S"
+            ],
+            "auth_asym_id": "K",
+            "parent_rcsb_id": "3J7Z",
+            "src_organism_names": [
+                "Escherichia coli K-12"
+            ],
+            "host_organism_names": [],
+            "src_organism_ids": [
+                83333
+            ],
+            "host_organism_ids": [],
+            "rcsb_pdbx_description": "50S ribosomal protein L14",
+            "entity_poly_strand_id": "K",
+            "entity_poly_seq_one_letter_code": "MIQEQTMLNVADNSGARRVMCIKVLGGSHRRYAGVGDIIKITIKEAIPRGKVKKGDVLKAVVVRTKKGVRRPDGSVIRFDGNACVLLNNNSEQPIGTRIFGPVTRELRSEKFMKIISLAPEVL",
+            "entity_poly_seq_one_letter_code_can": "MIQEQTMLNVADNSGARRVMCIKVLGGSHRRYAGVGDIIKITIKEAIPRGKVKKGDVLKAVVVRTKKGVRRPDGSVIRFDGNACVLLNNNSEQPIGTRIFGPVTRELRSEKFMKIISLAPEVL",
+            "entity_poly_seq_length": 123,
+            "entity_poly_polymer_type": "Protein",
+            "entity_poly_entity_type": "polypeptide(L)",
+            "nomenclature": [
+                "uL14"
+            ],
+            "pfam_accessions": [
+                "PF00238"
+            ],
+            "pfam_comments": [
+                "NULL"
+            ],
+            "pfam_descriptions": [
+                "Ribosomal protein L14p/L23e"
+            ],
+            "uniprot_accession": [
+                "P0ADY3"
+            ]
+        },
+        {
+            "assembly_id": 0,
+            "asym_ids": [
+                "B"
+            ],
+            "auth_asym_id": "1",
+            "parent_rcsb_id": "3J7Z",
+            "src_organism_names": [
+                "Escherichia coli K-12"
+            ],
+            "host_organism_names": [],
+            "src_organism_ids": [
+                83333
+            ],
+            "host_organism_ids": [],
+            "rcsb_pdbx_description": "50S ribosomal protein L33",
+            "entity_poly_strand_id": "1",
+            "entity_poly_seq_one_letter_code": "MAKGIREKIKLVSSAGTGHFYTTTKNKRTKPEKLELKKFDPVVRQHVIYKEAKIK",
+            "entity_poly_seq_one_letter_code_can": "MAKGIREKIKLVSSAGTGHFYTTTKNKRTKPEKLELKKFDPVVRQHVIYKEAKIK",
+            "entity_poly_seq_length": 55,
+            "entity_poly_polymer_type": "Protein",
+            "entity_poly_entity_type": "polypeptide(L)",
+            "nomenclature": [
+                "bL33"
+            ],
+            "pfam_accessions": [
+                "PF00471"
+            ],
+            "pfam_comments": [
+                "NULL"
+            ],
+            "pfam_descriptions": [
+                "Ribosomal protein L33"
+            ],
+            "uniprot_accession": [
+                "P0A7N9"
+            ]
+        },
+        {
+            "assembly_id": 0,
+            "asym_ids": [
+                "T"
+            ],
+            "auth_asym_id": "L",
+            "parent_rcsb_id": "3J7Z",
+            "src_organism_names": [
+                "Escherichia coli K-12"
+            ],
+            "host_organism_names": [],
+            "src_organism_ids": [
+                83333
+            ],
+            "host_organism_ids": [],
+            "rcsb_pdbx_description": "50S ribosomal protein L15",
+            "entity_poly_strand_id": "L",
+            "entity_poly_seq_one_letter_code": "MRLNTLSPAEGSKKAGKRLGRGIGSGLGKTGGRGHKGQKSRSGGGVRRGFEGGQMPLYRRLPKFGFTSRKAAITAEIRLSDLAKVEGGVVDLNTLKAANIIGIQIEFAKVILAGEVTTPVTVRGLRVTKGARAAIEAAGGKIEE",
+            "entity_poly_seq_one_letter_code_can": "MRLNTLSPAEGSKKAGKRLGRGIGSGLGKTGGRGHKGQKSRSGGGVRRGFEGGQMPLYRRLPKFGFTSRKAAITAEIRLSDLAKVEGGVVDLNTLKAANIIGIQIEFAKVILAGEVTTPVTVRGLRVTKGARAAIEAAGGKIEE",
+            "entity_poly_seq_length": 144,
+            "entity_poly_polymer_type": "Protein",
+            "entity_poly_entity_type": "polypeptide(L)",
+            "nomenclature": [
+                "uL15"
+            ],
+            "pfam_accessions": [
+                "PF00828"
+            ],
+            "pfam_comments": [
+                "This family includes higher eukaryotic ribosomal 60S L27A, archaeal 50S L18e, prokaryotic 50S L15, fungal mitochondrial L10, plant L27A, mitochondrial L15 and chloroplast L18-3 proteins."
+            ],
+            "pfam_descriptions": [
+                "Ribosomal proteins 50S-L15, 50S-L18e, 60S-L27A"
+            ],
+            "uniprot_accession": [
+                "P02413"
+            ]
+        },
+        {
+            "assembly_id": 0,
+            "asym_ids": [
+                "U"
+            ],
+            "auth_asym_id": "M",
+            "parent_rcsb_id": "3J7Z",
+            "src_organism_names": [
+                "Escherichia coli K-12"
+            ],
+            "host_organism_names": [],
+            "src_organism_ids": [
+                83333
+            ],
+            "host_organism_ids": [],
+            "rcsb_pdbx_description": "50S ribosomal protein L16",
+            "entity_poly_strand_id": "M",
+            "entity_poly_seq_one_letter_code": "MLQPKRTKFRKMHKGRNRGLAQGTDVSFGSFGLKAVGRGRLTARQIEAARRAMTRAVKRQGKIWIRVFPDKPITEKPLAVRMGKGKGNVEYWVALIQPGKVLYEMDGVPEELAREAFKLAAAKLPIKTTFVTKTVM",
+            "entity_poly_seq_one_letter_code_can": "MLQPKRTKFRKMHKGRNRGLAQGTDVSFGSFGLKAVGRGRLTARQIEAARRAMTRAVKRQGKIWIRVFPDKPITEKPLAVRMGKGKGNVEYWVALIQPGKVLYEMDGVPEELAREAFKLAAAKLPIKTTFVTKTVM",
+            "entity_poly_seq_length": 136,
+            "entity_poly_polymer_type": "Protein",
+            "entity_poly_entity_type": "polypeptide(L)",
+            "nomenclature": [
+                "uL16"
+            ],
+            "pfam_accessions": [
+                "PF00252"
+            ],
+            "pfam_comments": [
+                "NULL"
+            ],
+            "pfam_descriptions": [
+                "Ribosomal protein L16p/L10e"
+            ],
+            "uniprot_accession": [
+                "P0ADY7"
+            ]
+        },
+        {
+            "assembly_id": 0,
+            "asym_ids": [
+                "V"
+            ],
+            "auth_asym_id": "N",
+            "parent_rcsb_id": "3J7Z",
+            "src_organism_names": [
+                "Escherichia coli K-12"
+            ],
+            "host_organism_names": [],
+            "src_organism_ids": [
+                83333
+            ],
+            "host_organism_ids": [],
+            "rcsb_pdbx_description": "50S ribosomal protein L17",
+            "entity_poly_strand_id": "N",
+            "entity_poly_seq_one_letter_code": "MRHRKSGRQLNRNSSHRQAMFRNMAGSLVRHEIIKTTLPKAKELRRVVEPLITLAKTDSVANRRLAFARTRDNEIVAKLFNELGPRFASRAGGYTRILKCGFRAGDNAPMAYIELVDRSEKAEAAAE",
+            "entity_poly_seq_one_letter_code_can": "MRHRKSGRQLNRNSSHRQAMFRNMAGSLVRHEIIKTTLPKAKELRRVVEPLITLAKTDSVANRRLAFARTRDNEIVAKLFNELGPRFASRAGGYTRILKCGFRAGDNAPMAYIELVDRSEKAEAAAE",
+            "entity_poly_seq_length": 127,
+            "entity_poly_polymer_type": "Protein",
+            "entity_poly_entity_type": "polypeptide(L)",
+            "nomenclature": [
+                "bL17"
+            ],
+            "pfam_accessions": [
+                "PF01196"
+            ],
+            "pfam_comments": [
+                "NULL"
+            ],
+            "pfam_descriptions": [
+                "Ribosomal protein L17"
+            ],
+            "uniprot_accession": [
+                "P0AG44"
+            ]
+        },
+        {
+            "assembly_id": 0,
+            "asym_ids": [
+                "W"
+            ],
+            "auth_asym_id": "O",
+            "parent_rcsb_id": "3J7Z",
+            "src_organism_names": [
+                "Escherichia coli K-12"
+            ],
+            "host_organism_names": [],
+            "src_organism_ids": [
+                83333
+            ],
+            "host_organism_ids": [],
+            "rcsb_pdbx_description": "50S ribosomal protein L18",
+            "entity_poly_strand_id": "O",
+            "entity_poly_seq_one_letter_code": "MDKKSARIRRATRARRKLQELGATRLVVHRTPRHIYAQVIAPNGSEVLVAASTVEKAIAEQLKYTGNKDAAAAVGKAVAERALEKGIKDVSFDRSGFQYHGRVQALADAAREAGLQF",
+            "entity_poly_seq_one_letter_code_can": "MDKKSARIRRATRARRKLQELGATRLVVHRTPRHIYAQVIAPNGSEVLVAASTVEKAIAEQLKYTGNKDAAAAVGKAVAERALEKGIKDVSFDRSGFQYHGRVQALADAAREAGLQF",
+            "entity_poly_seq_length": 117,
+            "entity_poly_polymer_type": "Protein",
+            "entity_poly_entity_type": "polypeptide(L)",
+            "nomenclature": [
+                "uL18"
+            ],
+            "pfam_accessions": [
+                "PF00861"
+            ],
+            "pfam_comments": [
+                "This family includes the large subunit ribosomal proteins from bacteria, archaea, the mitochondria and the chloroplast. It does not include the 60S L18 or L5 proteins from Metazoa."
+            ],
+            "pfam_descriptions": [
+                "Ribosomal L18 of archaea, bacteria, mitoch. and chloroplast"
+            ],
+            "uniprot_accession": [
+                "P0C018"
+            ]
+        },
+        {
+            "assembly_id": 0,
+            "asym_ids": [
+                "X"
+            ],
+            "auth_asym_id": "P",
+            "parent_rcsb_id": "3J7Z",
+            "src_organism_names": [
+                "Escherichia coli K-12"
+            ],
+            "host_organism_names": [],
+            "src_organism_ids": [
+                83333
+            ],
+            "host_organism_ids": [],
+            "rcsb_pdbx_description": "50S ribosomal protein L19",
+            "entity_poly_strand_id": "P",
+            "entity_poly_seq_one_letter_code": "MSNIIKQLEQEQMKQDVPSFRPGDTVEVKVWVVEGSKKRLQAFEGVVIAIRNRGLHSAFTVRKISNGEGVERVFQTHSPVVDSISVKRRGAVRKAKLYYLRERTGKAARIKERLN",
+            "entity_poly_seq_one_letter_code_can": "MSNIIKQLEQEQMKQDVPSFRPGDTVEVKVWVVEGSKKRLQAFEGVVIAIRNRGLHSAFTVRKISNGEGVERVFQTHSPVVDSISVKRRGAVRKAKLYYLRERTGKAARIKERLN",
+            "entity_poly_seq_length": 115,
+            "entity_poly_polymer_type": "Protein",
+            "entity_poly_entity_type": "polypeptide(L)",
+            "nomenclature": [
+                "bL19"
+            ],
+            "pfam_accessions": [
+                "PF01245"
+            ],
+            "pfam_comments": [
+                "NULL"
+            ],
+            "pfam_descriptions": [
+                "Ribosomal protein L19"
+            ],
+            "uniprot_accession": [
+                "P0A7K6"
+            ]
+        },
+        {
+            "assembly_id": 0,
+            "asym_ids": [
+                "Y"
+            ],
+            "auth_asym_id": "Q",
+            "parent_rcsb_id": "3J7Z",
+            "src_organism_names": [
+                "Escherichia coli K-12"
+            ],
+            "host_organism_names": [],
+            "src_organism_ids": [
+                83333
+            ],
+            "host_organism_ids": [],
+            "rcsb_pdbx_description": "50S ribosomal protein L20",
+            "entity_poly_strand_id": "Q",
+            "entity_poly_seq_one_letter_code": "MARVKRGVIARARHKKILKQAKGYYGARSRVYRVAFQAVIKAGQYAYRDRRQRKRQFRQLWIARINAAARQNGISYSKFINGLKKASVEIDRKILADIAVFDKVAFTALVEKAKAALA",
+            "entity_poly_seq_one_letter_code_can": "MARVKRGVIARARHKKILKQAKGYYGARSRVYRVAFQAVIKAGQYAYRDRRQRKRQFRQLWIARINAAARQNGISYSKFINGLKKASVEIDRKILADIAVFDKVAFTALVEKAKAALA",
+            "entity_poly_seq_length": 118,
+            "entity_poly_polymer_type": "Protein",
+            "entity_poly_entity_type": "polypeptide(L)",
+            "nomenclature": [
+                "bL20"
+            ],
+            "pfam_accessions": [
+                "PF00453"
+            ],
+            "pfam_comments": [
+                "NULL"
+            ],
+            "pfam_descriptions": [
+                "Ribosomal protein L20"
+            ],
+            "uniprot_accession": [
+                "P0A7L3"
+            ]
+        },
+        {
+            "assembly_id": 0,
+            "asym_ids": [
+                "Z"
+            ],
+            "auth_asym_id": "R",
+            "parent_rcsb_id": "3J7Z",
+            "src_organism_names": [
+                "Escherichia coli K-12"
+            ],
+            "host_organism_names": [],
+            "src_organism_ids": [
+                83333
+            ],
+            "host_organism_ids": [],
+            "rcsb_pdbx_description": "50S ribosomal protein L21",
+            "entity_poly_strand_id": "R",
+            "entity_poly_seq_one_letter_code": "MYAVFQSGGKQHRVSEGQTVRLEKLDIATGETVEFAEVLMIANGEEVKIGVPFVDGGVIKAEVVAHGRGEKVKIVKFRRRKHYRKQQGHRQWFTDVKITGISA",
+            "entity_poly_seq_one_letter_code_can": "MYAVFQSGGKQHRVSEGQTVRLEKLDIATGETVEFAEVLMIANGEEVKIGVPFVDGGVIKAEVVAHGRGEKVKIVKFRRRKHYRKQQGHRQWFTDVKITGISA",
+            "entity_poly_seq_length": 103,
+            "entity_poly_polymer_type": "Protein",
+            "entity_poly_entity_type": "polypeptide(L)",
+            "nomenclature": [
+                "bL21"
+            ],
+            "pfam_accessions": [
+                "PF00829"
+            ],
+            "pfam_comments": [
+                "NULL"
+            ],
+            "pfam_descriptions": [
+                "Ribosomal prokaryotic L21 protein"
+            ],
+            "uniprot_accession": [
+                "P0AG48"
+            ]
+        },
+        {
+            "assembly_id": 0,
+            "asym_ids": [
+                "AA"
+            ],
+            "auth_asym_id": "S",
+            "parent_rcsb_id": "3J7Z",
+            "src_organism_names": [
+                "Escherichia coli K-12"
+            ],
+            "host_organism_names": [],
+            "src_organism_ids": [
+                83333
+            ],
+            "host_organism_ids": [],
+            "rcsb_pdbx_description": "50S ribosomal protein L22",
+            "entity_poly_strand_id": "S",
+            "entity_poly_seq_one_letter_code": "METIAKHRHARSSAQKVRLVADLIRGKKVSQALDILTYTNKKAAVLVKKVLESAIANAEHNDGADIDDLKVTKIFVDEGPSMKRIMPRAKGRADRILKRTSHITVVVSDR",
+            "entity_poly_seq_one_letter_code_can": "METIAKHRHARSSAQKVRLVADLIRGKKVSQALDILTYTNKKAAVLVKKVLESAIANAEHNDGADIDDLKVTKIFVDEGPSMKRIMPRAKGRADRILKRTSHITVVVSDR",
+            "entity_poly_seq_length": 110,
+            "entity_poly_polymer_type": "Protein",
+            "entity_poly_entity_type": "polypeptide(L)",
+            "nomenclature": [
+                "uL22"
+            ],
+            "pfam_accessions": [
+                "PF00237"
+            ],
+            "pfam_comments": [
+                "This family includes L22 from prokaryotes and chloroplasts and L17 from eukaryotes."
+            ],
+            "pfam_descriptions": [
+                "Ribosomal protein L22p/L17e"
+            ],
+            "uniprot_accession": [
+                "P61175"
+            ]
+        },
+        {
+            "assembly_id": 0,
+            "asym_ids": [
+                "BA"
+            ],
+            "auth_asym_id": "T",
+            "parent_rcsb_id": "3J7Z",
+            "src_organism_names": [
+                "Escherichia coli K-12"
+            ],
+            "host_organism_names": [],
+            "src_organism_ids": [
+                83333
+            ],
+            "host_organism_ids": [],
+            "rcsb_pdbx_description": "50S ribosomal protein L23",
+            "entity_poly_strand_id": "T",
+            "entity_poly_seq_one_letter_code": "MIREERLLKVLRAPHVSEKASTAMEKSNTIVLKVAKDATKAEIKAAVQKLFEVEVEVVNTLVVKGKVKRHGQRIGRRSDWKKAYVTLKEGQNLDFVGGAE",
+            "entity_poly_seq_one_letter_code_can": "MIREERLLKVLRAPHVSEKASTAMEKSNTIVLKVAKDATKAEIKAAVQKLFEVEVEVVNTLVVKGKVKRHGQRIGRRSDWKKAYVTLKEGQNLDFVGGAE",
+            "entity_poly_seq_length": 100,
+            "entity_poly_polymer_type": "Protein",
+            "entity_poly_entity_type": "polypeptide(L)",
+            "nomenclature": [
+                "uL23"
+            ],
+            "pfam_accessions": [
+                "PF00276"
+            ],
+            "pfam_comments": [
+                "NULL"
+            ],
+            "pfam_descriptions": [
+                "Ribosomal protein L23"
+            ],
+            "uniprot_accession": [
+                "P0ADZ0"
+            ]
+        },
+        {
+            "assembly_id": 0,
+            "asym_ids": [
+                "CA"
+            ],
+            "auth_asym_id": "U",
+            "parent_rcsb_id": "3J7Z",
+            "src_organism_names": [
+                "Escherichia coli K-12"
+            ],
+            "host_organism_names": [],
+            "src_organism_ids": [
+                83333
+            ],
+            "host_organism_ids": [],
+            "rcsb_pdbx_description": "50S ribosomal protein L24",
+            "entity_poly_strand_id": "U",
+            "entity_poly_seq_one_letter_code": "MAAKIRRDDEVIVLTGKDKGKRGKVKNVLSSGKVIVEGINLVKKHQKPVPALNQPGGIVEKEAAIQVSNVAIFNAATGKADRVGFRFEDGKKVRFFKSNSETIK",
+            "entity_poly_seq_one_letter_code_can": "MAAKIRRDDEVIVLTGKDKGKRGKVKNVLSSGKVIVEGINLVKKHQKPVPALNQPGGIVEKEAAIQVSNVAIFNAATGKADRVGFRFEDGKKVRFFKSNSETIK",
+            "entity_poly_seq_length": 104,
+            "entity_poly_polymer_type": "Protein",
+            "entity_poly_entity_type": "polypeptide(L)",
+            "nomenclature": [
+                "uL24"
+            ],
+            "pfam_accessions": [
+                "PF17136",
+                "PF00467"
+            ],
+            "pfam_comments": [
+                "This family has been extended to coincide with ref [1]. The KOW (Kyprides, Ouzounis, Woese) motif is found in a variety of ribosomal proteins and NusG.",
+                "This is the family of bacterial 50S ribosomal subunit proteins L24. It also carries some mitochondrial 39S L24 proteins."
+            ],
+            "pfam_descriptions": [
+                "Ribosomal proteins 50S L24/mitochondrial 39S L24",
+                "KOW motif"
+            ],
+            "uniprot_accession": [
+                "P60624"
+            ]
+        },
+        {
+            "assembly_id": 0,
+            "asym_ids": [
+                "C"
+            ],
+            "auth_asym_id": "2",
+            "parent_rcsb_id": "3J7Z",
+            "src_organism_names": [
+                "Escherichia coli K-12"
+            ],
+            "host_organism_names": [],
+            "src_organism_ids": [
+                83333
+            ],
+            "host_organism_ids": [],
+            "rcsb_pdbx_description": "50S ribosomal protein L34",
+            "entity_poly_strand_id": "2",
+            "entity_poly_seq_one_letter_code": "MKRTFQPSVLKRNRSHGFRARMATKNGRQVLARRRAKGRARLTVSK",
+            "entity_poly_seq_one_letter_code_can": "MKRTFQPSVLKRNRSHGFRARMATKNGRQVLARRRAKGRARLTVSK",
+            "entity_poly_seq_length": 46,
+            "entity_poly_polymer_type": "Protein",
+            "entity_poly_entity_type": "polypeptide(L)",
+            "nomenclature": [
+                "bL34"
+            ],
+            "pfam_accessions": [
+                "PF00468"
+            ],
+            "pfam_comments": [
+                "NULL"
+            ],
+            "pfam_descriptions": [
+                "Ribosomal protein L34"
+            ],
+            "uniprot_accession": [
+                "P0A7P5"
+            ]
+        },
+        {
+            "assembly_id": 0,
+            "asym_ids": [
+                "DA"
+            ],
+            "auth_asym_id": "V",
+            "parent_rcsb_id": "3J7Z",
+            "src_organism_names": [
+                "Escherichia coli K-12"
+            ],
+            "host_organism_names": [],
+            "src_organism_ids": [
+                83333
+            ],
+            "host_organism_ids": [],
+            "rcsb_pdbx_description": "50S ribosomal protein L25",
+            "entity_poly_strand_id": "V",
+            "entity_poly_seq_one_letter_code": "MFTINAEVRKEQGKGASRRLRAANKFPAIIYGGKEAPLAIELDHDKVMNMQAKAEFYSEVLTIVVDGKEIKVKAQDVQRHPYKPKLQHIDFVRA",
+            "entity_poly_seq_one_letter_code_can": "MFTINAEVRKEQGKGASRRLRAANKFPAIIYGGKEAPLAIELDHDKVMNMQAKAEFYSEVLTIVVDGKEIKVKAQDVQRHPYKPKLQHIDFVRA",
+            "entity_poly_seq_length": 94,
+            "entity_poly_polymer_type": "Protein",
+            "entity_poly_entity_type": "polypeptide(L)",
+            "nomenclature": [
+                "bL25"
+            ],
+            "pfam_accessions": [
+                "PF01386"
+            ],
+            "pfam_comments": [
+                "Ribosomal protein L25 is an RNA binding protein, that binds 5S rRNA. This family includes Ctc from B. subtilis Swiss:P14194, which is induced by stress."
+            ],
+            "pfam_descriptions": [
+                "Ribosomal L25p family"
+            ],
+            "uniprot_accession": [
+                "P68919"
+            ]
+        },
+        {
+            "assembly_id": 0,
+            "asym_ids": [
+                "EA"
+            ],
+            "auth_asym_id": "W",
+            "parent_rcsb_id": "3J7Z",
+            "src_organism_names": [
+                "Escherichia coli K-12"
+            ],
+            "host_organism_names": [],
+            "src_organism_ids": [
+                83333
+            ],
+            "host_organism_ids": [],
+            "rcsb_pdbx_description": "50S ribosomal protein L27",
+            "entity_poly_strand_id": "W",
+            "entity_poly_seq_one_letter_code": "MAHKKAGGSTRNGRDSEAKRLGVKRFGGESVLAGSIIVRQRGTKFHAGANVGCGRDHTLFAKADGKVKFEVKGPKNRKFISIEAE",
+            "entity_poly_seq_one_letter_code_can": "MAHKKAGGSTRNGRDSEAKRLGVKRFGGESVLAGSIIVRQRGTKFHAGANVGCGRDHTLFAKADGKVKFEVKGPKNRKFISIEAE",
+            "entity_poly_seq_length": 85,
+            "entity_poly_polymer_type": "Protein",
+            "entity_poly_entity_type": "polypeptide(L)",
+            "nomenclature": [
+                "bL27"
+            ],
+            "pfam_accessions": [
+                "PF01016"
+            ],
+            "pfam_comments": [
+                "NULL"
+            ],
+            "pfam_descriptions": [
+                "Ribosomal L27 protein"
+            ],
+            "uniprot_accession": [
+                "P0A7L8"
+            ]
+        },
+        {
+            "assembly_id": 0,
+            "asym_ids": [
+                "FA"
+            ],
+            "auth_asym_id": "X",
+            "parent_rcsb_id": "3J7Z",
+            "src_organism_names": [
+                "Escherichia coli K-12"
+            ],
+            "host_organism_names": [],
+            "src_organism_ids": [
+                83333
+            ],
+            "host_organism_ids": [],
+            "rcsb_pdbx_description": "50S ribosomal protein L28",
+            "entity_poly_strand_id": "X",
+            "entity_poly_seq_one_letter_code": "MSRVCQVTGKRPVTGNNRSHALNATKRRFLPNLHSHRFWVESEKRFVTLRVSAKGMRVIDKKGIDTVLAELRARGEKY",
+            "entity_poly_seq_one_letter_code_can": "MSRVCQVTGKRPVTGNNRSHALNATKRRFLPNLHSHRFWVESEKRFVTLRVSAKGMRVIDKKGIDTVLAELRARGEKY",
+            "entity_poly_seq_length": 78,
+            "entity_poly_polymer_type": "Protein",
+            "entity_poly_entity_type": "polypeptide(L)",
+            "nomenclature": [
+                "bL28"
+            ],
+            "pfam_accessions": [
+                "PF00830"
+            ],
+            "pfam_comments": [
+                "The ribosomal 28 family includes L28 proteins from bacteria and chloroplasts.  The L24 protein from yeast Swiss:P36525 also contains a region of similarity to prokaryotic L28 proteins.  L24 from yeast is also found in the large ribosomal subunit"
+            ],
+            "pfam_descriptions": [
+                "Ribosomal L28 family"
+            ],
+            "uniprot_accession": [
+                "P0A7M2"
+            ]
+        },
+        {
+            "assembly_id": 0,
+            "asym_ids": [
+                "GA"
+            ],
+            "auth_asym_id": "Y",
+            "parent_rcsb_id": "3J7Z",
+            "src_organism_names": [
+                "Escherichia coli K-12"
+            ],
+            "host_organism_names": [],
+            "src_organism_ids": [
+                83333
+            ],
+            "host_organism_ids": [],
+            "rcsb_pdbx_description": "50S ribosomal protein L29",
+            "entity_poly_strand_id": "Y",
+            "entity_poly_seq_one_letter_code": "MKAKELREKSVEELNTELLNLLREQFNLRMQAASGQLQQSHLLKQVRRDVARVKTLLNEKAGA",
+            "entity_poly_seq_one_letter_code_can": "MKAKELREKSVEELNTELLNLLREQFNLRMQAASGQLQQSHLLKQVRRDVARVKTLLNEKAGA",
+            "entity_poly_seq_length": 63,
+            "entity_poly_polymer_type": "Protein",
+            "entity_poly_entity_type": "polypeptide(L)",
+            "nomenclature": [
+                "uL29"
+            ],
+            "pfam_accessions": [
+                "PF00831"
+            ],
+            "pfam_comments": [
+                "NULL"
+            ],
+            "pfam_descriptions": [
+                "Ribosomal L29 protein"
+            ],
+            "uniprot_accession": [
+                "P0A7M6"
+            ]
+        },
+        {
+            "assembly_id": 0,
+            "asym_ids": [
+                "HA"
+            ],
+            "auth_asym_id": "Z",
+            "parent_rcsb_id": "3J7Z",
+            "src_organism_names": [
+                "Escherichia coli K-12"
+            ],
+            "host_organism_names": [],
+            "src_organism_ids": [
+                83333
+            ],
+            "host_organism_ids": [],
+            "rcsb_pdbx_description": "50S ribosomal protein L30",
+            "entity_poly_strand_id": "Z",
+            "entity_poly_seq_one_letter_code": "MAKTIKITQTRSAIGRLPKHKATLLGLGLRRIGHTVEREDTPAIRGMINAVSFMVKVEE",
+            "entity_poly_seq_one_letter_code_can": "MAKTIKITQTRSAIGRLPKHKATLLGLGLRRIGHTVEREDTPAIRGMINAVSFMVKVEE",
+            "entity_poly_seq_length": 59,
+            "entity_poly_polymer_type": "Protein",
+            "entity_poly_entity_type": "polypeptide(L)",
+            "nomenclature": [
+                "uL30"
+            ],
+            "pfam_accessions": [
+                "PF00327"
+            ],
+            "pfam_comments": [
+                "This family includes prokaryotic L30 and eukaryotic L7."
+            ],
+            "pfam_descriptions": [
+                "Ribosomal protein L30p/L7e"
+            ],
+            "uniprot_accession": [
+                "P0AG51"
+            ]
+        },
+        {
+            "assembly_id": 0,
+            "asym_ids": [
+                "IA"
+            ],
+            "auth_asym_id": "a",
+            "parent_rcsb_id": "3J7Z",
+            "src_organism_names": [
+                "Staphylococcus aureus"
+            ],
+            "host_organism_names": [],
+            "src_organism_ids": [
+                1280
+            ],
+            "host_organism_ids": [],
+            "rcsb_pdbx_description": "ErmCL nascent chain",
+            "entity_poly_strand_id": "a",
+            "entity_poly_seq_one_letter_code": "MGIFSIFVISTVHYQPNKK",
+            "entity_poly_seq_one_letter_code_can": "MGIFSIFVISTVHYQPNKK",
+            "entity_poly_seq_length": 19,
+            "entity_poly_polymer_type": "Protein",
+            "entity_poly_entity_type": "polypeptide(L)",
+            "nomenclature": [],
+            "pfam_accessions": [
+                "PF08253"
+            ],
+            "pfam_comments": [
+                "These short proteins are Leader peptides (15-19 amino acids) of  erm genes that code for resistance determinants in Staphylococcus  aureus [1]."
+            ],
+            "pfam_descriptions": [
+                "Erm Leader peptide"
+            ],
+            "uniprot_accession": [
+                "P03063"
+            ]
+        },
+        {
+            "assembly_id": 0,
+            "asym_ids": [
+                "D"
+            ],
+            "auth_asym_id": "3",
+            "parent_rcsb_id": "3J7Z",
+            "src_organism_names": [
+                "Escherichia coli K-12"
+            ],
+            "host_organism_names": [],
+            "src_organism_ids": [
+                83333
+            ],
+            "host_organism_ids": [],
+            "rcsb_pdbx_description": "50S ribosomal protein L35",
+            "entity_poly_strand_id": "3",
+            "entity_poly_seq_one_letter_code": "MPKIKTVRGAAKRFKKTGKGGFKHKHANLRHILTKKATKRKRHLRPKAMVSKGDLGLVIACLPYA",
+            "entity_poly_seq_one_letter_code_can": "MPKIKTVRGAAKRFKKTGKGGFKHKHANLRHILTKKATKRKRHLRPKAMVSKGDLGLVIACLPYA",
+            "entity_poly_seq_length": 65,
+            "entity_poly_polymer_type": "Protein",
+            "entity_poly_entity_type": "polypeptide(L)",
+            "nomenclature": [
+                "bL35"
+            ],
+            "pfam_accessions": [
+                "PF01632"
+            ],
+            "pfam_comments": [
+                "NULL"
+            ],
+            "pfam_descriptions": [
+                "Ribosomal protein L35"
+            ],
+            "uniprot_accession": [
+                "P0A7Q1"
+            ]
+        },
+        {
+            "assembly_id": 0,
+            "asym_ids": [
+                "E"
+            ],
+            "auth_asym_id": "4",
+            "parent_rcsb_id": "3J7Z",
+            "src_organism_names": [
+                "Escherichia coli K-12"
+            ],
+            "host_organism_names": [],
+            "src_organism_ids": [
+                83333
+            ],
+            "host_organism_ids": [],
+            "rcsb_pdbx_description": "50S ribosomal protein L36",
+            "entity_poly_strand_id": "4",
+            "entity_poly_seq_one_letter_code": "MKVRASVKKLCRNCKIVKRDGVIRVICSAEPKHKQRQG",
+            "entity_poly_seq_one_letter_code_can": "MKVRASVKKLCRNCKIVKRDGVIRVICSAEPKHKQRQG",
+            "entity_poly_seq_length": 38,
+            "entity_poly_polymer_type": "Protein",
+            "entity_poly_entity_type": "polypeptide(L)",
+            "nomenclature": [
+                "bL36"
+            ],
+            "pfam_accessions": [
+                "PF00444"
+            ],
+            "pfam_comments": [
+                "NULL"
+            ],
+            "pfam_descriptions": [
+                "Ribosomal protein L36"
+            ],
+            "uniprot_accession": [
+                "P0A7Q6"
+            ]
+        },
+        {
+            "assembly_id": 0,
+            "asym_ids": [
+                "F"
+            ],
+            "auth_asym_id": "5",
+            "parent_rcsb_id": "3J7Z",
+            "src_organism_names": [
+                "Escherichia coli K-12"
+            ],
+            "host_organism_names": [],
+            "src_organism_ids": [
+                83333
+            ],
+            "host_organism_ids": [],
+            "rcsb_pdbx_description": "50S ribosomal protein L10",
+            "entity_poly_strand_id": "5",
+            "entity_poly_seq_one_letter_code": "MALNLQDKQAIVAEVSEVAKGALSAVVADSRGVTVDKMTELRKAGREAGVYMRVVRNTLLRRAVEGTPFECLKDAFVGPTLIAYSMEHPGAAARLFKEFAKANAKFEVKAAAFEGELIPASQIDRLATLPTYEEAIARLMATMKEASAGKLVRTLAAVRDAKEAA",
+            "entity_poly_seq_one_letter_code_can": "MALNLQDKQAIVAEVSEVAKGALSAVVADSRGVTVDKMTELRKAGREAGVYMRVVRNTLLRRAVEGTPFECLKDAFVGPTLIAYSMEHPGAAARLFKEFAKANAKFEVKAAAFEGELIPASQIDRLATLPTYEEAIARLMATMKEASAGKLVRTLAAVRDAKEAA",
+            "entity_poly_seq_length": 165,
+            "entity_poly_polymer_type": "Protein",
+            "entity_poly_entity_type": "polypeptide(L)",
+            "nomenclature": [
+                "uL10"
+            ],
+            "pfam_accessions": [
+                "PF00466"
+            ],
+            "pfam_comments": [
+                "NULL"
+            ],
+            "pfam_descriptions": [
+                "Ribosomal protein L10"
+            ],
+            "uniprot_accession": [
+                "P0A7J3"
+            ]
+        },
+        {
+            "assembly_id": 0,
+            "asym_ids": [
+                "G"
+            ],
+            "auth_asym_id": "6",
+            "parent_rcsb_id": "3J7Z",
+            "src_organism_names": [
+                "Escherichia coli K-12"
+            ],
+            "host_organism_names": [],
+            "src_organism_ids": [
+                83333
+            ],
+            "host_organism_ids": [],
+            "rcsb_pdbx_description": "50S ribosomal protein L7/L12",
+            "entity_poly_strand_id": "6",
+            "entity_poly_seq_one_letter_code": "MSITKDQIIEAVAAMSVMDVVELISAMEEKFGVSAAAAVAVAAGPVEAAEEKTEFDVILKAAGANKVAVIKAVRGATGLGLKEAKDLVESAPAALKEGVSKDDAEALKKALEEAGAEVEVK",
+            "entity_poly_seq_one_letter_code_can": "MSITKDQIIEAVAAMSVMDVVELISAMEEKFGVSAAAAVAVAAGPVEAAEEKTEFDVILKAAGANKVAVIKAVRGATGLGLKEAKDLVESAPAALKEGVSKDDAEALKKALEEAGAEVEVK",
+            "entity_poly_seq_length": 121,
+            "entity_poly_polymer_type": "Protein",
+            "entity_poly_entity_type": "polypeptide(L)",
+            "nomenclature": [
+                "bL12"
+            ],
+            "pfam_accessions": [
+                "PF16320"
+            ],
+            "pfam_comments": [
+                "This is the N-terminal dimerisation domain of ribosomal protein L7/L12 [1]."
+            ],
+            "pfam_descriptions": [
+                "Ribosomal protein L7/L12 dimerisation domain"
+            ],
+            "uniprot_accession": [
+                "P0A7K2"
+            ]
+        }
+    ],
+    "rnas": [
+        {
+            "assembly_id": 0,
+            "asym_ids": [
+                "J"
+            ],
+            "auth_asym_id": "B",
+            "parent_rcsb_id": "3J7Z",
+            "src_organism_names": [
+                "Escherichia coli K-12"
+            ],
+            "host_organism_names": [],
+            "src_organism_ids": [
+                83333
+            ],
+            "host_organism_ids": [],
+            "rcsb_pdbx_description": "5S rRNA",
+            "entity_poly_strand_id": "B",
+            "entity_poly_seq_one_letter_code": "GCCUGGCGGCCGUAGCGCGGUGGUCCCACCUGACCCCAUGCCGAACUCAGAAGUGAAACGCCGUAGCGCCGAUGGUAGUGUGGGGUCUCCCCAUGCGAGAGUAGGGAACUGCCAGGCA",
+            "entity_poly_seq_one_letter_code_can": "GCCUGGCGGCCGUAGCGCGGUGGUCCCACCUGACCCCAUGCCGAACUCAGAAGUGAAACGCCGUAGCGCCGAUGGUAGUGUGGGGUCUCCCCAUGCGAGAGUAGGGAACUGCCAGGCA",
+            "entity_poly_seq_length": 118,
+            "entity_poly_polymer_type": "RNA",
+            "entity_poly_entity_type": "polyribonucleotide",
+            "nomenclature": [
+                "5SrRNA"
+            ]
+        },
+        {
+            "assembly_id": 0,
+            "asym_ids": [
+                "H"
+            ],
+            "auth_asym_id": "7",
+            "parent_rcsb_id": "3J7Z",
+            "src_organism_names": [
+                "Escherichia coli K-12"
+            ],
+            "host_organism_names": [],
+            "src_organism_ids": [
+                83333
+            ],
+            "host_organism_ids": [],
+            "rcsb_pdbx_description": "P-tRNA CCA-end",
+            "entity_poly_strand_id": "7",
+            "entity_poly_seq_one_letter_code": "CCA",
+            "entity_poly_seq_one_letter_code_can": "CCA",
+            "entity_poly_seq_length": 3,
+            "entity_poly_polymer_type": "RNA",
+            "entity_poly_entity_type": "polyribonucleotide",
+            "nomenclature": []
+        },
+        {
+            "assembly_id": 0,
+            "asym_ids": [
+                "I"
+            ],
+            "auth_asym_id": "A",
+            "parent_rcsb_id": "3J7Z",
+            "src_organism_names": [
+                "Escherichia coli K-12"
+            ],
+            "host_organism_names": [],
+            "src_organism_ids": [
+                83333
+            ],
+            "host_organism_ids": [],
+            "rcsb_pdbx_description": "23S rRNA",
+            "entity_poly_strand_id": "A",
+            "entity_poly_seq_one_letter_code": "GGUUAAGCGACUAAGCGUACACGGUGGAUGCCCUGGCAGUCAGAGGCGAUGAAGGACGUGCUAAUCUGCGAUAAGCGUCGGUAAGGUGAUAUGAACCGUUAUAACCGGCGAUUUCCGAAUGGGGAAACCCAGUGUGUUUCGACACACUAUCAUUAACUGAAUCCAUAGGUUAAUGAGGCGAACCGGGGGAACUGAAACAUCUAAGUACCCCGAGGAAAAGAAAUCAACCGAGAUUCCCCCAGUAGCGGCGAGCGAACGGGGAGCAGCCCAGAGCCUGAAUCAGUGUGUGUGUUAGUGGAAGCGUCUGGAAAGGCGCGCGAUACAGGGUGACAGCCCCGUACACAAAAAUGCACAUGCUGUGAGCUCGAUGAGUAGGGCGGGACACGUGGUAUCCUGUCUGAAUAUGGGGGGACCAUCCUCCAAGGCUAAAUACUCCUGACUGACCGAUAGUGAACCAGUACCGUGAGGGAAAGGCGAAAAGAACCCCGGCGAGGGGAGUGAAAAAGAACCUGAAACCGUGUACGUACAAGCAGUGGGAGCACGCUUAGGCGUGUGACUGCGUACCUUUUGUAUAAUGGGUCAGCGACUUAUAUUCUGUAGCAAGGUUAACCGAAUAGGGGAGCCGAAGGGAAACCGAGUCUUAACUGGGCGUUAAGUUGCAGGGUAUAGACCCGAAACCCGGUGAUCUAGCCAUGGGCAGGUUGAAGGUUGGGUAACACUAACUGGAGGACCGAACCGACUAAUGUUGAAAAAUUAGCGGAUGACUUGUGGCUGGGGGUGAAAGGCCAAUCAAACCGGGAGAUAGCUGGUUCUCCCCGAAAGCUAUUUAGGUAGCGCCUCGUGAAUUCAUCUCCGGGGGUAGAGCACUGUUUCGGCAAGGGGGUCAUCCCGACUUACCAACCCGAUGCAAACUGCGAAUACCGGAGAAUGUUAUCACGGGAGACACACGGCGGGUGCUAACGUCCGUCGUGAAGAGGGAAACAACCCAGACCGCCAGCUAAGGUCCCAAAGUCAUGGUUAAGUGGGAAACGAUGUGGGAAGGCCCAGACAGCCAGGAUGUUGGCUUAGAAGCAGCCAUCAUUUAAAGAAAGCGUAAUAGCUCACUGGUCGAGUCGGCCUGCGCGGAAGAUGUAACGGGGCUAAACCAUGCACCGAAGCUGCGGCAGCGACGCUUAUGCGUUGUUGGGUAGGGGAGCGUUCUGUAAGCCUGCGAAGGUGUGCUGUGAGGCAUGCUGGAGGUAUCAGAAGUGCGAAUGCUGACAUAAGUAACGAUAAAGCGGGUGAAAAGCCCGCUCGCCGGAAGACCAAGGGUUCCUGUCCAACGUUAAUCGGGGCAGGGUGAGUCGACCCCUAAGGCGAGGCCGAAAGGCGUAGUCGAUGGGAAACAGGUUAAUAUUCCUGUACUUGGUGUUACUGCGAAGGGGGGACGGAGAAGGCUAUGUUGGCCGGGCGACGGUUGUCCCGGUUUAAGCGUGUAGGCUGGUUUUCCAGGCAAAUCCGGAAAAUCAAGGCUGAGGCGUGAUGACGAGGCACUACGGUGCUGAAGCAACAAAUGCCCUGCUUCCAGGAAAAGCCUCUAAGCAUCAGGUAACAUCAAAUCGUACCCCAAACCGACACAGGUGGUCAGGUAGAGAAUACCAAGGCGCUUGAGAGAACUCGGGUGAAGGAACUAGGCAAAAUGGUGCCGUAACUUCGGGAGAAGGCACGCUGAUAUGUAGGUGAGGUCCCUCGCGGAUGGAGCUGAAAUCAGUCGAAGAUACCAGCUGGCUGCAACUGUUUAUUAAAAACACAGCACUGUGCAAACACGAAAGUGGACGUAUACGGUGUGACGCCUGCCCGGUGCCGGAAGGUUAAUUGAUGGGGUUAGCGCAAGCGAAGCUCUUGAUCGAAGCCCCGGUAAACGGCGGCCGUAACUAUAACGGUCCUAAGGUAGCGAAAUUCCUUGUCGGGUAAGUUCCGACCUGCACGAAUGGCGUAAUGAUGGCCAGGCUGUCUCCACCCGAGACUCAGUGAAAUUGAACUCGCUGUGAAGAUGCAGUGUACCCGCGGCAAGACGGAAAGACCCCGUGAACCUUUACUAUAGCUUGACACUGAACAUUGAGCCUUGAUGUGUAGGAUAGGUGGGAGGCUUUGAAGUGUGGACGCCAGUCUGCAUGGAGCCGACCUUGAAAUACCACCCUUUAAUGUUUGAUGUUCUAACGUUGACCCGUAAUCCGGGUUGCGGACAGUGUCUGGUGGGUAGUUUGACUGGGGCGGUCUCCUCCUAAAGAGUAACGGAGGAGCACGAAGGUUGGCUAAUCCUGGUCGGACAUCAGGAGGUUAGUGCAAUGGCAUAAGCCAGCUUGACUGCGAGCGUGACGGCGCGAGCAGGUGCGAAAGCAGGUCAUAGUGAUCCGGUGGUUCUGAAUGGAAGGGCCAUCGCUCAACGGAUAAAAGGUACUCCGGGGAUAACAGGCUGAUACCGCCCAAGAGUUCAUAUCGACGGCGGUGUUUGGCACCUCGAUGUCGGCUCAUCACAUCCUGGGGCUGAAGUAGGUCCCAAGGGUAUGGCUGUUCGCCAUUUAAAGUGGUACGCGAGCUGGGUUUAGAACGUCGUGAGACAGUUCGGUCCCUAUCUGCCGUGGGCGCUGGAGAACUGAGGGGGGCUGCUCCUAGUACGAGAGGACCGGAGUGGACGCAUCACUGGUGUUCGGGUUGUCAUGCCAAUGGCACUGCCCGGUAGCUAAAUGCGGAAGAGAUAAGUGCUGAAAGCAUCUAAGCACGAAACUUGCCCCGAGAUGAGUUCUCCCUGACCCUUUAAGGGUCCUGAAGGAACGUUGAAGACGACGACGUUGAUAGGCCGGGUGUGUAAGCGCAGCGAUGCGUUGAGCUAACCGGUACUAAUGAACCGUGAGGCUUAACCU",
+            "entity_poly_seq_one_letter_code_can": "GGUUAAGCGACUAAGCGUACACGGUGGAUGCCCUGGCAGUCAGAGGCGAUGAAGGACGUGCUAAUCUGCGAUAAGCGUCGGUAAGGUGAUAUGAACCGUUAUAACCGGCGAUUUCCGAAUGGGGAAACCCAGUGUGUUUCGACACACUAUCAUUAACUGAAUCCAUAGGUUAAUGAGGCGAACCGGGGGAACUGAAACAUCUAAGUACCCCGAGGAAAAGAAAUCAACCGAGAUUCCCCCAGUAGCGGCGAGCGAACGGGGAGCAGCCCAGAGCCUGAAUCAGUGUGUGUGUUAGUGGAAGCGUCUGGAAAGGCGCGCGAUACAGGGUGACAGCCCCGUACACAAAAAUGCACAUGCUGUGAGCUCGAUGAGUAGGGCGGGACACGUGGUAUCCUGUCUGAAUAUGGGGGGACCAUCCUCCAAGGCUAAAUACUCCUGACUGACCGAUAGUGAACCAGUACCGUGAGGGAAAGGCGAAAAGAACCCCGGCGAGGGGAGUGAAAAAGAACCUGAAACCGUGUACGUACAAGCAGUGGGAGCACGCUUAGGCGUGUGACUGCGUACCUUUUGUAUAAUGGGUCAGCGACUUAUAUUCUGUAGCAAGGUUAACCGAAUAGGGGAGCCGAAGGGAAACCGAGUCUUAACUGGGCGUUAAGUUGCAGGGUAUAGACCCGAAACCCGGUGAUCUAGCCAUGGGCAGGUUGAAGGUUGGGUAACACUAACUGGAGGACCGAACCGACUAAUGUUGAAAAAUUAGCGGAUGACUUGUGGCUGGGGGUGAAAGGCCAAUCAAACCGGGAGAUAGCUGGUUCUCCCCGAAAGCUAUUUAGGUAGCGCCUCGUGAAUUCAUCUCCGGGGGUAGAGCACUGUUUCGGCAAGGGGGUCAUCCCGACUUACCAACCCGAUGCAAACUGCGAAUACCGGAGAAUGUUAUCACGGGAGACACACGGCGGGUGCUAACGUCCGUCGUGAAGAGGGAAACAACCCAGACCGCCAGCUAAGGUCCCAAAGUCAUGGUUAAGUGGGAAACGAUGUGGGAAGGCCCAGACAGCCAGGAUGUUGGCUUAGAAGCAGCCAUCAUUUAAAGAAAGCGUAAUAGCUCACUGGUCGAGUCGGCCUGCGCGGAAGAUGUAACGGGGCUAAACCAUGCACCGAAGCUGCGGCAGCGACGCUUAUGCGUUGUUGGGUAGGGGAGCGUUCUGUAAGCCUGCGAAGGUGUGCUGUGAGGCAUGCUGGAGGUAUCAGAAGUGCGAAUGCUGACAUAAGUAACGAUAAAGCGGGUGAAAAGCCCGCUCGCCGGAAGACCAAGGGUUCCUGUCCAACGUUAAUCGGGGCAGGGUGAGUCGACCCCUAAGGCGAGGCCGAAAGGCGUAGUCGAUGGGAAACAGGUUAAUAUUCCUGUACUUGGUGUUACUGCGAAGGGGGGACGGAGAAGGCUAUGUUGGCCGGGCGACGGUUGUCCCGGUUUAAGCGUGUAGGCUGGUUUUCCAGGCAAAUCCGGAAAAUCAAGGCUGAGGCGUGAUGACGAGGCACUACGGUGCUGAAGCAACAAAUGCCCUGCUUCCAGGAAAAGCCUCUAAGCAUCAGGUAACAUCAAAUCGUACCCCAAACCGACACAGGUGGUCAGGUAGAGAAUACCAAGGCGCUUGAGAGAACUCGGGUGAAGGAACUAGGCAAAAUGGUGCCGUAACUUCGGGAGAAGGCACGCUGAUAUGUAGGUGAGGUCCCUCGCGGAUGGAGCUGAAAUCAGUCGAAGAUACCAGCUGGCUGCAACUGUUUAUUAAAAACACAGCACUGUGCAAACACGAAAGUGGACGUAUACGGUGUGACGCCUGCCCGGUGCCGGAAGGUUAAUUGAUGGGGUUAGCGCAAGCGAAGCUCUUGAUCGAAGCCCCGGUAAACGGCGGCCGUAACUAUAACGGUCCUAAGGUAGCGAAAUUCCUUGUCGGGUAAGUUCCGACCUGCACGAAUGGCGUAAUGAUGGCCAGGCUGUCUCCACCCGAGACUCAGUGAAAUUGAACUCGCUGUGAAGAUGCAGUGUACCCGCGGCAAGACGGAAAGACCCCGUGAACCUUUACUAUAGCUUGACACUGAACAUUGAGCCUUGAUGUGUAGGAUAGGUGGGAGGCUUUGAAGUGUGGACGCCAGUCUGCAUGGAGCCGACCUUGAAAUACCACCCUUUAAUGUUUGAUGUUCUAACGUUGACCCGUAAUCCGGGUUGCGGACAGUGUCUGGUGGGUAGUUUGACUGGGGCGGUCUCCUCCUAAAGAGUAACGGAGGAGCACGAAGGUUGGCUAAUCCUGGUCGGACAUCAGGAGGUUAGUGCAAUGGCAUAAGCCAGCUUGACUGCGAGCGUGACGGCGCGAGCAGGUGCGAAAGCAGGUCAUAGUGAUCCGGUGGUUCUGAAUGGAAGGGCCAUCGCUCAACGGAUAAAAGGUACUCCGGGGAUAACAGGCUGAUACCGCCCAAGAGUUCAUAUCGACGGCGGUGUUUGGCACCUCGAUGUCGGCUCAUCACAUCCUGGGGCUGAAGUAGGUCCCAAGGGUAUGGCUGUUCGCCAUUUAAAGUGGUACGCGAGCUGGGUUUAGAACGUCGUGAGACAGUUCGGUCCCUAUCUGCCGUGGGCGCUGGAGAACUGAGGGGGGCUGCUCCUAGUACGAGAGGACCGGAGUGGACGCAUCACUGGUGUUCGGGUUGUCAUGCCAAUGGCACUGCCCGGUAGCUAAAUGCGGAAGAGAUAAGUGCUGAAAGCAUCUAAGCACGAAACUUGCCCCGAGAUGAGUUCUCCCUGACCCUUUAAGGGUCCUGAAGGAACGUUGAAGACGACGACGUUGAUAGGCCGGGUGUGUAAGCGCAGCGAUGCGUUGAGCUAACCGGUACUAAUGAACCGUGAGGCUUAACCU",
+            "entity_poly_seq_length": 2903,
+            "entity_poly_polymer_type": "RNA",
+            "entity_poly_entity_type": "polyribonucleotide",
+            "nomenclature": [
+                "23SrRNA"
+            ]
+        }
+    ],
+    "other_polymers": [],
+    "nonpolymeric_ligands": [
+        {
+            "chemicalId": "ERY",
+            "chemicalName": "ERYTHROMYCIN A",
+            "formula_weight": 0.734,
+            "pdbx_description": "ERYTHROMYCIN A",
+            "number_of_instances": 1,
+            "nonpolymer_comp": {
+                "chemp_comp": null,
+                "drugbank": {
+                    "drugbank_container_identifiers": {
+                        "drugbank_id": "DB00199"
+                    },
+                    "drugbank_info": {
+                        "cas_number": "114-07-8",
+                        "description": "Erythromycin is a bacteriostatic antibiotic drug produced by a strain of Saccharopolyspora erythraea (formerly Streptomyces erythraeus) and belongs to the macrolide group of antibiotics which consists of [Azithromycin], [Clarithromycin], [Spiramycin] and others. It was originally discovered in 1952.[L5245] Erythromycin is widely used for treating a variety of infections, including those caused by gram-positive and gram-negative bacteria.[L5245,L7261] It is available for administration in various forms, including intravenous, topical, and eye drop preparations.[L5245]"
+                    }
+                },
+                "rcsb_chem_comp_target": [
+                    {
+                        "interaction_type": "target",
+                        "name": "23S ribosomal RNA",
+                        "provenance_source": "DrugBank",
+                        "reference_database_accession_code": null,
+                        "reference_database_name": null
+                    },
+                    {
+                        "interaction_type": "target",
+                        "name": "Motilin receptor",
+                        "provenance_source": "DrugBank",
+                        "reference_database_accession_code": "O43193",
+                        "reference_database_name": "UniProt"
+                    },
+                    {
+                        "interaction_type": "target",
+                        "name": "Potassium voltage-gated channel subfamily H member 2",
+                        "provenance_source": "DrugBank",
+                        "reference_database_accession_code": "Q12809",
+                        "reference_database_name": "UniProt"
+                    },
+                    {
+                        "interaction_type": "enzyme",
+                        "name": "Cytochrome P450 3A5",
+                        "provenance_source": "DrugBank",
+                        "reference_database_accession_code": "P20815",
+                        "reference_database_name": "UniProt"
+                    },
+                    {
+                        "interaction_type": "enzyme",
+                        "name": "Cytochrome P450 3A4",
+                        "provenance_source": "DrugBank",
+                        "reference_database_accession_code": "P08684",
+                        "reference_database_name": "UniProt"
+                    },
+                    {
+                        "interaction_type": "enzyme",
+                        "name": "Cytochrome P450 3A7",
+                        "provenance_source": "DrugBank",
+                        "reference_database_accession_code": "P24462",
+                        "reference_database_name": "UniProt"
+                    },
+                    {
+                        "interaction_type": "transporter",
+                        "name": "Solute carrier organic anion transporter family member 1B3",
+                        "provenance_source": "DrugBank",
+                        "reference_database_accession_code": "Q9NPD5",
+                        "reference_database_name": "UniProt"
+                    },
+                    {
+                        "interaction_type": "transporter",
+                        "name": "Bile salt export pump",
+                        "provenance_source": "DrugBank",
+                        "reference_database_accession_code": "O95342",
+                        "reference_database_name": "UniProt"
+                    },
+                    {
+                        "interaction_type": "transporter",
+                        "name": "P-glycoprotein 1",
+                        "provenance_source": "DrugBank",
+                        "reference_database_accession_code": "P08183",
+                        "reference_database_name": "UniProt"
+                    },
+                    {
+                        "interaction_type": "transporter",
+                        "name": "Solute carrier organic anion transporter family member 1B1",
+                        "provenance_source": "DrugBank",
+                        "reference_database_accession_code": "Q9Y6L6",
+                        "reference_database_name": "UniProt"
+                    },
+                    {
+                        "interaction_type": "transporter",
+                        "name": "Canalicular multispecific organic anion transporter 1",
+                        "provenance_source": "DrugBank",
+                        "reference_database_accession_code": "Q92887",
+                        "reference_database_name": "UniProt"
+                    },
+                    {
+                        "interaction_type": "transporter",
+                        "name": "Solute carrier organic anion transporter family member 1A2",
+                        "provenance_source": "DrugBank",
+                        "reference_database_accession_code": "P46721",
+                        "reference_database_name": "UniProt"
+                    }
+                ]
+            }
+        }
+    ]
+}
