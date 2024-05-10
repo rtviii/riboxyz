@@ -59,7 +59,6 @@ return prot, protof, struct
                        "PARENT": parent_rcsb_id}).values('prot', 'protof', 'struct')
     return _
 
-
 def node__polymer_class(polymer_class:str):
     def _(tx:Transaction | ManagedTransaction):
         return tx.run("""//

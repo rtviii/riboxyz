@@ -22,6 +22,9 @@ adapter = Neo4jAdapter('bolt://localhost:7687', 'neo4j')
 # # adapter.init_polymer_classes()
 # # print(adapter.get_any())
 adapter.add_structure('3j7z')
+adapter.add_structure('4ug0')
+adapter.add_structure('5afi')
+adapter.add_structure('7k00')
 # # adapter.sync_with_rcsb(10)
 
 

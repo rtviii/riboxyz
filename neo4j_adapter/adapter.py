@@ -2,10 +2,10 @@ from concurrent.futures import ALL_COMPLETED, Future, ThreadPoolExecutor, wait
 import typing
 from neo4j.exceptions import AuthError
 from neo4j import Driver, GraphDatabase
-from neo4j_adapter.node_polymer import add_polymer
+from neo4j_adapter.node_polymer import  link__polymer_to_polymer_class, link__polymer_to_structure, node__polymer, upsert_polymer_to_protein, upsert_polymer_to_rna
 from neo4j_adapter.node_protein import add_protein, node__polymer_class
 from neo4j_adapter.node_rna import add_rna
-from neo4j_adapter.node_structure import  add_ligand, add_structure, link__ligand_to_struct, node__ligand, node__structure, struct_exists
+from neo4j_adapter.node_structure import   link__ligand_to_struct, node__ligand, node__structure, struct_exists
 from ribctl.etl.etl_pipeline import current_rcsb_structs
 from ribctl.lib.schema.types_ribosome import MitochondrialProteinClass, PolymerClass, PolynucleotideClass, RibosomeStructure
 from ribctl.etl.ribosome_assets import RibosomeAssets
@@ -63,37 +63,45 @@ class Neo4jAdapter():
 
 
 
-
     def add_structure(self, rcsb_id:str):
 
+        rcsb_id = rcsb_id.upper()
         if self.check_structure_exists(rcsb_id):
             print("Struct node {} already exists.".format(rcsb_id))
             return
 
         R:RibosomeStructure = RibosomeAssets(rcsb_id).profile()
 
-        add_structure(self.driver,R)
+        with self.driver.session() as s:
+            structure_node = s.execute_write(node__structure(R))
 
-        for protein in R.proteins:
-            add_polymer(self.driver, protein)
-            # add_protein(self.driver, protein)
+            for protein in R.proteins:
+                   protein_node = s.execute_write(node__polymer                 (protein                        ))
+                   s.execute_write(link__polymer_to_structure    (protein_node   , protein.parent_rcsb_id))
+                   s.execute_write(link__polymer_to_polymer_class(protein_node                           ))
+                   s.execute_write(upsert_polymer_to_protein     (protein_node   , protein               ))
 
-        if R.rnas is not None:
-            for rna in R.rnas:
-                add_polymer(self.driver, rna)
-                # add_rna(self.driver, rna)
+            if R.rnas is not None:
+                for rna in R.rnas:
+                    rna_node = s.execute_write(node__polymer(rna))
+                    s.execute_write(link__polymer_to_structure(rna_node, rna.parent_rcsb_id))
+                    s.execute_write(link__polymer_to_polymer_class(rna_node))
+                    s.execute_write(upsert_polymer_to_rna(rna_node, rna))
 
-        if R.other_polymers is not None:
-            for polymer in R.other_polymers:
-                add_polymer(self.driver, polymer)
+            if R.other_polymers is not None:
+                for polymer in R.other_polymers:
+                    other_poly_node = s.execute_write(node__polymer(polymer))
+                    s.execute_write(link__polymer_to_structure(other_poly_node, polymer.parent_rcsb_id))
+                    s.execute_write(link__polymer_to_polymer_class(other_poly_node))
 
 
-        if R.nonpolymeric_ligands is not None:
-            for ligand in R.nonpolymeric_ligands:
-                add_ligand(self.driver,ligand, R.rcsb_id)
+            if R.nonpolymeric_ligands is not None:
+                for ligand in R.nonpolymeric_ligands:
+                    ligand_node = s.execute_write(node__ligand(ligand))
+                    s.execute_write(link__ligand_to_struct(ligand_node, R.rcsb_id))
 
         print("Sucessfully added struct node {}".format(rcsb_id))
-        return struct_node_result.data()
+        return structure_node
 
 
     def see_current_auth(self):

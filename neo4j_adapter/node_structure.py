@@ -76,14 +76,3 @@ def link__ligand_to_struct(prot: Node, parent_rcsb_id: str) -> Callable[[Transac
 """,
                       {"ELEM_ID": prot.element_id, "PARENT": parent_rcsb_id}).values('struct', 'ligand', 'contains')
     return _
-
-
-def add_structure(driver:Driver, rib:RibosomeStructure):
-    with driver.session() as s:
-        node = s.execute_write(node__structure(rib))
-        return node
-
-def add_ligand(driver:Driver,lig:NonpolymericLigand, parent_rcsb_id:str):
-    with driver.session() as s:
-        node = s.execute_write(node__ligand(lig))
-        s.execute_write(link__ligand_to_struct(node, parent_rcsb_id))

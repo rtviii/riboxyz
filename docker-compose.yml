@@ -1,4 +1,40 @@
 services:
+  neo:
+    hostname: neo
+    container_name: neo
+    image: neo4j:5.19.0-enterprise
+    restart: always
+
+    environment:
+
+      - NEO4J_AUTH=none #this disables auth on a fresh node
+      - NEO4J_ACCEPT_LICENSE_AGREEMENT=eval
+      - NEO4J_apoc_export_file_enabled=true
+      - NEO4J_apoc_import_file_enabled=true
+      - NEO4J_apoc_import_file_use__neo4j__config=true
+      - NEO4J_PLUGINS=\[\"apoc-extended\"\]
+
+
+    ports:
+
+      - 7473:7473
+      - 7474:7474
+      - 7687:7687
+
+    volumes:
+      # Would be nice to automate this bit: 
+      # sudo chown -R 7474:7474 /opt/ribxz_neo4j_volume && sudo chown -R 755 /opt/ribxz_neo4j_volume
+      # still not sure how to do it from hostspace and inside docker-compose(would like to avoid separate Neo4j Dockerfile).
+
+      - ${NEO4J_MOUNTPATH}/plugins:/var/lib/neo4j/plugins  #<-- don't forget to move apoc.jar to this folder
+      - ${NEO4J_MOUNTPATH}/data:/var/lib/neo4j/data
+      - ${NEO4J_MOUNTPATH}/conf:/var/lib/neo4j/conf
+      - ${NEO4J_MOUNTPATH}/logs:/var/lib/neo4j/logs
+
+      - type  : bind
+        source: ${RIBETL_DATA:?err}
+        target: /import/RIBETL_DATA
+        read_only: true
   django:
     env_file:
         - ./.env
@@ -17,8 +53,8 @@ services:
       # *FOR LIVE DEVELOPMENT -----------------------|
       # - What this does is it mounts the local version of the ribxz_api folder to the container's /home/ribxz_api
       # So instead of just a static mounted version inside the container,
-      # the changes made to the local ribxz folder will be reflected inside the container 
-      # while it is running. 
+      # the changes made to the local ribxz folder will be reflected inside the container
+      # while it is running.
       # - ./ribxz_api:/home/ribxz_api                    #|  <--- DEV ONLY
       #* --------------------------------------------|
 
@@ -32,36 +68,6 @@ services:
       - neo
     depends_on:
       - neo
-  neo:
-    hostname: neo
-    container_name: neo
-    image: neo4j:5.19-enterprise
-    restart: always
-    # build:
-    #   context: .
-    #   dockerfile: Dockerfile-neo4j
 
-    environment:
-      - NEO4J_AUTH=none #this disables auth on a fresh node 
-      - NEO4J_ACCEPT_LICENSE_AGREEMENT=eval 
 
-    ports:
 
-      - 7473:7473
-      - 7474:7474
-      - 7687:7687
-
-    volumes:
-
-      - ${NEO4J_MOUNTPATH}/plugins:/var/lib/neo4j/plugins
-      - ${NEO4J_MOUNTPATH}/data:/var/lib/neo4j/data
-      - ${NEO4J_MOUNTPATH}/conf:/var/lib/neo4j/conf
-      - ${NEO4J_MOUNTPATH}/logs:/var/lib/neo4j/logs
-
-      - type  : bind
-        source: ${RIBETL_DATA:?err}
-        target: /import/RIBETL_DATA
-        read_only: true
-
-        
-        

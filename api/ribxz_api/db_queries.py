@@ -4,11 +4,11 @@ from neo4j_adapter.adapter import Neo4jAdapter
 
 class DBQuery():
 
-
     adapter: Neo4jAdapter 
     def __init__(self) -> None:
         self.adapter = Neo4jAdapter('bolt://localhost:7687', 'neo4j')
         pass
+
     def list_structs(self, filters=None, limit=None, offset=None):
         with self.adapter.driver.session() as session:
             def _(tx: Transaction | ManagedTransaction):
@@ -25,11 +25,12 @@ class DBQuery():
                                     entity_poly_seq_one_letter_code: rps.entity_poly_seq_one_letter_code
                                     }) as rps
 
-                                optional match (struct_rnas:RNA)-[]-(struct)
+
+                                optional match (rnas:RNA)-[]-(struct)
                                 with ligands, struct, rps, collect({
-                                    auth_asym_id                   : struct_rnas.auth_asym_id,
-                                    nomenclature                   : struct_rnas.nomenclature,
-                                    entity_poly_seq_one_letter_code: struct_rnas.entity_poly_seq_one_letter_code
+                                    auth_asym_id                   : rnas.auth_asym_id,
+                                    nomenclature                   : rnas.nomenclature,
+                                    entity_poly_seq_one_letter_code: rnas.entity_poly_seq_one_letter_code
                                     }) as rnas
 
                                 with ligands, rps, rnas, keys(struct) as keys, struct 

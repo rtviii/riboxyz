@@ -2,10 +2,9 @@ from typing import Callable
 from neo4j import Driver, ManagedTransaction, Transaction
 from neo4j.graph import Node, Relationship
 from neo4j import ManagedTransaction, Transaction
-from ribctl.lib.schema.types_ribosome import Polymer, Protein 
+from ribctl.lib.schema.types_ribosome import RNA, Polymer, Protein 
 
 
-# Transaction
 def node__polymer(poly:Polymer)->Callable[[Transaction | ManagedTransaction], Node ]:
     P = poly.model_dump()
     print("Creating poly node", P)
@@ -55,7 +54,6 @@ return polymer, poly, struct
                        "PARENT": parent_rcsb_id}).values('polymer', 'poly', 'struct')
     return _
 
-# Transaction
 def link__polymer_to_polymer_class(poly: Node) -> Callable[[Transaction | ManagedTransaction], list[list[Node | Relationship]]]:
     def _(tx: Transaction | ManagedTransaction):
         return tx.run("""//
@@ -67,18 +65,24 @@ def link__polymer_to_polymer_class(poly: Node) -> Callable[[Transaction | Manage
                       {"ELEM_ID": poly.element_id}).values('poly', 'member', 'polymer_class')
     return _
 
-def add_polymer(driver:Driver,polymer:Polymer):
-    print("Adding polymer" ,polymer.auth_asym_id)
-    with driver.session() as s:
-        node = s.execute_write(node__polymer(polymer))
-        s.execute_write(link__polymer_to_structure(node, polymer.parent_rcsb_id))
-        s.execute_write(link__polymer_to_polymer_class(node))
+def upsert_polymer_to_protein( polymer_node:Node, protein:Protein):
+    def _(tx: Transaction | ManagedTransaction):
+        return tx.run("""//
+        match (n) where elementid(n)=$ELEM_ID 
+        with n, $PROT as map
+        with n, apoc.map.removeKeys(map, keys(n)) as onlyNewPropsMap
+            set n+=onlyNewPropsMap, n:Protein
+        return n
+    """, {"ELEM_ID": polymer_node.element_id, "PROT": protein.model_dump()}).single()
 
+    return _
 
-def upsert_polymer_to_protein(driver:Driver, polymer_node:Node, protein:Protein):
+def upsert_polymer_to_rna( polymer_node:Node, rna:RNA):
+    def _(tx: Transaction | ManagedTransaction):
+        return tx.run("""//
+        match (n) where elementid(n)=$ELEM_ID 
+        set n:RNA
+        return n
+    """, {"ELEM_ID": polymer_node.element_id, "RNA": rna.model_dump()}).single()
 
-    """//
-MATCH (p {name: 'Peter'})
-SET p += {age: 38, hungry: true, position: 'Entrepreneur'}
-RETURN p.name, p.age, p.hungry, p.position
-"""
+    return _
