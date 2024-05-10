@@ -490,7 +490,8 @@ class NonpolymericLigand(BaseModel):
     pdbx_description: str
     number_of_instances: int
 
-    nonpolymer_comp: NonpolymerComp
+    nonpolymer_comp: Optional[NonpolymerComp] =None
+
 
     # nonpoly["nonpolymer_comp"]["chem_comp"]["id"]
     # nonpoly["nonpolymer_comp"]["chem_comp"]["name"]

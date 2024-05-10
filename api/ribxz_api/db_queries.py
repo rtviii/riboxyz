@@ -15,7 +15,7 @@ class DBQuery():
                 return tx.run("""//
 
         match (rib:RibosomeStructure) 
-        with rib order by rib.rcsb_id limit 1
+        with rib order by rib.rcsb_id limit 2
 
         optional match (l:Ligand)-[]-(rib) 
         with collect(PROPERTIES(l)) as ligands, rib
@@ -26,9 +26,9 @@ class DBQuery():
         optional match (rna:RNA)-[]-(rib) 
         with collect(PROPERTIES(rna)) as rnas, proteins, ligands, rib
         
-        with  apoc.map.mergeList([{proteins:proteins},{ligands:ligands},{rnas:rnas}]) as rest, rib
+        with  apoc.map.mergeList([{proteins:proteins},{nonpolymeric_ligands:ligands},{rnas:rnas},{other_polymers:[]}]) as rest, rib
         return apoc.map.merge(rib, rest)
-                                        """).data()
+                                        """).value()
 
             return session.execute_read(_)
 
