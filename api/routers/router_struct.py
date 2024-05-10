@@ -25,12 +25,12 @@ def structure_profile(request,rcsb_id:str):
 @structure_router.post('/list_structures', response=list[RibosomeStructure], tags=[TAG])
 def list_structures(request):
     structs = dbqueries.list_structs()
+
     pprint(structs[0])
     print(structs)
     pprint(len(structs))
     print(structs[0].keys())
-
-    r =RibosomeStructure.model_validate(structs[0])
+    r = RibosomeStructure.model_validate(structs[0])
 
     # def load_metadata(rcsb_id:str):
     #     with open(RibosomeAssets(rcsb_id)._json_profile_filepath(), 'r') as infile:

@@ -443,11 +443,6 @@ class RNA(Polymer):
 
     # pass
 
-# class NonpolymericLigandMetadatum(BaseModel):
-#     chemicalId: str
-#     chemicalName: str
-#     number_of_instances: int
-
 class NonpolymericLigand(BaseModel):
     # def metadatum(self) -> NonpolymericLigandMetadatum:
     #     return NonpolymericLigandMetadatum(**self.model_dump())
