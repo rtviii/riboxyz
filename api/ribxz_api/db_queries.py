@@ -15,7 +15,7 @@ class DBQuery():
                 return tx.run("""//
 
         match (rib:RibosomeStructure) 
-        with rib order by rib.rcsb_id limit 10
+        with rib order by rib.rcsb_id limit 12
 
         optional match (l:Ligand)-[]-(rib) 
         with collect(PROPERTIES(l)) as ligands, rib

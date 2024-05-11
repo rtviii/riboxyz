@@ -22,27 +22,11 @@ def structure_profile(request,rcsb_id:str):
         return HttpResponseServerError("Failed to find structure profile {}:\n\n{}".format(rcsb_id, e))
 
 
-@structure_router.post('/list_structures', response=list[RibosomeStructure], tags=[TAG])
+@structure_router.get('/list_structures', response=list[RibosomeStructure], tags=[TAG])
 def list_structures(request):
-    structs = dbqueries.list_structs()
-
-    pprint(structs[0])
-    print(structs)
-    pprint(len(structs))
-    print(structs[0].keys())
-    r = RibosomeStructure.model_validate(structs[0])
-
-    # def load_metadata(rcsb_id:str):
-    #     with open(RibosomeAssets(rcsb_id)._json_profile_filepath(), 'r') as infile:
-    #         return RibosomeStructure.model_validate_json(infile.read()).metadata()
-
-    # def read_parallel(rcsb_ids:list[str]):
-    #     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-    #         futures = [executor.submit(load_metadata, f) for f in rcsb_ids]
-    #         return [fut.result() for fut in futures]
-
-    # structure_profiles = read_parallel(RibosomeAssets.list_all_structs()[:20])
-    return [r]
+    structs_response = dbqueries.list_structs()
+    structures       = list(map(lambda r: RibosomeStructure.model_validate(r), structs_response))
+    return structures
 
 # #TODO
 # """map (just stream from emdb), mmcif"""
