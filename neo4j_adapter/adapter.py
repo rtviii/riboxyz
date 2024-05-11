@@ -1,5 +1,6 @@
 import sys
 sys.dont_write_bytecode = True
+
 from concurrent.futures import ALL_COMPLETED, Future, ThreadPoolExecutor, wait
 from neo4j.exceptions import AuthError
 from neo4j import Driver, GraphDatabase
@@ -13,7 +14,6 @@ from ribctl.etl.ribosome_assets import RibosomeAssets
 from neo4j import GraphDatabase, Driver, ManagedTransaction, Transaction
 from ribctl.lib.schema.types_ribosome import  NonpolymericLigand,  CytosolicProteinClass, RibosomeStructure
 
-
 NODE_CONSTRAINTS = [
     """CREATE CONSTRAINT rcsb_id_unique IF NOT EXISTS FOR (ribosome:RibosomeStructure) REQUIRE ribosome.rcsb_id IS UNIQUE;""",
     """CREATE CONSTRAINT polymer_class_unique IF NOT EXISTS FOR (poly_class:PolymerClass) REQUIRE poly_class.class_id IS UNIQUE;""",
@@ -24,7 +24,8 @@ NODE_CONSTRAINTS = [
 # the system database in the current session, and then restart your driver with the new password configured.
 
 class Neo4jAdapter():
-    driver: Driver
+
+    driver   : Driver
     uri      : str
     user     : str
     databases: list[str]
@@ -54,8 +55,6 @@ class Neo4jAdapter():
             print("Established connection to ", self.uri)
         except Exception as ae:
             print(ae)
-
-
 
     def add_structure(self, rcsb_id:str):
 
@@ -97,7 +96,6 @@ class Neo4jAdapter():
         print("Sucessfully added struct node {}".format(rcsb_id))
         return structure_node
 
-
     # ------------------- OLD SHIT --------------------
 
     def see_current_auth(self):
@@ -128,7 +126,6 @@ class Neo4jAdapter():
             """).values('n.rcsb_id'))]
             return struct_ids
 
-
     def get_individual_ligand(self, chemId: str) -> NonpolymericLigand:
         with self.driver.session() as session:
             def _(tx: Transaction | ManagedTransaction):
@@ -139,7 +136,6 @@ class Neo4jAdapter():
         rcsb_id = rcsb_id.upper()
         with self.driver.session() as session:
             return session.execute_read(struct_exists(rcsb_id))
-
 
     def get_RibosomeStructure(self, rcsb_id: str) -> RibosomeStructure:
         with self.driver.session() as session:

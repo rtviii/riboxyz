@@ -1,52 +1,64 @@
-import json
-from pprint import pprint
-import sys
 from typing import Literal
 from ribctl.etl.ribosome_assets import RibosomeAssets
-from ribctl.lib.schema.types_ribosome import RNA, CytosolicRNAClass, LifecycleFactorClass, MitochondrialRNAClass, Polymer, tRNA
+from ribctl.lib.schema.types_ribosome import (
+    RNA,
+    CytosolicRNAClass,
+    LifecycleFactorClass,
+    MitochondrialRNAClass,
+    Polymer,
+    tRNA,
+)
+from ribctl.lib.libmsa import Taxid, ncbi
 
 
+def struct_stats(ra: RibosomeAssets):
+    profile = ra.profile()
 
-def struct_stats(ra:RibosomeAssets):
-    profile     = ra.profile()
-
-    struct_stat          = {}
+    struct_stat = {}
     nomenclature_classes = {}
-    lig_compounds        = {}
+    lig_compounds = {}
 
-    n_dbank_compounds    = 0
+    n_dbank_compounds = 0
 
-    rnas  = profile.rnas
+    rnas = profile.rnas
     prots = profile.proteins
-    ligs  = profile.nonpolymeric_ligands
+    ligs = profile.nonpolymeric_ligands
 
     for lig in ligs:
         if lig.nonpolymer_comp.drugbank != None:
             n_dbank_compounds += 1
-            chemn =  lig.chemicalName
+            chemn = lig.chemicalName
             if chemn not in nomenclature_classes:
                 lig_compounds[chemn] = 1
             else:
-                lig_compounds[chemn]= nomenclature_classes[chemn] + 1
-            lig_compounds[lig.chemicalName] =1
+                lig_compounds[chemn] = nomenclature_classes[chemn] + 1
+            lig_compounds[lig.chemicalName] = 1
         else:
             ...
             # print("No drugbank")
-    
-    def lsu_ssu_presence(rnas:list[RNA])->Literal["both","ssu","lsu"]:
-        has_lsu     = 0
-        has_ssu     = 0
+
+    def lsu_ssu_presence(rnas: list[RNA]) -> Literal["both", "ssu", "lsu"]:
+        has_lsu = 0
+        has_ssu = 0
 
         for rna in rnas:
-            if profile.mitochondrial :
-                if  MitochondrialRNAClass.mtrRNA12S in rna.nomenclature:
+            if profile.mitochondrial:
+                if MitochondrialRNAClass.mtrRNA12S in rna.nomenclature:
                     has_ssu = 1
-                elif  MitochondrialRNAClass.mtrRNA16S in rna.nomenclature:
+                elif MitochondrialRNAClass.mtrRNA16S in rna.nomenclature:
                     has_lsu = 2
             else:
-                if  ( CytosolicRNAClass.rRNA_5_8S in rna.nomenclature )or ( CytosolicRNAClass.rRNA_5S in rna.nomenclature ) or( CytosolicRNAClass.rRNA_28S in rna.nomenclature ) or ( CytosolicRNAClass.rRNA_25S in rna.nomenclature ) or ( CytosolicRNAClass.rRNA_23S in rna.nomenclature ):
+                if (
+                    (CytosolicRNAClass.rRNA_5_8S in rna.nomenclature)
+                    or (CytosolicRNAClass.rRNA_5S in rna.nomenclature)
+                    or (CytosolicRNAClass.rRNA_28S in rna.nomenclature)
+                    or (CytosolicRNAClass.rRNA_25S in rna.nomenclature)
+                    or (CytosolicRNAClass.rRNA_23S in rna.nomenclature)
+                ):
                     has_lsu = 2
-                elif ( CytosolicRNAClass.rRNA_16S in rna.nomenclature ) or ( CytosolicRNAClass.rRNA_18S  in rna.nomenclature ):
+                elif (CytosolicRNAClass.rRNA_16S in rna.nomenclature) or (
+                    CytosolicRNAClass.rRNA_18S in rna.nomenclature
+                ):
                     has_ssu = 1
 
         match has_ssu + has_lsu:
@@ -59,23 +71,22 @@ def struct_stats(ra:RibosomeAssets):
             case _:
                 raise Exception("No ssu or lsu found")
 
-    struct_stat['has_factors']         = False
-    struct_stat['has_trna']            = False
-    struct_stat['subunit_composition'] = lsu_ssu_presence(rnas)
+    struct_stat["has_factors"] = False
+    struct_stat["has_trna"] = False
+    struct_stat["subunit_composition"] = lsu_ssu_presence(rnas)
 
-        
-    for chain in [*rnas,*prots]:
-        if chain.assembly_id != 0: continue
+    for chain in [*rnas, *prots]:
+        if chain.assembly_id != 0:
+            continue
 
         if len(chain.nomenclature) > 0:
             cls = chain.nomenclature[0].value
-
 
             #! class acc
             if cls not in nomenclature_classes:
                 nomenclature_classes[cls] = 1
             else:
-                nomenclature_classes[cls]= nomenclature_classes[cls] + 1
+                nomenclature_classes[cls] = nomenclature_classes[cls] + 1
 
             #! subunit determinatiaon
             if cls in [k.value for k in list(LifecycleFactorClass)]:
@@ -83,45 +94,34 @@ def struct_stats(ra:RibosomeAssets):
             if cls in [k.value for k in list(tRNA)]:
                 struct_stat["has_trna"] = True
 
-    return [struct_stat,nomenclature_classes,lig_compounds,n_dbank_compounds]
-
-        
-            
-
-   
-
-
-    
-
+    return [struct_stat, nomenclature_classes, lig_compounds, n_dbank_compounds]
 
 
 def get_stats():
 
     global_stats = {
-        "lsu_only"          : 0,
-        "ssu_only"          : 0,
-        "ssu_lsu"           : 0,
-
-        "with_trna"         : 0,
-        "with_factor"       : 0,
-        "drugbank_compounds": 0
+        "lsu_only": 0,
+        "ssu_only": 0,
+        "ssu_lsu": 0,
+        "with_trna": 0,
+        "with_factor": 0,
+        "drugbank_compounds": 0,
     }
     chain_classes = {}
-    lig_global    = {}
-
-
+    lig_global = {}
 
     for struct in RibosomeAssets.list_all_structs():
         print(struct)
         try:
-            [struct_stat,nomenclature_classes,lig_compounds,n_dbank_compounds] = struct_stats(RibosomeAssets(struct))
+            [struct_stat, nomenclature_classes, lig_compounds, n_dbank_compounds] = (
+                struct_stats(RibosomeAssets(struct))
+            )
 
-            for (k,v) in nomenclature_classes.items():
+            for k, v in nomenclature_classes.items():
                 if k not in chain_classes:
                     chain_classes[k] = v
                 else:
                     chain_classes[k] += v
-
 
             if struct_stat["subunit_composition"] == "lsu":
                 global_stats["lsu_only"] += 1
@@ -137,23 +137,43 @@ def get_stats():
 
             global_stats["drugbank_compounds"] += n_dbank_compounds
 
-
-            for (k,v) in lig_compounds.items():
+            for k, v in lig_compounds.items():
                 if k not in lig_global:
                     lig_global[k] = v
                 else:
                     lig_global[k] += v
 
         except Exception as e:
-            print ("e--->" ,e)
+            print("e--->", e)
 
     return {
         **global_stats,
-        "chain_classes" : {key: chain_classes[key] for key in sorted(chain_classes)} ,
-        "lig_global"    :  {key: value for key, value in sorted(lig_global.items(), key=lambda item: item[1], reverse=True)}   
+        "chain_classes": {key: chain_classes[key] for key in sorted(chain_classes)},
+        "lig_global": {
+            key: value
+            for key, value in sorted(
+                lig_global.items(), key=lambda item: item[1], reverse=True
+            )
+        },
     }
 
-s = get_stats()
-with open('stats.json', 'w') as of:
-    json.dump(s, of, indent=4)
-pprint(s)
+
+def collect_taxonomy():
+    #TODO:
+    # okay we need to make sure we induct the correct lineage relationships here as well
+    _ = {
+        "all_organisms":[]
+    }
+
+    for struct in RibosomeAssets.list_all_structs()[:10]:
+        rp = RibosomeAssets(struct).profile()
+        for org in [*rp.src_organism_ids, *rp.host_organism_ids]:
+            print(Taxid.get_name(org))
+        _.update({ rp.rcsb_id: {'src_ids':rp.src_organism_ids, 'host_ids':rp.host_organism_ids} }) 
+    return _
+
+print(collect_taxonomy())
+
+
+# with open('stats.json', 'w') as of:
+#     json.dump(get_stats(), of, indent=4)

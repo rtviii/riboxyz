@@ -2,7 +2,8 @@ from io import StringIO
 from pprint import pprint
 import tempfile
 import os
-import re
+from Bio import SeqIO
+from Bio.Align import MultipleSeqAlignment, AlignInfo
 import subprocess
 import typing
 from Bio import SeqIO
@@ -11,7 +12,7 @@ from functools import reduce
 from io import StringIO
 import os
 import subprocess
-from typing import Callable, Iterator, Literal, Optional
+from typing import Callable, Iterator, Literal
 from ribctl import MUSCLE_BIN, NCBI_TAXA_SQLITE, TAXID_ARCHAEA, TAXID_BACTERIA, TAXID_EUKARYOTA
 from ete3 import NCBITaxa
 import os
@@ -188,11 +189,6 @@ class Fasta:
             taxids = [*taxids, record.id]
         return taxids
 
-#!----------------------
-
-from Bio import AlignIO, SeqIO
-from Bio.Align import MultipleSeqAlignment, AlignInfo
-
 
 def generate_consensus(records):
     # Convert the list of sequence records to a MultipleSeqAlignment object
@@ -200,8 +196,6 @@ def generate_consensus(records):
     summary_align = AlignInfo.SummaryInfo(alignment)
     summary_align.dumb_consensus()
     return summary_align
-
-#!----------------------
 
 def util__backwards_match(aligned_target: str, resid: int):
     """Returns the target-sequence index of a residue in the (aligned) target sequence
@@ -222,7 +216,6 @@ def util__backwards_match(aligned_target: str, resid: int):
         else:
             counter_proper += 1
 
-
 def util__forwards_match(aligned_seq: str, resid: int):
     """Returns the index of a source-sequence residue in the aligned source sequence.
     Basically, "count forward including gaps until you reach @resid"
@@ -237,10 +230,8 @@ def util__forwards_match(aligned_seq: str, resid: int):
         else:
             count_proper += 1
 
-
 def barr2str(bArr):
     return "".join([x.decode("utf-8") for x in bArr])
-
 
 def seq_to_fasta(rcsb_id: str, _seq: str, outfile: str):
     from Bio.Seq import Seq
@@ -267,7 +258,6 @@ def phylogenetic_neighborhood(
         return nbr_taxids[1:]
     else:
         return nbr_taxids[1 : n_neighbors + 1]
-
 
 def muscle_align_N_seq(
     seq_records: list[SeqRecord], vvv: bool = False
@@ -307,5 +297,4 @@ def muscle_align_N_seq(
             temp_file.close()
             os.remove(temp_filename)
             raise Exception("Error running muscle.")
-
 
