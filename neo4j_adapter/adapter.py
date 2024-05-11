@@ -11,7 +11,7 @@ from concurrent.futures import ALL_COMPLETED, Future, ThreadPoolExecutor, wait
 from neo4j import Driver, GraphDatabase
 from neo4j_adapter.node_polymer import  link__polymer_to_polymer_class, link__polymer_to_structure, node__polymer, upsert_polymer_to_protein, upsert_polymer_to_rna
 from neo4j_adapter.node_protein import  node__polymer_class
-from neo4j_adapter.node_structure import   link__ligand_to_struct, node__ligand, node__structure, struct_exists
+from neo4j_adapter.node_structure import   link__ligand_to_struct, link__structure_to_phylogeny, node__ligand, node__structure, struct_exists
 from ribctl.etl.etl_pipeline import current_rcsb_structs
 from ribctl.lib.schema.types_ribosome import MitochondrialProteinClass, PolymerClass, PolynucleotideClass, RibosomeStructure
 from ribctl.etl.ribosome_assets import RibosomeAssets
@@ -67,6 +67,22 @@ class Neo4jAdapter():
         for taxon in taxa:
             self.create_lineage(taxon.ncbi_tax_id)
         
+    def link_structure_to_phylogeny(self,rcsb_id:str):
+        rcsb_id = rcsb_id.upper()
+        R:RibosomeStructure = RibosomeAssets(rcsb_id).profile()
+        with self.driver.session() as s:
+            if self.check_structure_exists(rcsb_id):
+                ...
+            else:
+                s.execute_write(node__structure(R))
+
+        for organim in R.host_organism_ids:
+            link__structure_to_phylogeny(rcsb_id, organim, 'host_organism')
+        for organim in R.src_organism_ids:
+            link__structure_to_phylogeny(rcsb_id, organim, 'source_organism')
+        print("Linked structure {} to phylogeny".format(rcsb_id))
+
+
 
     def add_structure(self, rcsb_id:str):
 
@@ -80,8 +96,14 @@ class Neo4jAdapter():
         with self.driver.session() as s:
             structure_node = s.execute_write(node__structure(R))
 
+            for organim in R.host_organism_ids:
+                link__structure_to_phylogeny(rcsb_id, organim, 'host_organism')
+            for organim in R.src_organism_ids:
+                link__structure_to_phylogeny(rcsb_id, organim, 'source_organism')
+
+
             for protein in R.proteins:
-                   protein_node = s.execute_write(node__polymer                 (protein                        ))
+                   protein_node = s.execute_write(node__polymer(protein))
                    s.execute_write(link__polymer_to_structure    (protein_node   , protein.parent_rcsb_id))
                    s.execute_write(link__polymer_to_polymer_class(protein_node                           ))
                    s.execute_write(upsert_polymer_to_protein     (protein_node   , protein               ))

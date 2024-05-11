@@ -2,13 +2,12 @@ from pprint import pprint
 from typing import Literal
 import typing
 from ribctl.etl.ribosome_assets import RibosomeAssets
+from ribctl.lib.libtax import PhylogenyNode
 from ribctl.lib.schema.types_ribosome import (
     RNA,
     CytosolicRNAClass,
     LifecycleFactorClass,
     MitochondrialRNAClass,
-    PhylogenyNode,
-    PhylogenyRank,
     Polymer,
     tRNA,
 )

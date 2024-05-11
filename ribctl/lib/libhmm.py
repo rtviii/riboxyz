@@ -9,6 +9,7 @@ from ribctl.lib.schema.types_ribosome import RNA, ElongationFactorClass, Initiat
 from pyhmmer.easel import Alphabet, DigitalSequenceBlock, TextSequence, SequenceFile, SequenceBlock, TextSequenceBlock, DigitalSequence
 from pyhmmer.plan7 import Pipeline, HMM , TopHits
 from ribctl.logs.loggers import get_classification_logger
+
 import concurrent.futures
 
 # logger= get_classification_logger()
@@ -263,13 +264,11 @@ class HMMClassifier():
         # return [ sorted(hits, key=lambda x: x["hit.score"])[0]["hit.name"].decode() ] if len(hits) >0 else []
 
     def classify_chains(self)->None:
-        """This is an alternative implementation of `scan_chains` that does not use `hmmscan`. Waiting on https://github.com/althonos/pyhmmer/issues/53 to resolve"""
+        """This is an alternative implementation of `scan_chains` that does not use `hmmscan`.
+         Waiting on https://github.com/althonos/pyhmmer/issues/53 to resolve"""
 
         for chain in self.chains:
-            try:
-            
                 organism_taxid = chain.src_organism_ids[0]
-
                 if organism_taxid not in self.organism_scanners:
                     hmmscanner                             = HMMs(organism_taxid, self.candidate_classes, no_cache = True, max_seed_seqs = 5)
                     self.organism_scanners[organism_taxid] = hmmscanner
@@ -292,10 +291,7 @@ class HMMClassifier():
                                 "domains"           : [( d.score, d.c_evalue, d.env_from, d.env_to ) for d in hit.domains]
                             }
                            self.report[chain.auth_asym_id].append(d_hit)
-            except Exception as e:
-                l = get_classification_logger()
-                l.error("Error in classification of chain {}.{} : {}".format(chain.parent_rcsb_id, chain.auth_asym_id, e))
-                exit(-1)
+
 
     def ___scan_chains(self)->None:
         """DEPRECATED: Waiting on https://github.com/althonos/pyhmmer/issues/53 to resolve"""

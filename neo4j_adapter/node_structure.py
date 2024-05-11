@@ -14,27 +14,25 @@ def struct_exists(rcsb_id:str) -> Callable[[Transaction | ManagedTransaction], b
                 """, parameters={"rcsb_id":rcsb_id}).single().value()
     return _
 
-# def link__structure_to_phylogeny(rib:RibosomeStructure)->Callable[[Transaction | ManagedTransaction], Node]:
-#     rib.src_organism_ids
-#     rib.host_organism_ids
-
-def link__structure_to_phylogeny(rib:RibosomeStructure, taxid,relationship:Literal['host_organism', 'source_organism'])->Callable[[Transaction | ManagedTransaction], list[ Node ]]:
+def link__structure_to_phylogeny(rcsb_id:str, taxid,relationship:Literal['host_organism', 'source_organism'])->Callable[[Transaction | ManagedTransaction], list[ Node ]]:
     def _(tx: Transaction | ManagedTransaction):
         return tx.run("""//
         match (struct:RibosomeStructure {rcsb_id: $rcsb_id})
         match (phylo:PhylogenyNode {ncbi_tax_id: $tax_id}) 
-        merge (struct)<-[:$relationsip]-(phylo)
+        merge (struct)<-[:$relationship]-(phylo)
         return  struct, struct
         """, {
-            "rcsb_id"    : rib.rcsb_id,
+            "rcsb_id"    : rcsb_id,
             "tax_id"     : taxid,
-            "relationsip": relationship
+            "relationship": relationship
         }).values('struct', 'phylo')
+
 
     return _
 
 # Transaction
 def node__structure(_rib: RibosomeStructure) -> Callable[[Transaction | ManagedTransaction], Record | None]:
+    print("Creating struct node from", _rib.rcsb_id)
     R = _rib.model_dump()
     def _(tx: Transaction | ManagedTransaction):
         return tx.run("""//
@@ -62,7 +60,8 @@ def node__structure(_rib: RibosomeStructure) -> Callable[[Transaction | ManagedT
               struct.rcsb_external_ref_type = CASE WHEN $rcsb_external_ref_type = null then \"null\" else $rcsb_external_ref_type END,
               struct.rcsb_external_ref_link = CASE WHEN $rcsb_external_ref_link = null then \"null\" else $rcsb_external_ref_link END,
               struct.citation_pdbx_doi      = CASE WHEN $citation_pdbx_doi = null then \"null\" else $citation_pdbx_doi END,
-              struct.citation_year          = CASE WHEN $citation_year = null then \"null\" else $citation_year END
+              struct.citation_year          = CASE WHEN $citation_year = null then \"null\" else $citation_year END,
+              struct.citation_rcsb_authors  = CASE WHEN $citation_rcsb_authors = null then \"null\" else $citation_rcsb_authors END
               return struct
         """, **R).single()
     return _

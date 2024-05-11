@@ -1,5 +1,6 @@
 import functools
 import os
+from pprint import pprint
 import more_itertools as mitt
 import json
 from typing import Any, Optional
@@ -366,6 +367,7 @@ class ReannotationPipeline:
             if self.rcsb_data_dict["struct_keywords"] != None
             else None
         )
+
         kwords = (
             self.rcsb_data_dict["struct_keywords"]["pdbx_keywords"]
             if self.rcsb_data_dict["struct_keywords"] != None
@@ -739,6 +741,10 @@ class ReannotationPipeline:
         reshaped_nonpolymers                     = self.process_nonpolymers()
         [externalRefs, pub, kwords_text, kwords] = self.process_metadata()
         organisms                                = self.infer_organisms_from_polymers([*_prot_polypeptides, *_rna_polynucleotides])
+        print(reshaped_nonpolymers)
+        print(_prot_polypeptides)
+        print(_rna_polynucleotides)
+
         reshaped                                 = RibosomeStructure(
             rcsb_id                = self.rcsb_data_dict["rcsb_id"],
             expMethod              = self.rcsb_data_dict["exptl"][0]["method"],
@@ -763,5 +769,6 @@ class ReannotationPipeline:
             assembly_map           = self.asm_maps,
             mitochondrial          = is_mitochondrial
         )
+        print(reshaped.model_dump())
 
         return reshaped

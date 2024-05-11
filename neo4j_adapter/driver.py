@@ -1,5 +1,7 @@
 from pprint import pprint
 import sys
+
+from ribctl.etl.ribosome_assets import RibosomeAssets
 sys.dont_write_bytecode = True
 from neo4j_adapter.adapter import Neo4jAdapter
 
@@ -26,6 +28,8 @@ adapter = Neo4jAdapter('bolt://localhost:7687', 'neo4j')
 # # adapter.sync_with_rcsb(10)
 # phn = PhylogenyNode.from_taxid(9605)
 # adapter.create_lineage(9606)
+for r in RibosomeAssets.list_all_structs():
+    adapter.link_structure_to_phylogeny(r)
 
-pprint(adapter.init_phylogenies())
+# pprint(adapter.init_phylogenies())
 
