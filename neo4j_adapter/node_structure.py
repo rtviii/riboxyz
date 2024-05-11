@@ -1,4 +1,4 @@
-from typing import Callable
+from typing import Callable, Literal
 from neo4j import  Driver, ManagedTransaction, Record, Transaction
 from neo4j.graph import Node, Relationship
 from neo4j import ManagedTransaction, Transaction
@@ -10,9 +10,27 @@ def struct_exists(rcsb_id:str) -> Callable[[Transaction | ManagedTransaction], b
     def _(tx: Transaction | ManagedTransaction):
         return tx.run("""//
                 MATCH (u:RibosomeStructure {rcsb_id: $rcsb_id})
-                WITH COUNT(u) > 0  as node_exists
-                RETURN node_exists
-                """, parameters={"rcsb_id":rcsb_id}).single()['node_exists'] 
+                return COUNT(u) > 0;
+                """, parameters={"rcsb_id":rcsb_id}).single().value()
+    return _
+
+# def link__structure_to_phylogeny(rib:RibosomeStructure)->Callable[[Transaction | ManagedTransaction], Node]:
+#     rib.src_organism_ids
+#     rib.host_organism_ids
+
+def link__structure_to_phylogeny(rib:RibosomeStructure, taxid,relationship:Literal['host_organism', 'source_organism'])->Callable[[Transaction | ManagedTransaction], list[ Node ]]:
+    def _(tx: Transaction | ManagedTransaction):
+        return tx.run("""//
+        match (struct:RibosomeStructure {rcsb_id: $rcsb_id})
+        match (phylo:PhylogenyNode {ncbi_tax_id: $tax_id}) 
+        merge (struct)<-[:$relationsip]-(phylo)
+        return  struct, struct
+        """, {
+            "rcsb_id"    : rib.rcsb_id,
+            "tax_id"     : taxid,
+            "relationsip": relationship
+        }).values('struct', 'phylo')
+
     return _
 
 # Transaction

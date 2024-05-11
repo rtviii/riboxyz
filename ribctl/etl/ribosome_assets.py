@@ -1,22 +1,21 @@
 import json
 import os
-from pprint import pprint
 import typing
 from Bio.PDB.Structure import Structure
 from Bio.PDB.Chain import Chain
 from typing import Optional
 from ribctl import AMINO_ACIDS_3_TO_1_CODE
+from ribctl.lib.libtax import PhylogenyNode, PhylogenyRank, Taxid
 from ribctl.lib.schema.types_binding_site import BindingSite
 from ribctl.lib.mod_extract_bsites import  struct_ligand_ids, bsite_ligand
 from ribctl.lib.mod_split_rename import split_rename
 from ribctl.etl.etl_pipeline import current_rcsb_structs, ReannotationPipeline, rcsb_single_structure_graphql, query_rcsb_api
 from ribctl.lib.tunnel import ptc_resdiues_get, ptc_residues_calculate_midpoint
-# from ribctl.lib.mod_render_thumbnail import render_thumbnail
 from ribctl.lib.utils import download_unpack_place, open_structure
-from ribctl.lib.schema.types_ribosome import RNA, LifecycleFactorClass, Polymer, PolymerClass, PolynucleotideClass, PolypeptideClass, Protein, CytosolicProteinClass, RibosomeStructure
+from ribctl.lib.schema.types_ribosome import RNA,  Polymer, PolymerClass, PolynucleotideClass, PolypeptideClass, Protein, CytosolicProteinClass, RibosomeStructure
+
 from ribctl import RIBETL_DATA
 from pydantic import BaseModel
-from concurrent.futures import ALL_COMPLETED, Future, ProcessPoolExecutor, ThreadPoolExecutor, wait
 from ribctl.logs.loggers import get_etl_logger
 
 
@@ -40,6 +39,28 @@ class RibosomeAssets():
         if not RIBETL_DATA:
             raise Exception(
                 "RIBETL_DATA environment variable not set. Cannot access assets.")
+
+    @staticmethod
+    def collect_all_taxa()->set[PhylogenyNode]:
+        _ = set()
+
+        for struct in RibosomeAssets.list_all_structs():
+            rp = RibosomeAssets(struct).profile()
+            for org in [*rp.src_organism_ids, *rp.host_organism_ids]:
+                if Taxid.rank(org) not in list(typing.get_args(PhylogenyRank)):
+                    org = Taxid.coerce_to_rank(org, 'species')
+                assert(org is not None)
+                try:
+                    pn = PhylogenyNode(
+                        ncbi_tax_id     = org,
+                        scientific_name = Taxid.get_name(org),
+                        rank            = Taxid.rank(org) )
+                except Exception as e:
+                    print(struct, Taxid.get_name(org), "|\t",Taxid.rank(org),"->", Taxid.get_lineage(org))
+                    print("Error with", org, struct)
+                    print(e)
+                _.add(pn)
+        return _
 
     def _dir_path(self):
         self._envcheck()

@@ -1,12 +1,11 @@
 import json
 import os
-from typing import Generic, Iterator, Literal, Optional, Tuple, Type, TypeVar
+from typing import  Iterator,  Tuple
 from Bio.SeqRecord import SeqRecord
 import pyhmmer
-from ribctl import ASSETS, MUSCLE_BIN
+from ribctl import ASSETS
 from ribctl.lib.libmsa import Fasta, muscle_align_N_seq, phylogenetic_neighborhood
 from ribctl.lib.schema.types_ribosome import RNA, ElongationFactorClass, InitiationFactorClass, LifecycleFactorClass, MitochondrialProteinClass, Polymer, PolymerClass, PolynucleotideClass, PolypeptideClass, Protein, CytosolicProteinClass, CytosolicProteinClass, tRNA
-# from ribctl.etl.ribosome_assets import RibosomeAssets
 from pyhmmer.easel import Alphabet, DigitalSequenceBlock, TextSequence, SequenceFile, SequenceBlock, TextSequenceBlock, DigitalSequence
 from pyhmmer.plan7 import Pipeline, HMM , TopHits
 from ribctl.logs.loggers import get_classification_logger

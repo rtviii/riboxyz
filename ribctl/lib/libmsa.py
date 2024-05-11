@@ -6,18 +6,15 @@ from Bio import SeqIO
 from Bio.Align import MultipleSeqAlignment, AlignInfo
 import subprocess
 import typing
-from Bio import SeqIO
 from Bio.SeqRecord import SeqRecord
 from functools import reduce
-from io import StringIO
 import os
 import subprocess
-from typing import Callable, Iterator, Literal
-from ribctl import MUSCLE_BIN, NCBI_TAXA_SQLITE, TAXID_ARCHAEA, TAXID_BACTERIA, TAXID_EUKARYOTA
-from ete3 import NCBITaxa
+from typing import Callable, Iterator
+from ribctl import MUSCLE_BIN
 import os
+from ribctl.lib.libtax import  Taxid, ncbi
 
-from ribctl.lib.schema.types_ribosome import Taxid, ncbi
 
 
 
@@ -162,7 +159,7 @@ def phylogenetic_neighborhood(
 ) -> list[str]:
     """Given a set of taxids and a target taxid, return a list of the [n_neighbors] phylogenetically closest to the target."""
 
-    tree = ncbi_.get_topology(list(set([*taxids_base, str(taxid_target)])))
+    tree = ncbi.get_topology(list(set([*taxids_base, str(taxid_target)])))
     target_node = tree.search_nodes(name=str(taxid_target))[0]
     phylo_all_nodes = [(node.name, tree.get_distance(target_node, node)) for node in tree.traverse()]
     phylo_extant_nodes = filter(lambda taxid: taxid[0] in taxids_base, phylo_all_nodes)

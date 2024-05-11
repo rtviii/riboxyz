@@ -162,48 +162,6 @@ def get_stats():
     }
 
 
-def collect_taxonomy():
-    #TODO:
-    # okay we need to make sure we induct the correct lineage relationships here as well
-    _ = {
-        "all_nodes":set()
-    }
-
-    for struct in RibosomeAssets.list_all_structs():
-
-        rp = RibosomeAssets(struct).profile()
-        
-        print(struct, rp.src_organism_ids, rp.host_organism_ids)
-
-        for org in [*rp.src_organism_ids, *rp.host_organism_ids]:
-            if Taxid.rank(org) not in list(typing.get_args(PhylogenyRank)):
-                org = Taxid.coerce_to_rank(org, 'species')
-
-            assert(org is not None)
-            try:
-                pn = PhylogenyNode(
-                    ncbi_tax_id     = org,
-                    scientific_name = Taxid.get_name(org),
-                    rank            = Taxid.rank(org) )
-            except:
-                print(struct, Taxid.get_name(org), "|\t",Taxid.rank(org),"->", Taxid.get_lineage(org))
-                print("Error with", org, struct)
-
-
-
-            _["all_nodes"].add(pn)
-
-            # _["all_organisms"].append({
-            #     "lineage"        : Taxid.get_lineage(org),
-            #     "scientific_name": Taxid.get_name(org),
-            # })
-
-            # _[rp.rcsb_id] = {
-            #     "host_organisms"  : rp.host_organism_ids,
-            #     "source_organisms": rp.src_organism_ids
-            # }
-
-    return _
 
 # pprint(collect_taxonomy())
 pprint(PhylogenyNode.from_taxid(9606).get_lineage_nodes())

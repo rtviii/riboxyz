@@ -1,18 +1,19 @@
 import sys
+
+from ribctl.lib.libtax import PhylogenyNode, Taxid
+
+
 sys.dont_write_bytecode = True
 
-from neo4j_adapter.node_phylogeny import link__phylogeny, node__phylogeny, node__phylogeny_exists
+from neo4j_adapter.node_phylogeny import link__phylogeny, node__phylogeny
 from neo4j.graph import Node
-
 from concurrent.futures import ALL_COMPLETED, Future, ThreadPoolExecutor, wait
-from neo4j.exceptions import AuthError
 from neo4j import Driver, GraphDatabase
 from neo4j_adapter.node_polymer import  link__polymer_to_polymer_class, link__polymer_to_structure, node__polymer, upsert_polymer_to_protein, upsert_polymer_to_rna
-from neo4j_adapter.node_protein import add_protein, node__polymer_class
-from neo4j_adapter.node_rna import add_rna
+from neo4j_adapter.node_protein import  node__polymer_class
 from neo4j_adapter.node_structure import   link__ligand_to_struct, node__ligand, node__structure, struct_exists
 from ribctl.etl.etl_pipeline import current_rcsb_structs
-from ribctl.lib.schema.types_ribosome import MitochondrialProteinClass, PhylogenyNode, PolymerClass, PolynucleotideClass, RibosomeStructure, Taxid
+from ribctl.lib.schema.types_ribosome import MitochondrialProteinClass, PolymerClass, PolynucleotideClass, RibosomeStructure
 from ribctl.etl.ribosome_assets import RibosomeAssets
 from neo4j import GraphDatabase, Driver, ManagedTransaction, Transaction
 from ribctl.lib.schema.types_ribosome import  NonpolymericLigand,  CytosolicProteinClass, RibosomeStructure
@@ -48,6 +49,7 @@ class Neo4jAdapter():
 
         self.init_constraints()
         self.init_polymer_classes()
+        self.init_phylogenies()
 
     def __init__(self, uri: str, user: str, password: str|None=None) -> None:
         self.uri      = uri
@@ -59,6 +61,12 @@ class Neo4jAdapter():
             print("Established connection to ", self.uri)
         except Exception as ae:
             print(ae)
+
+    def init_phylogenies(self):
+        taxa = RibosomeAssets.collect_all_taxa()
+        for taxon in taxa:
+            self.create_lineage(taxon.ncbi_tax_id)
+        
 
     def add_structure(self, rcsb_id:str):
 
@@ -91,13 +99,11 @@ class Neo4jAdapter():
                     s.execute_write(link__polymer_to_structure(other_poly_node, polymer.parent_rcsb_id))
                     s.execute_write(link__polymer_to_polymer_class(other_poly_node))
 
-
             if R.nonpolymeric_ligands is not None:
                 for ligand in R.nonpolymeric_ligands:
                     ligand_node = s.execute_write(node__ligand(ligand))
                     s.execute_write(link__ligand_to_struct(ligand_node, R.rcsb_id))
-
-        print("Sucessfully added struct node {}".format(rcsb_id))
+    
         return structure_node
 
     def add_phylogeny_node(self, taxid:int)->Node:
@@ -105,23 +111,21 @@ class Neo4jAdapter():
             node = session.execute_write(node__phylogeny(PhylogenyNode.from_taxid(taxid)))
             return node
 
-
-
     def create_lineage(self,taxid:int)->None:
-
         lin = Taxid.get_lineage(taxid)
         lin.reverse()
-
         previous_id: int|None = None
-
         with self.driver.session() as session:
             for taxid in lin:
-                session.execute_write(node__phylogeny(PhylogenyNode.from_taxid(taxid)))
+                node = session.execute_write(node__phylogeny(PhylogenyNode.from_taxid(taxid)))
+                print("Created node {} with taxid {}".format(node, taxid))
                 if previous_id == None: # initial (superkingdom has no parent node)
                     previous_id = taxid
                     continue
+
                 session.execute_write(link__phylogeny( taxid , previous_id)) # link current tax to parent
                 previous_id = taxid
+        print("Created lineage: ", lin)
         return
 
 
