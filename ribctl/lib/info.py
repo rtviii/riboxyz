@@ -205,7 +205,8 @@ def collect_taxonomy():
 
     return _
 
-pprint(collect_taxonomy())
+# pprint(collect_taxonomy())
+pprint(PhylogenyNode.from_taxid(9606).get_lineage_nodes())
 
 
 # with open('stats.json', 'w') as of:

@@ -1,6 +1,9 @@
 import sys
 sys.dont_write_bytecode = True
 
+from neo4j_adapter.node_phylogeny import link__phylogeny, node__phylogeny, node__phylogeny_exists
+from neo4j.graph import Node
+
 from concurrent.futures import ALL_COMPLETED, Future, ThreadPoolExecutor, wait
 from neo4j.exceptions import AuthError
 from neo4j import Driver, GraphDatabase
@@ -9,7 +12,7 @@ from neo4j_adapter.node_protein import add_protein, node__polymer_class
 from neo4j_adapter.node_rna import add_rna
 from neo4j_adapter.node_structure import   link__ligand_to_struct, node__ligand, node__structure, struct_exists
 from ribctl.etl.etl_pipeline import current_rcsb_structs
-from ribctl.lib.schema.types_ribosome import MitochondrialProteinClass, PolymerClass, PolynucleotideClass, RibosomeStructure
+from ribctl.lib.schema.types_ribosome import MitochondrialProteinClass, PhylogenyNode, PolymerClass, PolynucleotideClass, RibosomeStructure, Taxid
 from ribctl.etl.ribosome_assets import RibosomeAssets
 from neo4j import GraphDatabase, Driver, ManagedTransaction, Transaction
 from ribctl.lib.schema.types_ribosome import  NonpolymericLigand,  CytosolicProteinClass, RibosomeStructure
@@ -96,6 +99,32 @@ class Neo4jAdapter():
 
         print("Sucessfully added struct node {}".format(rcsb_id))
         return structure_node
+
+    def add_phylogeny_node(self, taxid:int)->Node:
+        with self.driver.session() as session:
+            node = session.execute_write(node__phylogeny(PhylogenyNode.from_taxid(taxid)))
+            return node
+
+
+
+    def create_lineage(self,taxid:int)->None:
+
+        lin = Taxid.get_lineage(taxid)
+        lin.reverse()
+
+        previous_id: int|None = None
+
+        with self.driver.session() as session:
+            for taxid in lin:
+                session.execute_write(node__phylogeny(PhylogenyNode.from_taxid(taxid)))
+                if previous_id == None: # initial (superkingdom has no parent node)
+                    previous_id = taxid
+                    continue
+                session.execute_write(link__phylogeny( taxid , previous_id)) # link current tax to parent
+                previous_id = taxid
+        return
+
+
 
     # ------------------- OLD SHIT --------------------
 
@@ -227,3 +256,6 @@ class Neo4jAdapter():
                 match (n:RibosomeStructure {rcsb_id:$RCSB_ID})-[]-(c:Protein{auth_asym_id:$AUTH_ASYM_ID})-[]-(pc:ProteinClass) return pc.class_id
                     """, {"RCSB_ID": rcsb_id, "AUTH_ASYM_ID": auth_asym_id}).values('pc.class_id')]
             return session.execute_read(_)
+
+
+
