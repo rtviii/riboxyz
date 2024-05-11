@@ -1,3 +1,4 @@
+from pprint import pprint
 from typing import Literal
 from ribctl.etl.ribosome_assets import RibosomeAssets
 from ribctl.lib.schema.types_ribosome import (
@@ -5,6 +6,7 @@ from ribctl.lib.schema.types_ribosome import (
     CytosolicRNAClass,
     LifecycleFactorClass,
     MitochondrialRNAClass,
+    PhylogenyNode,
     Polymer,
     tRNA,
 )
@@ -162,17 +164,38 @@ def collect_taxonomy():
     #TODO:
     # okay we need to make sure we induct the correct lineage relationships here as well
     _ = {
-        "all_organisms":[]
+        "all_nodes":set()
     }
 
     for struct in RibosomeAssets.list_all_structs()[:10]:
+
         rp = RibosomeAssets(struct).profile()
+
         for org in [*rp.src_organism_ids, *rp.host_organism_ids]:
-            print(Taxid.get_name(org))
-        _.update({ rp.rcsb_id: {'src_ids':rp.src_organism_ids, 'host_ids':rp.host_organism_ids} }) 
+            # print(ncbi.get_lineage(org))
+            # return ncbi.get_rank(ncbi.get_lineage(org))
+            scientific_name = Taxid.get_name(org)
+            print(scientific_name)
+            exit()
+            PhylogenyNode(
+                ncbi_tax_id     = org,
+                scientific_name = Taxid.get_name(org).values()[0],
+                rank            = Taxid.rank(org),
+            )
+            _["all_nodes"].add()
+            # _["all_organisms"].append({
+            #     "lineage"        : Taxid.get_lineage(org),
+            #     "scientific_name": Taxid.get_name(org),
+            # })
+
+            _[rp.rcsb_id] = {
+                "host_organisms"  : rp.host_organism_ids,
+                "source_organisms": rp.src_organism_ids
+            }
+
     return _
 
-print(collect_taxonomy())
+pprint(collect_taxonomy())
 
 
 # with open('stats.json', 'w') as of:

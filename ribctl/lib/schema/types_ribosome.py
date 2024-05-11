@@ -2,6 +2,7 @@ import json
 from pprint import pprint
 from typing import Any, Optional
 from enum import Enum
+from typing_extensions import Literal
 from Bio.SeqRecord import SeqRecord
 from Bio.Seq import Seq
 from pydantic import BaseModel, field_serializer
@@ -11,6 +12,14 @@ from ribctl.lib.enumunion import enum_union
 # |********************************************************************************************************|
 # | https://docs.google.com/spreadsheets/d/1mapshbn1ArofPN-Omu8GG5QdcwlJ0ym0BlN252kkUBU/edit#gid=815712128 |
 # |********************************************************************************************************|
+# ? ---------------- [ Phylogeny] ----------------
+
+
+PhylogenyRank = Literal[ "superkingdom", "phylum", "class", "order", "family", "genus", "species", "strain" ]
+class PhylogenyNode(BaseModel):
+    ncbi_tax_id    : int
+    scientific_name: str
+    rank           : PhylogenyRank
 
 
 # ? ----------------------------------------------{ Subcomponent Types }------------------------------------------------

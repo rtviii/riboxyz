@@ -14,6 +14,7 @@ import os
 import subprocess
 from typing import Callable, Iterator, Literal
 from ribctl import MUSCLE_BIN, NCBI_TAXA_SQLITE, TAXID_ARCHAEA, TAXID_BACTERIA, TAXID_EUKARYOTA
+from ribctl.lib.schema.types_ribosome import PhylogenyRank
 from ete3 import NCBITaxa
 import os
 
@@ -22,7 +23,6 @@ TAXID_BACTERIA  = 2
 TAXID_EUKARYOTA = 2759
 TAXID_ARCHAEA   = 2157
 
-PhylogenyRank = Literal[ "superkingdom", "phylum", "class", "order", "family", "genus", "species", "strain" ]
 ncbi          = NCBITaxa(dbfile=NCBI_TAXA_SQLITE)
 
 class Taxid:
@@ -36,6 +36,10 @@ class Taxid:
     @staticmethod
     def get_name(taxid):
         return ncbi.get_taxid_translator([taxid])
+
+    @staticmethod
+    def get_lineage(taxid):
+        return ncbi.get_lineage(taxid)
 
     @staticmethod
     def rank(taxid: int) -> str:
