@@ -17,6 +17,7 @@ from ribctl.lib.schema.types_ribosome import  NonpolymericLigand,  CytosolicProt
 NODE_CONSTRAINTS = [
     """CREATE CONSTRAINT rcsb_id_unique IF NOT EXISTS FOR (ribosome:RibosomeStructure) REQUIRE ribosome.rcsb_id IS UNIQUE;""",
     """CREATE CONSTRAINT polymer_class_unique IF NOT EXISTS FOR (poly_class:PolymerClass) REQUIRE poly_class.class_id IS UNIQUE;""",
+    """CREATE CONSTRAINT taxid_unique IF NOT EXISTS FOR (phylonode:PhylogenyNode) REQUIRE phylonode.ncbi_tax_id IS UNIQUE;""",
 ]
 
 # If you are connecting via a shell or programmatically via a driver,

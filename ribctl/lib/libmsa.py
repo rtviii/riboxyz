@@ -35,20 +35,20 @@ class Taxid:
 
     @staticmethod
     def get_name(taxid):
-        return ncbi.get_taxid_translator([taxid])
+        return list(ncbi.get_taxid_translator([taxid]).values())[0]
 
     @staticmethod
-    def get_lineage(taxid):
-        return ncbi.get_lineage(taxid)
+    def get_lineage(taxid)->list[int]:
+        return ncbi.get_lineage(taxid) 
 
     @staticmethod
-    def rank(taxid: int) -> str:
+    def rank(taxid: int) -> PhylogenyRank:
         """Given a @taxid, return the rank of the taxid"""
         lineage = ncbi.get_lineage(taxid)
         return ncbi.get_rank(lineage)[taxid]
 
     @staticmethod
-    def ancestor_at_rank(taxid: int, target_rank: PhylogenyRank) -> int | None:
+    def coerce_to_rank(taxid: int, target_rank: PhylogenyRank) -> int | None:
         """Given a @taxid and a @rank, return the taxid of the first ancestor of @taxid that is at @rank"""
         lineage = ncbi.get_lineage(taxid)
         if lineage is None:
@@ -91,7 +91,7 @@ class Taxid:
         new = []
         for taxid in taxids:
             try:
-                new.append(Taxid.ancestor_at_rank(taxid, level))
+                new.append(Taxid.coerce_to_rank(taxid, level))
             except Exception as e:
                 print(e)
                 raise Exception(e)

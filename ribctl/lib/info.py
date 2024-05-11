@@ -1,5 +1,6 @@
 from pprint import pprint
 from typing import Literal
+import typing
 from ribctl.etl.ribosome_assets import RibosomeAssets
 from ribctl.lib.schema.types_ribosome import (
     RNA,
@@ -7,6 +8,7 @@ from ribctl.lib.schema.types_ribosome import (
     LifecycleFactorClass,
     MitochondrialRNAClass,
     PhylogenyNode,
+    PhylogenyRank,
     Polymer,
     tRNA,
 )
@@ -167,31 +169,39 @@ def collect_taxonomy():
         "all_nodes":set()
     }
 
-    for struct in RibosomeAssets.list_all_structs()[:10]:
+    for struct in RibosomeAssets.list_all_structs():
 
         rp = RibosomeAssets(struct).profile()
+        
+        print(struct, rp.src_organism_ids, rp.host_organism_ids)
 
         for org in [*rp.src_organism_ids, *rp.host_organism_ids]:
-            # print(ncbi.get_lineage(org))
-            # return ncbi.get_rank(ncbi.get_lineage(org))
-            scientific_name = Taxid.get_name(org)
-            print(scientific_name)
-            exit()
-            PhylogenyNode(
-                ncbi_tax_id     = org,
-                scientific_name = Taxid.get_name(org).values()[0],
-                rank            = Taxid.rank(org),
-            )
-            _["all_nodes"].add()
+            if Taxid.rank(org) not in list(typing.get_args(PhylogenyRank)):
+                org = Taxid.coerce_to_rank(org, 'species')
+
+            assert(org is not None)
+            try:
+                pn = PhylogenyNode(
+                    ncbi_tax_id     = org,
+                    scientific_name = Taxid.get_name(org),
+                    rank            = Taxid.rank(org) )
+            except:
+                print(struct, Taxid.get_name(org), "|\t",Taxid.rank(org),"->", Taxid.get_lineage(org))
+                print("Error with", org, struct)
+
+
+
+            _["all_nodes"].add(pn)
+
             # _["all_organisms"].append({
             #     "lineage"        : Taxid.get_lineage(org),
             #     "scientific_name": Taxid.get_name(org),
             # })
 
-            _[rp.rcsb_id] = {
-                "host_organisms"  : rp.host_organism_ids,
-                "source_organisms": rp.src_organism_ids
-            }
+            # _[rp.rcsb_id] = {
+            #     "host_organisms"  : rp.host_organism_ids,
+            #     "source_organisms": rp.src_organism_ids
+            # }
 
     return _
 

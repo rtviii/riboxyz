@@ -7,6 +7,7 @@ from Bio.SeqRecord import SeqRecord
 from Bio.Seq import Seq
 from pydantic import BaseModel, field_serializer
 from ribctl.lib.enumunion import enum_union
+from ribctl.lib.libmsa import Taxid
 
 # TODO:
 # |********************************************************************************************************|
@@ -17,6 +18,13 @@ from ribctl.lib.enumunion import enum_union
 
 PhylogenyRank = Literal[ "superkingdom", "phylum", "class", "order", "family", "genus", "species", "strain" ]
 class PhylogenyNode(BaseModel):
+
+    def __hash__(self) -> int:
+        return self.ncbi_tax_id
+
+    def get_lineage(self) -> list[int]:
+        return Taxid.get_lineage(self.ncbi_tax_id)
+
     ncbi_tax_id    : int
     scientific_name: str
     rank           : PhylogenyRank
