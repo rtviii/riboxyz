@@ -12,8 +12,6 @@ from ribctl.lib.schema.types_ribosome import RibosomeStructure
 sys.dont_write_bytecode = True
 import argparse
 import json
-from pprint import pprint
-
 from ribctl.cli.ls import cmd_ls
 from ribctl.cli.sync import cmd_db
 from ribctl.lib.mod_transpose_bsites import init_transpose_ligand

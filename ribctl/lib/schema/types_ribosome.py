@@ -1,6 +1,5 @@
 import json
-from pprint import pprint
-from typing import Any, Optional
+from typing import Optional
 from enum import Enum
 from Bio.SeqRecord import SeqRecord
 from Bio.Seq import Seq
@@ -11,9 +10,6 @@ from ribctl.lib.enumunion import enum_union
 # |********************************************************************************************************|
 # | https://docs.google.com/spreadsheets/d/1mapshbn1ArofPN-Omu8GG5QdcwlJ0ym0BlN252kkUBU/edit#gid=815712128 |
 # |********************************************************************************************************|
-
-
-# ? ----------------------------------------------{ Subcomponent Types }------------------------------------------------
 class tRNA(Enum):
     tRNA = "tRNA"
 
@@ -392,8 +388,8 @@ class Polymer(BaseModel):
     nomenclature                       : list[PolymerClass]
 
     @field_serializer('nomenclature')
-    def serialize_dt(self, ncl: list[PolymerClass], _info):
-        return [x.value for x in ncl]
+    def serialize_nomenclature(self, nomenclature_classes: list[PolymerClass], _info):
+        return [x.value for x in nomenclature_classes]
 
 class Protein(Polymer):
     def __hash__(self):

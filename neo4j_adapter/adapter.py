@@ -1,22 +1,27 @@
 import sys
+
+from ribctl.lib.libtax import PhylogenyNode, Taxid
+
+
 sys.dont_write_bytecode = True
+
+from neo4j_adapter.node_phylogeny import link__phylogeny, node__phylogeny
+from neo4j.graph import Node
 from concurrent.futures import ALL_COMPLETED, Future, ThreadPoolExecutor, wait
-from neo4j.exceptions import AuthError
 from neo4j import Driver, GraphDatabase
 from neo4j_adapter.node_polymer import  link__polymer_to_polymer_class, link__polymer_to_structure, node__polymer, upsert_polymer_to_protein, upsert_polymer_to_rna
-from neo4j_adapter.node_protein import add_protein, node__polymer_class
-from neo4j_adapter.node_rna import add_rna
-from neo4j_adapter.node_structure import   link__ligand_to_struct, node__ligand, node__structure, struct_exists
+from neo4j_adapter.node_protein import  node__polymer_class
+from neo4j_adapter.node_structure import   link__ligand_to_struct, link__structure_to_phylogeny, node__ligand, node__structure, struct_exists
 from ribctl.etl.etl_pipeline import current_rcsb_structs
 from ribctl.lib.schema.types_ribosome import MitochondrialProteinClass, PolymerClass, PolynucleotideClass, RibosomeStructure
 from ribctl.etl.ribosome_assets import RibosomeAssets
 from neo4j import GraphDatabase, Driver, ManagedTransaction, Transaction
 from ribctl.lib.schema.types_ribosome import  NonpolymericLigand,  CytosolicProteinClass, RibosomeStructure
 
-
 NODE_CONSTRAINTS = [
     """CREATE CONSTRAINT rcsb_id_unique IF NOT EXISTS FOR (ribosome:RibosomeStructure) REQUIRE ribosome.rcsb_id IS UNIQUE;""",
     """CREATE CONSTRAINT polymer_class_unique IF NOT EXISTS FOR (poly_class:PolymerClass) REQUIRE poly_class.class_id IS UNIQUE;""",
+    """CREATE CONSTRAINT taxid_unique IF NOT EXISTS FOR (phylonode:PhylogenyNode) REQUIRE phylonode.ncbi_tax_id IS UNIQUE;""",
 ]
 
 # If you are connecting via a shell or programmatically via a driver,
@@ -24,7 +29,8 @@ NODE_CONSTRAINTS = [
 # the system database in the current session, and then restart your driver with the new password configured.
 
 class Neo4jAdapter():
-    driver: Driver
+
+    driver   : Driver
     uri      : str
     user     : str
     databases: list[str]
@@ -43,6 +49,7 @@ class Neo4jAdapter():
 
         self.init_constraints()
         self.init_polymer_classes()
+        self.init_phylogenies()
 
     def __init__(self, uri: str, user: str, password: str|None=None) -> None:
         self.uri      = uri
@@ -54,6 +61,26 @@ class Neo4jAdapter():
             print("Established connection to ", self.uri)
         except Exception as ae:
             print(ae)
+
+    def init_phylogenies(self):
+        taxa = RibosomeAssets.collect_all_taxa()
+        for taxon in taxa:
+            self.create_lineage(taxon.ncbi_tax_id)
+        
+    def link_structure_to_phylogeny(self,rcsb_id:str):
+        rcsb_id = rcsb_id.upper()
+        R:RibosomeStructure = RibosomeAssets(rcsb_id).profile()
+        with self.driver.session() as s:
+            if self.check_structure_exists(rcsb_id):
+                ...
+            else:
+                s.execute_write(node__structure(R))
+
+            for organism_host in R.host_organism_ids:
+                s.execute_write(link__structure_to_phylogeny(rcsb_id, organism_host, 'host_organism'))
+            for organism_src in R.src_organism_ids:
+                s.execute_write(link__structure_to_phylogeny(rcsb_id, organism_src, 'source_organism'))
+        print("Linked structure {} to phylogeny".format(rcsb_id))
 
 
 
@@ -69,8 +96,14 @@ class Neo4jAdapter():
         with self.driver.session() as s:
             structure_node = s.execute_write(node__structure(R))
 
+            for organim in R.host_organism_ids:
+                link__structure_to_phylogeny(rcsb_id, organim, 'host_organism')
+            for organim in R.src_organism_ids:
+                link__structure_to_phylogeny(rcsb_id, organim, 'source_organism')
+
+
             for protein in R.proteins:
-                   protein_node = s.execute_write(node__polymer                 (protein                        ))
+                   protein_node = s.execute_write(node__polymer(protein))
                    s.execute_write(link__polymer_to_structure    (protein_node   , protein.parent_rcsb_id))
                    s.execute_write(link__polymer_to_polymer_class(protein_node                           ))
                    s.execute_write(upsert_polymer_to_protein     (protein_node   , protein               ))
@@ -88,14 +121,35 @@ class Neo4jAdapter():
                     s.execute_write(link__polymer_to_structure(other_poly_node, polymer.parent_rcsb_id))
                     s.execute_write(link__polymer_to_polymer_class(other_poly_node))
 
-
             if R.nonpolymeric_ligands is not None:
                 for ligand in R.nonpolymeric_ligands:
                     ligand_node = s.execute_write(node__ligand(ligand))
                     s.execute_write(link__ligand_to_struct(ligand_node, R.rcsb_id))
-
-        print("Sucessfully added struct node {}".format(rcsb_id))
+    
         return structure_node
+
+    def add_phylogeny_node(self, taxid:int)->Node:
+        with self.driver.session() as session:
+            node = session.execute_write(node__phylogeny(PhylogenyNode.from_taxid(taxid)))
+            return node
+
+    def create_lineage(self,taxid:int)->None:
+        lin = Taxid.get_lineage(taxid)
+        lin.reverse()
+        previous_id: int|None = None
+        with self.driver.session() as session:
+            for taxid in lin:
+                node = session.execute_write(node__phylogeny(PhylogenyNode.from_taxid(taxid)))
+                print("Created node {} with taxid {}".format(node, taxid))
+                if previous_id == None: # initial (superkingdom has no parent node)
+                    previous_id = taxid
+                    continue
+
+                session.execute_write(link__phylogeny( taxid , previous_id)) # link current tax to parent
+                previous_id = taxid
+        print("Created lineage: ", lin)
+        return
+
 
 
     # ------------------- OLD SHIT --------------------
@@ -128,7 +182,6 @@ class Neo4jAdapter():
             """).values('n.rcsb_id'))]
             return struct_ids
 
-
     def get_individual_ligand(self, chemId: str) -> NonpolymericLigand:
         with self.driver.session() as session:
             def _(tx: Transaction | ManagedTransaction):
@@ -139,7 +192,6 @@ class Neo4jAdapter():
         rcsb_id = rcsb_id.upper()
         with self.driver.session() as session:
             return session.execute_read(struct_exists(rcsb_id))
-
 
     def get_RibosomeStructure(self, rcsb_id: str) -> RibosomeStructure:
         with self.driver.session() as session:
@@ -230,3 +282,6 @@ class Neo4jAdapter():
                 match (n:RibosomeStructure {rcsb_id:$RCSB_ID})-[]-(c:Protein{auth_asym_id:$AUTH_ASYM_ID})-[]-(pc:ProteinClass) return pc.class_id
                     """, {"RCSB_ID": rcsb_id, "AUTH_ASYM_ID": auth_asym_id}).values('pc.class_id')]
             return session.execute_read(_)
+
+
+

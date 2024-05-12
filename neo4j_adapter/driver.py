@@ -1,9 +1,9 @@
-import sys
-sys.dont_write_bytecode = True
-import json
 from pprint import pprint
+import sys
+
+from ribctl.etl.ribosome_assets import RibosomeAssets
+sys.dont_write_bytecode = True
 from neo4j_adapter.adapter import Neo4jAdapter
-from ribctl.lib.schema.types_ribosome import RibosomeStructure
 
 from dotenv import load_dotenv
 
@@ -21,10 +21,15 @@ adapter = Neo4jAdapter('bolt://localhost:7687', 'neo4j')
 # # print(adapter.see_current_auth())
 # # adapter.init_polymer_classes()
 # # print(adapter.get_any())
-adapter.add_structure('3j7z')
-adapter.add_structure('4ug0')
-adapter.add_structure('5afi')
-adapter.add_structure('7k00')
+# adapter.add_structure('3j7z')
+# adapter.add_structure('4ug0')
+# adapter.add_structure('5afi')
+# adapter.add_structure('7k00')
 # # adapter.sync_with_rcsb(10)
+# phn = PhylogenyNode.from_taxid(9605)
+# adapter.create_lineage(9606)
+for rib in RibosomeAssets.list_all_structs():
+    adapter.link_structure_to_phylogeny(rib)
 
+# pprint(adapter.init_phylogenies())
 

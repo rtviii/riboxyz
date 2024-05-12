@@ -45,7 +45,7 @@ async def obtain_assets(rcsb_id: str, assetlist, overwrite: bool = False):
 
     await asyncio.gather(*coroutines)
 
-def obtain_assets_threadpool(assetlist: Assetlist, workers: int = 15,  overwrite=False):
+def obtain_assets_threadpool(assetlist: Assetlist, workers: int = 10,  overwrite=False):
     """Get all ribosome profiles from RCSB via a threadpool"""
     logger = get_etl_logger()
     unsynced = sorted(current_rcsb_structs())

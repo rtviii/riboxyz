@@ -1,5 +1,6 @@
 import functools
 import os
+from pprint import pprint
 import more_itertools as mitt
 import json
 from typing import Any, Optional
@@ -18,6 +19,7 @@ from ribctl.lib.schema.types_ribosome import (
     MitochondrialRNAClass,
     NonpolymericLigand,
     Polymer,
+    PolymerClass,
     PolynucleotideClass,
     Protein,
     CytosolicProteinClass,
@@ -366,6 +368,7 @@ class ReannotationPipeline:
             if self.rcsb_data_dict["struct_keywords"] != None
             else None
         )
+
         kwords = (
             self.rcsb_data_dict["struct_keywords"]["pdbx_keywords"]
             if self.rcsb_data_dict["struct_keywords"] != None
@@ -712,14 +715,16 @@ class ReannotationPipeline:
             logger.debug("Saved classification report to {}".format(report_path))
 
 
-        #! TODO : PROPAGATE NOMENCLATUERE
+        #! PROPAGATE NOMENCLATUERE FROM HMM REPORT TO POLYMERS
         for polymer_dict in _rna_polynucleotides:
             if polymer_dict.auth_asym_id in reported_classes.keys():
-                polymer_dict.nomenclature = reported_classes[polymer_dict.auth_asym_id]
-
+                # momentarily converting to the PolymerClass enums to serialize correctly (see Polymer class def)
+                polymer_dict.nomenclature = list(map(PolymerClass, reported_classes[polymer_dict.auth_asym_id])) 
+ 
         for polymer_dict in _prot_polypeptides:
             if polymer_dict.auth_asym_id in reported_classes.keys():
-                polymer_dict.nomenclature = reported_classes[polymer_dict.auth_asym_id]
+                # momentarily converting to the PolymerClass enums to serialize correctly (see Polymer class def)
+                polymer_dict.nomenclature = list(map(PolymerClass,reported_classes[polymer_dict.auth_asym_id]))
 
         assert (
             len(_rna_polynucleotides)
@@ -739,6 +744,7 @@ class ReannotationPipeline:
         reshaped_nonpolymers                     = self.process_nonpolymers()
         [externalRefs, pub, kwords_text, kwords] = self.process_metadata()
         organisms                                = self.infer_organisms_from_polymers([*_prot_polypeptides, *_rna_polynucleotides])
+
         reshaped                                 = RibosomeStructure(
             rcsb_id                = self.rcsb_data_dict["rcsb_id"],
             expMethod              = self.rcsb_data_dict["exptl"][0]["method"],

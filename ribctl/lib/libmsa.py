@@ -2,107 +2,21 @@ from io import StringIO
 from pprint import pprint
 import tempfile
 import os
-import re
+from Bio import SeqIO
+from Bio.Align import MultipleSeqAlignment, AlignInfo
 import subprocess
 import typing
-from Bio import SeqIO
 from Bio.SeqRecord import SeqRecord
 from functools import reduce
-from io import StringIO
 import os
 import subprocess
-from typing import Callable, Iterator, Literal, Optional
-from ribctl import MUSCLE_BIN, NCBI_TAXA_SQLITE, TAXID_ARCHAEA, TAXID_BACTERIA, TAXID_EUKARYOTA
-from ete3 import NCBITaxa
+from typing import Callable, Iterator
+from ribctl import MUSCLE_BIN
 import os
+from ribctl.lib.libtax import  Taxid, ncbi
 
 
-TAXID_BACTERIA  = 2
-TAXID_EUKARYOTA = 2759
-TAXID_ARCHAEA   = 2157
 
-PhylogenyRank = Literal[ "superkingdom", "phylum", "class", "order", "family", "genus", "species", "strain" ]
-ncbi          = NCBITaxa(dbfile=NCBI_TAXA_SQLITE)
-
-class Taxid:
-    @staticmethod
-    def is_descendant_of(parent_taxid: int, target_taxid: int) -> bool:
-        lineage = ncbi.get_lineage(target_taxid)
-        if lineage is None:
-            raise LookupError("Lineage is None. Check if taxid is NCBI-valid.")
-        return False if parent_taxid not in lineage else True
-
-    @staticmethod
-    def get_name(taxid):
-        return ncbi.get_taxid_translator([taxid])
-
-    @staticmethod
-    def rank(taxid: int) -> str:
-        """Given a @taxid, return the rank of the taxid"""
-        lineage = ncbi.get_lineage(taxid)
-        return ncbi.get_rank(lineage)[taxid]
-
-    @staticmethod
-    def ancestor_at_rank(taxid: int, target_rank: PhylogenyRank) -> int | None:
-        """Given a @taxid and a @rank, return the taxid of the first ancestor of @taxid that is at @rank"""
-        lineage = ncbi.get_lineage(taxid)
-        if lineage is None:
-            raise LookupError("Lineage is None. Check if taxid is NCBI-valid.")
-        for item in lineage:
-            rank = ncbi.get_rank([item])[item]
-            if rank == target_rank:
-                return item
-
-        raise IndexError("Taxid {} does not have a {} level".format(taxid, target_rank))
-
-    @staticmethod
-    def superkingdom(
-        taxid: int,
-    ) -> typing.Literal["bacteria", "eukaryota", "archaea", "virus"]:
-        match (
-            Taxid.is_descendant_of(TAXID_EUKARYOTA, taxid),
-            Taxid.is_descendant_of(TAXID_BACTERIA, taxid),
-            Taxid.is_descendant_of(TAXID_ARCHAEA, taxid),
-        ):
-            case (False, False, True):
-                return "archaea"
-            case (False, True, False):
-                return "bacteria"
-            case (True, False, False):
-                return "eukaryota"
-            case (False, False, False):
-                print("Probably a virus")
-                return "virus"
-            case _:
-                raise ValueError(
-                    "Taxid {} is not a descendant of any of the three domains".format(
-                        taxid
-                    )
-                )
-
-    @staticmethod
-    def coerce_all_to_rank(taxids: list[int], level: PhylogenyRank) -> list[int]:
-        """Given a list of taxids, return a list of the same taxids but coerced to the given lineage level(rank)."""
-        new = []
-        for taxid in taxids:
-            try:
-                new.append(Taxid.ancestor_at_rank(taxid, level))
-            except Exception as e:
-                print(e)
-                raise Exception(e)
-        return new
-
-    @staticmethod
-    def get_descendants_of(parent: int, targets: list[int]):
-        """Given a @parent taxid and a list of @taxids, return the subset of @taxids that are descendants of @parent"""
-        descendants = set()
-        for tax_id in targets:
-            lineage = ncbi.get_lineage(tax_id)
-            if lineage == None:
-                raise LookupError("Lineage is None. Check if taxid is NCBI-valid.")
-            if parent in lineage:
-                descendants.add(tax_id)
-        return descendants
 
 class Fasta:
     records: list[SeqRecord]
@@ -188,11 +102,6 @@ class Fasta:
             taxids = [*taxids, record.id]
         return taxids
 
-#!----------------------
-
-from Bio import AlignIO, SeqIO
-from Bio.Align import MultipleSeqAlignment, AlignInfo
-
 
 def generate_consensus(records):
     # Convert the list of sequence records to a MultipleSeqAlignment object
@@ -200,8 +109,6 @@ def generate_consensus(records):
     summary_align = AlignInfo.SummaryInfo(alignment)
     summary_align.dumb_consensus()
     return summary_align
-
-#!----------------------
 
 def util__backwards_match(aligned_target: str, resid: int):
     """Returns the target-sequence index of a residue in the (aligned) target sequence
@@ -222,7 +129,6 @@ def util__backwards_match(aligned_target: str, resid: int):
         else:
             counter_proper += 1
 
-
 def util__forwards_match(aligned_seq: str, resid: int):
     """Returns the index of a source-sequence residue in the aligned source sequence.
     Basically, "count forward including gaps until you reach @resid"
@@ -237,10 +143,8 @@ def util__forwards_match(aligned_seq: str, resid: int):
         else:
             count_proper += 1
 
-
 def barr2str(bArr):
     return "".join([x.decode("utf-8") for x in bArr])
-
 
 def seq_to_fasta(rcsb_id: str, _seq: str, outfile: str):
     from Bio.Seq import Seq
@@ -255,9 +159,9 @@ def phylogenetic_neighborhood(
 ) -> list[str]:
     """Given a set of taxids and a target taxid, return a list of the [n_neighbors] phylogenetically closest to the target."""
 
-    tree = ncbi_.get_topology(list(set([*taxids_base, str(taxid_target)])))
-    target_node = tree.search_nodes(name=str(taxid_target))[0]
-    phylo_all_nodes = [(node.name, tree.get_distance(target_node, node)) for node in tree.traverse()]
+    tree               = ncbi.get_topology(list(set([*taxids_base, str(taxid_target)])))
+    target_node        = tree.search_nodes(name=str(taxid_target))[0]
+    phylo_all_nodes    = [(node.name, tree.get_distance(target_node, node)) for node in tree.traverse()]
     phylo_extant_nodes = filter(lambda taxid: taxid[0] in taxids_base, phylo_all_nodes)
     phylo_sorted_nodes = sorted(phylo_extant_nodes, key=lambda x: x[1])
 
@@ -267,7 +171,6 @@ def phylogenetic_neighborhood(
         return nbr_taxids[1:]
     else:
         return nbr_taxids[1 : n_neighbors + 1]
-
 
 def muscle_align_N_seq(
     seq_records: list[SeqRecord], vvv: bool = False
@@ -307,5 +210,4 @@ def muscle_align_N_seq(
             temp_file.close()
             os.remove(temp_filename)
             raise Exception("Error running muscle.")
-
 
