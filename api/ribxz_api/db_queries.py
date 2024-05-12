@@ -3,7 +3,7 @@ import typing
 from neo4j import ManagedTransaction, Transaction
 from neo4j_adapter.adapter import Neo4jAdapter
 
-class DBQuery():
+class Neo4jQuery():
 
     adapter: Neo4jAdapter 
     def __init__(self) -> None:
@@ -43,4 +43,5 @@ class DBQuery():
         with self.adapter.driver.session() as session:
             return session.execute_read(_)
 
-dbqueries = DBQuery()
+
+dbqueries = Neo4jQuery()

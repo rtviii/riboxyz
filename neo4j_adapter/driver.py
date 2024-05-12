@@ -1,7 +1,7 @@
 from pprint import pprint
 import sys
 
-from api.ribxz_api.db_queries import DBQuery
+from api.ribxz_api.db_queries import Neo4jQuery
 from ribctl.etl.ribosome_assets import RibosomeAssets
 sys.dont_write_bytecode = True
 from neo4j_adapter.adapter import Neo4jAdapter
@@ -50,39 +50,10 @@ load_dotenv('.env')
 #     ],
 #   }
 
-db = DBQuery()
+db = Neo4jQuery()
+
 s = db.get_taxa('source')
 
-normalized_taxa = []
-
-
-def tax_list_to_dict(tax_list:list[int]):
-    # TODO: This can be done a lot better with recursive descent. 
-    # You could also parametrize the "include_only" given that all Taxid handles that.
-    def inject_species(node, S:int, F:int, L:int):
-        """This acts on the family node"""
-        global nodes
-        if node['value'] == F:
-            if len(list(filter(lambda subnode: subnode['value'] == S, node['children'])) ) < 1:
-                node['children'].append({'value': S, 'title': '' })
-        return node
-
-    def inject_families(node, S:int, F:int, K:int):
-        """This acts on the superkingdom node"""
-        global nodes
-        if node['value'] == K:
-            if len(list(filter(lambda subnode: subnode['value'] == F, node['children'])) ) < 1:
-                node['children'].append({'value': F, 'title': [], 'children': []})
-            list(map(lambda node: inject_species(node,S, F, K), node['children']))
-        return node
-
-    for tax in tax_list:
-        p = Taxid.get_lineage(tax, include_only=['superkingdom', 'family', 'species'])
-        K,F,S = p
-        if len( list(filter(lambda obj: obj['value'] == K, normalized_taxa)) ) < 1:
-            normalized_taxa.append({'value': K, 'title': '', "children": []})
-        
-        list(map(lambda node: inject_families(node,S, F, K), normalized_taxa))
 
 
 
