@@ -10,10 +10,10 @@ from ribctl.lib.enumunion import enum_union
 # |********************************************************************************************************|
 # | https://docs.google.com/spreadsheets/d/1mapshbn1ArofPN-Omu8GG5QdcwlJ0ym0BlN252kkUBU/edit#gid=815712128 |
 # |********************************************************************************************************|
-class tRNA(Enum):
+class tRNA(str,Enum):
     tRNA = "tRNA"
 
-class MitochondrialProteinClass(Enum):
+class MitochondrialProteinClass(str,Enum):
     # mSSU
     bS1m  = "bS1m"
     uS2m  = "uS2m"
@@ -119,7 +119,7 @@ class MitochondrialProteinClass(Enum):
     mL66  = "mL66"
     mL67  = "mL67"
 
-class CytosolicProteinClass(Enum):
+class CytosolicProteinClass(str,Enum):
     # SSU
     bS1   = "bS1"
     eS1   = "eS1"
@@ -224,11 +224,11 @@ class CytosolicProteinClass(Enum):
     eL43 = "eL43"
     P1P2 = "P1P2"
 
-class MitochondrialRNAClass(Enum):
+class MitochondrialRNAClass(str,Enum):
     mtrRNA12S = "mt12SrRNA"  # mitochondrial
     mtrRNA16S = "mt16SrRNA"  # mitochondrial
 
-class CytosolicRNAClass(Enum):
+class CytosolicRNAClass(str,Enum):
     rRNA_5S   = "5SrRNA"  #  bacterial or eykaryotic
     rRNA_16S  = "16SrRNA"  #  c-bacterial or mitochondrial
     rRNA_23S  = "23SrRNA"  # bacterial
@@ -237,7 +237,7 @@ class CytosolicRNAClass(Enum):
     rRNA_18S  = "18SrRNA"  # eukaryotic
     rRNA_28S  = "28SrRNA"  # eukaryotic
 
-class ElongationFactorClass(Enum):
+class ElongationFactorClass(str,Enum):
     # Eukaryotic
     eEF1A = "eEF1A"
     eEF1B = "eEF1B"
@@ -261,7 +261,7 @@ class ElongationFactorClass(Enum):
     aEF1A = "aEF1A"
     aEF2  = "aEF2"
 
-class InitiationFactorClass(Enum):
+class InitiationFactorClass(str,Enum):
     #!Eukaryotic
     eIF1  = "eIF1"
     eIF1A = "eIF1A"

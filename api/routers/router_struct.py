@@ -2,10 +2,10 @@ import json
 from pprint import pprint
 import typing
 from django.http import  JsonResponse, HttpResponseServerError
-from ninja import Router
+from ninja import Router, Schema
 from api.ribxz_api.db_queries import dbqueries
 from ribctl.etl.ribosome_assets import RibosomeAssets
-from ribctl.lib.schema.types_ribosome import  RibosomeStructure
+from ribctl.lib.schema.types_ribosome import  CytosolicProteinClass, CytosolicRNAClass, ElongationFactorClass, InitiationFactorClass, LifecycleFactorClass, MitochondrialProteinClass, MitochondrialRNAClass, PolynucleotideClass, PolypeptideClass, ProteinClass, RibosomeStructure, tRNA
 from ribctl.lib.libtax import Taxid, ncbi
 
 structure_router = Router()
@@ -31,38 +31,63 @@ def list_structures(request):
     return structures
 
 
+# @structure_router.get('/list_rp_classses', response=CytosolicProteinClass, tags=[TAG], include_in_schema=True)
+# def rp_classes(request, cl:PolypeptideClass):
+#     ...
+#     return
 
-# [
-#   {
-#     value: '2',
-#     title: 'Bacteria',
-#     children: [
-#       {
-#         value: '66',
-#         title: 'parent 1-0',
-#         children: [
-#           {
-#             value: '44',
-#             title: 'my leaf',
-#           },
-#           {
-#             value: '22',
-#             title: 'your leaf',
-#           },
-#         ],
-#       },
-#     ],
-#   },
-#   {
-#     value: '4',
-#     title: 'Eukarya',
-#   },
-#   {
-#     value: '6',
-#     title: 'Prokaroyta',
-#   }
-# ]
+# LifecycleFactorClass = enum_union(ElongationFactorClass, InitiationFactorClass)
+# ProteinClass         = enum_union(CytosolicProteinClass,MitochondrialProteinClass )
+# PolypeptideClass     = enum_union(LifecycleFactorClass, ProteinClass)
+# PolynucleotideClass  = enum_union(CytosolicRNAClass, MitochondrialRNAClass, tRNA)
+# PolymerClass         = enum_union(PolynucleotideClass, PolypeptideClass)
+# @structure_router.get('/list_rna_classses', response=[ ElongationFactorClass, InitiationFactorClass, CytosolicProteinClass,MitochondrialProteinClass ,  CytosolicRNAClass, MitochondrialRNAClass, tRNA,  ElongationFactorClass, InitiationFactorClass ], tags=[TAG], include_in_schema=True)
+# def rna_classes(request):
+#     ...
+#     return
+# @structure_router.get('/listi', response= [InitiationFactorClass ], tags=[TAG], include_in_schema=True)
+# def rna_classes(request):
+#     ...
+#     return
+# @structure_router.get('/listi', response= [CytosolicProteinClass ], tags=[TAG], include_in_schema=True)
+# def rna_classes(request):
+#     ...
+#     return
 
+# @structure_router.get('/listi', response= [MitochondrialRNAClass ], tags=[TAG], include_in_schema=True)
+# def rna_classes(request):
+#     ...
+#     return
+
+
+class NomenclatureSet(Schema):
+    ElongationFactorClass    : list[ElongationFactorClass]
+    InitiationFactorClass    : list[InitiationFactorClass]
+    CytosolicProteinClass    : list[CytosolicProteinClass ]
+    MitochondrialProteinClass: list[MitochondrialProteinClass ]
+    CytosolicRNAClass        : list[CytosolicRNAClass ]
+    MitochondrialRNAClass    : list[MitochondrialRNAClass ]
+
+@structure_router.get('/list_nomenclature', response=NomenclatureSet)
+def polymer_classes(request):
+    return {
+        "ElongationFactorClass"    : [e.value for e in ElongationFactorClass],
+        "InitiationFactorClass"    : [e.value for e in InitiationFactorClass],
+        "CytosolicProteinClass"    : [e.value for e in CytosolicProteinClass ],
+        "MitochondrialProteinClass": [e.value for e in MitochondrialProteinClass ],
+        "CytosolicRNAClass"        : [e.value for e in CytosolicRNAClass ],
+        "MitochondrialRNAClass"    : [e.value for e in MitochondrialRNAClass ],
+    }
+
+# @structure_router.get('/listr', response=MitochondrialProteinClass, tags=[TAG], include_in_schema=True)
+# def rna_classsss(request):
+#     ...
+#     return
+
+# @structure_router.get('/listi', response= [ElongationFactorClass ], tags=[TAG], include_in_schema=True)
+# def rna_classes(request):
+#     ...
+#     return
 
 @structure_router.get('/list_source_taxa', response=list[dict], tags=[TAG])
 def list_source_taxa(request, source_or_host:typing.Literal["source", "host"]):

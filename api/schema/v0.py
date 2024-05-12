@@ -3,6 +3,12 @@ from ninja import Schema
 from ribctl.lib.schema.types_ribosome import NonpolymericLigand, PolynucleotideClass, Protein, CytosolicProteinClass, RibosomeStructure
 """This file documents the possible requests that the API can receive."""
 
+
+
+
+
+
+
 class ExogenousRNAByStruct(Schema):
     struct: str
     rnas: list[str]
