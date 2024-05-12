@@ -28,8 +28,8 @@ adapter = Neo4jAdapter('bolt://localhost:7687', 'neo4j')
 # # adapter.sync_with_rcsb(10)
 # phn = PhylogenyNode.from_taxid(9605)
 # adapter.create_lineage(9606)
-for r in RibosomeAssets.list_all_structs():
-    adapter.link_structure_to_phylogeny(r)
+for rib in RibosomeAssets.list_all_structs():
+    adapter.link_structure_to_phylogeny(rib)
 
 # pprint(adapter.init_phylogenies())
 

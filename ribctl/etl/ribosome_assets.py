@@ -310,7 +310,6 @@ class RibosomeAssets():
             ribosome = ReannotationPipeline(query_rcsb_api(rcsb_single_structure_graphql(self.rcsb_id.upper()))).process_structure()
             if not RibosomeStructure.model_validate(ribosome):
                 raise Exception("Created invalid ribosome profile (Schema validation failed). Not writing")
-            print("Got " ,ribosome.model_dump())
             self.write_own_json_profile( ribosome.model_dump(), overwrite=True)
             logger.debug("Processing {} profile.".format(self.rcsb_id))
         else:

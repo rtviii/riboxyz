@@ -76,10 +76,10 @@ class Neo4jAdapter():
             else:
                 s.execute_write(node__structure(R))
 
-        for organim in R.host_organism_ids:
-            link__structure_to_phylogeny(rcsb_id, organim, 'host_organism')
-        for organim in R.src_organism_ids:
-            link__structure_to_phylogeny(rcsb_id, organim, 'source_organism')
+            for organism_host in R.host_organism_ids:
+                s.execute_write(link__structure_to_phylogeny(rcsb_id, organism_host, 'host_organism'))
+            for organism_src in R.src_organism_ids:
+                s.execute_write(link__structure_to_phylogeny(rcsb_id, organism_src, 'source_organism'))
         print("Linked structure {} to phylogeny".format(rcsb_id))
 
 

@@ -4,7 +4,21 @@ from neo4j.graph import Node, Relationship
 from neo4j import ManagedTransaction, Transaction
 from ribctl.lib.schema.types_ribosome import  NonpolymericLigand, RibosomeStructure
 
+# Get superkingdom given an rcsb_id
+"""
+match (n:RibosomeStructure)-[]-(p:PhylogenyNode {ncbi_tax_id:83333}) 
+with n, p
+match (p)-[:descendant_of*]-(s {rank:"superkingdom"})
+return n,s;
 
+"""
+# get all structs for a given superkingdom
+"""
+match (p:PhylogenyNode)-[:descendant_of*]-(s {ncbi_tax_id:2,rank:"superkingdom"})
+with p,s
+match (p)-[]-(str:RibosomeStructure)
+return p.ncbi_tax_id, str.rcsb_id
+"""
 
 def struct_exists(rcsb_id:str) -> Callable[[Transaction | ManagedTransaction], bool]:
     def _(tx: Transaction | ManagedTransaction):
@@ -16,23 +30,30 @@ def struct_exists(rcsb_id:str) -> Callable[[Transaction | ManagedTransaction], b
 
 def link__structure_to_phylogeny(rcsb_id:str, taxid,relationship:Literal['host_organism', 'source_organism'])->Callable[[Transaction | ManagedTransaction], list[ Node ]]:
     def _(tx: Transaction | ManagedTransaction):
-        return tx.run("""//
-        match (struct:RibosomeStructure {rcsb_id: $rcsb_id})
-        match (phylo:PhylogenyNode {ncbi_tax_id: $tax_id}) 
-        merge (struct)<-[:$relationship]-(phylo)
-        return  struct, struct
-        """, {
-            "rcsb_id"    : rcsb_id,
-            "tax_id"     : taxid,
-            "relationship": relationship
-        }).values('struct', 'phylo')
-
-
+        if relationship == 'host_organism':
+            return tx.run("""//
+            match (struct:RibosomeStructure {rcsb_id: $rcsb_id})
+            match (phylo:PhylogenyNode {ncbi_tax_id: $tax_id}) 
+            merge (struct)<-[organism:host]-(phylo)
+            return  struct, phylo
+            """, {
+                "rcsb_id"    : rcsb_id,
+                "tax_id"     : taxid,
+            }).values('struct', 'phylo')
+        elif relationship == 'source_organism':
+            return tx.run("""//
+            match (struct:RibosomeStructure {rcsb_id: $rcsb_id})
+            match (phylo:PhylogenyNode {ncbi_tax_id: $tax_id}) 
+            merge (struct)<-[organism:source]-(phylo)
+            return  struct, phylo
+            """, {
+                "rcsb_id"    : rcsb_id,
+                "tax_id"     : taxid,
+            }).values('struct', 'phylo')
     return _
 
 # Transaction
 def node__structure(_rib: RibosomeStructure) -> Callable[[Transaction | ManagedTransaction], Record | None]:
-    print("Creating struct node from", _rib.rcsb_id)
     R = _rib.model_dump()
     def _(tx: Transaction | ManagedTransaction):
         return tx.run("""//
@@ -40,8 +61,6 @@ def node__structure(_rib: RibosomeStructure) -> Callable[[Transaction | ManagedT
                   rcsb_id               : $rcsb_id,
                   expMethod             : $expMethod,
                   resolution            : $resolution,
-                  citation_rcsb_authors : $citation_rcsb_authors,
-                  citation_title        : $citation_title,
 
                   pdbx_keywords     : $pdbx_keywords,
                   pdbx_keywords_text: $pdbx_keywords_text,

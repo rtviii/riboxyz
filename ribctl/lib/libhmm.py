@@ -260,9 +260,6 @@ class HMMClassifier():
         sorted_by_biscore = sorted(hits, key=lambda x: x["bitscore"], reverse=True)
         return [ sorted_by_biscore[0]['class_name'] ] if sorted_by_biscore[0]['bitscore'] > self.bitscore_threshold else []
 
-
-        # return [ sorted(hits, key=lambda x: x["hit.score"])[0]["hit.name"].decode() ] if len(hits) >0 else []
-
     def classify_chains(self)->None:
         """This is an alternative implementation of `scan_chains` that does not use `hmmscan`.
          Waiting on https://github.com/althonos/pyhmmer/issues/53 to resolve"""

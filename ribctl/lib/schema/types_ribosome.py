@@ -387,9 +387,9 @@ class Polymer(BaseModel):
 
     nomenclature                       : list[PolymerClass]
 
-    # @field_serializer('nomenclature')
-    # def serialize_nomenclature(self, nomenclature_classes: list[PolymerClass], _info):
-    #     return [x.value for x in nomenclature_classes]
+    @field_serializer('nomenclature')
+    def serialize_nomenclature(self, nomenclature_classes: list[PolymerClass], _info):
+        return [x.value for x in nomenclature_classes]
 
 class Protein(Polymer):
     def __hash__(self):
