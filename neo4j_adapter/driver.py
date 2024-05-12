@@ -53,58 +53,37 @@ load_dotenv('.env')
 db = DBQuery()
 s = db.get_taxa('source')
 
-import operator
 normalized_taxa = []
 
-global nodes 
-nodes = 0
 
-def inject_species(node, S:int, F:int, L:int):
+def tax_list_to_dict(tax_list:list[int]):
+    # TODO: This can be done a lot better with recursive descent. 
+    # You could also parametrize the "include_only" given that all Taxid handles that.
+    def inject_species(node, S:int, F:int, L:int):
+        """This acts on the family node"""
+        global nodes
+        if node['value'] == F:
+            if len(list(filter(lambda subnode: subnode['value'] == S, node['children'])) ) < 1:
+                node['children'].append({'value': S, 'title': '' })
+        return node
 
-    """This acts on the superkingdom node"""
-    global nodes
-    if node['value'] == F:
-        if len(list(filter(lambda subnode: subnode['value'] == S, node['children'])) ) < 1:
-            node['children'].append({'value': S, 'title': '' })
-            nodes+=1
-    return node
+    def inject_families(node, S:int, F:int, K:int):
+        """This acts on the superkingdom node"""
+        global nodes
+        if node['value'] == K:
+            if len(list(filter(lambda subnode: subnode['value'] == F, node['children'])) ) < 1:
+                node['children'].append({'value': F, 'title': [], 'children': []})
+            list(map(lambda node: inject_species(node,S, F, K), node['children']))
+        return node
 
-def inject_families(node, S:int, F:int, K:int):
-    """This acts on the superkingdom node"""
-    global nodes
-    if node['value'] == K:
-        if len(list(filter(lambda subnode: subnode['value'] == F, node['children'])) ) < 1:
-            node['children'].append({'value': F, 'title': [], 'children': []})
-            nodes+=1
-        list(map(lambda node: inject_species(node,S, F, K), node['children']))
-    return node
+    for tax in tax_list:
+        p = Taxid.get_lineage(tax, include_only=['superkingdom', 'family', 'species'])
+        K,F,S = p
+        if len( list(filter(lambda obj: obj['value'] == K, normalized_taxa)) ) < 1:
+            normalized_taxa.append({'value': K, 'title': '', "children": []})
+        
+        list(map(lambda node: inject_families(node,S, F, K), normalized_taxa))
 
-for tax in s:
-    p = Taxid.get_lineage(tax, include_only=['superkingdom', 'family', 'species'])
-    K,F,S = p
-    if len( list(filter(lambda obj: obj['value'] == K, normalized_taxa)) ) < 1:
-        normalized_taxa.append({'value': K, 'title': '', "children": []})
-        nodes+=1
-    
-    list(map(lambda node: inject_families(node,S, F, K), normalized_taxa))
-
-    
-
-    
-_ = set()
-for i in s:
-    for y in Taxid.get_lineage(i, include_only=['superkingdom', 'family', 'species']):
-        _.add(y)
-
-print(len(s), nodes, len(_))
-
-    
-    # else:
-    #     continue
-
-# pprint(normalized_taxa)
-
-    
 
 
 
