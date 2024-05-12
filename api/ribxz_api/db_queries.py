@@ -1,4 +1,5 @@
 
+import typing
 from neo4j import ManagedTransaction, Transaction
 from neo4j_adapter.adapter import Neo4jAdapter
 
@@ -32,5 +33,14 @@ class DBQuery():
 
             return session.execute_read(_)
 
+    def get_taxa(self, src_host:typing.Literal['source', 'host'])-> list[int]:
+        def _(tx: Transaction | ManagedTransaction):
+            return tx.run("""//
+                    match (p:PhylogenyNode)-[k:{}]->(s:RibosomeStructure)
+                    return collect(distinct(p.ncbi_tax_id))
+            """.format(src_host)).single().value()
+
+        with self.adapter.driver.session() as session:
+            return session.execute_read(_)
 
 dbqueries = DBQuery()

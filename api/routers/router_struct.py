@@ -1,10 +1,12 @@
 import json
 from pprint import pprint
+import typing
 from django.http import  JsonResponse, HttpResponseServerError
 from ninja import Router
 from api.ribxz_api.db_queries import dbqueries
 from ribctl.etl.ribosome_assets import RibosomeAssets
 from ribctl.lib.schema.types_ribosome import  RibosomeStructure
+from ribctl.lib.libtax import ncbi
 
 structure_router = Router()
 TAG              = "Structure"
@@ -28,24 +30,42 @@ def list_structures(request):
     structures       = list(map(lambda r: RibosomeStructure.model_validate(r), structs_response))
     return structures
 
-# #TODO
-# """map (just stream from emdb), mmcif"""
-# @structure_router.get('/mmcif',  tags=[TAG])
-# def structure_mmcif(request, rcsb_id:str):
-#     params      = dict(request.GET)
-#     rcsb_id     = str.upper(params['rcsb_id'][0])
-    
 
-#     document = open(RibosomeAssets(rcsb_id)._cif_filepath(), 'rb')
-#     response = HttpResponse(FileWrapper(document), content_type='chemical/x-mmcif')
-#     response['Content-Disposition'] = 'attachment; filename="{}.cif"'.format(rcsb_id)
-#     return response
 
-# @structure_router.get('/ptc', response=list[RibosomeStructure], tags=[TAG])
-# def structure_ptc(request,rcsb_id:str):
-#     ...
-        
-# @structure_router.get('/ligands', response=list[RibosomeStructure], tags=[TAG])
-# def structure_ligands(request,rcsb_id:str):
-#     ...
+# [
+#   {
+#     value: '2',
+#     title: 'Bacteria',
+#     children: [
+#       {
+#         value: '66',
+#         title: 'parent 1-0',
+#         children: [
+#           {
+#             value: '44',
+#             title: 'my leaf',
+#           },
+#           {
+#             value: '22',
+#             title: 'your leaf',
+#           },
+#         ],
+#       },
+#     ],
+#   },
+#   {
+#     value: '4',
+#     title: 'Eukarya',
+#   },
+#   {
+#     value: '6',
+#     title: 'Prokaroyta',
+#   }
+# ]
 
+
+@structure_router.get('/list_source_taxa', response=list, tags=[TAG])
+def list_source_taxa(request, src_host:typing.Literal["source", "host"]):
+    s = dbqueries.get_taxa(src_host)
+   
+    return s

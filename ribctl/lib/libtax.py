@@ -29,9 +29,12 @@ class Taxid:
         return list(ncbi.get_taxid_translator([taxid]).values())[0]
 
     @staticmethod
-    def get_lineage(taxid)->list[int]:
+    def get_lineage(taxid, include_only: None|list[PhylogenyRank] =None)->list[int]:
         """Return ncbi lineage, except filter out the ranks that are not among the @PhylogenyRank."""
-        return list(filter(lambda x: Taxid.rank(x) in typing.get_args(PhylogenyRank), ncbi.get_lineage(taxid) ) )
+        lin = list(filter(lambda x: Taxid.rank(x) in typing.get_args(PhylogenyRank), ncbi.get_lineage(taxid) ) )
+        if include_only is not None:
+            return list(filter(lambda x: Taxid.rank(x) in include_only, lin))
+        return lin
 
     @staticmethod
     def rank(taxid: int) -> PhylogenyRank:

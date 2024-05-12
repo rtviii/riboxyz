@@ -1,7 +1,8 @@
 
 from typing import Callable
+import typing
 from pydantic import BaseModel
-from neo4j import Transaction, ManagedTransaction
+from neo4j import Driver, Transaction, ManagedTransaction
 from neo4j.graph import Node
 from ribctl.lib.libtax import PhylogenyNode, Taxid
 

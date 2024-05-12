@@ -112,3 +112,4 @@ def link__ligand_to_struct(prot: Node, parent_rcsb_id: str) -> Callable[[Transac
 """,
                       {"ELEM_ID": prot.element_id, "PARENT": parent_rcsb_id}).values('struct', 'ligand', 'contains')
     return _
+
