@@ -10,6 +10,28 @@ class Neo4jQuery():
         self.adapter = Neo4jAdapter('bolt://localhost:7687', 'neo4j')
         pass
 
+
+
+    def list_chains_by_struct(self, filters=None, limit=None, offset=None):
+        with self.adapter.driver.session() as session:
+            def _(tx: Transaction | ManagedTransaction):
+                # TODO : Fix the limit here (didn't have all structures taged with polymers in dev)
+                return tx.run("""//
+                        match (rib:RibosomeStructure) 
+                        with rib order by rib.rcsb_id desc  limit 120000000 
+                        match (poly:Polymer)-[]-(rib)
+                        with collect({
+                            nomenclature: poly.nomenclature,
+                            auth_asym_id: poly.auth_asym_id,
+                            entity_poly_polymer_type: poly.entity_poly_polymer_type,
+                            entity_poly_seq_length:poly.entity_poly_seq_length
+                        }) as polymers, rib
+                        return {rcsb_id: rib.rcsb_id,polymers: polymers}
+                                        """).value()
+
+            return session.execute_read(_)
+
+
     def list_structs(self, filters=None, limit=None, offset=None):
         with self.adapter.driver.session() as session:
             def _(tx: Transaction | ManagedTransaction):

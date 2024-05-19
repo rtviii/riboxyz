@@ -9,9 +9,8 @@ from ribctl.lib.schema.types_ribosome import RNA, LifecycleFactorClass, Mitochon
 mmcif_router = Router();tag = "pdbx/mmcif_structures"
 
 # E  E - ul4
-@mmcif_router.get('/chain',  tags=[tag])
+@mmcif_router.get('/chain',  tags=[tag], include_in_schema=False)
 def send_pdbx_mmcif_file(request, rcsb_id:str, auth_asym_id:str):
-
     rcsb_id = rcsb_id.upper()
     chain_fullpath = os.path.join(os.environ.get('RIBETL_DATA'), rcsb_id, "CHAINS", f'{rcsb_id}_STRAND_{auth_asym_id}.cif')
     

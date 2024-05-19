@@ -45,6 +45,13 @@ def list_structures(request):
     return structures
 
 
+
+@structure_router.get('/chains', response=list[RibosomeStructure], tags=[TAG])
+def chains_per_struct(request):
+    structs_response = dbqueries.list_structs()
+    structures       = list(map(lambda r: RibosomeStructure.model_validate(r), structs_response))
+    return structures
+
 class NomenclatureSet(Schema):
     ElongationFactorClass    : list[ElongationFactorClass]
     InitiationFactorClass    : list[InitiationFactorClass]
