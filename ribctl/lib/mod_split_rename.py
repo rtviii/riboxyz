@@ -4,7 +4,8 @@ import itertools
 import itertools
 import numpy as np
 import gemmi
-from Bio.PDB import MMCIF2Dict, MMCIFIO
+from Bio.PDB import MMCIF2Dict
+from Bio.PDB.mmcifio import MMCIFIO
 from Bio.PDB.Structure import Structure
 from ribctl.lib.utils import open_structure
 
@@ -77,7 +78,6 @@ def __process_chains(pdbid: str):
             io.save(destination)
         else:
             ...
-            # print("Exists: ", destination)
 
 async def split_rename(pdbid: str):
     pdbid = pdbid.upper()
