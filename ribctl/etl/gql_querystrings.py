@@ -190,7 +190,6 @@ single_structure_graphql_template = """{
   }
 }"""
 
-
 polymer_entities_string = """{
   entry(entry_id: "$RCSB_ID") {
    assemblies {

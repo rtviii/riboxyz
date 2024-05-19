@@ -17,47 +17,32 @@ def structure_profile(request,rcsb_id:str):
 
     params      = dict(request.GET)
     rcsb_id     = str.upper(params['rcsb_id'][0])
+
     try:
         with open(RibosomeAssets(rcsb_id)._json_profile_filepath(), 'r') as f:
             return JsonResponse(json.load(f))
     except Exception as e:
         return HttpResponseServerError("Failed to find structure profile {}:\n\n{}".format(rcsb_id, e))
 
+@structure_router.get('/ptc', response=dict, tags=[TAG],)
+def structure_ptc(request,rcsb_id:str):
+    """Return a `.json` profile of the given RCSB_ID structure."""
+    params      = dict(request.GET)
+    rcsb_id     = str.upper(params['rcsb_id'][0])
+
+    try:
+        ptc = RibosomeAssets(rcsb_id)._ptc_residues()
+        pprint(ptc)
+    except Exception as e:
+        return HttpResponseServerError("Failed to find structure profile {}:\n\n{}".format(rcsb_id, e))
+    # except Exception as e:
+    #     return HttpResponseServerError("Failed to find structure profile {}:\n\n{}".format(rcsb_id, e))
 
 @structure_router.get('/list_structures', response=list[RibosomeStructure], tags=[TAG])
 def list_structures(request):
     structs_response = dbqueries.list_structs()
     structures       = list(map(lambda r: RibosomeStructure.model_validate(r), structs_response))
     return structures
-
-
-# @structure_router.get('/list_rp_classses', response=CytosolicProteinClass, tags=[TAG], include_in_schema=True)
-# def rp_classes(request, cl:PolypeptideClass):
-#     ...
-#     return
-
-# LifecycleFactorClass = enum_union(ElongationFactorClass, InitiationFactorClass)
-# ProteinClass         = enum_union(CytosolicProteinClass,MitochondrialProteinClass )
-# PolypeptideClass     = enum_union(LifecycleFactorClass, ProteinClass)
-# PolynucleotideClass  = enum_union(CytosolicRNAClass, MitochondrialRNAClass, tRNA)
-# PolymerClass         = enum_union(PolynucleotideClass, PolypeptideClass)
-# @structure_router.get('/list_rna_classses', response=[ ElongationFactorClass, InitiationFactorClass, CytosolicProteinClass,MitochondrialProteinClass ,  CytosolicRNAClass, MitochondrialRNAClass, tRNA,  ElongationFactorClass, InitiationFactorClass ], tags=[TAG], include_in_schema=True)
-# def rna_classes(request):
-#     ...
-#     return
-# @structure_router.get('/listi', response= [InitiationFactorClass ], tags=[TAG], include_in_schema=True)
-# def rna_classes(request):
-#     ...
-#     return
-# @structure_router.get('/listi', response= [CytosolicProteinClass ], tags=[TAG], include_in_schema=True)
-# def rna_classes(request):
-#     ...
-#     return
-
-# @structure_router.get('/listi', response= [MitochondrialRNAClass ], tags=[TAG], include_in_schema=True)
-# def rna_classes(request):
-#     ...
-#     return
 
 
 class NomenclatureSet(Schema):
@@ -69,7 +54,7 @@ class NomenclatureSet(Schema):
     MitochondrialRNAClass    : list[MitochondrialRNAClass ]
 
 @structure_router.get('/list_nomenclature', response=NomenclatureSet)
-def polymer_classes(request):
+def polymer_classes_nomenclature(request):
     return {
         "ElongationFactorClass"    : [e.value for e in ElongationFactorClass],
         "InitiationFactorClass"    : [e.value for e in InitiationFactorClass],
@@ -79,15 +64,6 @@ def polymer_classes(request):
         "MitochondrialRNAClass"    : [e.value for e in MitochondrialRNAClass ],
     }
 
-# @structure_router.get('/listr', response=MitochondrialProteinClass, tags=[TAG], include_in_schema=True)
-# def rna_classsss(request):
-#     ...
-#     return
-
-# @structure_router.get('/listi', response= [ElongationFactorClass ], tags=[TAG], include_in_schema=True)
-# def rna_classes(request):
-#     ...
-#     return
 
 @structure_router.get('/list_source_taxa', response=list[dict], tags=[TAG])
 def list_source_taxa(request, source_or_host:typing.Literal["source", "host"]):
