@@ -10,8 +10,6 @@ class Neo4jQuery():
         self.adapter = Neo4jAdapter('bolt://localhost:7687', 'neo4j')
         pass
 
-
-
     def list_chains_by_struct(self, filters=None, limit=None, offset=None):
         with self.adapter.driver.session() as session:
             def _(tx: Transaction | ManagedTransaction):

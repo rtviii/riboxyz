@@ -5,7 +5,7 @@ from django.http import  JsonResponse, HttpResponseServerError
 from ninja import Router, Schema
 from api.ribxz_api.db_queries import dbqueries
 from ribctl.etl.ribosome_assets import RibosomeAssets
-from ribctl.lib.schema.types_ribosome import  CytosolicProteinClass, CytosolicRNAClass, ElongationFactorClass, InitiationFactorClass, LifecycleFactorClass, MitochondrialProteinClass, MitochondrialRNAClass, PolynucleotideClass, PolypeptideClass, ProteinClass, RibosomeStructure, tRNA
+from ribctl.lib.schema.types_ribosome import  CytosolicProteinClass, CytosolicRNAClass, ElongationFactorClass, InitiationFactorClass, LifecycleFactorClass, MitochondrialProteinClass, MitochondrialRNAClass, PolymerClass, PolynucleotideClass, PolypeptideClass, ProteinClass, RibosomeStructure, tRNA
 from ribctl.lib.libtax import Taxid, ncbi
 
 structure_router = Router()
@@ -46,11 +46,20 @@ def list_structures(request):
 
 
 
-@structure_router.get('/chains', response=list[RibosomeStructure], tags=[TAG])
-def chains_per_struct(request):
-    structs_response = dbqueries.list_structs()
-    structures       = list(map(lambda r: RibosomeStructure.model_validate(r), structs_response))
-    return structures
+class ChainsByStruct(Schema):
+    class PolymerByStruct(Schema):
+        nomenclature: list[PolymerClass]
+        auth_asym_id: str
+        entity_poly_polymer_type: str
+        entity_poly_seq_length: int
+
+    polymers: list[PolymerByStruct]
+    rcsb_id : str
+   
+@structure_router.get('/chains_by_struct', response=list[ChainsByStruct], tags=[TAG])
+def chains_by_struct(request):
+    structs_response = dbqueries.list_chains_by_struct()
+    return structs_response
 
 class NomenclatureSet(Schema):
     ElongationFactorClass    : list[ElongationFactorClass]
