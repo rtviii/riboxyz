@@ -29,6 +29,7 @@ def struct_exists(rcsb_id:str) -> Callable[[Transaction | ManagedTransaction], b
     return _
 
 def link__structure_to_phylogeny(rcsb_id:str, taxid,relationship:Literal['host_organism', 'source_organism'])->Callable[[Transaction | ManagedTransaction], list[ Node ]]:
+
     def _(tx: Transaction | ManagedTransaction):
         if relationship == 'host_organism':
             return tx.run("""//
@@ -80,6 +81,7 @@ def node__structure(_rib: RibosomeStructure) -> Callable[[Transaction | ManagedT
               struct.rcsb_external_ref_link = CASE WHEN $rcsb_external_ref_link = null then \"null\" else $rcsb_external_ref_link END,
               struct.citation_pdbx_doi      = CASE WHEN $citation_pdbx_doi = null then \"null\" else $citation_pdbx_doi END,
               struct.citation_year          = CASE WHEN $citation_year = null then \"null\" else $citation_year END,
+              struct.citation_title         = CASE WHEN $citation_title = null then \"null\" else $citation_title END,
               struct.citation_rcsb_authors  = CASE WHEN $citation_rcsb_authors = null then \"null\" else $citation_rcsb_authors END
               return struct
         """, **R).single()

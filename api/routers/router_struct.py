@@ -3,7 +3,7 @@ from pprint import pprint
 import typing
 from django.http import  JsonResponse, HttpResponseServerError
 from ninja import Router, Schema
-from api.ribxz_api.db_queries import dbqueries
+from neo4j_ribosome.db_reader import dbqueries
 from ribctl.etl.ribosome_assets import RibosomeAssets
 from ribctl.lib.schema.types_ribosome import  CytosolicProteinClass, CytosolicRNAClass, ElongationFactorClass, InitiationFactorClass, LifecycleFactorClass, MitochondrialProteinClass, MitochondrialRNAClass, PolymerClass, PolynucleotideClass, PolypeptideClass, ProteinClass, RibosomeStructure, tRNA
 from ribctl.lib.libtax import Taxid, ncbi

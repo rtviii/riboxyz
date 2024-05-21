@@ -1,8 +1,8 @@
 from concurrent.futures import ALL_COMPLETED, Future, ThreadPoolExecutor, wait
 from functools import partial
 import sys
-from api.ribxz_api.db_queries import Neo4jQuery
-from neo4j_ribosome.adapter import Neo4jBuilder
+from neo4j_ribosome.db_reader import Neo4jQuery
+from neo4j_ribosome.db_builder import Neo4jBuilder
 from ribctl.etl.ribosome_assets import RibosomeAssets
 sys.dont_write_bytecode = True
 from dotenv import load_dotenv
@@ -14,6 +14,7 @@ load_dotenv('.env')
 #* - assumes the RiboosomeStrucutre profiles are rendered
 
 def full_upload(constrains:bool=True):
+    #TODO :  ------- SANITY CHECKS
     adapter = Neo4jBuilder('bolt://localhost:7687', 'neo4j')
     if constrains:
         adapter.initialize_new_instance()
@@ -26,7 +27,8 @@ def full_upload(constrains:bool=True):
         wait(futures, return_when=ALL_COMPLETED)
 
 
+
+
+# reader = Neo4jQuery()
+# reader.list_structs
 full_upload()
-
-
-#TODO :  ------- SANITY CHECKS

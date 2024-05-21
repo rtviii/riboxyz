@@ -1,6 +1,8 @@
 import typing
+import sys
+sys.dont_write_bytecode = True
 from neo4j import ManagedTransaction, Transaction
-from neo4j_ribosome.adapter import Neo4jBuilder
+from neo4j_ribosome.db_builder import Neo4jBuilder
 
 """This is the primary interface to the Neo4j instance. It queries the database and passes the results to the [ Django ] API.
 DO NOT put validation logic/schema here. This is a pure interface to the database. All the conversions are done in the API layer.
@@ -32,13 +34,52 @@ class Neo4jQuery():
 
             return session.execute_read(_)
 
+
+
+    #TODO: Filters to implement: 
+        # - search
+        # - year
+        # - resolution
+        # - polymer classes
+        # - taxonomy
+
+
+
+    """
+    match (rib:RibosomeStructure) 
+    where toLower(rib.citation_title) 
+          + toLower(rib.pdbx_keywords_text) 
+          + ...
+          + apoc.text.join(rib.citation_rcsb_authors, "")  contains "complex" 
+    and rib.citation_year > 2020 
+    and rib.resolution < 3 
+
+    match (rib)-[]-(p:PhylogenyNode)-[:descendant_of*1..8]-(s:PhylogenyNode)
+    where p.ncbi_tax_id  in [83333, 9606] or s.ncbi_tax_id in [8333,9606]
+
+    with rib, s, p 
+    return rib limit 400 skip 10
+    """
+
+    """
+    match (rib:RibosomeStructure) 
+    where toLower(rib.citation_title) 
+          + toLower(rib.pdbx_keywords_text) 
+          + apoc.text.join(rib.citation_rcsb_authors, "")  contains "complex" 
+    and rib.citation_year > 2020
+    and rib.resolution < 3 
+    with rib 
+    order by rib.rcsb_id desc, rib.citation_year desc, rib.resolution desc
+    return rib.rcsb_id, rib.citation_year, rib.resolution  limit 10 
+    """
+
     def list_structs(self, filters=None, limit=None, offset=None):
         with self.adapter.driver.session() as session:
             def _(tx: Transaction | ManagedTransaction):
                 return tx.run("""//
 
         match (rib:RibosomeStructure) 
-        with rib order by rib.rcsb_id limit 40
+        with rib order by rib.rcsb_id desc limit 20
 
         optional match (l:Ligand)-[]-(rib) 
         with collect(PROPERTIES(l)) as ligands, rib

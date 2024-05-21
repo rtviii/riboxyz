@@ -31,7 +31,6 @@ def node__polymer(poly:Polymer)->Callable[[Transaction | ManagedTransaction], No
       entity_poly_seq_length             : $entity_poly_seq_length,
       entity_poly_polymer_type           : $entity_poly_polymer_type,
       entity_poly_entity_type            : $entity_poly_entity_type,
-
       nomenclature                       : $nomenclature
   })
   on create set

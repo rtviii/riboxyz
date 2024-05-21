@@ -1,13 +1,8 @@
 import sys
-
-from ribctl.lib.libtax import PhylogenyNode, Taxid
-
-
 sys.dont_write_bytecode = True
-
+from ribctl.lib.libtax import PhylogenyNode, Taxid
 from neo4j_ribosome.node_phylogeny import link__phylogeny, node__phylogeny
 from neo4j.graph import Node
-from concurrent.futures import ALL_COMPLETED, Future, ThreadPoolExecutor, wait
 from neo4j import Driver, GraphDatabase
 from neo4j_ribosome.node_polymer import  link__polymer_to_polymer_class, link__polymer_to_structure, node__polymer, upsert_polymer_to_protein, upsert_polymer_to_rna,node__polymer_class
 from neo4j_ribosome.node_structure import   link__ligand_to_struct, link__structure_to_phylogeny, node__ligand, node__structure, struct_exists
