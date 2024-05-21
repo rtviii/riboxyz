@@ -1,5 +1,9 @@
 import typing
 import sys
+
+from ninja import Schema
+
+from ribctl.lib.schema.types_ribosome import PolymerClass
 sys.dont_write_bytecode = True
 from neo4j import ManagedTransaction, Transaction
 from neo4j_ribosome.db_builder import Neo4jBuilder
@@ -7,6 +11,8 @@ from neo4j_ribosome.db_builder import Neo4jBuilder
 """This is the primary interface to the Neo4j instance. It queries the database and passes the results to the [ Django ] API.
 DO NOT put validation logic/schema here. This is a pure interface to the database. All the conversions are done in the API layer.
 """
+
+
 
 class Neo4jQuery():
 
@@ -63,58 +69,98 @@ class Neo4jQuery():
     }
 
     with rib, count(rib) as C
-    order by rib.rcsb_id desc, rib.citation_year desc, rib.resolution desc limit 10
-    with collect({ rcsb_id: rib.rcsb_id})  as structures , C
-    return structures, C
+    order by rib.rcsb_id desc limit 10
+
+    optional match (l:Ligand)-[]-(rib) 
+    with collect(PROPERTIES(l)) as ligands, rib, C
+
+    match (rps:Protein)-[]-(rib) 
+    with collect(PROPERTIES(rps)) as proteins, ligands, rib, C
+
+    optional match (rna:RNA)-[]-(rib) 
+    with collect(PROPERTIES(rna)) as rnas, proteins, ligands, rib, C
+
+    with  apoc.map.mergeList([{proteins:proteins},{nonpolymeric_ligands:ligands},{rnas:rnas},{other_polymers:[]}]) as rest, rib, C
+    return apoc.map.merge(rib, rest), C
+
+    """
+    """
+    match (rib:RibosomeStructure) 
+    with rib
+    order by rib.rcsb_id desc 
+    where 
+        toLower(rib.citation_title) 
+          + toLower(rib.pdbx_keywords_text) 
+          + apoc.text.join(rib.citation_rcsb_authors, "")  contains "complex" 
+        and rib.citation_year > 2020 
+        and rib.resolution < 3
+        and ALL(x in ["uL4", "uL22"] where x in apoc.coll.flatten(collect{match (rib)-[]-(p:Polymer) return p.nomenclature }) )
+    return count(rib), collect(rib)
     """
 
 
-    def list_structs(self, filters=None, limit=None, offset=None):
+    def list_structs(self):
         with self.adapter.driver.session() as session:
             def _(tx: Transaction | ManagedTransaction):
                 return tx.run("""//
+    match (rib:RibosomeStructure) """ + \
 
-        match (rib:RibosomeStructure) 
-        with rib order by rib.rcsb_id desc limit 10
+    """
+    where toLower(rib.citation_title) 
+          + toLower(rib.pdbx_keywords_text) 
+          + ...
+          + apoc.text.join(rib.citation_rcsb_authors, "")  contains "complex" 
+    and rib.citation_year > 2020 
+    and rib.resolution < 3 
 
-        optional match (l:Ligand)-[]-(rib) 
-        with collect(PROPERTIES(l)) as ligands, rib
+    match (rib)-[]-(p:PhylogenyNode)-[:descendant_of*1..8]-(s:PhylogenyNode)
+    where p.ncbi_tax_id  in [83333, 9606] or s.ncbi_tax_id in [8333,9606]
+    """  + \
 
-        match (rps:Protein)-[]-(rib) 
-        with collect(PROPERTIES(rps)) as proteins, ligands, rib
+    """
+    with rib, count(rib) as C
+    order by rib.rcsb_id desc limit 10
 
-        optional match (rna:RNA)-[]-(rib) 
-        with collect(PROPERTIES(rna)) as rnas, proteins, ligands, rib
-        
-        with  apoc.map.mergeList([{proteins:proteins},{nonpolymeric_ligands:ligands},{rnas:rnas},{other_polymers:[]}]) as rest, rib
-        return apoc.map.merge(rib, rest)
-                                        """).value()
+    optional match (l:Ligand)-[]-(rib) 
+    with collect(PROPERTIES(l)) as ligands, rib, C
+
+    match (rps:Protein)-[]-(rib) 
+    with collect(PROPERTIES(rps)) as proteins, ligands, rib, C
+
+    optional match (rna:RNA)-[]-(rib) 
+    with collect(PROPERTIES(rna)) as rnas, proteins, ligands, rib, C
+
+    with  apoc.map.mergeList([{proteins:proteins},{nonpolymeric_ligands:ligands},{rnas:rnas},{other_polymers:[]}]) as rest, rib, C
+    return collect([]), C
+                              
+                              """).values()
+    # return , C
 
             return session.execute_read(_)
 
 
-    def list_struct_count(self, filters=None, limit=None, offset=None):
-        with self.adapter.driver.session() as session:
-            def _(tx: Transaction | ManagedTransaction):
-                return tx.run("""//
+    # def list_struct_count(self, filters=None, limit=None, offset=None):
+    #     with self.adapter.driver.session() as session:
+    #         def _(tx: Transaction | ManagedTransaction):
+    #             return tx.run("""//
 
-        match (rib:RibosomeStructure) 
-        with rib order by rib.rcsb_id desc limit 10
+    #     match (rib:RibosomeStructure) 
+    #     with rib order by rib.rcsb_id desc limit 10
 
-        optional match (l:Ligand)-[]-(rib) 
-        with collect(PROPERTIES(l)) as ligands, rib
+    #     optional match (l:Ligand)-[]-(rib) 
+    #     with collect(PROPERTIES(l)) as ligands, rib
 
-        match (rps:Protein)-[]-(rib) 
-        with collect(PROPERTIES(rps)) as proteins, ligands, rib
+    #     match (rps:Protein)-[]-(rib) 
+    #     with collect(PROPERTIES(rps)) as proteins, ligands, rib
 
-        optional match (rna:RNA)-[]-(rib) 
-        with collect(PROPERTIES(rna)) as rnas, proteins, ligands, rib
+    #     optional match (rna:RNA)-[]-(rib) 
+    #     with collect(PROPERTIES(rna)) as rnas, proteins, ligands, rib
         
-        with  apoc.map.mergeList([{proteins:proteins},{nonpolymeric_ligands:ligands},{rnas:rnas},{other_polymers:[]}]) as rest, rib
-        return apoc.map.merge(rib, rest)
-                                        """).value()
+    #     with  apoc.map.mergeList([{proteins:proteins},{nonpolymeric_ligands:ligands},{rnas:rnas},{other_polymers:[]}]) as rest, rib
+    #     return apoc.map.merge(rib, rest)
+    #                                     """).value()
 
-            return session.execute_read(_)
+    #         return session.execute_read(_)
 
 
 
