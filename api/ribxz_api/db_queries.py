@@ -1,7 +1,10 @@
-
 import typing
 from neo4j import ManagedTransaction, Transaction
 from neo4j_adapter.adapter import Neo4jAdapter
+
+"""This is the primary interface to the Neo4j instance. It queries the database and passes the results to the [ Django ] API.
+DO NOT put validation logic/schema here. This is a pure interface to the database. All the conversions are done in the API layer.
+"""
 
 class Neo4jQuery():
 
@@ -29,14 +32,13 @@ class Neo4jQuery():
 
             return session.execute_read(_)
 
-
     def list_structs(self, filters=None, limit=None, offset=None):
         with self.adapter.driver.session() as session:
             def _(tx: Transaction | ManagedTransaction):
                 return tx.run("""//
 
         match (rib:RibosomeStructure) 
-        with rib order by rib.rcsb_id limit 12
+        with rib order by rib.rcsb_id limit 40
 
         optional match (l:Ligand)-[]-(rib) 
         with collect(PROPERTIES(l)) as ligands, rib
@@ -62,6 +64,5 @@ class Neo4jQuery():
 
         with self.adapter.driver.session() as session:
             return session.execute_read(_)
-
 
 dbqueries = Neo4jQuery()

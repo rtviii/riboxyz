@@ -1,16 +1,12 @@
 from pprint import pprint
 import sys
-
 from api.ribxz_api.db_queries import Neo4jQuery
 from ribctl.etl.ribosome_assets import RibosomeAssets
 sys.dont_write_bytecode = True
 from neo4j_adapter.adapter import Neo4jAdapter
 from ribctl.lib.libtax import Taxid, ncbi
-
 from dotenv import load_dotenv
-
 load_dotenv('.env')
-
 
 
 # with open('./neo4j_adapter/3J7Z.json') as f:
@@ -52,10 +48,6 @@ load_dotenv('.env')
 
 db = Neo4jQuery()
 
-<<<<<<< HEAD
-s = db.get_taxa('source')
-
-=======
 global nodes 
 nodes = 0
 
@@ -103,7 +95,6 @@ print(len(s), nodes, len(_))
     #     continue
 
 # pprint(normalized_taxa)
->>>>>>> master
 
 
 

@@ -5,13 +5,13 @@ from ribctl.lib.libtax import PhylogenyNode, Taxid
 
 sys.dont_write_bytecode = True
 
-from neo4j_adapter.node_phylogeny import link__phylogeny, node__phylogeny
+from neo4j_ribosome.node_phylogeny import link__phylogeny, node__phylogeny
 from neo4j.graph import Node
 from concurrent.futures import ALL_COMPLETED, Future, ThreadPoolExecutor, wait
 from neo4j import Driver, GraphDatabase
-from neo4j_adapter.node_polymer import  link__polymer_to_polymer_class, link__polymer_to_structure, node__polymer, upsert_polymer_to_protein, upsert_polymer_to_rna
-from neo4j_adapter.node_protein import  node__polymer_class
-from neo4j_adapter.node_structure import   link__ligand_to_struct, link__structure_to_phylogeny, node__ligand, node__structure, struct_exists
+from neo4j_ribosome.node_polymer import  link__polymer_to_polymer_class, link__polymer_to_structure, node__polymer, upsert_polymer_to_protein, upsert_polymer_to_rna
+from neo4j_ribosome.node_protein import  node__polymer_class
+from neo4j_ribosome.node_structure import   link__ligand_to_struct, link__structure_to_phylogeny, node__ligand, node__structure, struct_exists
 from ribctl.etl.etl_pipeline import current_rcsb_structs
 from ribctl.lib.schema.types_ribosome import MitochondrialProteinClass, PolymerClass, PolynucleotideClass, RibosomeStructure
 from ribctl.etl.ribosome_assets import RibosomeAssets

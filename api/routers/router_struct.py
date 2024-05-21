@@ -44,8 +44,6 @@ def list_structures(request):
     structures       = list(map(lambda r: RibosomeStructure.model_validate(r), structs_response))
     return structures
 
-
-
 class ChainsByStruct(Schema):
     class PolymerByStruct(Schema):
         nomenclature: list[PolymerClass]
