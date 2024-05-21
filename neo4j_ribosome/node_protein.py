@@ -59,14 +59,6 @@ return prot, protof, struct
                        "PARENT": parent_rcsb_id}).values('prot', 'protof', 'struct')
     return _
 
-def node__polymer_class(polymer_class:str):
-    def _(tx:Transaction | ManagedTransaction):
-        return tx.run("""//
-            merge (polymer_class:PolymerClass {class_id:$CLASS_ID})
-            return polymer_class
-        """, {"CLASS_ID":polymer_class}).single(strict=True)['polymer_class']
-    return _
-
 def add_protein(driver:Driver,prot:Protein):
     with driver.session() as s:
         node = s.execute_write(node__protein(prot))

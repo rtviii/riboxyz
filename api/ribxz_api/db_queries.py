@@ -1,6 +1,6 @@
 import typing
 from neo4j import ManagedTransaction, Transaction
-from neo4j_adapter.adapter import Neo4jAdapter
+from neo4j_ribosome.adapter import Neo4jBuilder
 
 """This is the primary interface to the Neo4j instance. It queries the database and passes the results to the [ Django ] API.
 DO NOT put validation logic/schema here. This is a pure interface to the database. All the conversions are done in the API layer.
@@ -8,9 +8,9 @@ DO NOT put validation logic/schema here. This is a pure interface to the databas
 
 class Neo4jQuery():
 
-    adapter: Neo4jAdapter 
+    adapter: Neo4jBuilder 
     def __init__(self) -> None:
-        self.adapter = Neo4jAdapter('bolt://localhost:7687', 'neo4j')
+        self.adapter = Neo4jBuilder('bolt://localhost:7687', 'neo4j')
         pass
 
     def list_chains_by_struct(self, filters=None, limit=None, offset=None):

@@ -65,6 +65,15 @@ def link__polymer_to_polymer_class(poly: Node) -> Callable[[Transaction | Manage
                       {"ELEM_ID": poly.element_id}).values('poly', 'member', 'polymer_class')
     return _
 
+def node__polymer_class(polymer_class:str):
+    def _(tx:Transaction | ManagedTransaction):
+        return tx.run("""//
+            merge (polymer_class:PolymerClass {class_id:$CLASS_ID})
+            return polymer_class
+        """, {"CLASS_ID":polymer_class}).single(strict=True)['polymer_class']
+    return _
+
+
 def upsert_polymer_to_protein( polymer_node:Node, protein:Protein):
     def _(tx: Transaction | ManagedTransaction):
         return tx.run("""//

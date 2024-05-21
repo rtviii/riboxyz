@@ -34,7 +34,6 @@ def node__rna(_rna: RNA) -> Callable[[Transaction | ManagedTransaction], Node]:
 """, **RNA_dict).single(strict=True)['rna']
     return _
 
-
 # Transaction
 def link__rna_to_struct(rna: Node, parent_rcsb_id: str) -> Callable[[Transaction | ManagedTransaction], list[list[Node | Relationship]]]:
 

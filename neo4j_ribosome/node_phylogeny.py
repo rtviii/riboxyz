@@ -6,7 +6,6 @@ from neo4j import Driver, Transaction, ManagedTransaction
 from neo4j.graph import Node
 from ribctl.lib.libtax import PhylogenyNode, Taxid
 
-
 # Create constraint on phylogenyNode that ncbi_tax_id is unique
 def node__phylogeny(phylogeny_obj:PhylogenyNode)->Callable[[Transaction | ManagedTransaction], Node ]:
     def _(tx: Transaction | ManagedTransaction):
