@@ -55,7 +55,6 @@ class Neo4jQuery():
     match (rib)-[]-(p:PhylogenyNode)-[:descendant_of*1..8]-(s:PhylogenyNode)
     where p.ncbi_tax_id  in [83333, 9606] or s.ncbi_tax_id in [8333,9606]
 
-
     
     { TODO:
         - The polymer classes bit
@@ -63,9 +62,10 @@ class Neo4jQuery():
         - Optimize taxonomy pass on the django side to only match LCD nodes 
     }
 
-    with rib 
-    order by rib.rcsb_id desc, rib.citation_year desc, rib.resolution desc
-    return rib.rcsb_id, rib.citation_year, rib.resolution  limit 10 
+    with rib, count(rib) as C
+    order by rib.rcsb_id desc, rib.citation_year desc, rib.resolution desc limit 10
+    with collect({ rcsb_id: rib.rcsb_id})  as structures , C
+    return structures, C
     """
 
 
@@ -91,6 +91,32 @@ class Neo4jQuery():
                                         """).value()
 
             return session.execute_read(_)
+
+
+    def list_struct_count(self, filters=None, limit=None, offset=None):
+        with self.adapter.driver.session() as session:
+            def _(tx: Transaction | ManagedTransaction):
+                return tx.run("""//
+
+        match (rib:RibosomeStructure) 
+        with rib order by rib.rcsb_id desc limit 10
+
+        optional match (l:Ligand)-[]-(rib) 
+        with collect(PROPERTIES(l)) as ligands, rib
+
+        match (rps:Protein)-[]-(rib) 
+        with collect(PROPERTIES(rps)) as proteins, ligands, rib
+
+        optional match (rna:RNA)-[]-(rib) 
+        with collect(PROPERTIES(rna)) as rnas, proteins, ligands, rib
+        
+        with  apoc.map.mergeList([{proteins:proteins},{nonpolymeric_ligands:ligands},{rnas:rnas},{other_polymers:[]}]) as rest, rib
+        return apoc.map.merge(rib, rest)
+                                        """).value()
+
+            return session.execute_read(_)
+
+
 
     def get_taxa(self, src_host:typing.Literal['source', 'host'])-> list[int]:
         def _(tx: Transaction | ManagedTransaction):
