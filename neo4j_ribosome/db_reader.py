@@ -43,8 +43,6 @@ class Neo4jQuery():
         # - polymer classes
         # - taxonomy
 
-
-
     """
     match (rib:RibosomeStructure) 
     where toLower(rib.citation_title) 
@@ -57,21 +55,19 @@ class Neo4jQuery():
     match (rib)-[]-(p:PhylogenyNode)-[:descendant_of*1..8]-(s:PhylogenyNode)
     where p.ncbi_tax_id  in [83333, 9606] or s.ncbi_tax_id in [8333,9606]
 
-    with rib, s, p 
-    return rib limit 400 skip 10
-    """
 
-    """
-    match (rib:RibosomeStructure) 
-    where toLower(rib.citation_title) 
-          + toLower(rib.pdbx_keywords_text) 
-          + apoc.text.join(rib.citation_rcsb_authors, "")  contains "complex" 
-    and rib.citation_year > 2020
-    and rib.resolution < 3 
+    
+    { TODO:
+        - The polymer classes bit
+        - The host/source taxonomy bit
+        - Optimize taxonomy pass on the django side to only match LCD nodes 
+    }
+
     with rib 
     order by rib.rcsb_id desc, rib.citation_year desc, rib.resolution desc
     return rib.rcsb_id, rib.citation_year, rib.resolution  limit 10 
     """
+
 
     def list_structs(self, filters=None, limit=None, offset=None):
         with self.adapter.driver.session() as session:
@@ -79,7 +75,7 @@ class Neo4jQuery():
                 return tx.run("""//
 
         match (rib:RibosomeStructure) 
-        with rib order by rib.rcsb_id desc limit 20
+        with rib order by rib.rcsb_id desc limit 10
 
         optional match (l:Ligand)-[]-(rib) 
         with collect(PROPERTIES(l)) as ligands, rib
