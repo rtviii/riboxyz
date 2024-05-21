@@ -47,7 +47,6 @@ class Neo4jBuilder():
             print(ae)
 
     def initialize_new_instance(self):
-
         self.init_constraints()
         self.init_polymer_classes()
         self.init_phylogenies()

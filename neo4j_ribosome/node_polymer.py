@@ -7,7 +7,6 @@ from ribctl.lib.schema.types_ribosome import RNA, Polymer, Protein
 
 def node__polymer(poly:Polymer)->Callable[[Transaction | ManagedTransaction], Node ]:
     P = poly.model_dump()
-    print("Creating poly node", P)
     def _(tx: Transaction | ManagedTransaction):
         return tx.run("""//
     merge (poly:Polymer {
@@ -72,7 +71,6 @@ def node__polymer_class(polymer_class:str):
             return polymer_class
         """, {"CLASS_ID":polymer_class}).single(strict=True)['polymer_class']
     return _
-
 
 def upsert_polymer_to_protein( polymer_node:Node, protein:Protein):
     def _(tx: Transaction | ManagedTransaction):
