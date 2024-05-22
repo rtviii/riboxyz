@@ -35,18 +35,21 @@ def structure_ptc(request,rcsb_id:str):
         pprint(ptc)
     except Exception as e:
         return HttpResponseServerError("Failed to find structure profile {}:\n\n{}".format(rcsb_id, e))
-    # except Exception as e:
-    #     return HttpResponseServerError("Failed to find structure profile {}:\n\n{}".format(rcsb_id, e))
 
 
 
 
+@structure_router.post('/list', response=list[RibosomeStructure],  tags=[TAG])
+def list_structures(request,
+                    search          : None|str                                            = None,
+                    year            : None| typing.Tuple[int | None , int | None]         = None,
+                    resolution      : None| typing.Tuple[float | None , float | None]     = None,
+                    polymer_classes : None| list[PolynucleotideClass | PolypeptideClass ] = None,
+                    source_taxa     : None| list[int]                                     = None,
+                    host_taxa       : None| list[int]                                     = None):
 
-@structure_router.get('/list_structures',  tags=[TAG],)
-def list_structures(request):
-    structs_response = dbqueries.list_structs_filtered()
+    structs_response = dbqueries.list_structs_filtered(search, year, resolution, polymer_classes, source_taxa, host_taxa)
     structures       = list(map(lambda r: RibosomeStructure.model_validate(r), structs_response))
-    print(len(structures))
     return structures
 
 class ChainsByStruct(Schema):

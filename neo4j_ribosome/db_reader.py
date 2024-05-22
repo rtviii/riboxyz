@@ -1,3 +1,4 @@
+from pprint import pprint
 import typing
 import sys
 
@@ -59,10 +60,11 @@ class Neo4jQuery():
  ):
         with self.adapter.driver.session() as session:
             def _(tx: Transaction | ManagedTransaction):
-                return tx.run("""//
+
+                query = """//
                         match (rib:RibosomeStructure) 
                         with rib
-                        order by rib.rcsb_id desc 
+                        order by rib.rcsb_id desc\n""" + ( """
                         where toLower(rib.citation_title) 
                               + toLower(rib.pdbx_keywords_text) 
                               + apoc.text.join(rib.citation_rcsb_authors, "")  contains "complex" 
@@ -70,19 +72,22 @@ class Neo4jQuery():
                         and rib.resolution < 3
                         and ALL(x in ["uL4", "uL22"] where x in apoc.coll.flatten(collect{match (rib)-[]-(p:Polymer) return p.nomenclature }) )
                         and ANY(tax in [9606] where tax in apoc.coll.flatten(collect{ match (rib)-[:source]-(p:PhylogenyNode)-[:descendant_of*]-(s:PhylogenyNode) return [p.ncbi_tax_id, s.ncbi_tax_id]}) )
-                        with rib limit 10
-                            optional match (l:Ligand)-[]-(rib) 
-                            with collect(PROPERTIES(l)) as ligands, rib
+                        """ if search is not None else '' ) + """
+                        with rib limit 200
+                        optional match (l:Ligand)-[]-(rib) 
+                        with collect(PROPERTIES(l)) as ligands, rib
 
-                            match (rps:Protein)-[]-(rib) 
-                            with collect(PROPERTIES(rps)) as proteins, ligands, rib
+                        match (rps:Protein)-[]-(rib) 
+                        with collect(PROPERTIES(rps)) as proteins, ligands, rib
 
-                            optional match (rna:RNA)-[]-(rib) 
-                            with collect(PROPERTIES(rna)) as rnas, proteins, ligands, rib
+                        optional match (rna:RNA)-[]-(rib) 
+                        with collect(PROPERTIES(rna)) as rnas, proteins, ligands, rib
 
                         with apoc.map.mergeList([{proteins:proteins},{nonpolymeric_ligands:ligands},{rnas:rnas},{other_polymers:[]}]) as rest, rib
                         return collect(apoc.map.merge(rib, rest))
-                              """).value()[0]
+                              """
+                pprint(query)
+                return tx.run(query).value()[0]
 
             return session.execute_read(_)
 
