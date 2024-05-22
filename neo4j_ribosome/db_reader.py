@@ -65,25 +65,33 @@ class Neo4jQuery():
         print("Polymer Classes : ", polymer_classes)
         print("Source Taxa : ", source_taxa)
         print("Host Taxa : ", host_taxa)
-
-
         print("befor concat")
+
+
+       
         query = """//
-                match (rib:RibosomeStructure) 
+                match (rib:RibosomeStructure)
                 with rib
                 order by rib.rcsb_id desc\n""" + \
-                      ( "where\n" if list(map(lambda x: x is not None, [search, year, resolution, polymer_classes, source_taxa, host_taxa]) ).count(True) > 0 else '' ) + \
-                      ( "toLower(rib.citation_title) + toLower(rib.pdbx_keywords_text) + apoc.text.join(rib.citation_rcsb_authors, \"\")  contains '{}' \n".format(search) if search is not None else '' )  +\
-                       ( "{} < rib.citation_year < {}\n".format(year[0] if year[0] is not None else 0, year[1] if year[1] is not None else 9999)  if year is not None else '') + \
-                       ( "{} < rib.resolution < {}".format(resolution[0] if resolution[0] is not None else 0, resolution[1] if resolution[1] is not None else 9999) if resolution is not None else '') + \
-                       ( "ALL(x in [ {} ] where x in apoc.coll.flatten(collect{match (rib)-[]-(p:Polymer) return p.nomenclature }) )".format(",".join(polymer_classes)) if polymer_classes is not None else '' ) +\
-                       ( "ANY(tax in {} where tax in apoc.coll.flatten(collect{ match (rib)-[:source]-(p:PhylogenyNode)-[:descendant_of*]-(s:PhylogenyNode) return [p.ncbi_tax_id, s.ncbi_tax_id]}) )".format(source_taxa) if source_taxa is not None else '') + \
-                       ( "ANY(tax in {} where tax in apoc.coll.flatten(collect{ match (rib)-[:host]-(p:PhylogenyNode)-[:descendant_of*]-(s:PhylogenyNode) return [p.ncbi_tax_id, s.ncbi_tax_id]}) )".format(host_taxa) if host_taxa is not None else '') + \
+( "where\n" if list(map(lambda x: x is not None, [search, year, resolution, polymer_classes, source_taxa, host_taxa]) ).count(True) > 0 else '' ) + \
+\
+( "toLower(rib.citation_title) + toLower(rib.pdbx_keywords_text) + apoc.text.join(rib.citation_rcsb_authors, \"\")  contains '{}' \n".format(
+    search) if search is not None else '' )  +\
+( "{} {} <= rib.citation_year and rib.citation_year <= {}\n".format(
+    "and" if search != None else '', year[0] if year[0] is not None else 0, year[1] if year[1] is not None else 9999)  if year is not None else '') + \
+( "{} {} < rib.resolution and rib.resolution < {}\n".format(
+    "and" if search != None or year !=None else '', resolution[0] if resolution[0] is not None else 0, resolution[1] if resolution[1] is not None else 9999) if resolution is not None else '') + \
+( "{} ALL(x in [ {} ] where x in apoc.coll.flatten(collect{{ match (rib)-[]-(p:Polymer) return p.nomenclature }}))\n".format(
+    "and" if search!=None or year!=None or resolution != None else '',', '.join(['"%s"' % w.value for w in polymer_classes])) if polymer_classes is not None else '' ) +\
+( "{} ANY(tax in {} where tax in apoc.coll.flatten(collect{{ match (rib)-[:source]-(p:PhylogenyNode)-[:descendant_of*]-(s:PhylogenyNode) return [p.ncbi_tax_id, s.ncbi_tax_id]}}))\n".format(
+    "and" if search!=None or year!=None or resolution!=None or  polymer_classes!=None else '', source_taxa) if source_taxa is not None else '') + \
+( "{} ANY(tax in {} where tax in apoc.coll.flatten(collect{{ match (rib)-[:host]-(p:PhylogenyNode)-[:descendant_of*]-(s:PhylogenyNode) return [p.ncbi_tax_id, s.ncbi_tax_id]}}))\n".format(
+    "and" if search!=None or year!=None or resolution!=None or polymer_classes !=None or source_taxa!=None else '', host_taxa) if host_taxa is not None else '') + \
                 "return count(rib)"
-        print("after concat")
 
-        print("Created query:")
+        print("=======Created query:==========")
         print(query)
+        print("===============================")
         with self.adapter.driver.session() as session:
             def _(tx: Transaction | ManagedTransaction):
                 return tx.run(query).value()[0]
