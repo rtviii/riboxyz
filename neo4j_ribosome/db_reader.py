@@ -66,8 +66,6 @@ class Neo4jQuery():
         print("Source Taxa : ", source_taxa)
         print("Host Taxa : ", host_taxa)
         print("befor concat")
-
-
        
         query = """//
                 match (rib:RibosomeStructure)
@@ -87,14 +85,30 @@ class Neo4jQuery():
     "and" if search!=None or year!=None or resolution!=None or  polymer_classes!=None else '', source_taxa) if source_taxa is not None else '') + \
 ( "{} ANY(tax in {} where tax in apoc.coll.flatten(collect{{ match (rib)-[:host]-(p:PhylogenyNode)-[:descendant_of*]-(s:PhylogenyNode) return [p.ncbi_tax_id, s.ncbi_tax_id]}}))\n".format(
     "and" if search!=None or year!=None or resolution!=None or polymer_classes !=None or source_taxa!=None else '', host_taxa) if host_taxa is not None else '') + \
-                "return count(rib)"
+        \
+    """
+    with collect(rib)[..10] as rib, count(rib) as total_count 
+    unwind rib as ribosomes
+    optional match (l:Ligand)-[]-(ribosomes) 
+    with collect(PROPERTIES(l)) as ligands, ribosomes, total_count
+
+    match (rps:Protein)-[]-(ribosomes) 
+    with collect(PROPERTIES(rps)) as proteins, ligands, ribosomes, total_count
+
+    optional match (rna:RNA)-[]-(ribosomes) 
+    with collect(PROPERTIES(rna)) as rnas, proteins, ligands, ribosomes, total_count
+
+    with apoc.map.mergeList([{proteins:proteins},{nonpolymeric_ligands:ligands},{rnas:rnas},{other_polymers:[]}]) as rest, ribosomes, total_count
+    return collect(apoc.map.merge(ribosomes, rest)),  collect(distinct total_count)[0]
+    """
+
 
         print("=======Created query:==========")
         print(query)
         print("===============================")
         with self.adapter.driver.session() as session:
             def _(tx: Transaction | ManagedTransaction):
-                return tx.run(query).value()[0]
+                return tx.run(query).values()
             return session.execute_read(_)
 
     def list_structs_filtered(self,
@@ -110,7 +124,7 @@ class Neo4jQuery():
                 query = """//
                         match (rib:RibosomeStructure) 
                         with rib
-                        order by rib.rcsb_id desc\n""" + ( """
+                        order by rib.rcsb_id desc
                         where toLower(rib.citation_title) 
                               + toLower(rib.pdbx_keywords_text) 
                               + apoc.text.join(rib.citation_rcsb_authors, "")  contains "complex" 
@@ -118,7 +132,6 @@ class Neo4jQuery():
                         and rib.resolution < 3
                         and ALL(x in ["uL4", "uL22"] where x in apoc.coll.flatten(collect{match (rib)-[]-(p:Polymer) return p.nomenclature }) )
                         and ANY(tax in [9606] where tax in apoc.coll.flatten(collect{ match (rib)-[:source]-(p:PhylogenyNode)-[:descendant_of*]-(s:PhylogenyNode) return [p.ncbi_tax_id, s.ncbi_tax_id]}) )
-                        """ if search is not None else '' ) + """
                         with rib limit 10
                         optional match (l:Ligand)-[]-(rib) 
                         with collect(PROPERTIES(l)) as ligands, rib
@@ -216,3 +229,30 @@ dbqueries = Neo4jQuery()
     # and ANY(tax in [9606] where tax in apoc.coll.flatten(collect{ match (rib)-[:source]-(p:PhylogenyNode)-[:descendant_of*]-(s:PhylogenyNode) return [p.ncbi_tax_id, s.ncbi_tax_id]}) )
     # return count(rib)
     # """
+
+""""
+                        match (rib:RibosomeStructure) 
+                        with rib
+                        order by rib.rcsb_id desc
+                        where toLower(rib.citation_title) 
+                              + toLower(rib.pdbx_keywords_text) 
+                              + apoc.text.join(rib.citation_rcsb_authors, "")  contains "complex" 
+                        and rib.citation_year > 2020 
+                        and rib.resolution < 3
+                        and ALL(x in ["uL4", "uL22"] where x in apoc.coll.flatten(collect{match (rib)-[]-(p:Polymer) return p.nomenclature }) )
+                        and ANY(tax in [9606] where tax in apoc.coll.flatten(collect{ match (rib)-[:source]-(p:PhylogenyNode)-[:descendant_of*]-(s:PhylogenyNode) return [p.ncbi_tax_id, s.ncbi_tax_id]}) )
+                        
+                        with collect(rib)[..10] as rib, count(rib) as total_count 
+                        Unwind rib as ribs
+                        optional match (l:Ligand)-[]-(ribs) 
+                        with collect(PROPERTIES(l)) as ligands, ribs, total_count
+
+                        match (rps:Protein)-[]-(ribs) 
+                        with collect(PROPERTIES(rps)) as proteins, ligands, ribs, total_count
+
+                        optional match (rna:RNA)-[]-(ribs) 
+                        with collect(PROPERTIES(rna)) as rnas, proteins, ligands, ribs, total_count
+
+                        with apoc.map.mergeList([{proteins:proteins},{nonpolymeric_ligands:ligands},{rnas:rnas},{other_polymers:[]}]) as rest, ribs, total_count
+                        return collect(apoc.map.merge(ribs, rest)),  collect(distinct total_count)[0]
+"""
