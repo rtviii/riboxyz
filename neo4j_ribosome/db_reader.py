@@ -41,49 +41,6 @@ class Neo4jQuery():
             return session.execute_read(_)
 
 
-
-    #TODO: Filters to implement: 
-        # - search
-        # - year
-        # - resolution
-        # - polymer classes
-        # - taxonomy
-
-    """
-    match (rib:RibosomeStructure) 
-    where toLower(rib.citation_title) 
-          + toLower(rib.pdbx_keywords_text) 
-          + ...
-          + apoc.text.join(rib.citation_rcsb_authors, "")  contains "complex" 
-    and rib.citation_year > 2020 
-    and rib.resolution < 3 
-
-    match (rib)-[]-(p:PhylogenyNode)-[:descendant_of*1..8]-(s:PhylogenyNode)
-    where p.ncbi_tax_id  in [83333, 9606] or s.ncbi_tax_id in [8333,9606]
-
-    
-    { TODO:
-        - The polymer classes bit
-        - The host/source taxonomy bit
-        - Optimize taxonomy pass on the django side to only match LCD nodes 
-    }
-
-    with rib, count(rib) as C
-    order by rib.rcsb_id desc limit 10
-
-    optional match (l:Ligand)-[]-(rib) 
-    with collect(PROPERTIES(l)) as ligands, rib, C
-
-    match (rps:Protein)-[]-(rib) 
-    with collect(PROPERTIES(rps)) as proteins, ligands, rib, C
-
-    optional match (rna:RNA)-[]-(rib) 
-    with collect(PROPERTIES(rna)) as rnas, proteins, ligands, rib, C
-
-    with  apoc.map.mergeList([{proteins:proteins},{nonpolymeric_ligands:ligands},{rnas:rnas},{other_polymers:[]}]) as rest, rib, C
-    return apoc.map.merge(rib, rest), C
-
-    """
     """
     match (rib:RibosomeStructure) 
     with rib
@@ -94,8 +51,37 @@ class Neo4jQuery():
     and rib.citation_year > 2020 
     and rib.resolution < 3
     and ALL(x in ["uL4", "uL22"] where x in apoc.coll.flatten(collect{match (rib)-[]-(p:Polymer) return p.nomenclature }) )
-    return count(rib), collect(rib)[1..10]
+    and ANY(tax in [9606] where tax in apoc.coll.flatten(collect{ match (rib)-[:source]-(p:PhylogenyNode)-[:descendant_of*]-(s:PhylogenyNode) return [p.ncbi_tax_id, s.ncbi_tax_id]}) )
+    with rib limit 10
+        optional match (l:Ligand)-[]-(rib) 
+        with collect(PROPERTIES(l)) as ligands, rib
+
+        match (rps:Protein)-[]-(rib) 
+        with collect(PROPERTIES(rps)) as proteins, ligands, rib
+
+        optional match (rna:RNA)-[]-(rib) 
+        with collect(PROPERTIES(rna)) as rnas, proteins, ligands, rib
+
+    with apoc.map.mergeList([{proteins:proteins},{nonpolymeric_ligands:ligands},{rnas:rnas},{other_polymers:[]}]) as rest, rib
+    return apoc.map.merge(rib, rest)
     """
+    #* ................................I................
+    #* COUNT
+    """
+    match (rib:RibosomeStructure) 
+    with rib
+    order by rib.rcsb_id desc 
+    where toLower(rib.citation_title) 
+          + toLower(rib.pdbx_keywords_text) 
+          + apoc.text.join(rib.citation_rcsb_authors, "")  contains "complex" 
+    and rib.citation_year > 2020 
+    and rib.resolution < 3
+    and ALL(x in ["uL4", "uL22"] where x in apoc.coll.flatten(collect{match (rib)-[]-(p:Polymer) return p.nomenclature }) )
+    and ANY(tax in [9606] where tax in apoc.coll.flatten(collect{ match (rib)-[:source]-(p:PhylogenyNode)-[:descendant_of*]-(s:PhylogenyNode) return [p.ncbi_tax_id, s.ncbi_tax_id]}) )
+    return count(rib)
+    """
+
+
 
 
     def list_structs(self):
