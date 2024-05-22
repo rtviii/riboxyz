@@ -88,14 +88,13 @@ class Neo4jQuery():
     match (rib:RibosomeStructure) 
     with rib
     order by rib.rcsb_id desc 
-    where 
-        toLower(rib.citation_title) 
+    where toLower(rib.citation_title) 
           + toLower(rib.pdbx_keywords_text) 
           + apoc.text.join(rib.citation_rcsb_authors, "")  contains "complex" 
-        and rib.citation_year > 2020 
-        and rib.resolution < 3
-        and ALL(x in ["uL4", "uL22"] where x in apoc.coll.flatten(collect{match (rib)-[]-(p:Polymer) return p.nomenclature }) )
-    return count(rib), collect(rib)
+    and rib.citation_year > 2020 
+    and rib.resolution < 3
+    and ALL(x in ["uL4", "uL22"] where x in apoc.coll.flatten(collect{match (rib)-[]-(p:Polymer) return p.nomenclature }) )
+    return count(rib), collect(rib)[1..10]
     """
 
 
