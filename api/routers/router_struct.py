@@ -35,31 +35,19 @@ def structure_ptc(request,rcsb_id:str):
     except Exception as e:
         return HttpResponseServerError("Failed to find structure profile {}:\n\n{}".format(rcsb_id, e))
 
-
-@structure_router.post('/count', response=int,  tags=[TAG])
-def count(request,
-                            search          : None| str                                          = None,
-                            year            : None| typing.Tuple[int | None , int | None]        = None,
-                            resolution      : None| typing.Tuple[float | None , float | None]    = None,
+@structure_router.post('/list', response=dict,  tags=[TAG])
+def filter_list(request,
+                            search          : None| str                                           = None,
+                            year            : None| typing.Tuple[int | None , int | None]         = None,
+                            resolution      : None| typing.Tuple[float | None , float | None]     = None,
                             polymer_classes: None | list[PolynucleotideClass | PolypeptideClass ] = None,
-                            source_taxa     : None| list[int]                                    = None,
-                            host_taxa       : None| list[int]                                    = None ):
+                            source_taxa     : None| list[int]                                     = None,
+                            host_taxa       : None| list[int]                                     = None ):
 
-    return dbqueries.count_structs_filtered(search, year, resolution, polymer_classes, source_taxa, host_taxa)
+    structures, count = dbqueries.list_structs_filtered(search, year, resolution, polymer_classes, source_taxa, host_taxa)[0]
+    structures_validated = list(map(lambda r: RibosomeStructure.model_validate(r), structures))
+    return { "structures":structures_validated,"count": count }
      
-
-@structure_router.post('/list', response=list[RibosomeStructure],  tags=[TAG])
-def list_structures(request,
-                    search          : None|str                                            = None,
-                    year            : None| typing.Tuple[int | None , int | None]         = None,
-                    resolution      : None| typing.Tuple[float | None , float | None]     = None,
-                    polymer_classes : None| list[PolynucleotideClass | PolypeptideClass ] = None,
-                    source_taxa     : None| list[int]                                     = None,
-                    host_taxa       : None| list[int]                                     = None):
-    structs_response = dbqueries.count_structs_filtered(search, year, resolution, polymer_classes, source_taxa, host_taxa)
-    structures       = list(map(lambda r: RibosomeStructure.model_validate(r), structs_response))
-    return structures
-
 class ChainsByStruct(Schema):
     class PolymerByStruct(Schema):
         nomenclature: list[PolymerClass]
