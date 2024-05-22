@@ -3,7 +3,7 @@ import sys
 
 from ninja import Schema
 
-from ribctl.lib.schema.types_ribosome import PolymerClass
+from ribctl.lib.schema.types_ribosome import PolymerClass, PolynucleotideClass, PolypeptideClass
 sys.dont_write_bytecode = True
 from neo4j import ManagedTransaction, Transaction
 from neo4j_ribosome.db_builder import Neo4jBuilder
@@ -12,6 +12,15 @@ from neo4j_ribosome.db_builder import Neo4jBuilder
 DO NOT put validation logic/schema here. This is a pure interface to the database. All the conversions are done in the API layer.
 """
 
+class FiltersSchema():
+    search         : str
+    year           : typing.Tuple[int | None , int | None]
+    resolution     : typing.Tuple[float | None , float | None]
+    polymer_classes: list[PolynucleotideClass | PolypeptideClass ]
+    source_taxa    : list[int]
+    host_taxa      : list[int]
+    def __init__(self) -> None:
+        pass
 
 
 class Neo4jQuery():
@@ -40,6 +49,42 @@ class Neo4jQuery():
 
             return session.execute_read(_)
 
+    def list_structs_filtered(self,
+                            search         : None|str=None,
+                            year           : None| typing.Tuple[int | None , int | None] =None,
+                            resolution     : None| typing.Tuple[float | None , float | None] =None, 
+                            polymer_classes: None| list[PolynucleotideClass | PolypeptideClass ] =None,
+                            source_taxa    : None| list[int] =None,
+                            host_taxa      : None| list[int] =None
+ ):
+        with self.adapter.driver.session() as session:
+            def _(tx: Transaction | ManagedTransaction):
+                return tx.run("""//
+                        match (rib:RibosomeStructure) 
+                        with rib
+                        order by rib.rcsb_id desc 
+                        where toLower(rib.citation_title) 
+                              + toLower(rib.pdbx_keywords_text) 
+                              + apoc.text.join(rib.citation_rcsb_authors, "")  contains "complex" 
+                        and rib.citation_year > 2020 
+                        and rib.resolution < 3
+                        and ALL(x in ["uL4", "uL22"] where x in apoc.coll.flatten(collect{match (rib)-[]-(p:Polymer) return p.nomenclature }) )
+                        and ANY(tax in [9606] where tax in apoc.coll.flatten(collect{ match (rib)-[:source]-(p:PhylogenyNode)-[:descendant_of*]-(s:PhylogenyNode) return [p.ncbi_tax_id, s.ncbi_tax_id]}) )
+                        with rib limit 10
+                            optional match (l:Ligand)-[]-(rib) 
+                            with collect(PROPERTIES(l)) as ligands, rib
+
+                            match (rps:Protein)-[]-(rib) 
+                            with collect(PROPERTIES(rps)) as proteins, ligands, rib
+
+                            optional match (rna:RNA)-[]-(rib) 
+                            with collect(PROPERTIES(rna)) as rnas, proteins, ligands, rib
+
+                        with apoc.map.mergeList([{proteins:proteins},{nonpolymeric_ligands:ligands},{rnas:rnas},{other_polymers:[]}]) as rest, rib
+                        return collect(apoc.map.merge(rib, rest))
+                              """).value()[0]
+
+            return session.execute_read(_)
 
     """
     match (rib:RibosomeStructure) 
@@ -82,46 +127,9 @@ class Neo4jQuery():
     """
 
 
+   
 
 
-    def list_structs(self):
-        with self.adapter.driver.session() as session:
-            def _(tx: Transaction | ManagedTransaction):
-                return tx.run("""//
-    match (rib:RibosomeStructure) """ + \
-
-    """
-    where toLower(rib.citation_title) 
-          + toLower(rib.pdbx_keywords_text) 
-          + ...
-          + apoc.text.join(rib.citation_rcsb_authors, "")  contains "complex" 
-    and rib.citation_year > 2020 
-    and rib.resolution < 3 
-
-    match (rib)-[]-(p:PhylogenyNode)-[:descendant_of*1..8]-(s:PhylogenyNode)
-    where p.ncbi_tax_id  in [83333, 9606] or s.ncbi_tax_id in [8333,9606]
-    """  + \
-
-    """
-    with rib, count(rib) as C
-    order by rib.rcsb_id desc limit 10
-
-    optional match (l:Ligand)-[]-(rib) 
-    with collect(PROPERTIES(l)) as ligands, rib, C
-
-    match (rps:Protein)-[]-(rib) 
-    with collect(PROPERTIES(rps)) as proteins, ligands, rib, C
-
-    optional match (rna:RNA)-[]-(rib) 
-    with collect(PROPERTIES(rna)) as rnas, proteins, ligands, rib, C
-
-    with  apoc.map.mergeList([{proteins:proteins},{nonpolymeric_ligands:ligands},{rnas:rnas},{other_polymers:[]}]) as rest, rib, C
-    return collect([]), C
-                              
-                              """).values()
-    # return , C
-
-            return session.execute_read(_)
 
 
     # def list_struct_count(self, filters=None, limit=None, offset=None):

@@ -41,22 +41,12 @@ def structure_ptc(request,rcsb_id:str):
 
 
 
-class FiltersSchema():
-    search         : str
-    year           : typing.Tuple[int | None , int | None]
-    resolution     : typing.Tuple[float | None , float | None]
-    polymer_classes: list[ProteinClass]
-    source_taxa    : list[int]
-    host_taxa      : list[int]
 
-@structure_router.post('/list_structures',  tags=[TAG],)
+@structure_router.get('/list_structures',  tags=[TAG],)
 def list_structures(request):
-    print(request)
-    structs_response = dbqueries.list_structs()
-    pprint(structs_response)
+    structs_response = dbqueries.list_structs_filtered()
     structures       = list(map(lambda r: RibosomeStructure.model_validate(r), structs_response))
-    for k in structures:
-        pprint(k)
+    print(len(structures))
     return structures
 
 class ChainsByStruct(Schema):
