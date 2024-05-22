@@ -50,14 +50,52 @@ class Neo4jQuery():
 
             return session.execute_read(_)
 
+    def count_structs_filtered(self,
+                            search          : None| str                                          = None,
+                            year            : None| typing.Tuple[int | None , int | None]        = None,
+                            resolution      : None| typing.Tuple[float | None , float | None]    = None,
+                            polymer_classes: None | list[PolynucleotideClass | PolypeptideClass ] = None,
+                            source_taxa     : None| list[int]                                    = None,
+                            host_taxa       : None| list[int]                                    = None ):
+
+        print("Got the following params ----:")
+        print("Search : ", search)
+        print("Year : ", year)
+        print("Resolution : ", resolution)
+        print("Polymer Classes : ", polymer_classes)
+        print("Source Taxa : ", source_taxa)
+        print("Host Taxa : ", host_taxa)
+
+
+        print("befor concat")
+        query = """//
+                match (rib:RibosomeStructure) 
+                with rib
+                order by rib.rcsb_id desc\n""" + \
+                      ( "where\n" if list(map(lambda x: x is not None, [search, year, resolution, polymer_classes, source_taxa, host_taxa]) ).count(True) > 0 else '' ) + \
+                      ( "toLower(rib.citation_title) + toLower(rib.pdbx_keywords_text) + apoc.text.join(rib.citation_rcsb_authors, \"\")  contains '{}' \n".format(search) if search is not None else '' )  +\
+                       ( "{} < rib.citation_year < {}\n".format(year[0] if year[0] is not None else 0, year[1] if year[1] is not None else 9999)  if year is not None else '') + \
+                       ( "{} < rib.resolution < {}".format(resolution[0] if resolution[0] is not None else 0, resolution[1] if resolution[1] is not None else 9999) if resolution is not None else '') + \
+                       ( "ALL(x in [ {} ] where x in apoc.coll.flatten(collect{match (rib)-[]-(p:Polymer) return p.nomenclature }) )".format(",".join(polymer_classes)) if polymer_classes is not None else '' ) +\
+                       ( "ANY(tax in {} where tax in apoc.coll.flatten(collect{ match (rib)-[:source]-(p:PhylogenyNode)-[:descendant_of*]-(s:PhylogenyNode) return [p.ncbi_tax_id, s.ncbi_tax_id]}) )".format(source_taxa) if source_taxa is not None else '') + \
+                       ( "ANY(tax in {} where tax in apoc.coll.flatten(collect{ match (rib)-[:host]-(p:PhylogenyNode)-[:descendant_of*]-(s:PhylogenyNode) return [p.ncbi_tax_id, s.ncbi_tax_id]}) )".format(host_taxa) if host_taxa is not None else '') + \
+                "return count(rib)"
+        print("after concat")
+
+        print("Created query:")
+        print(query)
+        with self.adapter.driver.session() as session:
+            def _(tx: Transaction | ManagedTransaction):
+                return tx.run(query).value()[0]
+            return session.execute_read(_)
+
     def list_structs_filtered(self,
                             search         : None|str=None,
                             year           : None| typing.Tuple[int | None , int | None] =None,
                             resolution     : None| typing.Tuple[float | None , float | None] =None, 
                             polymer_classes: None| list[PolynucleotideClass | PolypeptideClass ] =None,
                             source_taxa    : None| list[int] =None,
-                            host_taxa      : None| list[int] =None
- ):
+                            host_taxa      : None| list[int] =None ):
         with self.adapter.driver.session() as session:
             def _(tx: Transaction | ManagedTransaction):
 
@@ -73,7 +111,7 @@ class Neo4jQuery():
                         and ALL(x in ["uL4", "uL22"] where x in apoc.coll.flatten(collect{match (rib)-[]-(p:Polymer) return p.nomenclature }) )
                         and ANY(tax in [9606] where tax in apoc.coll.flatten(collect{ match (rib)-[:source]-(p:PhylogenyNode)-[:descendant_of*]-(s:PhylogenyNode) return [p.ncbi_tax_id, s.ncbi_tax_id]}) )
                         """ if search is not None else '' ) + """
-                        with rib limit 200
+                        with rib limit 10
                         optional match (l:Ligand)-[]-(rib) 
                         with collect(PROPERTIES(l)) as ligands, rib
 
@@ -86,56 +124,8 @@ class Neo4jQuery():
                         with apoc.map.mergeList([{proteins:proteins},{nonpolymeric_ligands:ligands},{rnas:rnas},{other_polymers:[]}]) as rest, rib
                         return collect(apoc.map.merge(rib, rest))
                               """
-                pprint(query)
                 return tx.run(query).value()[0]
-
             return session.execute_read(_)
-
-    """
-    match (rib:RibosomeStructure) 
-    with rib
-    order by rib.rcsb_id desc 
-    where toLower(rib.citation_title) 
-          + toLower(rib.pdbx_keywords_text) 
-          + apoc.text.join(rib.citation_rcsb_authors, "")  contains "complex" 
-    and rib.citation_year > 2020 
-    and rib.resolution < 3
-    and ALL(x in ["uL4", "uL22"] where x in apoc.coll.flatten(collect{match (rib)-[]-(p:Polymer) return p.nomenclature }) )
-    and ANY(tax in [9606] where tax in apoc.coll.flatten(collect{ match (rib)-[:source]-(p:PhylogenyNode)-[:descendant_of*]-(s:PhylogenyNode) return [p.ncbi_tax_id, s.ncbi_tax_id]}) )
-    with rib limit 10
-        optional match (l:Ligand)-[]-(rib) 
-        with collect(PROPERTIES(l)) as ligands, rib
-
-        match (rps:Protein)-[]-(rib) 
-        with collect(PROPERTIES(rps)) as proteins, ligands, rib
-
-        optional match (rna:RNA)-[]-(rib) 
-        with collect(PROPERTIES(rna)) as rnas, proteins, ligands, rib
-
-    with apoc.map.mergeList([{proteins:proteins},{nonpolymeric_ligands:ligands},{rnas:rnas},{other_polymers:[]}]) as rest, rib
-    return apoc.map.merge(rib, rest)
-    """
-    #* ................................I................
-    #* COUNT
-    """
-    match (rib:RibosomeStructure) 
-    with rib
-    order by rib.rcsb_id desc 
-    where toLower(rib.citation_title) 
-          + toLower(rib.pdbx_keywords_text) 
-          + apoc.text.join(rib.citation_rcsb_authors, "")  contains "complex" 
-    and rib.citation_year > 2020 
-    and rib.resolution < 3
-    and ALL(x in ["uL4", "uL22"] where x in apoc.coll.flatten(collect{match (rib)-[]-(p:Polymer) return p.nomenclature }) )
-    and ANY(tax in [9606] where tax in apoc.coll.flatten(collect{ match (rib)-[:source]-(p:PhylogenyNode)-[:descendant_of*]-(s:PhylogenyNode) return [p.ncbi_tax_id, s.ncbi_tax_id]}) )
-    return count(rib)
-    """
-
-
-   
-
-
-
 
     # def list_struct_count(self, filters=None, limit=None, offset=None):
     #     with self.adapter.driver.session() as session:
@@ -173,3 +163,48 @@ class Neo4jQuery():
             return session.execute_read(_)
 
 dbqueries = Neo4jQuery()
+
+
+
+
+
+
+    # """
+    # match (rib:RibosomeStructure) 
+    # with rib
+    # order by rib.rcsb_id desc 
+    # where toLower(rib.citation_title) 
+    #       + toLower(rib.pdbx_keywords_text) 
+    #       + apoc.text.join(rib.citation_rcsb_authors, "")  contains "complex" 
+    # and rib.citation_year > 2020 
+    # and rib.resolution < 3
+    # and ALL(x in ["uL4", "uL22"] where x in apoc.coll.flatten(collect{match (rib)-[]-(p:Polymer) return p.nomenclature }) )
+    # and ANY(tax in [9606] where tax in apoc.coll.flatten(collect{ match (rib)-[:source]-(p:PhylogenyNode)-[:descendant_of*]-(s:PhylogenyNode) return [p.ncbi_tax_id, s.ncbi_tax_id]}) )
+    # with rib limit 10
+    #     optional match (l:Ligand)-[]-(rib) 
+    #     with collect(PROPERTIES(l)) as ligands, rib
+
+    #     match (rps:Protein)-[]-(rib) 
+    #     with collect(PROPERTIES(rps)) as proteins, ligands, rib
+
+    #     optional match (rna:RNA)-[]-(rib) 
+    #     with collect(PROPERTIES(rna)) as rnas, proteins, ligands, rib
+
+    # with apoc.map.mergeList([{proteins:proteins},{nonpolymeric_ligands:ligands},{rnas:rnas},{other_polymers:[]}]) as rest, rib
+    # return apoc.map.merge(rib, rest)
+    # """
+    # #* ................................I................
+    # #* COUNT
+    # """
+    # match (rib:RibosomeStructure) 
+    # with rib
+    # order by rib.rcsb_id desc 
+    # where toLower(rib.citation_title) 
+    #       + toLower(rib.pdbx_keywords_text) 
+    #       + apoc.text.join(rib.citation_rcsb_authors, "")  contains "complex" 
+    # and rib.citation_year > 2020 
+    # and rib.resolution < 3
+    # and ALL(x in ["uL4", "uL22"] where x in apoc.coll.flatten(collect{match (rib)-[]-(p:Polymer) return p.nomenclature }) )
+    # and ANY(tax in [9606] where tax in apoc.coll.flatten(collect{ match (rib)-[:source]-(p:PhylogenyNode)-[:descendant_of*]-(s:PhylogenyNode) return [p.ncbi_tax_id, s.ncbi_tax_id]}) )
+    # return count(rib)
+    # """

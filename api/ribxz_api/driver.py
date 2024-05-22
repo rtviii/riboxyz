@@ -7,6 +7,6 @@ from routers.router_mmcif import mmcif_router
 
 
 root_api = NinjaAPI(docs_url='/', openapi_url='/openapi', title='ribxz API', description='A programming interface for ribosome data.', version='0.1.0' )
-root_api.add_router('/structure', structure_router)
-root_api.add_router('/polymer_class', classification_router)
-root_api.add_router('/mmcif_structures', mmcif_router)
+root_api.add_router('/structures', structure_router)
+root_api.add_router('/polymers', classification_router)
+root_api.add_router('/mmcif', mmcif_router)
