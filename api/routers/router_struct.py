@@ -69,16 +69,22 @@ def filter_list(request,
         else:
             return None
 
+    def parse_empty_or_float(_:str):
+        if _ != '':
+            return float(_)
+        else:
+            return None
 
 
-    year            = list(map(parse_empty_or_int,year.split(","))) if year else None
-    resolution      = list(map(parse_empty_or_int,resolution.split(",")))  if resolution else None
-    host_taxa       = list(map(parse_empty_or_int,host_taxa.split(","))) if host_taxa else None
-    source_taxa     = list(map(parse_empty_or_int,source_taxa.split(","))) if source_taxa else None
-    polymer_classes = list(map(PolymerClass,polymer_classes.split(","))) if polymer_classes else None
+    year            = None if year == "" else list(map(parse_empty_or_int,year.split(",")))
+    resolution      = None if resolution == "" else list(map(parse_empty_or_float,resolution.split(","))) 
+    host_taxa       = None if host_taxa == "" else list(map(parse_empty_or_int,host_taxa.split(","))) if host_taxa else None
+    source_taxa     = None if source_taxa == "" else list(map(parse_empty_or_int,source_taxa.split(","))) if source_taxa else None
+    polymer_classes = None if polymer_classes == "" else list(map(lambda _: PolymerClass(_), polymer_classes.split(","))) 
 
     structures, count = dbqueries.list_structs_filtered(search, year, resolution, polymer_classes, source_taxa, host_taxa)[0]
     structures_validated = list(map(lambda r: RibosomeStructure.model_validate(r), structures))
+    print("Returning", count, "structures")
     return { "structures":structures_validated, "count": count }
      
 class ChainsByStruct(Schema):
