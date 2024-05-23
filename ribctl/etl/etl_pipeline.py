@@ -113,6 +113,7 @@ class ReannotationPipeline:
 
     def __init__(self, response: dict):
         self.rcsb_data_dict = response
+        print("Got rcsb_data response", response)
         # self.hmm_ribosomal_proteins = hmm_dict_init__candidates_per_organism(ProteinClassEnum, response["rcsb_id"])
 
         self.asm_maps         = self.asm_parse(response["assemblies"])
@@ -665,6 +666,7 @@ class ReannotationPipeline:
     def process_structure(self):
         rcsb_id = self.rcsb_data_dict["rcsb_id"]
 
+
         # ! According to RCSB schema, polymer_entites include "Protein", "RNA" but also "DNA", N"A-Hybrids" and "Other".
         # ! We only make the distinction between Proteins and RNA and Other for purposes of simplicity
         def is_protein(poly:Polymer)->bool:
@@ -744,11 +746,13 @@ class ReannotationPipeline:
         reshaped_nonpolymers                     = self.process_nonpolymers()
         [externalRefs, pub, kwords_text, kwords] = self.process_metadata()
         organisms                                = self.infer_organisms_from_polymers([*_prot_polypeptides, *_rna_polynucleotides])
+        dep_date = int(self.rcsb_data_dict["rcsb_accession_info"]["deposit_date"].split("-")[0])
 
         reshaped                                 = RibosomeStructure(
             rcsb_id                = self.rcsb_data_dict["rcsb_id"],
             expMethod              = self.rcsb_data_dict["exptl"][0]["method"],
             resolution             = self.rcsb_data_dict["rcsb_entry_info"]["resolution_combined"][0],
+            deposition_date        = dep_date,
             rcsb_external_ref_id   = externalRefs[0],
             rcsb_external_ref_type = externalRefs[1],
             rcsb_external_ref_link = externalRefs[2],

@@ -47,6 +47,11 @@ entry_info_string = """
       pdbx_keywords
       text
     }
+
+  rcsb_accession_info{
+    deposit_date
+  }
+
 """
 
 single_structure_graphql_template = """{

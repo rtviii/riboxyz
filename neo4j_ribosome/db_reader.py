@@ -64,7 +64,7 @@ with rib order by rib.rcsb_id desc\n""" + \
 ( "\nwhere\n" if list(map(lambda x: x is not None, [search, year, resolution, polymer_classes, source_taxa, host_taxa]) ).count(True) > 0 else '' ) + \
 \
 ( "toLower(rib.citation_title) + toLower(rib.pdbx_keywords_text) + apoc.text.join(rib.citation_rcsb_authors, \"\")  contains '{}' \n".format(
-    search) if search is not '' else '' )  +\
+    search) if search != '' else '' )  +\
 ( "{} ({} <= rib.citation_year and rib.citation_year <= {} or rib.citation_year is null)\n".format(
     "and" if search != '' else '', year[0] if year[0] is not None else 0, year[1] if year[1] is not None else 9999)  if year is not None else '') + \
 ( "{} {} < rib.resolution and rib.resolution < {}\n".format(
@@ -78,7 +78,7 @@ with rib order by rib.rcsb_id desc\n""" + \
     "and" if search!= '' or year!=None or resolution!=None or polymer_classes !=None or source_taxa!=None else '', host_taxa) if host_taxa is not None else '') + \
         \
 """
-with collect(rib)[..10] as rib, count(rib) as total_count 
+with collect(rib)[..20] as rib, count(rib) as total_count 
 unwind rib as ribosomes
 
 optional match (l:Ligand)-[]-(ribosomes) 

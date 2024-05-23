@@ -610,7 +610,7 @@ class RibosomeStructure(BaseModel):
     pdbx_keywords     : Optional[str] =None
     pdbx_keywords_text: Optional[str] = None
 
-    rcsb_external_ref_id: list[str]
+    rcsb_external_ref_id  : list[str]
     rcsb_external_ref_type: list[str]
     rcsb_external_ref_link: list[str]
 
@@ -619,10 +619,12 @@ class RibosomeStructure(BaseModel):
     citation_title       : Optional[str] = None
     citation_pdbx_doi    : Optional[str] = None
 
+    # deposition_date    : Optional[int] = None #TODO <-- This is a better source than citation_year
+
     src_organism_ids  : list[int]
     src_organism_names: list[str]
 
-    host_organism_ids: list[int]
+    host_organism_ids  : list[int]
     host_organism_names: list[str]
 
     assembly_map: Optional[list[AssemblyInstancesMap]] = None
