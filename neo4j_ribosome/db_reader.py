@@ -65,7 +65,7 @@ with rib order by rib.rcsb_id desc\n""" + \
 \
 ( "toLower(rib.citation_title) + toLower(rib.pdbx_keywords_text) + apoc.text.join(rib.citation_rcsb_authors, \"\")  contains '{}' \n".format(
     search) if search is not '' else '' )  +\
-( "{} ({} <= rib.citation_year and rib.citation_year <= {} or rib.citaion_year is null)\n".format(
+( "{} ({} <= rib.citation_year and rib.citation_year <= {} or rib.citation_year is null)\n".format(
     "and" if search != '' else '', year[0] if year[0] is not None else 0, year[1] if year[1] is not None else 9999)  if year is not None else '') + \
 ( "{} {} < rib.resolution and rib.resolution < {}\n".format(
     "and" if search != '' or year !=None else '', resolution[0] if resolution[0] is not None else 0, resolution[1] if resolution[1] is not None else 9999) if resolution is not None else '') + \
