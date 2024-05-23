@@ -1,7 +1,7 @@
 import json
 from pprint import pprint
 import typing
-from typing import Optional
+from typing import Optional, Tuple
 from django.http import  JsonResponse, HttpResponseServerError
 from ninja import Router, Schema
 from neo4j_ribosome.db_reader import dbqueries
@@ -48,30 +48,38 @@ def structure_ptc(request,rcsb_id:str):
 
 @structure_router.get('/list', response=dict,  tags=[TAG])
 def filter_list(request,
-                
-                
-      search                   =None,
-      year                     =None,
-      resolution               =None,
-      polymer_classes          =None,
-      source_taxa              =None,
-      host_taxa                =None):
+      search          = None,
+      year            = None,
+      resolution      = None,
+      polymer_classes = None,
+      source_taxa     = None,
+      host_taxa       = None):
 
+    print("Got params:" )
+    print("Search:", search)
+    print("year:", year)
+    print("resolution:", resolution)
+    print("polymer_classes:", polymer_classes)
+    print("source_taxa:", source_taxa)
+    print("host_taxa:", host_taxa)
                 
-                
-    print(dict(request))
-    print(search, year, resolution, polymer_classes, source_taxa, host_taxa)
-    year = list(map(int,year.split(","))) if year else None
-    resolution = list(map(int,resolution.split(",")))  if resolution else None
-    host_taxa = list(map(int,host_taxa.split(","))) if host_taxa else None
-    source_taxa = list(map(int,source_taxa.split(","))) if source_taxa else None
+    def parse_empty_or_int(_:str):
+        if _ != '':
+            return int(_)
+        else:
+            return None
+
+
+
+    year            = list(map(parse_empty_or_int,year.split(","))) if year else None
+    resolution      = list(map(parse_empty_or_int,resolution.split(",")))  if resolution else None
+    host_taxa       = list(map(parse_empty_or_int,host_taxa.split(","))) if host_taxa else None
+    source_taxa     = list(map(parse_empty_or_int,source_taxa.split(","))) if source_taxa else None
     polymer_classes = list(map(PolymerClass,polymer_classes.split(","))) if polymer_classes else None
-    # request_params = dict(request.GET)
-    # print("got rq params:", request_params)
+
     structures, count = dbqueries.list_structs_filtered(search, year, resolution, polymer_classes, source_taxa, host_taxa)[0]
-    # structures, count = dbqueries.list_structs_filtered(search="complex")[0]
     structures_validated = list(map(lambda r: RibosomeStructure.model_validate(r), structures))
-    return { "structures":structures_validated,"count": count }
+    return { "structures":structures_validated, "count": count }
      
 class ChainsByStruct(Schema):
     class PolymerByStruct(Schema):
