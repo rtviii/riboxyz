@@ -1,6 +1,7 @@
 import json
 from pprint import pprint
 import typing
+from typing import Optional
 from django.http import  JsonResponse, HttpResponseServerError
 from ninja import Router, Schema
 from neo4j_ribosome.db_reader import dbqueries
@@ -35,18 +36,38 @@ def structure_ptc(request,rcsb_id:str):
     except Exception as e:
         return HttpResponseServerError("Failed to find structure profile {}:\n\n{}".format(rcsb_id, e))
 
+
+
+# class StructsListSchema(Schema): 
+#       search                   : Optional[str                                           ]= None
+#       year                     : Optional[typing.Tuple[int | None , int | None]         ]= None
+#       resolution               : Optional[typing.Tuple[float | None , float | None]     ]= None
+#       polymer_classes          : Optional[list[PolynucleotideClass | PolypeptideClass ] ]= None
+#       source_taxa              : Optional[list[int]                                     ]= None
+#       host_taxa                : Optional[list[int]                                     ]= None
+
 @structure_router.get('/list', response=dict,  tags=[TAG])
 def filter_list(request,
-                            search          : None| str                                           = None,
-                            year            : None| typing.Tuple[int | None , int | None]         = None,
-                            resolution      : None| typing.Tuple[float | None , float | None]     = None,
-                            polymer_classes: None | list[PolynucleotideClass | PolypeptideClass ] = None,
-                            source_taxa     : None| list[int]                                     = None,
-                            host_taxa       : None| list[int]                                     = None ):
+                
+                
+      search                   =None,
+      year                     =None,
+      resolution               =None,
+      polymer_classes          =None,
+      source_taxa              =None,
+      host_taxa                =None):
 
-
-    request_params = dict(request.GET)
-    print("got rq params:", request_params)
+                
+                
+    print(dict(request))
+    print(search, year, resolution, polymer_classes, source_taxa, host_taxa)
+    year = list(map(int,year.split(","))) if year else None
+    resolution = list(map(int,resolution.split(",")))  if resolution else None
+    host_taxa = list(map(int,host_taxa.split(","))) if host_taxa else None
+    source_taxa = list(map(int,source_taxa.split(","))) if source_taxa else None
+    polymer_classes = list(map(PolymerClass,polymer_classes.split(","))) if polymer_classes else None
+    # request_params = dict(request.GET)
+    # print("got rq params:", request_params)
     structures, count = dbqueries.list_structs_filtered(search, year, resolution, polymer_classes, source_taxa, host_taxa)[0]
     # structures, count = dbqueries.list_structs_filtered(search="complex")[0]
     structures_validated = list(map(lambda r: RibosomeStructure.model_validate(r), structures))
