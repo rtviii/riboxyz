@@ -470,7 +470,7 @@ class NonpolymericLigand(BaseModel):
     chemicalName  : str
     formula_weight: Optional[float] =None
 
-    pdbx_description: str
+    pdbx_description   : str
     number_of_instances: int
 
     nonpolymer_comp: Optional[NonpolymerComp] = None
