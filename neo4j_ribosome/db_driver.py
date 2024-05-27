@@ -27,8 +27,11 @@ def full_upload(constrains:bool=True):
         wait(futures, return_when=ALL_COMPLETED)
 
 
+# full_upload()
 
 
-# reader = Neo4jQuery()
-# reader.list_structs
-full_upload()
+adapter = Neo4jBuilder('bolt://localhost:7687', 'neo4j')
+for rib in RibosomeAssets.list_all_structs():
+    print("Ligands of {}".format(rib))
+    for l in RibosomeAssets(rib).profile().nonpolymeric_ligands:
+        adapter.upsert_ligand_node(l, rib)

@@ -1,8 +1,8 @@
 from typing import Callable, Literal
-from neo4j import  Driver, ManagedTransaction, Record, Transaction
+from neo4j import Driver, ManagedTransaction, Record, Transaction
 from neo4j.graph import Node, Relationship
 from neo4j import ManagedTransaction, Transaction
-from ribctl.lib.schema.types_ribosome import  NonpolymericLigand, RibosomeStructure
+from ribctl.lib.schema.types_ribosome import NonpolymericLigand, RibosomeStructure
 
 # Get superkingdom given an rcsb_id
 """
@@ -20,44 +20,68 @@ match (p)-[]-(str:RibosomeStructure)
 return p.ncbi_tax_id, str.rcsb_id
 """
 
-def struct_exists(rcsb_id:str) -> Callable[[Transaction | ManagedTransaction], bool]:
+
+def struct_exists(rcsb_id: str) -> Callable[[Transaction | ManagedTransaction], bool]:
     def _(tx: Transaction | ManagedTransaction):
-        return tx.run("""//
+        return (
+            tx.run(
+                """//
                 MATCH (u:RibosomeStructure {rcsb_id: $rcsb_id})
                 return COUNT(u) > 0;
-                """, parameters={"rcsb_id":rcsb_id}).single().value()
+                """,
+                parameters={"rcsb_id": rcsb_id},
+            )
+            .single()
+            .value()
+        )
+
     return _
 
-def link__structure_to_phylogeny(rcsb_id:str, taxid,relationship:Literal['host_organism', 'source_organism'])->Callable[[Transaction | ManagedTransaction], list[ Node ]]:
+
+def link__structure_to_phylogeny(
+    rcsb_id: str, taxid, relationship: Literal["host_organism", "source_organism"]
+) -> Callable[[Transaction | ManagedTransaction], list[Node]]:
 
     def _(tx: Transaction | ManagedTransaction):
-        if relationship == 'host_organism':
-            return tx.run("""//
+        if relationship == "host_organism":
+            return tx.run(
+                """//
             match (struct:RibosomeStructure {rcsb_id: $rcsb_id})
             match (phylo:PhylogenyNode {ncbi_tax_id: $tax_id}) 
             merge (struct)<-[organism:host]-(phylo)
             return  struct, phylo
-            """, {
-                "rcsb_id"    : rcsb_id,
-                "tax_id"     : taxid,
-            }).values('struct', 'phylo')
-        elif relationship == 'source_organism':
-            return tx.run("""//
+            """,
+                {
+                    "rcsb_id": rcsb_id,
+                    "tax_id": taxid,
+                },
+            ).values("struct", "phylo")
+        elif relationship == "source_organism":
+            return tx.run(
+                """//
             match (struct:RibosomeStructure {rcsb_id: $rcsb_id})
             match (phylo:PhylogenyNode {ncbi_tax_id: $tax_id}) 
             merge (struct)<-[organism:source]-(phylo)
             return  struct, phylo
-            """, {
-                "rcsb_id"    : rcsb_id,
-                "tax_id"     : taxid,
-            }).values('struct', 'phylo')
+            """,
+                {
+                    "rcsb_id": rcsb_id,
+                    "tax_id": taxid,
+                },
+            ).values("struct", "phylo")
+
     return _
 
+
 # Transaction
-def node__structure(_rib: RibosomeStructure) -> Callable[[Transaction | ManagedTransaction], Record | None]:
+def node__structure(
+    _rib: RibosomeStructure,
+) -> Callable[[Transaction | ManagedTransaction], Record | None]:
     R = _rib.model_dump()
+
     def _(tx: Transaction | ManagedTransaction):
-        return tx.run("""//
+        return tx.run(
+            """//
         merge ( struct:RibosomeStructure{
                   rcsb_id               : $rcsb_id,
                   expMethod             : $expMethod,
@@ -84,34 +108,73 @@ def node__structure(_rib: RibosomeStructure) -> Callable[[Transaction | ManagedT
               struct.citation_title         = CASE WHEN $citation_title = null then \"null\" else $citation_title END,
               struct.citation_rcsb_authors  = CASE WHEN $citation_rcsb_authors = null then \"null\" else $citation_rcsb_authors END
               return struct
-        """, **R).single()
+        """,
+            **R
+        ).single()
+
     return _
 
+
 # Transaction
-def node__ligand(_ligand:NonpolymericLigand)->Callable[[Transaction | ManagedTransaction], Node ]:
+def node__ligand(
+    _ligand: NonpolymericLigand,
+) -> Callable[[Transaction | ManagedTransaction], Node]:
     L = _ligand.model_dump()
+
     def _(tx: Transaction | ManagedTransaction):
-     return tx.run("""//
-MERGE (ligand:Ligand {chemicalId: 
-                $chemicalId })
-   ON CREATE SET	ligand.chemicalName        = $chemicalName      ,
+        drugbank_id          = None
+        drugbank_description = None
+        try:
+            drugbank_id = _ligand.nonpolymer_comp.drugbank.drugbank_container_identifiers.drugbank_id
+        except:
+            ...
+        try:
+            drugbank_description = _ligand.nonpolymer_comp.drugbank.drugbank_info.description
+        except:
+            ...
+
+
+
+        return tx.run(
+            """//
+    MERGE (ligand:Ligand {chemicalId: $chemicalId })
+    ON CREATE SET   ligand.chemicalName        = $chemicalName      ,
  	                ligand.formula_weight      = $formula_weight    ,
  	                ligand.pdbx_description    = $pdbx_description  ,
- 	                ligand.number_of_instances = $number_of_instances
-       RETURN ligand       
-        """, **L).single(strict=True)['ligand']
+ 	                ligand.number_of_instances = $number_of_instances,
+                    ligand.drugbank_id          =  CASE WHEN $drugbank_id = null then \"null\" else $drugbank_id END,
+                    ligand.drugbank_description =  CASE WHEN $drugbank_description = null then \"null\" else $drugbank_description END
+               RETURN ligand       
+        """,
+            {
+                "chemicalId"          : _ligand.chemicalId,
+                "chemicalName"        : _ligand.chemicalName,
+                "formula_weight"      : _ligand.formula_weight,
+                "pdbx_description"    : _ligand.pdbx_description,
+                "number_of_instances" : _ligand.number_of_instances,
+                "drugbank_id"         : drugbank_id,
+                "drugbank_description": drugbank_description,
+            },
+        ).single(strict=True)["ligand"]
+
     return _
 
+
 # Transaction
-def link__ligand_to_struct(prot: Node, parent_rcsb_id: str) -> Callable[[Transaction | ManagedTransaction], list[list[Node | Relationship]]]: 
+def link__ligand_to_struct(
+    prot: Node, parent_rcsb_id: str
+) -> Callable[[Transaction | ManagedTransaction], list[list[Node | Relationship]]]:
     parent_rcsb_id = parent_rcsb_id.upper()
+
     def _(tx: Transaction | ManagedTransaction):
-        return tx.run("""//
+        return tx.run(
+            """//
   match (ligand:Ligand) where ELEMENTID(ligand)=$ELEM_ID
   match (struct:RibosomeStructure {rcsb_id: $PARENT})
   merge (ligand)<-[contains:contains]-(struct)
   return struct, ligand, contains
 """,
-                      {"ELEM_ID": prot.element_id, "PARENT": parent_rcsb_id}).values('struct', 'ligand', 'contains')
-    return _
+            {"ELEM_ID": prot.element_id, "PARENT": parent_rcsb_id},
+        ).values("struct", "ligand", "contains")
 
+    return _

@@ -48,6 +48,7 @@ def structure_ptc(request,rcsb_id:str):
 
 @structure_router.get('/list', response=dict,  tags=[TAG])
 def filter_list(request,
+      page  = 1,
       search          = None,
       year            = None,
       resolution      = None,
@@ -82,7 +83,7 @@ def filter_list(request,
     source_taxa     = None if source_taxa == "" else list(map(parse_empty_or_int,source_taxa.split(","))) if source_taxa else None
     polymer_classes = None if polymer_classes == "" else list(map(lambda _: PolymerClass(_), polymer_classes.split(","))) 
 
-    structures, count = dbqueries.list_structs_filtered(search, year, resolution, polymer_classes, source_taxa, host_taxa)[0]
+    structures, count = dbqueries.list_structs_filtered(int(page), search, year, resolution, polymer_classes, source_taxa, host_taxa)[0]
     structures_validated = list(map(lambda r: RibosomeStructure.model_validate(r), structures))
     print("Returning", count, "structures")
     return { "structures":structures_validated, "count": count }

@@ -92,7 +92,6 @@ def cmd_etl(args):
             workers   = 4,
             overwrite = args.overwrite or False
         )
-        exit("Exited")
 
     if args.rcsb_id:
         RCSB_ID = str(args.rcsb_id)
