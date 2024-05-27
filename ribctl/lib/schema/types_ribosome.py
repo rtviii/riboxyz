@@ -444,13 +444,6 @@ class NonpolymericLigand(BaseModel):
     #     return NonpolymericLigandMetadatum(**self.model_dump())
 
     class NonpolymerComp(BaseModel):
-        class ChemComp(BaseModel):
-            class ChemCompContainerIdentifiers(BaseModel):
-                id: str
-                name: str
-                three_letter_code: str
-
-            chem_comp_container_identifiers: ChemCompContainerIdentifiers
 
         class Drugbank(BaseModel):
             class DrugbankInfo(BaseModel):
@@ -470,7 +463,6 @@ class NonpolymericLigand(BaseModel):
             reference_database_accession_code: Optional[str] =None
             reference_database_name: Optional[str] =None
 
-        chemp_comp           : Optional[ChemComp]=None
         drugbank             : Optional[Drugbank]=None
         rcsb_chem_comp_target: Optional[list[RcsbChemCompTarget]]=None
 
@@ -481,8 +473,7 @@ class NonpolymericLigand(BaseModel):
     pdbx_description: str
     number_of_instances: int
 
-    nonpolymer_comp: Optional[NonpolymerComp] =None
-
+    nonpolymer_comp: Optional[NonpolymerComp] = None
 
     # nonpoly["nonpolymer_comp"]["chem_comp"]["id"]
     # nonpoly["nonpolymer_comp"]["chem_comp"]["name"]

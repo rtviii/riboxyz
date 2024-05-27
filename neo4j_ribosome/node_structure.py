@@ -92,9 +92,8 @@ def node__ligand(_ligand:NonpolymericLigand)->Callable[[Transaction | ManagedTra
     L = _ligand.model_dump()
     def _(tx: Transaction | ManagedTransaction):
      return tx.run("""//
-MERGE (ligand:Ligand {chemicalId: 
-                $chemicalId })
-   ON CREATE SET	ligand.chemicalName        = $chemicalName      ,
+    MERGE (ligand:Ligand {chemicalId: $chemicalId })
+    ON CREATE SET ligand.chemicalName        = $chemicalName      ,
  	                ligand.formula_weight      = $formula_weight    ,
  	                ligand.pdbx_description    = $pdbx_description  ,
  	                ligand.number_of_instances = $number_of_instances
