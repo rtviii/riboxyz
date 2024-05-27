@@ -106,6 +106,12 @@ class Neo4jBuilder():
         with self.driver.session() as session:
             return session.execute_read(struct_exists(rcsb_id))
 
+    def upsert_ligand_node(self, ligand:NonpolymericLigand, parent_rcsb_id:str):
+
+        with self.driver.session() as s:
+            ligand_node = s.execute_write(node__ligand(ligand))
+            s.execute_write(link__ligand_to_struct(ligand_node, parent_rcsb_id))
+
     def add_structure(self, rcsb_id:str, disable_exists_check:bool=False):
         rcsb_id = rcsb_id.upper()
         if not disable_exists_check and self.check_structure_exists(rcsb_id):
