@@ -415,7 +415,6 @@ def ribosome_representation(session, structure: AtomicStructure):
             run(session, "color /{} {}".format(aaid, get_polymer_color(polyclass)))
             run(session, "show /{} cartoon".format(aaid, get_polymer_color(polyclass)))
 
-
     run(session, "set bgColor white")
     run(session, "graphics silhouettes true width 1")
     run(session, "light soft")
@@ -440,6 +439,7 @@ def register_command(logger):
         synopsis="representation ",
     )
     register("ribrep", desc, ribosome_representation, logger=logger)
+
 
 
 register_command(session.logger)

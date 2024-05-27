@@ -1,0 +1,8 @@
+cd /home/rtviii/dev/riboxyz/chimerax_scripts
+open ribrepr.py
+ribrep #1
+
+movie record
+turn y 2 180
+wait 180
+movie encode /home/rtviii/Desktop/movie2.mp4
