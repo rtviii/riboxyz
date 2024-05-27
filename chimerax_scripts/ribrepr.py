@@ -9,6 +9,7 @@ from chimerax.atomic import Structure, AtomicStructure, Chain
 RIBETL_DATA = os.environ.get("RIBETL_DATA", "/home/rtviii/dev/RIBETL_DATA")
 
 
+
 def ribosome_representation(session, structure: AtomicStructure):
 
     from chimerax.core.commands import run
@@ -16,20 +17,28 @@ def ribosome_representation(session, structure: AtomicStructure):
 
     rcsb_id = str(structure.name).upper()
 
+    run(session, 'hide #1')
+
     with open(os.path.join(RIBETL_DATA, rcsb_id, "{}.json".format(rcsb_id)), "r") as f:
         profile        = json.load(f)
 
 
-    by_aaid        = {}
+    polymers        = {}
     polymer_chains = [ *profile["proteins"], *profile["rnas"], *profile["other_polymers"] ]
-    [ by_aaid.update(x) for x in [ {chain['auth_asym_id']:chain} for chain in polymer_chains ] ]
+    [ polymers.update(x) for x in [ {chain['auth_asym_id']:chain} for chain in polymer_chains ] ]
 
     c:Chain
     for c in structure.chains:
-        chain_auth = c.chain_id
+        aaid = c.chain_id
 
-        print(chain_auth)
-        print(by_aaid[chain_auth])
+        if polymers[aaid]["entity_poly_polymer_type"] == "RNA":
+            run(session, 'surf /{}'.format(aaid))
+            run(session, 'color /{} white'.format(aaid))
+            run(session, 'transparency /{} 75'.format(aaid))
+
+
+
+        run(session, 'light soft' )
         # for c in :
         #     nomenclature = c['nomenclature']
         #     if len(nomenclature) < 1:
@@ -38,17 +47,8 @@ def ribosome_representation(session, structure: AtomicStructure):
         #     poly_class = nomenclature[0]
         #     print(poly_class)
 
+    run(session, 'graphics silhouettes true width 1')
     run(session, 'light soft' )
-        # run(session, 'color #%s/%s %s ribbon' % (s.id_string, cid, hex_color(chain_colors[cid])))
-
-        #     for r in c["residues"]:
-        #         residue = chain.residues[r["residue_id"]]
-        #         for a in r["atoms"]:
-        #             atom = residue.atoms[a["atom_id"]]
-        #             atom.color = a["color"]
-        #             atom.display = a["display"]
-        #             atom.radius = a["radius"]
-        # print(profile)
 
 
 def register_command(logger):
