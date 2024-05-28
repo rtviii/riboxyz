@@ -1,8 +1,8 @@
 from concurrent.futures import ALL_COMPLETED, Future, ThreadPoolExecutor, wait
 from functools import partial
 import sys
-from neo4j_ribosome.db_reader import Neo4jQuery
-from neo4j_ribosome.db_builder import Neo4jBuilder
+from neo4j_ribosome.db_lib_reader import Neo4jQuery
+from neo4j_ribosome.db_lib_builder import Neo4jBuilder
 from ribctl.etl.ribosome_assets import RibosomeAssets
 sys.dont_write_bytecode = True
 from dotenv import load_dotenv

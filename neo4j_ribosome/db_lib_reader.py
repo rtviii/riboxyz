@@ -74,8 +74,6 @@ class Neo4jQuery:
 
             return session.execute_read(_)
 
-    # TODO : {FETCH POLYMERS (RNA/PROTEIN)(BYSTRUCTURE/BYPOLYMERCLASS)}
-
     def list_polymers_filtered_by_polymer_class(self, page: int):
 
         query_by_polymer_class = """
@@ -344,7 +342,6 @@ return collect(apoc.map.merge(ribosomes, rest)),  collect(distinct total_count)[
                 return tx.run(query).values()
 
             return session.execute_read(_)
-
 
     def get_taxa(self, src_host:typing.Literal['source', 'host'])-> list[int]:
         def _(tx: Transaction | ManagedTransaction):
