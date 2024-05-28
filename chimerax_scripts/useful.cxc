@@ -1,8 +1,0 @@
-light soft
-light gentle
-
-graphics silhouettes true width 1
-surface /A
-color /A cornflower blue
-color /E light salmon
-transparency 95 target s

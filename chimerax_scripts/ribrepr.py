@@ -409,11 +409,21 @@ def ribosome_representation(session, structure: AtomicStructure):
         if polymers[aaid]["entity_poly_polymer_type"] == "RNA":
             run(session, "surf /{}".format(aaid))
             run(session, "color /{} gray".format(aaid))
-            # run(session, "transparency /{} 75".format(aaid))
         else:
-            # run(session, "surf /{}".format(aaid))
-            run(session, "color /{} {}".format(aaid, get_polymer_color(polyclass)))
+            # run(session, "show /{} surf".format(aaid))
             run(session, "show /{} cartoon".format(aaid, get_polymer_color(polyclass)))
+            run(session, "color /{} {}".format(aaid, get_polymer_color(polyclass)))
+
+    # for c in structure.chains:
+
+    #     if polymers[aaid]["entity_poly_polymer_type"] == "RNA":
+    #         ...
+    #     else:
+
+    #         run(session, "transparency /{} 80".format(aaid))
+    #         run(session, "transparency /{} 80".format(aaid))
+
+
 
     run(session, "set bgColor white")
     run(session, "graphics silhouettes true width 1")
@@ -434,10 +444,11 @@ def register_command(logger):
     from chimerax.atomic import Residue, Atom
 
     desc = CmdDesc(
-        required=[("structure", AtomicStructureArg)],
-        required_arguments=["structure"],
-        synopsis="representation ",
+        required           = [("structure", AtomicStructureArg)],
+        required_arguments = ["structure"],
+        synopsis           = "representation ",
     )
+
     register("ribrep", desc, ribosome_representation, logger=logger)
 
 register_command(session.logger)
