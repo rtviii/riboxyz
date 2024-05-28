@@ -60,6 +60,10 @@ class Neo4jQuery():
 
             return session.execute_read(_)
 
+    # TODO : {FETCH POLYMERS (RNA/PROTEIN)(BYSTRUCTURE/BYPOLYMERCLASS)}
+    def list_polymers_filtered(self):
+        ...
+
     def list_structs_filtered(self,
                             page: int,
                             search          : None| str                                           = None,

@@ -440,6 +440,4 @@ def register_command(logger):
     )
     register("ribrep", desc, ribosome_representation, logger=logger)
 
-
-
 register_command(session.logger)
