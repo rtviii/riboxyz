@@ -81,7 +81,7 @@ class Neo4jQuery:
          with poly order by poly.nomenclature desc
          with collect(poly)[{}..{}] as poly, count(poly) as pcount
          unwind poly as polys
-         return properties(polys), pcount
+         return collect(properties(polys)), pcount
         """.format(
             (page - 1) * 50, page * 50
         )
@@ -201,7 +201,7 @@ with rib order by rib.rcsb_id desc\n"""
  with poly order by poly.nomenclature desc
  with collect(poly)[{}..{}] as poly, count(poly) as pcount
  unwind poly as polys
- return properties(polys), pcount
+ return collect(properties(polys)), pcount
 """.format(
                 (page - 1) * 50, page * 50
             )

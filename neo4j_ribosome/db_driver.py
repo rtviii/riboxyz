@@ -14,7 +14,7 @@ load_dotenv('.env')
 #* - assumes the RiboosomeStrucutre profiles are rendered
 
 def full_upload(constrains:bool=True):
-    #TODO :  ------- SANITY CHECKS
+
     adapter = Neo4jBuilder('bolt://localhost:7687', 'neo4j')
     if constrains:
         adapter.initialize_new_instance()

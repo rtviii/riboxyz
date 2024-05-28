@@ -1,53 +1,21 @@
 import json
-from pprint import pprint
 import typing
-from typing import Optional, Tuple
 from django.http import  JsonResponse, HttpResponseServerError
 from ninja import Router, Schema
-from neo4j_ribosome.db_reader import dbqueries
+from neo4j_ribosome.db_lib_reader import dbqueries
 from ribctl.etl.ribosome_assets import RibosomeAssets
-from ribctl.lib.schema.types_ribosome import  CytosolicProteinClass, CytosolicRNAClass, ElongationFactorClass, InitiationFactorClass, LifecycleFactorClass, MitochondrialProteinClass, MitochondrialRNAClass, PolymerClass, PolynucleotideClass, PolypeptideClass, ProteinClass, RibosomeStructure, tRNA
-from ribctl.lib.libtax import Taxid, ncbi
+from ribctl.lib.schema.types_ribosome import  CytosolicProteinClass, CytosolicRNAClass, ElongationFactorClass, InitiationFactorClass, LifecycleFactorClass, MitochondrialProteinClass, MitochondrialRNAClass, Polymer, PolymerClass, PolynucleotideClass, PolypeptideClass, ProteinClass, RibosomeStructure, tRNA
+from ribctl.lib.libtax import Taxid 
 
 structure_router = Router()
 TAG              = "structures"
 
-@structure_router.get('/profile', response=RibosomeStructure, tags=[TAG],)
-def structure_profile(request,rcsb_id:str):
-    """Return a `.json` profile of the given RCSB_ID structure."""
-
-    params      = dict(request.GET)
-    rcsb_id     = str.upper(params['rcsb_id'][0])
-
-    try:
-        with open(RibosomeAssets(rcsb_id)._json_profile_filepath(), 'r') as f:
-            return JsonResponse(json.load(f))
-    except Exception as e:
-        return HttpResponseServerError("Failed to find structure profile {}:\n\n{}".format(rcsb_id, e))
-
-@structure_router.get('/ptc', response=dict, tags=[TAG],)
-def structure_ptc(request,rcsb_id:str):
-    """Return a `.json` profile of the given RCSB_ID structure."""
-
-    params      = dict(request.GET)
-    rcsb_id     = str.upper(params['rcsb_id'][0])
-    try:
-        ptc = RibosomeAssets(rcsb_id)._ptc_residues()
-    except Exception as e:
-        return HttpResponseServerError("Failed to find structure profile {}:\n\n{}".format(rcsb_id, e))
 
 
 
-# class StructsListSchema(Schema): 
-#       search                   : Optional[str                                           ]= None
-#       year                     : Optional[typing.Tuple[int | None , int | None]         ]= None
-#       resolution               : Optional[typing.Tuple[float | None , float | None]     ]= None
-#       polymer_classes          : Optional[list[PolynucleotideClass | PolypeptideClass ] ]= None
-#       source_taxa              : Optional[list[int]                                     ]= None
-#       host_taxa                : Optional[list[int]                                     ]= None
 
-@structure_router.get('/list', response=dict,  tags=[TAG])
-def filter_list(request,
+@structure_router.get('/list_polymers_by_structure', response=dict,  tags=[TAG])
+def polymers_by_structure(request,
       page  = 1,
       search          = None,
       year            = None,
@@ -77,16 +45,58 @@ def filter_list(request,
             return None
 
 
-    year            = None if year == "" else list(map(parse_empty_or_int,year.split(",")))
-    resolution      = None if resolution == "" else list(map(parse_empty_or_float,resolution.split(","))) 
-    host_taxa       = None if host_taxa == "" else list(map(parse_empty_or_int,host_taxa.split(","))) if host_taxa else None
-    source_taxa     = None if source_taxa == "" else list(map(parse_empty_or_int,source_taxa.split(","))) if source_taxa else None
-    polymer_classes = None if polymer_classes == "" else list(map(lambda _: PolymerClass(_), polymer_classes.split(","))) 
+    year            = None if year            == "" else list(map(parse_empty_or_int,year.split(",")))
+    resolution      = None if resolution      == "" else list(map(parse_empty_or_float,resolution.split(",")))
+    host_taxa       = None if host_taxa       == "" else list(map(parse_empty_or_int,host_taxa.split(","))) if host_taxa else None
+    source_taxa     = None if source_taxa     == "" else list(map(parse_empty_or_int,source_taxa.split(","))) if source_taxa else None
+    polymer_classes = None if polymer_classes == "" else list(map(lambda _: PolymerClass(_), polymer_classes.split(",")))
 
-    structures, count = dbqueries.list_structs_filtered(int(page), search, year, resolution, polymer_classes, source_taxa, host_taxa)[0]
-    structures_validated = list(map(lambda r: RibosomeStructure.model_validate(r), structures))
-    print("Returning", count, "structures")
-    return { "structures":structures_validated, "count": count }
+    polymers, count = dbqueries.list_polymers_filtered_by_structure(page, search, year, resolution, polymer_classes, source_taxa, host_taxa)[0]
+    print(polymers, count)
+    print("Got", len(polymers), "polymers")
+    for p in polymers:
+        print(p)
+    # polymers_validated = list(map(lambda r: Polymer.model_validate(r), polymers))
+
+
+    # print(polymers[0])
+    print("Returning", count, "polymers")
+    return { "polymers":polymers_validated, "count": count }
+
+
+
+
+
+
+
+
+@structure_router.get('/profile', response=RibosomeStructure, tags=[TAG],)
+def structure_profile(request,rcsb_id:str):
+    """Return a `.json` profile of the given RCSB_ID structure."""
+
+    params      = dict(request.GET)
+    rcsb_id     = str.upper(params['rcsb_id'][0])
+
+    try:
+        with open(RibosomeAssets(rcsb_id)._json_profile_filepath(), 'r') as f:
+            return JsonResponse(json.load(f))
+    except Exception as e:
+        return HttpResponseServerError("Failed to find structure profile {}:\n\n{}".format(rcsb_id, e))
+
+@structure_router.get('/ptc', response=dict, tags=[TAG],)
+def structure_ptc(request,rcsb_id:str):
+    """Return a `.json` profile of the given RCSB_ID structure."""
+
+    params      = dict(request.GET)
+    rcsb_id     = str.upper(params['rcsb_id'][0])
+    try:
+        ptc = RibosomeAssets(rcsb_id)._ptc_residues()
+    except Exception as e:
+        return HttpResponseServerError("Failed to find structure profile {}:\n\n{}".format(rcsb_id, e))
+
+
+
+
      
 class ChainsByStruct(Schema):
     class PolymerByStruct(Schema):
