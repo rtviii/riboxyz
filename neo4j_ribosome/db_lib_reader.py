@@ -74,15 +74,15 @@ class Neo4jQuery:
 
             return session.execute_read(_)
 
-    def list_polymers_filtered_by_polymer_class(self, page: int):
+    def list_polymers_filtered_by_polymer_class(self, page: int, polymer_class: PolymerClass):
 
         query_by_polymer_class = """
-         match (poly:Polymer)-[]-(pc:PolymerClass {class_id:"uL4"})
+         match (poly:Polymer)-[]-(pc:PolymerClass {{class_id:"{}" }})
          with poly order by poly.nomenclature desc
          with collect(poly)[{}..{}] as poly, count(poly) as pcount
          unwind poly as polys
-         return properties(polys), pcount
-        """.format(
+         return collect(properties(polys)), pcount
+        """.format(polymer_class.value,
             (page - 1) * 50, page * 50
         )
 
@@ -201,7 +201,7 @@ with rib order by rib.rcsb_id desc\n"""
  with poly order by poly.nomenclature desc
  with collect(poly)[{}..{}] as poly, count(poly) as pcount
  unwind poly as polys
- return properties(polys), pcount
+ return collect(properties(polys)), pcount
 """.format(
                 (page - 1) * 50, page * 50
             )
