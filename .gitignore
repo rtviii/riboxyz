@@ -8,6 +8,9 @@ rnacentral*
 
 **/logs/**
 
+**/*.mp4
+*.mp4
+
 **/*.ply
 *.ply
 

@@ -5,6 +5,9 @@ import sys
 from chimerax.core.commands import register, CmdDesc
 from chimerax.atomic import ResiduesArg, Chains, ChainArg, StructureArg
 from chimerax.atomic import Structure, AtomicStructure, Chain
+from chimerax.core.commands import run, runscript
+
+# https://mail.cgl.ucsf.edu/mailman/archives/list/chimera-users@cgl.ucsf.edu/thread/EOUA5K3CZU6DJYVPISR3GFWHCISR6WGV/
 
 
 RIBETL_DATA = os.environ.get("RIBETL_DATA", "/home/rtviii/dev/RIBETL_DATA")
@@ -376,7 +379,7 @@ def ribosome_representation(session, structure: AtomicStructure):
     from chimerax.core.colors import hex_color
     from chimerax.atomic import Residue, Atom, Chain
 
-    rcsb_id = str(structure.name).upper()
+    rcsb_id = str(structure.name).upper().split('.')[0] # <-- the structure gets opened with the basename ex "(5AFI.cif)" 
 
     run(session, "hide #1")
 
@@ -414,26 +417,42 @@ def ribosome_representation(session, structure: AtomicStructure):
     run(session, "graphics silhouettes true width 1")
     run(session, "light soft")
 
+def produce_and_save_movie(session, target:str):
+    print("GOT TARGET", target)
+    RCSB_ID = target
+    
+    run(session, "open /home/rtviii/dev/RIBETL_DATA/{}/{}.cif".format(RCSB_ID, RCSB_ID))
+    run(session, "ribrep #1")
+    run(session, "movie record")
+    run(session, "turn y 2 180")
+    run(session, "wait 180")
+    run(session, "movie encode /home/rtviii/dev/riboxyz/chimerax/movies/{}.mp4".format(RCSB_ID))
+    run(session, "delete all")
 
-def register_command(logger):
+
+def register_ribrepr_command(logger):
     from chimerax.core.commands import CmdDesc, register
-    from chimerax.core.commands import (
-        OpenFolderNameArg,
-        BoolArg,
-        FloatArg,
-        RepeatOf,
-        StringArg,
-    )
-    from chimerax.map import MapArg
     from chimerax.atomic import AtomicStructureArg, Chain, Residue, Atom
-    from chimerax.atomic import Residue, Atom
 
     desc = CmdDesc(
         required           = [("structure", AtomicStructureArg)],
         required_arguments = ["structure"],
         synopsis           = "representation ",
     )
-
     register("ribrep", desc, ribosome_representation, logger=logger)
 
-register_command(session.logger)
+def register_movie_command(logger):
+    from chimerax.core.commands import CmdDesc, register, StringArg
+    from chimerax.atomic import AtomicStructureArg, Chain, Residue, Atom
+    desc = CmdDesc(
+        required           = [("target", StringArg)],
+        # required_arguments = ["structure"],
+        synopsis           = "target ",
+    )
+    register("ribmovie", desc, produce_and_save_movie, logger=logger)
+
+
+register_ribrepr_command(session.logger)
+register_movie_command(session.logger)
+
+
