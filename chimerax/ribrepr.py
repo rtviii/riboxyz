@@ -381,7 +381,7 @@ def ribosome_representation(session, structure: AtomicStructure):
 
     rcsb_id = str(structure.name).upper().split('.')[0] # <-- the structure gets opened with the basename ex "(5AFI.cif)" 
 
-    run(session, "hide #1")
+    run(session, "hide #2")
 
     with open(os.path.join(RIBETL_DATA, rcsb_id, "{}.json".format(rcsb_id)), "r") as f:
         profile = json.load(f)
@@ -422,12 +422,13 @@ def produce_and_save_movie(session, target:str):
     RCSB_ID = target
     
     run(session, "open /home/rtviii/dev/RIBETL_DATA/{}/{}.cif".format(RCSB_ID, RCSB_ID))
-    run(session, "ribrep #1")
+    run(session, "sym #1 assembly 1") # take only one assembly if multiple are available
+    run(session, "ribrep #2")
     run(session, "movie record")
     run(session, "turn y 2 180")
     run(session, "wait 180")
     run(session, "movie encode /home/rtviii/dev/riboxyz/chimerax/movies/{}.mp4".format(RCSB_ID))
-    run(session, "delete all")
+    run(session, "close all")
 
 
 def register_ribrepr_command(logger):

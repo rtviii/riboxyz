@@ -11,8 +11,6 @@ structure_router = Router()
 TAG              = "structures"
 
 
-
-
 @structure_router.get('/list_polymers_filtered_by_polymer_class', response=dict,  tags=[TAG])
 def polymers_by_polymer_class(request,
       polymer_class:PolymerClass,
@@ -21,7 +19,6 @@ def polymers_by_polymer_class(request,
 
     polymers, count = dbqueries.list_polymers_filtered_by_polymer_class(page, polymer_class)[0]
     return { "polymers":polymers, "count": count }
-
 
 @structure_router.get('/list_polymers_by_structure', response=dict,  tags=[TAG])
 def polymers_by_structure(request,
@@ -33,13 +30,6 @@ def polymers_by_structure(request,
       source_taxa     = None,
       host_taxa       = None):
 
-    print("Got params:" )
-    print("Search:", search)
-    print("year:", year)
-    print("resolution:", resolution)
-    print("polymer_classes:", polymer_classes)
-    print("source_taxa:", source_taxa)
-    print("host_taxa:", host_taxa)
                 
     def parse_empty_or_int(_:str):
         if _ != '':
@@ -60,10 +50,13 @@ def polymers_by_structure(request,
     source_taxa     = None if source_taxa     == "" else list(map(parse_empty_or_int,source_taxa.split(","))) if source_taxa else None
     polymer_classes = None if polymer_classes == "" else list(map(lambda _: PolymerClass(_), polymer_classes.split(",")))
 
-    polymers, count = dbqueries.list_polymers_filtered_by_structure(page, search, year, resolution, polymer_classes, source_taxa, host_taxa)[0]
 
-
-    return { "polymers":polymers, "count": count }
+    qreturn =  dbqueries.list_polymers_filtered_by_structure(page, search, year, resolution, polymer_classes, source_taxa, host_taxa)
+    if len(qreturn) < 1:
+        return { "polymers":[], "count": 0 }
+    else:
+        polymers, count = qreturn[0]
+        return { "polymers":polymers, "count": count }
 
 
 @structure_router.get('/list', response=dict,  tags=[TAG])
@@ -108,7 +101,6 @@ def filter_list(request,
     return { "structures":structures_validated, "count": count }
 
 
-
 @structure_router.get('/profile', response=RibosomeStructure, tags=[TAG],)
 def structure_profile(request,rcsb_id:str):
     """Return a `.json` profile of the given RCSB_ID structure."""
@@ -132,9 +124,6 @@ def structure_ptc(request,rcsb_id:str):
         ptc = RibosomeAssets(rcsb_id)._ptc_residues()
     except Exception as e:
         return HttpResponseServerError("Failed to find structure profile {}:\n\n{}".format(rcsb_id, e))
-
-
-
 
      
 class ChainsByStruct(Schema):
