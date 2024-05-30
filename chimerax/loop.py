@@ -4,7 +4,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 DEST_DIR = "/home/rtviii/dev/riboxyz/chimerax/movies"
 
-for rcsb_id in ["7K00", "4UG0"]:
+for rcsb_id in os.listdir('/home/rtviii/dev/RIBETL_DATA'):
     movie_dir = os.path.join(DEST_DIR, "{}.mp4".format(rcsb_id))
     print("Attempting to write ", movie_dir)
     print("Listdir:", os.listdir(DEST_DIR))
@@ -14,3 +14,4 @@ for rcsb_id in ["7K00", "4UG0"]:
         continue
     else:
         run(session,"ribmovie {}".format(rcsb_id))
+        
