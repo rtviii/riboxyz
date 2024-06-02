@@ -69,7 +69,12 @@ class Neo4jQuery:
                 return tx.run(
                     """//
 match (n:Ligand)-[]-(r:RibosomeStructure) where not toLower(n.chemicalName) contains "ion" 
-return properties(n), {parent_structures: collect(r.rcsb_id), parent_organism_ids: collect(DISTINCT r.src_organism_ids[0]), parent_organism_names: collect(DISTINCT r.src_organism_names[0])}
+return properties(n), 
+    {
+        parent_structures    : collect(r.rcsb_id),
+        parent_organism_ids  : collect(DISTINCT r.src_organism_ids[0]),
+        parent_organism_names: collect(DISTINCT r.src_organism_names[0])
+    }
 """
                 ).values()
 
