@@ -8,8 +8,6 @@ sys.dont_write_bytecode = True
 from dotenv import load_dotenv
 load_dotenv('.env')
 
-
-
 #* Recipe for initializing a new instance from the RIBETL_DATA pool
 #* - assumes the RiboosomeStrucutre profiles are rendered
 
@@ -25,10 +23,6 @@ def full_upload(constrains:bool=True):
             fut          = executor.submit(partial(adapter.add_structure, rcsb_id, False))
             futures.append(fut)
         wait(futures, return_when=ALL_COMPLETED)
-
-
-# full_upload()
-
 
 adapter = Neo4jBuilder('bolt://localhost:7687', 'neo4j')
 for rib in RibosomeAssets.list_all_structs():

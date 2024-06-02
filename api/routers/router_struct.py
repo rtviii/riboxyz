@@ -1,15 +1,15 @@
 import json
+from pprint import pprint
 import typing
 from django.http import  JsonResponse, HttpResponseServerError
 from ninja import Router, Schema
 from neo4j_ribosome.db_lib_reader import dbqueries
 from ribctl.etl.ribosome_assets import RibosomeAssets
-from ribctl.lib.schema.types_ribosome import  RNA, CytosolicProteinClass, CytosolicRNAClass, ElongationFactorClass, InitiationFactorClass, LifecycleFactorClass, MitochondrialProteinClass, MitochondrialRNAClass, Polymer, PolymerClass, PolynucleotideClass, PolypeptideClass, Protein, ProteinClass, RibosomeStructure, tRNA
+from ribctl.lib.schema.types_ribosome import  CytosolicProteinClass, CytosolicRNAClass, ElongationFactorClass, InitiationFactorClass, LifecycleFactorClass, MitochondrialProteinClass, MitochondrialRNAClass, Polymer, PolymerClass, PolynucleotideClass, PolypeptideClass, Protein, ProteinClass, RibosomeStructure, tRNA
 from ribctl.lib.libtax import Taxid 
 
 structure_router = Router()
 TAG              = "structures"
-
 
 @structure_router.get('/list_polymers_filtered_by_polymer_class', response=dict,  tags=[TAG])
 def polymers_by_polymer_class(request,
@@ -50,14 +50,19 @@ def polymers_by_structure(request,
     source_taxa     = None if source_taxa     == "" else list(map(parse_empty_or_int,source_taxa.split(","))) if source_taxa else None
     polymer_classes = None if polymer_classes == "" else list(map(lambda _: PolymerClass(_), polymer_classes.split(",")))
 
-
     qreturn =  dbqueries.list_polymers_filtered_by_structure(page, search, year, resolution, polymer_classes, source_taxa, host_taxa)
+
     if len(qreturn) < 1:
         return { "polymers":[], "count": 0 }
     else:
         polymers, count = qreturn[0]
         return { "polymers":polymers, "count": count }
 
+
+@structure_router.get('/list_ligands', response=list[dict|list[str]],  tags=[TAG])
+def list_lignads(request):
+    # structures_validated = list(map(lambda r: RibosomeStructure.model_validate(r), structures))
+    return dbqueries.list_ligands()
 
 @structure_router.get('/list', response=dict,  tags=[TAG])
 def filter_list(request,

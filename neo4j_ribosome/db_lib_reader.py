@@ -68,9 +68,8 @@ class Neo4jQuery:
             def _(tx: Transaction | ManagedTransaction):
                 return tx.run(
                     """//
-                        match (n:Ligand)-[]-(r:RibosomeStructure) where not toLower(n.chemicalName) contains "ion" return properties(n), collect(r.rcsb_id)
-                                        """
-                ).value()
+match (n:Ligand)-[]-(r:RibosomeStructure) where not toLower(n.chemicalName) contains "ion" return properties(n), collect(r.rcsb_id)"""
+                ).values()
 
             return session.execute_read(_)
 
