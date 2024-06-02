@@ -58,15 +58,13 @@ def polymers_by_structure(request,
         polymers, count = qreturn[0]
         return { "polymers":polymers, "count": count }
 
-
-@structure_router.get('/list_ligands', response=list[dict|list[str]],  tags=[TAG])
+@structure_router.get('/list_ligands',   tags=[TAG])
 def list_lignads(request):
-    # structures_validated = list(map(lambda r: RibosomeStructure.model_validate(r), structures))
     return dbqueries.list_ligands()
 
 @structure_router.get('/list', response=dict,  tags=[TAG])
 def filter_list(request,
-      page  = 1,
+      page            = 1,
       search          = None,
       year            = None,
       resolution      = None,
@@ -74,14 +72,6 @@ def filter_list(request,
       source_taxa     = None,
       host_taxa       = None):
 
-    print("Got params:" )
-    print("Search:", search)
-    print("year:", year)
-    print("resolution:", resolution)
-    print("polymer_classes:", polymer_classes)
-    print("source_taxa:", source_taxa)
-    print("host_taxa:", host_taxa)
-                
     def parse_empty_or_int(_:str):
         if _ != '':
             return int(_)
