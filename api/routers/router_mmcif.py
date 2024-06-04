@@ -6,13 +6,14 @@ from ninja import Router
 from ribctl.etl.ribosome_assets import RibosomeAssets
 from ribctl.lib.schema.types_ribosome import RNA, LifecycleFactorClass, MitochondrialProteinClass, Polymer, PolymerClass, CytosolicProteinClass, PolynucleotideClass, PolypeptideClass, Protein, ProteinClass, RibosomeStructure
 
-mmcif_router = Router();tag = "pdbx/mmcif_structures"
+mmcif_router = Router();
+tag = "mmcif"
 
 # E  E - ul4
-@mmcif_router.get('/chain',  tags=[tag], include_in_schema=False)
-def send_pdbx_mmcif_file(request, rcsb_id:str, auth_asym_id:str):
+@mmcif_router.get('/polymer',  tags=[tag])
+def polymer(request, rcsb_id:str, auth_asym_id:str):
     rcsb_id = rcsb_id.upper()
-    chain_fullpath = os.path.join(os.environ.get('RIBETL_DATA'), rcsb_id, "CHAINS", f'{rcsb_id}_STRAND_{auth_asym_id}.cif')
+    chain_fullpath = os.path.join(os.environ.get('RIBETL_DATA'), rcsb_id, "CHAINS", f'{rcsb_id}_{auth_asym_id}.cif')
     
     # Ensure the file exists
     if not os.path.exists(chain_fullpath):
