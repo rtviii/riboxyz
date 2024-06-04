@@ -367,6 +367,7 @@ CHIMERAX_COLORS = [
 def get_polymer_color(polymer_class:str):
     polyix      = list(map(lambda x: x.value, (PolymerClass)))
     class_index = polyix.index(polymer_class) % len(polyix)
+
     if polymer_class == None:
         return "gray"
     return CHIMERAX_COLORS[(class_index % len(CHIMERAX_COLORS))][1]

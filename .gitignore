@@ -24,7 +24,9 @@ volume/**
 **/volume/
 
 
-**/*.hmm
+**.mmcif
+**/*.mmcif
+
 *.hmm
 **/f_**
 

@@ -182,13 +182,13 @@ try:
                 asyncio.run(obtain_assets(struct, Assetlist(profile=True), overwrite=True))
         exit(0)
 
-    if args.ncbi_init:
+    # if args.ncbi_init:
 
-        for struct in os.listdir(RIBETL_DATA):
-            print(struct, verify_profile_exists(struct))
-            if not verify_profile_exists(struct):
-                asyncio.run(obtain_assets(struct, Assetlist(profile=True), overwrite=True))
-        exit(0)
+    #     for struct in os.listdir(RIBETL_DATA):
+    #         print(struct, verify_profile_exists(struct))
+    #         if not verify_profile_exists(struct):
+    #             asyncio.run(obtain_assets(struct, Assetlist(profile=True), overwrite=True))
+    #     exit(0)
 
     if hasattr(args, 'func'):
         args.func(args)

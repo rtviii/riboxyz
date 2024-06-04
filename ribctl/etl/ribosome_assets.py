@@ -106,9 +106,7 @@ class RibosomeAssets:
         return f"{self._dir_path()}/{self.rcsb_id}_modified.cif"
 
     def _ptc_residues(self) -> dict[str, dict[str, list[float]]]:
-        PTC_RESIDUES_PATH = os.path.join(
-            RIBETL_DATA, self.rcsb_id, "{}_PTC_COORDINATES.json".format(self.rcsb_id)
-        )
+        PTC_RESIDUES_PATH = os.path.join( RIBETL_DATA, self.rcsb_id, "{}_PTC_COORDINATES.json".format(self.rcsb_id) )
         with open(PTC_RESIDUES_PATH, "r") as infile:
             return json.load(infile)
 
@@ -341,6 +339,7 @@ class RibosomeAssets:
         return seq
 
     # ※ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-= Verification =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    #TODO : A lot of this crap should be lib functions untied to this infra class.
 
     def _verify_dir_exists(self):
         if not os.path.exists(self._dir_path()):

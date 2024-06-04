@@ -844,25 +844,6 @@ dbscan_pairs = [
 ]
 
 
-# def move_cords_to_normalized_cord_frame(
-#     grid_dimensions    : np.ndarray,
-#     translation_vectors: np.ndarray,
-#     original_cords     : np.ndarray,
-# )                  : 
-#     """this is a helper function for plotting to move additional atom coordinates into the cord frame of the mesh (vox grid indices)"""
-#     normalized_original_cords = ( original_cords - translation_vectors[0] + translation_vectors[1] )
-#     voxel_size = 1
-#     normalized_original_cords_quantized = np.round(
-#         normalized_original_cords / voxel_size
-#     ).astype(int)
-#     vox_grid = np.zeros(grid_dimensions)
-#     vox_grid[
-#         normalized_original_cords_quantized[:, 0],
-#         normalized_original_cords_quantized[:, 1],
-#         normalized_original_cords_quantized[:, 2],
-#     ] = 1
-#     __xyz_v_positive_ix = np.asarray( np.where(vox_grid == 1) )
-#     return __xyz_v_positive_ix.T
 
 def retrieve_ptc_and_chain_atoms(rcsb_id):
         with open( tunnel_atom_encoding_path(rcsb_id), "r", ) as infile:
