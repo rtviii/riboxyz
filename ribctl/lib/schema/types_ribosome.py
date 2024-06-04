@@ -579,6 +579,12 @@ class AssemblyInstancesMap(BaseModel):
 #     # other_polymers_metadata: list[PolymerMetadatum]
 #     # nonpolymeric_ligands   : list[NonpolymericLigandMetadatum]
 
+
+# class PTCSite(BaseModel):
+
+
+
+
 class RibosomeStructure(BaseModel):
 
     def get_nomenclature_map(self) -> dict[str, list[Polymer]]:

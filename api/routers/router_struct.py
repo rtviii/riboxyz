@@ -62,6 +62,9 @@ def polymers_by_structure(request,
 
 
 
+@structure_router.get('/ptc',  tags=[TAG])
+def ptc(request):
+    return dbqueries.list_ligands()
 
 
 @structure_router.get('/list_ligands',  tags=[TAG])

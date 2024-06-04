@@ -100,7 +100,7 @@ def ptc_resdiues_get(
     Given a bacterial(?) structure (assertion un_enforced):
      - obtain the LSU rRNA chain
      - sanitze the sequence (canonicalize non-canonical residues)
-     - locate the conserved subsequence (due to Doris et al.)
+     - locate the conserved subsequence (due to Doris et al. 2015)
      Returns the residue list for the ptc and the `auth_asym_id` of the rRNA chain
     """
     struct_profile = biopython_structure
@@ -128,8 +128,7 @@ def ptc_resdiues_get(
         if _r.get_resname() == "PSU":
             _r.resname = "U"
 
-    raw_seq = reduce(lambda x, y: x + y.resname, ress_sanitized, "")
-
+    raw_seq      = reduce(lambda x, y: x + y.resname, ress_sanitized, "")
 
     matches      = find_near_matches(DORIS_ET_AL["SITE_9"], raw_seq, max_l_dist=1)
     m0           = pick_match(matches, len(raw_seq))
