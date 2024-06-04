@@ -1,5 +1,5 @@
 import json
-from typing import Optional
+from typing import Dict, Optional
 from enum import Enum
 from Bio.SeqRecord import SeqRecord
 from Bio.Seq import Seq
@@ -579,8 +579,19 @@ class AssemblyInstancesMap(BaseModel):
 #     # other_polymers_metadata: list[PolymerMetadatum]
 #     # nonpolymeric_ligands   : list[NonpolymericLigandMetadatum]
 
+class NomenclatureItem(BaseModel):
+    nomenclature: list[str]
 
-# class PTCSite(BaseModel):
+class NomenclatureTable(BaseModel):
+    __pydantic_root_model__: Dict[str, NomenclatureItem]
+
+
+
+class PTCInfo(BaseModel):
+    site_9_residues : list[tuple[str, int]]
+    LSU_rRNA_auth_asym_id: str
+    midpoint_coordinates : tuple[float, float, float]
+    nomenclature_table: NomenclatureTable
 
 
 

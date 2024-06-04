@@ -442,7 +442,6 @@ class RibosomeAssets:
             "nomenclature_table": self._nomenclature_table(),
         }
 
-        pprint(writeout)
         with open(asset_ptc_coords_path, "w") as f:
             json.dump(writeout, f)
             etllogger.info(

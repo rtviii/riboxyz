@@ -6,7 +6,7 @@ from ninja import Router, Schema
 from pydantic import BaseModel
 from neo4j_ribosome.db_lib_reader import dbqueries
 from ribctl.etl.ribosome_assets import RibosomeAssets
-from ribctl.lib.schema.types_ribosome import  CytosolicProteinClass, CytosolicRNAClass, ElongationFactorClass, InitiationFactorClass, LifecycleFactorClass, MitochondrialProteinClass, MitochondrialRNAClass, Polymer, PolymerClass, PolynucleotideClass, PolypeptideClass, Protein, ProteinClass, RibosomeStructure, tRNA
+from ribctl.lib.schema.types_ribosome import  CytosolicProteinClass, CytosolicRNAClass, ElongationFactorClass, InitiationFactorClass, LifecycleFactorClass, MitochondrialProteinClass, MitochondrialRNAClass, PTCInfo, Polymer, PolymerClass, PolynucleotideClass, PolypeptideClass, Protein, ProteinClass, RibosomeStructure, tRNA
 from ribctl.lib.libtax import Taxid 
 
 structure_router = Router()
@@ -59,13 +59,10 @@ def polymers_by_structure(request,
         polymers, count = qreturn[0]
         return { "polymers":polymers, "count": count }
 
-
-
-
-@structure_router.get('/ptc',  tags=[TAG])
-def ptc(request):
-    return dbqueries.list_ligands()
-
+@structure_router.get('/ptc',  tags=[TAG], response=PTCInfo)
+def ptc(request, rcsb_id:str):
+    rcsb_id = str.upper(rcsb_id)
+    return RibosomeAssets(rcsb_id)._ptc_residues()
 
 @structure_router.get('/list_ligands',  tags=[TAG])
 def list_lignads(request):
