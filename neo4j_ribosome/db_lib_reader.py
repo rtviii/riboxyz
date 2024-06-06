@@ -41,7 +41,6 @@ class Neo4jQuery:
         pass
 
 
-
     def random_structure(self):
         with self.adapter.driver.session() as session:
             def _(tx: Transaction | ManagedTransaction):

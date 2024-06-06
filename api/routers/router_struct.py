@@ -1,11 +1,15 @@
+import datetime
 import json
+import os
 from pprint import pprint
 import typing
 from django.http import  JsonResponse, HttpResponseServerError
 from ninja import Router, Schema
 from pydantic import BaseModel
 from neo4j_ribosome.db_lib_reader import dbqueries
+from ribctl import ASSETS, ASSETS_PATH
 from ribctl.etl.ribosome_assets import RibosomeAssets
+from ribctl.lib.info import run_composition_stats
 from ribctl.lib.schema.types_ribosome import  CytosolicProteinClass, CytosolicRNAClass, ElongationFactorClass, InitiationFactorClass, LifecycleFactorClass, MitochondrialProteinClass, MitochondrialRNAClass, PTCInfo, Polymer, PolymerClass, PolynucleotideClass, PolypeptideClass, Protein, ProteinClass, RibosomeStructure, tRNA
 from ribctl.lib.libtax import Taxid 
 
@@ -15,13 +19,31 @@ import random
 
 
 
+@structure_router.get("/structure_composition_stats", response=dict, tags=[TAG])
+def structure_composition_stats(request):
+
+    filename = os.path.join(ASSETS_PATH, "structure_composition_stats.json")
+    if os.path.exists(filename):
+        creation_time = os.path.getctime(filename)
+        creation_date = datetime.datetime.fromtimestamp(creation_time)
+        #TODO:  if past the last update date, rerun
+    else:
+        run_composition_stats()
+
+    with open(filename, 'r') as f:
+        return json.load(f)
+
+
+
+
+
 @structure_router.get("/random_profile", response=RibosomeStructure, tags=[TAG])
 def random_profile(request):
     return RibosomeStructure.model_validate(dbqueries.random_structure()[0])
 
 @structure_router.get('/list_polymers_filtered_by_polymer_class', response=dict,  tags=[TAG])
 def polymers_by_polymer_class(request,
-      polymer_class:PolymerClass,
+      polymer_class: PolymerClass,
       page  = 1,
       ):
 

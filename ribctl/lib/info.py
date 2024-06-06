@@ -1,7 +1,9 @@
 import json
+import os
 from pprint import pprint
 from typing import Literal
 import typing
+from ribctl import ASSETS, ASSETS_PATH
 from ribctl.etl.ribosome_assets import RibosomeAssets
 from ribctl.lib.libtax import PhylogenyNode
 from ribctl.lib.schema.types_ribosome import (
@@ -19,29 +21,26 @@ from ribctl.lib.libmsa import Taxid, ncbi
 
 def struct_stats(ra: RibosomeAssets):
     profile = ra.profile()
+    struct_stat = {}
+    lig_compounds = {}
+    n_dbank_compounds = 0
 
-    struct_stat          = {}
-    nomenclature_classes = {}
-    lig_compounds        = {}
-    n_dbank_compounds    = 0
-
-    rnas        = profile.rnas
-    prots       = profile.proteins
-    other_polys = profile.other_polymers
-    ligs        = profile.nonpolymeric_ligands
+    rnas = profile.rnas
+    ligs = profile.nonpolymeric_ligands
 
     for lig in ligs:
+        # If this particualr ligand is a drugbank compound
+        chem_name = lig.chemicalName
+
         if lig.nonpolymer_comp.drugbank != None:
             n_dbank_compounds += 1
-            chemn = lig.chemicalName
-            if chemn not in nomenclature_classes:
-                lig_compounds[chemn] = 1
+            if chem_name not in lig_compounds:
+                lig_compounds[chem_name] = 1
             else:
-                lig_compounds[chemn] = nomenclature_classes[chemn] + 1
-            lig_compounds[lig.chemicalName] = 1
+                lig_compounds[chem_name] = lig_compounds[chem_name] + 1
         else:
             ...
-            # print("No drugbank")
+            print("No drugbank")
 
     def lsu_ssu_presence(rnas: list[RNA]) -> Literal["both", "ssu", "lsu"]:
         has_lsu = 0
@@ -77,110 +76,128 @@ def struct_stats(ra: RibosomeAssets):
             case _:
                 raise Exception("No ssu or lsu found")
 
-    struct_stat["has_factors"]         = False
-    struct_stat["has_elongation_factors"]         = False
-    struct_stat["has_initiation_factors"]         = False
-    struct_stat["has_trna"]            = False
     struct_stat["subunit_composition"] = lsu_ssu_presence(rnas)
-    struct_stat["mitochondrial"]       = profile.mitochondrial
+    struct_stat["mitochondrial"] = profile.mitochondrial
 
-    for chain in [*rnas, *prots,*other_polys ]:
-        if chain.assembly_id != 0:
-            continue
-        if len(chain.nomenclature) > 0:
-            cls = chain.nomenclature[0].value
+    # for chain in [*rnas, *prots,*other_polys ]:
+    #     if chain.assembly_id != 0:
+    #         continue
+    #     if len(chain.nomenclature) > 0:
+    #         cls = chain.nomenclature[0].value
 
-            #! class acc
-            if cls not in nomenclature_classes:
-                nomenclature_classes[cls] = 1
-            else:
-                nomenclature_classes[cls] = nomenclature_classes[cls] + 1
+    #         #! class acc
+    #         if cls not in nomenclature_classes:
+    #             nomenclature_classes[cls] = 1
+    #         else:
+    #             nomenclature_classes[cls] = nomenclature_classes[cls] + 1
 
-            #! subunit determinatiaon
-            if cls in [k.value for k in list(LifecycleFactorClass)]:
-                struct_stat["has_factors"] = True
+    #         #! subunit determinatiaon
+    #         if cls in [k.value for k in list(LifecycleFactorClass)]:
+    #             struct_stat["has_factors"] = True
 
-            if cls in [k.value for k in list(ElongationFactorClass)]:
-                struct_stat["has_elongation_factors"] = True
+    #         if cls in [k.value for k in list(ElongationFactorClass)]:
+    #             struct_stat["has_elongation_factors"] = True
 
-            if cls in [k.value for k in list(InitiationFactorClass)]:
-                struct_stat["has_initiation_factors"] = True
+    #         if cls in [k.value for k in list(InitiationFactorClass)]:
+    #             struct_stat["has_initiation_factors"] = True
 
-            if cls in [k.value for k in list(tRNA)]:
-                struct_stat["has_trna"] = True
+    #         if cls in [k.value for k in list(tRNA)]:
+    # #             struct_stat["has_trna"] = True
 
-    return [struct_stat, nomenclature_classes, lig_compounds, n_dbank_compounds]
+    return [
+        struct_stat,
+        lig_compounds,
+        n_dbank_compounds,
+        Taxid.superkingdom(profile.src_organism_ids[0]),
+    ]
 
 
 def get_stats():
-
     global_stats = {
-        "lsu_only"              : 0,
-        "ssu_only"              : 0,
-        "ssu_lsu"               : 0,
-        "with_trna"             : 0,
-        "with_factor"           : 0,
-        "with_elongation_factor": 0,
-        "with_initiation_factor": 0,
-        "drugbank_compounds"    : 0,
-        "mitochondrial"         : 0,
+        "bacteria": {
+            "lsu_only": 0,
+            "ssu_only": 0,
+            "ssu_lsu": 0,
+            "drugbank_compounds": 0,
+            "mitochondrial": 0,
+        },
+        "eukaryota": {
+            "lsu_only": 0,
+            "ssu_only": 0,
+            "ssu_lsu": 0,
+            "drugbank_compounds": 0,
+            "mitochondrial": 0,
+        },
+        "archaea": {
+            "lsu_only": 0,
+            "ssu_only": 0,
+            "ssu_lsu": 0,
+            "drugbank_compounds": 0,
+            "mitochondrial": 0,
+        },
     }
-    chain_classes = {}
-    lig_global    = {}
+    lig_global = {
+        "archaea": {},
+        "eukaryota": {},
+        "bacteria": {},
+    }
 
     for struct in RibosomeAssets.list_all_structs():
-
         try:
-            [struct_stat, nomenclature_classes, lig_compounds, n_dbank_compounds] = (struct_stats(RibosomeAssets(struct)) )
+            [struct_stat, lig_compounds, n_dbank_compounds, superkingdom] = (
+                struct_stats(RibosomeAssets(struct))
+            )
 
-            for k, v in nomenclature_classes.items():
-                if k not in chain_classes:
-                    chain_classes[k] = v
-                else:
-                    chain_classes[k] += v
-
+            # for k, v in nomenclature_classes.items():
+            #     if k not in chain_classes:
+            #         chain_classes[k] = v
+            #     else:
+            #         chain_classes[k] += v
+            if superkingdom not in list(global_stats.keys()):
+                continue
+            # ---------- SUBUNUTIS
             if struct_stat["subunit_composition"] == "lsu":
-                global_stats["lsu_only"] += 1
+                global_stats[superkingdom]["lsu_only"] += 1
+
             elif struct_stat["subunit_composition"] == "ssu":
-                global_stats["ssu_only"] += 1
+                global_stats[superkingdom]["ssu_only"] += 1
+
             elif struct_stat["subunit_composition"] == "both":
-                global_stats["ssu_lsu"] += 1
+                global_stats[superkingdom]["ssu_lsu"] += 1
 
-            if struct_stat["has_trna"] == True:
-                global_stats["with_trna"] += 1
+            # if struct_stat["has_trna"] == True:
+            #     global_stats["with_trna"] += 1
 
-            if struct_stat["has_elongation_factors"] == True:
-                global_stats["with_elongation_factor"] += 1
-            if struct_stat["has_initiation_factors"] == True:
-                global_stats["with_initiation_factor"] += 1
+            # if struct_stat["has_elongation_factors"] == True:
+            #     global_stats["with_elongation_factor"] += 1
+            # if struct_stat["has_initiation_factors"] == True:
+            #     global_stats["with_initiation_factor"] += 1
 
-            if struct_stat["has_factors"] == True:
-                global_stats["with_factor"] += 1
+            # if struct_stat["has_factors"] == True:
+            #     global_stats["with_factor"] += 1
 
             if struct_stat["mitochondrial"] == True:
-                global_stats["mitochondrial"] += 1
+                global_stats[superkingdom]["mitochondrial"] += 1
 
-            global_stats["drugbank_compounds"] += n_dbank_compounds
+            global_stats[superkingdom]["drugbank_compounds"] += n_dbank_compounds
 
             for k, v in lig_compounds.items():
                 if k not in lig_global:
-                    lig_global[k] = v
+                    lig_global[superkingdom][k] = v
                 else:
-                    lig_global[k] += v
+                    lig_global[superkingdom][k] += v
 
         except Exception as e:
             print("Error --->", e)
 
     return {
         **global_stats,
-        "chain_classes": {key: chain_classes[key] for key in sorted(chain_classes)},
-        "lig_global": {
-            key: value
-            for key, value in sorted(
-                lig_global.items(), key=lambda item: item[1], reverse=True
-            )
-        },
+        "ligands": lig_global,
+        # "chain_classes": {key: chain_classes[key] for key in sorted(chain_classes)},
     }
 
-with open('stats.json', 'w') as of:
-    json.dump(get_stats(), of, indent=4)
+
+def run_composition_stats():
+    with open(os.path.join(ASSETS_PATH,"structure_composition_stats.json"), "w") as of:
+        print("Saved structure composition_stats: ", os.path.join(ASSETS_PATH,"structure_composition_stats.json"))
+        json.dump(get_stats(), of, indent=4)
