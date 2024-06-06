@@ -11,6 +11,13 @@ from ribctl.lib.libtax import Taxid
 
 structure_router = Router()
 TAG              = "structures"
+import random
+
+
+
+@structure_router.get("/random_profile", response=RibosomeStructure, tags=[TAG])
+def random_profile(request):
+    return RibosomeStructure.model_validate(dbqueries.random_structure()[0])
 
 @structure_router.get('/list_polymers_filtered_by_polymer_class', response=dict,  tags=[TAG])
 def polymers_by_polymer_class(request,

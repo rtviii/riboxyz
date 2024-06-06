@@ -40,11 +40,34 @@ class Neo4jQuery:
         self.adapter = Neo4jBuilder("bolt://localhost:7687", "neo4j")
         pass
 
+
+
+    def random_structure(self):
+        with self.adapter.driver.session() as session:
+            def _(tx: Transaction | ManagedTransaction):
+                return tx.run(
+        """
+match (rib: RibosomeStructure) 
+with rand() as r, rib
+order by r limit 1
+
+optional match (l:Ligand)-[]-(rib) 
+with collect(PROPERTIES(l)) as ligands, rib
+match (rps:Protein)-[]-(rib) 
+with collect(PROPERTIES(rps)) as proteins, ligands, rib
+optional match (rna:RNA)-[]-(rib) 
+with collect(PROPERTIES(rna)) as rnas, proteins, ligands, rib
+
+with apoc.map.mergeList([{proteins:proteins},{nonpolymeric_ligands:ligands},{rnas:rnas},{other_polymers:[]}]) as rest, rib
+return apoc.map.merge(rib, rest)
+        """ ).value()
+
+            return session.execute_read(_)
+
     def list_chains_by_struct(self, filters=None, limit=None, offset=None):
         with self.adapter.driver.session() as session:
 
             def _(tx: Transaction | ManagedTransaction):
-                # TODO : Fix the limit here (didn't have all structures taged with polymers in dev)
                 return tx.run(
                     """//
                         match (rib:RibosomeStructure) 
