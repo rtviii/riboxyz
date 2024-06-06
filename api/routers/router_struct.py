@@ -9,7 +9,7 @@ from pydantic import BaseModel
 from neo4j_ribosome.db_lib_reader import dbqueries
 from ribctl import ASSETS, ASSETS_PATH
 from ribctl.etl.ribosome_assets import RibosomeAssets
-from ribctl.lib.info import run_composition_stats
+from ribctl.lib.info import StructureCompositionStats, run_composition_stats
 from ribctl.lib.schema.types_ribosome import  CytosolicProteinClass, CytosolicRNAClass, ElongationFactorClass, InitiationFactorClass, LifecycleFactorClass, MitochondrialProteinClass, MitochondrialRNAClass, PTCInfo, Polymer, PolymerClass, PolynucleotideClass, PolypeptideClass, Protein, ProteinClass, RibosomeStructure, tRNA
 from ribctl.lib.libtax import Taxid 
 
@@ -19,7 +19,8 @@ import random
 
 
 
-@structure_router.get("/structure_composition_stats", response=dict, tags=[TAG])
+
+@structure_router.get("/structure_composition_stats", response=StructureCompositionStats, tags=[TAG])
 def structure_composition_stats(request):
 
     filename = os.path.join(ASSETS_PATH, "structure_composition_stats.json")
@@ -31,7 +32,7 @@ def structure_composition_stats(request):
         run_composition_stats()
 
     with open(filename, 'r') as f:
-        return json.load(f)
+        return StructureCompositionStats.model_validate(json.load(f))
 
 
 

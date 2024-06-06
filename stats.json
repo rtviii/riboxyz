@@ -7,11 +7,11 @@
         "mitochondrial": 0
     },
     "eukaryota": {
-        "lsu_only": 232,
-        "ssu_only": 180,
-        "ssu_lsu": 267,
+        "lsu_only"          : 232,
+        "ssu_only"          : 180,
+        "ssu_lsu"           : 267,
         "drugbank_compounds": 530,
-        "mitochondrial": 94
+        "mitochondrial"     : 94
     },
     "archaea": {
         "lsu_only": 70,

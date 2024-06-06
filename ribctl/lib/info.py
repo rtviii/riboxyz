@@ -3,6 +3,8 @@ import os
 from pprint import pprint
 from typing import Literal
 import typing
+
+from pydantic import BaseModel
 from ribctl import ASSETS, ASSETS_PATH
 from ribctl.etl.ribosome_assets import RibosomeAssets
 from ribctl.lib.libtax import PhylogenyNode
@@ -111,8 +113,20 @@ def struct_stats(ra: RibosomeAssets):
         Taxid.superkingdom(profile.src_organism_ids[0]),
     ]
 
+class CompositionStats(BaseModel):
+    lsu_only          :int
+    ssu_only          :int
+    ssu_lsu           :int
+    drugbank_compounds:int
+    mitochondrial     :int
 
-def get_stats():
+class StructureCompositionStats(BaseModel):
+
+    archaea  : CompositionStats
+    bacteria : CompositionStats
+    eukaryota: CompositionStats
+
+def get_stats()->StructureCompositionStats:
     global_stats = {
         "bacteria": {
             "lsu_only": 0,
@@ -190,14 +204,18 @@ def get_stats():
         except Exception as e:
             print("Error --->", e)
 
-    return {
+    return StructureCompositionStats.model_validate({
         **global_stats,
         "ligands": lig_global,
         # "chain_classes": {key: chain_classes[key] for key in sorted(chain_classes)},
-    }
+    })
+
 
 
 def run_composition_stats():
     with open(os.path.join(ASSETS_PATH,"structure_composition_stats.json"), "w") as of:
+        json.dump(get_stats().model_dump(), of, indent=4)
         print("Saved structure composition_stats: ", os.path.join(ASSETS_PATH,"structure_composition_stats.json"))
-        json.dump(get_stats(), of, indent=4)
+
+if __name__ == "__main__":
+    run_composition_stats()
