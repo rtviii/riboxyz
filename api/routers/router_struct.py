@@ -142,24 +142,28 @@ def chains_by_struct(request):
     structs_response = dbqueries.list_chains_by_struct()
     return structs_response
 
-class NomenclatureSet(Schema):
-    ElongationFactorClass    : list[ElongationFactorClass]
-    InitiationFactorClass    : list[InitiationFactorClass]
-    CytosolicProteinClass    : list[CytosolicProteinClass ]
-    MitochondrialProteinClass: list[MitochondrialProteinClass ]
-    CytosolicRNAClass        : list[CytosolicRNAClass ]
-    MitochondrialRNAClass    : list[MitochondrialRNAClass ]
+class NomenclatureSet(Schema)  : 
+      ElongationFactorClass    : list[ElongationFactorClass]
+      InitiationFactorClass    : list[InitiationFactorClass]
+      CytosolicProteinClass    : list[CytosolicProteinClass ]
+      MitochondrialProteinClass: list[MitochondrialProteinClass ]
+      CytosolicRNAClass        : list[CytosolicRNAClass ]
+      MitochondrialRNAClass    : list[MitochondrialRNAClass ]
+      tRNAClass                : list[tRNA]
+
 
 @structure_router.get('/list_nomenclature', response=NomenclatureSet)
 def polymer_classes_nomenclature(request):
-    return {
+    classes = {
         "ElongationFactorClass"    : [e.value for e in ElongationFactorClass],
         "InitiationFactorClass"    : [e.value for e in InitiationFactorClass],
         "CytosolicProteinClass"    : [e.value for e in CytosolicProteinClass ],
         "MitochondrialProteinClass": [e.value for e in MitochondrialProteinClass ],
         "CytosolicRNAClass"        : [e.value for e in CytosolicRNAClass ],
         "MitochondrialRNAClass"    : [e.value for e in MitochondrialRNAClass ],
+        "tRNAClass"                : [e.value for e in tRNA ],
     }
+    return  classes
 
 
 @structure_router.get('/list_source_taxa', response=list[dict], tags=[TAG])

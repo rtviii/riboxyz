@@ -12,9 +12,10 @@ tag = "mmcif"
 # E  E - ul4
 @mmcif_router.get('/polymer',  tags=[tag])
 def polymer(request, rcsb_id:str, auth_asym_id:str):
-    rcsb_id = rcsb_id.upper()
-    chain_fullpath = os.path.join(os.environ.get('RIBETL_DATA'), rcsb_id, "CHAINS", f'{rcsb_id}_{auth_asym_id}.cif')
+    rcsb_id        = rcsb_id.upper()
+    chain_fullpath = os.path.join(os.environ.get('RIBETL_DATA'), rcsb_id, "CHAINS", f'{rcsb_id}_{auth_asym_id}.mmcif')
     
+    print( chain_fullpath)
     # Ensure the file exists
     if not os.path.exists(chain_fullpath):
         return HttpResponse(status=404)
@@ -22,6 +23,7 @@ def polymer(request, rcsb_id:str, auth_asym_id:str):
     # Open and read the file
     with open(chain_fullpath, 'rb') as file:
         file_content = file.read()
+    print("GOT FILE AT APTH" , chain_fullpath)
     
     # Create the response with the correct MIME type
     response = HttpResponse(file_content, content_type='chemical/x-mmcif')

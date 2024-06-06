@@ -1,3 +1,4 @@
+import json
 from pprint import pprint
 from typing import Literal
 import typing
@@ -6,6 +7,8 @@ from ribctl.lib.libtax import PhylogenyNode
 from ribctl.lib.schema.types_ribosome import (
     RNA,
     CytosolicRNAClass,
+    ElongationFactorClass,
+    InitiationFactorClass,
     LifecycleFactorClass,
     MitochondrialRNAClass,
     Polymer,
@@ -17,15 +20,15 @@ from ribctl.lib.libmsa import Taxid, ncbi
 def struct_stats(ra: RibosomeAssets):
     profile = ra.profile()
 
-    struct_stat = {}
+    struct_stat          = {}
     nomenclature_classes = {}
-    lig_compounds = {}
+    lig_compounds        = {}
+    n_dbank_compounds    = 0
 
-    n_dbank_compounds = 0
-
-    rnas = profile.rnas
-    prots = profile.proteins
-    ligs = profile.nonpolymeric_ligands
+    rnas        = profile.rnas
+    prots       = profile.proteins
+    other_polys = profile.other_polymers
+    ligs        = profile.nonpolymeric_ligands
 
     for lig in ligs:
         if lig.nonpolymer_comp.drugbank != None:
@@ -74,14 +77,16 @@ def struct_stats(ra: RibosomeAssets):
             case _:
                 raise Exception("No ssu or lsu found")
 
-    struct_stat["has_factors"] = False
-    struct_stat["has_trna"] = False
+    struct_stat["has_factors"]         = False
+    struct_stat["has_elongation_factors"]         = False
+    struct_stat["has_initiation_factors"]         = False
+    struct_stat["has_trna"]            = False
     struct_stat["subunit_composition"] = lsu_ssu_presence(rnas)
+    struct_stat["mitochondrial"]       = profile.mitochondrial
 
-    for chain in [*rnas, *prots]:
+    for chain in [*rnas, *prots,*other_polys ]:
         if chain.assembly_id != 0:
             continue
-
         if len(chain.nomenclature) > 0:
             cls = chain.nomenclature[0].value
 
@@ -94,6 +99,13 @@ def struct_stats(ra: RibosomeAssets):
             #! subunit determinatiaon
             if cls in [k.value for k in list(LifecycleFactorClass)]:
                 struct_stat["has_factors"] = True
+
+            if cls in [k.value for k in list(ElongationFactorClass)]:
+                struct_stat["has_elongation_factors"] = True
+
+            if cls in [k.value for k in list(InitiationFactorClass)]:
+                struct_stat["has_initiation_factors"] = True
+
             if cls in [k.value for k in list(tRNA)]:
                 struct_stat["has_trna"] = True
 
@@ -103,22 +115,23 @@ def struct_stats(ra: RibosomeAssets):
 def get_stats():
 
     global_stats = {
-        "lsu_only": 0,
-        "ssu_only": 0,
-        "ssu_lsu": 0,
-        "with_trna": 0,
-        "with_factor": 0,
-        "drugbank_compounds": 0,
+        "lsu_only"              : 0,
+        "ssu_only"              : 0,
+        "ssu_lsu"               : 0,
+        "with_trna"             : 0,
+        "with_factor"           : 0,
+        "with_elongation_factor": 0,
+        "with_initiation_factor": 0,
+        "drugbank_compounds"    : 0,
+        "mitochondrial"         : 0,
     }
     chain_classes = {}
-    lig_global = {}
+    lig_global    = {}
 
     for struct in RibosomeAssets.list_all_structs():
-        print(struct)
+
         try:
-            [struct_stat, nomenclature_classes, lig_compounds, n_dbank_compounds] = (
-                struct_stats(RibosomeAssets(struct))
-            )
+            [struct_stat, nomenclature_classes, lig_compounds, n_dbank_compounds] = (struct_stats(RibosomeAssets(struct)) )
 
             for k, v in nomenclature_classes.items():
                 if k not in chain_classes:
@@ -135,8 +148,17 @@ def get_stats():
 
             if struct_stat["has_trna"] == True:
                 global_stats["with_trna"] += 1
+
+            if struct_stat["has_elongation_factors"] == True:
+                global_stats["with_elongation_factor"] += 1
+            if struct_stat["has_initiation_factors"] == True:
+                global_stats["with_initiation_factor"] += 1
+
             if struct_stat["has_factors"] == True:
                 global_stats["with_factor"] += 1
+
+            if struct_stat["mitochondrial"] == True:
+                global_stats["mitochondrial"] += 1
 
             global_stats["drugbank_compounds"] += n_dbank_compounds
 
@@ -147,7 +169,7 @@ def get_stats():
                     lig_global[k] += v
 
         except Exception as e:
-            print("e--->", e)
+            print("Error --->", e)
 
     return {
         **global_stats,
@@ -160,11 +182,5 @@ def get_stats():
         },
     }
 
-
-
-# pprint(collect_taxonomy())
-pprint(PhylogenyNode.from_taxid(9606).get_lineage_nodes())
-
-
-# with open('stats.json', 'w') as of:
-#     json.dump(get_stats(), of, indent=4)
+with open('stats.json', 'w') as of:
+    json.dump(get_stats(), of, indent=4)

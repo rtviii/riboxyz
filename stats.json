@@ -1,12 +1,15 @@
 {
-    "lsu_only"          : 447,
-    "ssu_only"          : 380,
-    "ssu_lsu"           : 962,
-    "with_trna"         : 563,
-    "with_factor"       : 348,
-    "drugbank_compounds": 1322,
+    "lsu_only"              : 447,
+    "ssu_only"              : 380,
+    "ssu_lsu"               : 962,
+    "with_trna"             : 563,
+    "with_factor"           : 348,
+    "with_elongation_factor": 235,
+    "with_initiation_factor": 120,
+    "drugbank_compounds"    : 1322,
+    "mitochondrial"         : 94,
 
-    "chain_classes"     : {
+    "chain_classes"         : {
         "16SrRNA": 934,
         "18SrRNA": 394,
         "23SrRNA": 933,
@@ -266,7 +269,6 @@
         "uS9": 1277,
         "uS9m": 65
     },
-
     "lig_global": {
         "GUANOSINE-5'-DIPHOSPHATE": 135,
         "N-FORMYLMETHIONINE": 100,
