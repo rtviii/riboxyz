@@ -15,14 +15,9 @@ from ribctl.lib.libtax import Taxid
 
 structure_router = Router()
 TAG              = "structures"
-import random
-
-
-
 
 @structure_router.get("/structure_composition_stats", response=StructureCompositionStats, tags=[TAG])
 def structure_composition_stats(request):
-
     filename = os.path.join(ASSETS_PATH, "structure_composition_stats.json")
     if os.path.exists(filename):
         creation_time = os.path.getctime(filename)
@@ -31,11 +26,8 @@ def structure_composition_stats(request):
     else:
         run_composition_stats()
 
-    with open(filename, 'r') as f:
-        return StructureCompositionStats.model_validate(json.load(f))
-
-
-
+    with open(filename, 'r') as infile:
+        return json.load(infile)
 
 
 @structure_router.get("/random_profile", response=RibosomeStructure, tags=[TAG])

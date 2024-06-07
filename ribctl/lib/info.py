@@ -126,7 +126,7 @@ class StructureCompositionStats(BaseModel):
     bacteria : CompositionStats
     eukaryota: CompositionStats
 
-def get_stats()->StructureCompositionStats:
+def get_stats():
     global_stats = {
         "bacteria": {
             "lsu_only": 0,
@@ -208,13 +208,14 @@ def get_stats()->StructureCompositionStats:
         **global_stats,
         "ligands": lig_global,
         # "chain_classes": {key: chain_classes[key] for key in sorted(chain_classes)},
-    })
+    }).model_dump()
 
 
 
 def run_composition_stats():
     with open(os.path.join(ASSETS_PATH,"structure_composition_stats.json"), "w") as of:
-        json.dump(get_stats().model_dump(), of, indent=4)
+        d = get_stats()
+        json.dump(d, of, indent=4)
         print("Saved structure composition_stats: ", os.path.join(ASSETS_PATH,"structure_composition_stats.json"))
 
 if __name__ == "__main__":

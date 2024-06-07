@@ -1,0 +1,23 @@
+{
+    "archaea": {
+        "lsu_only": 70,
+        "ssu_only": 6,
+        "ssu_lsu": 12,
+        "drugbank_compounds": 38,
+        "mitochondrial": 0
+    },
+    "bacteria": {
+        "lsu_only": 145,
+        "ssu_only": 194,
+        "ssu_lsu": 683,
+        "drugbank_compounds": 754,
+        "mitochondrial": 0
+    },
+    "eukaryota": {
+        "lsu_only": 232,
+        "ssu_only": 180,
+        "ssu_lsu": 267,
+        "drugbank_compounds": 530,
+        "mitochondrial": 94
+    }
+}

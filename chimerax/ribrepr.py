@@ -6,6 +6,7 @@ from chimerax.core.commands import register, CmdDesc
 from chimerax.atomic import ResiduesArg, Chains, ChainArg, StructureArg
 from chimerax.atomic import Structure, AtomicStructure, Chain
 from chimerax.core.commands import run, runscript
+from chimerax.core.commands import CmdDesc, register, StringArg
 
 # https://mail.cgl.ucsf.edu/mailman/archives/list/chimera-users@cgl.ucsf.edu/thread/EOUA5K3CZU6DJYVPISR3GFWHCISR6WGV/
 
@@ -381,7 +382,7 @@ def ribosome_representation(session, structure: AtomicStructure):
     from chimerax.atomic import Residue, Atom, Chain
 
     rcsb_id = str(structure.name).upper().split('.')[0] # <-- the structure gets opened with the basename ex "(5AFI.cif)" 
-
+    run(session, "sym #1 assembly 1") # take only one assembly if multiple are available
     run(session, "hide #2")
 
     with open(os.path.join(RIBETL_DATA, rcsb_id, "{}.json".format(rcsb_id)), "r") as f:
@@ -418,10 +419,13 @@ def ribosome_representation(session, structure: AtomicStructure):
     run(session, "graphics silhouettes true width 1")
     run(session, "light soft")
 
+
+
+
+# ! Didn't work out for now. Chimerax segfaults when looped on this.
 def produce_and_save_movie(session, target:str):
     print("GOT TARGET", target)
     RCSB_ID = target
-    
     run(session, "open /home/rtviii/dev/RIBETL_DATA/{}/{}.cif".format(RCSB_ID, RCSB_ID))
     run(session, "sym #1 assembly 1") # take only one assembly if multiple are available
     run(session, "ribrep #2")
@@ -432,6 +436,12 @@ def produce_and_save_movie(session, target:str):
     run(session, "close all")
 
 
+def register_ribetl_command(logger):
+    def ribetl(session, rcsb_id:str):
+        rcsb_id = rcsb_id.upper()
+        run(session, "open /home/rtviii/dev/RIBETL_DATA/{}/{}.cif".format(rcsb_id, rcsb_id))
+    desc = CmdDesc( required= [("rcsb_id", StringArg)], )
+    register("ribmovie", desc, produce_and_save_movie, logger=logger)
 def register_ribrepr_command(logger):
     from chimerax.core.commands import CmdDesc, register
     from chimerax.atomic import AtomicStructureArg, Chain, Residue, Atom
@@ -456,5 +466,6 @@ def register_movie_command(logger):
 
 register_ribrepr_command(session.logger)
 register_movie_command(session.logger)
+register_ribetl_command(session.logger)
 
 
