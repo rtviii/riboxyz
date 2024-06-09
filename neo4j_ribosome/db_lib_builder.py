@@ -72,11 +72,13 @@ class Neo4jBuilder():
 
     def _create_lineage(self,taxid:int)->None:
         lin = Taxid.get_lineage(taxid)
+        print("lineage: " ,lin)
         lin.reverse()
         previous_id: int|None = None
 
         with self.driver.session() as session:
             for taxid in lin:
+                print("creating node for " , taxid)
                 node = session.execute_write(node__phylogeny(PhylogenyNode.from_taxid(taxid)))
                 if previous_id == None: # initial (superkingdom has no parent node)
                     previous_id = taxid
@@ -87,10 +89,13 @@ class Neo4jBuilder():
         return
         
     def link_structure_to_phylogeny(self,rcsb_id:str):
+
         rcsb_id = rcsb_id.upper()
         R:RibosomeStructure = RibosomeAssets(rcsb_id).profile()
+
         with self.driver.session() as s:
             if self.check_structure_exists(rcsb_id):
+                print("Struct node {} already exists.".format(rcsb_id))
                 ...
             else:
                 s.execute_write(node__structure(R))
