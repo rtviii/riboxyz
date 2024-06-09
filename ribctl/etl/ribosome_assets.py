@@ -20,6 +20,7 @@ from ribctl.lib.tunnel import ptc_resdiues_get, ptc_residues_calculate_midpoint
 from ribctl.lib.utils import download_unpack_place, open_structure
 from ribctl.lib.schema.types_ribosome import (
     RNA,
+    PTCInfo,
     Polymer,
     PolymerClass,
     PolynucleotideClass,
@@ -69,7 +70,7 @@ class AssetPaths:
 
     @property
     def profile(self):
-        return os.path.join(self.dir(), f"{self.rcsb_id}.json")
+        return os.path.join(self.dir, f"{self.rcsb_id}.json")
 
     @property
     def polymers_dir(self):
@@ -118,6 +119,7 @@ class RibosomeAssets:
     def list_all_structs():
         return os.listdir(RIBETL_DATA)
 
+    #! [I] for Individual structure methods. Brew on this for a little bit, maybe should be a separate namespace.
 
     #! I
     def nomenclature_table(self, verbose: bool = False) -> dict[str, dict]:
@@ -164,9 +166,9 @@ class RibosomeAssets:
 
 
     #! I
-    def _ptc_residues(self) -> dict[str, dict[str, list[float]]]:
+    def ptc(self) -> PTCInfo:
         with open(self.paths.ptc, "r") as infile:
-            return json.load(infile)
+            return PTCInfo.model_validate(json.load(infile))
 
     #! I
     def profile(self) -> RibosomeStructure:
@@ -177,8 +179,6 @@ class RibosomeAssets:
     #! I
     def biopython_structure(self):
         return open_structure(self.rcsb_id, "cif")
-
-
 
     #! I
     def write_own_json_profile(self, new_profile: dict, overwrite: bool = False):
@@ -191,8 +191,6 @@ class RibosomeAssets:
                 json.dump(new_profile, f)
                 logger.debug(f"Updated profile for {self.rcsb_id}")
 
-
-    # ※ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-= Getters =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
     def get_taxids(self) -> tuple[list[int], list[int]]:
         p = self.profile()

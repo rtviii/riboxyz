@@ -99,7 +99,7 @@ def polymers_by_structure(request,
 @structure_router.get('/ptc',  tags=[TAG], response=PTCInfo)
 def ptc(request, rcsb_id:str):
     rcsb_id = str.upper(rcsb_id)
-    return RibosomeAssets(rcsb_id)._ptc_residues()
+    return RibosomeAssets(rcsb_id).ptc()
 
 @structure_router.get('/list_ligands',  tags=[TAG])
 def list_lignads(request):
@@ -159,7 +159,7 @@ def structure_ptc(request,rcsb_id:str):
     params      = dict(request.GET)
     rcsb_id     = str.upper(params['rcsb_id'][0])
     try:
-        ptc = RibosomeAssets(rcsb_id)._ptc_residues()
+        ptc = RibosomeAssets(rcsb_id).ptc()
     except Exception as e:
         return HttpResponseServerError("Failed to find structure profile {}:\n\n{}".format(rcsb_id, e))
 

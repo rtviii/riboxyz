@@ -325,16 +325,6 @@ PolymerClass         = enum_union(PolynucleotideClass, PolypeptideClass)
 
 # ? ----------------------------------------------{ Object Types }------------------------------------------------
 
-# class PolymerMetadatum(BaseModel):
-#     assembly_id           : int
-#     asym_ids              : list[str]
-#     auth_asym_id          : str
-#     entity_poly_seq_length: int
-#     nomenclature          : list[PolymerClass]
-
-#     @field_serializer('nomenclature')
-#     def serialize_dt(self, ncl: list[PolymerClass], _info):
-#         return [x.value for x in ncl]
 
 class Polymer(BaseModel):
     def __hash__(self):
@@ -546,46 +536,11 @@ class AssemblyInstancesMap(BaseModel):
     nonpolymer_entity_instances: Optional[list[NonpolymerEntityInstance]] =None
     polymer_entity_instances: list[PolymerEntityInstance]
 
-# class RibosomeStructureMetadatum(BaseModel):
-
-#     rcsb_id   : str
-#     expMethod : str
-#     resolution: float
-
-#     pdbx_keywords     : Optional[str] =None
-#     pdbx_keywords_text: Optional[str] = None
-
-#     rcsb_external_ref_id: list[str]
-#     rcsb_external_ref_type: list[str]
-#     rcsb_external_ref_link: list[str]
-
-#     citation_year         : Optional[int]      = None
-#     citation_rcsb_authors : Optional[list[str]] = None
-#     citation_title        : Optional[str]      = None
-#     citation_pdbx_doi     : Optional[str]      = None
-
-#     src_organism_ids  : list[int]
-#     src_organism_names: list[str]
-
-#     host_organism_ids  : list[int]
-#     host_organism_names: list[str]
-
-#     # assembly_map: list[AssemblyInstancesMap]
-#     mitochondrial: bool
-
-#     # proteins_metadata: list[PolymerMetadatum]
-#     # rnas_metadata    : list[PolymerMetadatum]
-#     # # ? This includes DNA-RNA hybrid strands, DNA and all other polymers
-#     # other_polymers_metadata: list[PolymerMetadatum]
-#     # nonpolymeric_ligands   : list[NonpolymericLigandMetadatum]
-
 class NomenclatureItem(BaseModel):
     nomenclature: list[str]
 
 class NomenclatureTable(BaseModel):
     __pydantic_root_model__: Dict[str, NomenclatureItem]
-
-
 
 class PTCInfo(BaseModel):
 
@@ -593,8 +548,6 @@ class PTCInfo(BaseModel):
     LSU_rRNA_auth_asym_id: str
     midpoint_coordinates : tuple[float, float, float]
     nomenclature_table   : NomenclatureTable
-
-
 
 
 class RibosomeStructure(BaseModel):
