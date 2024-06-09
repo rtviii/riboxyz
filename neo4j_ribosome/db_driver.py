@@ -49,7 +49,8 @@ connect_all_structures_to_phylogenies()
 # p = RibosomeAssets('8OVE').profile()
 # for tax in [ *p.host_organism_ids, *p.src_organism_ids ]:
 #     print(tax)
-# # td = 941442
-# # print(Taxid.rank(td))
+# td = 679895
+# print(Taxid.get_lineage(td))
+# print(Taxid.rank(td))
 #     adapter._create_lineage(tax)
 # adapter.link_structure_to_phylogeny('8OVE')
