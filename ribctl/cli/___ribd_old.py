@@ -34,7 +34,6 @@ parser_lig.add_argument('--chemid', type=str, required=True, help='Chemical iden
 parser_lig.add_argument('--src', type=str, required=True, help='Source file or path')
 parser_lig.add_argument('--dest', type=str, required=True, help='Destination file or path')
 
-
 parser_cmd_etl.add_argument('-getall'      , '--obtain_all_structures', action='store_true')
 parser_cmd_etl.add_argument('--rcsb_id'               , dest   ='rcsb_id'    )
 
