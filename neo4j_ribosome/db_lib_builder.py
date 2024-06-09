@@ -46,7 +46,6 @@ class Neo4jBuilder():
         self.init_polymer_classes()
         self.init_phylogenies()
 
-
     def init_constraints(self) -> None:
         with self.driver.session() as session:
             for c in NODE_CONSTRAINTS:
@@ -58,7 +57,6 @@ class Neo4jBuilder():
             for polymer_class in [*list(PolymerClass)]:
                 session.execute_write(node__polymer_class(polymer_class.value))
                 print("Added polymer class: ", polymer_class.value)
-
 
     def add_phylogeny_node(self, taxid:int)->Node:
         with self.driver.session() as session:
@@ -129,8 +127,10 @@ class Neo4jBuilder():
             structure_node = s.execute_write(node__structure(R))
 
             for organism in R.host_organism_ids:
+                self._create_lineage(organism)
                 s.execute_write(link__structure_to_phylogeny(rcsb_id, organism, 'host_organism'))
             for organism in R.src_organism_ids:
+                self._create_lineage(organism)
                 s.execute_write(link__structure_to_phylogeny(rcsb_id, organism, 'source_organism'))
 
             for protein in R.proteins:
