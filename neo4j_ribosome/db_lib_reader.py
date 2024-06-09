@@ -40,6 +40,14 @@ class Neo4jQuery:
         self.adapter = Neo4jBuilder("bolt://localhost:7687", "neo4j")
         pass
 
+    def tax_dict(self):
+        """All taxonomic ids present in the database mapped to their scientific name per NCBI"""
+        with self.adapter.driver.session() as session:
+            def _(tx: Transaction | ManagedTransaction):
+                return tx.run("""match (t:PhylogenyNode) 
+match (t)-[:descendant_of*]-(s:PhylogenyNode) where s.ncbi_tax_id in [2759, 2157, 2] 
+return collect([t.ncbi_tax_id,t.scientific_name, s.scientific_name])""").value()[0]
+            return session.execute_read(_)
 
     def random_structure(self):
         with self.adapter.driver.session() as session:
@@ -362,9 +370,9 @@ return collect(apoc.map.merge(ribosomes, rest)),  collect(distinct total_count)[
             )
         )
 
-        print("=======Executing query:==========")
+        print("=======Executing filtered structures query:==========")
         print("\033[96m" + query + "\033[0m")
-        print("===============================")
+        print("=====================================================")
 
         with self.adapter.driver.session() as session:
 

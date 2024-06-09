@@ -16,6 +16,19 @@ from ribctl.lib.libtax import Taxid
 structure_router = Router()
 TAG              = "structures"
 
+
+@structure_router.get("/tax_dict", response=dict, tags=[TAG])
+def tax_dict(request):
+    """Returns a dictionary of all taxonomic IDs present in the database as keys, [ scientific name, corresponding superkingdom ] as the values."""
+    td = dbqueries.tax_dict()
+    _  = {}
+    for kvp in td:
+        _[kvp[0]] =[kvp[1],kvp[2]]
+    return _
+
+
+
+
 @structure_router.get("/structure_composition_stats", response=StructureCompositionStats, tags=[TAG])
 def structure_composition_stats(request):
     filename = os.path.join(ASSETS_PATH, "structure_composition_stats.json")
@@ -28,7 +41,6 @@ def structure_composition_stats(request):
 
     with open(filename, 'r') as infile:
         return json.load(infile)
-
 
 @structure_router.get("/random_profile", response=RibosomeStructure, tags=[TAG])
 def random_profile(request):
@@ -76,9 +88,11 @@ def polymers_by_structure(request,
     qreturn =  dbqueries.list_polymers_filtered_by_structure(page, search, year, resolution, polymer_classes, source_taxa, host_taxa)
 
     if len(qreturn) < 1:
+        print("Found none. returning empty", { "polymers":[], "count": 0 })
         return { "polymers":[], "count": 0 }
     else:
         polymers, count = qreturn[0]
+        print("RETURNING POLYMERS actual len", len( polymers ), count)
         return { "polymers":polymers, "count": count }
 
 @structure_router.get('/ptc',  tags=[TAG], response=PTCInfo)
@@ -165,13 +179,13 @@ def chains_by_struct(request):
     return structs_response
 
 class NomenclatureSet(Schema)  : 
-      ElongationFactorClass    : list[ElongationFactorClass]
-      InitiationFactorClass    : list[InitiationFactorClass]
-      CytosolicProteinClass    : list[CytosolicProteinClass ]
-      MitochondrialProteinClass: list[MitochondrialProteinClass ]
-      CytosolicRNAClass        : list[CytosolicRNAClass ]
-      MitochondrialRNAClass    : list[MitochondrialRNAClass ]
-      tRNAClass                : list[tRNA]
+      ElongationFactorClass    : list[str]
+      InitiationFactorClass    : list[str]
+      CytosolicProteinClass    : list[str]
+      MitochondrialProteinClass: list[str]
+      CytosolicRNAClass        : list[str]
+      MitochondrialRNAClass    : list[str]
+      tRNAClass                : list[str]
 
 
 @structure_router.get('/list_nomenclature', response=NomenclatureSet)

@@ -14,7 +14,6 @@ from chimerax.core.commands import CmdDesc, register, StringArg
 RIBETL_DATA = os.environ.get("RIBETL_DATA", "/home/rtviii/dev/RIBETL_DATA")
 
 class PolymerClass(str, enum.Enum):
-
     tRNA = "tRNA"
     bS1m  = "bS1m"
     uS2m  = "uS2m"
@@ -381,7 +380,7 @@ def ribosome_representation(session, structure: AtomicStructure):
     from chimerax.core.colors import hex_color
     from chimerax.atomic import Residue, Atom, Chain
 
-    rcsb_id = str(structure.name).upper().split('.')[0] # <-- the structure gets opened with the basename ex "(5AFI.cif)" 
+    rcsb_id = str(structure.name).upper().split('.')[0] # <-- the structure gets opened with the basename ex "(5AFI.cif)"
     run(session, "set bgColor white")
     run(session, "sym #1 assembly 1") # take only one assembly if multiple are available
     run(session, "hide #2")
@@ -463,4 +462,5 @@ register_ribetl_command(session.logger)
 
 run(session,"ribetl 5AFI")
 run(session,"ribrep #1")
-run(session,"save 5afi.png")
+run(session,"save 5afi.png width 400 height 400 transparentBackground true")
+
