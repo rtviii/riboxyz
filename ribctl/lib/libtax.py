@@ -13,7 +13,7 @@ from ete3 import NCBITaxa
 TAXID_BACTERIA  = 2
 TAXID_EUKARYOTA = 2759
 TAXID_ARCHAEA   = 2157
-PhylogenyRank = Literal["superkingdom", "phylum", "class", "order", "family", "genus", "species", "strain", "subspecies"]
+PhylogenyRank = Literal["superkingdom", "phylum", "class", "order", "clade", "family", "genus", "species", "strain", "subspecies"]
 ncbi          = NCBITaxa(dbfile=NCBI_TAXA_SQLITE)
 
 class Taxid:

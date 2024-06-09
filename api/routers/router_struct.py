@@ -23,7 +23,8 @@ def tax_dict(request):
     td = dbqueries.tax_dict()
     _  = {}
     for kvp in td:
-        _[kvp[0]] =[kvp[1],kvp[2]]
+        # _[kvp[0]] =[kvp[1],kvp[2]]
+        _[kvp[0]] = kvp[1]
     return _
 
 

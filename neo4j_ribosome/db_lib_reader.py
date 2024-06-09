@@ -44,9 +44,7 @@ class Neo4jQuery:
         """All taxonomic ids present in the database mapped to their scientific name per NCBI"""
         with self.adapter.driver.session() as session:
             def _(tx: Transaction | ManagedTransaction):
-                return tx.run("""match (t:PhylogenyNode) 
-match (t)-[:descendant_of*]-(s:PhylogenyNode) where s.ncbi_tax_id in [2759, 2157, 2] 
-return collect([t.ncbi_tax_id,t.scientific_name, s.scientific_name])""").value()[0]
+                return tx.run("""match (t:PhylogenyNode) return collect([t.ncbi_tax_id,t.scientific_name])""").value()[0]
             return session.execute_read(_)
 
     def random_structure(self):
