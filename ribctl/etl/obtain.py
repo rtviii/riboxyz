@@ -27,18 +27,18 @@ async def obtain_assets(rcsb_id: str, assetlist, overwrite: bool = False):
 
 
     if assetlist.profile:
-        coroutines.append(assets._update_json_profile(overwrite))
+        coroutines.append(assets.update_profile(overwrite))
 
     if assetlist.cif:
         print("Obtaining assets:cif")
-        coroutines.append(assets._update_cif(overwrite))
+        coroutines.append(assets.update_cif(overwrite))
 
     if assetlist.ligands:
         coroutines.append(assets._update_ligands(overwrite))
 
     if assetlist.ptc_coords:
 
-        coroutines.append(assets._update_ptc_coordinates(overwrite))
+        coroutines.append(assets.update_ptc(overwrite))
 
     if assetlist.cif_modified_and_chains:
         coroutines.append(assets.upsert(overwrite))

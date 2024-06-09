@@ -3,7 +3,11 @@ import pathlib
 from typing import Literal
 
 
-RIBETL_DATA     = os.environ.get("RIBETL_DATA")
+
+
+  
+RIBETL_DATA     = os.environ.get("RIBETL_DATA", "/home/{}/dev/RIBETL_DATA".format(os.getlogin( )))
+if not os.path.exists(RIBETL_DATA): raise NotADirectoryError("RIBETL_DATA directory does not exist. Most things won't work.")
 
 # This amounts to "_assets folder is expected to exist in the root of `ribctl`(next to top-level __init__.py)"
 #! ------------- logs ----------------

@@ -38,30 +38,63 @@ logger = get_etl_logger()
 
 
 class Assetlist(BaseModel):
-    profile: Optional[bool] = None
-    ptc_coords: Optional[bool] = None
-    cif: Optional[bool] = None
-    cif_modified_and_chains: Optional[bool] = None
-    ligands: Optional[bool] = None
-    png_thumbnail: Optional[bool] = None
+
+    profile       : Optional[bool] = None
+    cif           : Optional[bool] = None
+    ptc_coords    : Optional[bool] = None
+    chains        : Optional[bool] = None
+    ligands       : Optional[bool] = None
+    png_thumbnail : Optional[bool] = None
 
 
+
+
+class AssetPaths:
+    rcsb_id:str
+    def __init__(self, rcsb_id) -> None:
+        self.rcsb_id = rcsb_id
+        pass
+
+    @property
+    def dir(self):
+        return os.path.join(RIBETL_DATA, self.rcsb_id)
+
+    @property
+    def cif(self):
+        return f"{self.dir}/{self.rcsb_id}.cif"
+
+    @property
+    def ptc(self):
+        return os.path.join( RIBETL_DATA, self.rcsb_id, "{}_PTC.json".format(self.rcsb_id) )
+
+    @property
+    def profile(self):
+        return os.path.join(self.dir(), f"{self.rcsb_id}.json")
+
+    @property
+    def polymers_dir(self):
+        return f"{self.dir}/polymers"
+
+    @property
+    def thumbnail(self):
+        return f"{self.dir}/{self.rcsb_id}.png"
+
+# This needs to be split into paths-getter, individual-asset getter, utility functions for individual structures, database-wide functions and acquisition routines
 class RibosomeAssets:
     rcsb_id: str
 
     def __init__(self, rcsb_id: str) -> None:
+        if not RIBETL_DATA:
+            raise Exception("RIBETL_DATA environment variable not set. Cannot access assets." )
         self.rcsb_id = rcsb_id.upper()
 
-    def _envcheck(self):
-        if not RIBETL_DATA:
-            raise Exception(
-                "RIBETL_DATA environment variable not set. Cannot access assets."
-            )
+    @property
+    def paths(self):
+        return AssetPaths(self.rcsb_id)
 
     @staticmethod
     def collect_all_taxa() -> set[PhylogenyNode]:
         _ = set()
-
         for struct in RibosomeAssets.list_all_structs():
             rp = RibosomeAssets(struct).profile()
             for org in [*rp.src_organism_ids, *rp.host_organism_ids]:
@@ -75,53 +108,21 @@ class RibosomeAssets:
                         rank=Taxid.rank(org),
                     )
                 except Exception as e:
-                    print(
-                        struct,
-                        Taxid.get_name(org),
-                        "|\t",
-                        Taxid.rank(org),
-                        "->",
-                        Taxid.get_lineage(org),
-                    )
+                    print( struct, Taxid.get_name(org), "|\t", Taxid.rank(org), "->", Taxid.get_lineage(org), )
                     print("Error with", org, struct)
                     print(e)
                 _.add(pn)
         return _
 
-    def _dir_path(self):
-        self._envcheck()
-        return os.path.join(RIBETL_DATA, self.rcsb_id)
+    @staticmethod
+    def list_all_structs():
+        return os.listdir(RIBETL_DATA)
 
-    def _emdb_path(self):
-        self._envcheck()
-        emdb_path = os.path.join(RIBETL_DATA, self.rcsb_id.upper(), "{}.map.gz")
-        return os.path.join(RIBETL_DATA, self.rcsb_id)
 
-    def _cif_filepath(self):
-        self._envcheck()
-        return f"{self._dir_path()}/{self.rcsb_id}.cif"
-
-    def _cif_modified_filepath(self):
-        self._envcheck()
-        return f"{self._dir_path()}/{self.rcsb_id}_modified.cif"
-
-    def _ptc_residues(self) -> dict[str, dict[str, list[float]]]:
-        PTC_RESIDUES_PATH = os.path.join( RIBETL_DATA, self.rcsb_id, "{}_PTC_COORDINATES.json".format(self.rcsb_id) )
-        with open(PTC_RESIDUES_PATH, "r") as infile:
-            return json.load(infile)
-
-    def _json_profile_filepath(self):
-        self._envcheck()
-        return os.path.join(self._dir_path(), f"{self.rcsb_id}.json")
-
-    def profile(self) -> RibosomeStructure:
-        with open(self._json_profile_filepath(), "r") as f:
-            return RibosomeStructure.model_validate(json.load(f))
-
-    def _nomenclature_table(self, verbose: bool = False) -> dict[str, dict]:
-        # TODO: update getter
+    #! I
+    def nomenclature_table(self, verbose: bool = False) -> dict[str, dict]:
         prof = self.profile()
-        m = {}
+        m    = {}
 
         for p in prof.other_polymers:
             m[p.auth_asym_id] = {
@@ -161,42 +162,41 @@ class RibosomeAssets:
 
         return m
 
+
+    #! I
+    def _ptc_residues(self) -> dict[str, dict[str, list[float]]]:
+        with open(self.paths.ptc, "r") as infile:
+            return json.load(infile)
+
+    #! I
+    def profile(self) -> RibosomeStructure:
+        with open(self.paths.profile, "r") as f:
+            return RibosomeStructure.model_validate(json.load(f))
+
+
+    #! I
     def biopython_structure(self):
         return open_structure(self.rcsb_id, "cif")
 
-    def chains_dir(self):
-        self._envcheck()
-        return f"{self._dir_path()}/CHAINS"
 
-    def _png_thumbnail_filepath(self):
-        self._envcheck()
-        return f"{self._dir_path()}/_ray_{self.rcsb_id}.png"
 
+    #! I
     def write_own_json_profile(self, new_profile: dict, overwrite: bool = False):
         """Update self, basically."""
-        if os.path.exists(self._json_profile_filepath()) and not overwrite:
-            print(
-                "You are about to overwrite {}. Specify `overwrite=True` explicitly.".format(
-                    self._json_profile_filepath()
-                )
+        if os.path.exists(self.paths.profile) and not overwrite:
+            print( "You are about to overwrite {}. Specify `overwrite=True` explicitly.".format( self.paths.profile )
             )
         elif overwrite:
-            with open(self._json_profile_filepath(), "w") as f:
+            with open(self.paths.profile, "w") as f:
                 json.dump(new_profile, f)
                 logger.debug(f"Updated profile for {self.rcsb_id}")
 
-    @staticmethod
-    def list_all_structs():
-        return os.listdir(RIBETL_DATA)
 
     # ※ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-= Getters =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
     def get_taxids(self) -> tuple[list[int], list[int]]:
         p = self.profile()
         return (p.src_organism_ids, p.host_organism_ids)
-
-    def get_struct_and_profile(self) -> tuple[Structure, RibosomeStructure]:
-        return self.biopython_structure(), self.profile()
 
     def get_chain_by_polymer_class(
         self, poly_class: PolymerClass, assembly: int = 0
@@ -233,31 +233,17 @@ class RibosomeAssets:
                     return polyf
         return None
 
-    def get_chain_by_auth_asym_id(
+    def get_poly_by_auth_asym_id(
         self, auth_asym_id: str
-    ) -> tuple[
-        RNA | Protein | None, typing.Literal["RNA", "Protein", "PolymericFactor"] | None
-    ]:
+    ) -> Polymer |None:
 
         profile = self.profile()
-        for chain in profile.proteins:
+        for chain in [ *profile.proteins, *profile.rnas, *profile.other_polymers]:
             if chain.auth_asym_id == auth_asym_id:
-                return (chain, "Protein")
+                return chain
+        return None
 
-        if profile.rnas is not None:
-            for chain in profile.rnas:
-                if chain.auth_asym_id == auth_asym_id:
-                    return (chain, "RNA")
-
-        # TODO: update getter
-        if profile.polymeric_factors is not None:
-            for chain in profile.polymeric_factors:
-                if chain.auth_asym_id == auth_asym_id:
-                    return (chain, "PolymericFactor")
-
-        return (None, None)
-
-    def get_rna_by_nomclass(
+    def get_poly_by_polyclass(
         self, class_: PolynucleotideClass, assembly: int = 0
     ) -> RNA | None:
         """@assembly here stands to specify which of the two or more models the rna comes from
@@ -272,31 +258,18 @@ class RibosomeAssets:
             if class_ in rna.nomenclature and rna.assembly_id == assembly:
                 return rna
 
-    def get_prot_by_nomclass(
-        self, class_: CytosolicProteinClass, assembly: int = 0
-    ) -> Protein | None:
-        _auth_asym_id = {v: k for k, v in self.____nomenclature_v2().items()}.get(
-            class_, None
-        )
-        if _auth_asym_id != None:
-            return self.get_chain_by_auth_asym_id(_auth_asym_id)[0]
-
-        for prot in self.profile().proteins:
-            if class_ in prot.nomenclature and prot.assembly_id == assembly:
-                return prot
-        else:
-            return None
-
     def get_LSU_rRNA(self, assembly: int = 0) -> RNA:
         """retrieve the largest rRNA sequence in the structure
         @returns (seq, auth_asym_id, rna_type)
         """
 
-        rna = self.get_rna_by_nomclass(PolymerClass("23SrRNA"), assembly)
+        rna = self.get_poly_by_polyclass(PolymerClass("23SrRNA"), assembly)
         if rna == None:
-            rna = self.get_rna_by_nomclass(PolymerClass("25SrRNA"), assembly)
+            rna = self.get_poly_by_polyclass(PolymerClass("25SrRNA"), assembly)
         if rna == None:
-            rna = self.get_rna_by_nomclass(PolymerClass("28SrRNA"), assembly)
+            rna = self.get_poly_by_polyclass(PolymerClass("28SrRNA"), assembly)
+        if rna == None:
+            rna = self.get_poly_by_polyclass(PolymerClass("mt16SrRNA"), assembly)
         if rna == None:
             raise Exception("No LSU rRNA found in structure")
         else:
@@ -305,6 +278,7 @@ class RibosomeAssets:
     def biopython_get_chain(self, auth_asym_id: str) -> Chain:
         return self.biopython_structure().child_dict[0].child_dict[auth_asym_id]
 
+    #TODO : Utilities, various
     @staticmethod
     def biopython_chain_get_seq(
         struct: Structure,
@@ -316,14 +290,6 @@ class RibosomeAssets:
         chain3d = struct.child_dict[0].child_dict[auth_asym_id]
         ress = chain3d.child_list
 
-        # if sanitized == True:
-        #     print("sanitized")
-        #     ress = [*filter(lambda r: r.get_resname()
-        #                     in ["A", "C", "G", "U", "PSU"], ress)]
-
-        #     for _r in ress:
-        #         if _r.get_resname() == "PSU":
-        #             _r.resname = "U"
         seq = ""
         for i in ress:
             if i.resname not in AMINO_ACIDS_3_TO_1_CODE.keys():
@@ -335,45 +301,32 @@ class RibosomeAssets:
             else:
                 seq += AMINO_ACIDS_3_TO_1_CODE[i.resname]
 
-        # return reduce(lambda x, y: x + y.resname if protein_rna == 'rna' else AMINO_ACIDS_3_TO_1_CODE[y.resname], ress, '')
         return seq
 
     # ※ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-= Verification =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     #TODO : A lot of this crap should be lib functions untied to this infra class.
 
     def _verify_dir_exists(self):
-        if not os.path.exists(self._dir_path()):
+        if not os.path.exists(self.paths.dir):
             os.umask(0)
-            os.makedirs(self._dir_path(), 0o777)
+            os.makedirs(self.paths.dir, 0o777)
 
-    async def _update_cif(self, overwrite: bool = False) -> bool:
-        if not os.path.exists(self._cif_filepath()):
+    async def update_cif(self, overwrite: bool = False) -> bool:
+        if not os.path.exists(self.paths.cif):
             await download_unpack_place(self.rcsb_id)
-            print("Saved structure file:\t", self._cif_filepath())
+            print("Saved structure file:\t", self.paths.cif)
             return True
         else:
             if overwrite:
                 await download_unpack_place(self.rcsb_id)
-                print("Saved structure file:\t", self._cif_filepath())
+                print("Saved structure file:\t", self.paths.cif)
                 return True
             else:
                 return False
 
-    async def _update_cif_modified_and_chains(self, overwrite: bool = False) -> bool:
-        if not os.path.isdir(self.chains_dir()):
-            os.makedirs(self.chains_dir())
-            await split_rename(self.rcsb_id)
-            return True
-        else:
-            if overwrite:
-                await split_rename(self.rcsb_id)
-                return True
-            else:
-                return False
-
-    async def _update_json_profile(self, overwrite: bool = False) -> bool:
+    async def update_profile(self, overwrite: bool = False) -> bool:
         self._verify_dir_exists()
-        if not os.path.isfile(self._json_profile_filepath()):
+        if not os.path.isfile(self.paths.profile):
             ribosome = ReannotationPipeline(
                 query_rcsb_api(rcsb_single_structure_graphql(self.rcsb_id.upper()))
             ).process_structure()
@@ -402,26 +355,20 @@ class RibosomeAssets:
                 )
         return True
 
-    def _update_png_thumbnail(self, overwrite: bool = False) -> bool:
-        if overwrite:
-            print("Obtaning thumbnail...")
-            render_thumbnail(self.rcsb_id)
-            return True
-        else:
-            if os.path.exists(self._png_thumbnail_filepath()):
-                return True
-            else:
-                return False
+    #TODO: ChimeraX image gen
+    def update_thumbnail(self, overwrite: bool = False) -> bool:
+        ...
 
-    async def _update_chains_dir(self):
-        # TODO : use chimerax instead
-        split_rename(self.rcsb_id)
 
-    async def _update_ptc_coordinates(self, overwrite: bool = False):
+    #TODO: ChimeraX splitchain
+    async def update_chains(self):
+        ...
+
+    async def update_ptc(self, overwrite: bool = False):
 
         etllogger = get_etl_logger()
         asset_ptc_coords_path = os.path.join(
-            self._dir_path(), f"{self.rcsb_id}_PTC_COORDINATES.json"
+            self.paths.ptc
         )
 
         if os.path.exists(asset_ptc_coords_path) and not overwrite:
@@ -435,89 +382,12 @@ class RibosomeAssets:
         midpoint_coords = ptc_residues_calculate_midpoint(ress, auth_asym_id)
 
         writeout = {
-            "site_9_residues": [(res.get_resname(), res.id[1]) for res in ress],
+            "site_9_residues"      : [(res.get_resname(), res.id[1]) for res in ress],
             "LSU_rRNA_auth_asym_id": auth_asym_id,
-            "midpoint_coordinates": midpoint_coords,
-            "nomenclature_table": self._nomenclature_table(),
+            "midpoint_coordinates" : midpoint_coords,
+            "nomenclature_table"   : self.nomenclature_table(),
         }
 
         with open(asset_ptc_coords_path, "w") as f:
             json.dump(writeout, f)
-            etllogger.info(
-                f"Saved PTC coordinates for {self.rcsb_id} to {asset_ptc_coords_path}"
-            )
-
-    async def _update_ligands(self, overwrite: bool = False):
-
-        ligands = struct_ligand_ids(self.rcsb_id, self.profile())
-
-        for ligand in ligands:
-            ligand_chemid = ligand.chemicalId
-            if not os.path.exists(
-                BindingSite.path_nonpoly_ligand(self.rcsb_id, ligand_chemid)
-            ):
-                bsite = bsite_ligand(ligand_chemid, self.biopython_structure())
-                bsite.save(bsite.path_nonpoly_ligand(self.rcsb_id, ligand_chemid))
-            else:
-                if overwrite:
-                    bsite = bsite_ligand(ligand_chemid, self.biopython_structure())
-                    bsite.save(bsite.path_nonpoly_ligand(self.rcsb_id, ligand_chemid))
-                else:
-                    ...
-
-    # async def _verify_ligads_and_ligandlike_polys(self, overwrite: bool = False):
-
-    #     # def ligand_path(chem_id): return os.path.join(self._dir_path(), f"polymer_{chem_id.upper()}.json")
-    #     # def poly_factor_path(auth_asym_id): return os.path.join(self._dir_path(), f"polymer_{auth_asym_id.upper()}.json")
-
-    #     ligands           = struct_ligand_ids(self.rcsb_id, self.profile())
-    # polymeric_factors = struct_polymeric_factor_ids(self.profile())
-    #     all_verified_flag = True
-
-    #     for ligand_chemid in ligands:
-    #         if not os.path.exists(BindingSite.path_nonpoly_ligand(self.rcsb_id, ligand_chemid)):
-    #             all_verified_flag = False
-    #             bsite = bsite_ligand( ligand_chemid, self.biopython_structure())
-
-    #             bsite.save(bsite.path_nonpoly_ligand( self.rcsb_id, ligand_chemid))
-    #         else:
-    #             if overwrite:
-    #                 bsite = bsite_ligand( ligand_chemid, self.biopython_structure())
-    #                 bsite.save(bsite.path_nonpoly_ligand( self.rcsb_id, ligand_chemid))
-    #             else:
-    #                 ...
-
-    # if polymeric_factors is not None:
-    #     for poly in polymeric_factors:
-    #         if not os.path.exists(BindingSite.path_poly_factor(self.rcsb_id, poly.nomenclature[0], poly.auth_asym_id)):
-    #             all_verified_flag = False
-    #             bsite = bsite_extrarbx_polymer(
-    #                 poly.auth_asym_id, self.biopython_structure())
-    #             bsite.save(bsite.path_poly_factor(
-    #                 self.rcsb_id, poly.nomenclature[0], poly.auth_asym_id))
-    #         else:
-    #             if overwrite:
-    #                 bsite = bsite_extrarbx_polymer(
-    #                     poly.auth_asym_id, self.biopython_structure())
-    #                 bsite.save(bsite.path_poly_factor(
-    #                     self.rcsb_id, poly.nomenclature[0], poly.auth_asym_id))
-    #             else:
-    #                 ...
-
-    # return all_verified_flag
-
-
-def classify_struct_by_proportions(ribosome: RibosomeStructure) -> int:
-    ids = []
-    if ribosome.rnas is not None:
-        for rna in ribosome.rnas:
-            ids = [*rna.src_organism_ids, *ids]
-
-    for protein in ribosome.proteins:
-        ids = [*protein.src_organism_ids, *ids]
-
-    proportions = {}
-    for i in set(ids):
-        proportions[i] = ids.count(i) / len(ids)
-
-    return max(proportions, key=proportions.get)
+            etllogger.info( f"Saved PTC coordinates for {self.rcsb_id} to {asset_ptc_coords_path}" )

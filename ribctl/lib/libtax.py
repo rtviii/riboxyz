@@ -16,8 +16,8 @@ TAXID_ARCHAEA   = 2157
 PhylogenyRank = Literal["superkingdom", "phylum", "class", "order", "clade", "family", "genus", "species", "strain","isolate",
                          "subspecies", "no rank", "suborder", "kingdom", "subfamily", "subgenus", "subphylum", "infraorder","superorder", "superclass", "superfamily", "parvorder","cohort",
                          "infraclass", "subclass","subkingdom", "species group", "tribe", "species subgroup", "subcohort", "subtribe"]
-ncbi          = NCBITaxa(dbfile=NCBI_TAXA_SQLITE)
 
+ncbi          = NCBITaxa(dbfile=NCBI_TAXA_SQLITE)
 class Taxid:
     @staticmethod
     def is_descendant_of(parent_taxid: int, target_taxid: int) -> bool:
@@ -35,10 +35,10 @@ class Taxid:
         """Return ncbi lineage, except filter out the ranks that are not among the @PhylogenyRank."""
         # lin = list(filter(lambda x: Taxid.rank(x) in typing.get_args(PhylogenyRank), ncbi.get_lineage(taxid) ) )
         # lin = list(filter(lambda x: Taxid.rank(x) in typing.get_args(PhylogenyRank), ncbi.get_lineage(taxid) ) )
-        lin = ncbi.get_lineage(taxid)
+        lin = ncbi.get_lineage(taxid) 
         if include_only is not None:
             return list(filter(lambda x: Taxid.rank(x) in include_only, lin))
-        return lin
+        return lin if lin is not None else []
 
     @staticmethod
     def rank(taxid: int) -> PhylogenyRank:

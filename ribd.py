@@ -62,7 +62,7 @@ def cmd_etl(args):
         profile                 = False,
         ptc_coords              = False,
         cif                     = False,
-        cif_modified_and_chains = False,
+        chains = False,
         ligands                 = False,
         png_thumbnail           = False,
     )
@@ -77,7 +77,7 @@ def cmd_etl(args):
         ASL.cif=True
 
     if args.cif_modified_and_chains:
-        ASL.cif_modified_and_chains=True
+        ASL.chains=True
 
     if args.ligands:
         ASL.ligands=True
