@@ -1,4 +1,3 @@
-
 import json
 import os
 from pprint import pprint
@@ -6,7 +5,6 @@ from ribctl import RIBETL_DATA
 from ribctl.etl.ribosome_assets import RibosomeAssets
 from ribctl.lib.libmsa import Taxid
 from ribctl.lib.schema.types_ribosome import PolynucleotideClass, PolypeptideClass, RibosomeStructure
-# from ribctl.lib.libmsa import  Taxid
 
 
 def cmd_ls(args):
@@ -50,7 +48,6 @@ def cmd_ls(args):
         print("Descendants of taxid {}(2=bact, 2157=arch, 2159=euk):".format( args.taxid))
         print(list(sorted(_)))
 
-
     elif args.subelement != None:
         subelem = args.subelement
         found   =  []
@@ -73,12 +70,6 @@ def cmd_ls(args):
         with open('found_{}.json'.format(subelem), 'w') as outfile:
             json.dump([json.loads(_.json()) for _ in found], outfile, indent=4)
             print("Saved:", 'found_{}.json'.format(subelem))
-                
-               
-
-           
-
-
 
     else:
         print(all_structs)
