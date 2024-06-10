@@ -1,3 +1,4 @@
+from enum import Enum
 import json
 import os
 from pprint import pprint
@@ -38,20 +39,22 @@ from ribctl.logs.loggers import get_etl_logger
 logger = get_etl_logger()
 
 
-class Assetlist(BaseModel):
+# class Assetlist(BaseModel):
 
-    profile       : Optional[bool] = None
-    cif           : Optional[bool] = None
-    ptc_coords    : Optional[bool] = None
-    chains        : Optional[bool] = None
-    ligands       : Optional[bool] = None
-    png_thumbnail : Optional[bool] = None
+#     profile       : Optional[bool] = None
+#     cif           : Optional[bool] = None
+#     ptc_coords    : Optional[bool] = None
+#     chains        : Optional[bool] = None
+#     ligands       : Optional[bool] = None
+#     png_thumbnail : Optional[bool] = None
 
 
 #! -------------- [ Dev ]
 from typing import NewType, Literal
 
-AssetSet = NewType('AssetSet', set[Literal['Chains', 'Profile', 'Thumbnail']])
+
+Asset     = Literal['profile','cif','ptc_coords','chains','ligands']
+AssetList = NewType('AssetList', list[Asset])
 
 
 class AssetPaths:

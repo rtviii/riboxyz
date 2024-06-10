@@ -14,13 +14,11 @@ def ls(ctx):
             rcsb_id, auth_asym_id = rcsb_id.split(".")
             RA    = RibosomeAssets(rcsb_id)
             chain = RA.get_poly_by_auth_asym_id(auth_asym_id)
-
             if chain != None:
                 ce(chain.model_dump_json())
             else:
                 ce(f"Chain {auth_asym_id} not found in {rcsb_id}")
         else:
-
             ce(RibosomeAssets(rcsb_id).profile().model_dump_json())
     else:
         all_structs = os.listdir(RIBETL_DATA)

@@ -15,20 +15,16 @@ def ribd(ctx, debug, config, rcsb_id):
         click.echo('Debug mode is on')
     if config:
         click.echo(f'Using configuration file: {config}')
+
     ctx.ensure_object(dict)
-    ctx.obj['rcsb_id'] = rcsb_id
+
 
 ribd.add_command(etl)
 ribd.add_command(db)
 ribd.add_command(ls)
 
-# add_etl_commands(ribd)
-
 @ribd.command()
 def init():
-    """
-    Initialize the application.
-    """
     click.echo('Initializing the application...')
 
 if __name__ == '__main__':
