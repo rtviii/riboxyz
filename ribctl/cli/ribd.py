@@ -2,7 +2,7 @@ import click
 import sys
 sys.dont_write_bytecode = True
 from ribctl.cli.subparsers.ls import ls
-from subparsers.etl import etl
+from subparsers.etl import  etl
 from subparsers.db import db
 
 @click.group()
@@ -10,7 +10,7 @@ from subparsers.db import db
 @click.option('--config', type=click.Path(exists=True), help='Path to the configuration file')
 @click.option('--rcsb_id', required=False, help='RCSB ID')
 @click.pass_context
-def cli(ctx, debug, config, rcsb_id):
+def ribd(ctx, debug, config, rcsb_id):
     if debug:
         click.echo('Debug mode is on')
     if config:
@@ -18,11 +18,13 @@ def cli(ctx, debug, config, rcsb_id):
     ctx.ensure_object(dict)
     ctx.obj['rcsb_id'] = rcsb_id
 
-cli.add_command(etl)
-cli.add_command(db)
-cli.add_command(ls)
+ribd.add_command(etl)
+# ribd.add_command(db)
+# ribd.add_command(ls)
 
-@cli.command()
+# add_etl_commands(ribd)
+
+@ribd.command()
 def init():
     """
     Initialize the application.
@@ -30,4 +32,4 @@ def init():
     click.echo('Initializing the application...')
 
 if __name__ == '__main__':
-    cli(obj={})
+    ribd(obj={})

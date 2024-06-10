@@ -17,8 +17,6 @@ from ribctl.cli.sync import cmd_db
 from ribctl.lib.mod_transpose_bsites import init_transpose_ligand
 from ribctl.lib.schema.types_binding_site import BindingSite
 
-def parse_comma_separated_list(value):
-    return value.split(',')
 
 
 parser = argparse.ArgumentParser(description="Command line interface for the `ribctl` package.")
@@ -159,17 +157,17 @@ parser.add_argument('--t', action='store_true')
 #?---------------------------------------------------------------------------------------------------------
 
 
-def verify_structure_profile_schema(rcsb_id:str):
-    s = RibosomeAssets(rcsb_id).profile().model_dump_json()
-    try:
-        RibosomeStructure.model_validate_json(s)
-        return True
-    except Exception as e:
-        print(e)
-        return False
+# def verify_structure_profile_schema(rcsb_id:str):
+#     s = RibosomeAssets(rcsb_id).profile().model_dump_json()
+#     try:
+#         RibosomeStructure.model_validate_json(s)
+#         return True
+#     except Exception as e:
+#         print(e)
+#         return False
 
-def verify_profile_exists(rcsb_id:str):
-    return os.path.exists(RibosomeAssets(rcsb_id)._json_profile_filepath())
+# def verify_profile_exists(rcsb_id:str):
+#     return os.path.exists(RibosomeAssets(rcsb_id)._json_profile_filepath())
 
 try:
     args = parser.parse_args()

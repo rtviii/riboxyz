@@ -17,10 +17,10 @@ from concurrent.futures import  Future, ThreadPoolExecutor
 from ribctl.logs.loggers import get_etl_logger
 
 async def obtain_assets(rcsb_id: str, assetlist, overwrite: bool = False):
-    """Obtain all assets for a given RCSB ID"""
+    """Obtain assets for a given RCSB ID"""
 
     rcsb_id = rcsb_id.upper()
-    assets = RibosomeAssets(rcsb_id)
+    assets  = RibosomeAssets(rcsb_id)
     assets._verify_dir_exists()
 
     coroutines = []

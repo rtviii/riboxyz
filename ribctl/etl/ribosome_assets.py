@@ -48,6 +48,10 @@ class Assetlist(BaseModel):
     png_thumbnail : Optional[bool] = None
 
 
+#! -------------- [ Dev ]
+from typing import NewType, Literal
+
+AssetSet = NewType('AssetSet', set[Literal['Chains', 'Profile', 'Thumbnail']])
 
 
 class AssetPaths:
