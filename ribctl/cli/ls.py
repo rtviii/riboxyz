@@ -17,9 +17,7 @@ def cmd_ls(args):
         else:
             rcsb_id = args.struct
 
-
         ribosome_Assets = RibosomeAssets(rcsb_id)
-
         if "." in args.struct:
             chain, rp_class = ribosome_Assets.get_poly_by_auth_asym_id(auth_asym_id)
             if chain != None:

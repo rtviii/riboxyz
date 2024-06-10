@@ -203,6 +203,7 @@ class RibosomeAssets:
     def get_chain_by_polymer_class(
         self, poly_class: PolymerClass, assembly: int = 0
     ) -> Polymer | None:
+
         profile = self.profile()
 
         if poly_class in [v.value for v in PolynucleotideClass]:
@@ -235,11 +236,10 @@ class RibosomeAssets:
                     return polyf
         return None
 
-    def get_poly_by_auth_asym_id(
-        self, auth_asym_id: str
-    ) -> Polymer |None:
+    def get_poly_by_auth_asym_id( self, auth_asym_id: str ) -> Polymer |None:
 
         profile = self.profile()
+
         for chain in [ *profile.proteins, *profile.rnas, *profile.other_polymers]:
             if chain.auth_asym_id == auth_asym_id:
                 return chain

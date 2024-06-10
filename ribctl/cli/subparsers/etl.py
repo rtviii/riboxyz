@@ -2,8 +2,6 @@ from pprint import pprint
 import click
 from click import Context
 
-
-
 @click.group(invoke_without_command=True)
 @click.pass_context
 def etl(ctx: Context):
@@ -18,12 +16,10 @@ def etl(ctx: Context):
 def obtain(ctx):
     pprint(ctx)
     rcsb_id   = ctx.obj['rcsb_id']
-    # data_type = ctx.obj['data_type']
     click.echo(f'Extracting {rcsb_id}')
 
 @etl.command()
 @click.pass_context
 def transform(ctx):
     rcsb_id = ctx.obj['rcsb_id']
-    # data_type = ctx.obj['data_type']
     click.echo(f'Transforming {rcsb_id} ')
