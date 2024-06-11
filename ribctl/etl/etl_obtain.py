@@ -2,7 +2,7 @@ import asyncio
 from concurrent import futures
 from typing import Coroutine, Optional
 from ribctl import AMINO_ACIDS_3_TO_1_CODE
-from ribctl.etl.etl_ribosome_ops import AssetClass, Structure
+from ribctl.etl.etl_ribosome_ops import AssetClass, Assets, RibosomeOps, Structure
 from ribctl.etl.etl_pipeline import (
     current_rcsb_structs,
     ReannotationPipeline,
@@ -21,8 +21,9 @@ def asset_routines(
     """This should return an array of Futures for acquisition routines for each A  in asset type."""
 
     rcsb_id = rcsb_id.upper()
-    RA = Structure(rcsb_id)
-    RA._verify_dir_exists()
+    RO = RibosomeOps(rcsb_id)
+    RO._verify_dir_exists()
+    RA = Assets(rcsb_id)
 
     coroutines = []
 

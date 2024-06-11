@@ -5,7 +5,7 @@
 import json
 from pprint import pprint
 import numpy as np
-from ribctl.etl.ribosome_assets import Structure
+from ribctl.etl.etl_ribosome_ops import Structure
 from ribctl.lib.libhmm import fasta_phylogenetic_correction
 from ribctl.lib.libmsa import Fasta, muscle_align_N_seq
 from ribctl.lib.schema.types_ribosome import PolymerClass
@@ -15,12 +15,7 @@ from Bio.PDB.Residue import Residue
 from Bio.PDB.MMCIFParser import MMCIFParser
 from Bio.PDB.NeighborSearch import NeighborSearch
 from Bio.PDB import Selection
-from scipy.spatial.distance import cdist
-
 import urllib.request as urlreq
-from dash import Dash, html
-import dash_bio as dashbio
-from paths import tunnel_atom_encoding_path
 
 
 RCSB_ID = "4W29"

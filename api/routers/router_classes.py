@@ -4,7 +4,7 @@ import os
 from django.http import HttpResponse, JsonResponse, HttpResponseServerError
 from ninja import Router
 from ribctl import RIBETL_DATA
-from ribctl.etl.ribosome_assets import Structure
+from ribctl.etl.etl_ribosome_ops import RibosomeOps, Structure
 from ribctl.lib.schema.types_ribosome import RNA, LifecycleFactorClass, MitochondrialProteinClass, Polymer, PolymerClass, CytosolicProteinClass, PolynucleotideClass, PolypeptideClass, Protein, ProteinClass, RibosomeStructure
 from schema.v0 import BanClassMetadata, ExogenousRNAByStruct,LigandInstance, LigandlikeInstance, NeoStruct, NomenclatureClass, NomenclatureClassMember
 
@@ -19,7 +19,7 @@ def polynucleotide_class(request,rna_class:PolynucleotideClass):
 
     for rcsb_id in os.listdir(RIBETL_DATA):
         try:
-            x = Structure(rcsb_id).get_chain_by_polymer_class(rna_class)
+            x = RibosomeOps(rcsb_id).get_chain_by_polymer_class(rna_class)
         except Exception as e:
             print(e)
 
@@ -36,7 +36,7 @@ def polypeptide_class(request,protein_class:ProteinClass):
     protein_class = protein_class.value
     for rcsb_id in os.listdir(RIBETL_DATA):
         try:
-            x = Structure(rcsb_id).get_chain_by_polymer_class(protein_class)
+            x = RibosomeOps(rcsb_id).get_chain_by_polymer_class(protein_class)
         except Exception as e:
             print(e)
 
@@ -54,7 +54,7 @@ def lifecycle_factor_class(request,factor_class:LifecycleFactorClass):
     factor_class = factor_class.value
     for rcsb_id in os.listdir(RIBETL_DATA):
         try:
-            x = Structure(rcsb_id).get_chain_by_polymer_class(factor_class)
+            x = RibosomeOps(rcsb_id).get_chain_by_polymer_class(factor_class)
         except Exception as e:
             print(e)
         if x is not None:

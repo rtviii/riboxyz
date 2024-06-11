@@ -1,5 +1,5 @@
 from ribctl import RIBETL_DATA
-from ribctl.etl.ribosome_assets import Structure
+from ribctl.etl.etl_ribosome_ops import RibosomeOps, Structure
 import os
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
@@ -17,7 +17,7 @@ def download_file(url, dest):
 with ThreadPoolExecutor(max_workers=50) as executor:
     # Submit download tasks for each URL
     for struct in os.listdir(RIBETL_DATA):
-        prof = Structure(struct).profile()
+        prof = RibosomeOps(struct).profile()
         try:
             emd_id      = list(filter(lambda x: "EMD-" in x, prof.rcsb_external_ref_id))[0]
             url         = "https://ftp.ebi.ac.uk/pub/databases/emdb/structures/{}/map/{}.map.gz".format(emd_id,emd_id.replace('-','_').lower() )
