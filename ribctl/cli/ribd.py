@@ -17,6 +17,7 @@ def ribd(ctx, debug, config, rcsb_id):
         click.echo(f'Using configuration file: {config}')
 
     ctx.ensure_object(dict)
+    rcsb_id = ctx.obj['rcsb_id'] = rcsb_id
 
 
 ribd.add_command(etl)

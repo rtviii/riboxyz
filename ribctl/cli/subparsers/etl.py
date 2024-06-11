@@ -14,11 +14,12 @@ def etl(ctx: Context):
         click.echo("invoked with subcommand")
 
 @etl.command()
-@click.argument('data_type', required=True,  nargs=-1,  type=click.Choice(typing.get_args(Asset)))
 @click.pass_context
-def assets(ctx:Context, data_type):
-    print(data_type)
-    # debug = ctx.obj['DEBUG']
+@click.argument('assets', required=True,  nargs=-1,  type=click.Choice(typing.get_args(Asset)))
+def assets(ctx:Context, assets):
+    rcsb_id = ctx.obj['rcsb_id']
+    print(rcsb_id)
+    print(assets)
     # pprint(ctx)
     # click.echo(f'Debug mode: {debug}')
     # click.echo(f'Extracting data of type: {data_type}')
