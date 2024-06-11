@@ -7,7 +7,7 @@ from Bio.PDB.Chain import Chain
 from typing import Optional
 from ribctl import AMINO_ACIDS_3_TO_1_CODE
 from ribctl.etl import AssetFile
-from ribctl.etl.ribosome_assets import Assetlist, RibosomeAssets
+from ribctl.etl.ribosome_assets import  Asset, RibosomeAssets
 from ribctl.lib.tunnel import ptc_resdiues_get, ptc_residues_calculate_midpoint
 from ribctl.lib.schema.types_binding_site import BindingSite
 from ribctl.lib.mod_extract_bsites import bsite_ligand, struct_ligand_ids, bsite_extrarbx_polymer, bsite_extrarbx_polymer
@@ -16,8 +16,8 @@ from ribctl.etl.etl_pipeline import current_rcsb_structs, ReannotationPipeline, 
 from concurrent.futures import  Future, ThreadPoolExecutor
 from ribctl.logs.loggers import get_etl_logger
 
-async def obtain_assets(rcsb_id: str, assetlist, overwrite: bool = False):
-    """Obtain assets for a given RCSB ID"""
+def obtain_assets(rcsb_id: str, assetlist:list[Asset], overwrite: bool = False):
+    """This should return an array of Futures for acquisition routines for each A  in asset type."""
 
     rcsb_id = rcsb_id.upper()
     assets  = RibosomeAssets(rcsb_id)
@@ -26,26 +26,21 @@ async def obtain_assets(rcsb_id: str, assetlist, overwrite: bool = False):
     coroutines = []
 
 
-    if assetlist.profile:
+    if Asset.profile in assetlist:
         coroutines.append(assets.update_profile(overwrite))
 
-    if assetlist.cif:
-        print("Obtaining assets:cif")
+    if Asset.cif in assetlist:
         coroutines.append(assets.update_cif(overwrite))
 
-    if assetlist.ligands:
-        coroutines.append(assets._update_ligands(overwrite))
-
-    if assetlist.ptc_coords:
-
+    if Asset.ptc in assetlist:
         coroutines.append(assets.update_ptc(overwrite))
 
-    if assetlist.cif_modified_and_chains:
-        coroutines.append(assets.upsert(overwrite))
+    if Asset.chains in assetlist:
+        coroutines.append(...)
 
-    await asyncio.gather(*coroutines)
+    return coroutines
 
-def obtain_assets_threadpool(assetlist: Assetlist, workers: int = 10,  overwrite=False):
+def obtain_assets_threadpool(assetlist, workers: int = 10,  overwrite=False):
     """Get all ribosome profiles from RCSB via a threadpool"""
     logger = get_etl_logger()
     unsynced = sorted(current_rcsb_structs())

@@ -3,7 +3,8 @@ import typing
 import click
 from click import Context
 
-from ribctl.etl.ribosome_assets import Asset, AssetList 
+from ribctl.etl import obtain
+from ribctl.etl.ribosome_assets import Asset
 
 @click.group(invoke_without_command=True)
 @click.pass_context
@@ -15,29 +16,13 @@ def etl(ctx: Context):
 
 @etl.command()
 @click.pass_context
-@click.argument('assets', required=True,  nargs=-1,  type=click.Choice(typing.get_args(Asset)))
+@click.argument('assets', required=True,  nargs=-1,  type=click.Choice(Asset._member_names_))
 def assets(ctx:Context, assets):
     rcsb_id = ctx.obj['rcsb_id']
-    print(rcsb_id)
-    print(assets)
-    # pprint(ctx)
-    # click.echo(f'Debug mode: {debug}')
-    # click.echo(f'Extracting data of type: {data_type}')
-    # rcsb_id = ctx.obj['rcsb_id']
-    # al      = AssetList([ 'profile', 'ligands' ])
-    # print(al)
-    # click.echo(f'Transforming {rcsb_id} ')
 
-# @etl.command()
-# @click.pass_context
-# def obtain(ctx):
-#     pprint(ctx)
-#     rcsb_id   = ctx.obj['rcsb_id']
-#     click.echo(f'Extracting {rcsb_id}')
-
-# @etl.command()
-# @click.pass_context
-# def transform(ctx):
-#     rcsb_id = ctx.obj['rcsb_id']
-#     click.echo(f'Transforming {rcsb_id} ')
+    print("Obtaining assets ", assets , " for {}.".format(rcsb_id)) 
+    print("Got assets",  )
+    enums = list(map(Asset.from_str, assets))
+    print(obtain.obtain_assets(rcsb_id, enums))
+# 
 

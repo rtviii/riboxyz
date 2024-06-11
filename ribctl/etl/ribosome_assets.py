@@ -1,60 +1,44 @@
-from enum import Enum
+from enum import  StrEnum, auto
+import enum
 import json
 import os
-from pprint import pprint
 import typing
 from Bio.PDB.Structure import Structure
 from Bio.PDB.Chain import Chain
-from typing import Optional
+from loguru import logger
 from ribctl import AMINO_ACIDS_3_TO_1_CODE
 from ribctl.lib.libtax import PhylogenyNode, PhylogenyRank, Taxid
-from ribctl.lib.schema.types_binding_site import BindingSite
-from ribctl.lib.mod_extract_bsites import struct_ligand_ids, bsite_ligand
-from ribctl.lib.mod_split_rename import split_rename
 from ribctl.etl.etl_pipeline import (
-    current_rcsb_structs,
     ReannotationPipeline,
     rcsb_single_structure_graphql,
     query_rcsb_api,
 )
 from ribctl.lib.tunnel import ptc_resdiues_get, ptc_residues_calculate_midpoint
 from ribctl.lib.utils import download_unpack_place, open_structure
-from ribctl.lib.schema.types_ribosome import (
-    RNA,
-    PTCInfo,
-    Polymer,
-    PolymerClass,
-    PolynucleotideClass,
-    PolypeptideClass,
-    Protein,
-    CytosolicProteinClass,
-    RibosomeStructure,
-)
-
+from ribctl.lib.schema.types_ribosome import ( RNA, PTCInfo, Polymer, PolymerClass, PolynucleotideClass, PolypeptideClass, RibosomeStructure, )
 from ribctl import RIBETL_DATA
-from pydantic import BaseModel
 from ribctl.logs.loggers import get_etl_logger
-
-
-logger = get_etl_logger()
-
-
-# class Assetlist(BaseModel):
-
-#     profile       : Optional[bool] = None
-#     cif           : Optional[bool] = None
-#     ptc_coords    : Optional[bool] = None
-#     chains        : Optional[bool] = None
-#     ligands       : Optional[bool] = None
-#     png_thumbnail : Optional[bool] = None
-
 
 #! -------------- [ Dev ]
 from typing import NewType, Literal
 
 
-Asset     = Literal['profile','cif','ptc_coords','chains','ligands']
-AssetList = NewType('AssetList', list[Asset])
+class Asset(enum.StrEnum):
+    profile   = auto()
+    cif       = auto()
+    ptc       = auto()
+    chains    = auto()
+    thumbnail = auto()
+
+    @staticmethod
+    def from_str(_):
+        assets = [status for status in dir( Asset) if not status.startswith('_')]
+        if _ in assets:
+            return getattr(Asset, _)
+        return None
+
+
+
 
 
 class AssetPaths:
@@ -320,44 +304,29 @@ class RibosomeAssets:
         if not os.path.exists(self.paths.cif):
             await download_unpack_place(self.rcsb_id)
             print("Saved structure file:\t", self.paths.cif)
-            return True
         else:
             if overwrite:
                 await download_unpack_place(self.rcsb_id)
-                print("Saved structure file:\t", self.paths.cif)
                 return True
             else:
                 return False
 
-    async def update_profile(self, overwrite: bool = False) -> bool:
+    def update_profile(self, overwrite: bool = False) -> bool:
         self._verify_dir_exists()
         if not os.path.isfile(self.paths.profile):
-            ribosome = ReannotationPipeline(
-                query_rcsb_api(rcsb_single_structure_graphql(self.rcsb_id.upper()))
-            ).process_structure()
+            ribosome = ReannotationPipeline( query_rcsb_api(rcsb_single_structure_graphql(self.rcsb_id.upper())) ).process_structure()
             if not RibosomeStructure.model_validate(ribosome):
-                raise Exception(
-                    "Created invalid ribosome profile (Schema validation failed). Not writing"
-                )
+                raise Exception( "Created invalid ribosome profile (Schema validation failed). Not writing" )
+
             self.write_own_json_profile(ribosome.model_dump(), overwrite=True)
             logger.debug("Processing {} profile.".format(self.rcsb_id))
+
         else:
+            logger.debug( "Processing {} profile: already exists for {}. Overwriting.".format( self.rcsb_id, self.rcsb_id ))
             if overwrite:
-                ribosome = ReannotationPipeline(
-                    query_rcsb_api(rcsb_single_structure_graphql(self.rcsb_id.upper()))
-                ).process_structure()
+                ribosome = ReannotationPipeline( query_rcsb_api(rcsb_single_structure_graphql(self.rcsb_id.upper()))).process_structure()
                 self.write_own_json_profile(ribosome.model_dump(), overwrite)
-                logger.debug(
-                    "Processing {} profile: already exists for {}. Overwriting.".format(
-                        self.rcsb_id, self.rcsb_id
-                    )
-                )
-            else:
-                logger.debug(
-                    "Processing {} profile: already exists for {}.".format(
-                        self.rcsb_id, self.rcsb_id
-                    )
-                )
+                logger.debug("Overwritingw")
         return True
 
     #TODO: ChimeraX image gen

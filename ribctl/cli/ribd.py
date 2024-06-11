@@ -19,7 +19,6 @@ def ribd(ctx, debug, config, rcsb_id):
     ctx.ensure_object(dict)
     rcsb_id = ctx.obj['rcsb_id'] = rcsb_id
 
-
 ribd.add_command(etl)
 ribd.add_command(db)
 ribd.add_command(ls)
