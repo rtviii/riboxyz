@@ -6,7 +6,7 @@ import typing
 from Bio.PDB.Structure import Structure
 from Bio.PDB.Chain import Chain
 from loguru import logger
-from ribctl import AMINO_ACIDS_3_TO_1_CODE
+from ribctl import AMINO_ACIDS_3_TO_1_CODE, CLASSIFICATION_REPORTS
 from ribctl.lib.libtax import PhylogenyNode, PhylogenyRank, Taxid
 from ribctl.etl.etl_pipeline import (
     ReannotationPipeline,
@@ -59,6 +59,10 @@ class AssetPaths:
     @property
     def polymers_dir(self):
         return f"{self.dir}/polymers"
+
+    @property
+    def classification_report(self):
+        return os.path.join(CLASSIFICATION_REPORTS, f"{self.rcsb_id}.json")
 
     @property
     def thumbnail(self):

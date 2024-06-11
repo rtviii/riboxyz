@@ -8,6 +8,7 @@ import pyhmmer
 from pyhmmer.plan7 import HMM
 import requests
 from ribctl import ASSETS, CLASSIFICATION_REPORTS, RIBETL_DATA
+from ribctl.etl.ribosome_assets import RibosomeAssets
 from ribctl.lib.libhmm import (
     HMMClassifier,
 )
@@ -697,7 +698,7 @@ class ReannotationPipeline:
                         _other_polymers.append(poly)
 
         logger.debug("Classifying {}: {} polypeptides, {} polynucleotides, {} other.".format(rcsb_id, len(_prot_polypeptides), len(_rna_polynucleotides), len(_other_polymers)))
-        # logger.debug("Classifying polymers: Proteins.")
+        RibosomeAssets(rcsb_id)
         protein_alphabet      = pyhmmer.easel.Alphabet.amino()
         protein_classifier    = HMMClassifier(_prot_polypeptides, protein_alphabet, [p for p in [ *list(CytosolicProteinClass),*list(LifecycleFactorClass) , *list(MitochondrialProteinClass)] ])
         protein_classifier.classify_chains()
