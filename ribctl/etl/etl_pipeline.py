@@ -7,7 +7,7 @@ from typing import Any, Optional
 import pyhmmer
 from pyhmmer.plan7 import HMM
 import requests
-from ribctl.etl.ribosome_assets import RibosomeAssets
+from ribctl.etl.etl_ribosome_ops import RibosomeOps, Structure
 from ribctl.lib.libhmm import (
     HMMClassifier,
 )
@@ -667,7 +667,7 @@ class ReannotationPipeline:
 
     async def process_structure(self, overwrite: bool = False)->RibosomeStructure:
         rcsb_id = self.rcsb_data_dict["rcsb_id"]
-        RA      = RibosomeAssets(rcsb_id)
+        RA      = RibosomeOps(rcsb_id)
 
         if os.path.isfile(RA.paths.profile):
             logger.debug( "Profile already exists for {}.".format(rcsb_id))

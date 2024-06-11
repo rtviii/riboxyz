@@ -6,7 +6,7 @@ import numpy as np
 import open3d as o3d
 from mendeleev import element
 import pandas as pd
-from ribctl.etl.ribosome_assets import RibosomeAssets
+from ribctl.etl.ribosome_assets import Structure
 from Bio.PDB.Atom import Atom
 
 # Tunnel refinement:
@@ -35,7 +35,7 @@ def parse_struct_via_centerline(
     from Bio.PDB import Selection
 
     parser      = MMCIFParser()
-    struct_path = RibosomeAssets(rcsb_id)._cif_filepath()
+    struct_path = Structure(rcsb_id)._cif_filepath()
     structure   = parser.get_structure(rcsb_id, struct_path)
     atoms       = Selection.unfold_entities(structure, "A")
     ns          = NeighborSearch(atoms)
@@ -94,7 +94,7 @@ def encode_atoms(rcsb_id: str, atoms_list: list[Atom], write=False, writepath=No
     - van der waals radius
     - atom type
     """
-    profile      = RibosomeAssets(rcsb_id).profile()
+    profile      = Structure(rcsb_id).profile()
     nomenclature = profile.get_nomenclature_map()
     vdw_radii    = {}
     aggregate    = []

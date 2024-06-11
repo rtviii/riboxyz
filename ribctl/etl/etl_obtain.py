@@ -2,7 +2,7 @@ import asyncio
 from concurrent import futures
 from typing import Coroutine, Optional
 from ribctl import AMINO_ACIDS_3_TO_1_CODE
-from ribctl.etl.ribosome_assets import Asset, RibosomeAssets
+from ribctl.etl.etl_ribosome_ops import AssetClass, Structure
 from ribctl.etl.etl_pipeline import (
     current_rcsb_structs,
     ReannotationPipeline,
@@ -16,27 +16,27 @@ import asyncio
 
 # This should be in the RibosomeAssets module
 def asset_routines(
-    rcsb_id: str, assetlist: list[Asset], overwrite: bool = False
+    rcsb_id: str, assetlist: list[AssetClass], overwrite: bool = False
 ) -> list[Coroutine]:
     """This should return an array of Futures for acquisition routines for each A  in asset type."""
 
     rcsb_id = rcsb_id.upper()
-    RA = RibosomeAssets(rcsb_id)
+    RA = Structure(rcsb_id)
     RA._verify_dir_exists()
 
     coroutines = []
 
-    if Asset.profile in assetlist:
+    if AssetClass.profile in assetlist:
         coroutines.append(
             ReannotationPipeline( ReannotationPipeline.rcsb_request_struct(rcsb_id) ).process_structure(overwrite) )
 
-    if Asset.cif in assetlist:
+    if AssetClass.cif in assetlist:
         coroutines.append(RA.upsert_cif(overwrite))
 
-    if Asset.ptc in assetlist:
-        coroutines.append(RA.upsert(overwrite))
+    if AssetClass.ptc in assetlist:
+        coroutines.append(RA.upsert_ptc(overwrite))
 
-    if Asset.chains in assetlist:
+    if AssetClass.chains in assetlist:
         coroutines.append(...)  # todo: chimerax split chains (get 1.8 build)
 
     return coroutines

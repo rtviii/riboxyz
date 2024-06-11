@@ -7,7 +7,7 @@ from typing import List
 import chempy
 import pandas as pd
 from pymol import cmd
-from ribctl.etl.ribosome_assets import RibosomeAssets
+from ribctl.etl.ribosome_assets import Structure
 from mesh_generation.paths import TUNNEL_PATH, poisson_recon_ascii_path
 sys.path.append('/home/rtviii/dev/riboxyz')       #! hack until ribctl is a separate pypi project (after that just pip install ribctl)
 from ribctl.lib.tunnel import ptc_residues_calculate_midpoint, ptc_resdiues_get
@@ -156,7 +156,7 @@ def create_marker_at_atom(selection_name:str, posn:List[float], color_:str="red"
     cmd.show(repr, selection_name)
 
 def pseudoatom_ptc(rcsb_id: str):
-    assets   = RibosomeAssets(rcsb_id)
+    assets   = Structure(rcsb_id)
     profile  = assets.profile()
     ptc_path = os.path.join(assets._dir_path(), "{}_PTC_COORDINATES.json".format(rcsb_id))
 

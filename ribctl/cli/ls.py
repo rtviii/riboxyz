@@ -2,7 +2,7 @@ import json
 import os
 from pprint import pprint
 from ribctl import RIBETL_DATA
-from ribctl.etl.ribosome_assets import RibosomeAssets
+from ribctl.etl.etl_ribosome_ops import Structure
 from ribctl.lib.libmsa import Taxid
 from ribctl.lib.schema.types_ribosome import PolynucleotideClass, PolypeptideClass, RibosomeStructure
 
@@ -17,13 +17,13 @@ def cmd_ls(args):
         else:
             rcsb_id = args.struct
 
-        ribosome_Assets = RibosomeAssets(rcsb_id)
+        ribosome_Assets = Structure(rcsb_id)
         if "." in args.struct:
             chain, rp_class = ribosome_Assets.get_poly_by_auth_asym_id(auth_asym_id)
             if chain != None:
                 print(json.loads(chain.model_dump_json()))
         else:
-            print(RibosomeAssets(args.struct).profile().model_dump_json())
+            print(Structure(args.struct).profile().model_dump_json())
 
     elif args.taxid != None:
         print("Listing species information for", args.taxid)
@@ -33,7 +33,7 @@ def cmd_ls(args):
 
         for struct in all_structs:
             try: 
-                ribosome_Assets = RibosomeAssets(struct).profile()
+                ribosome_Assets = Structure(struct).profile()
                 pdbid_taxid_tuples.append(( ribosome_Assets.rcsb_id, ribosome_Assets.src_organism_ids[0] ))
             except:
                 continue
@@ -57,7 +57,7 @@ def cmd_ls(args):
             print([_.value for _ in [*list(PolynucleotideClass), *list(PolypeptideClass)]])
             exit(1)
         for struct in all_structs:
-            ra   = RibosomeAssets(struct)
+            ra   = Structure(struct)
             elem = ra.get_chain_by_polymer_class(subelem)
 
             if elem  != None:

@@ -8,7 +8,7 @@ from neo4j_ribosome.node_polymer import  link__polymer_to_polymer_class, link__p
 from neo4j_ribosome.node_structure import   link__ligand_to_struct, link__structure_to_phylogeny, node__ligand, node__structure, struct_exists
 from ribctl.etl.etl_pipeline import current_rcsb_structs
 from ribctl.lib.schema.types_ribosome import MitochondrialProteinClass, PolymerClass, PolynucleotideClass, RibosomeStructure
-from ribctl.etl.ribosome_assets import RibosomeAssets
+from ribctl.etl.etl_ribosome_ops import Structure
 from neo4j import GraphDatabase, Driver, ManagedTransaction, Transaction
 from ribctl.lib.schema.types_ribosome import  NonpolymericLigand,  CytosolicProteinClass, RibosomeStructure
 
@@ -64,7 +64,7 @@ class Neo4jBuilder():
             return node
 
     def init_phylogenies(self):
-        taxa = RibosomeAssets.collect_all_taxa()
+        taxa = Structure.collect_all_taxa()
         for taxon in taxa:
             self._create_lineage(taxon.ncbi_tax_id)
 
@@ -89,7 +89,7 @@ class Neo4jBuilder():
     def link_structure_to_phylogeny(self,rcsb_id:str):
 
         rcsb_id = rcsb_id.upper()
-        R:RibosomeStructure = RibosomeAssets(rcsb_id).profile()
+        R:RibosomeStructure = Structure(rcsb_id).profile()
 
         with self.driver.session() as s:
             if self.check_structure_exists(rcsb_id):
@@ -121,7 +121,7 @@ class Neo4jBuilder():
             print("Struct node {} already exists.".format(rcsb_id))
             return
 
-        R:RibosomeStructure = RibosomeAssets(rcsb_id).profile()
+        R:RibosomeStructure = Structure(rcsb_id).profile()
 
         with self.driver.session() as s:
             structure_node = s.execute_write(node__structure(R))

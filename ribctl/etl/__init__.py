@@ -16,7 +16,6 @@ class AssetType(Enum):
 class AssetFile:
     
     
-    
     def __init__(self, rcsb_id):
         self.rcsb_id = rcsb_id.upper()
 

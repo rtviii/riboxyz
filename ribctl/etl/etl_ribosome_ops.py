@@ -1,4 +1,4 @@
-from enum import  StrEnum, auto
+from enum import   auto
 import enum
 import json
 import os
@@ -7,6 +7,7 @@ from Bio.PDB.Structure import Structure
 from Bio.PDB.Chain import Chain
 from loguru import logger
 from ribctl import AMINO_ACIDS_3_TO_1_CODE, CLASSIFICATION_REPORTS
+from ribctl.etl.etl_assets import AssetPaths
 from ribctl.lib.libtax import PhylogenyNode, PhylogenyRank, Taxid
 from ribctl.lib.tunnel import ptc_resdiues_get, ptc_residues_calculate_midpoint
 from ribctl.lib.utils import download_unpack_place, open_structure
@@ -15,7 +16,8 @@ from ribctl import RIBETL_DATA
 from ribctl.logs.loggers import get_etl_logger
 
 
-class Asset(enum.StrEnum):
+
+class AssetClass(enum.StrEnum):
     profile   = auto()
     cif       = auto()
     ptc       = auto()
@@ -23,13 +25,13 @@ class Asset(enum.StrEnum):
     thumbnail = auto()
 
     @staticmethod
-    def from_str(_):
-        assets = [status for status in dir( Asset) if not status.startswith('_')]
+    def from_str(_:str):
+        assets = [status for status in dir( AssetClass) if not status.startswith('_')]
         if _ in assets:
-            return getattr(Asset, _)
+            return getattr(AssetClass, _)
         return None
 
-class AssetPaths:
+class AssetPath:
     rcsb_id:str
     def __init__(self, rcsb_id) -> None:
         self.rcsb_id = rcsb_id
@@ -63,24 +65,24 @@ class AssetPaths:
     def thumbnail(self):
         return f"{self.dir}/{self.rcsb_id}.png"
 
-# This needs to be split into paths-getter, individual-asset getter, utility functions for individual structures, database-wide functions and acquisition routines
-class RibosomeAssets:
+
+
+
+class RibosomeOps:
     rcsb_id: str
+    paths: AssetPath
 
     def __init__(self, rcsb_id: str) -> None:
         if not RIBETL_DATA:
             raise Exception("RIBETL_DATA environment variable not set. Cannot access assets." )
         self.rcsb_id = rcsb_id.upper()
-
-    @property
-    def paths(self):
-        return AssetPaths(self.rcsb_id)
+        self.paths   = AssetPath(self.rcsb_id)
 
     @staticmethod
     def collect_all_taxa() -> set[PhylogenyNode]:
         _ = set()
-        for struct in RibosomeAssets.list_all_structs():
-            rp = RibosomeAssets(struct).profile()
+        for struct in RibosomeOps.list_all_structs():
+            rp = RibosomeOps(struct).profile()
             for org in [*rp.src_organism_ids, *rp.host_organism_ids]:
                 if Taxid.rank(org) not in list(typing.get_args(PhylogenyRank)):
                     org = Taxid.coerce_to_rank(org, "species")
@@ -146,7 +148,6 @@ class RibosomeAssets:
                     )
 
         return m
-
 
     #! I
     def ptc(self) -> PTCInfo:
@@ -290,7 +291,22 @@ class RibosomeAssets:
             os.makedirs(self.paths.dir, 0o777)
 
     
-    #TODO : -- move to separate "asset_routines" or something module
+
+
+
+class Assets:
+
+    rcsb_id: str
+    ro     : RibosomeOps
+    paths  : AssetPath
+    
+    def __init__(self, rcsb_id: str) -> None:
+        self.rcsb_id = rcsb_id
+        self.ro      = RibosomeOps(rcsb_id)
+        self.paths   = AssetPath(rcsb_id)
+
+   
+    
     async def upsert_cif(self, overwrite: bool = False):
         if not os.path.exists(self.paths.cif):
             await download_unpack_place(self.rcsb_id)
@@ -311,21 +327,19 @@ class RibosomeAssets:
     async def upsert_ptc(self, overwrite: bool = False):
 
         etllogger = get_etl_logger()
-        asset_ptc_coords_path = os.path.join(
-            self.paths.ptc
-        )
+        asset_ptc_coords_path = os.path.join(self.paths.ptc)
 
         if os.path.exists(asset_ptc_coords_path) and not overwrite:
             logger.debug(f"PTC coordinates already exist for {self.rcsb_id} and overwrite is set to False" )
 
-        ress, auth_asym_id = ptc_resdiues_get( self.biopython_structure(), self.profile().rnas )
-        midpoint_coords = ptc_residues_calculate_midpoint(ress, auth_asym_id)
+        ress, auth_asym_id = ptc_resdiues_get( self.ro.biopython_structure(), self.ro.profile().rnas )
+        midpoint_coords    = ptc_residues_calculate_midpoint(ress, auth_asym_id)
 
         writeout = {
             "site_9_residues"      : [(res.get_resname(), res.id[1]) for res in ress],
             "LSU_rRNA_auth_asym_id": auth_asym_id,
             "midpoint_coordinates" : midpoint_coords,
-            "nomenclature_table"   : self.nomenclature_table(),
+            "nomenclature_table"   : self.ro.nomenclature_table(),
         }
 
         with open(asset_ptc_coords_path, "w") as f:

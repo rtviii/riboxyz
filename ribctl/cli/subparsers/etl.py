@@ -4,8 +4,8 @@ import typing
 import click
 from click import Context
 
-from ribctl.etl import obtain
-from ribctl.etl.ribosome_assets import Asset
+from ribctl.etl import etl_obtain
+from ribctl.etl.etl_ribosome_ops import AssetClass
 
 @click.group(invoke_without_command=True)
 @click.pass_context
@@ -25,15 +25,15 @@ def etl(ctx: Context):
 
 @etl.command()
 @click.pass_context
-@click.argument('assets', required=True,  nargs=-1,  type=click.Choice(Asset._member_names_))
+@click.argument('assets', required=True,  nargs=-1,  type=click.Choice(AssetClass._member_names_))
 @click.option('--overwrite', required=False,  type=bool)
 def assets(ctx:Context, assets, overwrite):
     rcsb_id = ctx.obj['rcsb_id']
     print("Obtaining assets ", assets , " for {}.".format(rcsb_id)) 
-    enums = list(map(Asset.from_str, assets))
-    asyncio.run(obtain.execute_asset_task_pool(obtain.asset_routines(rcsb_id, enums, overwrite)))
+    enums = list(map(AssetClass.from_str, assets))
+    asyncio.run(etl_obtain.execute_asset_task_pool(etl_obtain.asset_routines(rcsb_id, enums, overwrite)))
 
 
 
 def rcsb_unsynced():
-    return obtain.current_rcsb_structs()
+    return etl_obtain.current_rcsb_structs()

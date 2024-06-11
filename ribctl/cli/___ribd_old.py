@@ -50,8 +50,8 @@ parser_cmd_etl.add_argument('--ncbi_init' , action ='store_true' )
 import asyncio
 import os
 from ribctl import ASSETS, RIBETL_DATA
-from ribctl.etl.obtain import asset_routines, obtain_asssets_threadpool
-from ribctl.etl.ribosome_assets import Assetlist, RibosomeAssets
+from ribctl.etl.etl_obtain import asset_routines, obtain_asssets_threadpool
+from ribctl.etl.ribosome_assets import Assetlist, Structure
 
 def cmd_etl(args):
 
@@ -131,7 +131,7 @@ def cmd_lig(args):
     # with open(BindingSite.path_nonpoly_ligand(chemid, src), 'r') as infile:
     # ligdict      = json.load(infile)
     bsite_src    = BindingSite.parse_file(BindingSite.path_nonpoly_ligand(src,chemid))
-    dest_profile = RibosomeAssets(dest).profile()
+    dest_profile = Structure(dest).profile()
     # BindingSite.parse_obj()
     transpose = init_transpose_ligand(dest_profile, bsite_src)
     t         = transpose
@@ -195,7 +195,7 @@ try:
         tally       = { "valid": [], "invalid": []}
 
         for struct in all_structs:
-            if  not os.path.exists(RibosomeAssets(struct)._json_profile_filepath()):
+            if  not os.path.exists(Structure(struct)._json_profile_filepath()):
                 continue
             if not verify_structure_profile_schema(struct):
                 tally["invalid"].append(struct)

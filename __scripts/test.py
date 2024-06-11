@@ -27,14 +27,14 @@ from ribctl.etl.etl_pipeline import (
     query_rcsb_api,
     rcsb_single_structure_graphql,
 )
-from ribctl.etl.obtain import obtain_asssets_threadpool
+from ribctl.etl.etl_obtain import obtain_asssets_threadpool
 from ribctl.lib.libhmm import (
     HMMClassifier,
     HMMs,
     hmm_create,
     hmm_produce,
 )
-from ribctl.etl.ribosome_assets import Assetlist, RibosomeAssets
+from ribctl.etl.ribosome_assets import Assetlist, Structure
 from ribctl.lib.schema.types_ribosome import (
     LifecycleFactorClass,
     Polymer,
@@ -107,7 +107,7 @@ elif sys.argv[1] == "test":
     for i, struct in enumerate(all_structs):
         try:
             print(struct, i)
-            rp = RibosomeAssets(struct)
+            rp = Structure(struct)
             rp = rp.profile()
             pdbid_taxid_tuples.append((rp.rcsb_id, rp.src_organism_ids[0]))
         except:
@@ -228,7 +228,7 @@ elif sys.argv[1] == "ll":
     for i, struct in enumerate(all_structs):
         try:
             print(struct, i)
-            rp = RibosomeAssets(struct)
+            rp = Structure(struct)
             rp = rp.profile()
             pdbid_taxid_tuples.append((rp.rcsb_id, rp.src_organism_ids[0]))
         except:
@@ -301,11 +301,11 @@ elif sys.argv[1] == "tsv_to_fasta":
             SeqIO.write(seqrecords, output_handle, "fasta")
             print("Wrote {} seqs to  to {}".format(len(seqrecords), dest))
 elif sys.argv[1] == "struct_factors":
-    for struct in RibosomeAssets.list_all_structs()[:10]:
+    for struct in Structure.list_all_structs()[:10]:
         print(
             "========================Processing {}=====================".format(struct)
         )
-        prof = RibosomeAssets(struct).profile()
+        prof = Structure(struct).profile()
         prots = (
             prof.proteins + prof.polymeric_factors
             if prof.polymeric_factors != None
@@ -379,7 +379,7 @@ elif sys.argv[1] == "collect_factors":
 
     for struct in factor_structs:
         try:
-            prof = RibosomeAssets(struct).profile()
+            prof = Structure(struct).profile()
             for p in prof.polymeric_factors:
                 if "Factor" in p.nomenclature[0]:
                     factors[struct] = json.loads(p.json())
@@ -391,8 +391,8 @@ elif sys.argv[1] == "collect_factors":
 elif sys.argv[1] == "hmmt":
 
     
-    for rcsb_id in RibosomeAssets.list_all_structs():
-        prof     = RibosomeAssets(rcsb_id).profile()
+    for rcsb_id in Structure.list_all_structs():
+        prof     = Structure(rcsb_id).profile()
 
         proteins = [ *prof.proteins, *prof.other_polymers, *prof.polymeric_factors ]
         rna      = [ *prof.rnas, *prof.other_polymers ]
@@ -408,7 +408,7 @@ elif sys.argv[1] == "hmmt":
         report_path = os.path.join(LOGS_PATH,'classification_reports','{}_classification_report.json'.format(rcsb_id))
         pipeline.write_classification_report(report_path)
 elif sys.argv[1] == "hmmx":
-    p        = RibosomeAssets('3j7z').profile()
+    p        = Structure('3j7z').profile()
     rnas     = p.rnas
     alphabet = pyhmmer.easel.Alphabet.rna()
     alphabet = pyhmmer.easel.Alphabet.amino()

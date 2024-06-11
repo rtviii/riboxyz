@@ -7,7 +7,7 @@ import numpy as np
 import numpy as np
 from mesh_generation.paths import *
 from ribctl import EXIT_TUNNEL_WORK, POISSON_RECON_BIN, RIBETL_DATA
-from ribctl.etl.ribosome_assets import RibosomeAssets
+from ribctl.etl.ribosome_assets import Structure
 from ribctl.lib.libmsa import Taxid
 
 
@@ -980,7 +980,7 @@ def DBSCAN_CLUSTERS_visualize_largest(positive_space: np.ndarray, dbscan_cluster
 def plot_multiple_surfaces(rcsb_id:str):
 
     rcsb_id   = rcsb_id.upper()
-    src_taxid = RibosomeAssets(rcsb_id).get_taxids()[0][0]
+    src_taxid = Structure(rcsb_id).get_taxids()[0][0]
     taxname   = list( Taxid.get_name(str(src_taxid)).items() )[0][1]
     plotter               = pv.Plotter(shape=(2, 4))
 
@@ -1035,7 +1035,7 @@ def plot_multiple_by_kingdom(kingdom:typing.Literal['bacteria','archaea','eukary
             plotter.subplot(i,j)
 
             rcsb_id   = diagram_tunnels[kingdom][i*4+j]
-            src_taxid = RibosomeAssets(rcsb_id).get_taxids()[0][0]
+            src_taxid = Structure(rcsb_id).get_taxids()[0][0]
             taxname   = list( Taxid.get_name(str(src_taxid)).items() )[0][1]
 
             ptc_midpoint, atom_chains_dict, grid_dimensions, translation_vectors = retrieve_ptc_and_chain_atoms(rcsb_id)
@@ -1135,7 +1135,7 @@ def plot_with_landmarks( rcsb_id: str, poisson_recon_custom_path:str|None=None, 
         (to be used to reverse the normalization process or to travel to this coordinate frame)
     """
 
-    src_taxid = RibosomeAssets(rcsb_id).get_taxids()[0][0]
+    src_taxid = Structure(rcsb_id).get_taxids()[0][0]
     taxname   = list( Taxid.get_name(str(src_taxid)).items() )[0][1]
 
 
