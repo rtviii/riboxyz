@@ -746,13 +746,12 @@ class ReannotationPipeline:
         reshaped_nonpolymers                     = self.process_nonpolymers()
         [externalRefs, pub, kwords_text, kwords] = self.process_metadata()
         organisms                                = self.infer_organisms_from_polymers([*_prot_polypeptides, *_rna_polynucleotides])
-        dep_date = int(self.rcsb_data_dict["rcsb_accession_info"]["deposit_date"].split("-")[0])
 
         reshaped                                 = RibosomeStructure(
             rcsb_id                = self.rcsb_data_dict["rcsb_id"],
             expMethod              = self.rcsb_data_dict["exptl"][0]["method"],
             resolution             = self.rcsb_data_dict["rcsb_entry_info"]["resolution_combined"][0],
-            deposition_date        = dep_date,
+            deposition_date        = self.rcsb_data_dict["rcsb_accession_info"]["deposit_date"],
             rcsb_external_ref_id   = externalRefs[0],
             rcsb_external_ref_type = externalRefs[1],
             rcsb_external_ref_link = externalRefs[2],
