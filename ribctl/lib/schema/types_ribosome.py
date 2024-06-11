@@ -550,6 +550,8 @@ class RibosomeStructure(BaseModel):
 
         return _
 
+    def __hash__(self):
+        return hash(self.rcsb_id)
 
     rcsb_id   : str
     expMethod : str
