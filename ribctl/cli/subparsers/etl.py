@@ -1,3 +1,4 @@
+import asyncio
 from pprint import pprint
 import typing
 import click
@@ -17,12 +18,12 @@ def etl(ctx: Context):
 @etl.command()
 @click.pass_context
 @click.argument('assets', required=True,  nargs=-1,  type=click.Choice(Asset._member_names_))
-def assets(ctx:Context, assets):
+@click.option('--overwrite', required=False,  type=bool)
+def assets(ctx:Context, assets, overwrite):
     rcsb_id = ctx.obj['rcsb_id']
-
     print("Obtaining assets ", assets , " for {}.".format(rcsb_id)) 
     enums = list(map(Asset.from_str, assets))
-    print("got assets",  enums)
-    [print(x) for x in obtain.obtain_assets(rcsb_id, enums)]
-# 
+
+    
+    asyncio.run(obtain.execute_asset_task_pool(obtain.asset_routines(rcsb_id, enums, overwrite)))
 

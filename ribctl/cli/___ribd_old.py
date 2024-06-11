@@ -50,7 +50,7 @@ parser_cmd_etl.add_argument('--ncbi_init' , action ='store_true' )
 import asyncio
 import os
 from ribctl import ASSETS, RIBETL_DATA
-from ribctl.etl.obtain import obtain_assets, obtain_assets_threadpool
+from ribctl.etl.obtain import asset_routines, obtain_asssets_threadpool
 from ribctl.etl.ribosome_assets import Assetlist, RibosomeAssets
 
 def cmd_etl(args):
@@ -84,7 +84,7 @@ def cmd_etl(args):
 
     #All structures
     if args.obtain_all_structures:
-        obtain_assets_threadpool(
+        obtain_asssets_threadpool(
             ASL,
             workers   = 4,
             overwrite = args.overwrite or False
@@ -94,7 +94,7 @@ def cmd_etl(args):
         RCSB_ID = str(args.rcsb_id)
         loop    = asyncio.get_event_loop()
         loop.run_until_complete(
-            obtain_assets(
+            asset_routines(
                 RCSB_ID,
                 ASL,
                 args.overwrite or False
@@ -176,7 +176,7 @@ try:
         for struct in os.listdir(RIBETL_DATA):
             print(struct, verify_profile_exists(struct))
             if not verify_profile_exists(struct):
-                asyncio.run(obtain_assets(struct, Assetlist(profile=True), overwrite=True))
+                asyncio.run(asset_routines(struct, Assetlist(profile=True), overwrite=True))
         exit(0)
 
     # if args.ncbi_init:

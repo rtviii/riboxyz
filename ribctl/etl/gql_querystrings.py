@@ -1,26 +1,3 @@
-assembly_identification_string = """
-assemblies{
-    rcsb_id 
-   	nonpolymer_entity_instances{
-  
-      rcsb_nonpolymer_entity_instance_container_identifiers{
-        
-        comp_id
-        auth_asym_id
-        rcsb_id
-        auth_seq_id
-      }
-    }
-    polymer_entity_instances{
-       rcsb_polymer_entity_instance_container_identifiers {        
-        asym_id
-        auth_asym_id
-        entry_id
-        entity_id
-      }
-    }
-  }"""
-
 entry_info_string = """
     struct_keywords {
       pdbx_keywords
@@ -53,6 +30,29 @@ entry_info_string = """
   }
 
 """
+assembly_identification_string = """
+assemblies{
+    rcsb_id 
+   	nonpolymer_entity_instances{
+  
+      rcsb_nonpolymer_entity_instance_container_identifiers{
+        
+        comp_id
+        auth_asym_id
+        rcsb_id
+        auth_seq_id
+      }
+    }
+    polymer_entity_instances{
+       rcsb_polymer_entity_instance_container_identifiers {        
+        asym_id
+        auth_asym_id
+        entry_id
+        entity_id
+      }
+    }
+  }"""
+
 
 single_structure_graphql_template = """{
   entry(entry_id: "$RCSB_ID") {
