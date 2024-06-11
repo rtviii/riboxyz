@@ -7,7 +7,6 @@ from typing import Any, Optional
 import pyhmmer
 from pyhmmer.plan7 import HMM
 import requests
-from ribctl import ASSETS, CLASSIFICATION_REPORTS, RIBETL_DATA
 from ribctl.etl.ribosome_assets import RibosomeAssets
 from ribctl.lib.libhmm import (
     HMMClassifier,
@@ -68,7 +67,6 @@ def current_rcsb_structs() -> list[str]:
         "return_type": "entry",
         "request_options": {"return_all_hits": True, "results_verbosity": "compact"},
     }
-
     query = rcsb_search_api + "?json=" + json.dumps(q2)
     return requests.get(query).json()["result_set"]
 
@@ -112,10 +110,14 @@ class ReannotationPipeline:
 
     polymers_target_count: int
 
+
+    @staticmethod
+    def rcsb_request_struct(rcsb_id:str)->dict:
+        return query_rcsb_api(rcsb_single_structure_graphql(rcsb_id.upper()))
+
+
     def __init__(self, response: dict):
         self.rcsb_data_dict = response
-        print("Got rcsb_data response")
-        pprint(response)
         # self.hmm_ribosomal_proteins = hmm_dict_init__candidates_per_organism(ProteinClassEnum, response["rcsb_id"])
 
         self.asm_maps         = self.asm_parse(response["assemblies"])
@@ -665,8 +667,17 @@ class ReannotationPipeline:
             for auth_asym_id in other_polymer_obj[ "rcsb_polymer_entity_container_identifiers" ]["auth_asym_ids"]
         ]
 
-    def process_structure(self):
+    def process_structure(self, overwrite: bool = False)->RibosomeStructure:
         rcsb_id = self.rcsb_data_dict["rcsb_id"]
+        RA      = RibosomeAssets(rcsb_id)
+
+        if os.path.isfile(RA.paths.profile):
+            logger.debug( "Profile already exists for {}.".format(rcsb_id))
+            if overwrite:
+                print("Overwrite")
+            else:
+                return RA.profile()
+
 
 
         # # ! According to RCSB schema, polymer_entites include "Protein", "RNA" but also "DNA", N"A-Hybrids" and "Other".
@@ -698,26 +709,33 @@ class ReannotationPipeline:
                         _other_polymers.append(poly)
 
         logger.debug("Classifying {}: {} polypeptides, {} polynucleotides, {} other.".format(rcsb_id, len(_prot_polypeptides), len(_rna_polynucleotides), len(_other_polymers)))
-        RibosomeAssets(rcsb_id)
-        protein_alphabet      = pyhmmer.easel.Alphabet.amino()
-        protein_classifier    = HMMClassifier(_prot_polypeptides, protein_alphabet, [p for p in [ *list(CytosolicProteinClass),*list(LifecycleFactorClass) , *list(MitochondrialProteinClass)] ])
-        protein_classifier.classify_chains()
-       
-        # logger.debug("Classifying polymers: RNA.")
-        rna_alphabet             = pyhmmer.easel.Alphabet.rna()
-        rna_classifier           = HMMClassifier(_rna_polynucleotides, rna_alphabet, [p for p in list(PolynucleotideClass)])
-        rna_classifier.classify_chains()
+        if not os.path.exists(RA.paths.classification_report) :
+            protein_alphabet      = pyhmmer.easel.Alphabet.amino()
+            protein_classifier    = HMMClassifier(_prot_polypeptides, protein_alphabet, [p for p in [ *list(CytosolicProteinClass),*list(LifecycleFactorClass) , *list(MitochondrialProteinClass)] ])
+            protein_classifier.classify_chains()
+           
+            # logger.debug("Classifying polymers: RNA.")
+            rna_alphabet             = pyhmmer.easel.Alphabet.rna()
+            rna_classifier           = HMMClassifier(_rna_polynucleotides, rna_alphabet, [p for p in list(PolynucleotideClass)])
+            rna_classifier.classify_chains()
 
-        prot_classification = protein_classifier.produce_classification()
-        rna_classification  = rna_classifier.produce_classification()
+            prot_classification = protein_classifier.produce_classification()
+            rna_classification  = rna_classifier.produce_classification()
 
-        full_report      = { **rna_classifier.report, **protein_classifier.report }
-        reported_classes = { k:v for ( k,v ) in [*prot_classification.items(), *rna_classification.items()] }
-        report_path      = os.path.join(CLASSIFICATION_REPORTS, f"{rcsb_id}.json")
-        with open(report_path, "w") as outfile:
-            json.dump(full_report, outfile, indent=4)
-            logger.debug("Saved classification report to {}".format(report_path))
+            full_report      = { **rna_classifier.report, **protein_classifier.report }
+            reported_classes = { k:v for ( k,v ) in [*prot_classification.items(), *rna_classification.items()] }
+            report_path      = RA.paths.classification_report
 
+            with open(report_path, "w") as outfile:
+                json.dump(full_report, outfile, indent=4)
+                logger.debug("Saved classification report to {}".format(report_path))
+        else:
+            with open(RA.paths.classification_report, "r") as infile:
+                full_report = json.load(infile)
+                def access_class(_:dict):
+                    if len(_) <1 : return []
+                    return [ _[0]['class_name'] ]
+                reported_classes = { k:access_class(v) for ( k,v ) in full_report.items() }
 
         #! PROPAGATE NOMENCLATUERE FROM HMM REPORT TO POLYMERS
         for polymer_dict in _rna_polynucleotides:
@@ -729,7 +747,6 @@ class ReannotationPipeline:
             if polymer_dict.auth_asym_id in reported_classes.keys():
                 # momentarily converting to the PolymerClass enums to serialize correctly (see Polymer class def)
                 polymer_dict.nomenclature = list(map(PolymerClass,reported_classes[polymer_dict.auth_asym_id]))
-
         assert (
             len(_rna_polynucleotides)
             + len(_prot_polypeptides)
@@ -753,7 +770,7 @@ class ReannotationPipeline:
             rcsb_id                = self.rcsb_data_dict["rcsb_id"],
             expMethod              = self.rcsb_data_dict["exptl"][0]["method"],
             resolution             = self.rcsb_data_dict["rcsb_entry_info"]["resolution_combined"][0],
-            deposition_date        = self.rcsb_data_dict["entry"]["rcsb_accession_info"]["deposit_date"],
+            deposition_date        = self.rcsb_data_dict["rcsb_accession_info"]["deposit_date"],
             rcsb_external_ref_id   = externalRefs[0],
             rcsb_external_ref_type = externalRefs[1],
             rcsb_external_ref_link = externalRefs[2],
@@ -775,4 +792,5 @@ class ReannotationPipeline:
             mitochondrial          = is_mitochondrial
         )
 
+        RA.write_own_json_profile(reshaped, overwrite=True)
         return reshaped

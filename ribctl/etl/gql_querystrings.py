@@ -1,4 +1,8 @@
 entry_info_string = """
+
+  rcsb_accession_info{
+    deposit_date
+  }
     struct_keywords {
       pdbx_keywords
       text
@@ -25,9 +29,6 @@ entry_info_string = """
       text
     }
 
-  rcsb_accession_info{
-    deposit_date
-  }
 
 """
 assembly_identification_string = """
@@ -58,6 +59,7 @@ single_structure_graphql_template = """{
   entry(entry_id: "$RCSB_ID") {
     rcsb_id
 
+
     assemblies{
         rcsb_id 
        	nonpolymer_entity_instances{
@@ -78,7 +80,10 @@ single_structure_graphql_template = """{
 
 
 
-    struct_keywords {
+      rcsb_accession_info{
+        deposit_date
+      }
+      struct_keywords {
         pdbx_keywords
         text
       }

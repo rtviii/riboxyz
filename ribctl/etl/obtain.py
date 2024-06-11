@@ -2,25 +2,35 @@ import asyncio
 from concurrent import futures
 from typing import Coroutine, Optional
 from ribctl import AMINO_ACIDS_3_TO_1_CODE
-from ribctl.etl.ribosome_assets import  Asset, RibosomeAssets
-from ribctl.etl.etl_pipeline import current_rcsb_structs, ReannotationPipeline, rcsb_single_structure_graphql, query_rcsb_api
-from concurrent.futures import  Future, ProcessPoolExecutor, ThreadPoolExecutor
+from ribctl.etl.ribosome_assets import Asset, RibosomeAssets
+from ribctl.etl.etl_pipeline import (
+    current_rcsb_structs,
+    ReannotationPipeline,
+    rcsb_single_structure_graphql,
+    query_rcsb_api,
+)
+from concurrent.futures import Future, ProcessPoolExecutor, ThreadPoolExecutor
 from ribctl.logs.loggers import get_etl_logger
 import asyncio
-import concurrent.futures
 
-# This should be in the RibosomeAssets module 
-def asset_routines(rcsb_id: str, assetlist:list[Asset], overwrite: bool = False)->list[Coroutine]:
+
+# This should be in the RibosomeAssets module
+def asset_routines(
+    rcsb_id: str, assetlist: list[Asset], overwrite: bool = False
+) -> list[Coroutine]:
     """This should return an array of Futures for acquisition routines for each A  in asset type."""
 
     rcsb_id = rcsb_id.upper()
-    RA      = RibosomeAssets(rcsb_id)
+    RA = RibosomeAssets(rcsb_id)
     RA._verify_dir_exists()
 
     coroutines = []
 
     if Asset.profile in assetlist:
-        coroutines.append(RA.update_profile(overwrite))
+        coroutines.append(
+            ReannotationPipeline(
+                ReannotationPipeline.rcsb_request_struct(rcsb_id)
+            ).process_structure(overwrite) )
 
     if Asset.cif in assetlist:
         coroutines.append(RA.update_cif(overwrite))
@@ -29,28 +39,25 @@ def asset_routines(rcsb_id: str, assetlist:list[Asset], overwrite: bool = False)
         coroutines.append(RA.update_ptc(overwrite))
 
     if Asset.chains in assetlist:
-        coroutines.append(...) #todo: chimerax split chains (get 1.8 build)
+        coroutines.append(...)  # todo: chimerax split chains (get 1.8 build)
 
     return coroutines
 
 
-
 async def execute_asset_task_pool(tasks):
-
     results = asyncio.gather(*tasks)
-
     print("Results:", results)
 
 
-def obtain_asssets_threadpool(assetlist, workers: int = 10,  overwrite=False):
+def obtain_asssets_threadpool(assetlist, workers: int = 10, overwrite=False):
     """Get all ribosome profiles from RCSB via a threadpool"""
-    logger   = get_etl_logger()
+    logger = get_etl_logger()
     unsynced = sorted(current_rcsb_structs())
-        
+
     logger.info(f"Found {len(unsynced)} unsynced structures")
 
     tasks: list[Future] = []
-    results       = []
+    results = []
     logger.debug("Begun downloading ribosome profiles via RCSB")
 
     def log_commit_result(rcsb_id: str):
@@ -59,12 +66,15 @@ def obtain_asssets_threadpool(assetlist, workers: int = 10,  overwrite=False):
                 logger.error(rcsb_id + ":" + f.exception().__str__())
             else:
                 logger.debug(rcsb_id + ": processed successfully.")
+
         return _
 
     with ThreadPoolExecutor(max_workers=workers) as executor:
 
         for rcsb_id in unsynced:
-            fut = executor.submit(asyncio.run, asset_routines(rcsb_id, assetlist, overwrite))
+            fut = executor.submit(
+                asyncio.run, asset_routines(rcsb_id, assetlist, overwrite)
+            )
             fut.add_done_callback(log_commit_result(rcsb_id))
             tasks.append(fut)
 

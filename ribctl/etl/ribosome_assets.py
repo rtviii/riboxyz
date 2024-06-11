@@ -8,11 +8,6 @@ from Bio.PDB.Chain import Chain
 from loguru import logger
 from ribctl import AMINO_ACIDS_3_TO_1_CODE, CLASSIFICATION_REPORTS
 from ribctl.lib.libtax import PhylogenyNode, PhylogenyRank, Taxid
-from ribctl.etl.etl_pipeline import (
-    ReannotationPipeline,
-    rcsb_single_structure_graphql,
-    query_rcsb_api,
-)
 from ribctl.lib.tunnel import ptc_resdiues_get, ptc_residues_calculate_midpoint
 from ribctl.lib.utils import download_unpack_place, open_structure
 from ribctl.lib.schema.types_ribosome import ( RNA, PTCInfo, Polymer, PolymerClass, PolynucleotideClass, PolypeptideClass, RibosomeStructure, )
@@ -169,14 +164,14 @@ class RibosomeAssets:
         return open_structure(self.rcsb_id, "cif")
 
     #! I
-    def write_own_json_profile(self, new_profile: dict, overwrite: bool = False):
+    def write_own_json_profile(self, new_profile: RibosomeStructure, overwrite: bool = False):
         """Update self, basically."""
         if os.path.exists(self.paths.profile) and not overwrite:
             print( "You are about to overwrite {}. Specify `overwrite=True` explicitly.".format( self.paths.profile )
             )
         elif overwrite:
             with open(self.paths.profile, "w") as f:
-                json.dump(new_profile, f)
+                json.dump(new_profile.model_dump_json(), f)
                 logger.debug(f"Updated profile for {self.rcsb_id}")
 
 
@@ -306,23 +301,23 @@ class RibosomeAssets:
                 await download_unpack_place(self.rcsb_id)
                 print("Overwrote cif file: \t", self.paths.cif)
     
-    async def update_profile(self, overwrite: bool = False) -> bool:
-        self._verify_dir_exists()
-        if not os.path.isfile(self.paths.profile):
-            ribosome = ReannotationPipeline(query_rcsb_api(rcsb_single_structure_graphql(self.rcsb_id.upper())) ).process_structure()
-            if not RibosomeStructure.model_validate(ribosome):
-                raise Exception( "Created invalid ribosome profile (Schema validation failed). Not writing" )
+    # async def update_profile(self, overwrite: bool = False) -> bool:
+    #     self._verify_dir_exists()
+    #     if not os.path.isfile(self.paths.profile):
+    #         ribosome = ReannotationPipeline(query_rcsb_api(rcsb_single_structure_graphql(self.rcsb_id.upper())) ).process_structure()
+    #         if not RibosomeStructure.model_validate(ribosome):
+    #             raise Exception( "Created invalid ribosome profile (Schema validation failed). Not writing" )
 
-            self.write_own_json_profile(ribosome.model_dump(), overwrite=True)
-            logger.debug("Processing {} profile.".format(self.rcsb_id))
+    #         self.write_own_json_profile(ribosome.model_dump(), overwrite=True)
+    #         logger.debug("Processing {} profile.".format(self.rcsb_id))
 
-        else:
-            logger.debug( "Processing {} profile: already exists for {}. Overwriting.".format( self.rcsb_id, self.rcsb_id ))
-            if overwrite:
-                ribosome = ReannotationPipeline( query_rcsb_api(rcsb_single_structure_graphql(self.rcsb_id.upper()))).process_structure()
-                self.write_own_json_profile(ribosome.model_dump(), overwrite)
-                logger.debug("Overwritingw")
-        return True
+    #     else:
+    #         logger.debug( "Processing {} profile: already exists for {}. Overwriting.".format( self.rcsb_id, self.rcsb_id ))
+    #         if overwrite:
+    #             ribosome = ReannotationPipeline( query_rcsb_api(rcsb_single_structure_graphql(self.rcsb_id.upper()))).process_structure()
+    #             self.write_own_json_profile(ribosome.model_dump(), overwrite)
+    #             logger.debug("Overwritingw")
+    #     return True
 
     #TODO: ChimeraX image gen
     def update_thumbnail(self, overwrite: bool = False) -> bool:
