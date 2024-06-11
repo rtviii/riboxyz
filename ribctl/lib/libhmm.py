@@ -160,6 +160,7 @@ class HMMs():
     
         def __load_seed_sequences(candidate_class:PolymerClass,tax_id:int, max_seed_seqs:int)->Tuple[PolymerClass, list[SeqRecord]]:
             """This is just for housekeeping. Keeping sequences with which the HMMs were seeded as state on the classifier."""
+            print("Inputs:", candidate_class, tax_id, max_seed_seqs)
             return (candidate_class, [*fasta_phylogenetic_correction(candidate_class, tax_id, max_n_neighbors=max_seed_seqs)] )
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=25) as executor:

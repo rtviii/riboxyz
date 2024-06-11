@@ -326,15 +326,10 @@ PolymerClass         = enum_union(PolynucleotideClass, PolypeptideClass)
 # ? ----------------------------------------------{ Object Types }------------------------------------------------
 
 
+
 class Polymer(BaseModel):
     def __hash__(self):
         return hash(self.auth_asym_id + self.parent_rcsb_id)
-
-    def enum_union_fix(_):
-        return _
-    def to_dict(self):
-        """A hack for enum.union to work with pydantic BaseModel. Otherwise EnumUnion instances are represented as <MitochondrialProteinClass.mL64: 'mL64'> etc.(Correct is "mL64")"""
-        return json.loads(self.model_dump_json())
 
     def to_SeqRecord(self) -> SeqRecord:
         return SeqRecord(
@@ -343,15 +338,6 @@ class Polymer(BaseModel):
             description = '{}.{}'.format(self.parent_rcsb_id,self.auth_asym_id),
             name        = '{}.{}'.format(self.parent_rcsb_id,self.auth_asym_id)
         )
-
-    # def metadatum(self) -> PolymerMetadatum:
-
-    #     return PolymerMetadatum(
-    #         assembly_id            = self.assembly_id,
-    #         asym_ids               = self.asym_ids,
-    #         auth_asym_id           = self.auth_asym_id,
-    #         entity_poly_seq_length = self.entity_poly_seq_length,
-    #         nomenclature           = [x.value for x in self.nomenclature])
 
     assembly_id: int
 
@@ -378,7 +364,7 @@ class Polymer(BaseModel):
     nomenclature                       : list[PolymerClass]
 
     @field_serializer('nomenclature')
-    def serialize_nomenclature(self, nomenclature_classes: list[PolymerClass], _info):
+    def serialize_nomenclature(self, nomenclature_classes: list[PolymerClass], ):
         return [x.value for x in nomenclature_classes]
 
 class Protein(Polymer):

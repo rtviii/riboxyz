@@ -38,26 +38,26 @@ def current_rcsb_structs() -> list[str]:
     
     q2 = {
         "query": {
-            "type": "group",
+            "type"            : "group",
             "logical_operator": "and",
-            "nodes": [
+            "nodes"           : [
                 {
-                    "type": "terminal",
-                    "service": "text",
+                    "type"      : "terminal",
+                    "service"   : "text",
                     "parameters": {
-                        "operator": "contains_phrase",
-                        "negation": False,
-                        "value": "RIBOSOME",
+                        "operator" : "contains_phrase",
+                        "negation" : False,
+                        "value"    : "RIBOSOME",
                         "attribute": "struct_keywords.pdbx_keywords",
                     },
                 },
                 {
-                    "type": "terminal",
-                    "service": "text",
+                    "type"      : "terminal",
+                    "service"   : "text",
                     "parameters": {
-                        "operator": "greater",
-                        "negation": False,
-                        "value": 12,
+                        "operator" : "greater",
+                        "negation" : False,
+                        "value"    : 12,
                         "attribute": "rcsb_entry_info.polymer_entity_count_protein",
                     },
                 },
@@ -113,7 +113,8 @@ class ReannotationPipeline:
 
     def __init__(self, response: dict):
         self.rcsb_data_dict = response
-        print("Got rcsb_data response", response)
+        print("Got rcsb_data response")
+        pprint(response)
         # self.hmm_ribosomal_proteins = hmm_dict_init__candidates_per_organism(ProteinClassEnum, response["rcsb_id"])
 
         self.asm_maps         = self.asm_parse(response["assemblies"])
@@ -123,15 +124,15 @@ class ReannotationPipeline:
         # What is this garbage, you ask? Let me tell you.
         # The rcsb_data_dict contains a list of polymer entities, each of which has 4 properties(hidden in ..._container_identifiers):
 
-        # - auth_asym_ids: this is the closest you have to an id of the polymer in the structure, but if there are multiple assemblies, this is an array of the two chains that are the same polymer in each assembly.
-        # - asym_ids: this is the ids of the this AND all other chains that are the same assymteric unit as the given polymer. So, useless for purposes of identification:
-        # - entity_id: so far as I can tell, this only serves to connect a polymer to its assembly container ( why this is not done via auth_asym_id directly is beyond me, legacy reasons this and that probably)
-        # - pdbx_strand_id: confusing piece of garbage that sometimes overlaps with auth_asym_id
+        # - auth_asym_ids  : this is the closest you have to an id of the polymer in the structure, but if there are multiple assemblies, this is an array of the two chains that are the same polymer in each assembly.
+        # - asym_ids       : this is the ids of the this AND all other chains that are the same assymteric unit as the given polymer. So, useless for purposes of identification:
+        # - entity_id      : so far as I can tell, this only serves to connect a polymer to its assembly container ( why this is not done via auth_asym_id directly is beyond me, legacy reasons this and that probably)
+        # - pdbx_strand_id : confusing piece of garbage that sometimes overlaps with auth_asym_id
 
         # Ex. 4V8E.DD
         # assembly_id=1 asym_ids=['BB', 'CD', 'ED', 'ZA'] auth_asym_id='DD' parent_rcsb_id='4V8E' src_organism_names=[] host_organism_names=[] src_organism_ids=[] host_organism_ids=[] rcsb_pdbx_description='TRNA-TYR' entity_poly_strand_id='BB,BD,DB,DD' entity_poly_seq_one_letter_code='GGUGGGGUUCCCGAGCGGCCAAAGGGAGCAGACUGUA(MIA)AUCUGCCGUCAUCGACUUCGAAGGUUCGAAUCCUUCCCCCACCACCA' entity_poly_seq_one_letter_code_can='GGUGGGGUUCCCGAGCGGCCAAAGGGAGCAGACUGUAAAUCUGCCGUCAUCGACUUCGAAGGUUCGAAUCCUUCCCCCACCACCA' entity_poly_seq_length=85 entity_poly_polymer_type='RNA' entity_poly_entity_type='polyribonucleotide' nomenclature=['tRNA']
 
-        # Given this state of affairs, if we want to be able to uniquely (coordinate-wise) identify each chain, we need to account for cases where PDB has provided two and sometimes four polymer collapsed into one representation.
+        # Given this state of affairs, if we want to be able to uniquely (coordinate-wise) identify each chain, we need to account for cases where RCSB has provided two and sometimes four polymer collapsed into one representation.
         # We do this by counting assymetric_ids of each polymer and hold that as a
         self.polymers_target_count = functools.reduce(
             lambda count, poly: count + len(poly["rcsb_polymer_entity_container_identifiers"]["asym_ids"]),
@@ -239,7 +240,7 @@ class ReannotationPipeline:
         )
 
     def asm_parse(self, dictionaries: list[dict]) -> list[AssemblyInstancesMap]:
-        return list(map(AssemblyInstancesMap.parse_obj, dictionaries))
+        return list(map(AssemblyInstancesMap.model_validate, dictionaries))
 
     def poly_assign_to_asm(self, auth_asym_id: str) -> int:
         """
@@ -667,16 +668,16 @@ class ReannotationPipeline:
         rcsb_id = self.rcsb_data_dict["rcsb_id"]
 
 
-        # ! According to RCSB schema, polymer_entites include "Protein", "RNA" but also "DNA", N"A-Hybrids" and "Other".
-        # ! We only make the distinction between Proteins and RNA and Other for purposes of simplicity
-        def is_protein(poly:Polymer)->bool:
-            return poly.entity_poly_polymer_type == "Protein"
-        def is_rna(poly:Polymer)->bool:
-            return poly.entity_poly_entity_type == "RNA"
+        # # ! According to RCSB schema, polymer_entites include "Protein", "RNA" but also "DNA", N"A-Hybrids" and "Other".
+        # # ! We only make the distinction between Proteins and RNA and Other for purposes of simplicity
+        # def is_protein(poly:Polymer)->bool:
+        #     return poly.entity_poly_polymer_type == "Protein"
+        # def is_rna(poly:Polymer)->bool:
+        #     return poly.entity_poly_entity_type == "RNA"
 
 
         poly_entities = self.rcsb_data_dict["polymer_entities"]
-        polymers      = [*mitt.flatten([self.raw_to_polymer(_) for _ in poly_entities])]
+        # polymers      = [*mitt.flatten([self.raw_to_polymer(_) for _ in poly_entities])]
 
         _prot_polypeptides  :list[Protein] = []
         _rna_polynucleotides:list[RNA]     = []
@@ -698,7 +699,7 @@ class ReannotationPipeline:
         logger.debug("Classifying {}: {} polypeptides, {} polynucleotides, {} other.".format(rcsb_id, len(_prot_polypeptides), len(_rna_polynucleotides), len(_other_polymers)))
         # logger.debug("Classifying polymers: Proteins.")
         protein_alphabet      = pyhmmer.easel.Alphabet.amino()
-        protein_classifier    = HMMClassifier( _prot_polypeptides, protein_alphabet, [p for p in [ *list(CytosolicProteinClass),*list(LifecycleFactorClass) , *list(MitochondrialProteinClass)] ])
+        protein_classifier    = HMMClassifier(_prot_polypeptides, protein_alphabet, [p for p in [ *list(CytosolicProteinClass),*list(LifecycleFactorClass) , *list(MitochondrialProteinClass)] ])
         protein_classifier.classify_chains()
        
         # logger.debug("Classifying polymers: RNA.")
@@ -751,7 +752,7 @@ class ReannotationPipeline:
             rcsb_id                = self.rcsb_data_dict["rcsb_id"],
             expMethod              = self.rcsb_data_dict["exptl"][0]["method"],
             resolution             = self.rcsb_data_dict["rcsb_entry_info"]["resolution_combined"][0],
-            deposition_date        = self.rcsb_data_dict["rcsb_accession_info"]["deposit_date"],
+            deposition_date        = self.rcsb_data_dict["entry"]["rcsb_accession_info"]["deposit_date"],
             rcsb_external_ref_id   = externalRefs[0],
             rcsb_external_ref_type = externalRefs[1],
             rcsb_external_ref_link = externalRefs[2],
