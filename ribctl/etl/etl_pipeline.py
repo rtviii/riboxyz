@@ -30,7 +30,6 @@ from ribctl.etl.gql_querystrings import single_structure_graphql_template
 from ribctl.logs.loggers import get_etl_logger
 logger = get_etl_logger()
 
-
 def current_rcsb_structs() -> list[str]:
     """Return all structures in the rcsb that contain the phrase RIBOSOME and have more than 25 protein entities"""
 
@@ -110,11 +109,9 @@ class ReannotationPipeline:
 
     polymers_target_count: int
 
-
     @staticmethod
     def rcsb_request_struct(rcsb_id:str)->dict:
         return query_rcsb_api(rcsb_single_structure_graphql(rcsb_id.upper()))
-
 
     def __init__(self, response: dict):
         self.rcsb_data_dict = response
@@ -146,6 +143,7 @@ class ReannotationPipeline:
     #! Reshaping
 
     def infer_organisms_from_polymers(self, polymers: list[Polymer]):
+        #? A hack and should be differentiated
         """Grabbing taxid from every polymer in the structure to see which taxid prevails proportionally.
         Only needed because rcsb does not provide unequivocal taxid for structures (sometimes it's host+source)
         """
@@ -667,7 +665,7 @@ class ReannotationPipeline:
             for auth_asym_id in other_polymer_obj[ "rcsb_polymer_entity_container_identifiers" ]["auth_asym_ids"]
         ]
 
-    def process_structure(self, overwrite: bool = False)->RibosomeStructure:
+    async def process_structure(self, overwrite: bool = False)->RibosomeStructure:
         rcsb_id = self.rcsb_data_dict["rcsb_id"]
         RA      = RibosomeAssets(rcsb_id)
 
@@ -792,5 +790,5 @@ class ReannotationPipeline:
             mitochondrial          = is_mitochondrial
         )
 
-        RA.write_own_json_profile(reshaped, overwrite=True)
+        RA.write_own_json_profile(reshaped.model_dump(), overwrite=True)
         return reshaped

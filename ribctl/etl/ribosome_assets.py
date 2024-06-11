@@ -158,22 +158,20 @@ class RibosomeAssets:
         with open(self.paths.profile, "r") as f:
             return RibosomeStructure.model_validate(json.load(f))
 
-
     #! I
     def biopython_structure(self):
         return open_structure(self.rcsb_id, "cif")
 
     #! I
-    def write_own_json_profile(self, new_profile: RibosomeStructure, overwrite: bool = False):
+    def write_own_json_profile(self, new_profile: dict, overwrite: bool = False):
         """Update self, basically."""
         if os.path.exists(self.paths.profile) and not overwrite:
             print( "You are about to overwrite {}. Specify `overwrite=True` explicitly.".format( self.paths.profile )
             )
         elif overwrite:
             with open(self.paths.profile, "w") as f:
-                json.dump(new_profile.model_dump_json(), f)
+                json.dump(new_profile, f)
                 logger.debug(f"Updated profile for {self.rcsb_id}")
-
 
     def get_taxids(self) -> tuple[list[int], list[int]]:
         p = self.profile()
@@ -285,14 +283,15 @@ class RibosomeAssets:
         return seq
 
     # ※ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-= Verification =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-    #TODO : A lot of this crap should be lib functions untied to this infra class.
 
     def _verify_dir_exists(self):
         if not os.path.exists(self.paths.dir):
             os.umask(0)
             os.makedirs(self.paths.dir, 0o777)
 
-    async def update_cif(self, overwrite: bool = False):
+    
+    #TODO : -- move to separate "asset_routines" or something module
+    async def upsert_cif(self, overwrite: bool = False):
         if not os.path.exists(self.paths.cif):
             await download_unpack_place(self.rcsb_id)
             print("Saved cif file: \t", self.paths.cif)
@@ -300,35 +299,16 @@ class RibosomeAssets:
             if overwrite:
                 await download_unpack_place(self.rcsb_id)
                 print("Overwrote cif file: \t", self.paths.cif)
-    
-    # async def update_profile(self, overwrite: bool = False) -> bool:
-    #     self._verify_dir_exists()
-    #     if not os.path.isfile(self.paths.profile):
-    #         ribosome = ReannotationPipeline(query_rcsb_api(rcsb_single_structure_graphql(self.rcsb_id.upper())) ).process_structure()
-    #         if not RibosomeStructure.model_validate(ribosome):
-    #             raise Exception( "Created invalid ribosome profile (Schema validation failed). Not writing" )
-
-    #         self.write_own_json_profile(ribosome.model_dump(), overwrite=True)
-    #         logger.debug("Processing {} profile.".format(self.rcsb_id))
-
-    #     else:
-    #         logger.debug( "Processing {} profile: already exists for {}. Overwriting.".format( self.rcsb_id, self.rcsb_id ))
-    #         if overwrite:
-    #             ribosome = ReannotationPipeline( query_rcsb_api(rcsb_single_structure_graphql(self.rcsb_id.upper()))).process_structure()
-    #             self.write_own_json_profile(ribosome.model_dump(), overwrite)
-    #             logger.debug("Overwritingw")
-    #     return True
 
     #TODO: ChimeraX image gen
-    def update_thumbnail(self, overwrite: bool = False) -> bool:
+    def upsert_thumbnail(self, overwrite: bool = False) -> bool:
         ...
-
 
     #TODO: ChimeraX splitchain
-    async def update_chains(self):
+    async def upsert_chains(self):
         ...
 
-    async def update_ptc(self, overwrite: bool = False):
+    async def upsert_ptc(self, overwrite: bool = False):
 
         etllogger = get_etl_logger()
         asset_ptc_coords_path = os.path.join(
@@ -336,13 +316,9 @@ class RibosomeAssets:
         )
 
         if os.path.exists(asset_ptc_coords_path) and not overwrite:
-            raise Exception(
-                f"PTC coordinates already exist for {self.rcsb_id} and overwrite is set to False"
-            )
+            logger.debug(f"PTC coordinates already exist for {self.rcsb_id} and overwrite is set to False" )
 
-        ress, auth_asym_id = ptc_resdiues_get(
-            self.biopython_structure(), self.profile().rnas
-        )
+        ress, auth_asym_id = ptc_resdiues_get( self.biopython_structure(), self.profile().rnas )
         midpoint_coords = ptc_residues_calculate_midpoint(ress, auth_asym_id)
 
         writeout = {

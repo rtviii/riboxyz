@@ -28,15 +28,13 @@ def asset_routines(
 
     if Asset.profile in assetlist:
         coroutines.append(
-            ReannotationPipeline(
-                ReannotationPipeline.rcsb_request_struct(rcsb_id)
-            ).process_structure(overwrite) )
+            ReannotationPipeline( ReannotationPipeline.rcsb_request_struct(rcsb_id) ).process_structure(overwrite) )
 
     if Asset.cif in assetlist:
-        coroutines.append(RA.update_cif(overwrite))
+        coroutines.append(RA.upsert_cif(overwrite))
 
     if Asset.ptc in assetlist:
-        coroutines.append(RA.update_ptc(overwrite))
+        coroutines.append(RA.upsert(overwrite))
 
     if Asset.chains in assetlist:
         coroutines.append(...)  # todo: chimerax split chains (get 1.8 build)
@@ -45,8 +43,7 @@ def asset_routines(
 
 
 async def execute_asset_task_pool(tasks):
-    results = asyncio.gather(*tasks)
-    print("Results:", results)
+    asyncio.gather(*tasks)
 
 
 def obtain_asssets_threadpool(assetlist, workers: int = 10, overwrite=False):

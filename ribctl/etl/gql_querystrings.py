@@ -28,9 +28,8 @@ entry_info_string = """
       pdbx_keywords
       text
     }
-
-
 """
+
 assembly_identification_string = """
 assemblies{
     rcsb_id 
@@ -58,7 +57,6 @@ assemblies{
 single_structure_graphql_template = """{
   entry(entry_id: "$RCSB_ID") {
     rcsb_id
-
 
     assemblies{
         rcsb_id 
