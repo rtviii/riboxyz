@@ -21,8 +21,8 @@ def assets(ctx:Context, assets):
     rcsb_id = ctx.obj['rcsb_id']
 
     print("Obtaining assets ", assets , " for {}.".format(rcsb_id)) 
-    print("Got assets",  )
     enums = list(map(Asset.from_str, assets))
-    print(obtain.obtain_assets(rcsb_id, enums))
+    print("got assets",  enums)
+    [print(x) for x in obtain.obtain_assets(rcsb_id, enums)]
 # 
 

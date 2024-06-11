@@ -13,32 +13,36 @@ from ribctl.lib.schema.types_binding_site import BindingSite
 from ribctl.lib.mod_extract_bsites import bsite_ligand, struct_ligand_ids, bsite_extrarbx_polymer, bsite_extrarbx_polymer
 from ribctl.lib.mod_split_rename import split_rename
 from ribctl.etl.etl_pipeline import current_rcsb_structs, ReannotationPipeline, rcsb_single_structure_graphql, query_rcsb_api
-from concurrent.futures import  Future, ThreadPoolExecutor
+from concurrent.futures import  Future, ProcessPoolExecutor, ThreadPoolExecutor
 from ribctl.logs.loggers import get_etl_logger
 
 def obtain_assets(rcsb_id: str, assetlist:list[Asset], overwrite: bool = False):
     """This should return an array of Futures for acquisition routines for each A  in asset type."""
 
     rcsb_id = rcsb_id.upper()
-    assets  = RibosomeAssets(rcsb_id)
-    assets._verify_dir_exists()
+    RA  = RibosomeAssets(rcsb_id)
+    RA._verify_dir_exists()
 
     coroutines = []
 
 
     if Asset.profile in assetlist:
-        coroutines.append(assets.update_profile(overwrite))
+        coroutines.append(RA.update_profile(overwrite))
 
     if Asset.cif in assetlist:
-        coroutines.append(assets.update_cif(overwrite))
+        coroutines.append(RA.update_cif(overwrite))
 
     if Asset.ptc in assetlist:
-        coroutines.append(assets.update_ptc(overwrite))
+        coroutines.append(RA.update_ptc(overwrite))
 
     if Asset.chains in assetlist:
         coroutines.append(...)
 
     return coroutines
+    loop = asyncio.get_event_loop()
+    with ProcessPoolExecutor(5) as pool:
+            tasks = [loop.run_in_executor(pool, task) for task in coroutines]
+            return tasks
 
 def obtain_assets_threadpool(assetlist, workers: int = 10,  overwrite=False):
     """Get all ribosome profiles from RCSB via a threadpool"""

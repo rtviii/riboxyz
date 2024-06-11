@@ -19,9 +19,6 @@ from ribctl.lib.schema.types_ribosome import ( RNA, PTCInfo, Polymer, PolymerCla
 from ribctl import RIBETL_DATA
 from ribctl.logs.loggers import get_etl_logger
 
-#! -------------- [ Dev ]
-from typing import NewType, Literal
-
 
 class Asset(enum.StrEnum):
     profile   = auto()
@@ -36,10 +33,6 @@ class Asset(enum.StrEnum):
         if _ in assets:
             return getattr(Asset, _)
         return None
-
-
-
-
 
 class AssetPaths:
     rcsb_id:str
@@ -300,21 +293,19 @@ class RibosomeAssets:
             os.umask(0)
             os.makedirs(self.paths.dir, 0o777)
 
-    async def update_cif(self, overwrite: bool = False) -> bool:
+    async def update_cif(self, overwrite: bool = False):
         if not os.path.exists(self.paths.cif):
             await download_unpack_place(self.rcsb_id)
-            print("Saved structure file:\t", self.paths.cif)
+            print("Saved cif file: \t", self.paths.cif)
         else:
             if overwrite:
                 await download_unpack_place(self.rcsb_id)
-                return True
-            else:
-                return False
-
-    def update_profile(self, overwrite: bool = False) -> bool:
+                print("Overwrote cif file: \t", self.paths.cif)
+    
+    async def update_profile(self, overwrite: bool = False) -> bool:
         self._verify_dir_exists()
         if not os.path.isfile(self.paths.profile):
-            ribosome = ReannotationPipeline( query_rcsb_api(rcsb_single_structure_graphql(self.rcsb_id.upper())) ).process_structure()
+            ribosome = ReannotationPipeline(query_rcsb_api(rcsb_single_structure_graphql(self.rcsb_id.upper())) ).process_structure()
             if not RibosomeStructure.model_validate(ribosome):
                 raise Exception( "Created invalid ribosome profile (Schema validation failed). Not writing" )
 
