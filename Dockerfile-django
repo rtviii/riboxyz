@@ -11,6 +11,7 @@ ENV PYTHONDONTWRITEBYTECODE 1
 # vars inside the container
 ENV RIBXZ_API=/home/ribxz_api
 ENV RIBCTL=/home/ribctl
+ENV NEO4J_RIBOSOME=/home/neo4j_ribosome
 # ENV PYMOL_SOURCE=/home/pymol
 ENV RIBETL_DATA=/home/RIBETL_DATA
 
@@ -78,9 +79,8 @@ EXPOSE 8000 8001 8002
 
 # Be careful given that both the whole django project and the main module are called `rbxz_bend`. (hence not using the $DJANGO here)
 COPY api ${RIBXZ_API}
-
-# Be careful given that both the whole django project and the main module are called `rbxz_bend`. (hence not using the $DJANGO here)
 COPY ribctl ${RIBCTL}
+COPY neo4j_ribosome ${NEO4J_RIBOSOME}
 
 RUN pip3 install -r ${RIBXZ_API}/reqs.txt
 
