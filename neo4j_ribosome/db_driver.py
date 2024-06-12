@@ -3,7 +3,7 @@ from functools import partial
 import sys
 from neo4j_ribosome.db_lib_reader import Neo4jQuery
 from neo4j_ribosome.db_lib_builder import Neo4jBuilder
-from ribctl.etl.etl_ribosome_ops import RibosomeOps, Structure
+from ribctl.etl.etl_assets_ops import RibosomeOps, Structure
 from ribctl.lib.libtax import Taxid
 
 sys.dont_write_bytecode = True

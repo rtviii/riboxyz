@@ -5,7 +5,7 @@ import click
 from click import Context
 
 from ribctl.etl import etl_obtain
-from ribctl.etl.etl_ribosome_ops import AssetClass
+from ribctl.etl.etl_assets_ops import AssetClass, Assets
 
 @click.group(invoke_without_command=True)
 @click.pass_context
@@ -13,15 +13,15 @@ def etl(ctx: Context):
     if ctx.invoked_subcommand is None:
 
         stdin_text = click.get_text_stream('stdin')
-        # print("Got some stdin")
-        # click.echo(stdin_text.read())
 
-        print(rcsb_unsynced())
-        #TODO : display some integrity stats: 
-        # - which assets are missing, 
+        rcsb_id = ctx.obj['rcsb_id']
+        # print(Assets.status_vs_rcsb())
+        print(Assets(rcsb_id).status())
+
+        # - whichassets are missing, 
         # - how up-to date with RCSB are we
         # - last error logs.
-        click.echo("Hi! You ran the 'etl' command without any subcommands.")
+        # click.echo("Hi! You ran the 'etl' command without any subcommands.")
 
 @etl.command()
 @click.pass_context
@@ -34,6 +34,3 @@ def assets(ctx:Context, assets, overwrite):
     asyncio.run(etl_obtain.execute_asset_task_pool(etl_obtain.asset_routines(rcsb_id, enums, overwrite)))
 
 
-
-def rcsb_unsynced():
-    return etl_obtain.current_rcsb_structs()

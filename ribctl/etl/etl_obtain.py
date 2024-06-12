@@ -2,9 +2,8 @@ import asyncio
 from concurrent import futures
 from typing import Coroutine, Optional
 from ribctl import AMINO_ACIDS_3_TO_1_CODE
-from ribctl.etl.etl_ribosome_ops import AssetClass, Assets, RibosomeOps, Structure
+from ribctl.etl.etl_assets_ops import AssetClass, Assets, RibosomeOps, Structure
 from ribctl.etl.etl_pipeline import (
-    current_rcsb_structs,
     ReannotationPipeline,
     rcsb_single_structure_graphql,
     query_rcsb_api,
@@ -50,7 +49,7 @@ async def execute_asset_task_pool(tasks):
 def obtain_asssets_threadpool(assetlist, workers: int = 10, overwrite=False):
     """Get all ribosome profiles from RCSB via a threadpool"""
     logger = get_etl_logger()
-    unsynced = sorted(current_rcsb_structs())
+    unsynced = sorted(Assets.current_rcsb_structs())
 
     logger.info(f"Found {len(unsynced)} unsynced structures")
 

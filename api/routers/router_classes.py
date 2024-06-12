@@ -4,7 +4,7 @@ import os
 from django.http import HttpResponse, JsonResponse, HttpResponseServerError
 from ninja import Router
 from ribctl import RIBETL_DATA
-from ribctl.etl.etl_ribosome_ops import RibosomeOps, Structure
+from ribctl.etl.etl_assets_ops import RibosomeOps, Structure
 from ribctl.lib.schema.types_ribosome import RNA, LifecycleFactorClass, MitochondrialProteinClass, Polymer, PolymerClass, CytosolicProteinClass, PolynucleotideClass, PolypeptideClass, Protein, ProteinClass, RibosomeStructure
 from schema.v0 import BanClassMetadata, ExogenousRNAByStruct,LigandInstance, LigandlikeInstance, NeoStruct, NomenclatureClass, NomenclatureClassMember
 

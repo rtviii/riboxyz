@@ -1,7 +1,7 @@
 import os
 import click
 from ribctl import RIBETL_DATA
-from ribctl.etl.etl_ribosome_ops import RibosomeOps, Structure
+from ribctl.etl.etl_assets_ops import RibosomeOps, Structure
 ce = click.echo
 
 @click.command()

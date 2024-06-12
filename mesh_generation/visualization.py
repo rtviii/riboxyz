@@ -7,7 +7,7 @@ import numpy as np
 import numpy as np
 from mesh_generation.paths import *
 from ribctl import EXIT_TUNNEL_WORK, POISSON_RECON_BIN, RIBETL_DATA
-from ribctl.etl.etl_ribosome_ops import RibosomeOps, Structure
+from ribctl.etl.etl_assets_ops import RibosomeOps, Structure
 from ribctl.lib.libmsa import Taxid
 
 

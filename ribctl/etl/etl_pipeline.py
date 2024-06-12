@@ -7,7 +7,7 @@ from typing import Any, Optional
 import pyhmmer
 from pyhmmer.plan7 import HMM
 import requests
-from ribctl.etl.etl_ribosome_ops import RibosomeOps, Structure
+from ribctl.etl.etl_assets_ops import RibosomeOps, Structure
 from ribctl.lib.libhmm import (
     HMMClassifier,
 )
@@ -30,44 +30,6 @@ from ribctl.etl.gql_querystrings import single_structure_graphql_template
 from ribctl.logs.loggers import get_etl_logger
 logger = get_etl_logger()
 
-def current_rcsb_structs() -> list[str]:
-    """Return all structures in the rcsb that contain the phrase RIBOSOME and have more than 25 protein entities"""
-
-    rcsb_search_api = "https://search.rcsb.org/rcsbsearch/v2/query"
-    
-    q2 = {
-        "query": {
-            "type"            : "group",
-            "logical_operator": "and",
-            "nodes"           : [
-                {
-                    "type"      : "terminal",
-                    "service"   : "text",
-                    "parameters": {
-                        "operator" : "contains_phrase",
-                        "negation" : False,
-                        "value"    : "RIBOSOME",
-                        "attribute": "struct_keywords.pdbx_keywords",
-                    },
-                },
-                {
-                    "type"      : "terminal",
-                    "service"   : "text",
-                    "parameters": {
-                        "operator" : "greater",
-                        "negation" : False,
-                        "value"    : 12,
-                        "attribute": "rcsb_entry_info.polymer_entity_count_protein",
-                    },
-                },
-            ],
-            "label": "query-builder",
-        },
-        "return_type": "entry",
-        "request_options": {"return_all_hits": True, "results_verbosity": "compact"},
-    }
-    query = rcsb_search_api + "?json=" + json.dumps(q2)
-    return requests.get(query).json()["result_set"]
 
 def query_rcsb_api(gql_string: str) -> dict:
     """This defines a query in the RCSB search language that identifies the structures we view as 'current' i.e. 40+ proteins, smaller than 4A resolution etc."""

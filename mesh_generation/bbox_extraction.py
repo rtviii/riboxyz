@@ -6,7 +6,7 @@ import numpy as np
 import open3d as o3d
 from mendeleev import element
 import pandas as pd
-from ribctl.etl.etl_ribosome_ops import RibosomeOps, Structure
+from ribctl.etl.etl_assets_ops import RibosomeOps, Structure
 from Bio.PDB.Atom import Atom
 
 # Tunnel refinement:

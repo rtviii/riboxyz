@@ -6,7 +6,7 @@ import typing
 
 from pydantic import BaseModel
 from ribctl import ASSETS, ASSETS_PATH
-from ribctl.etl.etl_ribosome_ops import Structure
+from ribctl.etl.etl_assets_ops import Structure
 from ribctl.lib.libtax import PhylogenyNode
 from ribctl.lib.schema.types_ribosome import (
     RNA,

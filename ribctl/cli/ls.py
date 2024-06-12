@@ -2,7 +2,7 @@ import json
 import os
 from pprint import pprint
 from ribctl import RIBETL_DATA
-from ribctl.etl.etl_ribosome_ops import Structure
+from ribctl.etl.etl_assets_ops import Structure
 from ribctl.lib.libmsa import Taxid
 from ribctl.lib.schema.types_ribosome import PolynucleotideClass, PolypeptideClass, RibosomeStructure
 

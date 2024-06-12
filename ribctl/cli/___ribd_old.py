@@ -51,7 +51,7 @@ import asyncio
 import os
 from ribctl import ASSETS, RIBETL_DATA
 from ribctl.etl.etl_obtain import asset_routines, obtain_asssets_threadpool
-from ribctl.etl.etl_ribosome_ops import Assetlist, Structure
+from ribctl.etl.etl_assets_ops import Assetlist, Structure
 
 def cmd_etl(args):
 

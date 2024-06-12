@@ -6,6 +6,7 @@ import typing
 from Bio.PDB.Structure import Structure
 from Bio.PDB.Chain import Chain
 from loguru import logger
+import requests
 from ribctl import AMINO_ACIDS_3_TO_1_CODE, CLASSIFICATION_REPORTS
 from ribctl.lib.libtax import PhylogenyNode, PhylogenyRank, Taxid
 from ribctl.lib.tunnel import ptc_resdiues_get, ptc_residues_calculate_midpoint
@@ -14,6 +15,8 @@ from ribctl.lib.schema.types_ribosome import ( RNA, PTCInfo, Polymer, PolymerCla
 from ribctl import RIBETL_DATA
 from ribctl.logs.loggers import get_etl_logger
 
+
+RCSB_ID = typing.NewType("RCSB_ID", str)
 
 
 class AssetClass(enum.StrEnum):
@@ -64,9 +67,6 @@ class AssetPath:
     def thumbnail(self):
         return f"{self.dir}/{self.rcsb_id}.png"
 
-
-
-
 class RibosomeOps:
     rcsb_id: str
     paths: AssetPath
@@ -80,7 +80,7 @@ class RibosomeOps:
     @staticmethod
     def collect_all_taxa() -> set[PhylogenyNode]:
         _ = set()
-        for struct in RibosomeOps.list_all_structs():
+        for struct in Assets.list_all_structs():
             rp = RibosomeOps(struct).profile()
             for org in [*rp.src_organism_ids, *rp.host_organism_ids]:
                 if Taxid.rank(org) not in list(typing.get_args(PhylogenyRank)):
@@ -99,9 +99,6 @@ class RibosomeOps:
                 _.add(pn)
         return _
 
-    @staticmethod
-    def list_all_structs():
-        return os.listdir(RIBETL_DATA)
 
     #! [I] for Individual structure methods. Brew on this for a little bit, maybe should be a separate namespace.
 
@@ -289,10 +286,6 @@ class RibosomeOps:
             os.umask(0)
             os.makedirs(self.paths.dir, 0o777)
 
-    
-
-
-
 class Assets:
 
     rcsb_id: str
@@ -303,9 +296,86 @@ class Assets:
         self.rcsb_id = rcsb_id
         self.ro      = RibosomeOps(rcsb_id)
         self.paths   = AssetPath(rcsb_id)
-
-   
     
+    
+    @staticmethod
+    def list_all_structs():
+        return os.listdir(RIBETL_DATA)
+
+    @staticmethod
+    def current_rcsb_structs() -> list[str]:
+        """Return all structures in the rcsb that contain the phrase RIBOSOME and have more than 25 protein entities"""
+
+        rcsb_search_api = "https://search.rcsb.org/rcsbsearch/v2/query"
+        
+        q2 = {
+            "query": {
+                "type"            : "group",
+                "logical_operator": "and",
+                "nodes"           : [
+                    {
+                        "type"      : "terminal",
+                        "service"   : "text",
+                        "parameters": {
+                            "operator" : "contains_phrase",
+                            "negation" : False,
+                            "value"    : "RIBOSOME",
+                            "attribute": "struct_keywords.pdbx_keywords",
+                        },
+                    },
+                    {
+                        "type"      : "terminal",
+                        "service"   : "text",
+                        "parameters": {
+                            "operator" : "greater",
+                            "negation" : False,
+                            "value"    : 12,
+                            "attribute": "rcsb_entry_info.polymer_entity_count_protein",
+                        },
+                    },
+                ],
+                "label": "query-builder",
+            },
+            "return_type": "entry",
+            "request_options": {"return_all_hits": True, "results_verbosity": "compact"},
+        }
+        query = rcsb_search_api + "?json=" + json.dumps(q2)
+        return sorted(requests.get(query).json()["result_set"])
+
+    @staticmethod
+    def status_vs_rcsb() -> list:
+        return list(set(Assets.current_rcsb_structs()) - set(Assets.list_all_structs()))
+
+    @staticmethod
+    def assets_status(structs:list[RCSB_ID]):
+        for struct in structs:
+            print(Assets(struct).status())
+
+    def verify_exists(self, asset: AssetClass) -> bool:
+        match asset:
+            case AssetClass.profile:
+                return os.path.exists(self.paths.profile)
+            case AssetClass.cif:
+                return os.path.exists(self.paths.cif)
+            case AssetClass.ptc:
+                return os.path.exists(self.paths.ptc)
+            case AssetClass.chains:
+                return os.path.exists(self.paths.polymers_dir) and len(os.listdir(self.paths.polymers_dir))> 0
+            case AssetClass.thumbnail:
+                return os.path.exists(self.paths.thumbnail)
+            case _:
+                raise KeyError("AssetClass {} does not exist.".format(asset))
+
+    
+    def status(self) -> dict:
+        for a in AssetClass:
+            print(a)
+            
+            
+            # if not os.path.exists(getattr(self.paths, a.name)):
+            #     print(getattr(self.paths, a.name))
+            #     return {a.name: False}
+
     async def upsert_cif(self, overwrite: bool = False):
         if not os.path.exists(self.paths.cif):
             await download_unpack_place(self.rcsb_id)
