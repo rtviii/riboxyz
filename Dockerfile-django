@@ -11,14 +11,13 @@ ENV PYTHONDONTWRITEBYTECODE 1
 # vars inside the container
 ENV RIBXZ_API=/home/ribxz_api
 ENV RIBCTL=/home/ribctl
-ENV PYMOL_SOURCE=/home/pymol
+# ENV PYMOL_SOURCE=/home/pymol
 ENV RIBETL_DATA=/home/RIBETL_DATA
-
 
 # set work directory
 RUN mkdir -p $RIBXZ_API
 RUN mkdir -p $RIBCTL
-RUN mkdir -p $PYMOL_SOURCE
+# RUN mkdir -p $PYMOL_SOURCE
 
 # ----- LIBS -------------------------------------------
 RUN apt-get update -y && apt-get -y install curl 
@@ -37,13 +36,13 @@ RUN pip3 install virtualenv netCDF4
 
 #  the following pathing is elaborated on here: https://sourceforge.net/p/pymol/mailman/message/35988916/
 #  be mindful of the OS dependencies 
-COPY pymol_source $PYMOL_SOURCE
-ADD pymol_source $PYMOL_SOURCE
-ENV PYMOL_PATH="${PYMOL_SOURCE}/__pymol_lib"
-ENV PYTHONPATH="${PYMOL_PATH}/modules" 
-RUN mkdir -p $PYMOL_PATH
-WORKDIR $PYMOL_SOURCE
-RUN python3 setup.py build install --home="${PYMOL_PATH}" --install-lib="${PYMOL_PATH}/modules/" --install-scripts="${PYMOL_PATH}"
+# COPY pymol_source $PYMOL_SOURCE
+# ADD pymol_source $PYMOL_SOURCE
+# ENV PYMOL_PATH="${PYMOL_SOURCE}/__pymol_lib"
+# ENV PYTHONPATH="${PYMOL_PATH}/modules" 
+# RUN mkdir -p $PYMOL_PATH
+# WORKDIR $PYMOL_SOURCE
+# RUN python3 setup.py build install --home="${PYMOL_PATH}" --install-lib="${PYMOL_PATH}/modules/" --install-scripts="${PYMOL_PATH}"
 
 # --- NEO4J --------------------------------------------------------------------------------
 # RUN add-apt-repository -y ppa:openjdk-r/ppa
