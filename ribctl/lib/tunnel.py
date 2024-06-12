@@ -108,6 +108,7 @@ def ptc_resdiues_get(
     # For now just know that this is a hack.
 
     matches = {}
+
     for p_rna in rnas:
         m6, m8, m9, auth_asym_id = ptc_fuzzyfind_subseq_in_chain( struct_profile, p_rna.auth_asym_id )
         matches = {**matches, auth_asym_id: [m6, m8, m9]}
