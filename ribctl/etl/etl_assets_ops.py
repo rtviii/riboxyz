@@ -346,10 +346,11 @@ class Assets:
     def status_vs_rcsb() -> list:
         return list(set(Assets.current_rcsb_structs()) - set(Assets.list_all_structs()))
 
-    @staticmethod
-    def assets_status(structs:list[RCSB_ID]):
-        for struct in structs:
-            print(Assets(struct).status())
+    def assets_status(self)->dict[AssetClass, bool]:
+        _ = {}
+        for a in AssetClass:
+            _[a]= self.verify_exists(a)
+        return _
 
     def verify_exists(self, asset: AssetClass) -> bool:
         match asset:
@@ -365,16 +366,6 @@ class Assets:
                 return os.path.exists(self.paths.thumbnail)
             case _:
                 raise KeyError("AssetClass {} does not exist.".format(asset))
-
-    
-    def status(self) -> dict:
-        for a in AssetClass:
-            print(a)
-            
-            
-            # if not os.path.exists(getattr(self.paths, a.name)):
-            #     print(getattr(self.paths, a.name))
-            #     return {a.name: False}
 
     async def upsert_cif(self, overwrite: bool = False):
         if not os.path.exists(self.paths.cif):

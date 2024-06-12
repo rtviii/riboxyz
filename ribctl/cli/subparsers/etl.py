@@ -16,7 +16,8 @@ def etl(ctx: Context):
 
         rcsb_id = ctx.obj['rcsb_id']
         # print(Assets.status_vs_rcsb())
-        print(Assets(rcsb_id).status())
+        print("a status")
+        pprint(Assets(rcsb_id).assets_status())
 
         # - whichassets are missing, 
         # - how up-to date with RCSB are we
