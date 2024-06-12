@@ -557,7 +557,7 @@ class RibosomeStructure(BaseModel):
     expMethod : str
     resolution: float
 
-    deposition_date:str
+    deposition_date:Optional[ str ]  = None
 
     pdbx_keywords     : Optional[str] =None
     pdbx_keywords_text: Optional[str] = None

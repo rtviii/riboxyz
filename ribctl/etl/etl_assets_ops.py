@@ -299,6 +299,16 @@ class Assets:
     
     
     @staticmethod
+    def global_status()->dict[RCSB_ID, dict[AssetClass, bool]]:
+        _ = {}
+        for struct in Assets.list_all_structs():
+            _[struct] = Assets(struct).assets_status()
+        return _
+
+
+
+
+    @staticmethod
     def list_all_structs():
         return os.listdir(RIBETL_DATA)
 
@@ -344,6 +354,7 @@ class Assets:
 
     @staticmethod
     def status_vs_rcsb() -> list:
+        """Return a list of structures that are in the RCSB but not in the local database."""
         return list(set(Assets.current_rcsb_structs()) - set(Assets.list_all_structs()))
 
     def assets_status(self)->dict[AssetClass, bool]:

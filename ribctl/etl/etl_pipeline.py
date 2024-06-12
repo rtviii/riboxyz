@@ -670,6 +670,7 @@ class ReannotationPipeline:
 
         logger.debug("Classifying {}: {} polypeptides, {} polynucleotides, {} other.".format(rcsb_id, len(_prot_polypeptides), len(_rna_polynucleotides), len(_other_polymers)))
         if not os.path.exists(RA.paths.classification_report) :
+            print("Creating new classifciation report.")
             protein_alphabet      = pyhmmer.easel.Alphabet.amino()
             protein_classifier    = HMMClassifier(_prot_polypeptides, protein_alphabet, [p for p in [ *list(CytosolicProteinClass),*list(LifecycleFactorClass) , *list(MitochondrialProteinClass)] ])
             protein_classifier.classify_chains()
@@ -690,6 +691,7 @@ class ReannotationPipeline:
                 json.dump(full_report, outfile, indent=4)
                 logger.debug("Saved classification report to {}".format(report_path))
         else:
+            print("Using existing classification report: {}".format(RA.paths.classification_report))
             with open(RA.paths.classification_report, "r") as infile:
                 full_report = json.load(infile)
                 def access_class(_:dict):
