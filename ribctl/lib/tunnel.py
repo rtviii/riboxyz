@@ -45,14 +45,13 @@ def residue_labels(res: Residue | ResidueSummary) -> bool:
     return res.resname in [*AMINO_ACIDS.keys(), *NUCLEOTIDES]
 
 
-def ptc_fuzzyfind_subseq_in_chain( biopython_struct, auth_asym_id: str, assembly_id: int = 0 )  \
-    -> tuple[list[Residue], list[Residue], list[Residue], str]:
+def ptc_fuzzyfind_subseq_in_chain(
+    biopython_struct, auth_asym_id: str, assembly_id: int = 0
+) -> tuple[list[Residue], list[Residue], list[Residue], str]:
 
     chain3d       : Chain         = biopython_struct.child_dict[assembly_id].child_dict[auth_asym_id]
     ress          : list[Residue] = chain3d.child_list
-    ress_sanitized: list[Residue] = [
-        *filter(lambda r: r.get_resname() in ["A", "C", "G", "U", "-", "PSU"], ress)
-    ]
+    ress_sanitized: list[Residue] = [ *filter(lambda r: r.get_resname() in ["A", "C", "G", "U", "-", "PSU"], ress) ]
 
     for _r in ress_sanitized:
         if _r.get_resname() == "PSU":
@@ -110,13 +109,19 @@ def ptc_resdiues_get(
     matches = {}
 
     for p_rna in rnas:
-        m6, m8, m9, auth_asym_id = ptc_fuzzyfind_subseq_in_chain( struct_profile, p_rna.auth_asym_id )
+        m6, m8, m9, auth_asym_id = ptc_fuzzyfind_subseq_in_chain(struct_profile, p_rna.auth_asym_id)
         matches = {**matches, auth_asym_id: [m6, m8, m9]}
 
     try:
-        auth_asym_id, rRNA_fragment_matches = list( filter(lambda match_kv: len(match_kv[1][2]) > 0, list(matches.items())) )[0]
+        auth_asym_id, rRNA_fragment_matches = list(
+            filter(lambda match_kv: len(match_kv[1][2]) > 0, list(matches.items()))
+        )[0]
     except Exception as e:
-        raise Exception("Error:Could not identify PTC residues in {} : {} ".format(biopython_structure.id, e)   )
+        raise Exception(
+            "Error:Could not identify PTC residues in {} : {} ".format(
+                biopython_structure.id, e
+            )
+        )
 
     chain3d: Chain = struct_profile.child_dict[assembly_id].child_dict[auth_asym_id]
     ress: list[Residue] = chain3d.child_list
@@ -129,10 +134,10 @@ def ptc_resdiues_get(
         if _r.get_resname() == "PSU":
             _r.resname = "U"
 
-    raw_seq      = reduce(lambda x, y: x + y.resname, ress_sanitized, "")
+    raw_seq = reduce(lambda x, y: x + y.resname, ress_sanitized, "")
 
-    matches      = find_near_matches(DORIS_ET_AL["SITE_9"], raw_seq, max_l_dist=1)
-    m0           = pick_match(matches, len(raw_seq))
+    matches = find_near_matches(DORIS_ET_AL["SITE_9"], raw_seq, max_l_dist=1)
+    m0 = pick_match(matches, len(raw_seq))
     PTC_residues = [ress_sanitized[i] for i in list(range(m0.start, m0.end))]
 
     return PTC_residues, auth_asym_id

@@ -6,7 +6,6 @@ from neo4j.graph import Node
 from neo4j import Driver, GraphDatabase
 from neo4j_ribosome.node_polymer import  link__polymer_to_polymer_class, link__polymer_to_structure, node__polymer, upsert_polymer_to_protein, upsert_polymer_to_rna,node__polymer_class
 from neo4j_ribosome.node_structure import   link__ligand_to_struct, link__structure_to_phylogeny, node__ligand, node__structure, struct_exists
-from ribctl.etl.etl_pipeline import current_rcsb_structs
 from ribctl.lib.schema.types_ribosome import MitochondrialProteinClass, PolymerClass, PolynucleotideClass, RibosomeStructure
 from ribctl.etl.etl_assets_ops import RibosomeOps, Structure
 from neo4j import GraphDatabase, Driver, ManagedTransaction, Transaction
