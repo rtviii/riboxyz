@@ -1,7 +1,7 @@
 import json
 import os
 from ribctl import RIBETL_DATA
-from ribctl.etl.ribosome_assets import RibosomeAssets
+from ribctl.etl.etl_assets_ops import RibosomeOps, Structure
 from ribctl.lib.libmsa import Fasta
 import os
 from Bio import SeqRecord
@@ -10,7 +10,7 @@ from Bio.SeqRecord import SeqRecord
 from Bio.Seq import Seq
 records = []
 
-for s in RibosomeAssets.list_all_structs():
+for s in RibosomeOps.list_all_structs():
     try:
         with open(os.path.join(RIBETL_DATA,s,"{}.json".format(s)), 'r') as f:
             struct = json.load(f)

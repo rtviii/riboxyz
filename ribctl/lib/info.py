@@ -6,7 +6,7 @@ import typing
 
 from pydantic import BaseModel
 from ribctl import ASSETS, ASSETS_PATH
-from ribctl.etl.ribosome_assets import RibosomeAssets
+from ribctl.etl.etl_assets_ops import Structure
 from ribctl.lib.libtax import PhylogenyNode
 from ribctl.lib.schema.types_ribosome import (
     RNA,
@@ -21,7 +21,7 @@ from ribctl.lib.schema.types_ribosome import (
 from ribctl.lib.libmsa import Taxid, ncbi
 
 
-def struct_stats(ra: RibosomeAssets):
+def struct_stats(ra: Structure):
     profile = ra.profile()
     struct_stat = {}
     lig_compounds = {}
@@ -156,10 +156,10 @@ def get_stats():
         "bacteria": {},
     }
 
-    for struct in RibosomeAssets.list_all_structs():
+    for struct in Structure.list_all_structs():
         try:
             [struct_stat, lig_compounds, n_dbank_compounds, superkingdom] = (
-                struct_stats(RibosomeAssets(struct))
+                struct_stats(Structure(struct))
             )
 
             # for k, v in nomenclature_classes.items():

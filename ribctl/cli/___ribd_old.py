@@ -17,8 +17,6 @@ from ribctl.cli.sync import cmd_db
 from ribctl.lib.mod_transpose_bsites import init_transpose_ligand
 from ribctl.lib.schema.types_binding_site import BindingSite
 
-def parse_comma_separated_list(value):
-    return value.split(',')
 
 
 parser = argparse.ArgumentParser(description="Command line interface for the `ribctl` package.")
@@ -33,7 +31,6 @@ parser_lig = subparsers.add_parser('lig', help='ligands')
 parser_lig.add_argument('--chemid', type=str, required=True, help='Chemical identifier')
 parser_lig.add_argument('--src', type=str, required=True, help='Source file or path')
 parser_lig.add_argument('--dest', type=str, required=True, help='Destination file or path')
-
 
 parser_cmd_etl.add_argument('-getall'      , '--obtain_all_structures', action='store_true')
 parser_cmd_etl.add_argument('--rcsb_id'               , dest   ='rcsb_id'    )
@@ -53,8 +50,8 @@ parser_cmd_etl.add_argument('--ncbi_init' , action ='store_true' )
 import asyncio
 import os
 from ribctl import ASSETS, RIBETL_DATA
-from ribctl.etl.obtain import obtain_assets, obtain_assets_threadpool
-from ribctl.etl.ribosome_assets import Assetlist, RibosomeAssets
+from ribctl.etl.etl_obtain import asset_routines, obtain_asssets_threadpool
+from ribctl.etl.etl_assets_ops import Assetlist, Structure
 
 def cmd_etl(args):
 
@@ -62,7 +59,7 @@ def cmd_etl(args):
         profile                 = False,
         ptc_coords              = False,
         cif                     = False,
-        cif_modified_and_chains = False,
+        chains = False,
         ligands                 = False,
         png_thumbnail           = False,
     )
@@ -77,7 +74,7 @@ def cmd_etl(args):
         ASL.cif=True
 
     if args.cif_modified_and_chains:
-        ASL.cif_modified_and_chains=True
+        ASL.chains=True
 
     if args.ligands:
         ASL.ligands=True
@@ -87,7 +84,7 @@ def cmd_etl(args):
 
     #All structures
     if args.obtain_all_structures:
-        obtain_assets_threadpool(
+        obtain_asssets_threadpool(
             ASL,
             workers   = 4,
             overwrite = args.overwrite or False
@@ -97,7 +94,7 @@ def cmd_etl(args):
         RCSB_ID = str(args.rcsb_id)
         loop    = asyncio.get_event_loop()
         loop.run_until_complete(
-            obtain_assets(
+            asset_routines(
                 RCSB_ID,
                 ASL,
                 args.overwrite or False
@@ -134,7 +131,7 @@ def cmd_lig(args):
     # with open(BindingSite.path_nonpoly_ligand(chemid, src), 'r') as infile:
     # ligdict      = json.load(infile)
     bsite_src    = BindingSite.parse_file(BindingSite.path_nonpoly_ligand(src,chemid))
-    dest_profile = RibosomeAssets(dest).profile()
+    dest_profile = Structure(dest).profile()
     # BindingSite.parse_obj()
     transpose = init_transpose_ligand(dest_profile, bsite_src)
     t         = transpose
@@ -160,17 +157,17 @@ parser.add_argument('--t', action='store_true')
 #?---------------------------------------------------------------------------------------------------------
 
 
-def verify_structure_profile_schema(rcsb_id:str):
-    s = RibosomeAssets(rcsb_id).profile().model_dump_json()
-    try:
-        RibosomeStructure.model_validate_json(s)
-        return True
-    except Exception as e:
-        print(e)
-        return False
+# def verify_structure_profile_schema(rcsb_id:str):
+#     s = RibosomeAssets(rcsb_id).profile().model_dump_json()
+#     try:
+#         RibosomeStructure.model_validate_json(s)
+#         return True
+#     except Exception as e:
+#         print(e)
+#         return False
 
-def verify_profile_exists(rcsb_id:str):
-    return os.path.exists(RibosomeAssets(rcsb_id)._json_profile_filepath())
+# def verify_profile_exists(rcsb_id:str):
+#     return os.path.exists(RibosomeAssets(rcsb_id)._json_profile_filepath())
 
 try:
     args = parser.parse_args()
@@ -179,7 +176,7 @@ try:
         for struct in os.listdir(RIBETL_DATA):
             print(struct, verify_profile_exists(struct))
             if not verify_profile_exists(struct):
-                asyncio.run(obtain_assets(struct, Assetlist(profile=True), overwrite=True))
+                asyncio.run(asset_routines(struct, Assetlist(profile=True), overwrite=True))
         exit(0)
 
     # if args.ncbi_init:
@@ -198,7 +195,7 @@ try:
         tally       = { "valid": [], "invalid": []}
 
         for struct in all_structs:
-            if  not os.path.exists(RibosomeAssets(struct)._json_profile_filepath()):
+            if  not os.path.exists(Structure(struct)._json_profile_filepath()):
                 continue
             if not verify_structure_profile_schema(struct):
                 tally["invalid"].append(struct)

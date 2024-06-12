@@ -290,39 +290,39 @@ class HMMClassifier():
                            self.report[chain.auth_asym_id].append(d_hit)
 
 
-    def ___scan_chains(self)->None:
-        """DEPRECATED: Waiting on https://github.com/althonos/pyhmmer/issues/53 to resolve"""
+    # def ___scan_chains(self)->None:
+    #     """DEPRECATED: Waiting on https://github.com/althonos/pyhmmer/issues/53 to resolve"""
 
-        for chain in self.chains:
-            organism_taxid = chain.src_organism_ids[0]
+    #     for chain in self.chains:
+    #         organism_taxid = chain.src_organism_ids[0]
 
-            # -- pick scanner'|
-            if organism_taxid not in self.organism_scanners:
-                    hmmscanner                             = HMMs(organism_taxid, self.candidate_classes, no_cache = True, max_seed_seqs = 5)
-                    self.organism_scanners[organism_taxid] = hmmscanner
-            else:
-                hmmscanner = self.organism_scanners[organism_taxid]
-            # -- pick scanner.|
+    #         # -- pick scanner'|
+    #         if organism_taxid not in self.organism_scanners:
+    #                 hmmscanner                             = HMMs(organism_taxid, self.candidate_classes, no_cache = True, max_seed_seqs = 5)
+    #                 self.organism_scanners[organism_taxid] = hmmscanner
+    #         else:
+    #             hmmscanner = self.organism_scanners[organism_taxid]
+    #         # -- pick scanner.|
 
-            self.report[chain.auth_asym_id] = []
-            seq_record = chain.to_SeqRecord()
-            query_seq  = pyhmmer.easel.TextSequence(name=bytes(seq_record.id,'utf-8'), sequence=seq_record.seq)
-            query_seqs = [query_seq.digitize(self.alphabet)]
+    #         self.report[chain.auth_asym_id] = []
+    #         seq_record = chain.to_SeqRecord()
+    #         query_seq  = pyhmmer.easel.TextSequence(name=bytes(seq_record.id,'utf-8'), sequence=seq_record.seq)
+    #         query_seqs = [query_seq.digitize(self.alphabet)]
 
             
-            for scan in list(pyhmmer.hmmscan(query_seqs,[*hmmscanner.class_hmms_registry.values()], self.alphabet, background =pyhmmer.plan7.Background(self.alphabet))):
-                for hit in [*scan]:
-                   d_hit = {
-                    "fasta_seed"        : [str(seqrecord.seq) for seqrecord in hmmscanner.class_hmms_seed_sequences[hit.name.decode()]],
-                    "seed_organism_ids" : [seqrecord.id for seqrecord in hmmscanner.class_hmms_seed_sequences[hit.name.decode()]],
-                    "class_name"        : hit.name.decode(),                                                             # <- comes from the emitting hmm
-                    "evalue"            : hit.evalue,
-                    "bitscore"          : hit.score,
-                    "target_organism_id": organism_taxid,
-                    "consensus"         : hmmscanner.class_hmms_registry[hit.name.decode()].consensus,
-                    "domains"           : [( d.score, d.c_evalue, d.env_from, d.env_to ) for d in hit.domains]
-                    }
-                   self.report[chain.auth_asym_id].append(d_hit)
+    #         for scan in list(pyhmmer.hmmscan(query_seqs,[*hmmscanner.class_hmms_registry.values()], self.alphabet, background =pyhmmer.plan7.Background(self.alphabet))):
+    #             for hit in [*scan]:
+    #                d_hit = {
+    #                 "fasta_seed"        : [str(seqrecord.seq) for seqrecord in hmmscanner.class_hmms_seed_sequences[hit.name.decode()]],
+    #                 "seed_organism_ids" : [seqrecord.id for seqrecord in hmmscanner.class_hmms_seed_sequences[hit.name.decode()]],
+    #                 "class_name"        : hit.name.decode(),                                                             # <- comes from the emitting hmm
+    #                 "evalue"            : hit.evalue,
+    #                 "bitscore"          : hit.score,
+    #                 "target_organism_id": organism_taxid,
+    #                 "consensus"         : hmmscanner.class_hmms_registry[hit.name.decode()].consensus,
+    #                 "domains"           : [( d.score, d.c_evalue, d.env_from, d.env_to ) for d in hit.domains]
+    #                 }
+    #                self.report[chain.auth_asym_id].append(d_hit)
 
     def produce_classification(self)->dict[str,list]:
         classes = {}

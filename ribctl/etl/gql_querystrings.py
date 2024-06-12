@@ -1,27 +1,8 @@
-assembly_identification_string = """
-assemblies{
-    rcsb_id 
-   	nonpolymer_entity_instances{
-  
-      rcsb_nonpolymer_entity_instance_container_identifiers{
-        
-        comp_id
-        auth_asym_id
-        rcsb_id
-        auth_seq_id
-      }
-    }
-    polymer_entity_instances{
-       rcsb_polymer_entity_instance_container_identifiers {        
-        asym_id
-        auth_asym_id
-        entry_id
-        entity_id
-      }
-    }
-  }"""
-
 entry_info_string = """
+
+  rcsb_accession_info{
+    deposit_date
+  }
     struct_keywords {
       pdbx_keywords
       text
@@ -47,12 +28,31 @@ entry_info_string = """
       pdbx_keywords
       text
     }
-
-  rcsb_accession_info{
-    deposit_date
-  }
-
 """
+
+assembly_identification_string = """
+assemblies{
+    rcsb_id 
+   	nonpolymer_entity_instances{
+  
+      rcsb_nonpolymer_entity_instance_container_identifiers{
+        
+        comp_id
+        auth_asym_id
+        rcsb_id
+        auth_seq_id
+      }
+    }
+    polymer_entity_instances{
+       rcsb_polymer_entity_instance_container_identifiers {        
+        asym_id
+        auth_asym_id
+        entry_id
+        entity_id
+      }
+    }
+  }"""
+
 
 single_structure_graphql_template = """{
   entry(entry_id: "$RCSB_ID") {
@@ -78,7 +78,10 @@ single_structure_graphql_template = """{
 
 
 
-    struct_keywords {
+      rcsb_accession_info{
+        deposit_date
+      }
+      struct_keywords {
         pdbx_keywords
         text
       }

@@ -1,5 +1,5 @@
 from Bio.PDB.Structure import Structure
-from Bio.PDB import FastMMCIFParser
+from Bio.PDB.MMCIFParser import FastMMCIFParser
 import gzip
 import json
 import os
@@ -12,16 +12,15 @@ async def download_unpack_place(struct_id: str) -> None:
     BASE_URL = "http://files.rcsb.org/download/"
     FORMAT   = ".cif.gz"
 
-    structid = struct_id.upper()
-    url = BASE_URL + structid + FORMAT
-    compressed = requests.get(url).content
+    structid     = struct_id.upper()
+    url          = BASE_URL + structid + FORMAT
+    compressed   = requests.get(url).content
     decompressed = gzip.decompress(compressed)
 
     destination_chains = os.path.join(
         os.environ["RIBETL_DATA"],
         structid,
-        "CHAINS"
-    )
+        "CHAINS" )
 
     if not os.path.exists(destination_chains):
         os.mkdir(destination_chains)
@@ -30,19 +29,17 @@ async def download_unpack_place(struct_id: str) -> None:
     structfile = os.path.join(
         os.environ["RIBETL_DATA"],
         structid,
-        structid + ".cif"
-    )
+        structid + ".cif")
 
     with open(structfile, "wb") as f:
         f.write(decompressed)
 
+#TODO: This is old and should be rewritten in terms of assets. Better -- nuked/simplified
 def struct_path(pdbid: str, pftype: typing.Literal["cif", "json", "modified"]):
     if pftype == 'cif':
         return os.path.join(RIBETL_DATA, pdbid.upper(), f"{pdbid.upper()}.cif")
     elif pftype == 'json':
         return os.path.join(RIBETL_DATA, pdbid.upper(), f"{pdbid.upper()}.json")
-    elif pftype == 'modified':
-        return os.path.join(RIBETL_DATA, pdbid.upper(), f"{pdbid.upper()}_modified.cif")
     else:
         raise ValueError(
             "Invalid path type. Must be 'cif', 'json', or 'modified' ")
@@ -62,7 +59,6 @@ def open_structure(pdbid: str, path_type: typing.Literal["cif", "json", "modifie
 
     elif path_type == 'modified':
         with open(struct_path(pdbid, 'modified'), 'rb') as _:
-
             try:
                 return FastMMCIFParser(QUIET=True).get_structure(pdbid, _)
 

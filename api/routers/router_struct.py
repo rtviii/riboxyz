@@ -8,7 +8,7 @@ from ninja import Router, Schema
 from pydantic import BaseModel
 from neo4j_ribosome.db_lib_reader import dbqueries
 from ribctl import ASSETS, ASSETS_PATH
-from ribctl.etl.ribosome_assets import RibosomeAssets
+from ribctl.etl.etl_assets_ops import RibosomeOps, Structure
 from ribctl.lib.info import StructureCompositionStats, run_composition_stats
 from ribctl.lib.schema.types_ribosome import  CytosolicProteinClass, CytosolicRNAClass, ElongationFactorClass, InitiationFactorClass, LifecycleFactorClass, MitochondrialProteinClass, MitochondrialRNAClass, PTCInfo, Polymer, PolymerClass, PolynucleotideClass, PolypeptideClass, Protein, ProteinClass, RibosomeStructure, tRNA
 from ribctl.lib.libtax import Taxid 
@@ -99,7 +99,7 @@ def polymers_by_structure(request,
 @structure_router.get('/ptc',  tags=[TAG], response=PTCInfo)
 def ptc(request, rcsb_id:str):
     rcsb_id = str.upper(rcsb_id)
-    return RibosomeAssets(rcsb_id)._ptc_residues()
+    return RibosomeOps(rcsb_id).ptc()
 
 @structure_router.get('/list_ligands',  tags=[TAG])
 def list_lignads(request):
@@ -147,7 +147,7 @@ def structure_profile(request,rcsb_id:str):
     rcsb_id     = str.upper(params['rcsb_id'][0])
 
     try:
-        with open(RibosomeAssets(rcsb_id)._json_profile_filepath(), 'r') as f:
+        with open(RibosomeOps(rcsb_id).paths.profile, 'r') as f:
             return JsonResponse(json.load(f))
     except Exception as e:
         return HttpResponseServerError("Failed to find structure profile {}:\n\n{}".format(rcsb_id, e))
@@ -159,7 +159,7 @@ def structure_ptc(request,rcsb_id:str):
     params      = dict(request.GET)
     rcsb_id     = str.upper(params['rcsb_id'][0])
     try:
-        ptc = RibosomeAssets(rcsb_id)._ptc_residues()
+        ptc = RibosomeOps(rcsb_id).ptc()
     except Exception as e:
         return HttpResponseServerError("Failed to find structure profile {}:\n\n{}".format(rcsb_id, e))
 

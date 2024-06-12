@@ -1,0 +1,64 @@
+import asyncio
+import click
+from click import Context
+from ribctl.etl import etl_obtain
+from ribctl.etl.etl_assets_ops import AssetClass, Assets
+
+
+@click.group(invoke_without_command=True)
+@click.pass_context
+def etl(ctx: Context):
+    if ctx.invoked_subcommand is None:
+
+        stdin_text = click.get_text_stream("stdin")
+        rcsb_id = ctx.obj["rcsb_id"]
+
+        global_status = Assets.global_status()
+        list(map(lambda a: a.name, list(AssetClass)))
+        header = (
+            "[RCSB_ID \t"
+            + "".join(["| {}".format(a.name) for a in list(AssetClass)])
+            + "]"
+        )
+        click.echo(header)
+        for i, (k, v) in enumerate(global_status.items()):
+            if i % 20 == 0:
+                click.echo(header)
+            assets_row = "{}\t\t".format(k) + "".join(
+                ["| {}  ".format("X" if v[a] else " ") for a in list(AssetClass)]
+            )
+            click.echo(assets_row)
+
+        # - which assets are missing,
+        # - how up-to date with RCSB are we
+        # - last error logs.
+        # click.echo("Hi! You ran the 'etl' command without any subcommands.")
+
+
+@etl.command()
+@click.pass_context
+@click.argument( "assets", required=True, nargs=-1, type=click.Choice(AssetClass._member_names_) )
+@click.option("--overwrite", required=False, type=bool)
+@click.option( "--rcsb_sync", required=False, is_flag=True, default=False)
+@click.option( "--all_structs", required=False, is_flag=True, default=False)
+def assets(ctx: Context, assets, overwrite, rcsb_sync, all_structs):
+    rcsb_id = ctx.obj['rcsb_id']
+    assets = list(map(AssetClass.from_str, assets))
+
+    print(rcsb_sync, all_structs)
+    if rcsb_sync:
+        for rcsb_id in Assets.status_vs_rcsb():
+            print("RCSB Sync: Fetching assets for {}".format(rcsb_id))
+            routines = etl_obtain.asset_routines(rcsb_id, [AssetClass.profile, AssetClass.cif] )
+            asyncio.run(etl_obtain.execute_asset_task_pool(routines))
+        return
+
+    if all_structs:
+        print("Processing all structures ")
+        for rcsb_id in Assets.list_all_structs():
+            print("[{}]".format(rcsb_id))
+            routines = etl_obtain.asset_routines(rcsb_id, assets , overwrite)
+            asyncio.run(etl_obtain.execute_asset_task_pool(routines))
+        return
+
+    # asyncio.run(etl_obtain.execute_asset_task_pool())

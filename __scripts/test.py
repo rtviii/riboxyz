@@ -27,14 +27,14 @@ from ribctl.etl.etl_pipeline import (
     query_rcsb_api,
     rcsb_single_structure_graphql,
 )
-from ribctl.etl.obtain import obtain_assets_threadpool
+from ribctl.etl.etl_obtain import obtain_asssets_threadpool
 from ribctl.lib.libhmm import (
     HMMClassifier,
     HMMs,
     hmm_create,
     hmm_produce,
 )
-from ribctl.etl.ribosome_assets import Assetlist, RibosomeAssets
+from ribctl.etl.etl_assets_ops import Assetlist, RibosomeOps, Structure
 from ribctl.lib.schema.types_ribosome import (
     LifecycleFactorClass,
     Polymer,
@@ -54,8 +54,8 @@ hmm_cachedir = ASSETS["__hmm_cache"]
 import sys
 
 
-
 if sys.argv[1] == "tunnel":
+
     def list_euk_structs():
         EUK_STRUCTS = []
         with open("eukarya_2023.txt", "r") as data_file:
@@ -63,6 +63,7 @@ if sys.argv[1] == "tunnel":
                 structs = line.split(",")
                 EUK_STRUCTS = [*EUK_STRUCTS, *structs]
         return EUK_STRUCTS
+
     if __name__ == "__main__":
         EUK = list_euk_structs()
     print("tunnel")
@@ -107,7 +108,7 @@ elif sys.argv[1] == "test":
     for i, struct in enumerate(all_structs):
         try:
             print(struct, i)
-            rp = RibosomeAssets(struct)
+            rp = RibosomeOps(struct)
             rp = rp.profile()
             pdbid_taxid_tuples.append((rp.rcsb_id, rp.src_organism_ids[0]))
         except:
@@ -139,9 +140,11 @@ elif sys.argv[1] == "test":
     # obtain_assets_threadpool([rcsb_id for (rcsb_id, taxid) in rcsb_id_taxid_tuples], Assetlist(ptc_coords=True), overwrite=True)
 elif sys.argv[1] == "processtax":
     RCSB_ID = "5MYJ"
-    ReannotationPipeline(
-        query_rcsb_api(rcsb_single_structure_graphql(RCSB_ID))
-    ).process_structure()
+    asyncio.run(
+        ReannotationPipeline(
+            query_rcsb_api(rcsb_single_structure_graphql(RCSB_ID))
+        ).process_structure()
+    )
 elif sys.argv[1] == "ll":
     import shutil
 
@@ -228,7 +231,7 @@ elif sys.argv[1] == "ll":
     for i, struct in enumerate(all_structs):
         try:
             print(struct, i)
-            rp = RibosomeAssets(struct)
+            rp = Structure(struct)
             rp = rp.profile()
             pdbid_taxid_tuples.append((rp.rcsb_id, rp.src_organism_ids[0]))
         except:
@@ -275,13 +278,14 @@ elif sys.argv[1] == "ll":
 elif sys.argv[1] == "tsv_to_fasta":
     import csv
 
-    
-    mitoproteins_path = "/home/rtviii/dev/riboxyz/ribctl/assets/fasta_proteins_mitochondrial"
+    mitoproteins_path = (
+        "/home/rtviii/dev/riboxyz/ribctl/assets/fasta_proteins_mitochondrial"
+    )
 
     for i in os.listdir(mitoproteins_path):
-        tsv_path   = os.path.join(mitoproteins_path, i)
+        tsv_path = os.path.join(mitoproteins_path, i)
         fasta_path = os.path.join(mitoproteins_path, "{}.fasta".format(i.split(".")[0]))
-        records    = []
+        records = []
 
         with open(tsv_path, "r", newline="", encoding="utf-8") as tsvfile:
             tsvreader = csv.reader(tsvfile, delimiter="\t")
@@ -294,18 +298,22 @@ elif sys.argv[1] == "tsv_to_fasta":
 
         for record in records:
             (entry, taxid, sequence) = record
-            seqrecords.append( SeqRecord(Seq(sequence), id=taxid, description="uniprot_{}".format(entry)) )
+            seqrecords.append(
+                SeqRecord(
+                    Seq(sequence), id=taxid, description="uniprot_{}".format(entry)
+                )
+            )
 
         dest = os.path.join(fasta_path)
         with open(dest, "w") as output_handle:
             SeqIO.write(seqrecords, output_handle, "fasta")
             print("Wrote {} seqs to  to {}".format(len(seqrecords), dest))
 elif sys.argv[1] == "struct_factors":
-    for struct in RibosomeAssets.list_all_structs()[:10]:
+    for struct in Structure.list_all_structs()[:10]:
         print(
             "========================Processing {}=====================".format(struct)
         )
-        prof = RibosomeAssets(struct).profile()
+        prof = Structure(struct).profile()
         prots = (
             prof.proteins + prof.polymeric_factors
             if prof.polymeric_factors != None
@@ -317,10 +325,10 @@ elif sys.argv[1] == "struct_factors":
         for chain in prots:
             chain_organism_taxid = chain.src_organism_ids[0]
             if chain_organism_taxid not in [*hmm_organisms_registry.keys()]:
-                hmm_organisms_registry[
-                    chain_organism_taxid
-                ] = hmm_dict_init__candidates_per_organism(
-                    candidate_category, chain_organism_taxid
+                hmm_organisms_registry[chain_organism_taxid] = (
+                    hmm_dict_init__candidates_per_organism(
+                        candidate_category, chain_organism_taxid
+                    )
                 )
 
             k = classify_subchain(chain, hmm_organisms_registry[chain_organism_taxid])
@@ -379,7 +387,7 @@ elif sys.argv[1] == "collect_factors":
 
     for struct in factor_structs:
         try:
-            prof = RibosomeAssets(struct).profile()
+            prof = Structure(struct).profile()
             for p in prof.polymeric_factors:
                 if "Factor" in p.nomenclature[0]:
                     factors[struct] = json.loads(p.json())
@@ -390,26 +398,29 @@ elif sys.argv[1] == "collect_factors":
         json.dump(factors, outfile)
 elif sys.argv[1] == "hmmt":
 
-    
-    for rcsb_id in RibosomeAssets.list_all_structs():
-        prof     = RibosomeAssets(rcsb_id).profile()
+    for rcsb_id in Structure.list_all_structs():
+        prof = Structure(rcsb_id).profile()
 
-        proteins = [ *prof.proteins, *prof.other_polymers, *prof.polymeric_factors ]
-        rna      = [ *prof.rnas, *prof.other_polymers ]
+        proteins = [*prof.proteins, *prof.other_polymers, *prof.polymeric_factors]
+        rna = [*prof.rnas, *prof.other_polymers]
 
-        pipeline_polypeptides    = HMMClassifier( proteins, Alphabet.amino())
+        pipeline_polypeptides = HMMClassifier(proteins, Alphabet.amino())
         pipeline_polypeptides.___scan_chains()
         prots_report = pipeline_polypeptides.produce_classification()
 
-        pipeline_polynucleotides = HMMClassifier( proteins, Alphabet.rna())
+        pipeline_polynucleotides = HMMClassifier(proteins, Alphabet.rna())
         pipeline_polynucleotides.___scan_chains()
         rna_report = pipeline_polynucleotides.produce_classification()
 
-        report_path = os.path.join(LOGS_PATH,'classification_reports','{}_classification_report.json'.format(rcsb_id))
+        report_path = os.path.join(
+            LOGS_PATH,
+            "classification_reports",
+            "{}_classification_report.json".format(rcsb_id),
+        )
         pipeline.write_classification_report(report_path)
 elif sys.argv[1] == "hmmx":
-    p        = RibosomeAssets('3j7z').profile()
-    rnas     = p.rnas
+    p = Structure("3j7z").profile()
+    rnas = p.rnas
     alphabet = pyhmmer.easel.Alphabet.rna()
     alphabet = pyhmmer.easel.Alphabet.amino()
     # p.other_polymers
@@ -419,13 +430,11 @@ elif sys.argv[1] == "hmmx":
     # for rna in [ * p.polymeric_factors]:
     #     pprint(rna)
 
-    hmms = HMMs(cca['src_organism_ids'][0], [p for p in RNAClass], no_cache=True)
-    hmms.scan_seq(alphabet, [ SeqRecord(cca['entity_poly_seq_one_letter_code_can']) ] )
+    hmms = HMMs(cca["src_organism_ids"][0], [p for p in RNAClass], no_cache=True)
+    hmms.scan_seq(alphabet, [SeqRecord(cca["entity_poly_seq_one_letter_code_can"])])
     # pprint(hmms.info())
 
     # pprint()
-
-    
 
     # pipeline_polynucleotides = HMMClassifier( rna, Alphabet.rna())
     # pipeline_polynucleotides.scan_chains()
@@ -434,7 +443,7 @@ elif sys.argv[1] == "hmmx":
     # report_path = os.path.join(LOGS_PATH,'classification_reports','{}_classification_report.json'.format(rcsb_id))
     # pipeline.write_classification_report(report_path)
 
-#+
+# +
 #     hmmx        = HMMScanner(
 #         prof.src_organism_ids[0],
 #         [pc for pc in [*list(ProteinClass), *list(LifecycleFactorClass)]],
@@ -449,7 +458,7 @@ elif sys.argv[1] == "hmmx":
 
 #     alphabet     = pyhmmer.easel.Alphabet.amino()
 #     report_state = {}
-    
+
 #     for chain in  [ *prots, *factor_polymers, *other_polymers ]:
 
 #         report_state[chain.auth_asym_id] = []
@@ -470,7 +479,6 @@ elif sys.argv[1] == "hmmx":
 
 #     with open("{}.json".format(report_name), "w") as outfile:
 #         json.dump(report_state, outfile)
-
 
 
 # # TODO: deliberate on each chain's taxid
