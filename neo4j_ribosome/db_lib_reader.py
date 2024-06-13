@@ -4,6 +4,7 @@ import sys
 
 from ninja import Schema
 
+from neo4j_ribosome import NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER
 from ribctl.lib.schema.types_ribosome import (
     PolymerClass,
     PolynucleotideClass,
@@ -37,7 +38,7 @@ class Neo4jQuery:
     adapter: Neo4jBuilder
 
     def __init__(self) -> None:
-        self.adapter = Neo4jBuilder("bolt://localhost:7687", "neo4j")
+        self.adapter = Neo4jBuilder(NEO4J_URI, NEO4J_USER, NEO4J_PASSWORD)
         pass
 
     def tax_dict(self):

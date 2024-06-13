@@ -2,6 +2,7 @@ from concurrent.futures import ALL_COMPLETED, Future, ThreadPoolExecutor, wait
 from functools import partial
 import os
 import sys
+from neo4j_ribosome import NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER
 from neo4j_ribosome.db_lib_reader import Neo4jQuery
 from neo4j_ribosome.db_lib_builder import Neo4jBuilder
 from ribctl.etl.etl_assets_ops import RibosomeOps, Structure
@@ -29,10 +30,6 @@ def full_upload(constrains: bool = True):
             futures.append(fut)
         wait(futures, return_when=ALL_COMPLETED)
 
-NEO4J_URI       = os.environ.get("NEO4J_URI")
-NEO4J_PASSWORD  = os.environ.get("NEO4J_PASSWORD")
-NEO4J_USER      = os.environ.get("NEO4J_USER")
-NEO4J_CURRENTDB = os.environ.get("NEO4J_CURRENTDB")
 
 adapter = Neo4jBuilder(NEO4J_URI, NEO4J_USER, NEO4J_PASSWORD)
 # for rib in RibosomeAssets.list_all_structs():
