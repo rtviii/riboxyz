@@ -4,6 +4,7 @@ import sys
 
 from ninja import Schema
 
+from neo4j_ribosome import NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER
 from ribctl.lib.schema.types_ribosome import (
     PolymerClass,
     PolynucleotideClass,
@@ -37,7 +38,7 @@ class Neo4jQuery:
     adapter: Neo4jBuilder
 
     def __init__(self) -> None:
-        self.adapter = Neo4jBuilder("bolt://localhost:7687", "neo4j")
+        self.adapter = Neo4jBuilder(NEO4J_URI, NEO4J_USER, NEO4J_PASSWORD)
         pass
 
     def tax_dict(self):
@@ -198,8 +199,41 @@ with rib order by rib.rcsb_id desc\n"""
                 if polymer_classes is not None
                 else ""
             )
-            + (
-                "{} ANY(tax in {} where tax in apoc.coll.flatten(collect{{ match (rib)-[:source]-(p:PhylogenyNode)-[:descendant_of*]-(s:PhylogenyNode) return [p.ncbi_tax_id, s.ncbi_tax_id]}}))\n".format(
+# # !------------- TAXONOMY
+#             + (
+#                 "{} ANY(tax in {} where tax in apoc.coll.flatten(collect{{ match (rib)-[:source]-(p:PhylogenyNode)-[:descendant_of*]-(s:PhylogenyNode) return [p.ncbi_tax_id, s.ncbi_tax_id]}}))\n".format(
+#                     (
+#                         "and"
+#                         if search != ""
+#                         or year != None
+#                         or resolution != None
+#                         or polymer_classes != None
+#                         else ""
+#                     ),
+#                     source_taxa,
+#                 )
+#                 if source_taxa is not None
+#                 else ""
+#             )
+#             + (
+#                 "{} ANY(tax in {} where tax in apoc.coll.flatten(collect{{ match (rib)-[:host]-(p:PhylogenyNode)-[:descendant_of*]-(s:PhylogenyNode) return [p.ncbi_tax_id, s.ncbi_tax_id]}}))\n".format(
+#                     (
+#                         "and"
+#                         if search != ""
+#                         or year != None
+#                         or resolution != None
+#                         or polymer_classes != None
+#                         or source_taxa != None
+#                         else ""
+#                     ),
+#                     host_taxa,
+#                 )
+#                 if host_taxa is not None
+#                 else ""
+#             )
+# !------------- TAXONOMY NEW
+            +(
+                "{} exists{{ MATCH (rib)-[:belongs_to_lineage_source]-(p:PhylogenyNode ) where p.ncbi_tax_id in {} }}\n".format(
                     (
                         "and"
                         if search != ""
@@ -213,15 +247,15 @@ with rib order by rib.rcsb_id desc\n"""
                 if source_taxa is not None
                 else ""
             )
-            + (
-                "{} ANY(tax in {} where tax in apoc.coll.flatten(collect{{ match (rib)-[:host]-(p:PhylogenyNode)-[:descendant_of*]-(s:PhylogenyNode) return [p.ncbi_tax_id, s.ncbi_tax_id]}}))\n".format(
+
+            +(
+                "{} exists{{ MATCH (rib)-[:belongs_to_lineage_host]-(p:PhylogenyNode ) where p.ncbi_tax_id in {} }}\n".format(
                     (
                         "and"
                         if search != ""
                         or year != None
                         or resolution != None
                         or polymer_classes != None
-                        or source_taxa != None
                         else ""
                     ),
                     host_taxa,
@@ -229,6 +263,11 @@ with rib order by rib.rcsb_id desc\n"""
                 if host_taxa is not None
                 else ""
             )
+# !------------- TAXONOMY NEW
+
+
+
+
             + """
  with collect(rib) as rib
  unwind rib as ribosomes
@@ -319,8 +358,8 @@ with rib order by rib.rcsb_id desc\n"""
                 if polymer_classes is not None
                 else ""
             )
-            + (
-                "{} ANY(tax in {} where tax in apoc.coll.flatten(collect{{ match (rib)-[:source]-(p:PhylogenyNode)-[:descendant_of*]-(s:PhylogenyNode) return [p.ncbi_tax_id, s.ncbi_tax_id]}}))\n".format(
+            +(
+                "{} exists{{ MATCH (rib)-[:belongs_to_lineage_source]-(p:PhylogenyNode ) where p.ncbi_tax_id in {} }}\n".format(
                     (
                         "and"
                         if search != ""
@@ -334,15 +373,15 @@ with rib order by rib.rcsb_id desc\n"""
                 if source_taxa is not None
                 else ""
             )
-            + (
-                "{} ANY(tax in {} where tax in apoc.coll.flatten(collect{{ match (rib)-[:host]-(p:PhylogenyNode)-[:descendant_of*]-(s:PhylogenyNode) return [p.ncbi_tax_id, s.ncbi_tax_id]}}))\n".format(
+
+            +(
+                "{} exists{{ MATCH (rib)-[:belongs_to_lineage_host]-(p:PhylogenyNode ) where p.ncbi_tax_id in {} }}\n".format(
                     (
                         "and"
                         if search != ""
                         or year != None
                         or resolution != None
                         or polymer_classes != None
-                        or source_taxa != None
                         else ""
                     ),
                     host_taxa,

@@ -1,15 +1,15 @@
 from concurrent.futures import ALL_COMPLETED, Future, ThreadPoolExecutor, wait
 from functools import partial
+import os
 import sys
+from neo4j_ribosome import NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER
 from neo4j_ribosome.db_lib_reader import Neo4jQuery
 from neo4j_ribosome.db_lib_builder import Neo4jBuilder
-from ribctl.etl.etl_assets_ops import RibosomeOps, Structure
+from ribctl.etl.etl_assets_ops import Assets, RibosomeOps, Structure
 from ribctl.lib.libtax import Taxid
 
 sys.dont_write_bytecode = True
-from dotenv import load_dotenv
 
-load_dotenv(".env")
 
 # * Recipe for initializing a new instance from the RIBETL_DATA pool
 # * - assumes the RiboosomeStrucutre profiles are rendered
@@ -29,20 +29,19 @@ def full_upload(constrains: bool = True):
         wait(futures, return_when=ALL_COMPLETED)
 
 
-adapter = Neo4jBuilder("bolt://localhost:7687", "neo4j")
-# for rib in RibosomeAssets.list_all_structs():
-#     for l in RibosomeAssets(rib).profile().nonpolymeric_ligands:
-#         adapter.upsert_ligand_node(l, rib)
-
-
 def connect_all_structures_to_phylogenies():
     adapter = Neo4jBuilder("bolt://localhost:7687", "neo4j")
-    for rib in RibosomeOps.list_all_structs():
-        p = RibosomeOps(rib).profile()
-        for tax in [*p.host_organism_ids, *p.src_organism_ids]:
-            adapter._create_lineage(tax)
-        adapter.link_structure_to_phylogeny(rib)
+    for rib in Assets.list_all_structs():
+        try:
+            adapter.link_structure_to_phylogeny(rib)
+        except Exception as e:
+            print(e)
 
+
+print(NEO4J_URI, NEO4J_USER, NEO4J_PASSWORD)
+adapter = Neo4jBuilder(NEO4J_URI, NEO4J_USER, NEO4J_PASSWORD)
+
+# adapter.link_structure_to_phylogeny("8OVE")
 
 connect_all_structures_to_phylogenies()
 # adapter = Neo4jBuilder('bolt://localhost:7687', 'neo4j')

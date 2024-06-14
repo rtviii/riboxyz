@@ -95,6 +95,7 @@ USE_TZ        = True
 
 # STATIC_URL lets you namespace your static files to avoid url conflicts and make them inaccessible from the browser
 STATIC_URL       = '/static/'
+
 # STATIC_ROOT is where all the static files are collected by manage.py collectstatic
 STATIC_ROOT      = '/srv/www/static'
 STATICFILES_DIRS = [ os.path.join(BASE_DIR, 'static'), ]
