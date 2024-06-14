@@ -30,12 +30,7 @@ def full_upload(constrains: bool = True):
             futures.append(fut)
         wait(futures, return_when=ALL_COMPLETED)
 
-
 adapter = Neo4jBuilder(NEO4J_URI, NEO4J_USER, NEO4J_PASSWORD)
-# for rib in RibosomeAssets.list_all_structs():
-#     for l in RibosomeAssets(rib).profile().nonpolymeric_ligands:
-#         adapter.upsert_ligand_node(l, rib)
-
 
 def connect_all_structures_to_phylogenies():
     adapter = Neo4jBuilder("bolt://localhost:7687", "neo4j")
@@ -45,8 +40,8 @@ def connect_all_structures_to_phylogenies():
             adapter._create_lineage(tax)
         adapter.link_structure_to_phylogeny(rib)
 
-
 connect_all_structures_to_phylogenies()
+
 # adapter = Neo4jBuilder('bolt://localhost:7687', 'neo4j')
 # p = RibosomeAssets('8OVE').profile()
 # for tax in [ *p.host_organism_ids, *p.src_organism_ids ]:

@@ -38,37 +38,60 @@ def struct_exists(rcsb_id: str) -> Callable[[Transaction | ManagedTransaction], 
     return _
 
 
-def link__structure_to_phylogeny(
-    rcsb_id: str, taxid, relationship: Literal["host_organism", "source_organism"]
+def link__structure_to_lineage_member(
+    rcsb_id: str,
+    taxid,
+    relationship: Literal["belongs_to_lineage_host", "belongs_to_lineage_source"],
+) -> Callable[[Transaction | ManagedTransaction], list[Node]]:
+    def _(tx: Transaction | ManagedTransaction):
+        return tx.run(
+            """//
+            match (struct:RibosomeStructure {rcsb_id: $rcsb_id})
+            match (phylo:PhylogenyNode {ncbi_tax_id: $tax_id}) 
+            merge (struct)<-[organism: $rel ]-(phylo)
+            return  struct, phylo
+            """,
+            {
+                "rcsb_id": rcsb_id,
+                "tax_id": taxid,
+                "rel": relationship,
+            },
+        ).values("struct", "phylo")
+
+    return _
+
+
+def link__structure_to_organism(
+    rcsb_id: str, taxid, relationship: Literal["host", "source"]
 ) -> Callable[[Transaction | ManagedTransaction], list[Node]]:
 
     def _(tx: Transaction | ManagedTransaction):
-        if relationship == "host_organism":
-            return tx.run(
-                """//
+        # if relationship == "host_organism":
+        #     return tx.run(
+        #         """//
+        #     match (struct:RibosomeStructure {rcsb_id: $rcsb_id})
+        #     match (phylo:PhylogenyNode {ncbi_tax_id: $tax_id})
+        #     merge (struct)<-[organism:$rel]-(phylo)
+        #     return  struct, phylo
+        #     """,
+        #         {
+        #             "rcsb_id": rcsb_id,
+        #             "tax_id": taxid,
+        #         },
+        #     ).values("struct", "phylo")
+        return tx.run(
+            """//
             match (struct:RibosomeStructure {rcsb_id: $rcsb_id})
             match (phylo:PhylogenyNode {ncbi_tax_id: $tax_id}) 
-            merge (struct)<-[organism:host]-(phylo)
+            merge (struct)<-[organism: $rel ]-(phylo)
             return  struct, phylo
             """,
-                {
-                    "rcsb_id": rcsb_id,
-                    "tax_id": taxid,
-                },
-            ).values("struct", "phylo")
-        elif relationship == "source_organism":
-            return tx.run(
-                """//
-            match (struct:RibosomeStructure {rcsb_id: $rcsb_id})
-            match (phylo:PhylogenyNode {ncbi_tax_id: $tax_id}) 
-            merge (struct)<-[organism:source]-(phylo)
-            return  struct, phylo
-            """,
-                {
-                    "rcsb_id": rcsb_id,
-                    "tax_id": taxid,
-                },
-            ).values("struct", "phylo")
+            {
+                "rcsb_id": rcsb_id,
+                "tax_id": taxid,
+                "rel": relationship,
+            },
+        ).values("struct", "phylo")
 
     return _
 
@@ -122,18 +145,20 @@ def node__ligand(
     L = _ligand.model_dump()
 
     def _(tx: Transaction | ManagedTransaction):
-        drugbank_id          = None
+        drugbank_id = None
         drugbank_description = None
         try:
-            drugbank_id = _ligand.nonpolymer_comp.drugbank.drugbank_container_identifiers.drugbank_id
+            drugbank_id = (
+                _ligand.nonpolymer_comp.drugbank.drugbank_container_identifiers.drugbank_id
+            )
         except:
             ...
         try:
-            drugbank_description = _ligand.nonpolymer_comp.drugbank.drugbank_info.description
+            drugbank_description = (
+                _ligand.nonpolymer_comp.drugbank.drugbank_info.description
+            )
         except:
             ...
-
-
 
         return tx.run(
             """//
@@ -147,12 +172,12 @@ def node__ligand(
                RETURN ligand       
         """,
             {
-                "chemicalId"          : _ligand.chemicalId,
-                "chemicalName"        : _ligand.chemicalName,
-                "formula_weight"      : _ligand.formula_weight,
-                "pdbx_description"    : _ligand.pdbx_description,
-                "number_of_instances" : _ligand.number_of_instances,
-                "drugbank_id"         : drugbank_id,
+                "chemicalId": _ligand.chemicalId,
+                "chemicalName": _ligand.chemicalName,
+                "formula_weight": _ligand.formula_weight,
+                "pdbx_description": _ligand.pdbx_description,
+                "number_of_instances": _ligand.number_of_instances,
+                "drugbank_id": drugbank_id,
                 "drugbank_description": drugbank_description,
             },
         ).single(strict=True)["ligand"]

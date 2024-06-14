@@ -5,7 +5,7 @@ from neo4j_ribosome.node_phylogeny import link__phylogeny, node__phylogeny
 from neo4j.graph import Node
 from neo4j import Driver, GraphDatabase
 from neo4j_ribosome.node_polymer import  link__polymer_to_polymer_class, link__polymer_to_structure, node__polymer, upsert_polymer_to_protein, upsert_polymer_to_rna,node__polymer_class
-from neo4j_ribosome.node_structure import   link__ligand_to_struct, link__structure_to_phylogeny, node__ligand, node__structure, struct_exists
+from neo4j_ribosome.node_structure import   link__ligand_to_struct, link__structure_to_lineage, node__ligand, node__structure, struct_exists
 from ribctl.lib.schema.types_ribosome import MitochondrialProteinClass, PolymerClass, PolynucleotideClass, RibosomeStructure
 from ribctl.etl.etl_assets_ops import RibosomeOps, Structure
 from neo4j import GraphDatabase, Driver, ManagedTransaction, Transaction
@@ -69,13 +69,11 @@ class Neo4jBuilder():
 
     def _create_lineage(self,taxid:int)->None:
         lin = Taxid.get_lineage(taxid)
-        print("lineage: " ,lin)
         lin.reverse()
         previous_id: int|None = None
 
         with self.driver.session() as session:
             for taxid in lin:
-                print("creating node for " , taxid)
                 node = session.execute_write(node__phylogeny(PhylogenyNode.from_taxid(taxid)))
                 if previous_id == None: # initial (superkingdom has no parent node)
                     previous_id = taxid
@@ -86,7 +84,6 @@ class Neo4jBuilder():
         return
         
     def link_structure_to_phylogeny(self,rcsb_id:str):
-
         rcsb_id = rcsb_id.upper()
         R:RibosomeStructure = RibosomeOps(rcsb_id).profile()
 
@@ -98,9 +95,9 @@ class Neo4jBuilder():
                 s.execute_write(node__structure(R))
 
             for organism_host in R.host_organism_ids:
-                s.execute_write(link__structure_to_phylogeny(rcsb_id, organism_host, 'host_organism'))
+                s.execute_write(link__structure_to_lineage(rcsb_id, organism_host, 'host_organism'))
             for organism_src in R.src_organism_ids:
-                s.execute_write(link__structure_to_phylogeny(rcsb_id, organism_src, 'source_organism'))
+                s.execute_write(link__structure_to_lineage(rcsb_id, organism_src, 'source_organism'))
         print("Linked structure {} to phylogeny".format(rcsb_id))
 
     def check_structure_exists(self, rcsb_id:str)->bool:
@@ -127,10 +124,11 @@ class Neo4jBuilder():
 
             for organism in R.host_organism_ids:
                 self._create_lineage(organism)
-                s.execute_write(link__structure_to_phylogeny(rcsb_id, organism, 'host_organism'))
+                s.execute_write(link__structure_to_lineage(rcsb_id, organism, 'host_organism'))
+
             for organism in R.src_organism_ids:
                 self._create_lineage(organism)
-                s.execute_write(link__structure_to_phylogeny(rcsb_id, organism, 'source_organism'))
+                s.execute_write(link__structure_to_lineage(rcsb_id, organism, 'source_organism'))
 
             for protein in R.proteins:
                    protein_node = s.execute_write(node__polymer(protein))

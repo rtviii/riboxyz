@@ -1,0 +1,2025 @@
+﻿[
+  {
+    "name": "browser.allow_outgoing_connections",
+    "value": "true",
+    "isDynamic": false,
+    "defaultValue": "true",
+    "description": "Configure the policy for outgoing Neo4j Browser connections."
+  },
+  {
+    "name": "browser.credential_timeout",
+    "value": "0s",
+    "isDynamic": false,
+    "defaultValue": "0s",
+    "description": "Configure the Neo4j Browser to time out logged in users after this idle period. Setting this to 0 indicates no limit."
+  },
+  {
+    "name": "browser.post_connect_cmd",
+    "value": "",
+    "isDynamic": false,
+    "defaultValue": "",
+    "description": "Commands to be run when Neo4j Browser successfully connects to this server. Separate multiple commands with semi-colon."
+  },
+  {
+    "name": "browser.remote_content_hostname_whitelist",
+    "value": "guides.neo4j.com,localhost",
+    "isDynamic": false,
+    "defaultValue": "guides.neo4j.com,localhost",
+    "description": "Whitelist of hosts for the Neo4j Browser to be allowed to fetch content from."
+  },
+  {
+    "name": "browser.retain_connection_credentials",
+    "value": "true",
+    "isDynamic": false,
+    "defaultValue": "true",
+    "description": "Configure the Neo4j Browser to store or not store user credentials."
+  },
+  {
+    "name": "browser.retain_editor_history",
+    "value": "true",
+    "isDynamic": false,
+    "defaultValue": "true",
+    "description": "Configure the Neo4j Browser to store or not store user editor history."
+  },
+  {
+    "name": "client.allow_telemetry",
+    "value": "true",
+    "isDynamic": false,
+    "defaultValue": "true",
+    "description": "Configure client applications such as Browser and Bloom to send Product Analytics data."
+  },
+  {
+    "name": "db.checkpoint",
+    "value": "PERIODIC",
+    "isDynamic": false,
+    "defaultValue": "PERIODIC",
+    "description": "Configures the general policy for when check-points should occur. The default policy is the 'periodic' check-point policy, as specified by the 'db.checkpoint.interval.tx' and 'db.checkpoint.interval.time' settings. The Neo4j Enterprise Edition provides two alternative policies: The first is the 'continuous' check-point policy, which will ignore those settings and run the check-point process all the time. The second is the 'volumetric' check-point policy, which makes a best-effort at check-pointing often enough so that the database doesn't get too far behind on deleting old transaction logs in accordance with the 'db.tx_log.rotation.retention_policy' setting."
+  },
+  {
+    "name": "db.checkpoint.interval.time",
+    "value": "15m",
+    "isDynamic": false,
+    "defaultValue": "15m",
+    "description": "Configures the time interval between check-points. The database will not check-point more often than this (unless check pointing is triggered by a different event), but might check-point less often than this interval, if performing a check-point takes longer time than the configured interval. A check-point is a point in the transaction logs, which recovery would start from. Longer check-point intervals typically mean that recovery will take longer to complete in case of a crash. On the other hand, a longer check-point interval can also reduce the I/O load that the database places on the system, as each check-point implies a flushing and forcing of all the store files."
+  },
+  {
+    "name": "db.checkpoint.interval.tx",
+    "value": "100000",
+    "isDynamic": false,
+    "defaultValue": "100000",
+    "description": "Configures the transaction interval between check-points. The database will not check-point more often  than this (unless check pointing is triggered by a different event), but might check-point less often than this interval, if performing a check-point takes longer time than the configured interval. A check-point is a point in the transaction logs, which recovery would start from. Longer check-point intervals typically mean that recovery will take longer to complete in case of a crash. On the other hand, a longer check-point interval can also reduce the I/O load that the database places on the system, as each check-point implies a flushing and forcing of all the store files.  The default is '100000' for a check-point every 100000 transactions."
+  },
+  {
+    "name": "db.checkpoint.interval.volume",
+    "value": "250.00MiB",
+    "isDynamic": false,
+    "defaultValue": "250.00MiB",
+    "description": "Configures the volume of transaction logs between check-points. The database will not check-point more often than this (unless check pointing is triggered by a different event), but might check-point less often than this interval, if performing a check-point takes longer time than the configured interval. A check-point is a point in the transaction logs, which recovery would start from. Longer check-point intervals typically mean that recovery will take longer to complete in case of a crash. On the other hand, a longer check-point interval can also reduce the I/O load that the database places on the system, as each check-point implies a flushing and forcing of all the store files."
+  },
+  {
+    "name": "db.checkpoint.iops.limit",
+    "value": "600",
+    "isDynamic": true,
+    "defaultValue": "600",
+    "description": "Limit the number of IOs the background checkpoint process will consume per second. This setting is advisory, is ignored in Neo4j Community Edition, and is followed to best effort in Enterprise Edition. An IO is in this case a 8 KiB (mostly sequential) write. Limiting the write IO in this way will leave more bandwidth in the IO subsystem to service random-read IOs, which is important for the response time of queries when the database cannot fit entirely in memory. The only drawback of this setting is that longer checkpoint times may lead to slightly longer recovery times in case of a database or system crash. A lower number means lower IO pressure, and consequently longer checkpoint times. Set this to -1 to disable the IOPS limit and remove the limitation entirely; this will let the checkpointer flush data as fast as the hardware will go. Removing the setting, or commenting it out, will set the default value of 600."
+  },
+  {
+    "name": "db.cluster.catchup.pull_interval",
+    "value": "1s",
+    "isDynamic": false,
+    "defaultValue": "1s",
+    "description": "Interval of pulling updates from cores."
+  },
+  {
+    "name": "db.cluster.raft.apply.buffer.max_bytes",
+    "value": "1.00GiB",
+    "isDynamic": false,
+    "defaultValue": "1.00GiB",
+    "description": "The maximum number of bytes in the apply buffer. This parameter limits the amount of memory that can be consumed by the apply buffer. If the bytes limit is reached, buffer size will be limited even if max_entries is not exceeded."
+  },
+  {
+    "name": "db.cluster.raft.apply.buffer.max_entries",
+    "value": "1024",
+    "isDynamic": false,
+    "defaultValue": "1024",
+    "description": "The maximum number of entries in the raft log entry prefetch buffer."
+  },
+  {
+    "name": "db.cluster.raft.in_queue.batch.max_bytes",
+    "value": "8.00MiB",
+    "isDynamic": false,
+    "defaultValue": "8.00MiB",
+    "description": "Largest batch processed by RAFT in bytes"
+  },
+  {
+    "name": "db.cluster.raft.in_queue.max_bytes",
+    "value": "2.00GiB",
+    "isDynamic": false,
+    "defaultValue": "2.00GiB",
+    "description": "Maximum number of bytes in the RAFT in-queue"
+  },
+  {
+    "name": "db.cluster.raft.leader_transfer.priority_group",
+    "value": "",
+    "isDynamic": false,
+    "defaultValue": "",
+    "description": "The name of a server_group whose members should be prioritized as leaders. This does not guarantee that members of this group will be leader at all times, but the cluster will attempt to transfer leadership to such a member when possible. If a database is specified using db.cluster.raft.leader_transfer.priority_group.<database> the specified priority group will apply to that database only. If no database is specified that group will be the default and apply to all databases which have no priority group explicitly set. Using this setting will disable leadership balancing."
+  },
+  {
+    "name": "db.cluster.raft.leader_transfer.priority_tag",
+    "value": "",
+    "isDynamic": false,
+    "defaultValue": "",
+    "description": "The name of a server tag whose members should be prioritized as leaders. This does not guarantee that members with this group will be leader at all times, but the cluster will attempt to transfer leadership to such a member when possible. If a database is specified using db.cluster.raft.leader_transfer.priority_tag.<database> the specified priority tag will apply to that database only. If no database is specified that tag will be the default and apply to all databases which have no priority tag explicitly set. Using this setting will disable leadership balancing."
+  },
+  {
+    "name": "db.cluster.raft.log.prune_strategy",
+    "value": "1g size",
+    "isDynamic": false,
+    "defaultValue": "1g size",
+    "description": "RAFT log pruning strategy that determines which logs are to be pruned. Neo4j only prunes log entries up to the last applied index, which guarantees that logs are only marked for pruning once the transactions within are safely copied over to the local transaction logs and safely committed by a majority of cluster members. Possible values are a byte size or a number of transactions (e.g., 200K txs)."
+  },
+  {
+    "name": "db.cluster.raft.log_shipping.buffer.max_bytes",
+    "value": "1.00GiB",
+    "isDynamic": false,
+    "defaultValue": "1.00GiB",
+    "description": "The maximum number of bytes in the in-flight cache. This parameter limits the amount of memory that can be consumed by cache. If the bytes limit is reached, cache size will be limited even if max_entries is not exceeded."
+  },
+  {
+    "name": "db.cluster.raft.log_shipping.buffer.max_entries",
+    "value": "1024",
+    "isDynamic": false,
+    "defaultValue": "1024",
+    "description": "The maximum number of entries in the in-flight cache. Increasing size will require more memory but might improve performance in high load situations."
+  },
+  {
+    "name": "db.filewatcher.enabled",
+    "value": "true",
+    "isDynamic": false,
+    "defaultValue": "true",
+    "description": "Allows the enabling or disabling of the file watcher service. This is an auxiliary service but should be left enabled in almost all cases."
+  },
+  {
+    "name": "db.format",
+    "value": "aligned",
+    "isDynamic": true,
+    "defaultValue": "aligned",
+    "description": "Database format. This is the format that will be used for new databases. Valid values are `standard`, `aligned`, `high_limit` or `block`.The `aligned` format is essentially the `standard` format with some minimal padding at the end of pages such that a single record will never cross a page boundary. The `high_limit` and `block` formats are available for Enterprise Edition only. Either `high_limit` or `block` is required if you have a graph that is larger than 34 billion nodes, 34 billion relationships, or 68 billion properties."
+  },
+  {
+    "name": "db.import.csv.buffer_size",
+    "value": "2097152",
+    "isDynamic": false,
+    "defaultValue": "2097152",
+    "description": "The size of the internal buffer in bytes used by `LOAD CSV`. If the csv file contains huge fields this value may have to be increased."
+  },
+  {
+    "name": "db.import.csv.legacy_quote_escaping",
+    "value": "true",
+    "isDynamic": false,
+    "defaultValue": "true",
+    "description": "Selects whether to conform to the standard https://tools.ietf.org/html/rfc4180 for interpreting escaped quotation characters in CSV files loaded using `LOAD CSV`. Setting this to `false` will use the standard, interpreting repeated quotes '\"\"' as a single in-lined quote, while `true` will use the legacy convention originally supported in Neo4j 3.0 and 3.1, allowing a backslash to include quotes in-lined in fields."
+  },
+  {
+    "name": "db.index.fulltext.default_analyzer",
+    "value": "standard-no-stop-words",
+    "isDynamic": false,
+    "defaultValue": "standard-no-stop-words",
+    "description": "The name of the analyzer that the fulltext indexes should use by default."
+  },
+  {
+    "name": "db.index.fulltext.eventually_consistent",
+    "value": "false",
+    "isDynamic": false,
+    "defaultValue": "false",
+    "description": "Whether or not fulltext indexes should be eventually consistent by default or not."
+  },
+  {
+    "name": "db.index.fulltext.eventually_consistent_index_update_queue_max_length",
+    "value": "10000",
+    "isDynamic": false,
+    "defaultValue": "10000",
+    "description": "The eventually_consistent mode of the fulltext indexes works by queueing up index updates to be applied later in a background thread. This newBuilder sets an upper bound on how many index updates are allowed to be in this queue at any one point in time. When it is reached, the commit process will slow down and wait for the index update applier thread to make some more room in the queue."
+  },
+  {
+    "name": "db.index_sampling.background_enabled",
+    "value": "true",
+    "isDynamic": false,
+    "defaultValue": "true",
+    "description": "Enable or disable background index sampling"
+  },
+  {
+    "name": "db.index_sampling.sample_size_limit",
+    "value": "8388608",
+    "isDynamic": false,
+    "defaultValue": "8388608",
+    "description": "Index sampling chunk size limit"
+  },
+  {
+    "name": "db.index_sampling.update_percentage",
+    "value": "5",
+    "isDynamic": false,
+    "defaultValue": "5",
+    "description": "Percentage of index updates of total index size required before sampling of a given index is triggered"
+  },
+  {
+    "name": "db.lock.acquisition.timeout",
+    "value": "0s",
+    "isDynamic": true,
+    "defaultValue": "0s",
+    "description": "The maximum time interval within which lock should be acquired. Zero (default) means timeout is disabled."
+  },
+  {
+    "name": "db.logs.query.annotation_data_as_json_enabled",
+    "value": "false",
+    "isDynamic": true,
+    "defaultValue": "false",
+    "description": "Log the annotation data as a JSON strings instead of a cypher map. This only have effect when the query log is in JSON format."
+  },
+  {
+    "name": "db.logs.query.annotation_data_format",
+    "value": "CYPHER",
+    "isDynamic": true,
+    "defaultValue": "CYPHER",
+    "description": "The format to use for the JSON annotation data. `CYPHER`:: Formatted as a Cypher map. E.g. `{foo: 'bar', baz: {k: 1}}`. `JSON`:: Formatted as a JSON map. E.g. `{\"foo\": \"bar\", \"baz\": {\"k\": 1}}`. `FLAT_JSON`:: Formatted as a flattened JSON map. E.g. `{\"foo\": \"bar\", \"baz.k\": 1}`. This only have effect when the query log is in JSON format."
+  },
+  {
+    "name": "db.logs.query.early_raw_logging_enabled",
+    "value": "false",
+    "isDynamic": true,
+    "defaultValue": "false",
+    "description": "Log query text and parameters without obfuscating passwords. This allows queries to be logged earlier before parsing starts."
+  },
+  {
+    "name": "db.logs.query.enabled",
+    "value": "VERBOSE",
+    "isDynamic": true,
+    "defaultValue": "VERBOSE",
+    "description": "Log executed queries. Valid values are `OFF`, `INFO`, or `VERBOSE`. `OFF`::  no logging. `INFO`:: log queries at the end of execution, that take longer than the configured threshold, `db.logs.query.threshold`. `VERBOSE`:: log queries at the start and end of execution, regardless of `db.logs.query.threshold`. Log entries are written to the query log. This feature is available in the Neo4j Enterprise Edition."
+  },
+  {
+    "name": "db.logs.query.max_parameter_length",
+    "value": "2147483647",
+    "isDynamic": true,
+    "defaultValue": "2147483647",
+    "description": "Sets a maximum character length use for each parameter in the log. This only takes effect if `db.logs.query.parameter_logging_enabled = true`."
+  },
+  {
+    "name": "db.logs.query.obfuscate_literals",
+    "value": "false",
+    "isDynamic": true,
+    "defaultValue": "false",
+    "description": "Obfuscates all literals of the query before writing to the log. Note that node labels, relationship types and map property keys are still shown. Changing the setting will not affect queries that are cached. So, if you want the switch to have immediate effect, you must also call `CALL db.clearQueryCaches()`."
+  },
+  {
+    "name": "db.logs.query.parameter_logging_enabled",
+    "value": "true",
+    "isDynamic": true,
+    "defaultValue": "true",
+    "description": "Log parameters for the executed queries being logged."
+  },
+  {
+    "name": "db.logs.query.plan_description_enabled",
+    "value": "false",
+    "isDynamic": true,
+    "defaultValue": "false",
+    "description": "Log query plan description table, useful for debugging purposes."
+  },
+  {
+    "name": "db.logs.query.threshold",
+    "value": "0s",
+    "isDynamic": true,
+    "defaultValue": "0s",
+    "description": "If the execution of query takes more time than this threshold, the query is logged once completed - provided query logging is set to INFO. Defaults to 0 seconds, that is all queries are logged."
+  },
+  {
+    "name": "db.logs.query.transaction.enabled",
+    "value": "OFF",
+    "isDynamic": true,
+    "defaultValue": "OFF",
+    "description": "Log the start and end of a transaction. Valid values are `OFF`, `INFO`, or `VERBOSE`. `OFF`::  no logging. `INFO`:: log start and end of transactions that take longer than the configured threshold, `db.logs.query.transaction.threshold`. `VERBOSE`:: log start and end of all transactions. Log entries are written to the query log. This feature is available in the Neo4j Enterprise Edition."
+  },
+  {
+    "name": "db.logs.query.transaction.threshold",
+    "value": "0s",
+    "isDynamic": true,
+    "defaultValue": "0s",
+    "description": "If the transaction is open for more time than this threshold, the transaction is logged once completed - provided transaction logging (db.logs.query.transaction.enabled) is set to `INFO`. Defaults to 0 seconds (all transactions are logged)."
+  },
+  {
+    "name": "db.memory.pagecache.warmup.enable",
+    "value": "true",
+    "isDynamic": false,
+    "defaultValue": "true",
+    "description": "Page cache can be configured to perform usage sampling of loaded pages that can be used to construct active load profile. According to that profile pages can be reloaded on the restart, replication, etc. This setting allows disabling that behavior. This feature is available in Neo4j Enterprise Edition."
+  },
+  {
+    "name": "db.memory.pagecache.warmup.preload",
+    "value": "false",
+    "isDynamic": false,
+    "defaultValue": "false",
+    "description": "Page cache warmup can be configured to prefetch files, preferably when cache size is bigger than store size. Files to be prefetched can be filtered by 'dbms.memory.pagecache.warmup.preload.allowlist'. Enabling this disables warmup by profile "
+  },
+  {
+    "name": "db.memory.pagecache.warmup.preload.allowlist",
+    "value": ".*",
+    "isDynamic": false,
+    "defaultValue": ".*",
+    "description": "Page cache warmup prefetch file allowlist regex. By default matches all files."
+  },
+  {
+    "name": "db.memory.pagecache.warmup.profile.interval",
+    "value": "1m",
+    "isDynamic": false,
+    "defaultValue": "1m",
+    "description": "The profiling frequency for the page cache. Accurate profiles allow the page cache to do active warmup after a restart, reducing the mean time to performance. This feature is available in Neo4j Enterprise Edition."
+  },
+  {
+    "name": "db.memory.transaction.max",
+    "value": "0B",
+    "isDynamic": true,
+    "defaultValue": "0B",
+    "description": "Limit the amount of memory that a single transaction can consume, in bytes (or kibibytes with the 'k' suffix, mebibytes with 'm' and gibibytes with 'g'). Zero means 'largest possible value'."
+  },
+  {
+    "name": "db.memory.transaction.total.max",
+    "value": "0B",
+    "isDynamic": true,
+    "defaultValue": "0B",
+    "description": "Limit the amount of memory that all transactions in one database can consume, in bytes (or kibibytes with the 'k' suffix, mebibytes with 'm' and gibibytes with 'g'). Zero means 'unlimited'."
+  },
+  {
+    "name": "db.recovery.fail_on_missing_files",
+    "value": "true",
+    "isDynamic": false,
+    "defaultValue": "true",
+    "description": "If `true`, Neo4j will abort recovery if transaction log files are missing. Setting this to `false` will allow Neo4j to create new empty missing files for the already existing  database, but the integrity of the database might be compromised."
+  },
+  {
+    "name": "db.relationship_grouping_threshold",
+    "value": "50",
+    "isDynamic": false,
+    "defaultValue": "50",
+    "description": "Relationship count threshold for considering a node to be dense."
+  },
+  {
+    "name": "db.shutdown_transaction_end_timeout",
+    "value": "10s",
+    "isDynamic": false,
+    "defaultValue": "10s",
+    "description": "The maximum amount of time to wait for running transactions to complete before allowing initiated database shutdown to continue"
+  },
+  {
+    "name": "db.store.files.preallocate",
+    "value": "true",
+    "isDynamic": false,
+    "defaultValue": "true",
+    "description": "Specify if Neo4j should try to preallocate store files as they grow."
+  },
+  {
+    "name": "db.temporal.timezone",
+    "value": "Z",
+    "isDynamic": false,
+    "defaultValue": "Z",
+    "description": "Database timezone for temporal functions. All Time and DateTime values that are created without an explicit timezone will use this configured default timezone."
+  },
+  {
+    "name": "db.track_query_cpu_time",
+    "value": "false",
+    "isDynamic": true,
+    "defaultValue": "false",
+    "description": "Enables or disables tracking of how much time a query spends actively executing on the CPU. Calling `SHOW TRANSACTIONS` will display the time."
+  },
+  {
+    "name": "db.transaction.bookmark_ready_timeout",
+    "value": "30s",
+    "isDynamic": true,
+    "defaultValue": "30s",
+    "description": "The maximum amount of time to wait for the database state represented by the bookmark."
+  },
+  {
+    "name": "db.transaction.concurrent.maximum",
+    "value": "1000",
+    "isDynamic": true,
+    "defaultValue": "1000",
+    "description": "The maximum number of concurrently running transactions. If set to 0, limit is disabled."
+  },
+  {
+    "name": "db.transaction.monitor.check.interval",
+    "value": "2s",
+    "isDynamic": false,
+    "defaultValue": "2s",
+    "description": "Configures the time interval between transaction monitor checks. Determines how often monitor thread will check transaction for timeout."
+  },
+  {
+    "name": "db.transaction.sampling.percentage",
+    "value": "5",
+    "isDynamic": true,
+    "defaultValue": "5",
+    "description": "Transaction sampling percentage."
+  },
+  {
+    "name": "db.transaction.timeout",
+    "value": "0s",
+    "isDynamic": true,
+    "defaultValue": "0s",
+    "description": "The maximum time interval of a transaction within which it should be completed."
+  },
+  {
+    "name": "db.transaction.tracing.level",
+    "value": "DISABLED",
+    "isDynamic": true,
+    "defaultValue": "DISABLED",
+    "description": "Transaction creation tracing level."
+  },
+  {
+    "name": "db.tx_log.buffer.size",
+    "value": "2621440",
+    "isDynamic": false,
+    "defaultValue": "2621440",
+    "description": "On serialization of transaction logs, they will be temporary stored in the byte buffer that will be flushed at the end of the transaction or at any moment when buffer will be full. By default, the size of byte buffer is based on the number of available CPUs, with a minimum of 512KB. Every additional 4 CPUs add another 512KB into the buffer size. The maximal buffer size in this default scheme is 4MB taking into account that there can be one transaction log writer per database in a multi-database env.For example, runtimes with 4 CPUs will have a buffer size of 1MB; runtimes with 8 CPUs will have buffer size of 1.5MB; runtimes with 12 CPUs will have buffer size of 2MB."
+  },
+  {
+    "name": "db.tx_log.preallocate",
+    "value": "true",
+    "isDynamic": true,
+    "defaultValue": "true",
+    "description": "Specify if Neo4j should try to preallocate logical log file in advance."
+  },
+  {
+    "name": "db.tx_log.rotation.retention_policy",
+    "value": "2 days",
+    "isDynamic": true,
+    "defaultValue": "2 days",
+    "description": "Tell Neo4j how long logical transaction logs should be kept to backup the database.For example, \"10 days\" will prune logical logs that only contain transactions older than 10 days.Alternatively, \"100k txs\" will keep the 100k latest transactions from each database and prune any older transactions."
+  },
+  {
+    "name": "db.tx_log.rotation.size",
+    "value": "256.00MiB",
+    "isDynamic": true,
+    "defaultValue": "256.00MiB",
+    "description": "Specifies at which file size the logical log will auto-rotate. Minimum accepted value is 128 KiB. "
+  },
+  {
+    "name": "db.tx_state.memory_allocation",
+    "value": "ON_HEAP",
+    "isDynamic": false,
+    "defaultValue": "ON_HEAP",
+    "description": "Defines whether memory for transaction state should be allocated on- or off-heap. Note that for small transactions you can gain up to 25% write speed by setting it to `ON_HEAP`."
+  },
+  {
+    "name": "dbms.cluster.catchup.client_inactivity_timeout",
+    "value": "10m",
+    "isDynamic": false,
+    "defaultValue": "10m",
+    "description": "The catch up protocol times out if the given duration elapses with no network activity. Every message received by the client from the server extends the time out duration."
+  },
+  {
+    "name": "dbms.cluster.discovery.endpoints",
+    "value": null,
+    "isDynamic": false,
+    "defaultValue": null,
+    "description": "A comma-separated list of endpoints which a server should contact in order to discover other cluster members."
+  },
+  {
+    "name": "dbms.cluster.discovery.log_level",
+    "value": "WARN",
+    "isDynamic": false,
+    "defaultValue": "WARN",
+    "description": "The level of middleware logging"
+  },
+  {
+    "name": "dbms.cluster.discovery.resolver_type",
+    "value": "LIST",
+    "isDynamic": false,
+    "defaultValue": "LIST",
+    "description": "Configure the resolver type that the discovery service uses for determining who should be part of the cluster. Valid values are `LIST`, `SRV`, `DNS`, and `K8S`: `LIST`:: A static configuration where `dbms.cluster.discovery.endpoints` must contain a list of the addresses of the cluster members. `SRV` and `DNS`:: A dynamic configuration where `dbms.cluster.discovery.endpoints` must point to a DNS entry containing the cluster members' addresses. `K8S`:: At least `dbms.kubernetes.service_port_name` must be set.  The addresses of the cluster members are queried dynamically from Kubernetes."
+  },
+  {
+    "name": "dbms.cluster.discovery.type",
+    "value": "LIST",
+    "isDynamic": false,
+    "defaultValue": "LIST",
+    "description": "This setting has been replaced by 'dbms.cluster.discovery.resolver_type'"
+  },
+  {
+    "name": "dbms.cluster.minimum_initial_system_primaries_count",
+    "value": "3",
+    "isDynamic": false,
+    "defaultValue": "3",
+    "description": "Minimum number of machines initially required to formed a clustered DBMS. The cluster is considered formed when at least this many members have discovered each other, bound together and bootstrapped a highly available system database. As a result, at least this many of the cluster's initial machines must have 'server.cluster.system_database_mode' set to 'PRIMARY'.NOTE: If 'dbms.cluster.discovery.resolver_type' is set to 'LIST' and 'dbms.cluster.discovery.endpoints' is empty then the user is assumed to be deploying a standalone DBMS, and the value of this setting is ignored."
+  },
+  {
+    "name": "dbms.cluster.network.connect_timeout",
+    "value": "30s",
+    "isDynamic": true,
+    "defaultValue": "30s",
+    "description": "The maximum amount of time to wait for a network connection to be established."
+  },
+  {
+    "name": "dbms.cluster.network.handshake_timeout",
+    "value": "20s",
+    "isDynamic": false,
+    "defaultValue": "20s",
+    "description": "Time out for protocol negotiation handshake."
+  },
+  {
+    "name": "dbms.cluster.network.max_chunk_size",
+    "value": "32768",
+    "isDynamic": false,
+    "defaultValue": "32768",
+    "description": "Maximum chunk size allowable across network by clustering machinery."
+  },
+  {
+    "name": "dbms.cluster.network.supported_compression_algos",
+    "value": "",
+    "isDynamic": false,
+    "defaultValue": "",
+    "description": "Network compression algorithms that this instance will allow in negotiation as a comma-separated list. Listed in descending order of preference for incoming connections. An empty list implies no compression. For outgoing connections this merely specifies the allowed set of algorithms and the preference of the remote peer will be used for making the decision. Allowable values: [Gzip, Snappy, Snappy_validating, LZ4, LZ4_high_compression, LZ_validating, LZ4_high_compression_validating]"
+  },
+  {
+    "name": "dbms.cluster.raft.binding_timeout",
+    "value": "1d",
+    "isDynamic": false,
+    "defaultValue": "1d",
+    "description": "The time allowed for a database on a Neo4j server to either join a cluster or form a new cluster with at least the quorum of the members available. The members are provided by `dbms.cluster.discovery.endpoints` for the system database and by the topology graph for user databases."
+  },
+  {
+    "name": "dbms.cluster.raft.client.max_channels",
+    "value": "8",
+    "isDynamic": false,
+    "defaultValue": "8",
+    "description": "The maximum number of TCP channels between two nodes to operate the raft protocol. Each database gets allocated one channel, but a single channel can be used by more than one database."
+  },
+  {
+    "name": "dbms.cluster.raft.election_failure_detection_window",
+    "value": "3s-6s",
+    "isDynamic": false,
+    "defaultValue": "3s-6s",
+    "description": "The rate at which leader elections happen. Note that due to election conflicts it might take several attempts to find a leader. The window should be significantly larger than typical communication delays to make conflicts unlikely."
+  },
+  {
+    "name": "dbms.cluster.raft.leader_failure_detection_window",
+    "value": "20s-23s",
+    "isDynamic": false,
+    "defaultValue": "20s-23s",
+    "description": "The time window within which the loss of the leader is detected and the first re-election attempt is held. The window should be significantly larger than typical communication delays to make conflicts unlikely."
+  },
+  {
+    "name": "dbms.cluster.raft.leader_transfer.balancing_strategy",
+    "value": "EQUAL_BALANCING",
+    "isDynamic": false,
+    "defaultValue": "EQUAL_BALANCING",
+    "description": "Which strategy to use when transferring database leaderships around a cluster. This can be one of `equal_balancing` or `no_balancing`. `equal_balancing` automatically ensures that each Core server holds the leader role for an equal number of databases.`no_balancing` prevents any automatic balancing of the leader role. Note that if a `leadership_priority_group` is specified for a given database, the value of this setting will be ignored for that database."
+  },
+  {
+    "name": "dbms.cluster.raft.log.pruning_frequency",
+    "value": "10m",
+    "isDynamic": false,
+    "defaultValue": "10m",
+    "description": "RAFT log pruning frequency"
+  },
+  {
+    "name": "dbms.cluster.raft.log.reader_pool_size",
+    "value": "8",
+    "isDynamic": false,
+    "defaultValue": "8",
+    "description": "RAFT log reader pool size"
+  },
+  {
+    "name": "dbms.cluster.raft.log.rotation_size",
+    "value": "250.00MiB",
+    "isDynamic": false,
+    "defaultValue": "250.00MiB",
+    "description": "RAFT log rotation size"
+  },
+  {
+    "name": "dbms.cluster.raft.membership.join_max_lag",
+    "value": "10s",
+    "isDynamic": false,
+    "defaultValue": "10s",
+    "description": "Maximum amount of lag accepted for a new follower to join the Raft group"
+  },
+  {
+    "name": "dbms.cluster.raft.membership.join_timeout",
+    "value": "10m",
+    "isDynamic": false,
+    "defaultValue": "10m",
+    "description": "Time out for a new member to catch up"
+  },
+  {
+    "name": "dbms.cluster.store_copy.max_retry_time_per_request",
+    "value": "20m",
+    "isDynamic": false,
+    "defaultValue": "20m",
+    "description": "Maximum retry time per request during store copy. Regular store files and indexes are downloaded in separate requests during store copy. This configures the maximum time failed requests are allowed to resend."
+  },
+  {
+    "name": "dbms.cypher.forbid_exhaustive_shortestpath",
+    "value": "false",
+    "isDynamic": false,
+    "defaultValue": "false",
+    "description": "This setting is associated with performance optimization. Set this to `true` in situations where it is preferable to have any queries using the 'shortestPath' function terminate as soon as possible with no answer, rather than potentially running for a long time attempting to find an answer (even if there is no path to be found). For most queries, the 'shortestPath' algorithm will return the correct answer very quickly. However there are some cases where it is possible that the fast bidirectional breadth-first search algorithm will find no results even if they exist. This can happen when the predicates in the `WHERE` clause applied to 'shortestPath' cannot be applied to each step of the traversal, and can only be applied to the entire path. When the query planner detects these special cases, it will plan to perform an exhaustive depth-first search if the fast algorithm finds no paths. However, the exhaustive search may be orders of magnitude slower than the fast algorithm. If it is critical that queries terminate as soon as possible, it is recommended that this option be set to `true`, which means that Neo4j will never consider using the exhaustive search for shortestPath queries. However, please note that if no paths are found, an error will be thrown at run time, which will need to be handled by the application."
+  },
+  {
+    "name": "dbms.cypher.forbid_shortestpath_common_nodes",
+    "value": "true",
+    "isDynamic": false,
+    "defaultValue": "true",
+    "description": "This setting is associated with performance optimization. The shortest path algorithm does not work when the start and end nodes are the same. With this setting set to `false` no path will be returned when that happens. The default value of `true` will instead throw an exception. This can happen if you perform a shortestPath search after a cartesian product that might have the same start and end nodes for some of the rows passed to shortestPath. If it is preferable to not experience this exception, and acceptable for results to be missing for those rows, then set this to `false`. If you cannot accept missing results, and really want the shortestPath between two common nodes, then re-write the query using a standard Cypher variable length pattern expression followed by ordering by path length and limiting to one result."
+  },
+  {
+    "name": "dbms.cypher.hints_error",
+    "value": "false",
+    "isDynamic": false,
+    "defaultValue": "false",
+    "description": "Set this to specify the behavior when Cypher planner or runtime hints cannot be fulfilled. If true, then non-conformance will result in an error, otherwise only a warning is generated."
+  },
+  {
+    "name": "dbms.cypher.lenient_create_relationship",
+    "value": "false",
+    "isDynamic": false,
+    "defaultValue": "false",
+    "description": "Set this to change the behavior for Cypher create relationship when the start or end node is missing. By default this fails the query and stops execution, but by setting this flag the create operation is simply not performed and execution continues."
+  },
+  {
+    "name": "dbms.cypher.min_replan_interval",
+    "value": "10s",
+    "isDynamic": false,
+    "defaultValue": "10s",
+    "description": "The minimum time between possible cypher query replanning events. After this time, the graph statistics will be evaluated, and if they have changed by more than the value set by dbms.cypher.statistics_divergence_threshold, the query will be replanned. If the statistics have not changed sufficiently, the same interval will need to pass before the statistics will be evaluated again. Each time they are evaluated, the divergence threshold will be reduced slightly until it reaches 10% after 7h, so that even moderately changing databases will see query replanning after a sufficiently long time interval."
+  },
+  {
+    "name": "dbms.cypher.planner",
+    "value": "DEFAULT",
+    "isDynamic": false,
+    "defaultValue": "DEFAULT",
+    "description": "Set this to specify the default planner for the default language version."
+  },
+  {
+    "name": "dbms.cypher.render_plan_description",
+    "value": "true",
+    "isDynamic": true,
+    "defaultValue": "true",
+    "description": "If set to `true` a textual representation of the plan description will be rendered on the server for all queries running with `EXPLAIN` or `PROFILE`. This allows clients such as the neo4j browser and Cypher shell to show a more detailed plan description."
+  },
+  {
+    "name": "dbms.cypher.statistics_divergence_threshold",
+    "value": "0.75",
+    "isDynamic": false,
+    "defaultValue": "0.75",
+    "description": "The threshold for statistics above which a plan is considered stale. If any of the underlying statistics used to create the plan have changed more than this value, the plan will be considered stale and will be replanned. Change is calculated as `abs(a-b)/max(a,b)`. This means that a value of `0.75` requires the database to quadruple in size before query replanning. A value of `0` means that the query will be replanned as soon as there is any change in statistics and the replan interval has elapsed. This interval is defined by `dbms.cypher.min_replan_interval` and defaults to 10s. After this interval, the divergence threshold will slowly start to decline, reaching 10% after about 7h. This will ensure that long running databases will still get query replanning on even modest changes, while not replanning frequently unless the changes are very large."
+  },
+  {
+    "name": "dbms.databases.seed_from_uri_providers",
+    "value": "S3SeedProvider",
+    "isDynamic": false,
+    "defaultValue": "S3SeedProvider",
+    "description": "Databases may be created from an existing 'seed' (a database backup or dump) stored at some source URI. Different types of seed source are supported by different implementations of `com.neo4j.dbms.seeding.SeedProvider`. For example, seeds stored at 's3://' and 'https://' URIs are supported by the builtin `S3SeedProvider` and `URLConnectionSeedProvider` respectively. This list specifies enabled seed providers. If a seed source (URI scheme) is supported by multiple providers in the list, the first matching provider will be used. If the list is set to empty, the seed from uri functionality is effectively disabled."
+  },
+  {
+    "name": "dbms.db.timezone",
+    "value": "UTC",
+    "isDynamic": false,
+    "defaultValue": "UTC",
+    "description": "Database timezone. Among other things, this setting influences the monitoring procedures."
+  },
+  {
+    "name": "dbms.kubernetes.address",
+    "value": "kubernetes.default.svc:443",
+    "isDynamic": false,
+    "defaultValue": "kubernetes.default.svc:443",
+    "description": "Address for Kubernetes API"
+  },
+  {
+    "name": "dbms.kubernetes.ca_crt",
+    "value": "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt",
+    "isDynamic": false,
+    "defaultValue": "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt",
+    "description": "File location of CA certificate for Kubernetes API"
+  },
+  {
+    "name": "dbms.kubernetes.cluster_domain",
+    "value": "cluster.local",
+    "isDynamic": false,
+    "defaultValue": "cluster.local",
+    "description": "Kubernetes cluster domain"
+  },
+  {
+    "name": "dbms.kubernetes.label_selector",
+    "value": null,
+    "isDynamic": false,
+    "defaultValue": null,
+    "description": "LabelSelector for Kubernetes API"
+  },
+  {
+    "name": "dbms.kubernetes.namespace",
+    "value": "/var/run/secrets/kubernetes.io/serviceaccount/namespace",
+    "isDynamic": false,
+    "defaultValue": "/var/run/secrets/kubernetes.io/serviceaccount/namespace",
+    "description": "File location of namespace for Kubernetes API"
+  },
+  {
+    "name": "dbms.kubernetes.service_port_name",
+    "value": null,
+    "isDynamic": false,
+    "defaultValue": null,
+    "description": "Service port name for discovery for Kubernetes API"
+  },
+  {
+    "name": "dbms.kubernetes.token",
+    "value": "/var/run/secrets/kubernetes.io/serviceaccount/token",
+    "isDynamic": false,
+    "defaultValue": "/var/run/secrets/kubernetes.io/serviceaccount/token",
+    "description": "File location of token for Kubernetes API"
+  },
+  {
+    "name": "dbms.logs.http.enabled",
+    "value": "false",
+    "isDynamic": false,
+    "defaultValue": "false",
+    "description": "Enable HTTP request logging."
+  },
+  {
+    "name": "dbms.max_databases",
+    "value": "100",
+    "isDynamic": false,
+    "defaultValue": "100",
+    "description": "The maximum number of databases."
+  },
+  {
+    "name": "dbms.memory.tracking.enable",
+    "value": "true",
+    "isDynamic": false,
+    "defaultValue": "true",
+    "description": "Enable off heap and on heap memory tracking. Should not be set to `false` for clusters."
+  },
+  {
+    "name": "dbms.memory.transaction.total.max",
+    "value": "10.00GiB",
+    "isDynamic": true,
+    "defaultValue": "5.45GiB",
+    "description": "Limit the amount of memory that all of the running transactions can consume, in bytes (or kibibytes with the 'k' suffix, mebibytes with 'm' and gibibytes with 'g'). Zero means 'unlimited'. Defaults to 70% of the heap size limit."
+  },
+  {
+    "name": "dbms.netty.ssl.provider",
+    "value": "JDK",
+    "isDynamic": false,
+    "defaultValue": "JDK",
+    "description": "Netty SSL provider"
+  },
+  {
+    "name": "dbms.routing.client_side.enforce_for_domains",
+    "value": "",
+    "isDynamic": true,
+    "defaultValue": "",
+    "description": "Always use client side routing (regardless of the default router) for neo4j:// protocol connections to these domains. A comma separated list of domains. Wildcards (*) are supported."
+  },
+  {
+    "name": "dbms.routing.default_router",
+    "value": "CLIENT",
+    "isDynamic": false,
+    "defaultValue": "CLIENT",
+    "description": "Routing strategy for neo4j:// protocol connections. Default is `CLIENT`, using client-side routing, with server-side routing as a fallback (if enabled). When set to `SERVER`, client-side routing is short-circuited, and requests will rely on server-side routing (which must be enabled for proper operation, i.e. `dbms.routing.enabled=true`). Can be overridden by `dbms.routing.client_side.enforce_for_domains`."
+  },
+  {
+    "name": "dbms.routing.driver.connection.connect_timeout",
+    "value": "5s",
+    "isDynamic": false,
+    "defaultValue": "5s",
+    "description": "Socket connection timeout. A timeout of zero is treated as an infinite timeout and will be bound by the timeout configured on the operating system level."
+  },
+  {
+    "name": "dbms.routing.driver.connection.max_lifetime",
+    "value": "1h",
+    "isDynamic": false,
+    "defaultValue": "1h",
+    "description": "Pooled connections older than this threshold will be closed and removed from the pool. Setting this option to a low value will cause a high connection churn and might result in a performance hit. It is recommended to set maximum lifetime to a slightly smaller value than the one configured in network equipment (load balancer, proxy, firewall, etc. can also limit maximum connection lifetime). Zero and negative values result in lifetime not being checked."
+  },
+  {
+    "name": "dbms.routing.driver.connection.pool.acquisition_timeout",
+    "value": "1m",
+    "isDynamic": false,
+    "defaultValue": "1m",
+    "description": "Maximum amount of time spent attempting to acquire a connection from the connection pool. This timeout only kicks in when all existing connections are being used and no new connections can be created because maximum connection pool size has been reached. Error is raised when connection can't be acquired within configured time. Negative values are allowed and result in unlimited acquisition timeout. Value of 0 is allowed and results in no timeout and immediate failure when connection is unavailable"
+  },
+  {
+    "name": "dbms.routing.driver.connection.pool.idle_test",
+    "value": null,
+    "isDynamic": false,
+    "defaultValue": null,
+    "description": "Pooled connections that have been idle in the pool for longer than this timeout will be tested before they are used again, to ensure they are still alive. If this option is set too low, an additional network call will be incurred when acquiring a connection, which causes a performance hit. If this is set high, no longer live connections might be used which might lead to errors. Hence, this parameter tunes a balance between the likelihood of experiencing connection problems and performance. Normally, this parameter should not need tuning. Value 0 means connections will always be tested for validity. No connection liveliness check is done by default."
+  },
+  {
+    "name": "dbms.routing.driver.connection.pool.max_size",
+    "value": "-1",
+    "isDynamic": false,
+    "defaultValue": "-1",
+    "description": "Maximum total number of connections to be managed by a connection pool. The limit is enforced for a combination of a host and user. Negative values are allowed and result in unlimited pool. Value of `0`is not allowed. Defaults to `-1` (unlimited)."
+  },
+  {
+    "name": "dbms.routing.driver.logging.level",
+    "value": "INFO",
+    "isDynamic": false,
+    "defaultValue": "INFO",
+    "description": "Sets level for driver internal logging."
+  },
+  {
+    "name": "dbms.routing.enabled",
+    "value": "true",
+    "isDynamic": false,
+    "defaultValue": "true",
+    "description": "Enable server-side routing in clusters using an additional bolt connector. When configured, this allows requests to be forwarded from one cluster member to another, if the requests can't be satisfied by the first member (e.g. write requests received by a non-leader)."
+  },
+  {
+    "name": "dbms.routing.load_balancing.plugin",
+    "value": "server_policies",
+    "isDynamic": false,
+    "defaultValue": "server_policies",
+    "description": "The load balancing plugin to use."
+  },
+  {
+    "name": "dbms.routing.load_balancing.shuffle_enabled",
+    "value": "true",
+    "isDynamic": false,
+    "defaultValue": "true",
+    "description": "Vary the order of the entries in routing tables each time one is produced. This means that different clients should select a range of servers as their first contact, reducing the chance of all clients contacting the same server if alternatives are available. This makes the load across the servers more even."
+  },
+  {
+    "name": "dbms.routing.reads_on_primaries_enabled",
+    "value": "true",
+    "isDynamic": false,
+    "defaultValue": "true",
+    "description": "Configure if the `dbms.routing.getRoutingTable()` procedure should include non-writer primaries as read endpoints or return only secondaries. Note: if there are no secondaries for the given database primaries are returned as read end points regardless the value of this setting. Defaults to true so that non-writer primaries are available for read-only queries in a typical heterogeneous setup."
+  },
+  {
+    "name": "dbms.routing.reads_on_writers_enabled",
+    "value": "false",
+    "isDynamic": true,
+    "defaultValue": "false",
+    "description": "Configure if the `dbms.routing.getRoutingTable()` procedure should include the writer as read endpoint or return only non-writers (non writer primaries and secondaries) Note: writer is returned as read endpoint if no other member is present all."
+  },
+  {
+    "name": "dbms.routing_ttl",
+    "value": "5m",
+    "isDynamic": false,
+    "defaultValue": "5m",
+    "description": "How long callers should cache the response of the routing procedure `dbms.routing.getRoutingTable()`"
+  },
+  {
+    "name": "dbms.security.allow_csv_import_from_file_urls",
+    "value": "true",
+    "isDynamic": false,
+    "defaultValue": "true",
+    "description": "Determines if Cypher will allow using file URLs when loading data using `LOAD CSV`. Setting this value to `false` will cause Neo4j to fail `LOAD CSV` clauses that load data from the file system."
+  },
+  {
+    "name": "dbms.security.auth_cache_max_capacity",
+    "value": "10000",
+    "isDynamic": false,
+    "defaultValue": "10000",
+    "description": "The maximum capacity for authentication and authorization caches (respectively)."
+  },
+  {
+    "name": "dbms.security.auth_cache_ttl",
+    "value": "10m",
+    "isDynamic": false,
+    "defaultValue": "10m",
+    "description": "The time to live (TTL) for cached authentication and authorization info when using external auth providers (LDAP or plugin). Setting the TTL to 0 will disable auth caching. Disabling caching while using the LDAP auth provider requires the use of an LDAP system account for resolving authorization information."
+  },
+  {
+    "name": "dbms.security.auth_cache_use_ttl",
+    "value": "true",
+    "isDynamic": false,
+    "defaultValue": "true",
+    "description": "Enable time-based eviction of the authentication and authorization info cache for external auth providers (LDAP or plugin). Disabling this setting will make the cache live forever and only be evicted when `dbms.security.auth_cache_max_capacity` is exceeded."
+  },
+  {
+    "name": "dbms.security.auth_enabled",
+    "value": "false",
+    "isDynamic": false,
+    "defaultValue": "true",
+    "description": "Enable auth requirement to access Neo4j. Defaults to `true`."
+  },
+  {
+    "name": "dbms.security.auth_lock_time",
+    "value": "5s",
+    "isDynamic": false,
+    "defaultValue": "5s",
+    "description": "The amount of time user account should be locked after a configured number of unsuccessful authentication attempts. The locked out user will not be able to log in until the lock period expires, even if correct credentials are provided. Setting this configuration option to a low value is not recommended because it might make it easier for an attacker to brute force the password."
+  },
+  {
+    "name": "dbms.security.auth_max_failed_attempts",
+    "value": "3",
+    "isDynamic": false,
+    "defaultValue": "3",
+    "description": "The maximum number of unsuccessful authentication attempts before imposing a user lock for  the configured amount of time, as defined by `dbms.security.auth_lock_time`.The locked out user will not be able to log in until the lock period expires, even if correct  credentials are provided. Setting this configuration option to values less than 3 is not recommended because it might make  it easier for an attacker to brute force the password."
+  },
+  {
+    "name": "dbms.security.auth_minimum_password_length",
+    "value": "8",
+    "isDynamic": false,
+    "defaultValue": "8",
+    "description": "The minimum number of characters required in a password."
+  },
+  {
+    "name": "dbms.security.authentication_providers",
+    "value": "native",
+    "isDynamic": false,
+    "defaultValue": "native",
+    "description": "A list of security authentication providers containing the users and roles. This can be any of the built-in `native` or `ldap` providers, or it can be an externally provided plugin, with a custom name prefixed by `plugin-`, i.e. `plugin-<AUTH_PROVIDER_NAME>`. They will be queried in the given order when login is attempted."
+  },
+  {
+    "name": "dbms.security.authorization_providers",
+    "value": "native",
+    "isDynamic": false,
+    "defaultValue": "native",
+    "description": "A list of security authorization providers containing the users and roles. This can be any of the built-in `native` or `ldap` providers, or it can be an externally provided plugin, with a custom name prefixed by `plugin-`, i.e. `plugin-<AUTH_PROVIDER_NAME>`. They will be queried in the given order when login is attempted."
+  },
+  {
+    "name": "dbms.security.cluster_status_auth_enabled",
+    "value": "true",
+    "isDynamic": false,
+    "defaultValue": "true",
+    "description": "Require authorization for access to the Causal Clustering status endpoints."
+  },
+  {
+    "name": "dbms.security.http_access_control_allow_origin",
+    "value": "*",
+    "isDynamic": false,
+    "defaultValue": "*",
+    "description": "Value of the Access-Control-Allow-Origin header sent over any HTTP or HTTPS connector. This defaults to '*', which allows broadest compatibility. Note that any URI provided here limits HTTP/HTTPS access to that URI only."
+  },
+  {
+    "name": "dbms.security.http_auth_allowlist",
+    "value": "/,/browser.*",
+    "isDynamic": false,
+    "defaultValue": "/,/browser.*",
+    "description": "Defines an allowlist of http paths where Neo4j authentication is not required."
+  },
+  {
+    "name": "dbms.security.http_strict_transport_security",
+    "value": null,
+    "isDynamic": false,
+    "defaultValue": null,
+    "description": "Value of the HTTP Strict-Transport-Security (HSTS) response header. This header tells browsers that a webpage should only be accessed using HTTPS instead of HTTP. It is attached to every HTTPS response. Setting is not set by default so 'Strict-Transport-Security' header is not sent. Value is expected to contain directives like 'max-age', 'includeSubDomains' and 'preload'."
+  },
+  {
+    "name": "dbms.security.key.name",
+    "value": "aesKey",
+    "isDynamic": true,
+    "defaultValue": "aesKey",
+    "description": "Name of the 256 length AES encryption key, which is used for the symmetric encryption."
+  },
+  {
+    "name": "dbms.security.keystore.password",
+    "value": null,
+    "isDynamic": true,
+    "defaultValue": null,
+    "description": "Password for accessing the keystore holding a 256 length AES encryption key, which is used for the symmetric encryption."
+  },
+  {
+    "name": "dbms.security.keystore.path",
+    "value": null,
+    "isDynamic": true,
+    "defaultValue": null,
+    "description": "Location of the keystore holding a 256 length AES encryption key, which is used for the symmetric encryption of secrets held in system database."
+  },
+  {
+    "name": "dbms.security.ldap.authentication.attribute",
+    "value": "samaccountname",
+    "isDynamic": true,
+    "defaultValue": "samaccountname",
+    "description": "The attribute to use when looking up users. Using this setting requires `dbms.security.ldap.authentication.search_for_attribute` to be true and thus `dbms.security.ldap.authorization.system_username` and `dbms.security.ldap.authorization.system_password` to be configured."
+  },
+  {
+    "name": "dbms.security.ldap.authentication.cache_enabled",
+    "value": "true",
+    "isDynamic": false,
+    "defaultValue": "true",
+    "description": "Determines if the result of authentication via the LDAP server should be cached or not. Caching is used to limit the number of LDAP requests that have to be made over the network for users that have already been authenticated successfully. A user can be authenticated against an existing cache entry (instead of via an LDAP server) as long as it is alive (see `dbms.security.auth_cache_ttl`). An important consequence of setting this to `true` is that Neo4j then needs to cache a hashed version of the credentials in order to perform credentials matching. This hashing is done using a cryptographic hash function together with a random salt. Preferably a conscious decision should be made if this method is considered acceptable by the security standards of the organization in which this Neo4j instance is deployed."
+  },
+  {
+    "name": "dbms.security.ldap.authentication.mechanism",
+    "value": "simple",
+    "isDynamic": false,
+    "defaultValue": "simple",
+    "description": "LDAP authentication mechanism. This is one of `simple` or a SASL mechanism supported by JNDI, for example `DIGEST-MD5`. `simple` is basic username and password authentication and SASL is used for more advanced mechanisms. See RFC 2251 LDAPv3 documentation for more details."
+  },
+  {
+    "name": "dbms.security.ldap.authentication.search_for_attribute",
+    "value": "false",
+    "isDynamic": false,
+    "defaultValue": "false",
+    "description": "Perform authentication by searching for an unique attribute of a user. Using this setting requires `dbms.security.ldap.authorization.system_username` and `dbms.security.ldap.authorization.system_password` to be configured."
+  },
+  {
+    "name": "dbms.security.ldap.authentication.user_dn_template",
+    "value": "uid={0},ou=users,dc=example,dc=com",
+    "isDynamic": true,
+    "defaultValue": "uid={0},ou=users,dc=example,dc=com",
+    "description": "LDAP user DN template. An LDAP object is referenced by its distinguished name (DN), and a user DN is an LDAP fully-qualified unique user identifier. This setting is used to generate an LDAP DN that conforms with the LDAP directory's schema from the user principal that is submitted with the authentication token when logging in. The special token {0} is a placeholder where the user principal will be substituted into the DN string."
+  },
+  {
+    "name": "dbms.security.ldap.authorization.access_permitted_group",
+    "value": "",
+    "isDynamic": true,
+    "defaultValue": "",
+    "description": "The LDAP group to which a user must belong to get any access to the system.Set this to restrict access to a subset of LDAP users belonging to a particular group. If this is not set, any user to successfully authenticate via LDAP will have access to the PUBLIC role and any other roles assigned to them via dbms.security.ldap.authorization.group_to_role_mapping."
+  },
+  {
+    "name": "dbms.security.ldap.authorization.group_membership_attributes",
+    "value": "memberOf",
+    "isDynamic": true,
+    "defaultValue": "memberOf",
+    "description": "A list of attribute names on a user object that contains groups to be used for mapping to roles when LDAP authorization is enabled. This setting is ignored when `dbms.ldap_authorization_nested_groups_enabled` is `true`."
+  },
+  {
+    "name": "dbms.security.ldap.authorization.group_to_role_mapping",
+    "value": "",
+    "isDynamic": true,
+    "defaultValue": "",
+    "description": ""
+  },
+  {
+    "name": "dbms.security.ldap.authorization.nested_groups_enabled",
+    "value": "false",
+    "isDynamic": true,
+    "defaultValue": "false",
+    "description": "This setting determines whether multiple LDAP search results will be processed (as is required for the lookup of nested groups). If set to `true` then instead of using attributes on the user object to determine group membership (as specified by `dbms.security.ldap.authorization.group_membership_attributes`), the `user` object will only be used to determine the user's Distinguished Name, which will subsequently be used with  `dbms.security.ldap.authorization.user_search_filter` in order to perform a nested group search. The Distinguished Names of the resultant group search results will be used to determine roles."
+  },
+  {
+    "name": "dbms.security.ldap.authorization.nested_groups_search_filter",
+    "value": "(&(objectclass=group)(member:1.2.840.113556.1.4.1941:={0}))",
+    "isDynamic": true,
+    "defaultValue": "(&(objectclass=group)(member:1.2.840.113556.1.4.1941:={0}))",
+    "description": "The search template which will be used to find the nested groups which the user is a member of. The filter should contain the placeholder token `{0}` which will be substituted with the user's Distinguished Name (which is found for the specified user principle using `dbms.security.ldap.authorization.user_search_filter`). The default value specifies Active Directory's LDAP_MATCHING_RULE_IN_CHAIN (aka 1.2.840.113556.1.4.1941) implementation which will walk the ancestry of group membership for the specified user."
+  },
+  {
+    "name": "dbms.security.ldap.authorization.system_password",
+    "value": null,
+    "isDynamic": false,
+    "defaultValue": null,
+    "description": "An LDAP system account password to use for authorization searches when `dbms.security.ldap.authorization.use_system_account` is `true`."
+  },
+  {
+    "name": "dbms.security.ldap.authorization.system_username",
+    "value": null,
+    "isDynamic": false,
+    "defaultValue": null,
+    "description": "An LDAP system account username to use for authorization searches when `dbms.security.ldap.authorization.use_system_account` is `true`. Note that the `dbms.security.ldap.authentication.user_dn_template` will not be applied to this username, so you may have to specify a full DN."
+  },
+  {
+    "name": "dbms.security.ldap.authorization.use_system_account",
+    "value": "false",
+    "isDynamic": false,
+    "defaultValue": "false",
+    "description": "Perform LDAP search for authorization info using a system account instead of the user's own account. If this is set to `false` (default), the search for group membership will be performed directly after authentication using the LDAP context bound with the user's own account. The mapped roles will be cached for the duration of `dbms.security.auth_cache_ttl`, and then expire, requiring re-authentication. To avoid frequently having to re-authenticate sessions you may want to set a relatively long auth cache expiration time together with this option. NOTE: This option will only work if the users are permitted to search for their own group membership attributes in the directory. If this is set to `true`, the search will be performed using a special system account user with read access to all the users in the directory. You need to specify the username and password using the settings `dbms.security.ldap.authorization.system_username` and `dbms.security.ldap.authorization.system_password` with this option. Note that this account only needs read access to the relevant parts of the LDAP directory and does not need to have access rights to Neo4j, or any other systems."
+  },
+  {
+    "name": "dbms.security.ldap.authorization.user_search_base",
+    "value": "ou=users,dc=example,dc=com",
+    "isDynamic": true,
+    "defaultValue": "ou=users,dc=example,dc=com",
+    "description": "The name of the base object or named context to search for user objects when LDAP authorization is enabled. A common case is that this matches the last part of `dbms.security.ldap.authentication.user_dn_template`."
+  },
+  {
+    "name": "dbms.security.ldap.authorization.user_search_filter",
+    "value": "(&(objectClass=*)(uid={0}))",
+    "isDynamic": true,
+    "defaultValue": "(&(objectClass=*)(uid={0}))",
+    "description": "The LDAP search filter to search for a user principal when LDAP authorization is enabled. The filter should contain the placeholder token {0} which will be substituted for the user principal."
+  },
+  {
+    "name": "dbms.security.ldap.connection_timeout",
+    "value": "30s",
+    "isDynamic": false,
+    "defaultValue": "30s",
+    "description": "The timeout for establishing an LDAP connection. If a connection with the LDAP server cannot be established within the given time the attempt is aborted. A value of 0 means to use the network protocol's (i.e., TCP's) timeout value."
+  },
+  {
+    "name": "dbms.security.ldap.host",
+    "value": "localhost",
+    "isDynamic": false,
+    "defaultValue": "localhost",
+    "description": "URL of LDAP server to use for authentication and authorization. The format of the setting is `<protocol>://<hostname>:<port>`, where hostname is the only required field. The supported values for protocol are `ldap` (default) and `ldaps`. The default port for `ldap` is 389 and for `ldaps` 636. For example: `ldaps://ldap.example.com:10389`. You may want to consider using STARTTLS (`dbms.security.ldap.use_starttls`) instead of LDAPS for secure connections, in which case the correct protocol is `ldap`."
+  },
+  {
+    "name": "dbms.security.ldap.read_timeout",
+    "value": "30s",
+    "isDynamic": false,
+    "defaultValue": "30s",
+    "description": "The timeout for an LDAP read request (i.e. search). If the LDAP server does not respond within the given time the request will be aborted. A value of 0 means wait for a response indefinitely."
+  },
+  {
+    "name": "dbms.security.ldap.referral",
+    "value": "follow",
+    "isDynamic": false,
+    "defaultValue": "follow",
+    "description": "The LDAP referral behavior when creating a connection. This is one of `follow`, `ignore` or `throw`. * `follow` automatically follows any referrals * `ignore` ignores any referrals * `throw` throws an exception, which will lead to authentication failure"
+  },
+  {
+    "name": "dbms.security.ldap.use_starttls",
+    "value": "false",
+    "isDynamic": false,
+    "defaultValue": "false",
+    "description": "Use secure communication with the LDAP server using opportunistic TLS. First an initial insecure connection will be made with the LDAP server, and a STARTTLS command will be issued to negotiate an upgrade of the connection to TLS before initiating authentication."
+  },
+  {
+    "name": "dbms.security.log_successful_authentication",
+    "value": "true",
+    "isDynamic": false,
+    "defaultValue": "true",
+    "description": "Set to log successful authentication events to the security log. If this is set to `false` only failed authentication events will be logged, which could be useful if you find that the successful events spam the logs too much, and you do not require full auditing capability."
+  },
+  {
+    "name": "dbms.security.logs.ldap.groups_at_debug_level_enabled",
+    "value": "false",
+    "isDynamic": false,
+    "defaultValue": "false",
+    "description": "When set to `true`, will log the groups retrieved from the ldap server. This will only take effect when the security log level is set to `DEBUG`.WARNING: It is strongly advised that this is set to `false` when running in a production environment in order to prevent logging of sensitive information."
+  },
+  {
+    "name": "dbms.security.logs.oidc.jwt_claims_at_debug_level_enabled",
+    "value": "false",
+    "isDynamic": false,
+    "defaultValue": "false",
+    "description": "When set to `true`, will log the claims from the JWT. This will only take effect when the security log level is set to `DEBUG`.WARNING: It is strongly advised that this is set to `false` when running in a production environment in order to preventlogging of sensitive information. Please also note that the contents of the JWT claims set can change over time because they are dependent entirely upon the ID provider."
+  },
+  {
+    "name": "dbms.security.procedures.allowlist",
+    "value": "apoc.*",
+    "isDynamic": false,
+    "defaultValue": "*",
+    "description": "A list of procedures (comma separated) that are to be loaded. The list may contain both fully-qualified procedure names, and partial names with the wildcard '*'. If this setting is left empty no procedures will be loaded."
+  },
+  {
+    "name": "dbms.security.procedures.unrestricted",
+    "value": "apoc.*",
+    "isDynamic": false,
+    "defaultValue": "",
+    "description": "A list of procedures and user defined functions (comma separated) that are allowed full access to the database. The list may contain both fully-qualified procedure names, and partial names with the wildcard '*'. Note that this enables these procedures to bypass security. Use with caution."
+  },
+  {
+    "name": "initial.dbms.automatically_enable_free_servers",
+    "value": "false",
+    "isDynamic": false,
+    "defaultValue": "false",
+    "description": "Automatically enable free servers"
+  },
+  {
+    "name": "initial.dbms.database_allocator",
+    "value": "EQUAL_NUMBERS",
+    "isDynamic": false,
+    "defaultValue": "EQUAL_NUMBERS",
+    "description": "Name of the initial database allocator. After the creation of the dbms it can be set with the 'dbms.setDatabaseAllocator' procedure."
+  },
+  {
+    "name": "initial.dbms.default_database",
+    "value": "neo4j",
+    "isDynamic": false,
+    "defaultValue": "neo4j",
+    "description": "Name of the default database (aliases are not supported)."
+  },
+  {
+    "name": "initial.dbms.default_primaries_count",
+    "value": "1",
+    "isDynamic": false,
+    "defaultValue": "1",
+    "description": "Initial default number of primary instances of user databases. If the user does not specify the number of primaries in 'CREATE DATABASE', this value will be used, unless it is overwritten with the 'dbms.setDefaultAllocationNumbers' procedure."
+  },
+  {
+    "name": "initial.dbms.default_secondaries_count",
+    "value": "0",
+    "isDynamic": false,
+    "defaultValue": "0",
+    "description": "Initial default number of secondary instances of user databases. If the user does not specify the number of secondaries in 'CREATE DATABASE', this value will be used, unless it is overwritten with the 'dbms.setDefaultAllocationNumbers' procedure."
+  },
+  {
+    "name": "initial.server.allowed_databases",
+    "value": "",
+    "isDynamic": false,
+    "defaultValue": "",
+    "description": "The names of databases that are allowed on this server - all others are denied. Empty means all are allowed. Can be overridden when enabling the server, or altered at runtime, without changing this setting. Exclusive with 'initial.server.denied_databases'"
+  },
+  {
+    "name": "initial.server.denied_databases",
+    "value": "",
+    "isDynamic": false,
+    "defaultValue": "",
+    "description": "The names of databases that are not allowed on this server. Empty means nothing is denied. Can be overridden when enabling the server, or altered at runtime, without changing this setting. Exclusive with 'initial.server.allowed_databases'"
+  },
+  {
+    "name": "initial.server.mode_constraint",
+    "value": "NONE",
+    "isDynamic": false,
+    "defaultValue": "NONE",
+    "description": "An instance can restrict itself to allow databases to be hosted only as primaries or secondaries. This setting is the default input for the `ENABLE SERVER` command - the user can overwrite it when executing the command."
+  },
+  {
+    "name": "initial.server.tags",
+    "value": "",
+    "isDynamic": false,
+    "defaultValue": "",
+    "description": "A list of tag names for the server used when configuring load balancing and replication policies.This setting is the default input for the `ENABLE SERVER` command - the user can overwrite it when executing the command."
+  },
+  {
+    "name": "server.backup.enabled",
+    "value": "true",
+    "isDynamic": false,
+    "defaultValue": "true",
+    "description": "Enable support for running online backups."
+  },
+  {
+    "name": "server.backup.exec_connector.command",
+    "value": "",
+    "isDynamic": false,
+    "defaultValue": "",
+    "description": "Command to execute for ExecDataConnector list"
+  },
+  {
+    "name": "server.backup.exec_connector.scheme",
+    "value": "",
+    "isDynamic": false,
+    "defaultValue": "",
+    "description": "Schemes ExecDataConnector will match on"
+  },
+  {
+    "name": "server.backup.listen_address",
+    "value": "127.0.0.1:6362",
+    "isDynamic": false,
+    "defaultValue": "127.0.0.1:6362",
+    "description": "Network interface and port for the backup server to listen on."
+  },
+  {
+    "name": "server.backup.store_copy_max_retry_time_per_request",
+    "value": "20m",
+    "isDynamic": false,
+    "defaultValue": "20m",
+    "description": "Maximum retry time per request during store copy. Regular store files and indexes are downloaded in separate requests during store copy. This configures the maximum time failed requests are allowed to resend. "
+  },
+  {
+    "name": "server.bolt.advertised_address",
+    "value": "localhost:7687",
+    "isDynamic": false,
+    "defaultValue": ":7687",
+    "description": "Advertised address for this connector"
+  },
+  {
+    "name": "server.bolt.connection_keep_alive",
+    "value": "1m",
+    "isDynamic": false,
+    "defaultValue": "1m",
+    "description": "The maximum time to wait before sending a NOOP on connections waiting for responses from active ongoing queries. The minimum value is 1 millisecond."
+  },
+  {
+    "name": "server.bolt.connection_keep_alive_for_requests",
+    "value": "ALL",
+    "isDynamic": false,
+    "defaultValue": "ALL",
+    "description": "The type of messages to enable keep-alive messages for (ALL, STREAMING or OFF)"
+  },
+  {
+    "name": "server.bolt.connection_keep_alive_probes",
+    "value": "2",
+    "isDynamic": false,
+    "defaultValue": "2",
+    "description": "The total amount of probes to be missed before a connection is considered stale.The minimum for this value is 1."
+  },
+  {
+    "name": "server.bolt.connection_keep_alive_streaming_scheduling_interval",
+    "value": "1m",
+    "isDynamic": false,
+    "defaultValue": "1m",
+    "description": "The interval between every scheduled keep-alive check on all connections with active queries. Zero duration turns off keep-alive service."
+  },
+  {
+    "name": "server.bolt.enable_network_error_accounting",
+    "value": "true",
+    "isDynamic": false,
+    "defaultValue": "true",
+    "description": "Enables accounting based reporting of benign errors within the Bolt stack (when enabled, benign errors are reported only when such events occur with unusual frequency. Otherwise, all benign network errors will be reported)"
+  },
+  {
+    "name": "server.bolt.enabled",
+    "value": "true",
+    "isDynamic": false,
+    "defaultValue": "true",
+    "description": "Enable the bolt connector"
+  },
+  {
+    "name": "server.bolt.listen_address",
+    "value": "0.0.0.0:7687",
+    "isDynamic": false,
+    "defaultValue": ":7687",
+    "description": "Address the connector should bind to"
+  },
+  {
+    "name": "server.bolt.network_abort_clear_window_duration",
+    "value": "10m",
+    "isDynamic": false,
+    "defaultValue": "10m",
+    "description": "The duration for which network related connection aborts need to remain at a reasonable level before the error is cleared"
+  },
+  {
+    "name": "server.bolt.network_abort_warn_threshold",
+    "value": "2",
+    "isDynamic": false,
+    "defaultValue": "2",
+    "description": "The maximum amount of network related connection aborts permitted within a given window before emitting log messages (a value of zero reverts to legacy warning behavior)"
+  },
+  {
+    "name": "server.bolt.network_abort_warn_window_duration",
+    "value": "10m",
+    "isDynamic": false,
+    "defaultValue": "10m",
+    "description": "The duration of the window in which network related connection aborts are sampled"
+  },
+  {
+    "name": "server.bolt.ocsp_stapling_enabled",
+    "value": "false",
+    "isDynamic": false,
+    "defaultValue": "false",
+    "description": "Enable server OCSP stapling for bolt and http connectors."
+  },
+  {
+    "name": "server.bolt.telemetry.enabled",
+    "value": "false",
+    "isDynamic": false,
+    "defaultValue": "false",
+    "description": "Enable the collection of driver telemetry."
+  },
+  {
+    "name": "server.bolt.thread_pool_keep_alive",
+    "value": "5m",
+    "isDynamic": false,
+    "defaultValue": "5m",
+    "description": "The maximum time an idle thread in the thread pool bound to this connector will wait for new tasks."
+  },
+  {
+    "name": "server.bolt.thread_pool_max_size",
+    "value": "400",
+    "isDynamic": false,
+    "defaultValue": "400",
+    "description": "The maximum number of threads allowed in the thread pool bound to this connector."
+  },
+  {
+    "name": "server.bolt.thread_pool_min_size",
+    "value": "5",
+    "isDynamic": false,
+    "defaultValue": "5",
+    "description": "The number of threads to keep in the thread pool bound to this connector, even if they are idle."
+  },
+  {
+    "name": "server.bolt.thread_starvation_clear_window_duration",
+    "value": "10m",
+    "isDynamic": false,
+    "defaultValue": "10m",
+    "description": "The duration for which unscheduled requests need to remain at a reasonable level before the error is cleared"
+  },
+  {
+    "name": "server.bolt.thread_starvation_warn_threshold",
+    "value": "2",
+    "isDynamic": false,
+    "defaultValue": "2",
+    "description": "The maximum amount of unscheduled requests permitted during thread starvation events within a given window before emitting log messages"
+  },
+  {
+    "name": "server.bolt.thread_starvation_warn_window_duration",
+    "value": "10m",
+    "isDynamic": false,
+    "defaultValue": "10m",
+    "description": "The duration of the window in which unscheduled requests are sampled"
+  },
+  {
+    "name": "server.bolt.tls_level",
+    "value": "DISABLED",
+    "isDynamic": false,
+    "defaultValue": "DISABLED",
+    "description": "Encryption level to require this connector to use"
+  },
+  {
+    "name": "server.bolt.traffic_accounting_check_period",
+    "value": "5m",
+    "isDynamic": false,
+    "defaultValue": "5m",
+    "description": "Amount of time spent between samples of current traffic usage (lower values result in more accurate reporting while incurring a higher performance penalty; a value of zero disables traffic accounting)"
+  },
+  {
+    "name": "server.bolt.traffic_accounting_clear_duration",
+    "value": "10m",
+    "isDynamic": false,
+    "defaultValue": "10m",
+    "description": "Time required to be spent below the configured traffic threshold in order to clear traffic warnings"
+  },
+  {
+    "name": "server.bolt.traffic_accounting_incoming_threshold_mbps",
+    "value": "950",
+    "isDynamic": false,
+    "defaultValue": "950",
+    "description": "Maximum permitted incoming traffic within a configured accounting check window before emitting a warning (in Mbps)"
+  },
+  {
+    "name": "server.bolt.traffic_accounting_outgoing_threshold_mbps",
+    "value": "950",
+    "isDynamic": false,
+    "defaultValue": "950",
+    "description": "Maximum permitted outgoing traffic within a configured accounting check window before emitting a warning (in Mbps)"
+  },
+  {
+    "name": "server.cluster.advertised_address",
+    "value": "neo:6000",
+    "isDynamic": false,
+    "defaultValue": ":6000",
+    "description": "Advertised hostname/IP address and port for the transaction shipping server."
+  },
+  {
+    "name": "server.cluster.catchup.connect_randomly_to_server_group",
+    "value": "",
+    "isDynamic": true,
+    "defaultValue": "",
+    "description": "Comma separated list of groups to be used by the connect-randomly-to-server-group selection strategy. The connect-randomly-to-server-group strategy is used if the list of strategies (`server.cluster.catchup.upstream_strategy`) includes the value `connect-randomly-to-server-group`."
+  },
+  {
+    "name": "server.cluster.catchup.connect_randomly_to_server_tags",
+    "value": "",
+    "isDynamic": true,
+    "defaultValue": "",
+    "description": "Comma separated list of tags to be used by the connect-randomly-to-server-with-tag selection strategy. The connect-randomly-to-server-with-tag strategy is used if the list of strategies (`server.cluster.catchup.upstream_strategy`) includes the value `connect-randomly-to-server-with-tag`."
+  },
+  {
+    "name": "server.cluster.catchup.upstream_strategy",
+    "value": "",
+    "isDynamic": false,
+    "defaultValue": "",
+    "description": "An ordered list in descending preference of the strategy which secondaries use to choose the upstream server from which to pull transactional updates. If none are valid or the list is empty, there is a default strategy of `typically-connect-to-random-secondary`."
+  },
+  {
+    "name": "server.cluster.catchup.user_defined_upstream_strategy",
+    "value": "",
+    "isDynamic": false,
+    "defaultValue": "",
+    "description": "Configuration of a user-defined upstream selection strategy. The user-defined strategy is used if the list of strategies (`server.cluster.catchup.upstream_strategy`) includes the value `user_defined`."
+  },
+  {
+    "name": "server.cluster.listen_address",
+    "value": "0.0.0.0:6000",
+    "isDynamic": false,
+    "defaultValue": ":6000",
+    "description": "Network interface and port for the transaction shipping server to listen on. Please note that it is also possible to run the backup client against this port so always limit access to it via the firewall and configure an ssl policy."
+  },
+  {
+    "name": "server.cluster.network.native_transport_enabled",
+    "value": "true",
+    "isDynamic": false,
+    "defaultValue": "true",
+    "description": "Use native transport if available. Epoll for Linux or Kqueue for MacOS/BSD. If this setting is set to false, or if native transport is not available, Nio transport will be used."
+  },
+  {
+    "name": "server.cluster.raft.advertised_address",
+    "value": "neo:7000",
+    "isDynamic": false,
+    "defaultValue": ":7000",
+    "description": "Advertised hostname/IP address and port for the RAFT server."
+  },
+  {
+    "name": "server.cluster.raft.listen_address",
+    "value": "0.0.0.0:7000",
+    "isDynamic": false,
+    "defaultValue": ":7000",
+    "description": "Network interface and port for the RAFT server to listen on."
+  },
+  {
+    "name": "server.cluster.system_database_mode",
+    "value": "PRIMARY",
+    "isDynamic": false,
+    "defaultValue": "PRIMARY",
+    "description": "Users must manually specify the mode for the system database on each instance."
+  },
+  {
+    "name": "server.config.strict_validation.enabled",
+    "value": "true",
+    "isDynamic": false,
+    "defaultValue": "true",
+    "description": "A strict configuration validation will prevent the database from starting up if unknown configuration options are specified in the neo4j settings namespace (such as dbms., cypher., etc) or if settings are declared multiple times."
+  },
+  {
+    "name": "server.cypher.parallel.worker_limit",
+    "value": "0",
+    "isDynamic": false,
+    "defaultValue": "0",
+    "description": "Number of threads to allocate to Cypher worker threads for the parallel runtime. If set to a positive number, that number of workers will be started. If set to 0, one worker will be started for every logical processor available to the Java Virtual Machine. If set to a negative number, the total number of logical processors available on the server will be reduced by the absolute value of that number. For example, if the server has 16 available processors and you set `server.cypher.parallel.worker_limit` to `-1`, the parallel runtime will have 15 threads available."
+  },
+  {
+    "name": "server.databases.default_to_read_only",
+    "value": "false",
+    "isDynamic": true,
+    "defaultValue": "false",
+    "description": "Whether or not any database on this instance are read_only by default. If false, individual databases may be marked as read_only using server.database.read_only. If true, individual databases may be marked as writable using server.databases.writable."
+  },
+  {
+    "name": "server.databases.read_only",
+    "value": "",
+    "isDynamic": true,
+    "defaultValue": "",
+    "description": "List of databases for which to prevent write queries. Databases not included in this list maybe read_only anyway depending upon the value of server.databases.default_to_read_only."
+  },
+  {
+    "name": "server.databases.writable",
+    "value": "",
+    "isDynamic": true,
+    "defaultValue": "",
+    "description": "List of databases for which to allow write queries. Databases not included in this list will allow write queries anyway, unless server.databases.default_to_read_only is set to true."
+  },
+  {
+    "name": "server.db.query_cache_size",
+    "value": "1000",
+    "isDynamic": false,
+    "defaultValue": "1000",
+    "description": "The number of cached queries per database. Use `server.memory.query_cache.per_db_cache_num_entries` instead."
+  },
+  {
+    "name": "server.default_advertised_address",
+    "value": "localhost",
+    "isDynamic": false,
+    "defaultValue": "localhost",
+    "description": "Default hostname or IP address the server uses to advertise itself."
+  },
+  {
+    "name": "server.default_listen_address",
+    "value": "0.0.0.0",
+    "isDynamic": false,
+    "defaultValue": "localhost",
+    "description": "Default network interface to listen for incoming connections. To listen for connections on all interfaces, use \"0.0.0.0\". "
+  },
+  {
+    "name": "server.directories.cluster_state",
+    "value": "/var/lib/neo4j/data/cluster-state",
+    "isDynamic": false,
+    "defaultValue": "cluster-state",
+    "description": "Directory to hold cluster state including Raft log"
+  },
+  {
+    "name": "server.directories.data",
+    "value": "/var/lib/neo4j/data",
+    "isDynamic": false,
+    "defaultValue": "data",
+    "description": "Path of the data directory. You must not configure more than one Neo4j installation to use the same data directory."
+  },
+  {
+    "name": "server.directories.dumps.root",
+    "value": "/var/lib/neo4j/data/dumps",
+    "isDynamic": false,
+    "defaultValue": "dumps",
+    "description": "Root location where Neo4j will store database dumps optionally produced when dropping said databases."
+  },
+  {
+    "name": "server.directories.import",
+    "value": "/import",
+    "isDynamic": false,
+    "defaultValue": null,
+    "description": "Sets the root directory for file URLs used with the Cypher `LOAD CSV` clause. This should be set to a directory relative to the Neo4j installation path, restricting access to only those files within that directory and its subdirectories. For example the value \"import\" will only enable access to files within the 'import' folder. Removing this setting will disable the security feature, allowing all files in the local system to be imported. Setting this to an empty field will allow access to all files within the Neo4j installation folder."
+  },
+  {
+    "name": "server.directories.lib",
+    "value": "/var/lib/neo4j/lib",
+    "isDynamic": false,
+    "defaultValue": "lib",
+    "description": "Path of the lib directory"
+  },
+  {
+    "name": "server.directories.licenses",
+    "value": "/var/lib/neo4j/licenses",
+    "isDynamic": false,
+    "defaultValue": "licenses",
+    "description": "Path of the licenses directory."
+  },
+  {
+    "name": "server.directories.logs",
+    "value": "/logs",
+    "isDynamic": false,
+    "defaultValue": "logs",
+    "description": "Path of the logs directory."
+  },
+  {
+    "name": "server.directories.metrics",
+    "value": "/var/lib/neo4j/metrics",
+    "isDynamic": false,
+    "defaultValue": "metrics",
+    "description": "The target location of the CSV files: a path to a directory wherein a CSV file per reported field  will be written."
+  },
+  {
+    "name": "server.directories.neo4j_home",
+    "value": "/var/lib/neo4j",
+    "isDynamic": false,
+    "defaultValue": "/var/lib/neo4j",
+    "description": "Root relative to which directory settings are resolved. Calculated and set by the server on startup. Defaults to the current working directory."
+  },
+  {
+    "name": "server.directories.plugins",
+    "value": "/var/lib/neo4j/plugins",
+    "isDynamic": false,
+    "defaultValue": "plugins",
+    "description": "Location of the database plugin directory. Compiled Java JAR files that contain database procedures will be loaded if they are placed in this directory."
+  },
+  {
+    "name": "server.directories.run",
+    "value": "/var/lib/neo4j/run",
+    "isDynamic": false,
+    "defaultValue": "run",
+    "description": "Path of the run directory. This directory holds Neo4j's runtime state, such as a pidfile when it is running in the background. The pidfile is created when starting neo4j and removed when stopping it. It may be placed on an in-memory filesystem such as tmpfs."
+  },
+  {
+    "name": "server.directories.script.root",
+    "value": "/var/lib/neo4j/data/scripts",
+    "isDynamic": false,
+    "defaultValue": "scripts",
+    "description": "Root location where Neo4j will store scripts for configured databases."
+  },
+  {
+    "name": "server.directories.transaction.logs.root",
+    "value": "/var/lib/neo4j/data/transactions",
+    "isDynamic": false,
+    "defaultValue": "transactions",
+    "description": "Root location where Neo4j will store transaction logs for configured databases."
+  },
+  {
+    "name": "server.discovery.advertised_address",
+    "value": "neo:5000",
+    "isDynamic": false,
+    "defaultValue": ":5000",
+    "description": "Advertised cluster member discovery management communication."
+  },
+  {
+    "name": "server.discovery.listen_address",
+    "value": "0.0.0.0:5000",
+    "isDynamic": false,
+    "defaultValue": ":5000",
+    "description": "Host and port to bind the cluster member discovery management communication."
+  },
+  {
+    "name": "server.dynamic.setting.allowlist",
+    "value": "*",
+    "isDynamic": false,
+    "defaultValue": "*",
+    "description": "A list of setting name patterns (comma separated) that are allowed to be dynamically changed. The list may contain both full setting names, and partial names with the wildcard '*'. If this setting is left empty all dynamic settings updates will be blocked."
+  },
+  {
+    "name": "server.groups",
+    "value": "",
+    "isDynamic": false,
+    "defaultValue": "",
+    "description": "A list of tag names for the server used when configuring load balancing and replication policies."
+  },
+  {
+    "name": "server.http.advertised_address",
+    "value": "localhost:7474",
+    "isDynamic": false,
+    "defaultValue": ":7474",
+    "description": "Advertised address for this connector"
+  },
+  {
+    "name": "server.http.enabled",
+    "value": "true",
+    "isDynamic": false,
+    "defaultValue": "true",
+    "description": "Enable the http connector"
+  },
+  {
+    "name": "server.http.listen_address",
+    "value": "0.0.0.0:7474",
+    "isDynamic": false,
+    "defaultValue": ":7474",
+    "description": "Address the connector should bind to"
+  },
+  {
+    "name": "server.http_enabled_modules",
+    "value": "TRANSACTIONAL_ENDPOINTS,UNMANAGED_EXTENSIONS,BROWSER,ENTERPRISE_MANAGEMENT_ENDPOINTS",
+    "isDynamic": false,
+    "defaultValue": "TRANSACTIONAL_ENDPOINTS,UNMANAGED_EXTENSIONS,BROWSER,ENTERPRISE_MANAGEMENT_ENDPOINTS",
+    "description": "Defines the set of modules loaded into the Neo4j web server. The enterprise management endpoints are only available in the enterprise edition."
+  },
+  {
+    "name": "server.http_enabled_transports",
+    "value": "HTTP1_1,HTTP2",
+    "isDynamic": false,
+    "defaultValue": "HTTP1_1,HTTP2",
+    "description": "Defines the set of transports available on the HTTP server"
+  },
+  {
+    "name": "server.https.advertised_address",
+    "value": "localhost:7473",
+    "isDynamic": false,
+    "defaultValue": ":7473",
+    "description": "Advertised address for this connector"
+  },
+  {
+    "name": "server.https.enabled",
+    "value": "false",
+    "isDynamic": false,
+    "defaultValue": "false",
+    "description": "Enable the https connector"
+  },
+  {
+    "name": "server.https.listen_address",
+    "value": "0.0.0.0:7473",
+    "isDynamic": false,
+    "defaultValue": ":7473",
+    "description": "Address the connector should bind to"
+  },
+  {
+    "name": "server.jvm.additional",
+    "value": null,
+    "isDynamic": false,
+    "defaultValue": null,
+    "description": "Additional JVM arguments. Please note that argument order can be significant."
+  },
+  {
+    "name": "server.logs.config",
+    "value": "/var/lib/neo4j/conf/server-logs.xml",
+    "isDynamic": false,
+    "defaultValue": "conf/server-logs.xml",
+    "description": "Path to the logging configuration for debug, query, http and security logs."
+  },
+  {
+    "name": "server.logs.debug.enabled",
+    "value": "true",
+    "isDynamic": false,
+    "defaultValue": "true",
+    "description": "Enable the debug log."
+  },
+  {
+    "name": "server.logs.gc.enabled",
+    "value": "false",
+    "isDynamic": false,
+    "defaultValue": "false",
+    "description": "Enable GC Logging"
+  },
+  {
+    "name": "server.logs.gc.options",
+    "value": "-Xlog:gc*,safepoint,age*=trace",
+    "isDynamic": false,
+    "defaultValue": "-Xlog:gc*,safepoint,age*=trace",
+    "description": "GC Logging Options"
+  },
+  {
+    "name": "server.logs.gc.rotation.keep_number",
+    "value": "5",
+    "isDynamic": false,
+    "defaultValue": "5",
+    "description": "Number of GC logs to keep."
+  },
+  {
+    "name": "server.logs.gc.rotation.size",
+    "value": "20.00MiB",
+    "isDynamic": false,
+    "defaultValue": "20.00MiB",
+    "description": "Size of each GC log that is kept."
+  },
+  {
+    "name": "server.logs.user.config",
+    "value": "/var/lib/neo4j/conf/user-logs.xml",
+    "isDynamic": false,
+    "defaultValue": "conf/user-logs.xml",
+    "description": "Path to the logging configuration of user logs."
+  },
+  {
+    "name": "server.max_databases",
+    "value": "100",
+    "isDynamic": false,
+    "defaultValue": "100",
+    "description": "The maximum number of databases. Use dbms.max_databases instead."
+  },
+  {
+    "name": "server.memory.heap.initial_size",
+    "value": null,
+    "isDynamic": false,
+    "defaultValue": null,
+    "description": "Initial heap size. By default it is calculated based on available system resources."
+  },
+  {
+    "name": "server.memory.heap.max_size",
+    "value": null,
+    "isDynamic": false,
+    "defaultValue": null,
+    "description": "Maximum heap size. By default it is calculated based on available system resources."
+  },
+  {
+    "name": "server.memory.off_heap.block_cache_size",
+    "value": "128",
+    "isDynamic": false,
+    "defaultValue": "128",
+    "description": "Defines the size of the off-heap memory blocks cache. The cache will contain this number of blocks for each block size that is power of two. Thus, maximum amount of memory used by blocks cache can be calculated as 2 * server.memory.off_heap.max_cacheable_block_size * server.memory.off_heap.block_cache_size"
+  },
+  {
+    "name": "server.memory.off_heap.max_cacheable_block_size",
+    "value": "512.00KiB",
+    "isDynamic": false,
+    "defaultValue": "512.00KiB",
+    "description": "Defines the maximum size of an off-heap memory block that can be cached to speed up allocations. The value must be a power of 2."
+  },
+  {
+    "name": "server.memory.off_heap.transaction_max_size",
+    "value": "2.00GiB",
+    "isDynamic": false,
+    "defaultValue": "2.00GiB",
+    "description": "The maximum amount of off-heap memory that can be used to store transaction state data; it's a total amount of memory shared across all active transactions. Zero means 'unlimited'. Used when db.tx_state.memory_allocation is set to 'OFF_HEAP'."
+  },
+  {
+    "name": "server.memory.pagecache.directio",
+    "value": "false",
+    "isDynamic": false,
+    "defaultValue": "false",
+    "description": "Use direct I/O for page cache. Setting is supported only on Linux and only for a subset of record formats that use platform aligned page size."
+  },
+  {
+    "name": "server.memory.pagecache.flush.buffer.enabled",
+    "value": "false",
+    "isDynamic": true,
+    "defaultValue": "false",
+    "description": "Page cache can be configured to use a temporal buffer for flushing purposes. It is used to combine, if possible, sequence of several cache pages into one bigger buffer to minimize the number of individual IOPS performed and better utilization of available I/O resources, especially when those are restricted."
+  },
+  {
+    "name": "server.memory.pagecache.flush.buffer.size_in_pages",
+    "value": "128",
+    "isDynamic": true,
+    "defaultValue": "128",
+    "description": "Page cache can be configured to use a temporal buffer for flushing purposes. It is used to combine, if possible, sequence of several cache pages into one bigger buffer to minimize the number of individual IOPS performed and better utilization of available I/O resources, especially when those are restricted. Use this setting to configure individual file flush buffer size in pages (8KiB). To be able to utilize this buffer during page cache flushing, buffered flush should be enabled."
+  },
+  {
+    "name": "server.memory.pagecache.scan.prefetchers",
+    "value": "4",
+    "isDynamic": false,
+    "defaultValue": "4",
+    "description": "The maximum number of worker threads to use for pre-fetching data when doing sequential scans. Set to '0' to disable pre-fetching for scans."
+  },
+  {
+    "name": "server.memory.pagecache.size",
+    "value": "4.00GiB",
+    "isDynamic": false,
+    "defaultValue": null,
+    "description": "The amount of memory to use for mapping the store files. If Neo4j is running on a dedicated server, then it is generally recommended to leave about 2-4 gigabytes for the operating system, give the JVM enough heap to hold all your transaction state and query context, and then leave the rest for the page cache. If no page cache memory is configured, then a heuristic setting is computed based on available system resources. By default, the size of page cache is 50% of available RAM minus the max heap size (but not larger than 70x the max heap size, due to some overhead of the page cache in the heap)."
+  },
+  {
+    "name": "server.memory.query_cache.per_db_cache_num_entries",
+    "value": "1000",
+    "isDynamic": true,
+    "defaultValue": "1000",
+    "description": "The number of cached queries per database. The max number of queries that can be kept in a cache is `number of databases` * `server.memory.query_cache.per_db_cache_num_entries`. With 10 databases and `server.memory.query_cache.per_db_cache_num_entries`=1000, the cache can keep 10000 plans in total. This setting is only deciding cache size when `server.memory.query_cache.sharing_enabled` is set to `false`."
+  },
+  {
+    "name": "server.memory.query_cache.shared_cache_num_entries",
+    "value": "1000",
+    "isDynamic": true,
+    "defaultValue": "1000",
+    "description": "The number of cached queries for all databases. The max number of queries that can be kept in a cache is exactly `server.memory.query_cache.shared_cache_num_entries`. This setting is only deciding cache size when `server.memory.query_cache.sharing_enabled` is set to `true`."
+  },
+  {
+    "name": "server.memory.query_cache.sharing_enabled",
+    "value": "false",
+    "isDynamic": false,
+    "defaultValue": "false",
+    "description": "Enable sharing cache space between different databases. With this option turned on, databases will share cache space, but not cache entries. This means that a database may store and retrieve entries from the shared cache, but it may not retrieve entries produced by another database. The database may, however, evict entries from other databases as necessary, according to the constrained cache size and cache eviction policy. In essence, databases may compete for cache space, but may not observe each others entries. When this option is turned on, the cache space available to all databases is configured with `server.memory.query_cache.shared_cache_num_entries`. With this option turned off, the cache space available to each individual database is configured with `server.memory.query_cache.per_db_cache_num_entries`."
+  },
+  {
+    "name": "server.metrics.csv.enabled",
+    "value": "true",
+    "isDynamic": false,
+    "defaultValue": "true",
+    "description": "Set to `true` to enable exporting metrics to CSV files"
+  },
+  {
+    "name": "server.metrics.csv.interval",
+    "value": "30s",
+    "isDynamic": false,
+    "defaultValue": "30s",
+    "description": "The reporting interval for the CSV files. That is, how often new rows with numbers are appended to the CSV files."
+  },
+  {
+    "name": "server.metrics.csv.rotation.compression",
+    "value": "NONE",
+    "isDynamic": false,
+    "defaultValue": "NONE",
+    "description": "Decides what compression to use for the csv history files."
+  },
+  {
+    "name": "server.metrics.csv.rotation.keep_number",
+    "value": "7",
+    "isDynamic": false,
+    "defaultValue": "7",
+    "description": "Maximum number of history files for the csv files."
+  },
+  {
+    "name": "server.metrics.csv.rotation.size",
+    "value": "10.00MiB",
+    "isDynamic": false,
+    "defaultValue": "10.00MiB",
+    "description": "The file size in bytes at which the csv files will auto-rotate. If set to zero then no rotation will occur. Accepts a binary suffix `k`, `m` or `g`."
+  },
+  {
+    "name": "server.metrics.enabled",
+    "value": "true",
+    "isDynamic": false,
+    "defaultValue": "true",
+    "description": "Enable metrics. Setting this to `false` will to turn off all metrics."
+  },
+  {
+    "name": "server.metrics.filter",
+    "value": "*bolt.connections*,*bolt.messages_received*,*bolt.messages_started*,*dbms.pool.bolt.free,*dbms.pool.bolt.total_size,*dbms.pool.bolt.total_used,*dbms.pool.bolt.used_heap,*cluster.raft.is_leader,*cluster.raft.last_leader_message,*cluster.raft.replication_attempt,*cluster.raft.replication_fail,*cluster.raft.last_applied,*cluster.raft.last_appended,*cluster.raft.append_index,*cluster.raft.commit_index,*cluster.raft.applied_index,*check_point.*,*cypher.replan_events,*ids_in_use*,*pool.transaction.*.total_used,*pool.transaction.*.used_heap,*pool.transaction.*.used_native,*store.size*,*transaction.active_read,*transaction.active_write,*transaction.committed*,*transaction.last_committed_tx_id,*transaction.peak_concurrent,*transaction.rollbacks*,*page_cache.hit*,*page_cache.page_faults,*page_cache.usage_ratio,*vm.file.descriptors.count,*vm.gc.time.*,*vm.heap.used,*vm.memory.buffer.direct.used,*vm.memory.pool.g1_eden_space,*vm.memory.pool.g1_old_gen,*vm.pause_time,*vm.thread*,*db.query.execution*",
+    "isDynamic": false,
+    "defaultValue": "*bolt.connections*,*bolt.messages_received*,*bolt.messages_started*,*dbms.pool.bolt.free,*dbms.pool.bolt.total_size,*dbms.pool.bolt.total_used,*dbms.pool.bolt.used_heap,*cluster.raft.is_leader,*cluster.raft.last_leader_message,*cluster.raft.replication_attempt,*cluster.raft.replication_fail,*cluster.raft.last_applied,*cluster.raft.last_appended,*cluster.raft.append_index,*cluster.raft.commit_index,*cluster.raft.applied_index,*check_point.*,*cypher.replan_events,*ids_in_use*,*pool.transaction.*.total_used,*pool.transaction.*.used_heap,*pool.transaction.*.used_native,*store.size*,*transaction.active_read,*transaction.active_write,*transaction.committed*,*transaction.last_committed_tx_id,*transaction.peak_concurrent,*transaction.rollbacks*,*page_cache.hit*,*page_cache.page_faults,*page_cache.usage_ratio,*vm.file.descriptors.count,*vm.gc.time.*,*vm.heap.used,*vm.memory.buffer.direct.used,*vm.memory.pool.g1_eden_space,*vm.memory.pool.g1_old_gen,*vm.pause_time,*vm.thread*,*db.query.execution*",
+    "description": ""
+  },
+  {
+    "name": "server.metrics.graphite.enabled",
+    "value": "false",
+    "isDynamic": false,
+    "defaultValue": "false",
+    "description": "Set to `true` to enable exporting metrics to Graphite."
+  },
+  {
+    "name": "server.metrics.graphite.interval",
+    "value": "30s",
+    "isDynamic": false,
+    "defaultValue": "30s",
+    "description": "The reporting interval for Graphite. That is, how often to send updated metrics to Graphite."
+  },
+  {
+    "name": "server.metrics.graphite.server",
+    "value": "0.0.0.0:2003",
+    "isDynamic": false,
+    "defaultValue": ":2003",
+    "description": "The hostname or IP address of the Graphite server"
+  },
+  {
+    "name": "server.metrics.jmx.enabled",
+    "value": "true",
+    "isDynamic": false,
+    "defaultValue": "true",
+    "description": "Set to `true` to enable the JMX metrics endpoint"
+  },
+  {
+    "name": "server.metrics.prefix",
+    "value": "neo4j",
+    "isDynamic": false,
+    "defaultValue": "neo4j",
+    "description": "A common prefix for the reported metrics field names."
+  },
+  {
+    "name": "server.metrics.prometheus.enabled",
+    "value": "false",
+    "isDynamic": false,
+    "defaultValue": "false",
+    "description": "Set to `true` to enable the Prometheus endpoint"
+  },
+  {
+    "name": "server.metrics.prometheus.endpoint",
+    "value": "localhost:2004",
+    "isDynamic": false,
+    "defaultValue": "localhost:2004",
+    "description": "The hostname and port to use as Prometheus endpoint"
+  },
+  {
+    "name": "server.panic.shutdown_on_panic",
+    "value": "false",
+    "isDynamic": false,
+    "defaultValue": "false",
+    "description": "If there is a server panic (an unrecoverable error) should the neo4j process shut down or continue running. Following a server panic it is likely that a significant amount of functionality will be lost. Recovering full functionality will require the Neo4j process to restart. This feature is available in Neo4j Enterprise Edition. Defaults to `false` except for Neo4j Enterprise Edition deployments running on Kubernetes where it is `true`."
+  },
+  {
+    "name": "server.routing.advertised_address",
+    "value": "neo:7688",
+    "isDynamic": false,
+    "defaultValue": ":7688",
+    "description": "The advertised address for the intra-cluster routing connector"
+  },
+  {
+    "name": "server.routing.listen_address",
+    "value": "0.0.0.0:7688",
+    "isDynamic": false,
+    "defaultValue": ":7688",
+    "description": "The address the routing connector should bind to"
+  },
+  {
+    "name": "server.threads.worker_count",
+    "value": "16",
+    "isDynamic": false,
+    "defaultValue": "16",
+    "description": "Number of Neo4j worker threads. This setting is only valid for REST, and does not influence bolt-server. It sets the amount of worker threads for the Jetty server used by neo4j-server. This option can be tuned when you plan to execute multiple, concurrent REST requests, with the aim of getting more throughput from the database. By default, it is set to the number of available processors, or to 500 for machines with more than 500 processors. Your OS might enforce a lower limit than the maximum value specified here."
+  },
+  {
+    "name": "server.unmanaged_extension_classes",
+    "value": "",
+    "isDynamic": false,
+    "defaultValue": "",
+    "description": "Comma-separated list of <classname>=<mount point> for unmanaged extensions."
+  },
+  {
+    "name": "server.windows_service_name",
+    "value": "neo4j",
+    "isDynamic": false,
+    "defaultValue": "neo4j",
+    "description": "Name of the Windows Service managing Neo4j when installed using `neo4j install-service`. Only applicable on Windows OS. Note: This must be unique for each individual installation."
+  }
+]

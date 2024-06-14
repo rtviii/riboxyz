@@ -23,12 +23,17 @@ def tax_dict(request):
     td = dbqueries.tax_dict()
     _  = {}
     for kvp in td:
-        # _[kvp[0]] =[kvp[1],kvp[2]]
         _[kvp[0]] = kvp[1]
     return _
 
-
-
+@structure_router.get("/polymer_classification_report",  tags=[TAG])
+def polymer_classification_report(request, rcsb_id:str, auth_asym_id:str):
+    """Returns a dictionary of all taxonomic IDs present in the database as keys, [ scientific name, corresponding superkingdom ] as the values."""
+    if os.path.exists(RibosomeOps(rcsb_id).paths.classification_report):
+        with open(RibosomeOps(rcsb_id).paths.classification_report, 'r') as f:
+            return json.load(f)[auth_asym_id]
+    else :
+        return []
 
 @structure_router.get("/structure_composition_stats", response=StructureCompositionStats, tags=[TAG])
 def structure_composition_stats(request):
