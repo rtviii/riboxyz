@@ -46,15 +46,14 @@ def link__structure_to_lineage_member(
     def _(tx: Transaction | ManagedTransaction):
         return tx.run(
             """//
-            match (struct:RibosomeStructure {rcsb_id: $rcsb_id})
-            match (phylo:PhylogenyNode {ncbi_tax_id: $tax_id}) 
-            merge (struct)<-[organism: $rel ]-(phylo)
+            match (struct:RibosomeStructure {{rcsb_id: $rcsb_id}})
+            match (phylo:PhylogenyNode {{ncbi_tax_id: $tax_id}}) 
+            merge (struct)<-[organism: {} ]-(phylo)
             return  struct, phylo
-            """,
+            """.format(relationship),
             {
                 "rcsb_id": rcsb_id,
                 "tax_id": taxid,
-                "rel": relationship,
             },
         ).values("struct", "phylo")
 
@@ -66,30 +65,16 @@ def link__structure_to_organism(
 ) -> Callable[[Transaction | ManagedTransaction], list[Node]]:
 
     def _(tx: Transaction | ManagedTransaction):
-        # if relationship == "host_organism":
-        #     return tx.run(
-        #         """//
-        #     match (struct:RibosomeStructure {rcsb_id: $rcsb_id})
-        #     match (phylo:PhylogenyNode {ncbi_tax_id: $tax_id})
-        #     merge (struct)<-[organism:$rel]-(phylo)
-        #     return  struct, phylo
-        #     """,
-        #         {
-        #             "rcsb_id": rcsb_id,
-        #             "tax_id": taxid,
-        #         },
-        #     ).values("struct", "phylo")
         return tx.run(
             """//
-            match (struct:RibosomeStructure {rcsb_id: $rcsb_id})
-            match (phylo:PhylogenyNode {ncbi_tax_id: $tax_id}) 
-            merge (struct)<-[organism: $rel ]-(phylo)
+            match (struct:RibosomeStructure {{rcsb_id: $rcsb_id}})
+            match (phylo:PhylogenyNode {{ncbi_tax_id: $tax_id}}) 
+            merge (struct)<-[organism: {} ]-(phylo)
             return  struct, phylo
-            """,
+            """.format(relationship),
             {
                 "rcsb_id": rcsb_id,
                 "tax_id": taxid,
-                "rel": relationship,
             },
         ).values("struct", "phylo")
 
