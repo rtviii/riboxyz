@@ -2,7 +2,7 @@
 # `riboxyz`
 
 <p align="center">
-<img src="./logo.png" height="400" width="440" >
+<img src="./logo.gif" height="400" width="700" >
 </p>
 
 
