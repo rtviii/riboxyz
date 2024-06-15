@@ -29,14 +29,15 @@ class Neo4jBuilder():
     databases: list[str]
 
 
-    def __init__(self, uri: str, user: str, password: str|None=None) -> None:
+    def __init__(self, uri: str, user: str,current_db:str, password: str|None=None, ) -> None:
+       
         self.uri      = uri
         self.user     = user
         self.password = password 
 
         try:
-            self.driver = GraphDatabase.driver(uri, auth=(user, password))
-            print("Established connection to ", self.uri)
+            self.driver = GraphDatabase.driver(uri, auth=(user, password), database=current_db)
+            print("[{}] established connection to DB[{}] via {} ".format(user, current_db, uri))
         except Exception as ae:
             print(ae)
 
@@ -55,7 +56,7 @@ class Neo4jBuilder():
         with self.driver.session() as session:
             for polymer_class in [*list(PolymerClass)]:
                 session.execute_write(node__polymer_class(polymer_class.value))
-                print("Added polymer class: ", polymer_class.value)
+            print("Added polymer classes: ", [*list(PolymerClass)])
 
     def add_phylogeny_node(self, taxid:int)->Node:
         with self.driver.session() as session:
@@ -85,35 +86,30 @@ class Neo4jBuilder():
         
     def link_structure_to_phylogeny(self,rcsb_id:str, profile:RibosomeStructure|None=None):
         rcsb_id = rcsb_id.upper()
+
         if profile is None:
-            R:RibosomeStructure = RibosomeOps(rcsb_id).profile()
+            profile = RibosomeOps(rcsb_id).profile()
 
+        _= []
         with self.driver.session() as s:
-            if self.check_structure_exists(rcsb_id):
-                print("Struct node {} already exists.".format(rcsb_id))
-                ...
-            else:
-                s.execute_write(node__structure(R))
-
             
-            for organism_host in R.host_organism_ids:
+            for organism_host in profile.host_organism_ids:
 
                 self._create_lineage(organism_host)
                 s.execute_write(link__structure_to_organism(rcsb_id, organism_host, 'host'))
-                for org in  Taxid.get_lineage(organism_host):
+                lineage_memebers_host = Taxid.get_lineage(organism_host)
+                for org in  lineage_memebers_host:
                     s.execute_write(link__structure_to_lineage_member(rcsb_id, org, 'belongs_to_lineage_host'))
-                    print("Connected {} to lineage member src".format(rcsb_id))
+                _.extend(lineage_memebers_host)
 
-            for organism_src in R.src_organism_ids:
+            for organism_src in profile.src_organism_ids:
                 self._create_lineage(organism_src)
                 s.execute_write(link__structure_to_organism(rcsb_id, organism_src, 'source'))
-                for org in  Taxid.get_lineage(organism_src):
+                lineage_memebers_source = Taxid.get_lineage(organism_src)
+                for org in  lineage_memebers_source:
                     s.execute_write(link__structure_to_lineage_member(rcsb_id, org, 'belongs_to_lineage_source'))
-                    print("Connected {} to lineage member host".format(rcsb_id))
-
-
-
-        print("Linked structure {} to phylogeny".format(rcsb_id))
+                _.extend(lineage_memebers_source)
+        print("Linked structure {} to phylogeny: {}".format(rcsb_id, _))
 
     def check_structure_exists(self, rcsb_id:str)->bool:
         rcsb_id = rcsb_id.upper()
@@ -128,16 +124,18 @@ class Neo4jBuilder():
 
     def add_structure(self, rcsb_id:str, disable_exists_check:bool=False):
         rcsb_id = rcsb_id.upper()
-        if not disable_exists_check and self.check_structure_exists(rcsb_id):
-            print("Struct node {} already exists.".format(rcsb_id))
-            return
+
+        if not disable_exists_check:
+            if self.check_structure_exists(rcsb_id):
+                print("Struct node {} already exists.".format(rcsb_id))
+                return
 
         R:RibosomeStructure = RibosomeOps(rcsb_id).profile()
 
         with self.driver.session() as s:
-            structure_node = s.execute_write(node__structure(R))
 
-            self.link_structure_to_phylogeny(rcsb_id)
+            structure_node = s.execute_write(node__structure(R))
+            self.link_structure_to_phylogeny(rcsb_id, R)
 
             for protein in R.proteins:
                    protein_node = s.execute_write(node__polymer(protein))

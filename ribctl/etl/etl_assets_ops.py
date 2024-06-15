@@ -83,14 +83,14 @@ class RibosomeOps:
         for struct in Assets.list_all_structs():
             rp = RibosomeOps(struct).profile()
             for org in [*rp.src_organism_ids, *rp.host_organism_ids]:
-                if Taxid.rank(org) not in list(typing.get_args(PhylogenyRank)):
-                    org = Taxid.coerce_to_rank(org, "species")
+                # if Taxid.rank(org) not in list(typing.get_args(PhylogenyRank)):
+                #     org = Taxid.coerce_to_rank(org, "species")
                 assert org is not None
                 try:
                     pn = PhylogenyNode(
-                        ncbi_tax_id=org,
-                        scientific_name=Taxid.get_name(org),
-                        rank=Taxid.rank(org),
+                        ncbi_tax_id     = org,
+                        scientific_name = Taxid.get_name(org),
+                        rank            = Taxid.rank(org),
                     )
                 except Exception as e:
                     print( struct, Taxid.get_name(org), "|\t", Taxid.rank(org), "->", Taxid.get_lineage(org), )
@@ -309,8 +309,11 @@ class Assets:
 
 
     @staticmethod
-    def list_all_structs():
-        return os.listdir(RIBETL_DATA)
+    def list_all_structs()->list[str]:
+        
+        profiles_exist = [ rcsb_id if os.path.exists(RibosomeOps(rcsb_id).paths.profile)  else None for rcsb_id in os.listdir(RIBETL_DATA)]
+        return list(filter(lambda x: x!=None, profiles_exist))
+
 
     @staticmethod
     def current_rcsb_structs() -> list[str]:

@@ -9,6 +9,10 @@ from chimerax.core.commands import run, runscript
 from chimerax.list_info.util import spec, model_info
 from chimerax.core.state import StateManager
 
+
+
+RIBETL_DATA = os.environ.get("RIBETL_DATA")
+
 def chainsplitter(session, structure: AtomicStructure):
     print("Got some chains")
     print("----------------------------------")
