@@ -1,5 +1,6 @@
 import sys
 sys.dont_write_bytecode = True
+from neo4j_ribosome import NEO4J_CURRENTDB
 from ribctl.lib.libtax import PhylogenyNode, Taxid
 from neo4j_ribosome.node_phylogeny import link__phylogeny, node__phylogeny
 from neo4j.graph import Node
@@ -29,13 +30,13 @@ class Neo4jBuilder():
     databases: list[str]
 
 
-    def __init__(self, uri: str, user: str, password: str|None=None) -> None:
+    def __init__(self, uri: str, user: str,NEO4J_CURRENTDB, password: str|None=None, ) -> None:
         self.uri      = uri
         self.user     = user
         self.password = password 
 
         try:
-            self.driver = GraphDatabase.driver(uri, auth=(user, password))
+            self.driver = GraphDatabase.driver(uri, auth=(user, password), database=NEO4J_CURRENTDB)
             print("Established connection to ", self.uri)
         except Exception as ae:
             print(ae)
@@ -55,7 +56,7 @@ class Neo4jBuilder():
         with self.driver.session() as session:
             for polymer_class in [*list(PolymerClass)]:
                 session.execute_write(node__polymer_class(polymer_class.value))
-                print("Added polymer class: ", polymer_class.value)
+            print("Added polymer classes: ", [*list(PolymerClass)])
 
     def add_phylogeny_node(self, taxid:int)->Node:
         with self.driver.session() as session:
@@ -89,11 +90,11 @@ class Neo4jBuilder():
             R:RibosomeStructure = RibosomeOps(rcsb_id).profile()
 
         with self.driver.session() as s:
-            if self.check_structure_exists(rcsb_id):
-                print("Struct node {} already exists.".format(rcsb_id))
-                ...
-            else:
-                s.execute_write(node__structure(R))
+            # if self.check_structure_exists(rcsb_id):
+            #     print("Struct node {} already exists.".format(rcsb_id))
+            #     ...
+            # else:
+            #     s.execute_write(node__structure(R))
 
             
             for organism_host in R.host_organism_ids:
@@ -128,16 +129,17 @@ class Neo4jBuilder():
 
     def add_structure(self, rcsb_id:str, disable_exists_check:bool=False):
         rcsb_id = rcsb_id.upper()
-        if not disable_exists_check and self.check_structure_exists(rcsb_id):
-            print("Struct node {} already exists.".format(rcsb_id))
-            return
+        if not disable_exists_check:
+            if self.check_structure_exists(rcsb_id):
+                print("Struct node {} already exists.".format(rcsb_id))
+                return
 
         R:RibosomeStructure = RibosomeOps(rcsb_id).profile()
 
         with self.driver.session() as s:
-            structure_node = s.execute_write(node__structure(R))
 
-            self.link_structure_to_phylogeny(rcsb_id)
+            structure_node = s.execute_write(node__structure(R))
+            self.link_structure_to_phylogeny(rcsb_id, R)
 
             for protein in R.proteins:
                    protein_node = s.execute_write(node__polymer(protein))

@@ -11,7 +11,7 @@ def etl(ctx: Context):
     if ctx.invoked_subcommand is None:
 
         stdin_text = click.get_text_stream("stdin")
-        rcsb_id = ctx.obj["rcsb_id"]
+        rcsb_id    = ctx.obj["rcsb_id"]
 
         global_status = Assets.global_status()
         list(map(lambda a: a.name, list(AssetClass)))
@@ -45,7 +45,11 @@ def assets(ctx: Context, assets, overwrite, rcsb_sync, all_structs):
     rcsb_id = ctx.obj['rcsb_id']
     assets = list(map(AssetClass.from_str, assets))
 
-    print(rcsb_sync, all_structs)
+    if rcsb_id is not None:
+        routines = etl_obtain.asset_routines(rcsb_id, assets , overwrite)
+        asyncio.run(etl_obtain.execute_asset_task_pool(routines))
+        return 
+
     if rcsb_sync:
         for rcsb_id in Assets.status_vs_rcsb():
             print("RCSB Sync: Fetching assets for {}".format(rcsb_id))

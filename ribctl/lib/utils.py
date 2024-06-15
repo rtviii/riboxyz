@@ -17,15 +17,6 @@ async def download_unpack_place(struct_id: str) -> None:
     compressed   = requests.get(url).content
     decompressed = gzip.decompress(compressed)
 
-    destination_chains = os.path.join(
-        os.environ["RIBETL_DATA"],
-        structid,
-        "CHAINS" )
-
-    if not os.path.exists(destination_chains):
-        os.mkdir(destination_chains)
-        print(f"Created directory {destination_chains}.")
-
     structfile = os.path.join(
         os.environ["RIBETL_DATA"],
         structid,
