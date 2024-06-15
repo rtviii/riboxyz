@@ -1,40 +1,34 @@
-import enum
-import json
 import os
-import sys
-from chimerax.core.commands import register, CmdDesc
-from chimerax.atomic import ResiduesArg, Chains, ChainArg, StructureArg
-from chimerax.atomic import Structure, AtomicStructure, Chain
-from chimerax.core.commands import run, runscript
-from chimerax.list_info.util import spec, model_info
-from chimerax.core.state import StateManager
+from pprint import pprint
+from chimerax.core.commands import run, runscript ,StringArg
+from chimerax.atomic import all_atomic_structures
 
 
 
 RIBETL_DATA = os.environ.get("RIBETL_DATA")
 
-def chainsplitter(session, structure: AtomicStructure):
-    print("Got some chains")
-    print("----------------------------------")
-    # print(report_polymers(session.logger, structure))
-    # run(session, "split chains")
-    # chain:Chain
-    print(model_info(structure))
-    # for model in all
-    #     print(model)
-    # for chain in  structure.chains:
-    #     run(session,"save ")
-    #     print(chain.chain_id)
-    # print(model_info(structure))
+def chainsplitter(session, rcsb_id:str):
+    run(session, "split chains")
+    rcsb_id     = rcsb_id.upper()
+    cid_to_spec = {}
+
+    for s in all_atomic_structures(session):
+        for chain in s.chains:
+            cid_to_spec[chain.chain_id] = s.atomspec
     
+    for auth_asym_id, model_n in cid_to_spec.items():
+        chain_path = os.path.join(RIBETL_DATA, rcsb_id, "CHAINS", f"{rcsb_id}_{auth_asym_id}.cif")
+        run(session, "save {} {}".format(chain_path, model_n))
+
+        
 
 def register_ribrepr_command(logger):
     from chimerax.core.commands import CmdDesc, register
     from chimerax.atomic import AtomicStructureArg, Chain, Residue, Atom
 
     desc = CmdDesc(
-        required           = [("structure", AtomicStructureArg)],
-        required_arguments = ["structure"],
+        required           = [("rcsb_id", StringArg)],
+        required_arguments = ["rcsb_id"],
         synopsis           = "representation ",
     )
     register("chainsplitter", desc, chainsplitter, logger=logger)
