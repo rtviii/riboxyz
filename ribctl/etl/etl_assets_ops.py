@@ -309,7 +309,7 @@ class Assets:
 
 
     @staticmethod
-    def list_all_structs():
+    def list_all_structs()->list[str]:
         
         profiles_exist = [ rcsb_id if os.path.exists(RibosomeOps(rcsb_id).paths.profile)  else None for rcsb_id in os.listdir(RIBETL_DATA)]
         return list(filter(lambda x: x!=None, profiles_exist))

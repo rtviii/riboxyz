@@ -15,9 +15,10 @@ def full_upload():
     adapter = Neo4jBuilder(NEO4J_URI, NEO4J_USER, NEO4J_CURRENTDB)
     adapter.initialize_new_instance()
     futures: list[Future] = []
+
     with ThreadPoolExecutor(max_workers=10) as executor:
-        for rcsb_id in Assets.list_all_structs():
-            fut = executor.submit(partial(adapter.add_structure, rcsb_id, False))
+        for rcsb_id in sorted(Assets.list_all_structs()):
+            fut = executor.submit(partial(adapter.add_structure, rcsb_id, True))
             futures.append(fut)
         wait(futures, return_when=ALL_COMPLETED)
 
