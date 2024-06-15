@@ -4,7 +4,7 @@ import sys
 
 from ninja import Schema
 
-from neo4j_ribosome import NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER
+from neo4j_ribosome import NEO4J_CURRENTDB, NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER
 from ribctl.lib.schema.types_ribosome import (
     PolymerClass,
     PolynucleotideClass,
@@ -38,7 +38,7 @@ class Neo4jQuery:
     adapter: Neo4jBuilder
 
     def __init__(self) -> None:
-        self.adapter = Neo4jBuilder(NEO4J_URI, NEO4J_USER, NEO4J_PASSWORD)
+        self.adapter = Neo4jBuilder(NEO4J_URI, NEO4J_USER, NEO4J_CURRENTDB, NEO4J_PASSWORD)
         pass
 
     def tax_dict(self):
@@ -402,10 +402,7 @@ with collect(PROPERTIES(rna)) as rnas, proteins, ligands, ribosomes, total_count
 
 with apoc.map.mergeList([{{proteins:proteins}},{{nonpolymeric_ligands:ligands}},{{rnas:rnas}},{{other_polymers:[]}}]) as rest, ribosomes, total_count
 return collect(apoc.map.merge(ribosomes, rest)),  collect(distinct total_count)[0]
-""".format(
-                (page - 1) * 20, page * 20
-            )
-        )
+""".format( (page - 1) * 20, page * 20 ) )
 
         print("=======Executing filtered structures query:==========")
         print("\033[96m" + query + "\033[0m")
