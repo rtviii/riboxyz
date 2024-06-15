@@ -423,23 +423,27 @@ def ribosome_representation(session, structure: AtomicStructure):
 
 
 # # ! Didn't work out for now. Chimerax segfaults when looped on this.
-# def produce_and_save_movie(session, target:str):
-#     print("GOT TARGET", target)
-#     RCSB_ID = target
-#     run(session, "open /home/rtviii/dev/RIBETL_DATA/{}/{}.cif".format(RCSB_ID, RCSB_ID))
-#     run(session, "sym #1 assembly 1") # take only one assembly if multiple are available
-#     run(session, "ribrep #2")
-#     run(session, "movie record")
-#     run(session, "turn y 2 180")
-#     run(session, "wait 180")
-#     run(session, "movie encode /home/rtviii/dev/riboxyz/chimerax/movies/{}.mp4".format(RCSB_ID))
-#     run(session, "close all")
+def produce_and_save_movie(session, structure:str):
+    RCSB_ID = structure
+    run(session, "open /home/rtviii/dev/RIBETL_DATA/{}/{}.cif".format(RCSB_ID, RCSB_ID))
+    run(session, "sym #1 assembly 1") # take only one assembly if multiple are available
+    run(session, "ribrep #2")
+    run(session, "movie record")
+    run(session, "turn y 2 180")
+    run(session, "wait 180")
+    run(session, "movie encode /home/rtviii/dev/riboxyz/chimerax/movies/{}.mp4".format(RCSB_ID))
+    run(session, "close all")
 
 def register_ribetl_command(logger):
     def ribetl(session, rcsb_id:str):
         rcsb_id = rcsb_id.upper()
         run(session, "open /home/rtviii/dev/RIBETL_DATA/{}/{}.cif".format(rcsb_id, rcsb_id))
-    desc = CmdDesc( required= [("rcsb_id", StringArg)], )
+    desc = CmdDesc( required= [("rcsb_id", StringArg)], 
+
+        required_arguments = ["structure"],
+        synopsis           = "open struct",
+                   
+                   )
 
     register("ribetl", desc, ribetl, logger=logger)
 
@@ -454,13 +458,20 @@ def register_ribrepr_command(logger):
     )
     register("ribrep", desc, ribosome_representation, logger=logger)
 
+def register_ribmovie_command(logger):
+    from chimerax.core.commands import CmdDesc, register
+    from chimerax.atomic import AtomicStructureArg, Chain, Residue, Atom
+
+    desc = CmdDesc(
+        required           = [("structure", StringArg)],
+        required_arguments = ["structure"],
+        synopsis           = "making movies",
+    )
+    register("ribmovie", desc, produce_and_save_movie, logger=logger)
 
 register_ribrepr_command(session.logger)
 register_ribetl_command(session.logger)
+register_ribmovie_command(session.logger)
 
 
-
-run(session,"ribetl 5AFI")
-run(session,"ribrep #1")
-run(session,"save 5afi.png width 400 height 400 transparentBackground true")
 

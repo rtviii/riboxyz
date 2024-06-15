@@ -210,8 +210,6 @@ def get_stats():
         # "chain_classes": {key: chain_classes[key] for key in sorted(chain_classes)},
     }).model_dump()
 
-
-
 def run_composition_stats():
     with open(os.path.join(ASSETS_PATH,"structure_composition_stats.json"), "w") as of:
         d = get_stats()
