@@ -7,7 +7,7 @@ from Bio.PDB.Structure import Structure
 from Bio.PDB.Chain import Chain
 from loguru import logger
 import requests
-from ribctl import AMINO_ACIDS_3_TO_1_CODE, CLASSIFICATION_REPORTS
+from ribctl import AMINO_ACIDS_3_TO_1_CODE, CHAINSPLITTER_PATH, CLASSIFICATION_REPORTS
 from ribctl.lib.libtax import PhylogenyNode, PhylogenyRank, Taxid
 from ribctl.lib.tunnel import ptc_resdiues_get, ptc_residues_calculate_midpoint
 from ribctl.lib.utils import download_unpack_place, open_structure
@@ -396,6 +396,37 @@ class Assets:
 
     #TODO: ChimeraX splitchain
     async def upsert_chains(self):
+        print(CHAINSPLITTER_PATH)
+        exit()
+        try:
+            # Command to run ChimeraX with the script
+            command = ['chimerax', '--script', script_path]
+
+            # Create and run the subprocess
+            process = await asyncio.create_subprocess_exec(
+                *command,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE
+            )
+
+            # Wait for the subprocess to complete and capture output
+            stdout, stderr = await process.communicate()
+
+            # Check if the process was successful
+            if process.returncode == 0:
+                print("ChimeraX script executed successfully.")
+                print("Output:", stdout.decode())
+            else:
+                print("ChimeraX script execution failed.")
+                print("Error:", stderr.decode())
+
+            return process.returncode, stdout.decode(), stderr.decode()
+
+        except Exception as e:
+            print(f"An error occurred: {str(e)}")
+            return None, None, str(e)
+
+        
         ...
 
     async def upsert_ptc(self, overwrite: bool = False):

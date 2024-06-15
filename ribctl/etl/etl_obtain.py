@@ -29,7 +29,7 @@ def asset_routines(
         coroutines.append(RA.upsert_ptc(overwrite))
 
     if AssetClass.chains in assetlist:
-        coroutines.append(...)  # todo: chimerax split chains (get 1.8 build)
+        coroutines.append(RA.upsert_chains())  # todo: chimerax split chains (get 1.8 build)
 
     return coroutines
 

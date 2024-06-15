@@ -3,13 +3,11 @@ import json
 import os
 import sys
 from chimerax.core.commands import register, CmdDesc
-from chimerax.atomic import ResiduesArg, Chains, ChainArg, StructureArg
 from chimerax.atomic import Structure, AtomicStructure, Chain
 from chimerax.core.commands import run, runscript
 from chimerax.core.commands import CmdDesc, register, StringArg
 
 # https://mail.cgl.ucsf.edu/mailman/archives/list/chimera-users@cgl.ucsf.edu/thread/EOUA5K3CZU6DJYVPISR3GFWHCISR6WGV/
-
 
 RIBETL_DATA = os.environ.get("RIBETL_DATA", "/home/rtviii/dev/RIBETL_DATA")
 
@@ -363,7 +361,6 @@ CHIMERAX_COLORS = [
     ["black", "#000000"],
 ]
 
-
 def get_polymer_color(polymer_class:str):
     polyix      = list(map(lambda x: x.value, (PolymerClass)))
     class_index = polyix.index(polymer_class) % len(polyix)
@@ -418,9 +415,6 @@ def ribosome_representation(session, structure: AtomicStructure):
 
     run(session, "graphics silhouettes true width 1")
     run(session, "light soft")
-
-
-
 
 # # ! Didn't work out for now. Chimerax segfaults when looped on this.
 def produce_and_save_movie(session, structure:str):

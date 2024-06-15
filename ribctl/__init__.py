@@ -15,10 +15,11 @@ LOGS_PATH              = os.path.join(pathlib.Path(__file__).parent, "logs")
 CLASSIFICATION_REPORTS = os.path.join(pathlib.Path(__file__).parent, "logs","hmm_classification_reports")
 
 #! ------------- assets ----------------
-ASSETS_PATH       = os.path.join(pathlib.Path(__file__).parent, "assets")
-MUSCLE_BIN        = os.path.join(ASSETS_PATH, "muscle3.8.1")
-NCBI_TAXDUMP_GZ   = os.path.join(ASSETS_PATH, "taxdump.tar.gz")
-NCBI_TAXA_SQLITE  = os.path.join(ASSETS_PATH, "taxa.sqlite")
+ASSETS_PATH        = os.path.join(pathlib.Path(__file__).parent, "assets")
+MUSCLE_BIN         = os.path.join(ASSETS_PATH, "muscle3.8.1")
+NCBI_TAXDUMP_GZ    = os.path.join(ASSETS_PATH, "taxdump.tar.gz")
+NCBI_TAXA_SQLITE   = os.path.join(ASSETS_PATH, "taxa.sqlite")
+CHAINSPLITTER_PATH = os.path.join(pathlib.Path(__file__).parent.parent, "chimerax", "chainsplitter.py")
 
 #! -------------- locations
 EXIT_TUNNEL_WORK  = os.path.join(ASSETS_PATH, "exit_tunnel_work")

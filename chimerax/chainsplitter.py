@@ -1,9 +1,6 @@
 import os
-from pprint import pprint
-from chimerax.core.commands import run, runscript ,StringArg
+from chimerax.core.commands import run ,StringArg
 from chimerax.atomic import all_atomic_structures
-
-
 
 RIBETL_DATA = os.environ.get("RIBETL_DATA")
 
@@ -15,12 +12,10 @@ def chainsplitter(session, rcsb_id:str):
     for s in all_atomic_structures(session):
         for chain in s.chains:
             cid_to_spec[chain.chain_id] = s.atomspec
-    
+
     for auth_asym_id, model_n in cid_to_spec.items():
         chain_path = os.path.join(RIBETL_DATA, rcsb_id, "CHAINS", f"{rcsb_id}_{auth_asym_id}.cif")
         run(session, "save {} {}".format(chain_path, model_n))
-
-        
 
 def register_ribrepr_command(logger):
     from chimerax.core.commands import CmdDesc, register
