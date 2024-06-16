@@ -14,7 +14,7 @@ tag = "mmcif"
 def polymer(request, rcsb_id:str, auth_asym_id:str):
     rcsb_id        = rcsb_id.upper()
     RO             = RibosomeOps(rcsb_id)
-    chain_fullpath = os.path.join(RO.paths.polymers_dir, f'{rcsb_id}_{auth_asym_id}.cif')
+    chain_fullpath = os.path.join(RO.paths.chains_dir, f'{rcsb_id}_{auth_asym_id}.cif')
     
     print( chain_fullpath)
     # Ensure the file exists

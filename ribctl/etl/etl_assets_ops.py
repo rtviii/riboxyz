@@ -58,8 +58,8 @@ class AssetPath:
         return os.path.join(self.dir, f"{self.rcsb_id}.json")
 
     @property
-    def polymers_dir(self):
-        return f"{self.dir}/polymers"
+    def chains_dir(self):
+        return f"{self.dir}/CHAINS"
 
     @property
     def classification_report(self):
@@ -377,7 +377,7 @@ class Assets:
             case AssetClass.ptc:
                 return os.path.exists(self.paths.ptc)
             case AssetClass.chains:
-                return os.path.exists(self.paths.polymers_dir) and len(os.listdir(self.paths.polymers_dir))> 0
+                return os.path.exists(self.paths.chains_dir) and len(os.listdir(self.paths.chains_dir))> 0
             case AssetClass.thumbnail:
                 return os.path.exists(self.paths.thumbnail)
             case _:

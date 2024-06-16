@@ -1,10 +1,14 @@
 import os
 from chimerax.core.commands import run ,StringArg
 from chimerax.atomic import all_atomic_structures
+from ribctl.etl.etl_assets_ops import Assets
 
 RIBETL_DATA = os.environ.get("RIBETL_DATA")
 
+
+
 def chainsplitter(session, rcsb_id:str):
+    run(session, "ribetl {}".format(rcsb_id))
     run(session, "split chains")
     rcsb_id     = rcsb_id.upper()
     cid_to_spec = {}
@@ -13,9 +17,14 @@ def chainsplitter(session, rcsb_id:str):
         for chain in s.chains:
             cid_to_spec[chain.chain_id] = s.atomspec
 
+    chains_dir = Assets(rcsb_id).paths.chains_dir
+    if not os.path.exists(chains_dir):
+        os.makedirs(chains_dir)
+
     for auth_asym_id, model_n in cid_to_spec.items():
-        chain_path = os.path.join(RIBETL_DATA, rcsb_id, "CHAINS", f"{rcsb_id}_{auth_asym_id}.cif")
+        chain_path = os.path.join(chains_dir, f"{rcsb_id}_{auth_asym_id}.cif")
         run(session, "save {} {}".format(chain_path, model_n))
+    run(session, "close all")
 
 def register_ribrepr_command(logger):
     from chimerax.core.commands import CmdDesc, register

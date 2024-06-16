@@ -428,19 +428,6 @@ def produce_and_save_movie(session, structure:str):
     run(session, "movie encode /home/rtviii/dev/riboxyz/chimerax/movies/{}.mp4".format(RCSB_ID))
     run(session, "close all")
 
-def register_ribetl_command(logger):
-    def ribetl(session, rcsb_id:str):
-        rcsb_id = rcsb_id.upper()
-        run(session, "open /home/rtviii/dev/RIBETL_DATA/{}/{}.cif".format(rcsb_id, rcsb_id))
-    desc = CmdDesc( required= [("rcsb_id", StringArg)], 
-
-        required_arguments = ["structure"],
-        synopsis           = "open struct",
-                   
-                   )
-
-    register("ribetl", desc, ribetl, logger=logger)
-
 def register_ribrepr_command(logger):
     from chimerax.core.commands import CmdDesc, register
     from chimerax.atomic import AtomicStructureArg, Chain, Residue, Atom
@@ -464,7 +451,6 @@ def register_ribmovie_command(logger):
     register("ribmovie", desc, produce_and_save_movie, logger=logger)
 
 register_ribrepr_command(session.logger)
-register_ribetl_command(session.logger)
 register_ribmovie_command(session.logger)
 
 
