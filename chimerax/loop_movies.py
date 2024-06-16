@@ -2,16 +2,15 @@ import os
 from chimerax.core.commands import run
 from concurrent.futures import ThreadPoolExecutor
 
-DEST_DIR = "/home/rtviii/dev/riboxyz/chimerax/movies"
+RIBETL_DATA = os.environ.get("RIBETL_DATA")
 
-for rcsb_id in os.listdir('/home/rtviii/dev/RIBETL_DATA'):
-    movie_dir = os.path.join(DEST_DIR, "{}.mp4".format(rcsb_id))
-    print("Attempting to write ", movie_dir)
-    print("Listdir:", os.listdir(DEST_DIR))
+for rcsb_id in os.listdir(RIBETL_DATA):
+    try:
+        run(session, "ribetl {}".format(rcsb_id))
+        run(session, "ribmovie {}".format(rcsb_id))
+        run(session, "close all")
+    except Exception as e:
+        print(e)
+        
 
-    if os.path.join(DEST_DIR, rcsb_id, ".mp4") in os.listdir(DEST_DIR):
-        print("Skipping {}. Exists".format(rcsb_id))
-        continue
-    else:
-        run(session,"ribmovie {}".format(rcsb_id))
         
