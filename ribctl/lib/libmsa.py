@@ -115,11 +115,7 @@ def util__backwards_match(aligned_target: str, resid: int):
     Basically, "count back ignoring gaps" until you arrive at @resid
     """
     if resid > len(aligned_target):
-        exit(
-            IndexError(
-                f"Passed residue with invalid index ({resid}) to back-match to target.Seqlen:{len(aligned_target)}"
-            )
-        )
+        raise IndexError( f"Passed residue with invalid index ({resid}) to back-match to target.Seqlen:{len(aligned_target)}" ) 
     counter_proper = 0
     for i, char in enumerate(aligned_target):
         if i == resid:
