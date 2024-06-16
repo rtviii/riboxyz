@@ -21,6 +21,6 @@ def full_upload():
         for rcsb_id in sorted(Assets.list_all_structs()):
             fut = executor.submit(partial(adapter.add_structure, rcsb_id, True))
             futures.append(fut)
-        wait(futures, return_when=ALL_COMPLETED)
+    wait(futures, return_when=ALL_COMPLETED)
 
 full_upload()
