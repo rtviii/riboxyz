@@ -5,8 +5,6 @@ from chimerax.atomic import all_atomic_structures
 
 RIBETL_DATA = os.environ.get("RIBETL_DATA")
 
-
-
 def chainsplitter(session, rcsb_id:str):
     run(session, "split chains")
     rcsb_id     = rcsb_id.upper()
@@ -27,12 +25,10 @@ def chainsplitter(session, rcsb_id:str):
 def register_ribrepr_command(logger):
     from chimerax.core.commands import CmdDesc, register
     from chimerax.atomic import AtomicStructureArg, Chain, Residue, Atom
-
     desc = CmdDesc(
         required           = [("rcsb_id", StringArg)],
         required_arguments = ["rcsb_id"],
-        synopsis           = "representation ",
-    )
+        synopsis           = "representation")
     register("chainsplitter", desc, chainsplitter, logger=logger)
 
 register_ribrepr_command(session.logger)
