@@ -51,7 +51,7 @@ class AssetPath:
 
     @property
     def ptc(self):
-        return os.path.join( RIBETL_DATA, self.rcsb_id, "{}_PTC.json".format(self.rcsb_id) )
+        return os.path.join( self.dir, "{}_PTC.json".format(self.rcsb_id) )
 
     @property
     def profile(self):
@@ -63,11 +63,15 @@ class AssetPath:
 
     @property
     def classification_report(self):
-        return os.path.join(CLASSIFICATION_REPORTS, f"{self.rcsb_id}.json")
+        return os.path.join(self.dir, f"classification_report_{self.rcsb_id}.json")
 
     @property
     def thumbnail(self):
         return f"{self.dir}/{self.rcsb_id}.png"
+
+    @property
+    def tunnel_dir(self):
+        return os.path.join(self.dir, "TUNNELS")
 
 class RibosomeOps:
     rcsb_id: str
