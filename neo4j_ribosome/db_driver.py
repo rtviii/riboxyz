@@ -14,6 +14,7 @@ sys.dont_write_bytecode = True
 def full_upload():
     adapter = Neo4jBuilder(NEO4J_URI, NEO4J_USER, NEO4J_CURRENTDB)
     adapter.initialize_new_instance()
+
     futures: list[Future] = []
 
     with ThreadPoolExecutor(max_workers=10) as executor:
