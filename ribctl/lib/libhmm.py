@@ -162,7 +162,7 @@ class HMMs():
             """This is just for housekeeping. Keeping sequences with which the HMMs were seeded as state on the classifier."""
             return (candidate_class, [*fasta_phylogenetic_correction(candidate_class, tax_id, max_n_neighbors=max_seed_seqs)] )
 
-        with concurrent.futures.ThreadPoolExecutor(max_workers=25) as executor:
+        with concurrent.futures.ProcessPoolExecutor(max_workers=10) as executor:
             loading_futures = []
             loaded_results  = []
 
