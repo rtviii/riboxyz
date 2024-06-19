@@ -1,6 +1,7 @@
 from io import BytesIO
 import json
 import os
+from pprint import pprint
 from django.http import HttpResponse, JsonResponse, HttpResponseServerError
 from ninja import Router
 from ribctl import RIBETL_DATA
@@ -14,6 +15,7 @@ TAG              = "Polymer Classes"
 @classification_router.get('/polynucleotide',  tags=[TAG], response=list[RNA])
 def polynucleotide_class(request,rna_class:PolynucleotideClass):
     """All members of the given RNA class: small and large subunit, cytosolic and mitochondrial RNA; tRNA.  """
+
     agg = []
     rna_class = rna_class.value
 
@@ -24,9 +26,11 @@ def polynucleotide_class(request,rna_class:PolynucleotideClass):
             print(e)
 
         if x is not None:
-            agg.append(x.model_dump_json())
+            pprint(x.model_dump())
+            agg.append(x.model_dump())
 
-    return HttpResponse(agg)
+
+    return JsonResponse(agg, safe=False)
 
 @classification_router.get('/polypeptide',  tags=[TAG], response=list[Protein])
 def polypeptide_class(request,protein_class:ProteinClass):
@@ -42,9 +46,9 @@ def polypeptide_class(request,protein_class:ProteinClass):
 
         if x is not None:
             print("Found a protein class in struct ",protein_class, rcsb_id)
-            agg.append(x.model_dump_json())
+            agg.append(x.model_dump())
 
-    return HttpResponse(agg)
+    return JsonResponse(agg, safe=False)
 
 
 @classification_router.get('/lifecyle_factor',  tags=[TAG], response=list[Protein])
@@ -58,6 +62,6 @@ def lifecycle_factor_class(request,factor_class:LifecycleFactorClass):
         except Exception as e:
             print(e)
         if x is not None:
-            agg.append(x.model_dump_json())
+            agg.append(x.model_dump())
 
-    return HttpResponse(agg)
+    return JsonResponse(agg, safe=False)

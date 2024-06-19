@@ -29,7 +29,7 @@ INSTALLED_APPS = [
     'ninja']
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
+    #'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -41,11 +41,11 @@ MIDDLEWARE = [
 ]
 CORS_ALLOW_ALL_ORIGINS = True # If this is used then `CORS_ALLOWED_ORIGINS` will not have any effect
 CORS_ALLOW_CREDENTIALS = True
-# CORS_ALLOWED_ORIGINS = [
-#     'https://*',
-#     'http://*',
-#     'localhost',
-# ]
+CORS_ORIGIN_WHITELIST = ("https://ribosome.xyz", "https://*", "http://*")
+SECURE_CROSS_ORIGIN_OPENER_POLICY = None
+
+
+
 
 ROOT_URLCONF = 'ribxz_api.urls'
 
@@ -97,5 +97,5 @@ USE_TZ        = True
 STATIC_URL       = '/static/'
 
 # STATIC_ROOT is where all the static files are collected by manage.py collectstatic
-STATIC_ROOT      = '/srv/www/static'
+STATIC_ROOT      = os.path.join(BASE_DIR,'staticfiles')
 STATICFILES_DIRS = [ os.path.join(BASE_DIR, 'static'), ]
