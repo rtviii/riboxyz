@@ -1,8 +1,30 @@
 
 # `riboxyz`
 
-<p align="center">
-<img src="./logo.gif" height="400" width="700" >
+
+<div style="display: flex; align-items: center;">
+  <div style="width: 30%;">
+    <!-- Image -->
+    <img src="./logo.png" alt="Riboxyz Logo" style="max-width: 80%; padding:10px; ">
+  </div>
+  <div style="margin-left:10px; width:60%">
+    <!-- Overview Text -->
+    <p><code>riboxyz</code> (available at https://ribosome.xyz) is a package and a database application that provides organized access to ribosome structures, with several tools for visualisation and study. The database is up-to-date with the Protein Data Bank (PDB), provides a standardized nomenclature to ribosomal components:</p>
+    <ul>
+      <li>cytosolic and mitochondrial proteins</li>
+      <li>cytosolic and mitochondrial rRNA</li>
+      <li>tRNA</li>
+      <li>elongation, initiation, termination factors (archaeal, bacterial and eukaryotic)</li>
+    </ul>
+    <p>The provided datatypes allow for seamless comparison and programming against ribosomal components across all the available structures. In addition, the application has several specialized visualization tools, including the identification and prediction of ligand binding sites, and 3D superimposition of subchains.</p>
+    <p>The accompanying publication can be found <a href="#">here</a>.</p>
+  </div>
+</div>
+
+
+
+<!-- <p align="center">
+<img src="./logo.png" height="400" width="450" >
 </p>
 
 
@@ -18,7 +40,7 @@
 The provided datatypes allow for seamless comparison and programming against ribosomal components across all the available structures. In addition, the application has several specialized visualization tools, including the identification and prediction of ligand binding sites, and 3D superimposition of subchains.
 
 
-[ The accompanying publication can be found here ](https://academic.oup.com/nar/article/51/D1/D509/6777803).
+[ The accompanying publication can be found here ](https://academic.oup.com/nar/article/51/D1/D509/6777803). -->
 
 
 ------------------------------------------------------------------------------------------
