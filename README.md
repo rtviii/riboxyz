@@ -4,7 +4,7 @@
 
 <div style="display: flex; align-items: center; max-width: 800px; margin: 0 auto;">
   <div style="width: 30%;">
-  <img src="./logo.png" alt="Riboxyz Logo" style="max-width: 100%; padding: 10px;">
+  <img src="./logo.png" alt="Riboxyz Logo" style="max-width: 50%; padding: 10px;">
   </div>
   <div style="margin-left: 10px; width: 70%;">
     <p><code>riboxyz</code> (available at https://ribosome.xyz) is a package and a database application that provides organized access to ribosome structures, with several tools for visualisation and study. The database is up-to-date with the Protein Data Bank (PDB), provides a standardized nomenclature to ribosomal components:</p>
