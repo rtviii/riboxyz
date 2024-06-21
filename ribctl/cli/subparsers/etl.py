@@ -38,9 +38,9 @@ def etl(ctx: Context):
 @etl.command()
 @click.pass_context
 @click.argument( "assets", required=True, nargs=-1, type=click.Choice(AssetClass._member_names_) )
-@click.option("--overwrite", required=False, type=bool)
-@click.option( "--rcsb_sync", required=False, is_flag=True, default=False)
-@click.option( "--all_structs", required=False, is_flag=True, default=False)
+@click.option("--overwrite"  , required=False, is_flag=True, default=False)
+@click.option("--rcsb_sync"  , required=False, is_flag=True, default=False)
+@click.option("--all_structs", required=False, is_flag=True, default=False)
 def assets(ctx: Context, assets, overwrite, rcsb_sync, all_structs):
     rcsb_id = ctx.obj['rcsb_id']
     assets = list(map(AssetClass.from_str, assets))

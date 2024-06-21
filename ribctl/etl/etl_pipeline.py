@@ -8,9 +8,7 @@ import pyhmmer
 from pyhmmer.plan7 import HMM
 import requests
 from ribctl.etl.etl_assets_ops import RibosomeOps, Structure
-from ribctl.lib.libhmm import (
-    HMMClassifier,
-)
+from ribctl.lib.libhmm import ( HMMClassifier, )
 from ribctl.lib.schema.types_ribosome import (
     RNA,
     AssemblyInstancesMap,
@@ -26,6 +24,8 @@ from ribctl.lib.schema.types_ribosome import (
     CytosolicProteinClass,
     RibosomeStructure,
 )
+
+
 from ribctl.etl.gql_querystrings import single_structure_graphql_template
 from ribctl.logs.loggers import get_etl_logger
 logger = get_etl_logger()
@@ -84,7 +84,7 @@ class ReannotationPipeline:
         self.rcsb_nonpolymers = (len(self.rcsb_data_dict["nonpolymer_entities"]) if self.rcsb_data_dict["nonpolymer_entities"] != None else 0)
 
         # What is this garbage, you ask? Let me tell you.
-        # The rcsb_data_dict contains a list of polymer entities, each of which has 4 properties(hidden in ..._container_identifiers):
+        # The rcsb_data_dict contains a list of polymer entities, each of which has 4 properties (in ..._container_identifiers):
 
         # - auth_asym_ids  : this is the closest you have to an id of the polymer in the structure, but if there are multiple assemblies, this is an array of the two chains that are the same polymer in each assembly.
         # - asym_ids       : this is the ids of the this AND all other chains that are the same assymteric unit as the given polymer. So, useless for purposes of identification:
@@ -96,11 +96,7 @@ class ReannotationPipeline:
 
         # Given this state of affairs, if we want to be able to uniquely (coordinate-wise) identify each chain, we need to account for cases where RCSB has provided two and sometimes four polymer collapsed into one representation.
         # We do this by counting assymetric_ids of each polymer and hold that as a
-        self.polymers_target_count = functools.reduce(
-            lambda count, poly: count + len(poly["rcsb_polymer_entity_container_identifiers"]["asym_ids"]),
-            self.rcsb_data_dict["polymer_entities"],
-            0,
-        )
+        self.polymers_target_count = functools.reduce( lambda count, poly: count + len(poly["rcsb_polymer_entity_container_identifiers"]["asym_ids"]), self.rcsb_data_dict["polymer_entities"], 0)
 
     #! Reshaping
 

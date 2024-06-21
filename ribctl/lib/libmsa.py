@@ -70,9 +70,7 @@ class Fasta:
     def pick_taxids(self, taxids: list[str]) -> list[SeqRecord]:
         for taxid in set(taxids):
             if taxid not in self.all_taxids():
-                raise Exception(
-                    f"Taxid {taxid} not found in records. Violated assumption. Did you alter the fast archives recently?"
-                )
+                raise Exception( f"Taxid {taxid} not found in records. Violated assumption. Did you alter the fast archives recently?" )
 
         # ? ------ Filter duplicates. I discovered some duplicate sequences(and taxids) which breaks the HMM pipeline later on.
         # ? A cleaner solution would be to remove the duplicates from the fasta archives. Later.

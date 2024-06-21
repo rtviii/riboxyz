@@ -15,8 +15,6 @@ import concurrent.futures
 # logger= get_classification_logger()
 hmm_cachedir = ASSETS['__hmm_cache']
 
-#? Constructon
-#! This ought to be in libmsa
 def fasta_phylogenetic_correction(candidate_class:PolymerClass, organism_taxid:int, max_n_neighbors:int=10)->Iterator[SeqRecord]:
     """Given a candidate class and an organism taxid, retrieve the corresponding fasta file, and perform phylogenetic correction on it."""
 
@@ -50,9 +48,9 @@ def fasta_phylogenetic_correction(candidate_class:PolymerClass, organism_taxid:i
     if len( list(records.records) ) == 0 :
         raise Exception("Empty fasta file: {}".format(fasta_path))
 
-    ids        = records.all_taxids()
-    phylo_nbhd = phylogenetic_neighborhood(list(map(lambda x: str(x),ids)), str(organism_taxid), max_n_neighbors)
-    seqs       = records.pick_taxids(phylo_nbhd)
+    ids            = records.all_taxids()
+    phylo_nbhd_ids = phylogenetic_neighborhood(list(map(lambda x: str(x),ids)), str(organism_taxid), max_n_neighbors)
+    seqs           = records.pick_taxids(phylo_nbhd_ids)
 
     return iter(seqs)
 
@@ -163,6 +161,7 @@ class HMMs():
             return (candidate_class, [*fasta_phylogenetic_correction(candidate_class, tax_id, max_n_neighbors=max_seed_seqs)] )
 
         with concurrent.futures.ProcessPoolExecutor(max_workers=10) as executor:
+
             loading_futures = []
             loaded_results  = []
 
@@ -173,6 +172,7 @@ class HMMs():
 
             for future in concurrent.futures.as_completed(loading_futures): 
                 loaded_results.append(future.result())
+
             # ! populate seqs records
             for (cls, seedseqs) in loaded_results:
                  self.class_hmms_seed_sequences.update({str( cls.value ):seedseqs})
@@ -180,9 +180,11 @@ class HMMs():
             # ! clean containers
             loaded_results, loading_futures = [],[]
             # ! build hmms
+
             for candidate_class in candidate_classes:
                 future = executor.submit(hmm_produce,candidate_class, tax_id, self.class_hmms_seed_sequences[candidate_class.value], no_cache=no_cache)
                 loading_futures.append(future)
+
             for future in concurrent.futures.as_completed(loading_futures):
                 loaded_results.append(future.result())
 
