@@ -47,7 +47,6 @@ The application assumes three main components:
 - `neo4j-adapter`: a Neo4j database instance + `neo4j-adapter` package for managing the database (ingesting, querying, etc.)
 - `api`: a Django-based restful API for querying the database and feeding the clients (frontend included)
 
-
 ### Installation
 
 There is a number of config files and variables, some relevant to either of the packages above and some shared.

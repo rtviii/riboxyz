@@ -5,7 +5,7 @@ FROM ubuntu
 
 # Disable bytecode writing: Python
 ENV PYTHONDONTWRITEBYTECODE 1
-# ENV PYTHONUNBUFFERED 1
+ENV PYTHONUNBUFFERED 1
 
 # ----- SETUP -------------------
 # vars inside the container
@@ -42,11 +42,17 @@ RUN pip3 install gunicorn
 COPY api ${RIBXZ_API}
 RUN pip3 install -r ${RIBXZ_API}/reqs.txt
 
+
+
+
+
 # Django ports
 EXPOSE 8000 8001 8002
-
-# Be careful given that both the whole django project and the main module are called `rbxz_bend`. (hence not using the $DJANGO here)
 COPY ribctl ${RIBCTL}
 COPY neo4j_ribosome ${NEO4J_RIBOSOME}
 WORKDIR ${RIBXZ_API}
+# This might need permissions from the webserver (ex. nginx) to serve docs
+RUN python manage.py collectstatic --noinput  
+
+
 ENTRYPOINT ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "10", "ribxz_api.wsgi:application","--reload", "--timeout", "500"]

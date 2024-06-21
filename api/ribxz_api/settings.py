@@ -12,10 +12,10 @@ RIBCTL     = os.path.abspath(os.path.join(Path(BASE_DIR).parent.absolute()))
 # print("Sourced RIBCTL: {}".format(RIBCTL))
 sys.path.append(RIBCTL)       #! hack until ribctl is a separate pypi project
 
-RIBETL_DATA = os.environ["RIBETL_DATA"] if os.environ["RIBETL_DATA"] else os.path.join(BASE_DIR, "ribetldata")
+RIBETL_DATA = os.environ.get("RIBETL_DATA")
+if RIBETL_DATA is None:
+    raise Exception("$RIBETL_DATA is not set in the environment.")
 
-# ※ Dont' forget to export pymol path ( we want to ship a built pymol, but python needs to be aware of it)
-# export PYMOL_PATH=/home/rxz/dev/pymol3.11 && export PYTHONPATH="$PYTHONPATH:$PYMOL_PATH/modules/:"
 ALLOWED_HOSTS = ["*"]
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -87,15 +87,13 @@ USE_TZ        = True
 
 
 
-# NINJA_DOCS_VIEW  = 'swagger'
-
-# STATIC_URL       = '/static/'
-# STATIC_ROOT      = os.path.join(BASE_DIR, 'staticfiles')
-# STATICFILES_DIRS = [ os.path.join(BASE_DIR, 'static'), ]
-
 # STATIC_URL lets you namespace your static files to avoid url conflicts and make them inaccessible from the browser
 STATIC_URL       = '/static/'
 
 # STATIC_ROOT is where all the static files are collected by manage.py collectstatic
 STATIC_ROOT      = os.path.join(BASE_DIR,'staticfiles')
 STATICFILES_DIRS = [ os.path.join(BASE_DIR, 'static'), ]
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, "mediafiles")
+
