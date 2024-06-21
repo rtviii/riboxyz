@@ -217,6 +217,10 @@ class PolymerClassesOrganismScanner():
     - each HMM is representative of a polymer class parametrized by a seed MSA 
     - a sequence is searched against all HMMs in the registry
     """
+    def get_hmms_amino(self)->list[tuple[PolymerClass,HMM]]:
+        return list(filter(lambda x: x[0] in [*list(CytosolicProteinClass),*list(LifecycleFactorClass),*list(MitochondrialProteinClass )], self.class_hmms_registry.items()))
+    def get_hmms_rna(self)->list[tuple[PolymerClass,HMM]]:
+        return list(filter(lambda x: x[0] in [*list(PolynucleotideClass)], self.class_hmms_registry.items()))
 
     def __init__(self, organism_taxid:int, candidate_classes:list[PolymerClass], no_cache:bool=False, max_seed_seqs:int=5) -> None:
 
@@ -291,7 +295,8 @@ class PolymerClassesOrganismScanner():
         """analogue of `scan`"""
         print("Scanner ", self.organism_tax_id, " is classifying sequence: ", target_seq.name.decode())
         _ = []
-        for (candidate_class, hmm) in self.class_hmms_registry.items():
+        hmms = self.get_hmms_amino() if alphabet == pyhmmer.easel.Alphabet.amino() else self.get_hmms_rna()
+        for (candidate_class, hmm) in hmms:
             result = seq_evaluate_v_hmm(target_seq,alphabet, hmm)
             _.append(( candidate_class,result ))
         return _
