@@ -30,7 +30,7 @@ from ribctl.etl.etl_pipeline import (
 from ribctl.etl.etl_obtain import obtain_asssets_threadpool
 from ribctl.lib.libhmm import (
     HMMClassifier,
-    HMMs,
+    PolymerClassScanner,
     hmm_create,
     hmm_produce,
 )
@@ -430,7 +430,7 @@ elif sys.argv[1] == "hmmx":
     # for rna in [ * p.polymeric_factors]:
     #     pprint(rna)
 
-    hmms = HMMs(cca["src_organism_ids"][0], [p for p in RNAClass], no_cache=True)
+    hmms = PolymerClassScanner(cca["src_organism_ids"][0], [p for p in RNAClass], no_cache=True)
     hmms.scan_seq(alphabet, [SeqRecord(cca["entity_poly_seq_one_letter_code_can"])])
     # pprint(hmms.info())
 

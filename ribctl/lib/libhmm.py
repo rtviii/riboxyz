@@ -141,7 +141,7 @@ def hmm_produce(candidate_class: PolymerClass, organism_taxid:int, seed_sequence
             hmm_cache(HMM)
         return (candidate_class, HMM )
 
-class HMMs():
+class PolymerClassScanner():
     # https://pyhmmer.readthedocs.io/en/stable/api/plan7.html#pyhmmer.plan7.HMM
     """
     STEPS (bottom-up):
@@ -150,7 +150,7 @@ class HMMs():
     - a sequence is searched against all HMMs in the registry
     """
 
-    def __init__(self, tax_id:int, candidate_classes:list[PolymerClass],  no_cache:bool=False, max_seed_seqs:int=5) -> None:
+    def __init__(self, tax_id:int, candidate_classes:list[PolymerClass], no_cache:bool=False, max_seed_seqs:int=5) -> None:
 
         self.organism_tax_id = tax_id
         self.class_hmms_seed_sequences : dict[PolymerClass, list[SeqRecord]] = {}
@@ -206,17 +206,11 @@ class HMMs():
         #          self.class_hmms_registry.update({cls.value:hmm})
 
 
-# # !-
-#         for candidate_class in candidate_classes:
-#             seqs                                       = [*fasta_phylogenetic_correction(candidate_class, tax_id, max_n_neighbors=max_seed_seqs)]
-#             self.seed_sequences[candidate_class.value] = seqs
-#             self.hmms_registry[candidate_class.value]  = hmm_produce(candidate_class, tax_id, no_cache=no_cache, max_seed_seq=max_seed_seqs)
-#             print("Loded HMM: {}".format(candidate_class))
-# # !-
 
 
     def classify_seq(self, alphabet, target_seq:DigitalSequence)->list[Tuple[PolymerClass, TopHits]]:
         """analogue of `scan`"""
+        print("Scanner ", self.organism_tax_id, " is classifying sequence: ", target_seq.name.decode())
         _ = []
         for (candidate_class, hmm) in self.class_hmms_registry.items():
             result = seq_evaluate_v_hmm(target_seq,alphabet, hmm)
@@ -225,17 +219,17 @@ class HMMs():
 
 
 
-    def scan_seq(self, alphabet:pyhmmer.easel.Alphabet, target_seq:SeqRecord):
-        """Construct a scan pipeline for the current classifier"""
+    # def scan_seq(self, alphabet:pyhmmer.easel.Alphabet, target_seq:SeqRecord):
+    #     """Construct a scan pipeline for the current classifier"""
 
-        # convert seq records to a list of pyhmmer.DigitalSequences
-        query_seqs = []
-        for seq_record in target_seqs:
-            query_seq  = pyhmmer.easel.TextSequence(name=bytes(seq_record.id,'utf-8'), sequence=seq_record.seq)
-            query_seqs.append(query_seq.digitize(alphabet))
+    #     # convert seq records to a list of pyhmmer.DigitalSequences
+    #     query_seqs = []
+    #     for seq_record in target_seqs:
+    #         query_seq  = pyhmmer.easel.TextSequence(name=bytes(seq_record.id,'utf-8'), sequence=seq_record.seq)
+    #         query_seqs.append(query_seq.digitize(alphabet))
 
-        scans = list(pyhmmer.hmmscan(query_seqs,[*self.class_hmms_registry.values()] ))
-        return scans
+    #     scans = list(pyhmmer.hmmscan(query_seqs,[*self.class_hmms_registry.values()] ))
+    #     return scans
 
     def info(self)->dict:
         """Get info for the constituent HMMs in the current classifier"""
@@ -254,23 +248,27 @@ class HMMClassifier():
     """
     HMMClassifier takes a set of polymer chains and "candidate" polymer classes and returns a classification report for which polymer class best matches the given polymer chain.
 
-    In a nutshell it's an elaborate search engine
+    In a nutshell it's an elaborate search engine: 
+    - each polymer is scanned against all classes' HMM's.
 
-    
+    Each class'es HMM is seeded with a set of known sequences of representatives of that class of [ 5 ] "phylogenetically close" organisms.
+
+    Given that among the list of target polymers multiple taxonomic ids might be present (unusual), we keep the the "organism_scanners" field.
+    If a new taxonomic id appears, a new "scanner" is created and stored
+
     
     """
 
-    # organism_scanners : dict[int, HMMs] 
-    # chains            : list[Polymer] 
-    # alphabet          : pyhmmer.easel.Alphabet
-    # candidate_classes : list[PolymerClass]
+    organism_scanners : dict[int, PolymerClassScanner]
+    chains            : list[Polymer]
+    alphabet          : pyhmmer.easel.Alphabet
+    candidate_classes : list[PolymerClass]
     bitscore_threshold: int = 35
-    # report            : dict
+    report            : dict
 
     def __init__(self, chains: list[Polymer], alphabet:pyhmmer.easel.Alphabet, candidate_classes:list[PolymerClass]) -> None:
         self.alphabet          = alphabet
         self.candidate_classes = candidate_classes
-
         self.chains            = chains
         self.organism_scanners = {}
         self.report            = {}
@@ -278,25 +276,27 @@ class HMMClassifier():
     def pick_best_hit(self, hits:list[dict]) -> list[PolymerClass]:
         if len(hits) == 0:
             return []
+
         sorted_by_biscore = sorted(hits, key=lambda x: x["bitscore"], reverse=True)
         return [ sorted_by_biscore[0]['class_name'] ] if sorted_by_biscore[0]['bitscore'] > self.bitscore_threshold else []
 
     def classify_chains(self)->None:
-        """This is an alternative implementation of `scan_chains` that does not use `hmmscan`.
-         Waiting on https://github.com/althonos/pyhmmer/issues/53 to resolve"""
-
         for chain in self.chains:
+                # --- If the the scanner for this taxid is present, use it. Otherwise create it.
                 organism_taxid = chain.src_organism_ids[0]
                 if organism_taxid not in self.organism_scanners:
-                    hmmscanner                             = HMMs(organism_taxid, self.candidate_classes, no_cache = True, max_seed_seqs = 5)
+                    hmmscanner                             = PolymerClassScanner(organism_taxid, self.candidate_classes, no_cache = True, max_seed_seqs = 5)
                     self.organism_scanners[organism_taxid] = hmmscanner
                 else:
                     hmmscanner = self.organism_scanners[organism_taxid]
+                # --- If the the scanner for this taxid is present, use it. Otherwise create it.
 
                 self.report[chain.auth_asym_id] = []
                 seq_record                      = chain.to_SeqRecord()
                 query_seq                       = pyhmmer.easel.TextSequence(name=bytes(seq_record.id,'utf-8'), sequence=str( seq_record.seq )).digitize(self.alphabet)
-                for ( candidate_class, tophits ) in hmmscanner.classify_seq(self.alphabet, query_seq):
+                cls_hits_tuples                 = hmmscanner.classify_seq(self.alphabet, query_seq)
+
+                for ( candidate_class, tophits ) in cls_hits_tuples:
                     for hit in tophits:
                            d_hit = {
                                 "fasta_seed"        : [str(seqrecord.seq) for seqrecord in hmmscanner.class_hmms_seed_sequences[candidate_class]],
@@ -309,6 +309,17 @@ class HMMClassifier():
                                 "domains"           : [( d.score, d.c_evalue, d.env_from, d.env_to ) for d in hit.domains]
                             }
                            self.report[chain.auth_asym_id].append(d_hit)
+
+    def produce_classification(self)->dict[str,list]:
+        classes = {}
+        for (auth_asym_id,hits) in self.report.items():
+            classes[auth_asym_id] = self.pick_best_hit(hits)
+        return classes
+   
+    def write_classification_report(self,write_path:str)->None:
+        with open(write_path, "w") as outfile:
+            json.dump(self.report, outfile)
+
 
 
     # def ___scan_chains(self)->None:
@@ -344,15 +355,3 @@ class HMMClassifier():
     #                 "domains"           : [( d.score, d.c_evalue, d.env_from, d.env_to ) for d in hit.domains]
     #                 }
     #                self.report[chain.auth_asym_id].append(d_hit)
-
-    def produce_classification(self)->dict[str,list]:
-        classes = {}
-        for (auth_asym_id,hits) in self.report.items():
-            classes[auth_asym_id] = self.pick_best_hit(hits)
-        return classes
-   
-    def write_classification_report(self,write_path:str)->None:
-        with open(write_path, "w") as outfile:
-            json.dump(self.report, outfile)
-
-

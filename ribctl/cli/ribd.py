@@ -4,6 +4,7 @@ sys.dont_write_bytecode = True
 from ribctl.cli.subparsers.ls import ls
 from subparsers.etl import  etl
 from subparsers.db import db
+ce = click.echo
 
 @click.group()
 @click.option('--debug/--no-debug', default=False, help='Enable/disable debug mode')
@@ -22,6 +23,19 @@ def ribd(ctx, debug, config, rcsb_id):
 ribd.add_command(etl)
 ribd.add_command(db)
 ribd.add_command(ls)
+
+
+
+from ribctl import RIBETL_DATA
+from ribctl.etl.etl_assets_ops import RibosomeOps, Structure
+
+@click.command()
+@click.pass_context
+def test(ctx):
+    print("testing ")
+    ...
+
+ribd.add_command(test)
 
 @ribd.command()
 def init():
