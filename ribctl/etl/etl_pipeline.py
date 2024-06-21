@@ -665,6 +665,10 @@ class ReannotationPipeline:
                         _other_polymers.append(poly)
 
         logger.debug("Classifying {}: {} polypeptides, {} polynucleotides, {} other.".format(rcsb_id, len(_prot_polypeptides), len(_rna_polynucleotides), len(_other_polymers)))
+
+
+        import time
+        start_time = time.time()
         if not os.path.exists(RA.paths.classification_report) :
             print("Creating new classifciation report.")
             protein_alphabet      = pyhmmer.easel.Alphabet.amino()
@@ -693,6 +697,7 @@ class ReannotationPipeline:
                     if len(_) <1 : return []
                     return [ _[0]['class_name'] ]
                 reported_classes = { k:access_class(v) for ( k,v ) in full_report.items() }
+        print("--- %s seconds ---" % (time.time() - start_time))
 
         #! PROPAGATE NOMENCLATUERE FROM HMM REPORT TO POLYMERS
         for polymer_dict in _rna_polynucleotides:

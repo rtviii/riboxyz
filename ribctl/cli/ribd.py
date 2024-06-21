@@ -1,9 +1,15 @@
+from pprint import pprint
 import click
 import sys
+
+from ribctl.lib.libhmm import PolymerClassFastaRegistry
 sys.dont_write_bytecode = True
 from ribctl.cli.subparsers.ls import ls
 from subparsers.etl import  etl
 from subparsers.db import db
+from ribctl import RIBETL_DATA
+from ribctl.etl.etl_assets_ops import RibosomeOps, Structure
+
 ce = click.echo
 
 @click.group()
@@ -26,13 +32,12 @@ ribd.add_command(ls)
 
 
 
-from ribctl import RIBETL_DATA
-from ribctl.etl.etl_assets_ops import RibosomeOps, Structure
 
 @click.command()
 @click.pass_context
 def test(ctx):
-    print("testing ")
+    PolyclassRegistry = PolymerClassFastaRegistry()
+    pprint(PolyclassRegistry.registry_fasta)
     ...
 
 ribd.add_command(test)

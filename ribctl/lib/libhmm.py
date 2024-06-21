@@ -15,6 +15,9 @@ import concurrent.futures
 # logger= get_classification_logger()
 hmm_cachedir = ASSETS['__hmm_cache']
 
+
+
+
 def fasta_phylogenetic_correction(candidate_class:PolymerClass, organism_taxid:int, max_n_neighbors:int=10)->Iterator[SeqRecord]:
     """Given a candidate class and an organism taxid, retrieve the corresponding fasta file, and perform phylogenetic correction on it."""
 
@@ -48,8 +51,8 @@ def fasta_phylogenetic_correction(candidate_class:PolymerClass, organism_taxid:i
     if len( list(records.records) ) == 0 :
         raise Exception("Empty fasta file: {}".format(fasta_path))
 
-    ids            = records.all_taxids()
-    phylo_nbhd_ids = phylogenetic_neighborhood(list(map(lambda x: str(x),ids)), str(organism_taxid), max_n_neighbors)
+    ids:list[int] = records.all_taxids("int")
+    phylo_nbhd_ids = phylogenetic_neighborhood(ids, str(organism_taxid), max_n_neighbors)
     seqs           = records.pick_taxids(phylo_nbhd_ids)
 
     return iter(seqs)
@@ -141,6 +144,45 @@ def hmm_produce(candidate_class: PolymerClass, organism_taxid:int, seed_sequence
             hmm_cache(HMM)
         return (candidate_class, HMM )
 
+
+
+class PolymerClassFastaRegistry():
+    """This is a wrapper around fasta records for all polymer classes. Only a few sequences should be picked from it at a time."""
+    registry_fasta : dict[PolymerClass, Fasta ] = {}
+    registry_tax_ids : dict[PolymerClass, list[int] ] = {}
+
+    def __init__(self) :
+
+        for candidate_class in CytosolicProteinClass:
+            fasta_path                             = os.path.join(ASSETS["fasta_proteins_cytosolic"], f"{candidate_class.value}.fasta")
+            self.registry_fasta[candidate_class]   = Fasta(fasta_path)
+            self.registry_tax_ids[candidate_class] = Fasta(fasta_path).all_taxids("int")
+
+        for candidate_class in MitochondrialProteinClass:
+            fasta_path                             = os.path.join(ASSETS["fasta_proteins_mitochondrial"], f"{candidate_class.value}.fasta")
+            self.registry_fasta[candidate_class]   = Fasta(fasta_path)
+            self.registry_tax_ids[candidate_class] = Fasta(fasta_path).all_taxids("int")
+
+        for candidate_class in PolynucleotideClass:
+            fasta_path                             = os.path.join(ASSETS["fasta_rna"], f"{candidate_class.value}.fasta")
+            self.registry_fasta[candidate_class]   = Fasta(fasta_path)
+            self.registry_tax_ids[candidate_class] = Fasta(fasta_path).all_taxids("int")
+
+        for candidate_class in ElongationFactorClass:
+            fasta_path                             = os.path.join(ASSETS["fasta_factors_elongation"], f"{candidate_class.value}.fasta")
+            self.registry_fasta[candidate_class]   = Fasta(fasta_path)
+            self.registry_tax_ids[candidate_class] = Fasta(fasta_path).all_taxids("int")
+
+        for candidate_class in InitiationFactorClass:
+            fasta_path                             = os.path.join(ASSETS["fasta_factors_initiation"], f"{candidate_class.value}.fasta")
+            self.registry_fasta[candidate_class]   = Fasta(fasta_path)
+            self.registry_tax_ids[candidate_class] = Fasta(fasta_path).all_taxids("int")
+            
+
+
+
+
+
 class PolymerClassScanner():
     # https://pyhmmer.readthedocs.io/en/stable/api/plan7.html#pyhmmer.plan7.HMM
     """
@@ -204,9 +246,6 @@ class PolymerClassScanner():
         #     # ! populate hmms
         #     for (cls, hmm) in loaded_results:
         #          self.class_hmms_registry.update({cls.value:hmm})
-
-
-
 
     def classify_seq(self, alphabet, target_seq:DigitalSequence)->list[Tuple[PolymerClass, TopHits]]:
         """analogue of `scan`"""
@@ -355,3 +394,4 @@ class HMMClassifier():
     #                 "domains"           : [( d.score, d.c_evalue, d.env_from, d.env_to ) for d in hit.domains]
     #                 }
     #                self.report[chain.auth_asym_id].append(d_hit)
+
