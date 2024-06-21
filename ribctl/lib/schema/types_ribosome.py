@@ -374,15 +374,10 @@ class Protein(Polymer):
     @staticmethod
     def from_polymer(p: Polymer, **kwargs):
         if kwargs["pfams"] != None and len(kwargs["pfams"]) > 0:
-            pfam_comments = list(
-                set([pfam["rcsb_pfam_comment"] for pfam in kwargs["pfams"]])
-            )
-            pfam_descriptions = list(
-                set([pfam["rcsb_pfam_description"] for pfam in kwargs["pfams"]])
-            )
-            pfam_accessions = list(
-                set([pfam["rcsb_pfam_accession"] for pfam in kwargs["pfams"]])
-            )
+
+            pfam_comments     = list( set([pfam["rcsb_pfam_comment"] for pfam in kwargs["pfams"]]) )
+            pfam_descriptions = list( set([pfam["rcsb_pfam_description"] for pfam in kwargs["pfams"]]) )
+            pfam_accessions   = list( set([pfam["rcsb_pfam_accession"] for pfam in kwargs["pfams"]]) )
 
         else:
             pfam_comments = []

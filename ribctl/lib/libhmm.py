@@ -129,9 +129,13 @@ def hmm_produce(candidate_class: PolymerClass, organism_taxid:int, seed_sequence
     if ( hmm := hmm_check_cache(candidate_class, organism_taxid) ) != None and not no_cache:
         return (candidate_class, hmm )
     else:
-        if candidate_class in CytosolicProteinClass or candidate_class in LifecycleFactorClass or candidate_class in MitochondrialProteinClass:
+        # print("Got cc", candidate_class)
+        # print("Got cc.value ", candidate_class.value)
+        prot_classes = [*list(CytosolicProteinClass),*list(LifecycleFactorClass),*list(MitochondrialProteinClass )]
+        rna_classes  = [*list(PolynucleotideClass)]
+        if candidate_class in prot_classes:
             alphabet = pyhmmer.easel.Alphabet.amino()
-        elif candidate_class in PolynucleotideClass: 
+        elif candidate_class in rna_classes: 
             alphabet = pyhmmer.easel.Alphabet.rna()
         else:
             raise Exception("hmm_produce: Unimplemented candidate class")
@@ -144,46 +148,68 @@ def hmm_produce(candidate_class: PolymerClass, organism_taxid:int, seed_sequence
             hmm_cache(HMM)
         return (candidate_class, HMM )
 
-
+def _obtain_phylogenetic_nbhd_task(base_taxids:list[int], fasta_record:Fasta, polymer_class:PolymerClass, taxid:int, max_n_neighbors:int):
+    phylo_nbhd_ids = phylogenetic_neighborhood(base_taxids, str(taxid), max_n_neighbors)
+    seqs           = fasta_record.pick_taxids(phylo_nbhd_ids)
+    return polymer_class, iter(seqs)
 
 class PolymerClassFastaRegistry():
     """This is a wrapper around fasta records for all polymer classes. Only a few sequences should be picked from it at a time."""
     registry_fasta : dict[PolymerClass, Fasta ] = {}
-    registry_tax_ids : dict[PolymerClass, list[int] ] = {}
+    registry_all_tax_ids : dict[PolymerClass, list[int] ] = {}
 
     def __init__(self) :
 
         for candidate_class in CytosolicProteinClass:
             fasta_path                             = os.path.join(ASSETS["fasta_proteins_cytosolic"], f"{candidate_class.value}.fasta")
             self.registry_fasta[candidate_class]   = Fasta(fasta_path)
-            self.registry_tax_ids[candidate_class] = Fasta(fasta_path).all_taxids("int")
+            self.registry_all_tax_ids[candidate_class] = Fasta(fasta_path).all_taxids("int")
 
         for candidate_class in MitochondrialProteinClass:
             fasta_path                             = os.path.join(ASSETS["fasta_proteins_mitochondrial"], f"{candidate_class.value}.fasta")
             self.registry_fasta[candidate_class]   = Fasta(fasta_path)
-            self.registry_tax_ids[candidate_class] = Fasta(fasta_path).all_taxids("int")
+            self.registry_all_tax_ids[candidate_class] = Fasta(fasta_path).all_taxids("int")
 
         for candidate_class in PolynucleotideClass:
             fasta_path                             = os.path.join(ASSETS["fasta_rna"], f"{candidate_class.value}.fasta")
             self.registry_fasta[candidate_class]   = Fasta(fasta_path)
-            self.registry_tax_ids[candidate_class] = Fasta(fasta_path).all_taxids("int")
+            self.registry_all_tax_ids[candidate_class] = Fasta(fasta_path).all_taxids("int")
 
         for candidate_class in ElongationFactorClass:
             fasta_path                             = os.path.join(ASSETS["fasta_factors_elongation"], f"{candidate_class.value}.fasta")
             self.registry_fasta[candidate_class]   = Fasta(fasta_path)
-            self.registry_tax_ids[candidate_class] = Fasta(fasta_path).all_taxids("int")
+            self.registry_all_tax_ids[candidate_class] = Fasta(fasta_path).all_taxids("int")
 
         for candidate_class in InitiationFactorClass:
             fasta_path                             = os.path.join(ASSETS["fasta_factors_initiation"], f"{candidate_class.value}.fasta")
             self.registry_fasta[candidate_class]   = Fasta(fasta_path)
-            self.registry_tax_ids[candidate_class] = Fasta(fasta_path).all_taxids("int")
+            self.registry_all_tax_ids[candidate_class] = Fasta(fasta_path).all_taxids("int")
             
+        #-------------------- Initated all polymer class sequences. Check that they are not empty.
+        
+        for (polymer_class, fasta_record) in self.registry_fasta.items():
+            if len( list(fasta_record.records) ) == 0 :
+                raise Exception("Empty fasta file: {}".format(fasta_record))
+
+    def get_seed_sequences_for_taxid(self,taxid:int, max_n_neighbors:int = 5)->dict[PolymerClass, list[SeqRecord]]:
+        _ = {}
+        with concurrent.futures.ProcessPoolExecutor(max_workers=15) as executor:
+            futures = []
+            for (polymer_class, fasta_record) in self.registry_fasta.items():
+                futures.append(executor.submit(
+                                    _obtain_phylogenetic_nbhd_task,
+                                    self.registry_all_tax_ids[polymer_class],
+                                    fasta_record,
+                                    polymer_class,
+                                    taxid,
+                                    max_n_neighbors))
+        for completed_future in concurrent.futures.as_completed(futures):
+                    polymer_class, seqs  = completed_future.result()
+                    _[polymer_class] = seqs
+        return _ 
 
 
-
-
-
-class PolymerClassScanner():
+class PolymerClassesOrganismScanner():
     # https://pyhmmer.readthedocs.io/en/stable/api/plan7.html#pyhmmer.plan7.HMM
     """
     STEPS (bottom-up):
@@ -192,27 +218,41 @@ class PolymerClassScanner():
     - a sequence is searched against all HMMs in the registry
     """
 
-    def __init__(self, tax_id:int, candidate_classes:list[PolymerClass], no_cache:bool=False, max_seed_seqs:int=5) -> None:
+    def __init__(self, organism_taxid:int, candidate_classes:list[PolymerClass], no_cache:bool=False, max_seed_seqs:int=5) -> None:
 
-        self.organism_tax_id = tax_id
+        self.organism_tax_id = organism_taxid
         self.class_hmms_seed_sequences : dict[PolymerClass, list[SeqRecord]] = {}
         self.class_hmms_registry       : dict[PolymerClass, HMM]             = {}
     
-        def __load_seed_sequences(candidate_class:PolymerClass,tax_id:int, max_seed_seqs:int)->Tuple[PolymerClass, list[SeqRecord]]:
-            """This is just for housekeeping. Keeping sequences with which the HMMs were seeded as state on the classifier."""
-            return (candidate_class, [*fasta_phylogenetic_correction(candidate_class, tax_id, max_n_neighbors=max_seed_seqs)] )
+        # def __load_seed_sequences(candidate_class:PolymerClass,tax_id:int, max_seed_seqs:int)->Tuple[PolymerClass, list[SeqRecord]]:
+        #     """This is just for housekeeping. Keeping sequences with which the HMMs were seeded as state on the classifier."""
+        #     return (candidate_class, [*fasta_phylogenetic_correction(candidate_class, tax_id, max_n_neighbors=max_seed_seqs)] )
 
       
 
-        for candidate_class in candidate_classes:
-            cls, seedseqs = __load_seed_sequences(candidate_class, tax_id, max_seed_seqs)
-            self.class_hmms_seed_sequences.update({str( cls.value ):seedseqs})
+        # for candidate_class in candidate_classes:
+        #     cls, seedseqs = __load_seed_sequences(candidate_class, tax_id, max_seed_seqs)
+        #     self.class_hmms_seed_sequences.update({str( cls.value ):seedseqs})
+        self.class_hmms_seed_sequences = PolymerClassFastaRegistry().get_seed_sequences_for_taxid(organism_taxid, max_n_neighbors=max_seed_seqs)
 
-        for candidate_class in candidate_classes:
-            cls, hmm = hmm_produce(candidate_class, tax_id, self.class_hmms_seed_sequences[candidate_class.value], no_cache=no_cache)
-            self.class_hmms_registry.update({cls.value:hmm})
 
+
+
+        # for candidate_class in candidate_classes:
+        #     cls, hmm = hmm_produce(candidate_class, organism_taxid, self.class_hmms_seed_sequences[candidate_class.value], no_cache=no_cache)
+        #     self.class_hmms_registry.update({cls.value:hmm})
+
+        futures = []
+        with concurrent.futures.ProcessPoolExecutor(max_workers=10) as executor:
+            for ( candidate_class, seqs ) in self.class_hmms_seed_sequences.items():
+                print("Creating hmm for ", candidate_class)
+                future = executor.submit(hmm_produce,candidate_class, organism_taxid, seqs, no_cache=no_cache)
+                futures.append(future)
           
+
+        for completed_future in concurrent.futures.as_completed(futures):
+             poly_class, hmm = completed_future.result()
+             self.class_hmms_registry.update({poly_class.value:hmm})
 
 
         # with concurrent.futures.ProcessPoolExecutor(max_workers=10) as executor:
@@ -298,7 +338,7 @@ class HMMClassifier():
     
     """
 
-    organism_scanners : dict[int, PolymerClassScanner]
+    organism_scanners : dict[int, PolymerClassesOrganismScanner]
     chains            : list[Polymer]
     alphabet          : pyhmmer.easel.Alphabet
     candidate_classes : list[PolymerClass]
@@ -324,7 +364,7 @@ class HMMClassifier():
                 # --- If the the scanner for this taxid is present, use it. Otherwise create it.
                 organism_taxid = chain.src_organism_ids[0]
                 if organism_taxid not in self.organism_scanners:
-                    hmmscanner                             = PolymerClassScanner(organism_taxid, self.candidate_classes, no_cache = True, max_seed_seqs = 5)
+                    hmmscanner                             = PolymerClassesOrganismScanner(organism_taxid, self.candidate_classes, no_cache = True, max_seed_seqs = 5)
                     self.organism_scanners[organism_taxid] = hmmscanner
                 else:
                     hmmscanner = self.organism_scanners[organism_taxid]

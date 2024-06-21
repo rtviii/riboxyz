@@ -37,8 +37,9 @@ ribd.add_command(ls)
 @click.pass_context
 def test(ctx):
     PolyclassRegistry = PolymerClassFastaRegistry()
-    pprint(PolyclassRegistry.registry_fasta)
-    ...
+    # s = PolyclassRegistry.get_seed_sequences_for_taxid(9606)
+    # pprint(s)
+    # ...
 
 ribd.add_command(test)
 

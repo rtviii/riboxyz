@@ -656,10 +656,10 @@ class ReannotationPipeline:
             for poly in polys:
                 match poly.entity_poly_polymer_type:
                     case "Protein":
-                        prot = Protein.from_polymer(poly, **polymer_dict)
+                        prot = Protein.from_polymer(poly,**polymer_dict)
                         _prot_polypeptides.append(prot)
                     case "RNA":
-                        rna = RNA(**poly.dict())
+                        rna = RNA.model_validate(({**polymer_dict, **poly.model_dump()}))
                         _rna_polynucleotides.append(rna)
                     case _:
                         _other_polymers.append(poly)
