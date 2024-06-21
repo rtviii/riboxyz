@@ -160,37 +160,50 @@ class HMMs():
             """This is just for housekeeping. Keeping sequences with which the HMMs were seeded as state on the classifier."""
             return (candidate_class, [*fasta_phylogenetic_correction(candidate_class, tax_id, max_n_neighbors=max_seed_seqs)] )
 
-        with concurrent.futures.ProcessPoolExecutor(max_workers=10) as executor:
+      
 
-            loading_futures = []
-            loaded_results  = []
+        for candidate_class in candidate_classes:
+            cls, seedseqs = __load_seed_sequences(candidate_class, tax_id, max_seed_seqs)
+            self.class_hmms_seed_sequences.update({str( cls.value ):seedseqs})
 
-            # ! load seqs
-            for candidate_class in candidate_classes:
-                future = executor.submit(__load_seed_sequences, candidate_class, tax_id, max_seed_seqs)
-                loading_futures.append(future)
+        for candidate_class in candidate_classes:
+            cls, hmm = hmm_produce(candidate_class, tax_id, self.class_hmms_seed_sequences[candidate_class.value], no_cache=no_cache)
+            self.class_hmms_registry.update({cls.value:hmm})
 
-            for future in concurrent.futures.as_completed(loading_futures): 
-                loaded_results.append(future.result())
+          
 
-            # ! populate seqs records
-            for (cls, seedseqs) in loaded_results:
-                 self.class_hmms_seed_sequences.update({str( cls.value ):seedseqs})
 
-            # ! clean containers
-            loaded_results, loading_futures = [],[]
-            # ! build hmms
+        # with concurrent.futures.ProcessPoolExecutor(max_workers=10) as executor:
 
-            for candidate_class in candidate_classes:
-                future = executor.submit(hmm_produce,candidate_class, tax_id, self.class_hmms_seed_sequences[candidate_class.value], no_cache=no_cache)
-                loading_futures.append(future)
+        #     loading_futures = []
+        #     loaded_results  = []
 
-            for future in concurrent.futures.as_completed(loading_futures):
-                loaded_results.append(future.result())
+        #     # ! load seqs
+        #     for candidate_class in candidate_classes:
+        #         future = executor.submit(__load_seed_sequences, candidate_class, tax_id, max_seed_seqs)
+        #         loading_futures.append(future)
 
-            # ! populate hmms
-            for (cls, hmm) in loaded_results:
-                 self.class_hmms_registry.update({cls.value:hmm})
+        #     for future in concurrent.futures.as_completed(loading_futures): 
+        #         loaded_results.append(future.result())
+
+        #     # ! populate seqs records
+        #     for (cls, seedseqs) in loaded_results:
+        #          self.class_hmms_seed_sequences.update({str( cls.value ):seedseqs})
+
+        #     # ! clean containers
+        #     loaded_results, loading_futures = [],[]
+        #     # ! build hmms
+
+        #     for candidate_class in candidate_classes:
+        #         future = executor.submit(hmm_produce,candidate_class, tax_id, self.class_hmms_seed_sequences[candidate_class.value], no_cache=no_cache)
+        #         loading_futures.append(future)
+
+        #     for future in concurrent.futures.as_completed(loading_futures):
+        #         loaded_results.append(future.result())
+
+        #     # ! populate hmms
+        #     for (cls, hmm) in loaded_results:
+        #          self.class_hmms_registry.update({cls.value:hmm})
 
 
 # # !-
@@ -238,6 +251,14 @@ class HMMs():
         return _
 
 class HMMClassifier():
+    """
+    HMMClassifier takes a set of polymer chains and "candidate" polymer classes and returns a classification report for which polymer class best matches the given polymer chain.
+
+    In a nutshell it's an elaborate search engine
+
+    
+    
+    """
 
     # organism_scanners : dict[int, HMMs] 
     # chains            : list[Polymer] 
@@ -247,18 +268,16 @@ class HMMClassifier():
     # report            : dict
 
     def __init__(self, chains: list[Polymer], alphabet:pyhmmer.easel.Alphabet, candidate_classes:list[PolymerClass]) -> None:
-
-        self.organism_scanners = {}
-        self.chains            = chains
         self.alphabet          = alphabet
-        self.report            = {}
         self.candidate_classes = candidate_classes
 
+        self.chains            = chains
+        self.organism_scanners = {}
+        self.report            = {}
+
     def pick_best_hit(self, hits:list[dict]) -> list[PolymerClass]:
-        # TODO: look at filtering allunder self.bitscore threshold (while scaling the scores by the [average of the lowest half * 1.5]/[average of the lowest half])
         if len(hits) == 0:
             return []
-
         sorted_by_biscore = sorted(hits, key=lambda x: x["bitscore"], reverse=True)
         return [ sorted_by_biscore[0]['class_name'] ] if sorted_by_biscore[0]['bitscore'] > self.bitscore_threshold else []
 

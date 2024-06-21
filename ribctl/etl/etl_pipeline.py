@@ -671,7 +671,6 @@ class ReannotationPipeline:
             protein_classifier    = HMMClassifier(_prot_polypeptides, protein_alphabet, [p for p in [ *list(CytosolicProteinClass),*list(LifecycleFactorClass) , *list(MitochondrialProteinClass)] ])
             protein_classifier.classify_chains()
            
-            # logger.debug("Classifying polymers: RNA.")
             rna_alphabet             = pyhmmer.easel.Alphabet.rna()
             rna_classifier           = HMMClassifier(_rna_polynucleotides, rna_alphabet, [p for p in list(PolynucleotideClass)])
             rna_classifier.classify_chains()
