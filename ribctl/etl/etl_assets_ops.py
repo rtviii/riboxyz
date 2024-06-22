@@ -403,6 +403,7 @@ class Assets:
     #TODO: ChimeraX splitchain
     async def upsert_chains(self):
         try:
+            #TODO: chimerax should be a env variable pointint to the binary, so too should the script
             # Command to run ChimeraX with the script
             command = ['chimerax',   '--nogui', '--offscreen' ,'--cmd' ,'open /home/rtviii/dev/riboxyz/chimerax/chainsplitter.py; open {}; chainsplitter {}; exit'.format(self.rcsb_id, self.rcsb_id)]
 

@@ -12,7 +12,7 @@ def asset_routines(
     """This should return an array of Futures for acquisition routines for each A  in asset type."""
 
     rcsb_id = rcsb_id.upper()
-    RO = RibosomeOps(rcsb_id)
+    RO      = RibosomeOps(rcsb_id)
     RO._verify_dir_exists()
     RA = Assets(rcsb_id)
 

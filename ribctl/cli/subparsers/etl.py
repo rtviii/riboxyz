@@ -60,8 +60,11 @@ def assets(ctx: Context, assets, overwrite, rcsb_sync, all_structs):
         print("Processing all structures ")
         for rcsb_id in Assets.list_all_structs():
             print("[{}]".format(rcsb_id))
-            routines = etl_obtain.asset_routines(rcsb_id, assets , overwrite)
-            asyncio.run(etl_obtain.execute_asset_task_pool(routines))
+            try:
+                routines = etl_obtain.asset_routines(rcsb_id, assets , overwrite)
+                asyncio.run(etl_obtain.execute_asset_task_pool(routines))
+            except Exception as e:
+                print("Error processing {}: {}".format(rcsb_id, e))
         return
 
     # asyncio.run(etl_obtain.execute_asset_task_pool())
