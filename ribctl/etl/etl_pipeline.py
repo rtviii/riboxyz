@@ -8,6 +8,7 @@ import pyhmmer
 from pyhmmer.plan7 import HMM
 import requests
 from ribctl.etl.etl_assets_ops import RibosomeOps, Structure
+from ribctl.lib.info import lsu_ssu_presence
 from ribctl.lib.libhmm import ( HMMClassifier, )
 from ribctl.lib.schema.types_ribosome import (
     RNA,
@@ -723,6 +724,7 @@ class ReannotationPipeline:
         reshaped_nonpolymers                     = self.process_nonpolymers()
         [externalRefs, pub, kwords_text, kwords] = self.process_metadata()
         organisms                                = self.infer_organisms_from_polymers([*_prot_polypeptides, *_rna_polynucleotides])
+        subunuit_presence                        = lsu_ssu_presence(_rna_polynucleotides, is_mitochondrial)
 
         reshaped                                 = RibosomeStructure(
             rcsb_id                = self.rcsb_data_dict["rcsb_id"],
@@ -747,7 +749,8 @@ class ReannotationPipeline:
             nonpolymeric_ligands   = reshaped_nonpolymers,
             other_polymers         = _other_polymers,
             assembly_map           = self.asm_maps,
-            mitochondrial          = is_mitochondrial
+            mitochondrial          = is_mitochondrial,
+            subunuit_presence      = subunuit_presence
         )
 
         RA.write_own_json_profile(reshaped.model_dump(), overwrite=True)

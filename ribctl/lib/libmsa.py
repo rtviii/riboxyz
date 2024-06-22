@@ -16,8 +16,6 @@ import os
 from ribctl.lib.libtax import  Taxid, ncbi
 
 
-
-
 class Fasta:
     records: list[SeqRecord]
 
@@ -39,9 +37,6 @@ class Fasta:
 
         elif records is not None:
             self.records = records
-
-        # if taxid_getter is not None:
-        #     self.taxid_getter = taxid_getter
 
     def _yield_subset(self, predicate: Callable[[SeqRecord], bool]) -> list[SeqRecord]:
         return [*filter(predicate, self.records)]
@@ -106,7 +101,6 @@ class Fasta:
             return list(map(lambda _: int(_), taxids))
         else:
             raise Exception("Invalid type passed to all_taxids")
-
 
 def generate_consensus(records):
     # Convert the list of sequence records to a MultipleSeqAlignment object

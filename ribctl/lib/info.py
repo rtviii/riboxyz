@@ -21,16 +21,11 @@ from ribctl.lib.schema.types_ribosome import (
 )
 from ribctl.lib.libmsa import Taxid, ncbi
 
-
-
-def lsu_ssu_presence(profile: RibosomeStructure) -> Literal["neither","both", "ssu", "lsu"]:
-
-    rnas = profile.rnas
+def lsu_ssu_presence(rnas:list[RNA], is_mitochondrial :bool) -> list[Literal[ "ssu", "lsu"]]:
     has_lsu = 0
     has_ssu = 0
     for rna in rnas:
-
-        if profile.mitochondrial:
+        if is_mitochondrial:
             if MitochondrialRNAClass.mtrRNA12S in rna.nomenclature:
                 has_ssu = 1
             elif MitochondrialRNAClass.mtrRNA16S in rna.nomenclature:
@@ -47,13 +42,13 @@ def lsu_ssu_presence(profile: RibosomeStructure) -> Literal["neither","both", "s
                 has_ssu = 1
     match has_ssu + has_lsu:
         case 1:
-            return "ssu"
+            return [ "ssu" ]
         case 2:
-            return "lsu"
+            return [ "lsu" ]
         case 3:
-            return "both"
+            return ['ssu','lsu']
         case 0:
-            return "neither"
+            return []
         case _:
             raise ValueError("Invalid case")
 
@@ -80,8 +75,8 @@ def struct_stats(ra: RibosomeOps):
             print("No drugbank")
 
 
-    struct_stat["subunit_composition"] = lsu_ssu_presence(profile)
     struct_stat["mitochondrial"]       = profile.mitochondrial
+    struct_stat["subunit_composition"] = lsu_ssu_presence(profile.rnas, profile.mitochondrial)
 
 
     return [

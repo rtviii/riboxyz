@@ -1,6 +1,7 @@
 import json
 from typing import Dict, Optional
 from enum import Enum
+import typing
 from Bio.SeqRecord import SeqRecord
 from Bio.Seq import Seq
 from pydantic import BaseModel, field_serializer
@@ -574,8 +575,9 @@ class RibosomeStructure(BaseModel):
     host_organism_ids  : list[int]
     host_organism_names: list[str]
 
-    assembly_map: Optional[list[AssemblyInstancesMap]] = None
-    mitochondrial: bool
+    assembly_map     : Optional[list[AssemblyInstancesMap]] = None
+    mitochondrial    : bool
+    subunuit_presence: list[typing.Literal['ssu','lsu']]
 
     # proteins            : list[Any]
     # rnas                : list[Any]

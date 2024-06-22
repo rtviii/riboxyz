@@ -173,7 +173,7 @@ class PolymerClassesOrganismScanner():
     def cache_seed_seqs(self):
         with open(os.path.join(self.filename_seed_seqs), 'wb')  as outfile:
             pickle.dump(self.seed_sequences, outfile)
-            print("Saved {}".format(self.filename_hmms_registry))
+            print("Saved {}".format(self.filename_seed_seqs))
 
     def cache_load_hmms(self):
         if os.path.exists(self.filename_hmms_registry):
@@ -262,7 +262,6 @@ class HMMClassifier():
 
     Given that among the list of target polymers multiple taxonomic ids might be present (unusual), we keep the the "organism_scanners" field.
     If a new taxonomic id appears, a new "scanner" is created and stored
-
     
     """
 
