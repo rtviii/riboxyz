@@ -47,6 +47,14 @@ class Neo4jQuery:
             def _(tx: Transaction | ManagedTransaction):
                 return tx.run("""match (t:PhylogenyNode) return collect([t.ncbi_tax_id,t.scientific_name])""").value()[0]
             return session.execute_read(_)
+    def all_ids(self):
+        """All taxonomic ids present in the database mapped to their scientific name per NCBI"""
+        with self.adapter.driver.session() as session:
+            def _(tx: Transaction | ManagedTransaction):
+                return tx.run("""match (r:RibosomeStructure) return collect(r.rcsb_id)""").value()[0]
+            return session.execute_read(_)
+
+
 
     def random_structure(self):
         with self.adapter.driver.session() as session:

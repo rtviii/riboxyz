@@ -17,6 +17,12 @@ structure_router = Router()
 TAG              = "structures"
 
 
+@structure_router.get("/all_rcsb_ids", response=list[str], tags=[TAG])
+def all_rcsb_ids(request):
+    return dbqueries.all_ids()
+
+
+
 @structure_router.get("/tax_dict", response=dict, tags=[TAG])
 def tax_dict(request):
     """Returns a dictionary of all taxonomic IDs present in the database as keys, [ scientific name, corresponding superkingdom ] as the values."""
