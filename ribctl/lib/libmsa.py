@@ -67,12 +67,12 @@ class Fasta:
             node.name = scientific_name
         print(tree.get_ascii(attributes=["name", "sci_name"]))
 
-    def pick_taxids(self, taxids: list[str]) -> list[SeqRecord]:
+    def pick_taxids(self, _taxids_int: list[int]) -> list[SeqRecord]:
+         
+        taxids = list(map(lambda x: str(x), _taxids_int))
         for taxid in set(taxids):
-            if taxid not in self.all_taxids():
-                raise Exception(
-                    f"Taxid {taxid} not found in records. Violated assumption. Did you alter the fast archives recently?"
-                )
+            if taxid not in self.all_taxids(return_as='str'):
+                raise Exception( f"Taxid {taxid} not found in records. Violated assumption. Did you alter the fast archives recently? There might be a cached HMM Scanner with taxid that is no longer present. " )
 
         # ? ------ Filter duplicates. I discovered some duplicate sequences(and taxids) which breaks the HMM pipeline later on.
         # ? A cleaner solution would be to remove the duplicates from the fasta archives. Later.
@@ -93,14 +93,19 @@ class Fasta:
 
         return list(filtered_records["result"])
 
-    def all_taxids(self) -> list[int]:
+    def all_taxids(self, return_as:typing.Literal["int", "str"]="str") -> list[int] | list[str]:
         """Given a fasta file, return all the taxids present in it
         With the assumption that the tax id is the id of each seq record."""
         taxids = []
         for record in self.records:
             # taxids = [*taxids, self.taxid_getter(record)]
             taxids = [*taxids, record.id]
-        return taxids
+        if return_as == "str":
+            return taxids
+        elif return_as == "int":
+            return list(map(lambda _: int(_), taxids))
+        else:
+            raise Exception("Invalid type passed to all_taxids")
 
 
 def generate_consensus(records):
@@ -150,23 +155,23 @@ def seq_to_fasta(rcsb_id: str, _seq: str, outfile: str):
     seq_record.id = seq_record.description = rcsb_id
     SeqIO.write(seq_record, outfile, "fasta")
 
-def phylogenetic_neighborhood(
-    taxids_base: list[str], taxid_target: str, n_neighbors: int = 10
-) -> list[str]:
+def phylogenetic_neighborhood( _taxids_base: list[int], taxid_target: str, n_neighbors: int = 10 ) -> list[int]:
     """Given a set of taxids and a target taxid, return a list of the [n_neighbors] phylogenetically closest to the target."""
+
+    taxids_base        = list(map(lambda x: str(x),_taxids_base)) # Ensure all taxids are strings because that's what ete's ncbi expects
 
     tree               = ncbi.get_topology(list(set([*taxids_base, str(taxid_target)])))
     target_node        = tree.search_nodes(name=str(taxid_target))[0]
-    phylo_all_nodes    = [(node.name, tree.get_distance(target_node, node)) for node in tree.traverse()]
-    phylo_extant_nodes = filter(lambda taxid: taxid[0] in taxids_base, phylo_all_nodes)
-    phylo_sorted_nodes = sorted(phylo_extant_nodes, key=lambda x: x[1])
+    phylo_all_nodes    = [(other_node.name, tree.get_distance(target_node, other_node)) for other_node in tree.traverse()]
 
-    nbr_taxids = list(map(lambda tax_phydist: tax_phydist[0], phylo_sorted_nodes))
+    phylo_extant_nodes = filter(lambda taxid: taxid[0] in taxids_base, phylo_all_nodes)
+    phylo_sorted_nodes = sorted(phylo_extant_nodes, key=lambda x: x[1]) # Sort by phylogenetic distance (tuples are (taxid, phylo_dist) ex. ('4932', 3.0))
+    nbr_taxids         = list(map(lambda tax_phydist: tax_phydist[0], phylo_sorted_nodes))
 
     if len(nbr_taxids) < n_neighbors:
-        return nbr_taxids[1:]
+        return list(map(lambda x : int(x),  nbr_taxids[1:] ))
     else:
-        return nbr_taxids[1 : n_neighbors + 1]
+        return list(map(lambda x : int(x), nbr_taxids[1 : n_neighbors + 1]))
 
 def muscle_align_N_seq(
     seq_records: list[SeqRecord], vvv: bool = False
@@ -197,10 +202,7 @@ def muscle_align_N_seq(
                 os.remove(temp_filename)
                 return seq_records_a
             else:
-                print(
-                    "{} failed with code {}".format(" ".join(muscle_cmd)),
-                    process.returncode,
-                )
+                print( "{} failed with code {}".format(" ".join(muscle_cmd)), process.returncode, )
                 raise Exception("`{}` did not succeed.".format(" ".join(muscle_cmd)))
         except:
             temp_file.close()
