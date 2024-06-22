@@ -290,6 +290,8 @@ class HMMClassifier():
     def classify_chains(self)->None:
         for chain in self.chains:
                 # --- If the the scanner for this taxid is present, use it. Otherwise create it.
+                if len(chain.src_organism_ids)< 1:
+                    continue
                 organism_taxid = chain.src_organism_ids[0]
                 if organism_taxid not in self.organism_scanners:
                     hmmscanner                             = PolymerClassesOrganismScanner(organism_taxid, max_seed_seqs = 5)
