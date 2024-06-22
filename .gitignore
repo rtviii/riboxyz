@@ -17,6 +17,7 @@ rnacentral*
 
 *.gz
 *.sqlite
+**taxa.sqlite**
 
 ribctl/assets/PoissonRecon
 **/PoissonRecon
