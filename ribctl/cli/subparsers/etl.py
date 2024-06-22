@@ -1,8 +1,10 @@
 import asyncio
 import click
 from click import Context
+from loguru import logger
 from ribctl.etl import etl_obtain
 from ribctl.etl.etl_assets_ops import AssetClass, Assets
+from ribctl.logs.loggers import get_etl_logger
 
 
 @click.group(invoke_without_command=True)
@@ -42,6 +44,8 @@ def etl(ctx: Context):
 @click.option("--rcsb_sync"  , required=False, is_flag=True, default=False)
 @click.option("--all_structs", required=False, is_flag=True, default=False)
 def assets(ctx: Context, assets, overwrite, rcsb_sync, all_structs):
+
+    logger = get_etl_logger()
     rcsb_id = ctx.obj['rcsb_id']
     assets = list(map(AssetClass.from_str, assets))
     if rcsb_id is not None:
@@ -63,7 +67,9 @@ def assets(ctx: Context, assets, overwrite, rcsb_sync, all_structs):
             try:
                 routines = etl_obtain.asset_routines(rcsb_id, assets , overwrite)
                 asyncio.run(etl_obtain.execute_asset_task_pool(routines))
+                logger.info("Processed successfully {}: {}".format(rcsb_id, assets))
             except Exception as e:
+                logger.error("Error processing {}: {}".format(rcsb_id, e))
                 print("Error processing {}: {}".format(rcsb_id, e))
         return
 
