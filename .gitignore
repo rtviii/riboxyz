@@ -27,6 +27,8 @@ volume/**
 **.mmcif
 **/*.mmcif
 
+**/__hmm_cache/**
+
 *.hmm
 **/f_**
 
