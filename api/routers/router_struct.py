@@ -21,6 +21,9 @@ TAG              = "structures"
 def all_rcsb_ids(request):
     return dbqueries.all_ids()
 
+@structure_router.get("/polymer_classes_stats", response=list[str], tags=[TAG])
+def polymer_classes_stats(request):
+    return dbqueries.polymer_classes_stats()
 
 
 @structure_router.get("/tax_dict", response=dict, tags=[TAG])
