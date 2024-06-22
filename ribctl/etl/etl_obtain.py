@@ -17,7 +17,6 @@ def asset_routines(
     RA = Assets(rcsb_id)
 
     coroutines = []
-
     if AssetClass.profile in assetlist:
         coroutines.append(
             ReannotationPipeline( ReannotationPipeline.rcsb_request_struct(rcsb_id) ).process_structure(overwrite) )

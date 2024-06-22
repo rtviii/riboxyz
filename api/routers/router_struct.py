@@ -16,7 +16,6 @@ from ribctl.lib.libtax import Taxid
 structure_router = Router()
 TAG              = "structures"
 
-
 @structure_router.get("/all_rcsb_ids", response=list[str], tags=[TAG])
 def all_rcsb_ids(request):
     return dbqueries.all_ids()
@@ -176,7 +175,6 @@ def structure_ptc(request,rcsb_id:str):
         ptc = RibosomeOps(rcsb_id).ptc()
     except Exception as e:
         return HttpResponseServerError("Failed to find structure profile {}:\n\n{}".format(rcsb_id, e))
-
      
 class ChainsByStruct(Schema):
     class PolymerByStruct(Schema):

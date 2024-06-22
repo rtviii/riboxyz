@@ -6,7 +6,7 @@ import typing
 
 from pydantic import BaseModel
 from ribctl import ASSETS, ASSETS_PATH
-from ribctl.etl.etl_assets_ops import Structure
+from ribctl.etl.etl_assets_ops import Assets, RibosomeOps, Structure
 from ribctl.lib.libtax import PhylogenyNode
 from ribctl.lib.schema.types_ribosome import (
     RNA,
@@ -16,25 +16,60 @@ from ribctl.lib.schema.types_ribosome import (
     LifecycleFactorClass,
     MitochondrialRNAClass,
     Polymer,
+    RibosomeStructure,
     tRNA,
 )
 from ribctl.lib.libmsa import Taxid, ncbi
 
 
-def struct_stats(ra: Structure):
+
+def lsu_ssu_presence(profile: RibosomeStructure) -> Literal["neither","both", "ssu", "lsu"]:
+
+    rnas = profile.rnas
+    has_lsu = 0
+    has_ssu = 0
+    for rna in rnas:
+
+        if profile.mitochondrial:
+            if MitochondrialRNAClass.mtrRNA12S in rna.nomenclature:
+                has_ssu = 1
+            elif MitochondrialRNAClass.mtrRNA16S in rna.nomenclature:
+                has_lsu = 2
+        else:
+            if (
+                (CytosolicRNAClass.rRNA_5_8S in rna.nomenclature)
+                or (CytosolicRNAClass.rRNA_5S in rna.nomenclature)
+                or (CytosolicRNAClass.rRNA_28S in rna.nomenclature)
+                or (CytosolicRNAClass.rRNA_25S in rna.nomenclature)
+                or (CytosolicRNAClass.rRNA_23S in rna.nomenclature) ):
+                has_lsu = 2
+            elif (CytosolicRNAClass.rRNA_16S in rna.nomenclature) or ( CytosolicRNAClass.rRNA_18S in rna.nomenclature ):
+                has_ssu = 1
+    match has_ssu + has_lsu:
+        case 1:
+            return "ssu"
+        case 2:
+            return "lsu"
+        case 3:
+            return "both"
+        case 0:
+            return "neither"
+        case _:
+            raise ValueError("Invalid case")
+
+def struct_stats(ra: RibosomeOps):
     profile = ra.profile()
     struct_stat = {}
     lig_compounds = {}
     n_dbank_compounds = 0
 
-    rnas = profile.rnas
     ligs = profile.nonpolymeric_ligands
 
     for lig in ligs:
         # If this particualr ligand is a drugbank compound
         chem_name = lig.chemicalName
 
-        if lig.nonpolymer_comp.drugbank != None:
+        if lig.nonpolymer_comp != None and lig.nonpolymer_comp.drugbank != None:
             n_dbank_compounds += 1
             if chem_name not in lig_compounds:
                 lig_compounds[chem_name] = 1
@@ -44,67 +79,10 @@ def struct_stats(ra: Structure):
             ...
             print("No drugbank")
 
-    def lsu_ssu_presence(rnas: list[RNA]) -> Literal["both", "ssu", "lsu"]:
-        has_lsu = 0
-        has_ssu = 0
 
-        for rna in rnas:
-            if profile.mitochondrial:
-                if MitochondrialRNAClass.mtrRNA12S in rna.nomenclature:
-                    has_ssu = 1
-                elif MitochondrialRNAClass.mtrRNA16S in rna.nomenclature:
-                    has_lsu = 2
-            else:
-                if (
-                    (CytosolicRNAClass.rRNA_5_8S in rna.nomenclature)
-                    or (CytosolicRNAClass.rRNA_5S in rna.nomenclature)
-                    or (CytosolicRNAClass.rRNA_28S in rna.nomenclature)
-                    or (CytosolicRNAClass.rRNA_25S in rna.nomenclature)
-                    or (CytosolicRNAClass.rRNA_23S in rna.nomenclature)
-                ):
-                    has_lsu = 2
-                elif (CytosolicRNAClass.rRNA_16S in rna.nomenclature) or (
-                    CytosolicRNAClass.rRNA_18S in rna.nomenclature
-                ):
-                    has_ssu = 1
+    struct_stat["subunit_composition"] = lsu_ssu_presence(profile)
+    struct_stat["mitochondrial"]       = profile.mitochondrial
 
-        match has_ssu + has_lsu:
-            case 1:
-                return "ssu"
-            case 2:
-                return "lsu"
-            case 3:
-                return "both"
-            case _:
-                raise Exception("No ssu or lsu found")
-
-    struct_stat["subunit_composition"] = lsu_ssu_presence(rnas)
-    struct_stat["mitochondrial"] = profile.mitochondrial
-
-    # for chain in [*rnas, *prots,*other_polys ]:
-    #     if chain.assembly_id != 0:
-    #         continue
-    #     if len(chain.nomenclature) > 0:
-    #         cls = chain.nomenclature[0].value
-
-    #         #! class acc
-    #         if cls not in nomenclature_classes:
-    #             nomenclature_classes[cls] = 1
-    #         else:
-    #             nomenclature_classes[cls] = nomenclature_classes[cls] + 1
-
-    #         #! subunit determinatiaon
-    #         if cls in [k.value for k in list(LifecycleFactorClass)]:
-    #             struct_stat["has_factors"] = True
-
-    #         if cls in [k.value for k in list(ElongationFactorClass)]:
-    #             struct_stat["has_elongation_factors"] = True
-
-    #         if cls in [k.value for k in list(InitiationFactorClass)]:
-    #             struct_stat["has_initiation_factors"] = True
-
-    #         if cls in [k.value for k in list(tRNA)]:
-    # #             struct_stat["has_trna"] = True
 
     return [
         struct_stat,
@@ -156,7 +134,7 @@ def get_stats():
         "bacteria": {},
     }
 
-    for struct in Structure.list_all_structs():
+    for struct in Assets.list_all_structs():
         try:
             [struct_stat, lig_compounds, n_dbank_compounds, superkingdom] = (
                 struct_stats(Structure(struct))

@@ -290,7 +290,7 @@ class RibosomeOps:
     def _verify_dir_exists(self):
         if not os.path.exists(self.paths.dir):
             os.umask(0)
-            os.makedirs(self.paths.dir, 0o777)
+            os.makedirs(self.paths.dir, 0o755)
 
 class Assets:
 
@@ -406,12 +406,11 @@ class Assets:
             #TODO: chimerax should be a env variable pointint to the binary, so too should the script
             # Command to run ChimeraX with the script
             command = ['chimerax',   '--nogui', '--offscreen' ,'--cmd' ,'open /home/rtviii/dev/riboxyz/chimerax/chainsplitter.py; open {}; chainsplitter {}; exit'.format(self.rcsb_id, self.rcsb_id)]
-
             process = subprocess.Popen(
                 command,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True
+                stdout = subprocess.PIPE,
+                stderr = subprocess.PIPE,
+                text   = True
             )
             # Capture output in real-time
             while True:
