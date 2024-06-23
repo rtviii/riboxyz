@@ -132,15 +132,8 @@ def get_stats():
 
     for struct in Assets.list_all_structs():
         try:
-            [struct_stat, lig_compounds, n_dbank_compounds, superkingdom] = (
-                struct_stats(Structure(struct))
-            )
+            [struct_stat, lig_compounds, n_dbank_compounds, superkingdom] = (struct_stats(RibosomeOps(struct)))
 
-            # for k, v in nomenclature_classes.items():
-            #     if k not in chain_classes:
-            #         chain_classes[k] = v
-            #     else:
-            #         chain_classes[k] += v
             if superkingdom not in list(global_stats.keys()):
                 continue
             # ---------- SUBUNUTIS
@@ -152,17 +145,6 @@ def get_stats():
 
             elif struct_stat["subunit_composition"] == "both":
                 global_stats[superkingdom]["ssu_lsu"] += 1
-
-            # if struct_stat["has_trna"] == True:
-            #     global_stats["with_trna"] += 1
-
-            # if struct_stat["has_elongation_factors"] == True:
-            #     global_stats["with_elongation_factor"] += 1
-            # if struct_stat["has_initiation_factors"] == True:
-            #     global_stats["with_initiation_factor"] += 1
-
-            # if struct_stat["has_factors"] == True:
-            #     global_stats["with_factor"] += 1
 
             if struct_stat["mitochondrial"] == True:
                 global_stats[superkingdom]["mitochondrial"] += 1
