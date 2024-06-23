@@ -1,9 +1,6 @@
 from pprint import pprint
 import typing
 import sys
-
-from ninja import Schema
-
 from neo4j_ribosome import NEO4J_CURRENTDB, NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER
 from ribctl.lib.schema.types_ribosome import (
     PolymerClass,
@@ -41,12 +38,19 @@ class Neo4jReader:
             return
         self.adapter = Neo4jAdapter(NEO4J_URI, NEO4J_USER, NEO4J_CURRENTDB, NEO4J_PASSWORD)
 
+    def node_types(self):
+        with self.adapter.driver.session() as session:
+            def _(tx: Transaction | ManagedTransaction):
+                return tx.run("""match (n)return collect(distinct labels(n))""").value()[0]
+            return session.execute_read(_)
+
     def tax_dict(self):
         """All taxonomic ids present in the database mapped to their scientific name per NCBI"""
         with self.adapter.driver.session() as session:
             def _(tx: Transaction | ManagedTransaction):
                 return tx.run("""match (t:PhylogenyNode) return collect([t.ncbi_tax_id,t.scientific_name])""").value()[0]
             return session.execute_read(_)
+
     def all_ids(self):
         """All taxonomic ids present in the database mapped to their scientific name per NCBI"""
         with self.adapter.driver.session() as session:
@@ -60,7 +64,6 @@ class Neo4jReader:
             def _(tx: Transaction | ManagedTransaction):
                 return tx.run("""match (n:PolymerClass)-[]-(p:Polymer) with  count(p) as c, n return collect([n.class_id, c])""").value()[0]
             return session.execute_read(_)
-
 
     def random_structure(self):
         with self.adapter.driver.session() as session:

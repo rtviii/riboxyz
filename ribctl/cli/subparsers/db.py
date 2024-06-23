@@ -21,12 +21,14 @@ def upsert(ctx, all_structs):
     if all_structs:
         upsert_all_structures()
         return
+
     rcsb_id = ctx.obj['rcsb_id']
     adapter.upsert_structure_node(rcsb_id)
     click.echo(f'Upserted {rcsb_id} from profile...')
 
 @db.command()
 @click.pass_context
-@click.option("--node_types", required=False, is_flag=True, default=False)
+@click.option("--node_types", required=False, is_flag=True, default=True)
 def ls(ctx, node_types):
-    reader.
+    if node_types:
+        click.echo(reader.node_types())

@@ -1,5 +1,6 @@
 import sys
 sys.dont_write_bytecode = True
+
 from ribctl.lib.libtax import PhylogenyNode, Taxid
 from neo4j_ribosome.node_phylogeny import link__phylogeny, node__phylogeny
 from neo4j.graph import Node

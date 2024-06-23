@@ -724,7 +724,7 @@ class ReannotationPipeline:
         reshaped_nonpolymers                     = self.process_nonpolymers()
         [externalRefs, pub, kwords_text, kwords] = self.process_metadata()
         organisms                                = self.infer_organisms_from_polymers([*_prot_polypeptides, *_rna_polynucleotides])
-        subunuit_presence                        = lsu_ssu_presence(_rna_polynucleotides, is_mitochondrial)
+        subunit_presence                         = lsu_ssu_presence(_rna_polynucleotides, is_mitochondrial)
 
         reshaped                                 = RibosomeStructure(
             rcsb_id                = self.rcsb_data_dict["rcsb_id"],
@@ -750,7 +750,7 @@ class ReannotationPipeline:
             other_polymers         = _other_polymers,
             assembly_map           = self.asm_maps,
             mitochondrial          = is_mitochondrial,
-            subunuit_presence      = subunuit_presence
+            subunit_presence       = subunit_presence
         )
 
         RA.write_own_json_profile(reshaped.model_dump(), overwrite=True)

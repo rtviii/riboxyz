@@ -1,3 +1,4 @@
+from pprint import pprint
 from typing import Callable, Literal
 from neo4j import Driver, ManagedTransaction, Record, Transaction
 from neo4j.graph import Node, Relationship
@@ -86,40 +87,31 @@ def node__structure(
     _rib: RibosomeStructure,
 ) -> Callable[[Transaction | ManagedTransaction], Record | None]:
     R = _rib.model_dump()
-
+    pprint({**R})
     def _(tx: Transaction | ManagedTransaction):
         return tx.run(
             """//
-        merge ( struct:RibosomeStructure{
-                  rcsb_id               : $rcsb_id,
-                  expMethod             : $expMethod,
-                  resolution            : $resolution,
-
-                  pdbx_keywords     : $pdbx_keywords,
-                  pdbx_keywords_text: $pdbx_keywords_text,
-
-                  src_organism_ids           : $src_organism_ids,
-                  src_organism_names         : $src_organism_names,
-
-                  host_organism_ids           : $host_organism_ids,
-                  host_organism_names          : $host_organism_names,
-                  
-                  mitochondrial    : $mitochondrial,
-                  subunuit_presence: $subunit_presence
-              })
-
-              on create set
-              struct.rcsb_external_ref_id   = CASE WHEN $rcsb_external_ref_id = null then \"null\" else $rcsb_external_ref_id   END,
-              struct.rcsb_external_ref_type = CASE WHEN $rcsb_external_ref_type = null then \"null\" else $rcsb_external_ref_type END,
-              struct.rcsb_external_ref_link = CASE WHEN $rcsb_external_ref_link = null then \"null\" else $rcsb_external_ref_link END,
-              struct.citation_pdbx_doi      = CASE WHEN $citation_pdbx_doi = null then \"null\" else $citation_pdbx_doi END,
-              struct.citation_year          = CASE WHEN $citation_year = null then \"null\" else $citation_year END,
-              struct.citation_title         = CASE WHEN $citation_title = null then \"null\" else $citation_title END,
-              struct.citation_rcsb_authors  = CASE WHEN $citation_rcsb_authors = null then \"null\" else $citation_rcsb_authors END
-              return struct
-        """,
-            **R
-        ).single()
+        MERGE (struct:RibosomeStructure{ rcsb_id: $rcsb_id})
+        ON CREATE SET
+            struct.expMethod = $expMethod,
+            struct.resolution = $resolution,
+            struct.pdbx_keywords = $pdbx_keywords,
+            struct.pdbx_keywords_text = $pdbx_keywords_text,
+            struct.src_organism_ids = $src_organism_ids,
+            struct.src_organism_names = $src_organism_names,
+            struct.host_organism_ids = $host_organism_ids,
+            struct.host_organism_names = $host_organism_names,
+            struct.mitochondrial = $mitochondrial,
+            struct.rcsb_external_ref_id = CASE WHEN $rcsb_external_ref_id IS NULL THEN "null" ELSE $rcsb_external_ref_id END,
+            struct.rcsb_external_ref_type = CASE WHEN $rcsb_external_ref_type IS NULL THEN "null" ELSE $rcsb_external_ref_type END,
+            struct.rcsb_external_ref_link = CASE WHEN $rcsb_external_ref_link IS NULL THEN "null" ELSE $rcsb_external_ref_link END,
+            struct.citation_pdbx_doi = CASE WHEN $citation_pdbx_doi IS NULL THEN "null" ELSE $citation_pdbx_doi END,
+            struct.citation_year = CASE WHEN $citation_year IS NULL THEN "null" ELSE $citation_year END,
+            struct.citation_title = CASE WHEN $citation_title IS NULL THEN "null" ELSE $citation_title END,
+            struct.citation_rcsb_authors = CASE WHEN $citation_rcsb_authors IS NULL THEN "null" ELSE $citation_rcsb_authors END
+        SET struct.subunit_presence = $subunit_presence
+        RETURN struct
+               """ , **R).single()
 
     return _
 

@@ -1,6 +1,5 @@
 from concurrent.futures import ALL_COMPLETED, Future, ThreadPoolExecutor, wait
 from functools import partial
-import os
 import sys
 from neo4j_ribosome import NEO4J_CURRENTDB, NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER
 from neo4j_ribosome.db_lib_reader import Neo4jReader
