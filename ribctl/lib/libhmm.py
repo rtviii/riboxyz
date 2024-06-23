@@ -279,12 +279,13 @@ class HMMClassifier():
         self.organism_scanners = {}
         self.report            = {}
 
-    def pick_best_hit(self, hits:list[dict]) -> list[PolymerClass]:
+    @staticmethod
+    def pick_best_hit(hits:list[dict], bitscore_threshold:float) -> list[PolymerClass]:
         if len(hits) == 0:
             return []
 
         sorted_by_biscore = sorted(hits, key=lambda x: x["bitscore"], reverse=True)
-        return [ sorted_by_biscore[0]['class_name'] ] if sorted_by_biscore[0]['bitscore'] > self.bitscore_threshold else []
+        return [ sorted_by_biscore[0]['class_name'] ] if sorted_by_biscore[0]['bitscore'] > bitscore_threshold else []
 
     def classify_chains(self)->None:
         for chain in self.chains:
@@ -321,7 +322,7 @@ class HMMClassifier():
     def produce_classification(self)->dict[str,list]:
         classes = {}
         for (auth_asym_id,hits) in self.report.items():
-            classes[auth_asym_id] = self.pick_best_hit(hits)
+            classes[auth_asym_id] = self.pick_best_hit(hits, self.bitscore_threshold)
         return classes
    
     def write_classification_report(self,write_path:str)->None:

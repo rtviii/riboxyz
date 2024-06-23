@@ -687,14 +687,13 @@ class ReannotationPipeline:
             with open(report_path, "w") as outfile:
                 json.dump(full_report, outfile, indent=4)
                 logger.debug("Saved classification report to {}".format(report_path))
+
         else:
+            # * Make sure you pick the "best_hit". The reports are saved with multiple possible class assignments for each chain (for the record/debugging).
             print("Using existing classification report: {}".format(RA.paths.classification_report))
             with open(RA.paths.classification_report, "r") as infile:
-                full_report = json.load(infile)
-                def access_class(_:dict):
-                    if len(_) <1 : return []
-                    return [ _[0]['class_name'] ]
-                reported_classes = { k:access_class(v) for ( k,v ) in full_report.items() }
+                full_report      = json.load(infile)
+                reported_classes = { auth_asym_id:HMMClassifier.pick_best_hit(polymer_class_hits, 35) for ( auth_asym_id,polymer_class_hits ) in full_report.items() }
 
         #! PROPAGATE NOMENCLATUERE FROM HMM REPORT TO POLYMERS
         for polymer_dict in _rna_polynucleotides:
@@ -725,6 +724,7 @@ class ReannotationPipeline:
         [externalRefs, pub, kwords_text, kwords] = self.process_metadata()
         organisms                                = self.infer_organisms_from_polymers([*_prot_polypeptides, *_rna_polynucleotides])
         subunit_presence                         = lsu_ssu_presence(_rna_polynucleotides, is_mitochondrial)
+        print(rcsb_id, " ogt lsu ssu:", subunit_presence)
 
         reshaped                                 = RibosomeStructure(
             rcsb_id                = self.rcsb_data_dict["rcsb_id"],

@@ -25,6 +25,7 @@ def lsu_ssu_presence(rnas:list[RNA], is_mitochondrial :bool) -> list[Literal[ "s
     has_lsu = 0
     has_ssu = 0
     for rna in rnas:
+        # print("Inspecting rnas:", rna)
         if is_mitochondrial:
             if MitochondrialRNAClass.mtrRNA12S in rna.nomenclature:
                 has_ssu = 1

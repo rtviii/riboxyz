@@ -87,12 +87,11 @@ def node__structure(
     _rib: RibosomeStructure,
 ) -> Callable[[Transaction | ManagedTransaction], Record | None]:
     R = _rib.model_dump()
-    pprint({**R})
     def _(tx: Transaction | ManagedTransaction):
         return tx.run(
             """//
         MERGE (struct:RibosomeStructure{ rcsb_id: $rcsb_id})
-        ON CREATE SET
+        SET
             struct.expMethod = $expMethod,
             struct.resolution = $resolution,
             struct.pdbx_keywords = $pdbx_keywords,
@@ -108,8 +107,8 @@ def node__structure(
             struct.citation_pdbx_doi = CASE WHEN $citation_pdbx_doi IS NULL THEN "null" ELSE $citation_pdbx_doi END,
             struct.citation_year = CASE WHEN $citation_year IS NULL THEN "null" ELSE $citation_year END,
             struct.citation_title = CASE WHEN $citation_title IS NULL THEN "null" ELSE $citation_title END,
-            struct.citation_rcsb_authors = CASE WHEN $citation_rcsb_authors IS NULL THEN "null" ELSE $citation_rcsb_authors END
-        SET struct.subunit_presence = $subunit_presence
+            struct.citation_rcsb_authors = CASE WHEN $citation_rcsb_authors IS NULL THEN "null" ELSE $citation_rcsb_authors END,
+            struct.subunit_presence = $subunit_presence
         RETURN struct
                """ , **R).single()
 
