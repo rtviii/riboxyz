@@ -11,6 +11,7 @@ rnacentral*
 **/*.mp4
 *.mp4
 
+**.pyc
 
 **/*.ply
 *.ply
