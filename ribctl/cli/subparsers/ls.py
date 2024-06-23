@@ -7,7 +7,6 @@ ce = click.echo
 @click.command()
 @click.pass_context
 def ls(ctx):
-
     rcsb_id = ctx.obj['rcsb_id']
     if rcsb_id != None:
         if "." in rcsb_id:

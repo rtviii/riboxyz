@@ -362,7 +362,7 @@ class Assets:
         return sorted(requests.get(query).json()["result_set"])
 
     @staticmethod
-    def status_vs_rcsb() -> list:
+    def status_vs_rcsb() -> list[str]:
         """Return a list of structures that are in the RCSB but not in the local database."""
         return list(set(Assets.current_rcsb_structs()) - set(Assets.list_all_structs()))
 

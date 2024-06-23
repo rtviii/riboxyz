@@ -21,13 +21,12 @@ NODE_CONSTRAINTS = [
 # just issue a `ALTER CURRENT USER SET PASSWORD FROM 'current password' TO 'new password'` statement against
 # the system database in the current session, and then restart your driver with the new password configured.
 
-class Neo4jBuilder():
+class Neo4jAdapter():
 
     driver   : Driver
     uri      : str
     user     : str
     databases: list[str]
-
 
     def __init__(self, uri: str, user: str,current_db:str, password: str|None=None, ) -> None:
        
@@ -122,7 +121,7 @@ class Neo4jBuilder():
             ligand_node = s.execute_write(node__ligand(ligand))
             s.execute_write(link__ligand_to_struct(ligand_node, parent_rcsb_id))
 
-    def add_structure(self, rcsb_id:str, disable_exists_check:bool=False):
+    def add_total_structure(self, rcsb_id:str, disable_exists_check:bool=False):
         rcsb_id = rcsb_id.upper()
 
         if not disable_exists_check:
@@ -164,7 +163,11 @@ class Neo4jBuilder():
         print("Successfully initialized structure {}.".format(rcsb_id))
         return structure_node
 
-
-
-
-
+    def upsert_structure_node(self, rcsb_id:str):
+        rcsb_id = rcsb_id.upper()
+        R:RibosomeStructure = RibosomeOps(rcsb_id).profile()
+        with self.driver.session() as s:
+            structure_node = s.execute_write(node__structure(R))
+        print("Successfully merged structure {}.".format(rcsb_id))
+        return structure_node
+    

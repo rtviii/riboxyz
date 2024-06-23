@@ -3,8 +3,8 @@ from functools import partial
 import os
 import sys
 from neo4j_ribosome import NEO4J_CURRENTDB, NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER
-from neo4j_ribosome.db_lib_reader import Neo4jQuery
-from neo4j_ribosome.db_lib_builder import Neo4jBuilder
+from neo4j_ribosome.db_lib_reader import Neo4jReader
+from neo4j_ribosome.db_lib_builder import Neo4jAdapter
 from ribctl.etl.etl_assets_ops import Assets, RibosomeOps, Structure
 
 sys.dont_write_bytecode = True
@@ -12,15 +12,32 @@ sys.dont_write_bytecode = True
 # * Recipe for initializing a new instance from the RIBETL_DATA pool
 # * - assumes the RibosomeStrucutre profiles are rendered
 def full_upload():
-    adapter = Neo4jBuilder(NEO4J_URI, NEO4J_USER, NEO4J_CURRENTDB)
+    adapter = Neo4jAdapter(NEO4J_URI, NEO4J_USER, NEO4J_CURRENTDB)
     adapter.initialize_new_instance()
-
     futures: list[Future] = []
 
     with ThreadPoolExecutor(max_workers=10) as executor:
         for rcsb_id in sorted(Assets.list_all_structs()):
-            fut = executor.submit(partial(adapter.add_structure, rcsb_id, True))
+            fut = executor.submit(partial(adapter.add_total_structure, rcsb_id, True))
             futures.append(fut)
     wait(futures, return_when=ALL_COMPLETED)
 
-full_upload()
+# * Add only the profiles that are missing versus the RCSB.
+def rcsb_sync():
+    adapter = Neo4jAdapter(NEO4J_URI, NEO4J_USER, NEO4J_CURRENTDB)
+    futures: list[Future] = []
+    with ThreadPoolExecutor(max_workers=10) as executor:
+        for rcsb_id in sorted(Assets.status_vs_rcsb()):
+            fut = executor.submit(partial(adapter.add_total_structure, rcsb_id, True))
+            futures.append(fut)
+    wait(futures, return_when=ALL_COMPLETED)
+
+# * Alter only the core structure nodes given the profile is already rendered. (Does not alter the polymer nodes, etc.)
+def upsert_all_structures():
+    adapter = Neo4jAdapter(NEO4J_URI, NEO4J_USER, NEO4J_CURRENTDB)
+    futures: list[Future] = []
+    with ThreadPoolExecutor(max_workers=10) as executor:
+        for rcsb_id in sorted(Assets.list_all_structs()):
+            fut = executor.submit(partial(adapter.upsert_structure_node, rcsb_id))
+            futures.append(fut)
+    wait(futures, return_when=ALL_COMPLETED)

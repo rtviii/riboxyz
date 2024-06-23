@@ -13,7 +13,7 @@ from ribctl.lib.schema.types_ribosome import (
 
 sys.dont_write_bytecode = True
 from neo4j import ManagedTransaction, Transaction
-from neo4j_ribosome.db_lib_builder import Neo4jBuilder
+from neo4j_ribosome.db_lib_builder import Neo4jAdapter
 
 """This is the primary interface to the Neo4j instance. It queries the database and passes the results to the [ Django ] API.
 DO NOT put validation logic/schema here. This is a pure interface to the database. All the conversions are done in the API layer.
@@ -31,15 +31,15 @@ class FiltersSchema:
     def __init__(self) -> None:
         pass
 
+class Neo4jReader:
 
+    adapter: Neo4jAdapter
 
-class Neo4jQuery:
-
-    adapter: Neo4jBuilder
-
-    def __init__(self) -> None:
-        self.adapter = Neo4jBuilder(NEO4J_URI, NEO4J_USER, NEO4J_CURRENTDB, NEO4J_PASSWORD)
-        pass
+    def __init__(self, adapter:Neo4jAdapter|None=None) -> None:
+        if adapter:
+            self.adapter = adapter
+            return
+        self.adapter = Neo4jAdapter(NEO4J_URI, NEO4J_USER, NEO4J_CURRENTDB, NEO4J_PASSWORD)
 
     def tax_dict(self):
         """All taxonomic ids present in the database mapped to their scientific name per NCBI"""
@@ -441,7 +441,7 @@ return collect(apoc.map.merge(ribosomes, rest)),  collect(distinct total_count)[
 
 
 
-dbqueries = Neo4jQuery()
+dbqueries = Neo4jReader()
 
 
 
