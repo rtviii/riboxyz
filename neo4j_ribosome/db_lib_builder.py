@@ -139,9 +139,10 @@ class Neo4jAdapter():
 
             for protein in R.proteins:
                    protein_node = s.execute_write(node__polymer(protein))
-                   s.execute_write(link__polymer_to_structure    (protein_node   , protein.parent_rcsb_id))
-                   s.execute_write(link__polymer_to_polymer_class(protein_node                           ))
-                   s.execute_write(upsert_polymer_to_protein     (protein_node   , protein               ))
+
+                   s.execute_write(link__polymer_to_structure(protein_node, protein.parent_rcsb_id))
+                   s.execute_write(link__polymer_to_polymer_class(protein_node))
+                   s.execute_write(upsert_polymer_to_protein(protein_node, protein))
 
             if R.rnas is not None:
                 for rna in R.rnas:

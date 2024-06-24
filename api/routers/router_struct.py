@@ -114,7 +114,7 @@ def ptc(request, rcsb_id:str):
     rcsb_id = str.upper(rcsb_id)
     return RibosomeOps(rcsb_id).ptc()
 
-@structure_router.get('/list_ligands',  tags=[TAG])
+@structure_router.get('/list_ligands',response=list[tuple[dict,list[dict]]] , tags=[TAG])
 def list_lignads(request):
     return dbqueries.list_ligands()
 

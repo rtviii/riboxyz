@@ -31,8 +31,6 @@ ribd.add_command(db)
 ribd.add_command(ls)
 
 
-
-
 @click.command()
 @click.pass_context
 def test(ctx):
