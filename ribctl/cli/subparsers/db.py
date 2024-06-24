@@ -23,8 +23,9 @@ def upsert(ctx, all_structs):
         return
 
     rcsb_id = ctx.obj['rcsb_id']
-    adapter.upsert_structure_node(rcsb_id)
-    click.echo(f'Upserted {rcsb_id} from profile...')
+    if rcsb_id !=None:
+        adapter.upsert_structure_node(rcsb_id)
+        click.echo(f'Upserted {rcsb_id} from profile...')
 
 @db.command()
 @click.pass_context

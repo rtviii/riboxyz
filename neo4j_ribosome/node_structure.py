@@ -108,7 +108,8 @@ def node__structure(
             struct.citation_year = CASE WHEN $citation_year IS NULL THEN "null" ELSE $citation_year END,
             struct.citation_title = CASE WHEN $citation_title IS NULL THEN "null" ELSE $citation_title END,
             struct.citation_rcsb_authors = CASE WHEN $citation_rcsb_authors IS NULL THEN "null" ELSE $citation_rcsb_authors END,
-            struct.subunit_presence = $subunit_presence
+            struct.subunit_presence = $subunit_presence,
+            struct.deposition_date = $deposition_date
         RETURN struct
                """ , **R).single()
 
