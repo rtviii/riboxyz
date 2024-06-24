@@ -577,7 +577,7 @@ class RibosomeStructure(BaseModel):
 
     assembly_map     : Optional[list[AssemblyInstancesMap]] = None
     mitochondrial    : bool
-    subunit_presence: list[typing.Literal['ssu','lsu']]
+    subunit_presence: Optional[list[typing.Literal['ssu','lsu']]] = None
 
     # proteins            : list[Any]
     # rnas                : list[Any]

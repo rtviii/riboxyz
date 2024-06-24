@@ -114,15 +114,10 @@ return apoc.map.merge(rib, rest)
             def _(tx: Transaction | ManagedTransaction):
                 return tx.run(
                     """//
-match (n:Ligand)-[]-(r:RibosomeStructure) where not toLower(n.chemicalName) contains "ion" 
-with n, r
-match (r)-[:source]-(p:PhylogenyNode)-[:descendant_of*]-(s:PhylogenyNode) where s.ncbi_tax_id in [2759, 2157, 2] 
-return properties(n), collect({
-         parent_structure  : r.rcsb_id,
-         src_organism_ids  : r.src_organism_ids,
-         src_organism_names: r.src_organism_names,
-         superkingdom      : s.ncbi_tax_id
-     }),  collect(distinct [p.ncbi_tax_id, p.scientific_name])
+match (l:Ligand)-[]-(r:RibosomeStructure) where not toLower(l.chemicalName) contains "ion"
+with l, r
+match (r)-[:belongs_to_lineage_source]-(p:PhylogenyNode) where p.ncbi_tax_id in [2759, 2157, 2]
+return properties(l), collect({{rcsb_id: r.rcsb_id, tax_node: properties(p)}})
 """
                 ).values()
 
