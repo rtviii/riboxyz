@@ -16,14 +16,12 @@ from Bio.PDB.Structure import Structure
 from ribctl.lib.schema.types_ribosome import RNA
 from fuzzysearch import find_near_matches
 
-
 # https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4574749/pdf/1719.pdf
 DORIS_ET_AL = {
     "SITE_6": "AAGACCC",
     "SITE_8": "GGAUAAC",
     "SITE_9": "GAGCUGGGUUUA",
 }
-
 
 def pick_match(matches, rna_length: int):
     if len(matches) == 0:
@@ -63,31 +61,13 @@ def ptc_fuzzyfind_subseq_in_chain(
 
     # print("Raw seq is ", raw_seq)
 
-    match9 = pick_match(
-        find_near_matches(DORIS_ET_AL["SITE_9"], raw_seq, max_l_dist=1), len(raw_seq)
-    )
-    match8 = pick_match(
-        find_near_matches(DORIS_ET_AL["SITE_8"], raw_seq, max_l_dist=1), len(raw_seq)
-    )
-    match6 = pick_match(
-        find_near_matches(DORIS_ET_AL["SITE_6"], raw_seq, max_l_dist=1), len(raw_seq)
-    )
+    match9 = pick_match( find_near_matches(DORIS_ET_AL["SITE_9"], raw_seq, max_l_dist=1), len(raw_seq) )
+    match8 = pick_match( find_near_matches(DORIS_ET_AL["SITE_8"], raw_seq, max_l_dist=1), len(raw_seq) )
+    match6 = pick_match( find_near_matches(DORIS_ET_AL["SITE_6"], raw_seq, max_l_dist=1), len(raw_seq) )
 
-    PTC_residues_9 = (
-        [ress_sanitized[i] for i in list(range(match9.start, match9.end))]
-        if match9
-        else []
-    )
-    PTC_residues_8 = (
-        [ress_sanitized[i] for i in list(range(match8.start, match8.end))]
-        if match8
-        else []
-    )
-    PTC_residues_6 = (
-        [ress_sanitized[i] for i in list(range(match6.start, match6.end))]
-        if match6
-        else []
-    )
+    PTC_residues_9 = ( [ress_sanitized[i] for i in list(range(match9.start, match9.end))] if match9 else [] )
+    PTC_residues_8 = ( [ress_sanitized[i] for i in list(range(match8.start, match8.end))] if match8 else [] )
+    PTC_residues_6 = ( [ress_sanitized[i] for i in list(range(match6.start, match6.end))] if match6 else [] )
 
     return PTC_residues_6, PTC_residues_8, PTC_residues_9, auth_asym_id
 
@@ -214,31 +194,3 @@ def ptc_residues_calculate_midpoint(
     return midpoint
 
 
-def make_cylinder(p1: list[float], p2: list[float], R: float):
-    height = math.sqrt(
-        (p2[0] - p1[0]) ** 2 + (p2[1] - p1[1]) ** 2 + (p2[2] - p1[2]) ** 2
-    )
-    center = ((p1[0] + p2[0]) / 2, (p1[1] + p2[1]) / 2, (p1[2] + p2[2]) / 2)
-
-    return {"center": center, "height": height, "radius": R}
-
-
-def pt_is_inside_cylinder(cylinder, point):
-    distance_xy = math.sqrt(
-        (point[0] - cylinder["center"][0]) ** 2
-        + (point[1] - cylinder["center"][1]) ** 2
-    )
-
-    if distance_xy <= cylinder["radius"]:
-        distance_top = abs(point[2] - (cylinder["center"][2] + cylinder["height"] / 2))
-        distance_bottom = abs(
-            point[2] - (cylinder["center"][2] - cylinder["height"] / 2)
-        )
-
-        if (
-            distance_top <= cylinder["height"] / 2
-            and distance_bottom <= cylinder["height"] / 2
-        ):
-            return True
-
-    return False

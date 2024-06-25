@@ -122,6 +122,8 @@ class MitochondrialProteinClass(str,Enum):
 
 class CytosolicProteinClass(str,Enum):
     # SSU
+
+    
     bS1   = "bS1"
     eS1   = "eS1"
     uS2   = "uS2"
@@ -323,9 +325,7 @@ PolypeptideClass     = enum_union(LifecycleFactorClass, ProteinClass)
 PolynucleotideClass  = enum_union(CytosolicRNAClass, MitochondrialRNAClass, tRNA)
 PolymerClass         = enum_union(PolynucleotideClass, PolypeptideClass)
 
-
 # ? ----------------------------------------------{ Object Types }------------------------------------------------
-
 
 
 class Polymer(BaseModel):

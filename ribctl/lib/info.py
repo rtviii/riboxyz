@@ -32,8 +32,7 @@ def lsu_ssu_presence(rnas:list[RNA], is_mitochondrial :bool) -> list[Literal[ "s
             elif MitochondrialRNAClass.mtrRNA16S in rna.nomenclature:
                 has_lsu = 2
         else:
-            if (
-                (CytosolicRNAClass.rRNA_5_8S in rna.nomenclature)
+            if ( (CytosolicRNAClass.rRNA_5_8S in rna.nomenclature)
                 or (CytosolicRNAClass.rRNA_5S in rna.nomenclature)
                 or (CytosolicRNAClass.rRNA_28S in rna.nomenclature)
                 or (CytosolicRNAClass.rRNA_25S in rna.nomenclature)

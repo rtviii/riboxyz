@@ -83,28 +83,20 @@ class RibosomeOps:
         self.rcsb_id = rcsb_id.upper()
         self.paths   = AssetPath(self.rcsb_id)
 
-    @staticmethod
-    def collect_all_taxa() -> set[PhylogenyNode]:
-        _ = set()
-        for struct in Assets.list_all_structs():
-            rp = RibosomeOps(struct).profile()
-            for org in [*rp.src_organism_ids, *rp.host_organism_ids]:
-                # if Taxid.rank(org) not in list(typing.get_args(PhylogenyRank)):
-                #     org = Taxid.coerce_to_rank(org, "species")
-                assert org is not None
-                try:
-                    pn = PhylogenyNode(
-                        ncbi_tax_id     = org,
-                        scientific_name = Taxid.get_name(org),
-                        rank            = Taxid.rank(org),
-                    )
-                except Exception as e:
-                    print( struct, Taxid.get_name(org), "|\t", Taxid.rank(org), "->", Taxid.get_lineage(org), )
-                    print("Error with", org, struct)
-                    print(e)
-                _.add(pn)
-        return _
 
+
+    def chains_by_subunits(self):
+        _ = {
+            "ssu":[],
+            "lsu":[]
+        }
+        profile = self.profile()
+
+        chain:Polymer
+
+        for chain in [ *profile.rnas, *profile.proteins, *profile.other_polymers ]:
+            if len( chain.nomenclature )<1: continue
+            # if chain.nomenclature[0]
 
     #! [I] for Individual structure methods. Brew on this for a little bit, maybe should be a separate namespace.
 
@@ -312,6 +304,27 @@ class Assets:
         return _
 
 
+    @staticmethod
+    def collect_all_taxa() -> set[PhylogenyNode]:
+        _ = set()
+        for struct in Assets.list_all_structs():
+            rp = RibosomeOps(struct).profile()
+            for org in [*rp.src_organism_ids, *rp.host_organism_ids]:
+                # if Taxid.rank(org) not in list(typing.get_args(PhylogenyRank)):
+                #     org = Taxid.coerce_to_rank(org, "species")
+                assert org is not None
+                try:
+                    pn = PhylogenyNode(
+                        ncbi_tax_id     = org,
+                        scientific_name = Taxid.get_name(org),
+                        rank            = Taxid.rank(org),
+                    )
+                except Exception as e:
+                    print( struct, Taxid.get_name(org), "|\t", Taxid.rank(org), "->", Taxid.get_lineage(org), )
+                    print("Error with", org, struct)
+                    print(e)
+                _.add(pn)
+        return _
 
 
     @staticmethod
