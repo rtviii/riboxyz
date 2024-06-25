@@ -92,24 +92,24 @@ def node__structure(
             """//
         MERGE (struct:RibosomeStructure{ rcsb_id: $rcsb_id})
         SET
-            struct.expMethod = $expMethod,
-            struct.resolution = $resolution,
-            struct.pdbx_keywords = $pdbx_keywords,
-            struct.pdbx_keywords_text = $pdbx_keywords_text,
-            struct.src_organism_ids = $src_organism_ids,
-            struct.src_organism_names = $src_organism_names,
-            struct.host_organism_ids = $host_organism_ids,
-            struct.host_organism_names = $host_organism_names,
-            struct.mitochondrial = $mitochondrial,
-            struct.rcsb_external_ref_id = CASE WHEN $rcsb_external_ref_id IS NULL THEN "null" ELSE $rcsb_external_ref_id END,
+            struct.expMethod              = $expMethod,
+            struct.resolution             = $resolution,
+            struct.pdbx_keywords          = $pdbx_keywords,
+            struct.pdbx_keywords_text     = $pdbx_keywords_text,
+            struct.src_organism_ids       = $src_organism_ids,
+            struct.src_organism_names     = $src_organism_names,
+            struct.host_organism_ids      = $host_organism_ids,
+            struct.host_organism_names    = $host_organism_names,
+            struct.mitochondrial          = $mitochondrial,
+            struct.rcsb_external_ref_id   = CASE WHEN $rcsb_external_ref_id IS NULL THEN "null" ELSE $rcsb_external_ref_id END,
             struct.rcsb_external_ref_type = CASE WHEN $rcsb_external_ref_type IS NULL THEN "null" ELSE $rcsb_external_ref_type END,
             struct.rcsb_external_ref_link = CASE WHEN $rcsb_external_ref_link IS NULL THEN "null" ELSE $rcsb_external_ref_link END,
-            struct.citation_pdbx_doi = CASE WHEN $citation_pdbx_doi IS NULL THEN "null" ELSE $citation_pdbx_doi END,
-            struct.citation_year = CASE WHEN $citation_year IS NULL THEN "null" ELSE $citation_year END,
-            struct.citation_title = CASE WHEN $citation_title IS NULL THEN "null" ELSE $citation_title END,
-            struct.citation_rcsb_authors = CASE WHEN $citation_rcsb_authors IS NULL THEN "null" ELSE $citation_rcsb_authors END,
-            struct.subunit_presence = $subunit_presence,
-            struct.deposition_date = $deposition_date
+            struct.citation_pdbx_doi      = CASE WHEN $citation_pdbx_doi IS NULL THEN "null" ELSE $citation_pdbx_doi END,
+            struct.citation_year          = CASE WHEN $citation_year IS NULL THEN "null" ELSE $citation_year END,
+            struct.citation_title         = CASE WHEN $citation_title IS NULL THEN "null" ELSE $citation_title END,
+            struct.citation_rcsb_authors  = CASE WHEN $citation_rcsb_authors IS NULL THEN "null" ELSE $citation_rcsb_authors END,
+            struct.subunit_presence       = $subunit_presence,
+            struct.deposition_date        = $deposition_date
         RETURN struct
                """ , **R).single()
 

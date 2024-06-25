@@ -37,8 +37,6 @@ def get_polymer_nbrs(
     nbr_dict     = {}
     chain_names  = list(set(map(lambda _: _.parent_auth_asym_id, nbr_residues)))
 
-    
-
     profile                     = RibosomeStructure.from_json_profile(utils.open_structure(pdbid, 'json'))
     poly_entities:list[Polymer] = [*map(lambda _: Polymer(**_.dict()), itertools.chain(profile.proteins, profile.rnas if profile.rnas else []))]
 

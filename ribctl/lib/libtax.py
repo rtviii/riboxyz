@@ -17,7 +17,7 @@ PhylogenyRank = Literal["superkingdom", "phylum", "class", "order", "clade", "fa
                          "subspecies", "no rank", "suborder", "kingdom", "subfamily", "subgenus", "subphylum", "infraorder","superorder", "superclass", "superfamily", "parvorder","cohort",
                          "infraclass", "subclass","subkingdom", "species group", "tribe", "species subgroup", "subcohort", "subtribe"]
 
-ncbi          = NCBITaxa(dbfile=NCBI_TAXA_SQLITE)
+ncbi = NCBITaxa(dbfile=NCBI_TAXA_SQLITE)
 class Taxid:
     @staticmethod
     def is_descendant_of(parent_taxid: int, target_taxid: int) -> bool:
