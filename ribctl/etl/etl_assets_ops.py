@@ -84,19 +84,19 @@ class RibosomeOps:
         self.paths   = AssetPath(self.rcsb_id)
 
 
+    #TODO: 
+    # def chains_by_subunits(self):
+    #     _ = {
+    #         "ssu":[],
+    #         "lsu":[]
+    #     }
+    #     profile = self.profile()
 
-    def chains_by_subunits(self):
-        _ = {
-            "ssu":[],
-            "lsu":[]
-        }
-        profile = self.profile()
+    #     chain:Polymer
 
-        chain:Polymer
-
-        for chain in [ *profile.rnas, *profile.proteins, *profile.other_polymers ]:
-            if len( chain.nomenclature )<1: continue
-            # if chain.nomenclature[0]
+    #     for chain in [ *profile.rnas, *profile.proteins, *profile.other_polymers ]:
+    #         if len( chain.nomenclature )<1: continue
+    #         # if chain.nomenclature[0]
 
     #! [I] for Individual structure methods. Brew on this for a little bit, maybe should be a separate namespace.
 
