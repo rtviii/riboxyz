@@ -79,41 +79,43 @@ def load_trimming_parameters( RCSB_ID:str, file_path=TRIMMING_PARAMS_DICT_PATH):
 
 def pipeline(RCSB_ID,args):
 
-    print("pipeline")
     #! [ Pipeline Parameters ]
     _u_EPSILON     = 5.5 if args.dbscan_tuple is None else float(args.dbscan_tuple.split(",")[0])
     _u_MIN_SAMPLES = 600 if args.dbscan_tuple is None else int(args.dbscan_tuple.split(",")[1])
     _u_METRIC      = "euclidean"
 
-    d3d_alpha      = args.D3D_alpha if args.D3D_alpha is not None else 2
-    d3d_tol        = args.D3D_tol if args.D3D_tol is not None else 1
-    PR_depth       = args.PR_depth if args.PR_depth is not None else 6
-    PR_ptweight    = args.PR_ptweight if args.PR_ptweight is not None else 3
+    d3d_alpha   = args.D3D_alpha   if args.D3D_alpha   is not None else 2
+    d3d_tol     = args.D3D_tol     if args.D3D_tol     is not None else 1
+    PR_depth    = args.PR_depth    if args.PR_depth    is not None else 6
+    PR_ptweight = args.PR_ptweight if args.PR_ptweight is not None else 3
 
     struct_tunnel_dir = Assets(RCSB_ID).paths.tunnel_dir
 
     if not os.path.exists(struct_tunnel_dir):
         os.mkdir(struct_tunnel_dir)
 
-    #! [ Bounding Box Atoms ]
-    # if args.bbox or ( not os.path.exists(spheres_expanded_pointset_path(RCSB_ID)) ) :
-    if args.bbox:
-        print("bbox")
 
-        "the data arrives here as atom coordinates extracted from the biopython model "
-        if not os.path.exists(tunnel_atom_encoding_path(RCSB_ID)) and args.bbox_radius != None:
-            bbox_atoms          = extract_bbox_atoms(RCSB_ID)
-            _atom_centers       = np.array(list(map(lambda x: x["coord"], bbox_atoms)))
-            _vdw_radii          = np.array(list(map(lambda x: x["vdw_radius"], bbox_atoms)))
-            bbox_atoms_expanded = expand_bbox_atoms_to_spheres(_atom_centers,_vdw_radii, RCSB_ID)
-        else:
-            with open( tunnel_atom_encoding_path(RCSB_ID), "r", ) as infile: 
-                bbox_atoms = json.load(infile)
-            _atom_centers       = np.array(list(map(lambda x: x["coord"], bbox_atoms)))
-            _vdw_radii          = np.array(list(map(lambda x: x["vdw_radius"], bbox_atoms)))
-            bbox_atoms_expanded = expand_bbox_atoms_to_spheres(_atom_centers, _vdw_radii, RCSB_ID)
+    if not os.path.exists(tunnel_atom_encoding_path(RCSB_ID)):
+        extract_bbox_atoms(RCSB_ID)
+
+    #! [ Bounding Box Atoms ]
+    if args.bbox or ( not os.path.exists(spheres_expanded_pointset_path(RCSB_ID)) ) :
+        "the data arrives here as *bound_box around the centerline expansion* atom coordinates extracted from the biopython model "
+
+        # if not os.path.exists(tunnel_atom_encoding_path(RCSB_ID)) and args.bbox_radius != None:
+        #     bbox_atoms          = extract_bbox_atoms(RCSB_ID)
+        #     _atom_centers       = np.array(list(map(lambda x: x["coord"], bbox_atoms)))
+        #     _vdw_radii          = np.array(list(map(lambda x: x["vdw_radius"], bbox_atoms)))
+        #     bbox_atoms_expanded = expand_bbox_atoms_to_spheres(_atom_centers,_vdw_radii, RCSB_ID)
+        # else:
+        with open( tunnel_atom_encoding_path(RCSB_ID), "r", ) as infile: 
+            bbox_atoms = json.load(infile)
+        _atom_centers       = np.array(list(map(lambda x: x["coord"], bbox_atoms)))
+        _vdw_radii          = np.array(list(map(lambda x: x["vdw_radius"], bbox_atoms)))
+        bbox_atoms_expanded = expand_bbox_atoms_to_spheres(_atom_centers, _vdw_radii, RCSB_ID)
 
         np.save(spheres_expanded_pointset_path(RCSB_ID), bbox_atoms_expanded)
+        print("Saved spheres_expanded_pointset data to disk : {}".format(spheres_expanded_pointset_path(RCSB_ID)))
     else:
         print("Opened atoms in the bounding box")
         bbox_atoms_expanded = np.load(spheres_expanded_pointset_path(RCSB_ID))
@@ -124,15 +126,15 @@ def pipeline(RCSB_ID,args):
     initial_grid, grid_dimensions, translation_vectors = index_grid(bbox_atoms_expanded)
     # ? Here no trimming has yet occurred.
 
+
+
     #! [ Extract the largest cluster from the DBSCAN clustering ]
     db, clusters_container = DBSCAN_capture(np.asarray(np.where(initial_grid != 1)).T, _u_EPSILON, _u_MIN_SAMPLES, _u_METRIC )
     largest_cluster        = DBSCAN_pick_largest_cluster(clusters_container)
+
     # #! [ Visualize the largest DBSCAN cluster to establish whether trimming is required ]
     # DBSCAN_CLUSTERS_visualize_largest(np.asarray(np.where(initial_grid == 1)).T, clusters_container, largest_cluster)
     visualize_pointcloud(largest_cluster, RCSB_ID)
-
-    # #* It's probably incorrect to look at the largest cluster's indices, yet trim the full grid with them
-    # #* Threre is no gurantee that the shapes are congruent in most cases, i think
 
     # TODO : refactor this trimming logic out
     TRUNCATION_TUPLES = load_trimming_parameters(RCSB_ID)
@@ -167,6 +169,7 @@ def pipeline(RCSB_ID,args):
             raise IndexError("You have to enter three truncation parameters for x, y, and z axes. (ex. ||20:50 to skip x and y axes )")
 
         def trim_pt_filter(pt:np.ndarray):
+
             if TRUNCATION_TUPLES[0] is not None:
                 assert(len(TRUNCATION_TUPLES[0]) == 2)
                 x_start,x_end = TRUNCATION_TUPLES[0]
@@ -202,20 +205,30 @@ def pipeline(RCSB_ID,args):
                         return False
 
             return True
+
     if args.trim:
         trimmed_cluster = np.array(list(filter(trim_pt_filter,list(largest_cluster))))
+    else:
+        trimmed_cluster = largest_cluster
+
+
     visualize_pointcloud(trimmed_cluster, RCSB_ID)
     _, dbscan_container= DBSCAN_capture(trimmed_cluster, 3  , 123, _u_METRIC)
     print("DBSCAN Clusters: ")
     for (k,v) in dbscan_container.items():
         print(k, len(v))
         
+    #! [ Extract the largest DBSCAN cluster with more restrictive parameters so as to capture the geometry more precisely and avoid trimmed the merging of trimmed parts into the main cluster   ]
     main_cluster = DBSCAN_pick_largest_cluster(dbscan_container)
     visualize_pointcloud(main_cluster)
 
     #! [ Transform the cluster back into Original Coordinate Frame ]
     coordinates_in_the_original_frame = main_cluster  - translation_vectors[1] + translation_vectors[0]
+
+    #! [ Transform the cluster back into original coordinate frame ]
     surface_pts                       = ptcloud_convex_hull_points(coordinates_in_the_original_frame, d3d_alpha,d3d_tol)
+
+    #! [ Transform the cluster back into Original Coordinate Frame ]
     np.save(convex_hull_cluster_path(RCSB_ID), surface_pts)
     estimate_normals(surface_pts, surface_with_normals_path(RCSB_ID), kdtree_radius=10, kdtree_max_nn=15, correction_tangent_planes_n=10)
     apply_poisson_reconstruction(surface_with_normals_path(RCSB_ID), poisson_recon_path(RCSB_ID), recon_depth=PR_depth, recon_pt_weight=PR_ptweight)

@@ -54,7 +54,6 @@ def parse_struct_via_bbox(rcsb_id: str, bbox: list) -> list:
     from Bio.PDB.NeighborSearch import NeighborSearch
     from Bio.PDB import Selection
 
-
     parser      = MMCIFParser()
     struct_path = "{}/{}/{}.cif".format(RIBETL_DATA, rcsb_id, rcsb_id)
     structure   = parser.get_structure(rcsb_id, struct_path)
@@ -73,7 +72,6 @@ def parse_struct_via_bbox(rcsb_id: str, bbox: list) -> list:
             [max_x, max_y, max_z],
             [min_x, max_y, max_z],
                                     ] = box_coordinates
-
 
         if  ( min_x ) <= point[0] <= ( max_x ) and \
             ( min_y ) <= point[1] <= ( max_y ) and \
@@ -126,7 +124,6 @@ def encode_atoms(rcsb_id: str, atoms_list: list[Atom], write=False, writepath=No
             print(f"Couldn't figure out atom {a} :", e)
             print("Skipping...")
 
-
     if write and writepath:
         with open( writepath, "w", ) as outfile:
             json.dump(aggregate, outfile, indent=4)
@@ -136,6 +133,8 @@ def encode_atoms(rcsb_id: str, atoms_list: list[Atom], write=False, writepath=No
         raise LookupError("Provide writepath to `encode_atoms`.")
 
     return aggregate
+
+
 
 def create_pcd_from_atoms( positions: np.ndarray, atom_types: np.ndarray, save_path: str ):
     pcd        = o3d.geometry.PointCloud(o3d.utility.Vector3dVector(positions))
@@ -177,7 +176,9 @@ def bounding_box(points: np.ndarray):
         [min_x, max_y, max_z],
     ]
 
+
 def extract_bbox_atoms(rcsb_id: str) -> list:
+    print("Extracting tunnel bounding box atoms for {}".format(rcsb_id))
 
     centerline_expansion_atoms       = parse_struct_via_centerline( rcsb_id, open_tunnel_csv(rcsb_id) )
     centerline_expansion_coordinates = np.array( [a.get_coord() for a in centerline_expansion_atoms] )
