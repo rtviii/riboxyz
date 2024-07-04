@@ -91,7 +91,7 @@ USE_TZ        = True
 STATIC_URL       = '/static/'
 
 # STATIC_ROOT is where all the static files are collected by manage.py collectstatic
-STATIC_ROOT      = os.path.join(BASE_DIR,'staticfiles')
+STATIC_ROOT      = os.environ.get("DJANGO_STATIC_FILES_PATH")
 STATICFILES_DIRS = [ os.path.join(BASE_DIR, 'static'), ]
 
 MEDIA_URL = '/media/'
