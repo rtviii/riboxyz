@@ -18,7 +18,7 @@ RUN mkdir -p $RIBXZ_API
 RUN mkdir -p $RIBCTL
 
 # ----- LIBS -------------------------------------------
-RUN apt-get update -y && apt-get -y install curl 
+RUN apt-get update -y && apt-get -y install curl
 RUN apt-get install software-properties-common -y
 RUN add-apt-repository --remove ppa:ondrej/php
 
@@ -26,7 +26,7 @@ RUN apt-get install git vim apt-transport-https python3 \
 build-essential python3-dev python3-pip python3-venv \
 libglew-dev libpng-dev libfreetype6-dev libxml2-dev \
 libmsgpack-dev python3-pyqt5.qtopengl libglm-dev libnetcdf-dev \
-apt-transport-https ca-certificates libssl-dev wget  -y 
+apt-transport-https ca-certificates libssl-dev wget  -y
 # -------------------------------------------------------------
 
 
@@ -48,11 +48,14 @@ RUN pip3 install -r ${RIBXZ_API}/reqs.txt
 
 # Django ports
 EXPOSE 8000 8001 8002
+
+
+# Be careful given that both the whole django project and the main module are called `rbxz_bend`. (hence not using the $DJANGO here)
 COPY ribctl ${RIBCTL}
 COPY neo4j_ribosome ${NEO4J_RIBOSOME}
 WORKDIR ${RIBXZ_API}
-# This might need permissions from the webserver (ex. nginx) to serve docs
-RUN python manage.py collectstatic --noinput  
+ENV RIBETL_DATA ${RIBETL_DATA}
+RUN python manage.py collectstatic --noinput
 
 
 ENTRYPOINT ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "10", "ribxz_api.wsgi:application","--reload", "--timeout", "500"]
