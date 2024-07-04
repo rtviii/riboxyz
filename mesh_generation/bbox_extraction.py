@@ -7,6 +7,7 @@ import open3d as o3d
 from mendeleev import element
 import pandas as pd
 from ribctl.etl.etl_assets_ops import RibosomeOps, Structure
+from mesh_generation.paths import *
 from Bio.PDB.Atom import Atom
 
 # Tunnel refinement:
@@ -140,4 +141,53 @@ def create_pcd_from_atoms( positions: np.ndarray, atom_types: np.ndarray, save_p
     pcd        = o3d.geometry.PointCloud(o3d.utility.Vector3dVector(positions))
     pcd.colors = o3d.utility.Vector3dVector(atom_types)
     o3d.io.write_point_cloud(save_path, pcd)
+
+
+
+def bounding_box(points: np.ndarray):
+    """Computes the axis-aligned minimum bounding box of a list of points.
+
+    Parameters
+    ----------
+    points : sequence[point]
+        XYZ coordinates of the points.
+
+    Returns
+    -------
+    list[[float, float, float]]
+        XYZ coordinates of 8 points defining a box.
+
+
+    """
+    x, y, z = zip(*points)
+    min_x = min(x)
+    max_x = max(x)
+    min_y = min(y)
+    max_y = max(y)
+    min_z = min(z)
+    max_z = max(z)
+    return [
+        [min_x, min_y, min_z],
+        [max_x, min_y, min_z],
+        [max_x, max_y, min_z],
+        [min_x, max_y, min_z],
+        [min_x, min_y, max_z],
+        [max_x, min_y, max_z],
+        [max_x, max_y, max_z],
+        [min_x, max_y, max_z],
+    ]
+
+def extract_bbox_atoms(rcsb_id: str) -> list:
+
+    centerline_expansion_atoms       = parse_struct_via_centerline( rcsb_id, open_tunnel_csv(rcsb_id) )
+    centerline_expansion_coordinates = np.array( [a.get_coord() for a in centerline_expansion_atoms] )
+
+    bbox                             = bounding_box(centerline_expansion_coordinates)
+    bbox_interior_atoms              = parse_struct_via_bbox(rcsb_id, bbox)
+
+    return encode_atoms(
+        rcsb_id,
+        bbox_interior_atoms,
+        write     = True,
+        writepath = tunnel_atom_encoding_path(rcsb_id) )
 

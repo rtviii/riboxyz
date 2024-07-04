@@ -6,7 +6,7 @@ import json
 import os
 import numpy as np
 from sklearn.cluster import DBSCAN
-from mesh_generation.bbox_extraction import ( encode_atoms, open_tunnel_csv, parse_struct_via_bbox, parse_struct_via_centerline)
+from mesh_generation.bbox_extraction import ( encode_atoms, extract_bbox_atoms, open_tunnel_csv, parse_struct_via_bbox, parse_struct_via_centerline)
 from compas.geometry import bounding_box
 from mesh_generation.libsurf import apply_poisson_reconstruction, estimate_normals, ptcloud_convex_hull_points
 from mesh_generation.visualization import DBSCAN_CLUSTERS_visualize_largest, custom_cluster_recon_path, plot_multiple_by_kingdom, plot_multiple_surfaces, plot_with_landmarks, DBSCAN_CLUSTERS_particular_eps_minnbrs, visualize_mesh, visualize_pointcloud, visualize_pointclouds
@@ -16,54 +16,6 @@ from ribctl import EXIT_TUNNEL_WORK
 import numpy as np
 import matplotlib.pyplot as plt
 
-
-
-def bounding_box(points: np.ndarray):
-    """Computes the axis-aligned minimum bounding box of a list of points.
-
-    Parameters
-    ----------
-    points : sequence[point]
-        XYZ coordinates of the points.
-
-    Returns
-    -------
-    list[[float, float, float]]
-        XYZ coordinates of 8 points defining a box.
-
-
-    """
-    x, y, z = zip(*points)
-    min_x = min(x)
-    max_x = max(x)
-    min_y = min(y)
-    max_y = max(y)
-    min_z = min(z)
-    max_z = max(z)
-    return [
-        [min_x, min_y, min_z],
-        [max_x, min_y, min_z],
-        [max_x, max_y, min_z],
-        [min_x, max_y, min_z],
-        [min_x, min_y, max_z],
-        [max_x, min_y, max_z],
-        [max_x, max_y, max_z],
-        [min_x, max_y, max_z],
-    ]
-
-def extract_bbox_atoms(rcsb_id: str) -> list:
-
-    centerline_expansion_atoms       = parse_struct_via_centerline( rcsb_id, open_tunnel_csv(rcsb_id) )
-    centerline_expansion_coordinates = np.array( [a.get_coord() for a in centerline_expansion_atoms] )
-
-    bbox                             = bounding_box(centerline_expansion_coordinates)
-    bbox_interior_atoms              = parse_struct_via_bbox(rcsb_id, bbox)
-
-    return encode_atoms(
-        rcsb_id,
-        bbox_interior_atoms,
-        write     = True,
-        writepath = tunnel_atom_encoding_path(rcsb_id) )
 
 def expand_bbox_atoms_to_spheres(atom_coordinates:np.ndarray, sphere_vdw_radii:np.ndarray, rcsb_id: str):
     sphere_sources = zip(atom_coordinates, sphere_vdw_radii)
@@ -127,6 +79,7 @@ def load_trimming_parameters( RCSB_ID:str, file_path=TRIMMING_PARAMS_DICT_PATH):
 
 def pipeline(RCSB_ID,args):
 
+    print("pipeline")
     #! [ Pipeline Parameters ]
     _u_EPSILON     = 5.5 if args.dbscan_tuple is None else float(args.dbscan_tuple.split(",")[0])
     _u_MIN_SAMPLES = 600 if args.dbscan_tuple is None else int(args.dbscan_tuple.split(",")[1])
@@ -137,13 +90,15 @@ def pipeline(RCSB_ID,args):
     PR_depth       = args.PR_depth if args.PR_depth is not None else 6
     PR_ptweight    = args.PR_ptweight if args.PR_ptweight is not None else 3
 
-    struct_tunnel_dir = os.path.join(EXIT_TUNNEL_WORK, RCSB_ID)
+    struct_tunnel_dir = Assets(RCSB_ID).paths.tunnel_dir
 
     if not os.path.exists(struct_tunnel_dir):
         os.mkdir(struct_tunnel_dir)
 
     #! [ Bounding Box Atoms ]
-    if args.bbox or ( not os.path.exists(spheres_expanded_pointset_path(RCSB_ID)) ) :
+    # if args.bbox or ( not os.path.exists(spheres_expanded_pointset_path(RCSB_ID)) ) :
+    if args.bbox:
+        print("bbox")
 
         "the data arrives here as atom coordinates extracted from the biopython model "
         if not os.path.exists(tunnel_atom_encoding_path(RCSB_ID)) and args.bbox_radius != None:
