@@ -6,14 +6,14 @@ from django.http import HttpResponse, JsonResponse, HttpResponseServerError
 from ninja import Router
 from ribctl import RIBETL_DATA
 from ribctl.etl.etl_assets_ops import RibosomeOps, Structure
-from ribctl.lib.schema.types_ribosome import RNA, LifecycleFactorClass, MitochondrialProteinClass, Polymer, PolymerClass, CytosolicProteinClass, PolynucleotideClass, PolypeptideClass, Protein, ProteinClass, RibosomeStructure
+from ribctl.lib.schema.types_ribosome import RNA, LifecycleFactorClass, MitochondrialProteinClass, Polymer, PolymerClass, CytosolicProteinClass, PolymerClass, PolypeptideClass, Protein, ProteinClass, RibosomeStructure
 from schema.v0 import BanClassMetadata, ExogenousRNAByStruct,LigandInstance, LigandlikeInstance, NeoStruct, NomenclatureClass, NomenclatureClassMember
 
 classification_router = Router()
 TAG              = "Polymer Classes"
 
 @classification_router.get('/polynucleotide',  tags=[TAG], response=list[RNA])
-def polynucleotide_class(request,rna_class:PolynucleotideClass):
+def polynucleotide_class(request,rna_class:PolymerClass):
     """All members of the given RNA class: small and large subunit, cytosolic and mitochondrial RNA; tRNA.  """
 
     agg = []

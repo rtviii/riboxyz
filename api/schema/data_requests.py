@@ -1,5 +1,5 @@
 from ninja import Schema
-from ribctl.lib.schema.types_ribosome import PolynucleotideClass, Protein, CytosolicProteinClass
+from ribctl.lib.schema.types_ribosome import PolymerClass, Protein, CytosolicProteinClass
 """This file documents the possible requests that the API can receive."""
 
 
@@ -37,7 +37,7 @@ class LigandsByStruct(Schema):
 
 
 class RnaClass(Schema):
-    rna_class: PolynucleotideClass
+    rna_class: PolymerClass
 
 
 class Structure(Schema):

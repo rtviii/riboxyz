@@ -10,7 +10,6 @@ from ribctl import EXIT_TUNNEL_WORK, POISSON_RECON_BIN, RIBETL_DATA
 from ribctl.etl.etl_assets_ops import RibosomeOps, Structure
 from ribctl.lib.libmsa import Taxid
 
-
 diagram_tunnels = {
     "bacteria": [
         "4W29", # GOOD
@@ -842,8 +841,6 @@ dbscan_pairs = [
     (5, 490),
     (5.5,600)
 ]
-
-
 
 def retrieve_ptc_and_chain_atoms(rcsb_id):
         with open( tunnel_atom_encoding_path(rcsb_id), "r", ) as infile:

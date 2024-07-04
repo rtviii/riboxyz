@@ -13,11 +13,43 @@ from ete3 import NCBITaxa
 TAXID_BACTERIA  = 2
 TAXID_EUKARYOTA = 2759
 TAXID_ARCHAEA   = 2157
-PhylogenyRank = Literal["superkingdom", "phylum", "class", "order", "clade", "family", "genus", "species", "strain","isolate",
-                         "subspecies", "no rank", "suborder", "kingdom", "subfamily", "subgenus", "subphylum", "infraorder","superorder", "superclass", "superfamily", "parvorder","cohort",
-                         "infraclass", "subclass","subkingdom", "species group", "tribe", "species subgroup", "subcohort", "subtribe"]
+PhylogenyRank   = Literal[
+    "superkingdom",
+    "phylum",
+    "class",
+    "order",
+    "clade",
+    "family",
+    "genus",
+    "species",
+    "strain",
+    "isolate",
+    "subspecies",
+    "no rank",
+    "suborder",
+    "kingdom",
+    "subfamily",
+    "subgenus",
+    "subphylum",
+    "infraorder",
+    "superorder",
+    "superclass",
+    "superfamily",
+    "parvorder",
+    "cohort",
+    "infraclass",
+    "subclass",
+    "subkingdom",
+    "species group",
+    "tribe",
+    "species subgroup",
+    "subcohort",
+    "subtribe",
+]
 
 ncbi = NCBITaxa(dbfile=NCBI_TAXA_SQLITE)
+
+
 class Taxid:
     @staticmethod
     def is_descendant_of(parent_taxid: int, target_taxid: int) -> bool:
@@ -31,11 +63,13 @@ class Taxid:
         return list(ncbi.get_taxid_translator([taxid]).values())[0]
 
     @staticmethod
-    def get_lineage(taxid, include_only: None|list[PhylogenyRank] =None)->list[int]:
+    def get_lineage(
+        taxid, include_only: None | list[PhylogenyRank] = None
+    ) -> list[int]:
         """Return ncbi lineage, except filter out the ranks that are not among the @PhylogenyRank."""
         # lin = list(filter(lambda x: Taxid.rank(x) in typing.get_args(PhylogenyRank), ncbi.get_lineage(taxid) ) )
         # lin = list(filter(lambda x: Taxid.rank(x) in typing.get_args(PhylogenyRank), ncbi.get_lineage(taxid) ) )
-        lin = ncbi.get_lineage(taxid) 
+        lin = ncbi.get_lineage(taxid)
         if include_only is not None:
             return list(filter(lambda x: Taxid.rank(x) in include_only, lin))
         return lin if lin is not None else []
@@ -108,11 +142,16 @@ class Taxid:
                 descendants.add(tax_id)
         return descendants
 
+
 class PhylogenyNode(BaseModel):
 
     @staticmethod
-    def from_taxid(taxid:int):
-        return PhylogenyNode(ncbi_tax_id=taxid, scientific_name=Taxid.get_name(taxid), rank=Taxid.rank(taxid))
+    def from_taxid(taxid: int):
+        return PhylogenyNode(
+            ncbi_tax_id=taxid,
+            scientific_name=Taxid.get_name(taxid),
+            rank=Taxid.rank(taxid),
+        )
 
     def __hash__(self) -> int:
         return self.ncbi_tax_id
@@ -124,13 +163,13 @@ class PhylogenyNode(BaseModel):
         _ = []
         for taxid in self.get_lineage():
             if Taxid.rank(taxid) not in typing.get_args(PhylogenyRank):
-               continue
+                continue
             _.append(self.from_taxid(taxid))
         return _
 
-    ncbi_tax_id    : int
+    ncbi_tax_id: int
     scientific_name: str
-    rank           : PhylogenyRank
+    rank: PhylogenyRank
 
 
 # ? ----------------------------------------------{ Subcomponent Types }------------------------------------------------

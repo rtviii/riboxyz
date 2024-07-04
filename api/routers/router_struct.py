@@ -10,7 +10,7 @@ from neo4j_ribosome.db_lib_reader import dbqueries
 from ribctl import ASSETS, ASSETS_PATH
 from ribctl.etl.etl_assets_ops import RibosomeOps, Structure
 from ribctl.lib.info import StructureCompositionStats, run_composition_stats
-from ribctl.lib.schema.types_ribosome import  CytosolicProteinClass, CytosolicRNAClass, ElongationFactorClass, InitiationFactorClass, LifecycleFactorClass, MitochondrialProteinClass, MitochondrialRNAClass, PTCInfo, Polymer, PolymerClass, PolynucleotideClass, PolypeptideClass, Protein, ProteinClass, RibosomeStructure, tRNA
+from ribctl.lib.schema.types_ribosome import  CytosolicProteinClass, CytosolicRNAClass, ElongationFactorClass, InitiationFactorClass, LifecycleFactorClass, MitochondrialProteinClass, MitochondrialRNAClass, PTCInfo, Polymer, PolymerClass, PolymerClass, PolypeptideClass, Protein, ProteinClass, RibosomeStructure, tRNA
 from ribctl.lib.libtax import Taxid 
 
 structure_router = Router()
@@ -23,7 +23,6 @@ def all_rcsb_ids(request):
 @structure_router.get("/polymer_classes_stats", response=list[tuple[str,int]], tags=[TAG])
 def polymer_classes_stats(request):
     return dbqueries.polymer_classes_stats()
-
 
 @structure_router.get("/tax_dict", response=dict, tags=[TAG])
 def tax_dict(request):

@@ -13,7 +13,7 @@ from ribctl import AMINO_ACIDS_3_TO_1_CODE, CHAINSPLITTER_PATH, CLASSIFICATION_R
 from ribctl.lib.libtax import PhylogenyNode, PhylogenyRank, Taxid
 from ribctl.lib.tunnel import ptc_resdiues_get, ptc_residues_calculate_midpoint
 from ribctl.lib.utils import download_unpack_place, open_structure
-from ribctl.lib.schema.types_ribosome import ( RNA, PTCInfo, Polymer, PolymerClass, PolynucleotideClass, PolypeptideClass, RibosomeStructure, )
+from ribctl.lib.schema.types_ribosome import ( RNA, PTCInfo, Polymer, PolymerClass, PolymerClass, PolypeptideClass, RibosomeStructure, )
 from ribctl import RIBETL_DATA
 from ribctl.logs.loggers import get_etl_logger
 
@@ -178,7 +178,7 @@ class RibosomeOps:
 
         profile = self.profile()
 
-        if poly_class in [v.value for v in PolynucleotideClass]:
+        if poly_class in [v.value for v in PolymerClass]:
             if profile.rnas is not None:
                 for rna in profile.rnas:
                     if (
@@ -218,19 +218,24 @@ class RibosomeOps:
         return None
 
     def get_poly_by_polyclass(
-        self, class_: PolynucleotideClass, assembly: int = 0
+        self, class_: PolymerClass, assembly: int = 0
     ) -> RNA | None:
         """@assembly here stands to specify which of the two or more models the rna comes from
         in the case that a structure contains multiple models (ex. 4V4Q XRAY)"""
 
         profile = self.profile()
 
-        if profile.rnas == None:
-            return None
+        # if profile.rnas == None:
+        #     return None
 
-        for rna in profile.rnas:
-            if class_ in rna.nomenclature and rna.assembly_id == assembly:
-                return rna
+        # for rna in profile.rnas:
+        #     if class_ in rna.nomenclature and rna.assembly_id == assembly:
+        #         return rna
+
+        for polymer in [*profile.rnas, *profile.other_polymers, *profile.proteins]: 
+            if class_ in  polymer.nomenclature and polymer.assembly_id == assembly:
+                return polymer
+        
 
     def get_LSU_rRNA(self, assembly: int = 0) -> RNA:
         """retrieve the largest rRNA sequence in the structure
@@ -288,7 +293,7 @@ class Assets:
 
     rcsb_id: str
     ro     : RibosomeOps
-    paths  : AssetPath
+    paths : AssetPath
     
     def __init__(self, rcsb_id: str) -> None:
         self.rcsb_id = rcsb_id
@@ -302,7 +307,6 @@ class Assets:
         for struct in Assets.list_all_structs():
             _[struct] = Assets(struct).assets_status()
         return _
-
 
     @staticmethod
     def collect_all_taxa() -> set[PhylogenyNode]:
@@ -325,7 +329,6 @@ class Assets:
                     print(e)
                 _.add(pn)
         return _
-
 
     @staticmethod
     def list_all_structs()->list[str]:

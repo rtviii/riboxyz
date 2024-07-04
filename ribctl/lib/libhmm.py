@@ -9,7 +9,7 @@ from Bio.SeqRecord import SeqRecord
 import pyhmmer
 from ribctl import ASSETS
 from ribctl.lib.libmsa import Fasta, muscle_align_N_seq, phylogenetic_neighborhood
-from ribctl.lib.schema.types_ribosome import RNA, ElongationFactorClass, InitiationFactorClass, LifecycleFactorClass, MitochondrialProteinClass, Polymer, PolymerClass, PolynucleotideClass, PolypeptideClass, Protein, CytosolicProteinClass, CytosolicProteinClass, tRNA
+from ribctl.lib.schema.types_ribosome import RNA, ElongationFactorClass, InitiationFactorClass, LifecycleFactorClass, MitochondrialProteinClass, Polymer, PolymerClass, PolymerClass, PolypeptideClass, Protein, CytosolicProteinClass, CytosolicProteinClass, tRNA
 from pyhmmer.easel import Alphabet, DigitalSequenceBlock, TextSequence, SequenceFile, SequenceBlock, TextSequenceBlock, DigitalSequence
 from pyhmmer.plan7 import Pipeline, HMM , TopHits
 from ribctl.logs.loggers import get_classification_logger
@@ -71,7 +71,7 @@ def hmm_produce(candidate_class: PolymerClass, organism_taxid:int, seed_sequence
     """Produce an organism-specific HMM. Retrieve from cache if exists, otherwise generate and cache."""
 
     prot_classes = [*list(CytosolicProteinClass),*list(LifecycleFactorClass),*list(MitochondrialProteinClass )]
-    rna_classes  = [*list(PolynucleotideClass)]
+    rna_classes  = [*list(PolymerClass)]
 
     if candidate_class in prot_classes:
         alphabet = pyhmmer.easel.Alphabet.amino()
@@ -108,7 +108,7 @@ class PolymerClassFastaRegistry():
             self.registry_fasta[candidate_class]   = Fasta(fasta_path)
             self.registry_all_tax_ids[candidate_class] = Fasta(fasta_path).all_taxids("int")
 
-        for candidate_class in PolynucleotideClass:
+        for candidate_class in PolymerClass:
             fasta_path                             = os.path.join(ASSETS["fasta_rna"], f"{candidate_class.value}.fasta")
             self.registry_fasta[candidate_class]   = Fasta(fasta_path)
             self.registry_all_tax_ids[candidate_class] = Fasta(fasta_path).all_taxids("int")
@@ -165,7 +165,7 @@ class PolymerClassesOrganismScanner():
 
     @property
     def hmms_rna(self)->list[tuple[PolymerClass,HMM]]:
-        return list(filter(lambda x: x[0] in [*list(PolynucleotideClass)], self.hmms_registry.items()))
+        return list(filter(lambda x: x[0] in [*list(PolymerClass)], self.hmms_registry.items()))
 
     def cache_hmms(self):
         with open(os.path.join(self.filename_hmms_registry), 'wb')  as outfile:

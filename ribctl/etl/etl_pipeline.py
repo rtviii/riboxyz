@@ -19,7 +19,7 @@ from ribctl.lib.schema.types_ribosome import (
     NonpolymericLigand,
     Polymer,
     PolymerClass,
-    PolynucleotideClass,
+    PolymerClass,
     Protein,
     CytosolicProteinClass,
     CytosolicProteinClass,
@@ -674,7 +674,7 @@ class ReannotationPipeline:
             protein_classifier.classify_chains()
            
             rna_alphabet             = pyhmmer.easel.Alphabet.rna()
-            rna_classifier           = HMMClassifier(_rna_polynucleotides, rna_alphabet, [p for p in list(PolynucleotideClass)])
+            rna_classifier           = HMMClassifier(_rna_polynucleotides, rna_alphabet, [p for p in list(PolymerClass)])
             rna_classifier.classify_chains()
 
             prot_classification = protein_classifier.produce_classification()
