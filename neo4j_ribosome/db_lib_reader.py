@@ -108,6 +108,16 @@ return apoc.map.merge(rib, rest)
 
             return session.execute_read(_)
 
+
+    def structures_overview(self):
+        with self.adapter.driver.session() as session:
+            def _(tx: Transaction | ManagedTransaction):
+                return tx.run(
+    """//
+    match (n:RibosomeStructure)-[:source]-(p:PhylogenyNode) 
+    return collect({rcsb_id:n.rcsb_id, tax_id: p.ncbi_tax_id, tax_name:p.scientific_name, mitochondrial:n.mitochondrial})""").value()[0]
+            return session.execute_read(_)
+
     def list_ligands(self):
         with self.adapter.driver.session() as session:
             def _(tx: Transaction | ManagedTransaction):
@@ -336,7 +346,7 @@ with rib order by rib.rcsb_id desc\n"""
                 else ""
             )
             + (
-                "toLower(rib.citation_title) + toLower(rib.rcsb_id) + toLower(rib.pdbx_keywords_text) + toLower(reduce(acc = '', str IN rib.src_organism_names | acc + str))  contains '{}' \n".format(
+                "toLower(rib.citation_title) + toLower(rib.rcsb_id) + toLower(rib.pdbx_keywords_text) + toLower(reduce(acc = '', str IN rib.src_organism_names | acc + str)) + toLower(reduce(acc = '', str IN rib.host_organism_names | acc + str))  contains '{}' \n".format(
                     search
                 )
                 if search != ""

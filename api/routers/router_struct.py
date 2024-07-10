@@ -139,21 +139,29 @@ def filter_list(request,
         else:
             return None
 
-
     year            = None if year            == "" else list(map(parse_empty_or_int,year.split(",")))
     resolution      = None if resolution      == "" else list(map(parse_empty_or_float,resolution.split(",")))
     host_taxa       = None if host_taxa       == "" else list(map(parse_empty_or_int,host_taxa.split(","))) if host_taxa else None
     source_taxa     = None if source_taxa     == "" else list(map(parse_empty_or_int,source_taxa.split(","))) if source_taxa else None
     polymer_classes = None if polymer_classes == "" else list(map(lambda _: PolymerClass(_), polymer_classes.split(",")))
 
-    structures, count = dbqueries.list_structs_filtered(int(page), search, year, resolution, polymer_classes, source_taxa, host_taxa)[0]
+    structures, count    = dbqueries.list_structs_filtered(int(page), search, year, resolution, polymer_classes, source_taxa, host_taxa)[0]
     structures_validated = list(map(lambda r: RibosomeStructure.model_validate(r), structures))
 
     return { "structures":structures_validated, "count": count }
 
 
+
+@structure_router.get('/structures_overview', response=list[dict], tags=[TAG])
+def overview(request):
+    r = dbqueries.structures_overview()
+    pprint(r)
+    return r
+
+
 @structure_router.get('/profile', response=RibosomeStructure, tags=[TAG],)
 def structure_profile(request,rcsb_id:str):
+
     """Return a `.json` profile of the given RCSB_ID structure."""
 
     params      = dict(request.GET)
