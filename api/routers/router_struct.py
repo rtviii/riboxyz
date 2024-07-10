@@ -148,6 +148,7 @@ def filter_list(request,
 
     structures, count = dbqueries.list_structs_filtered(int(page), search, year, resolution, polymer_classes, source_taxa, host_taxa)[0]
     structures_validated = list(map(lambda r: RibosomeStructure.model_validate(r), structures))
+
     return { "structures":structures_validated, "count": count }
 
 

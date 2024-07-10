@@ -1,3 +1,4 @@
+import pickle
 from pprint import pprint
 import typing
 from matplotlib import pyplot as plt
@@ -870,11 +871,12 @@ def retrieve_ptc_and_chain_atoms(rcsb_id):
 
         return ptc_midpoint, atom_coordinates_by_chain
 
-
 #! For figure only
 def DBSCAN_CLUSTERS_particular_eps_minnbrs( dbscan_cluster_dict: dict[int, list], eps, min_nbrs):
     plotter               = pv.Plotter()
-    # plotter               = pv.Plotter(shape=(1, 2))
+    pickle.dump(dbscan_cluster_dict, open("dbscan_cluster_dict.pkl", "wb"))
+
+    pickle.load(open("dbscan_cluster_dict.pkl", "rb"))
 
     plotter.subplot(0,0)
     #? Visualize all clusters
@@ -897,25 +899,6 @@ def DBSCAN_CLUSTERS_particular_eps_minnbrs( dbscan_cluster_dict: dict[int, list]
     plotter.add_mesh(ptcloud_all_clusters, scalars="rgba", rgb=True, show_scalar_bar=False)
 
     plotter.add_text('eps: {} \nmin_nbrs: {}'.format(eps, min_nbrs), position='upper_left', font_size=20, shadow=True, font=FONT, color='black')
-    # plotter.add_text('Volume: {}'.format(round(mesh_.volume, 3)), position='lower_left', font_size=8, shadow=True, font=FONT, color='black')
-
-    # # ? Visualize selected cluster
-    # plotter.subplot(0,1)
-    # rgbas_cluster = [[15, 10, 221, 1] for datapoint in selected_cluster]
-    # rgbas_positive = np.array([[205, 209, 228, 0.2] for _ in positive_space])
-    # combined = np.concatenate([selected_cluster, positive_space])
-    # rgbas_combined = np.concatenate([rgbas_cluster, rgbas_positive])
-
-    # point_cloud = pv.PolyData(combined)
-    # point_cloud["rgba"] = rgbas_combined
-    # plotter.add_mesh(point_cloud, scalars="rgba", rgb=True, show_scalar_bar=False)
-
-
-    plotter.open_gif("dbscan.gif")
-    viewup = [0, 0, 1]
-    orbit  = plotter.generate_orbital_path( factor=2.0, n_points=48, shift=0.0, viewup=viewup )
-    plotter.orbit_on_path( orbit, write_frames=True, viewup=viewup, step=0.02 )
-
     plotter.show()
 
 def DBSCAN_CLUSTERS_visualize_largest(positive_space: np.ndarray, dbscan_cluster_dict: dict[int, list], selected_cluster: np.ndarray):
@@ -1132,8 +1115,12 @@ def plot_with_landmarks( rcsb_id: str, poisson_recon_custom_path:str|None=None, 
         (to be used to reverse the normalization process or to travel to this coordinate frame)
     """
 
+    print(rcsb_id)
+    # src_taxid = RibosomeOps(rcsb_id).get_taxids()[0][0]
     src_taxid = RibosomeOps(rcsb_id).get_taxids()[0][0]
-    taxname   = list( Taxid.get_name(str(src_taxid)).items() )[0][1]
+    print(src_taxid)
+    taxname   = list( Taxid.get_name(str(src_taxid)) )[0]
+    print(taxname)
 
 
     ptc_midpoint,atom_coordinates_by_chain= retrieve_ptc_and_chain_atoms(rcsb_id)
@@ -1194,9 +1181,5 @@ def plot_with_landmarks( rcsb_id: str, poisson_recon_custom_path:str|None=None, 
     plotter.add_text('Tunnel Mesh Volume: {}'.format(round(mesh_.volume, 3)), position='lower_left', font_size=8, shadow=True, font=FONT, color='black')
     plotter.add_text('{}'.format(taxname), position='lower_right', font_size=8, shadow=True, font=FONT, color='black') 
 
-    # plotter.open_gif("just_chains.gif")
-    # viewup = [1, 0, 0]
-    # orbit  = plotter.generate_orbital_path( factor=4.0, n_points=72, shift=2.0, viewup=viewup )
-    # plotter.orbit_on_path( orbit, write_frames=True, viewup=viewup, step=0.02 )
 
     plotter.show(auto_close=False)

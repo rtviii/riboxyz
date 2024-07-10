@@ -51,7 +51,7 @@ class AssetPath:
 
     @property
     def ptc(self):
-        return os.path.join( self.dir, "{}_PTC.json".format(self.rcsb_id) )
+        return os.path.join( self.dir, "{}_PTC_COORDINATES.json".format(self.rcsb_id) )
 
     @property
     def profile(self):

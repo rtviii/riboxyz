@@ -121,16 +121,20 @@ def pipeline(RCSB_ID,args):
         bbox_atoms_expanded = np.load(spheres_expanded_pointset_path(RCSB_ID))
 
 
+
+    pprint(bbox_atoms_expanded)
     # ! [ Bounding Box Atoms are transformed into an Index Grid ]
     # _, xyz_negative, _ , translation_vectors = index_grid(bbox_atoms_expanded)
     initial_grid, grid_dimensions, translation_vectors = index_grid(bbox_atoms_expanded)
     # ? Here no trimming has yet occurred.
 
 
-
     #! [ Extract the largest cluster from the DBSCAN clustering ]
     db, clusters_container = DBSCAN_capture(np.asarray(np.where(initial_grid != 1)).T, _u_EPSILON, _u_MIN_SAMPLES, _u_METRIC )
-    largest_cluster        = DBSCAN_pick_largest_cluster(clusters_container)
+    DBSCAN_CLUSTERS_particular_eps_minnbrs(clusters_container, _u_EPSILON, _u_MIN_SAMPLES)
+
+
+    largest_cluster = DBSCAN_pick_largest_cluster(clusters_container)
 
     # #! [ Visualize the largest DBSCAN cluster to establish whether trimming is required ]
     # DBSCAN_CLUSTERS_visualize_largest(np.asarray(np.where(initial_grid == 1)).T, clusters_container, largest_cluster)
@@ -213,23 +217,29 @@ def pipeline(RCSB_ID,args):
 
 
     visualize_pointcloud(trimmed_cluster, RCSB_ID)
+    # ! ----------
+    # ! [ Extract the largest DBSCAN cluster with more restrictive parameters so as to capture the geometry more precisely and avoid trimmed the merging of trimmed parts into the main cluster   ]
+    # ! Second pass of dbscan is needed to pick up the largest part of the trimmed cluster. 
+    # ! (it's not uncommon that the truncated shape contains more than one disconnected cluster. Ex. imagine cutting a crescent moon in half in the coronal plane) 
+
     _, dbscan_container= DBSCAN_capture(trimmed_cluster, 3  , 123, _u_METRIC)
     print("DBSCAN Clusters: ")
     for (k,v) in dbscan_container.items():
         print(k, len(v))
-        
-    #! [ Extract the largest DBSCAN cluster with more restrictive parameters so as to capture the geometry more precisely and avoid trimmed the merging of trimmed parts into the main cluster   ]
     main_cluster = DBSCAN_pick_largest_cluster(dbscan_container)
     visualize_pointcloud(main_cluster)
+    # ! ----------
 
     #! [ Transform the cluster back into Original Coordinate Frame ]
     coordinates_in_the_original_frame = main_cluster  - translation_vectors[1] + translation_vectors[0]
 
     #! [ Transform the cluster back into original coordinate frame ]
-    surface_pts                       = ptcloud_convex_hull_points(coordinates_in_the_original_frame, d3d_alpha,d3d_tol)
+    surface_pts = ptcloud_convex_hull_points(coordinates_in_the_original_frame, d3d_alpha,d3d_tol)
 
     #! [ Transform the cluster back into Original Coordinate Frame ]
     np.save(convex_hull_cluster_path(RCSB_ID), surface_pts)
+
     estimate_normals(surface_pts, surface_with_normals_path(RCSB_ID), kdtree_radius=10, kdtree_max_nn=15, correction_tangent_planes_n=10)
     apply_poisson_reconstruction(surface_with_normals_path(RCSB_ID), poisson_recon_path(RCSB_ID), recon_depth=PR_depth, recon_pt_weight=PR_ptweight)
+
     visualize_mesh(pv.read(poisson_recon_path(RCSB_ID)), RCSB_ID)

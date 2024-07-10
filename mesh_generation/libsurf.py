@@ -56,13 +56,13 @@ def apply_poisson_reconstruction(surf_estimated_ptcloud_path: str, output_path: 
 
 def ptcloud_convex_hull_points(pointcloud: np.ndarray, ALPHA:float, TOLERANCE:float) -> np.ndarray:
     assert pointcloud is not None
-    cloud = pv.PolyData(pointcloud)
-    grid = cloud.delaunay_3d(alpha=ALPHA, tol=TOLERANCE, offset=2, progress_bar=True)
+    cloud       = pv.PolyData(pointcloud)
+    grid        = cloud.delaunay_3d(alpha=ALPHA, tol=TOLERANCE, offset=2, progress_bar=True)
     convex_hull = grid.extract_surface().cast_to_pointset()
     return convex_hull.points
 
 def estimate_normals(convex_hull_surface_pts: np.ndarray, output_path: str, kdtree_radius=None, kdtree_max_nn=None, correction_tangent_planes_n=None): 
-    pcd = o3d.geometry.PointCloud()
+    pcd        = o3d.geometry.PointCloud()
     pcd.points = o3d.utility.Vector3dVector(convex_hull_surface_pts)
     pcd.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=kdtree_radius, max_nn=kdtree_max_nn) )
     pcd.orient_normals_consistent_tangent_plane(k=correction_tangent_planes_n)

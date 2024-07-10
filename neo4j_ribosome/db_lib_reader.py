@@ -336,7 +336,7 @@ with rib order by rib.rcsb_id desc\n"""
                 else ""
             )
             + (
-                "toLower(rib.citation_title) + toLower(rib.rcsb_id) + toLower(rib.pdbx_keywords_text) + apoc.text.join(rib.citation_rcsb_authors, \"\")  contains '{}' \n".format(
+                "toLower(rib.citation_title) + toLower(rib.rcsb_id) + toLower(rib.pdbx_keywords_text) + toLower(reduce(acc = '', str IN rib.src_organism_names | acc + str))  contains '{}' \n".format(
                     search
                 )
                 if search != ""

@@ -1,7 +1,6 @@
 from pprint import pprint
 import click
 import sys
-
 from ribctl.lib.libhmm import PolymerClassFastaRegistry
 sys.dont_write_bytecode = True
 from ribctl.cli.subparsers.ls import ls

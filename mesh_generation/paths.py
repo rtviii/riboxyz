@@ -18,7 +18,7 @@ convex_hull_cluster_path       = lambda rcsb_id: os.path.join( Assets(rcsb_id).p
 surface_with_normals_path      = lambda rcsb_id: os.path.join( Assets(rcsb_id).paths.tunnel_dir, "{}_normal_estimated_surf.ply".format(rcsb_id.upper()), )
 poisson_recon_path             = lambda rcsb_id: os.path.join( Assets(rcsb_id).paths.tunnel_dir, "{}_poisson_recon.ply".format(rcsb_id.upper()) )
 poisson_recon_ascii_path       = lambda rcsb_id: os.path.join( Assets(rcsb_id).paths.tunnel_dir, "{}_poisson_recon_ascii.ply".format(rcsb_id.upper()) )
-ptc_data_path                  = lambda rcsb_id: os.path.join( Assets(rcsb_id).paths.ptc, "{}_PTC_COORDINATES.json".format(rcsb_id.upper()) )
+ptc_data_path                  = lambda rcsb_id: os.path.join( Assets(rcsb_id).paths.ptc)
 
 TRIMMING_PARAMS_DICT_PATH = os.path.join( EXIT_TUNNEL_WORK, "trimming_params_dict.json" )
 TUNNEL_PATH               = lambda rcsb_id :  os.path.join( EXIT_TUNNEL_WORK, "mole_tunnels", "tunnel_{}.csv".format(rcsb_id) )
