@@ -150,13 +150,9 @@ def filter_list(request,
 
     return { "structures":structures_validated, "count": count }
 
-
-
 @structure_router.get('/structures_overview', response=list[dict], tags=[TAG])
 def overview(request):
-    r = dbqueries.structures_overview()
-    pprint(r)
-    return r
+    return dbqueries.structures_overview()
 
 
 @structure_router.get('/profile', response=RibosomeStructure, tags=[TAG],)
@@ -199,7 +195,7 @@ def chains_by_struct(request):
     structs_response = dbqueries.list_chains_by_struct()
     return structs_response
 
-class NomenclatureSet(Schema)  : 
+class NomenclatureSet(Schema): 
       ElongationFactorClass    : list[str]
       InitiationFactorClass    : list[str]
       CytosolicProteinClass    : list[str]
@@ -207,7 +203,6 @@ class NomenclatureSet(Schema)  :
       CytosolicRNAClass        : list[str]
       MitochondrialRNAClass    : list[str]
       tRNAClass                : list[str]
-
 
 @structure_router.get('/list_nomenclature', response=NomenclatureSet)
 def polymer_classes_nomenclature(request):
