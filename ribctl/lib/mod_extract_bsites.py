@@ -2,10 +2,12 @@ import json
 import operator
 import argparse
 import itertools
+from pprint import pprint
 from Bio.PDB.NeighborSearch import NeighborSearch
 from Bio.PDB.Residue import Residue
 from Bio.PDB.Structure import Structure
 from Bio.PDB.Chain import Chain
+from ribctl.etl.etl_assets_ops import Assets, RibosomeOps
 from ribctl.lib.schema.types_ribosome import NonpolymericLigand, Polymer, RibosomeStructure
 from ribctl.lib.schema.types_binding_site import AMINO_ACIDS, NUCLEOTIDES, BindingSite, BindingSiteChain, ResidueSummary 
 from ribctl.lib import utils
@@ -57,14 +59,13 @@ def get_ligand_nbrs(
     """KDTree search the neighbors of a given list of residues(which constitue a ligand) 
     and return unique having tagged them with a ban identifier proteins within 5 angstrom of these residues. """
 
-    pdbid = struct.get_id().upper()
-
-    profile = RibosomeStructure.from_json_profile(utils.open_structure(pdbid, 'json'))
+    pdbid         = struct.get_id().upper()
+    profile       = RibosomeOps(struct.get_id().upper()).profile()
 
     poly_entities = [*profile.proteins, *profile.rnas]
-    pdbid        = struct.get_id()
-    ns           = NeighborSearch(list(struct.get_atoms()))
-    nbr_residues = []
+    pdbid         = struct.get_id()
+    ns            = NeighborSearch(list(struct.get_atoms()))
+    nbr_residues  = []
 
     for lig_res in ligand_residues:
         for atom in lig_res.child_list:
@@ -82,7 +83,7 @@ def get_ligand_nbrs(
             if c == poly_entity.auth_asym_id:
                 nbr_dict[c] = BindingSiteChain(**json.loads(poly_entity.json()), residues=sorted( [residue for residue in nbr_residues if residue.get_parent_auth_asym_id() == c], key=operator.attrgetter('seqid') ))
 
-    return BindingSite.parse_obj(nbr_dict)
+    return BindingSite.model_validate(nbr_dict)
 
 def get_ligand_residue_ids(ligchemid: str, struct: Structure) -> list[Residue]:
 
@@ -93,6 +94,7 @@ def struct_ligand_ids(pdbid: str, profile:RibosomeStructure) -> list[Nonpolymeri
     """
     we identify ligands worth interest by their having drugbank annotations (ions and water are excluded)
     """
+
     pdbid = pdbid.upper()
     ligs  = []
 
@@ -104,17 +106,19 @@ def struct_ligand_ids(pdbid: str, profile:RibosomeStructure) -> list[Nonpolymeri
     return ligs
 
 def bsite_extrarbx_polymer(auth_asym_id:str, structure:Structure )->BindingSite:
-    residues: list[Residue] = get_polymer_residues(auth_asym_id, structure)
-    binding_site_polymer: BindingSite = get_polymer_nbrs(residues, structure )
+
+    residues            : list[Residue] = get_polymer_residues(auth_asym_id, structure)
+    binding_site_polymer: BindingSite   = get_polymer_nbrs(residues, structure )
     return binding_site_polymer
 
 def bsite_ligand(chemicalId:str, structure:Structure )->BindingSite:
 
     chemicalId = chemicalId.upper()
-    residues: list[Residue] = get_ligand_residue_ids(chemicalId, structure)
+
+    residues           : list[Residue] = get_ligand_residue_ids(chemicalId, structure)
     binding_site_ligand: BindingSite   = get_ligand_nbrs(residues, structure)
 
-    return binding_site_ligand
+    return binding_site_ligand.model_dump()
 
 if __name__ == "__main__":
 
@@ -126,15 +130,17 @@ if __name__ == "__main__":
     PDBID = args.structure.upper()
 
     _structure_cif_handle :Structure        = utils.open_structure(PDBID,'cif')
-    struct_profile_handle:RibosomeStructure = RibosomeStructure.parse_obj(utils.open_structure(PDBID,'json'))
+    struct_profile_handle:RibosomeStructure = RibosomeStructure.model_validate(utils.open_structure(PDBID,'json'))
 
-    liglike_polys = struct_polymeric_factor_ids(struct_profile_handle)
+    # liglike_polys = struct_polymeric_factor_ids(struct_profile_handle)
     ligands       = struct_ligand_ids(PDBID, struct_profile_handle)
 
 
-    if liglike_polys != None:
-        for polyref in liglike_polys:
-            bsite_extrarbx_polymer(polyref.auth_asym_id, _structure_cif_handle)
+    # if liglike_polys != None:
+    #     for polyref in liglike_polys:
+    #         bsite_extrarbx_polymer(polyref.auth_asym_id, _structure_cif_handle)
 
     for l in ligands:
-        bsite_ligand( l[0], _structure_cif_handle)
+        # pprint(l.model_dump())
+        bs = bsite_ligand(l.chemicalId , _structure_cif_handle)
+        pprint(bs)
