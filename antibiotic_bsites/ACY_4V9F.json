@@ -1,0 +1,401 @@
+{
+    "0": {
+        "assembly_id": 0,
+        "asym_ids": [
+            "A"
+        ],
+        "auth_asym_id": "0",
+        "parent_rcsb_id": "4V9F",
+        "src_organism_names": [
+            "Haloarcula marismortui"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            272569
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "23S Ribosomal RNA",
+        "entity_poly_strand_id": "0",
+        "entity_poly_seq_one_letter_code": "ACUAUGCCAGCUGGUGGAUUGCUCGGCUCAGGCGCUGAUGAAGGACGUGCCAAGCUGCGAUAAGCUGUGGGGAGCCGCACGGAGGCGAAGAACCACAGAUUUCCGAAUGAGAAUCUCUCUAACAAUUGCUUCGCGCAAUGAGGAACCCCGAGAACUGAAACAUCUCAGUAUCGGGAGGAACAGAAAACGCAACGUGAUGUCGUUAGUAACCGCGAGUGAACGCGAUACAGCCCAAACCGAAGCCCUCACGGGCAAUGUGGUGUCAGGGCUACCUCUCAUCAGCCGACCGUCUUCACGAAGUCUCUUGGAAUAGAGCGUGAUACAGGGUGACAACCCCGUACUGAAGACCAGUACGCUGUGCGGUAGUGCCAGAGUAGCGGGGGUUGGAUAUCCCUCGCGAAUAACGCAGGCAUCGACUGCGAAGGCUAAACACAACCUGAGACCGAUAGUGAACAAGUAGUGUGAACGAACGCUGCAAAGUACCCUCAGAAGGGAGGCGAAAUAGAGCAUGAAAUCAGUUGGCGAUCGAGCGACAGGGCAUACAAGGUCCCUUGACGAAUGACCGAGACGCGAGUCUCCAGUAAGACUCACGGGAAGCCGAUGUUCUGUCGUACGUUUUG(1MA)AAAACGAGCCAGGGAGUGUGUCUGUAUGGCAAGUCUAACCGGAGUAUCCGGGGAGGCACAGGGAAACCGACAUGGCCGCAGGGCUUUGCCCGAGGGCCGCCGUCUUCAAGGGCGGGGAGCCAUGUGGACACGACCCGAAUCCGGACGAUCUACGCAUGGACAAGAUGAAGCGUGCCGAAAGGCACGUGGAAGUCUGUUAGAGUUGGUGUCCUACAAUACCCUCUCGUGAUCUAUGUGUAGGGGUGAAAGGCCCAUCGAGUCCGGCAACAGCUGGUUCCAAUCGAAACAUGUCGAAGCAUGACCUCCGCCGAGGUAGUCUGUGAGGUAGAGCGACCGAUUGGUGUGUCCGCCUCCGAGAGGAGUCGGCCCUCCUGUCAAACUCCAAACUUACAGACGCUGUUUGACGCGGGGAUUCCGGUGCGCGGGGUAAGCCUGUGUACCAGGAGGGGAACAACCCAGAGAUAGGUUAAGGUCCCCAAGUGUGGAUUAAGUGUAAUCCUCUGAAGGUGGUCUCGAGCCCUAGACAGCCGGGAGGUGAGCUUAGAAGCAGCUACCCUCUAAGAAAAGCGUAACAGCUUACCGGCCGAGGUUUGAGGCGCCCAAAAUGAUCGGGACUCAAAUCCACCACCGAGACCUGUCCGUACCACUCAUACUGGUAAUCGAGUAGAUUGGCGCUCUAAUUGGAUGGAAGCAGGGGCGAGAGCUCCUGUGGACCGAUUAGUGACGAAAAUCCUGGCCAUAGUAGCAGCGAUAGUCGGGUGAGAACCCCGACGGCCUAAUGGAUAAGGGUUCCUCAGCACUGCUGAUCAGCUGAGGGUUAGCCGGUCCUAAGUCUCACCGCAACUCGACUGAGACGAAAUGGGAAACAGGUUAAUAUUCCUGUGCCAUCAUGCAGUGAAAGUUGACGCCCUGGGGUCGAUCACGCCGGGCAUUCGCCCGGUCGAACCGUCCAACUCCGUGGAAGCCGUAAUGGCAGGAAGCGGACGAACGGCGGCAUAGGGAAACGUGAUUCAACCUGGGGCCCAUGAAAAGACGAGCAUGAUGUCCGUACCGAGAACCGACACAGGUGUCCAUGGCGGCGAAAGCCAAGGCCUGUCGGGAGCAACCAACGUUAGGGAAUUCGGCAAGUUAGUCCCGUACCUUCGGAAGAAGGGAUGCCUGCUCCGGAACGGAGCAGGUCGCAGUGACUCGGAAGCUCGGACUGUCUAGUAACAACAUAGGUGACCGCAAAUCCGCAAGGACUCGUACGGUCACUGAAUCCUGCCCAGUGCAGGUAUCUGAACACCUCGUACAAGAGGACGAAGGACCUGUCAACGGCGGGGGUAACUAUGACCCUCUUAAGGUAGCGUAGUACCUUGCCGCAUCAGUAGCGGCUUGCAUGAAUGGAUUAACCAGAGCUUCACUGUCCCAACGUUGGGCCCGGUGAACUGUACAUUCCAGUGCGGAGUCUGGAGACACCCAGGGGGAAGCGAAGACCCUAUGGAGCUUUACUGCAGGCUGUCGCUGAGACGUGGUCGCCGAUGUGCAGCAUAGGUAGGAGACACUACACAGGUACCCGCGCUAGCGGGCCACCGAGUCAACAGUGAAAUACUACCCGUCGGUGACUGCGACUCUCACUCCGGGAGGAGGACACCGAUAGCCGGGCAGUUUGACUGGGGCGGUACGCGCUCGAAAAGAUAUCGAGCGCGCCCUAUGGUCAUCUCAGCCGGGACAGAGACCCGGCGAAGAGUGCAAGAGCAAAAGAUGACUUGACAGUGUUCUUCCCAACGAGGAACGCUGACGCGAAAGCGUGGUCUAGCGAACCAAUUAGCCUGCUUGAUGCGGGCAAUUGAUGACAGAAAAGCUACCCUAGGGAUAACAGAGUCGUCACUCGCAAGAGCACAUAUCGACCGAGUGGCUUGCUACCUCGAUGUCGGUUCCCUCCAUCCUGCCCGUGCAGAAGCGGGCAAGGGUGAGGU(OMU)(OMG)UUCGCCUAUUAAAGGAGGUCGUGAGCUGGG(UR3)U(PSU)AGACCGUCGUGAGACAGGUCGGCUGCUAUCUACUGGGUGUGUAAUGGUGUCUGACAAGAACGACCGUAUAGUACGAGAGGAACUACGGUUGGUGGCCACUGGUGUACCGGUUGUUCGAGAGAGCACGUGCCGGGUAGCCACGCCACACGGGGUAAGAGCUGAACGCAUCUAAGCUCGAAACCCACUUGGAAAAGAGACACCGCCGAGGUCCCGCGUACAAGACGCGGUCGAUAGACUCGGGGUGUGCGCGUCGAGGUAACGAGACGUUAAGCCCACGAGCACUAACAGACCAAAGC",
+        "entity_poly_seq_one_letter_code_can": "ACUAUGCCAGCUGGUGGAUUGCUCGGCUCAGGCGCUGAUGAAGGACGUGCCAAGCUGCGAUAAGCUGUGGGGAGCCGCACGGAGGCGAAGAACCACAGAUUUCCGAAUGAGAAUCUCUCUAACAAUUGCUUCGCGCAAUGAGGAACCCCGAGAACUGAAACAUCUCAGUAUCGGGAGGAACAGAAAACGCAACGUGAUGUCGUUAGUAACCGCGAGUGAACGCGAUACAGCCCAAACCGAAGCCCUCACGGGCAAUGUGGUGUCAGGGCUACCUCUCAUCAGCCGACCGUCUUCACGAAGUCUCUUGGAAUAGAGCGUGAUACAGGGUGACAACCCCGUACUGAAGACCAGUACGCUGUGCGGUAGUGCCAGAGUAGCGGGGGUUGGAUAUCCCUCGCGAAUAACGCAGGCAUCGACUGCGAAGGCUAAACACAACCUGAGACCGAUAGUGAACAAGUAGUGUGAACGAACGCUGCAAAGUACCCUCAGAAGGGAGGCGAAAUAGAGCAUGAAAUCAGUUGGCGAUCGAGCGACAGGGCAUACAAGGUCCCUUGACGAAUGACCGAGACGCGAGUCUCCAGUAAGACUCACGGGAAGCCGAUGUUCUGUCGUACGUUUUGAAAAACGAGCCAGGGAGUGUGUCUGUAUGGCAAGUCUAACCGGAGUAUCCGGGGAGGCACAGGGAAACCGACAUGGCCGCAGGGCUUUGCCCGAGGGCCGCCGUCUUCAAGGGCGGGGAGCCAUGUGGACACGACCCGAAUCCGGACGAUCUACGCAUGGACAAGAUGAAGCGUGCCGAAAGGCACGUGGAAGUCUGUUAGAGUUGGUGUCCUACAAUACCCUCUCGUGAUCUAUGUGUAGGGGUGAAAGGCCCAUCGAGUCCGGCAACAGCUGGUUCCAAUCGAAACAUGUCGAAGCAUGACCUCCGCCGAGGUAGUCUGUGAGGUAGAGCGACCGAUUGGUGUGUCCGCCUCCGAGAGGAGUCGGCCCUCCUGUCAAACUCCAAACUUACAGACGCUGUUUGACGCGGGGAUUCCGGUGCGCGGGGUAAGCCUGUGUACCAGGAGGGGAACAACCCAGAGAUAGGUUAAGGUCCCCAAGUGUGGAUUAAGUGUAAUCCUCUGAAGGUGGUCUCGAGCCCUAGACAGCCGGGAGGUGAGCUUAGAAGCAGCUACCCUCUAAGAAAAGCGUAACAGCUUACCGGCCGAGGUUUGAGGCGCCCAAAAUGAUCGGGACUCAAAUCCACCACCGAGACCUGUCCGUACCACUCAUACUGGUAAUCGAGUAGAUUGGCGCUCUAAUUGGAUGGAAGCAGGGGCGAGAGCUCCUGUGGACCGAUUAGUGACGAAAAUCCUGGCCAUAGUAGCAGCGAUAGUCGGGUGAGAACCCCGACGGCCUAAUGGAUAAGGGUUCCUCAGCACUGCUGAUCAGCUGAGGGUUAGCCGGUCCUAAGUCUCACCGCAACUCGACUGAGACGAAAUGGGAAACAGGUUAAUAUUCCUGUGCCAUCAUGCAGUGAAAGUUGACGCCCUGGGGUCGAUCACGCCGGGCAUUCGCCCGGUCGAACCGUCCAACUCCGUGGAAGCCGUAAUGGCAGGAAGCGGACGAACGGCGGCAUAGGGAAACGUGAUUCAACCUGGGGCCCAUGAAAAGACGAGCAUGAUGUCCGUACCGAGAACCGACACAGGUGUCCAUGGCGGCGAAAGCCAAGGCCUGUCGGGAGCAACCAACGUUAGGGAAUUCGGCAAGUUAGUCCCGUACCUUCGGAAGAAGGGAUGCCUGCUCCGGAACGGAGCAGGUCGCAGUGACUCGGAAGCUCGGACUGUCUAGUAACAACAUAGGUGACCGCAAAUCCGCAAGGACUCGUACGGUCACUGAAUCCUGCCCAGUGCAGGUAUCUGAACACCUCGUACAAGAGGACGAAGGACCUGUCAACGGCGGGGGUAACUAUGACCCUCUUAAGGUAGCGUAGUACCUUGCCGCAUCAGUAGCGGCUUGCAUGAAUGGAUUAACCAGAGCUUCACUGUCCCAACGUUGGGCCCGGUGAACUGUACAUUCCAGUGCGGAGUCUGGAGACACCCAGGGGGAAGCGAAGACCCUAUGGAGCUUUACUGCAGGCUGUCGCUGAGACGUGGUCGCCGAUGUGCAGCAUAGGUAGGAGACACUACACAGGUACCCGCGCUAGCGGGCCACCGAGUCAACAGUGAAAUACUACCCGUCGGUGACUGCGACUCUCACUCCGGGAGGAGGACACCGAUAGCCGGGCAGUUUGACUGGGGCGGUACGCGCUCGAAAAGAUAUCGAGCGCGCCCUAUGGUCAUCUCAGCCGGGACAGAGACCCGGCGAAGAGUGCAAGAGCAAAAGAUGACUUGACAGUGUUCUUCCCAACGAGGAACGCUGACGCGAAAGCGUGGUCUAGCGAACCAAUUAGCCUGCUUGAUGCGGGCAAUUGAUGACAGAAAAGCUACCCUAGGGAUAACAGAGUCGUCACUCGCAAGAGCACAUAUCGACCGAGUGGCUUGCUACCUCGAUGUCGGUUCCCUCCAUCCUGCCCGUGCAGAAGCGGGCAAGGGUGAGGUUGUUCGCCUAUUAAAGGAGGUCGUGAGCUGGGUUUAGACCGUCGUGAGACAGGUCGGCUGCUAUCUACUGGGUGUGUAAUGGUGUCUGACAAGAACGACCGUAUAGUACGAGAGGAACUACGGUUGGUGGCCACUGGUGUACCGGUUGUUCGAGAGAGCACGUGCCGGGUAGCCACGCCACACGGGGUAAGAGCUGAACGCAUCUAAGCUCGAAACCCACUUGGAAAAGAGACACCGCCGAGGUCCCGCGUACAAGACGCGGUCGAUAGACUCGGGGUGUGCGCGUCGAGGUAACGAGACGUUAAGCCCACGAGCACUAACAGACCAAAGC",
+        "entity_poly_seq_length": 2910,
+        "entity_poly_polymer_type": "RNA",
+        "entity_poly_entity_type": "polyribonucleotide",
+        "nomenclature": [
+            "23SrRNA"
+        ],
+        "residues": [
+            {
+                "full_id": [
+                    "4V9F",
+                    0,
+                    "0",
+                    [
+                        " ",
+                        44,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 44,
+                "parent_auth_asym_id": "0"
+            },
+            {
+                "full_id": [
+                    "4V9F",
+                    0,
+                    "0",
+                    [
+                        " ",
+                        45,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 45,
+                "parent_auth_asym_id": "0"
+            },
+            {
+                "full_id": [
+                    "4V9F",
+                    0,
+                    "0",
+                    [
+                        " ",
+                        146,
+                        " "
+                    ]
+                ],
+                "resname": "U",
+                "seqid": 146,
+                "parent_auth_asym_id": "0"
+            },
+            {
+                "full_id": [
+                    "4V9F",
+                    0,
+                    "0",
+                    [
+                        " ",
+                        147,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 147,
+                "parent_auth_asym_id": "0"
+            },
+            {
+                "full_id": [
+                    "4V9F",
+                    0,
+                    "0",
+                    [
+                        " ",
+                        966,
+                        " "
+                    ]
+                ],
+                "resname": "U",
+                "seqid": 966,
+                "parent_auth_asym_id": "0"
+            },
+            {
+                "full_id": [
+                    "4V9F",
+                    0,
+                    "0",
+                    [
+                        " ",
+                        967,
+                        " "
+                    ]
+                ],
+                "resname": "U",
+                "seqid": 967,
+                "parent_auth_asym_id": "0"
+            },
+            {
+                "full_id": [
+                    "4V9F",
+                    0,
+                    "0",
+                    [
+                        " ",
+                        1002,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1002,
+                "parent_auth_asym_id": "0"
+            },
+            {
+                "full_id": [
+                    "4V9F",
+                    0,
+                    "0",
+                    [
+                        " ",
+                        2727,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 2727,
+                "parent_auth_asym_id": "0"
+            },
+            {
+                "full_id": [
+                    "4V9F",
+                    0,
+                    "0",
+                    [
+                        " ",
+                        2756,
+                        " "
+                    ]
+                ],
+                "resname": "U",
+                "seqid": 2756,
+                "parent_auth_asym_id": "0"
+            },
+            {
+                "full_id": [
+                    "4V9F",
+                    0,
+                    "0",
+                    [
+                        " ",
+                        2757,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 2757,
+                "parent_auth_asym_id": "0"
+            },
+            {
+                "full_id": [
+                    "4V9F",
+                    0,
+                    "0",
+                    [
+                        " ",
+                        2861,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 2861,
+                "parent_auth_asym_id": "0"
+            },
+            {
+                "full_id": [
+                    "4V9F",
+                    0,
+                    "0",
+                    [
+                        " ",
+                        2862,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 2862,
+                "parent_auth_asym_id": "0"
+            },
+            {
+                "full_id": [
+                    "4V9F",
+                    0,
+                    "0",
+                    [
+                        " ",
+                        2895,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 2895,
+                "parent_auth_asym_id": "0"
+            },
+            {
+                "full_id": [
+                    "4V9F",
+                    0,
+                    "0",
+                    [
+                        " ",
+                        2896,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 2896,
+                "parent_auth_asym_id": "0"
+            },
+            {
+                "full_id": [
+                    "4V9F",
+                    0,
+                    "0",
+                    [
+                        " ",
+                        2897,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 2897,
+                "parent_auth_asym_id": "0"
+            }
+        ]
+    },
+    "W": {
+        "assembly_id": 0,
+        "asym_ids": [
+            "Y"
+        ],
+        "auth_asym_id": "W",
+        "parent_rcsb_id": "4V9F",
+        "src_organism_names": [
+            "Haloarcula marismortui"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            272569
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "50S ribosomal protein L30P",
+        "entity_poly_strand_id": "W",
+        "entity_poly_seq_one_letter_code": "MHALVQLRGEVNMHTDIQDTLEMLNIHHVNHCTLVPETDAYRGMVAKVNDFVAFGEPSQETLETVLATRAEPLEGDADVDDEWVAEHTDYDDISGLAFALLSEETTLREQGLSPTLRLHPPRGGHDGVKHPVKEGGQLGKHDTEGIDDLLEAMR",
+        "entity_poly_seq_one_letter_code_can": "MHALVQLRGEVNMHTDIQDTLEMLNIHHVNHCTLVPETDAYRGMVAKVNDFVAFGEPSQETLETVLATRAEPLEGDADVDDEWVAEHTDYDDISGLAFALLSEETTLREQGLSPTLRLHPPRGGHDGVKHPVKEGGQLGKHDTEGIDDLLEAMR",
+        "entity_poly_seq_length": 154,
+        "entity_poly_polymer_type": "Protein",
+        "entity_poly_entity_type": "polypeptide(L)",
+        "nomenclature": [
+            "uL30"
+        ],
+        "residues": [
+            {
+                "full_id": [
+                    "4V9F",
+                    0,
+                    "W",
+                    [
+                        " ",
+                        2,
+                        " "
+                    ]
+                ],
+                "resname": "HIS",
+                "seqid": 2,
+                "parent_auth_asym_id": "W"
+            },
+            {
+                "full_id": [
+                    "4V9F",
+                    0,
+                    "W",
+                    [
+                        " ",
+                        37,
+                        " "
+                    ]
+                ],
+                "resname": "GLU",
+                "seqid": 37,
+                "parent_auth_asym_id": "W"
+            },
+            {
+                "full_id": [
+                    "4V9F",
+                    0,
+                    "W",
+                    [
+                        " ",
+                        42,
+                        " "
+                    ]
+                ],
+                "resname": "ARG",
+                "seqid": 42,
+                "parent_auth_asym_id": "W"
+            },
+            {
+                "full_id": [
+                    "4V9F",
+                    0,
+                    "W",
+                    [
+                        " ",
+                        54,
+                        " "
+                    ]
+                ],
+                "resname": "PHE",
+                "seqid": 54,
+                "parent_auth_asym_id": "W"
+            },
+            {
+                "full_id": [
+                    "4V9F",
+                    0,
+                    "W",
+                    [
+                        " ",
+                        140,
+                        " "
+                    ]
+                ],
+                "resname": "LYS",
+                "seqid": 140,
+                "parent_auth_asym_id": "W"
+            }
+        ]
+    },
+    "B": {
+        "assembly_id": 0,
+        "asym_ids": [
+            "D"
+        ],
+        "auth_asym_id": "B",
+        "parent_rcsb_id": "4V9F",
+        "src_organism_names": [
+            "Haloarcula marismortui"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            272569
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "50S ribosomal protein L3P",
+        "entity_poly_strand_id": "B",
+        "entity_poly_seq_one_letter_code": "MPQPSRPRKGSLGFGPRKRSTSETPRFNSWPSDDGQPGVQGFAGYKAGMTHVVLVNDEPNSPREGMEETVPVTVIETPPMRAVALRAYEDTPYGQRPLTEVWTDEFHSELDRTLDVPEDHDPDAAEEQIRDAHEAGDLGDLRLITHTVPDAVPSVPKKKPDVMETRVGGGSVSDRLDHALDIVEDGGEHAMNDIFRAGEYADVAGVTKGKGTQGPVKRWGVQKRKGKHARQGWRRRIGNLGPWNPSRVRSTVPQQGQTGYHQRTELNKRLIDIGEGDEPTVDGGFVNYGEVDGPYTLVKGSVPGPDKRLVRFRPAVRPNDQPRLDPEVRYVSNESNQG",
+        "entity_poly_seq_one_letter_code_can": "MPQPSRPRKGSLGFGPRKRSTSETPRFNSWPSDDGQPGVQGFAGYKAGMTHVVLVNDEPNSPREGMEETVPVTVIETPPMRAVALRAYEDTPYGQRPLTEVWTDEFHSELDRTLDVPEDHDPDAAEEQIRDAHEAGDLGDLRLITHTVPDAVPSVPKKKPDVMETRVGGGSVSDRLDHALDIVEDGGEHAMNDIFRAGEYADVAGVTKGKGTQGPVKRWGVQKRKGKHARQGWRRRIGNLGPWNPSRVRSTVPQQGQTGYHQRTELNKRLIDIGEGDEPTVDGGFVNYGEVDGPYTLVKGSVPGPDKRLVRFRPAVRPNDQPRLDPEVRYVSNESNQG",
+        "entity_poly_seq_length": 338,
+        "entity_poly_polymer_type": "Protein",
+        "entity_poly_entity_type": "polypeptide(L)",
+        "nomenclature": [
+            "uL3"
+        ],
+        "residues": [
+            {
+                "full_id": [
+                    "4V9F",
+                    0,
+                    "B",
+                    [
+                        " ",
+                        336,
+                        " "
+                    ]
+                ],
+                "resname": "GLN",
+                "seqid": 336,
+                "parent_auth_asym_id": "B"
+            }
+        ]
+    }
+}

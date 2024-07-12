@@ -1,0 +1,358 @@
+{
+    "L": {
+        "assembly_id": 0,
+        "asym_ids": [
+            "M"
+        ],
+        "auth_asym_id": "L",
+        "parent_rcsb_id": "1HNW",
+        "src_organism_names": [
+            "Thermus thermophilus"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            274
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "30S RIBOSOMAL PROTEIN S12",
+        "entity_poly_strand_id": "L",
+        "entity_poly_seq_one_letter_code": "MVALPTINQLVRKGREKVRKKSKVPALKGAPFRRGVCTVVRTVTPKKPNSALRKVAKVRLTSGYEVTAYIPGEGHNLQEHSVVLIRGGRVKDLPGVRYHIVRGVYDAAGVKDRKKSRSKYGTKKPKEAAKTAAKK",
+        "entity_poly_seq_one_letter_code_can": "MVALPTINQLVRKGREKVRKKSKVPALKGAPFRRGVCTVVRTVTPKKPNSALRKVAKVRLTSGYEVTAYIPGEGHNLQEHSVVLIRGGRVKDLPGVRYHIVRGVYDAAGVKDRKKSRSKYGTKKPKEAAKTAAKK",
+        "entity_poly_seq_length": 135,
+        "entity_poly_polymer_type": "Protein",
+        "entity_poly_entity_type": "polypeptide(L)",
+        "nomenclature": [
+            "uS12"
+        ],
+        "residues": [
+            {
+                "full_id": [
+                    "1HNW",
+                    0,
+                    "L",
+                    [
+                        " ",
+                        16,
+                        " "
+                    ]
+                ],
+                "resname": "GLU",
+                "seqid": 16,
+                "parent_auth_asym_id": "L"
+            },
+            {
+                "full_id": [
+                    "1HNW",
+                    0,
+                    "L",
+                    [
+                        " ",
+                        19,
+                        " "
+                    ]
+                ],
+                "resname": "ARG",
+                "seqid": 19,
+                "parent_auth_asym_id": "L"
+            }
+        ]
+    },
+    "A": {
+        "assembly_id": 0,
+        "asym_ids": [
+            "A"
+        ],
+        "auth_asym_id": "A",
+        "parent_rcsb_id": "1HNW",
+        "src_organism_names": [
+            "Thermus thermophilus"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            274
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "16S RIBOSOMAL RNA",
+        "entity_poly_strand_id": "A",
+        "entity_poly_seq_one_letter_code": "UUUGUUGGAGAGUUUGAUCCUGGCUCAGGGUGAACGCUGGCGGCGUGCCUAAGACAUGCAAGUCGUGCGGGCCGCGGGGUUUUACUCCGUGGUCAGCGGCGGACGGGUGAGUAACGCGUGGGUGACCUACCCGGAAGAGGGGGACAACCCGGGGAAACUCGGGCUAAUCCCCCAUGUGGACCCGCCCCUUGGGGUGUGUCCAAAGGGCUUUGCCCGCUUCCGGAUGGGCCCGCGUCCCAUCAGCUAGUUGGUGGGGUAAUGGCCCACCAAGGCGACGACGGGUAGCCGGUCUGAGAGGAUGGCCGGCCACAGGGGCACUGAGACACGGGCCCCACUCCUACGGGAGGCAGCAGUUAGGAAUCUUCCGCAAUGGGCGCAAGCCUGACGGAGCGACGCCGCUUGGAGGAAGAAGCCCUUCGGGGUGUAAACUCCUGAACCCGGGACGAAACCCCCGACGAGGGGACUGACGGUACCGGGGUAAUAGCGCCGGCCAACUCCGUGCCAGCAGCCGCGGUAAUACGGAGGGCGCGAGCGUUACCCGGAUUCACUGGGCGUAAAGGGCGUGUAGGCGGCCUGGGGCGUCCCAUGUGAAAGACCACGGCUCAACCGUGGGGGAGCGUGGGAUACGCUCAGGCUAGACGGUGGGAGAGGGUGGUGGAAUUCCCGGAGUAGCGGUGAAAUGCGCAGAUACCGGGAGGAACGCCGAUGGCGAAGGCAGCCACCUGGUCCACCCGUGACGCUGAGGCGCGAAAGCGUGGGGAGCAAACCGGAUUAGAUACCCGGGUAGUCCACGCCCUAAACGAUGCGCGCUAGGUCUCUGGGUCUCCUGGGGGCCGAAGCUAACGCGUUAAGCGCGCCGCCUGGGGAGUACGGCCGCAAGGCUGAAACUCAAAGGAAUUGACGGGGGCCCGCACAAGCGGUGGAGCAUGUGGUUUAAUUCGAAGCAACGCGAAGAACCUUACCAGGCCUUGACAUGCUAGGGAACCCGGGUGAAAGCCUGGGGUGCCCCGCGAGGGGAGCCCUAGCACAGGUGCUGCAUGGCCGUCGUCAGCUCGUGCCGUGAGGUGUUGGGUUAAGUCCCGCAACGAGCGCAACCCCCGCCGUUAGUUGCCAGCGGUUCGGCCGGGCACUCUAACGGGACUGCCCGCGAAAGCGGGAGGAAGGAGGGGACGACGUCUGGUCAGCAUGGCCCUUACGGCCUGGGCGACACACGUGCUACAAUGCCCACUACAAAGCGAUGCCACCCGGCAACGGGGAGCUAAUCGCAAAAAGGUGGGCCCAGUUCGGAUUGGGGUCUGCAACCCGACCCCAUGAAGCCGGAAUCGCUAGUAAUCGCGGAUCAGCCAUGCCGCGGUGAAUACGUUCCCGGGCCUUGUACACACCGCCCGUCACGCCAUGGGAGCGGGCUCUACCCGAAGUCGCCGGGAGCCUACGGGCAGGCGCCGAGGGUAGGGCCCGUGACUGGGGCGAAGUCGUAACAAGGUAGCUGUACCGGAAGGUGCGGCUGGAUCACCUCCUUUCU",
+        "entity_poly_seq_one_letter_code_can": "UUUGUUGGAGAGUUUGAUCCUGGCUCAGGGUGAACGCUGGCGGCGUGCCUAAGACAUGCAAGUCGUGCGGGCCGCGGGGUUUUACUCCGUGGUCAGCGGCGGACGGGUGAGUAACGCGUGGGUGACCUACCCGGAAGAGGGGGACAACCCGGGGAAACUCGGGCUAAUCCCCCAUGUGGACCCGCCCCUUGGGGUGUGUCCAAAGGGCUUUGCCCGCUUCCGGAUGGGCCCGCGUCCCAUCAGCUAGUUGGUGGGGUAAUGGCCCACCAAGGCGACGACGGGUAGCCGGUCUGAGAGGAUGGCCGGCCACAGGGGCACUGAGACACGGGCCCCACUCCUACGGGAGGCAGCAGUUAGGAAUCUUCCGCAAUGGGCGCAAGCCUGACGGAGCGACGCCGCUUGGAGGAAGAAGCCCUUCGGGGUGUAAACUCCUGAACCCGGGACGAAACCCCCGACGAGGGGACUGACGGUACCGGGGUAAUAGCGCCGGCCAACUCCGUGCCAGCAGCCGCGGUAAUACGGAGGGCGCGAGCGUUACCCGGAUUCACUGGGCGUAAAGGGCGUGUAGGCGGCCUGGGGCGUCCCAUGUGAAAGACCACGGCUCAACCGUGGGGGAGCGUGGGAUACGCUCAGGCUAGACGGUGGGAGAGGGUGGUGGAAUUCCCGGAGUAGCGGUGAAAUGCGCAGAUACCGGGAGGAACGCCGAUGGCGAAGGCAGCCACCUGGUCCACCCGUGACGCUGAGGCGCGAAAGCGUGGGGAGCAAACCGGAUUAGAUACCCGGGUAGUCCACGCCCUAAACGAUGCGCGCUAGGUCUCUGGGUCUCCUGGGGGCCGAAGCUAACGCGUUAAGCGCGCCGCCUGGGGAGUACGGCCGCAAGGCUGAAACUCAAAGGAAUUGACGGGGGCCCGCACAAGCGGUGGAGCAUGUGGUUUAAUUCGAAGCAACGCGAAGAACCUUACCAGGCCUUGACAUGCUAGGGAACCCGGGUGAAAGCCUGGGGUGCCCCGCGAGGGGAGCCCUAGCACAGGUGCUGCAUGGCCGUCGUCAGCUCGUGCCGUGAGGUGUUGGGUUAAGUCCCGCAACGAGCGCAACCCCCGCCGUUAGUUGCCAGCGGUUCGGCCGGGCACUCUAACGGGACUGCCCGCGAAAGCGGGAGGAAGGAGGGGACGACGUCUGGUCAGCAUGGCCCUUACGGCCUGGGCGACACACGUGCUACAAUGCCCACUACAAAGCGAUGCCACCCGGCAACGGGGAGCUAAUCGCAAAAAGGUGGGCCCAGUUCGGAUUGGGGUCUGCAACCCGACCCCAUGAAGCCGGAAUCGCUAGUAAUCGCGGAUCAGCCAUGCCGCGGUGAAUACGUUCCCGGGCCUUGUACACACCGCCCGUCACGCCAUGGGAGCGGGCUCUACCCGAAGUCGCCGGGAGCCUACGGGCAGGCGCCGAGGGUAGGGCCCGUGACUGGGGCGAAGUCGUAACAAGGUAGCUGUACCGGAAGGUGCGGCUGGAUCACCUCCUUUCU",
+        "entity_poly_seq_length": 1522,
+        "entity_poly_polymer_type": "RNA",
+        "entity_poly_entity_type": "polyribonucleotide",
+        "nomenclature": [
+            "16SrRNA"
+        ],
+        "residues": [
+            {
+                "full_id": [
+                    "1HNW",
+                    0,
+                    "A",
+                    [
+                        " ",
+                        241,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 241,
+                "parent_auth_asym_id": "A"
+            },
+            {
+                "full_id": [
+                    "1HNW",
+                    0,
+                    "A",
+                    [
+                        " ",
+                        242,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 242,
+                "parent_auth_asym_id": "A"
+            },
+            {
+                "full_id": [
+                    "1HNW",
+                    0,
+                    "A",
+                    [
+                        " ",
+                        244,
+                        " "
+                    ]
+                ],
+                "resname": "U",
+                "seqid": 244,
+                "parent_auth_asym_id": "A"
+            },
+            {
+                "full_id": [
+                    "1HNW",
+                    0,
+                    "A",
+                    [
+                        " ",
+                        245,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 245,
+                "parent_auth_asym_id": "A"
+            },
+            {
+                "full_id": [
+                    "1HNW",
+                    0,
+                    "A",
+                    [
+                        " ",
+                        892,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 892,
+                "parent_auth_asym_id": "A"
+            },
+            {
+                "full_id": [
+                    "1HNW",
+                    0,
+                    "A",
+                    [
+                        " ",
+                        893,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 893,
+                "parent_auth_asym_id": "A"
+            },
+            {
+                "full_id": [
+                    "1HNW",
+                    0,
+                    "A",
+                    [
+                        " ",
+                        894,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 894,
+                "parent_auth_asym_id": "A"
+            },
+            {
+                "full_id": [
+                    "1HNW",
+                    0,
+                    "A",
+                    [
+                        " ",
+                        906,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 906,
+                "parent_auth_asym_id": "A"
+            },
+            {
+                "full_id": [
+                    "1HNW",
+                    0,
+                    "A",
+                    [
+                        " ",
+                        907,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 907,
+                "parent_auth_asym_id": "A"
+            },
+            {
+                "full_id": [
+                    "1HNW",
+                    0,
+                    "A",
+                    [
+                        " ",
+                        908,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 908,
+                "parent_auth_asym_id": "A"
+            },
+            {
+                "full_id": [
+                    "1HNW",
+                    0,
+                    "A",
+                    [
+                        " ",
+                        965,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 965,
+                "parent_auth_asym_id": "A"
+            },
+            {
+                "full_id": [
+                    "1HNW",
+                    0,
+                    "A",
+                    [
+                        " ",
+                        966,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 966,
+                "parent_auth_asym_id": "A"
+            },
+            {
+                "full_id": [
+                    "1HNW",
+                    0,
+                    "A",
+                    [
+                        " ",
+                        1053,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1053,
+                "parent_auth_asym_id": "A"
+            },
+            {
+                "full_id": [
+                    "1HNW",
+                    0,
+                    "A",
+                    [
+                        " ",
+                        1054,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 1054,
+                "parent_auth_asym_id": "A"
+            },
+            {
+                "full_id": [
+                    "1HNW",
+                    0,
+                    "A",
+                    [
+                        " ",
+                        1195,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 1195,
+                "parent_auth_asym_id": "A"
+            },
+            {
+                "full_id": [
+                    "1HNW",
+                    0,
+                    "A",
+                    [
+                        " ",
+                        1196,
+                        " "
+                    ]
+                ],
+                "resname": "U",
+                "seqid": 1196,
+                "parent_auth_asym_id": "A"
+            },
+            {
+                "full_id": [
+                    "1HNW",
+                    0,
+                    "A",
+                    [
+                        " ",
+                        1197,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1197,
+                "parent_auth_asym_id": "A"
+            },
+            {
+                "full_id": [
+                    "1HNW",
+                    0,
+                    "A",
+                    [
+                        " ",
+                        1198,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1198,
+                "parent_auth_asym_id": "A"
+            }
+        ]
+    }
+}

@@ -1,0 +1,268 @@
+{
+    "a": {
+        "assembly_id": 0,
+        "asym_ids": [
+            "GA"
+        ],
+        "auth_asym_id": "a",
+        "parent_rcsb_id": "7P7R",
+        "src_organism_names": [
+            "Enterococcus faecalis V583"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            226185
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "16S rRNA",
+        "entity_poly_strand_id": "a",
+        "entity_poly_seq_one_letter_code": "GAGAGUUUGAUCCUGGCUCAGGACGAACGCUGGCGGCGUGCCUAAUACAUGCAAGUCGAACGCUUCUUUCCUCCCGAGUGCUUGCACUCAAUUGGAAAGAGGAGUGGCGGACGGGUGAGUAACACGUGGGUAACCUACCCAUCAGAGGGGGAUAACACUUGGAAACAGGUGCUAAUACCGCAUAACAGUUUAUGCCGCAUGGCAUAAGAGUGAAAGGCGCUGGCGGGUGUCGCUGAUGGAUGGACCCGCGGUGCAUUAGCUAGUUGGUGAGGUAACGGCUCACCAAGGCCACGAUGCAUAGCCGACCUGAGAGGGUGAUCGGCCACACUGGGACUGAGACACGGCCCAGACUCCUACGGGAGGCAGCAGUAGGGAAUCUUCGGCAAUGGACGAAAGUCUGACCGAGCAACGCCGCGUGAGUGAAGAAGGUUUUCGGAUCGUAAAACUCUGUUGUUAGAGAAGAACAAGGACGUUAGUAACUGAACGUCCCCUGACGGUAUCUAACCAGAAAGCCACGGCUAACUACGUGCCAGCAGCCGCGGUAAUACGUAGGUGGCAAGCGUUGUCCGGAUUUAUUGGGCGUAAAGCGAGCGCAGGCGGUUUCUUAAGUCUGAUGUGAAAGCCCCCGGCUCAACCGGGGAGGGUCAUUGGAAACUGGGAGACUUGAGUGCAGAAGAGGAGAGUGGAAUUCCAUGUGUAGCGGUGAAAUGCGUAGAUAUAUGGAGGAACACCAGUGGCGAAGGCGGCUCUCUGGUCUGUAACUGACGCUGAGGCUCGAAAGCGUGGGGAGCAAACAGGAUUAGAUACCCUGGUAGUCCACGCCGUAAACGAUGAGUGCUAAGUGUUGGAGGGUUUCCGCCCUUCAGUGCUGCAGCAAACGCAUUAAGCACUCCGCCUGGGGAGUACGACCGCAAGGUUGAAACUCAAAGGAAUUGACGGGGGCCCGCACAAGCGGUGGAGCAUGUGGUUUAAUUCGAAGCAACGCGAAGAACCUUACCAGGUCUUGACAUCCUUUGACCACUCUAGAGAUAGAGCUUUCCCUUCGGGGACAAAGUGACAGGUGGUGCAUGGUUGUCGUCAGCUCGUGUCGUGAGAUGUUGGGUUAAGUCCCGCAACGAGCGCAACCCUUAUUGUUAGUUGCCAUCAUUUAGUUGGGCACUCUAGCGAGACUGCCGGUGACAAACCGGAGGAAGGUGGGGAUGACGUCAAAUCAUCAUGCCCCUUAUGACCUGGGCUACACACGUGCUACAAUGGGAAGUACAACGAGUCGCUAGACCGCGAGGUCAUGCAAAUCUCUUAAAGCUUCUCUCAGUUCGGAUUGCAGGCUGCAACUCGCCUGCAUGAAGCCGGAAUCGCUAGUAAUCGCGGAUCAGCACGCCGCGGUGAAUACGUUCCCGGGCCUUGUACACACCGCCCGUCACACCACGAGAGUUUGUAACACCCGAAGUCGGUGAGGUAACCUUUUUGGAGCCAGCCGCCUAAGGUGGGAUAGAUGAUUGGGGUGAAGUCGUAACAAGGUAGCCGUAUCGGAAGGUGCGGCUGGAUCACCUCCUCCUCC",
+        "entity_poly_seq_one_letter_code_can": "GAGAGUUUGAUCCUGGCUCAGGACGAACGCUGGCGGCGUGCCUAAUACAUGCAAGUCGAACGCUUCUUUCCUCCCGAGUGCUUGCACUCAAUUGGAAAGAGGAGUGGCGGACGGGUGAGUAACACGUGGGUAACCUACCCAUCAGAGGGGGAUAACACUUGGAAACAGGUGCUAAUACCGCAUAACAGUUUAUGCCGCAUGGCAUAAGAGUGAAAGGCGCUGGCGGGUGUCGCUGAUGGAUGGACCCGCGGUGCAUUAGCUAGUUGGUGAGGUAACGGCUCACCAAGGCCACGAUGCAUAGCCGACCUGAGAGGGUGAUCGGCCACACUGGGACUGAGACACGGCCCAGACUCCUACGGGAGGCAGCAGUAGGGAAUCUUCGGCAAUGGACGAAAGUCUGACCGAGCAACGCCGCGUGAGUGAAGAAGGUUUUCGGAUCGUAAAACUCUGUUGUUAGAGAAGAACAAGGACGUUAGUAACUGAACGUCCCCUGACGGUAUCUAACCAGAAAGCCACGGCUAACUACGUGCCAGCAGCCGCGGUAAUACGUAGGUGGCAAGCGUUGUCCGGAUUUAUUGGGCGUAAAGCGAGCGCAGGCGGUUUCUUAAGUCUGAUGUGAAAGCCCCCGGCUCAACCGGGGAGGGUCAUUGGAAACUGGGAGACUUGAGUGCAGAAGAGGAGAGUGGAAUUCCAUGUGUAGCGGUGAAAUGCGUAGAUAUAUGGAGGAACACCAGUGGCGAAGGCGGCUCUCUGGUCUGUAACUGACGCUGAGGCUCGAAAGCGUGGGGAGCAAACAGGAUUAGAUACCCUGGUAGUCCACGCCGUAAACGAUGAGUGCUAAGUGUUGGAGGGUUUCCGCCCUUCAGUGCUGCAGCAAACGCAUUAAGCACUCCGCCUGGGGAGUACGACCGCAAGGUUGAAACUCAAAGGAAUUGACGGGGGCCCGCACAAGCGGUGGAGCAUGUGGUUUAAUUCGAAGCAACGCGAAGAACCUUACCAGGUCUUGACAUCCUUUGACCACUCUAGAGAUAGAGCUUUCCCUUCGGGGACAAAGUGACAGGUGGUGCAUGGUUGUCGUCAGCUCGUGUCGUGAGAUGUUGGGUUAAGUCCCGCAACGAGCGCAACCCUUAUUGUUAGUUGCCAUCAUUUAGUUGGGCACUCUAGCGAGACUGCCGGUGACAAACCGGAGGAAGGUGGGGAUGACGUCAAAUCAUCAUGCCCCUUAUGACCUGGGCUACACACGUGCUACAAUGGGAAGUACAACGAGUCGCUAGACCGCGAGGUCAUGCAAAUCUCUUAAAGCUUCUCUCAGUUCGGAUUGCAGGCUGCAACUCGCCUGCAUGAAGCCGGAAUCGCUAGUAAUCGCGGAUCAGCACGCCGCGGUGAAUACGUUCCCGGGCCUUGUACACACCGCCCGUCACACCACGAGAGUUUGUAACACCCGAAGUCGGUGAGGUAACCUUUUUGGAGCCAGCCGCCUAAGGUGGGAUAGAUGAUUGGGGUGAAGUCGUAACAAGGUAGCCGUAUCGGAAGGUGCGGCUGGAUCACCUCCUCCUCC",
+        "entity_poly_seq_length": 1558,
+        "entity_poly_polymer_type": "RNA",
+        "entity_poly_entity_type": "polyribonucleotide",
+        "nomenclature": [
+            "16SrRNA"
+        ],
+        "residues": [
+            {
+                "full_id": [
+                    "7P7R",
+                    0,
+                    "a",
+                    [
+                        " ",
+                        1090,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 1090,
+                "parent_auth_asym_id": "a"
+            },
+            {
+                "full_id": [
+                    "7P7R",
+                    0,
+                    "a",
+                    [
+                        " ",
+                        1091,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1091,
+                "parent_auth_asym_id": "a"
+            },
+            {
+                "full_id": [
+                    "7P7R",
+                    0,
+                    "a",
+                    [
+                        " ",
+                        1093,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 1093,
+                "parent_auth_asym_id": "a"
+            },
+            {
+                "full_id": [
+                    "7P7R",
+                    0,
+                    "a",
+                    [
+                        " ",
+                        1095,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1095,
+                "parent_auth_asym_id": "a"
+            },
+            {
+                "full_id": [
+                    "7P7R",
+                    0,
+                    "a",
+                    [
+                        " ",
+                        1096,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 1096,
+                "parent_auth_asym_id": "a"
+            },
+            {
+                "full_id": [
+                    "7P7R",
+                    0,
+                    "a",
+                    [
+                        " ",
+                        1217,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 1217,
+                "parent_auth_asym_id": "a"
+            },
+            {
+                "full_id": [
+                    "7P7R",
+                    0,
+                    "a",
+                    [
+                        " ",
+                        1218,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 1218,
+                "parent_auth_asym_id": "a"
+            },
+            {
+                "full_id": [
+                    "7P7R",
+                    0,
+                    "a",
+                    [
+                        " ",
+                        1219,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1219,
+                "parent_auth_asym_id": "a"
+            },
+            {
+                "full_id": [
+                    "7P7R",
+                    0,
+                    "a",
+                    [
+                        " ",
+                        1220,
+                        " "
+                    ]
+                ],
+                "resname": "U",
+                "seqid": 1220,
+                "parent_auth_asym_id": "a"
+            },
+            {
+                "full_id": [
+                    "7P7R",
+                    0,
+                    "a",
+                    [
+                        " ",
+                        1412,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1412,
+                "parent_auth_asym_id": "a"
+            },
+            {
+                "full_id": [
+                    "7P7R",
+                    0,
+                    "a",
+                    [
+                        " ",
+                        1413,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1413,
+                "parent_auth_asym_id": "a"
+            },
+            {
+                "full_id": [
+                    "7P7R",
+                    0,
+                    "a",
+                    [
+                        " ",
+                        1414,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 1414,
+                "parent_auth_asym_id": "a"
+            }
+        ]
+    },
+    "f": {
+        "assembly_id": 0,
+        "asym_ids": [
+            "LA"
+        ],
+        "auth_asym_id": "f",
+        "parent_rcsb_id": "7P7R",
+        "src_organism_names": [
+            "Enterococcus faecalis (strain ATCC 700802 / V583)"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            226185
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "30S ribosomal protein S5",
+        "entity_poly_strand_id": "f",
+        "entity_poly_seq_one_letter_code": "MVYIDPKHLELEDRVVAINRVTKVVKGGRRLRFAALVVVGDKNGHVGFGTGKAQEVPEAIRKAIEDAKKNLVEVPMVGSTIPHEVIGVFGGGRILMKPAVEGSGVAAGGPVRAVLELAGVADITSKSLGSNTPINVVRATVEGLKQLKRAEEVAALRGKSVEEIIG",
+        "entity_poly_seq_one_letter_code_can": "MVYIDPKHLELEDRVVAINRVTKVVKGGRRLRFAALVVVGDKNGHVGFGTGKAQEVPEAIRKAIEDAKKNLVEVPMVGSTIPHEVIGVFGGGRILMKPAVEGSGVAAGGPVRAVLELAGVADITSKSLGSNTPINVVRATVEGLKQLKRAEEVAALRGKSVEEIIG",
+        "entity_poly_seq_length": 166,
+        "entity_poly_polymer_type": "Protein",
+        "entity_poly_entity_type": "polypeptide(L)",
+        "nomenclature": [
+            "uS5"
+        ],
+        "residues": [
+            {
+                "full_id": [
+                    "7P7R",
+                    0,
+                    "f",
+                    [
+                        " ",
+                        26,
+                        " "
+                    ]
+                ],
+                "resname": "LYS",
+                "seqid": 26,
+                "parent_auth_asym_id": "f"
+            },
+            {
+                "full_id": [
+                    "7P7R",
+                    0,
+                    "f",
+                    [
+                        " ",
+                        27,
+                        " "
+                    ]
+                ],
+                "resname": "GLY",
+                "seqid": 27,
+                "parent_auth_asym_id": "f"
+            }
+        ]
+    }
+}

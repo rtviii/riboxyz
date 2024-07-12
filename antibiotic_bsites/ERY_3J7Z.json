@@ -1,0 +1,324 @@
+{
+    "S": {
+        "assembly_id": 0,
+        "asym_ids": [
+            "AA"
+        ],
+        "auth_asym_id": "S",
+        "parent_rcsb_id": "3J7Z",
+        "src_organism_names": [
+            "Escherichia coli K-12"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            83333
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "50S ribosomal protein L22",
+        "entity_poly_strand_id": "S",
+        "entity_poly_seq_one_letter_code": "METIAKHRHARSSAQKVRLVADLIRGKKVSQALDILTYTNKKAAVLVKKVLESAIANAEHNDGADIDDLKVTKIFVDEGPSMKRIMPRAKGRADRILKRTSHITVVVSDR",
+        "entity_poly_seq_one_letter_code_can": "METIAKHRHARSSAQKVRLVADLIRGKKVSQALDILTYTNKKAAVLVKKVLESAIANAEHNDGADIDDLKVTKIFVDEGPSMKRIMPRAKGRADRILKRTSHITVVVSDR",
+        "entity_poly_seq_length": 110,
+        "entity_poly_polymer_type": "Protein",
+        "entity_poly_entity_type": "polypeptide(L)",
+        "nomenclature": [
+            "uL22"
+        ],
+        "residues": [
+            {
+                "full_id": [
+                    "3J7Z",
+                    0,
+                    "S",
+                    [
+                        " ",
+                        90,
+                        " "
+                    ]
+                ],
+                "resname": "LYS",
+                "seqid": 90,
+                "parent_auth_asym_id": "S"
+            },
+            {
+                "full_id": [
+                    "3J7Z",
+                    0,
+                    "S",
+                    [
+                        " ",
+                        92,
+                        " "
+                    ]
+                ],
+                "resname": "ARG",
+                "seqid": 92,
+                "parent_auth_asym_id": "S"
+            }
+        ]
+    },
+    "a": {
+        "assembly_id": 0,
+        "asym_ids": [
+            "IA"
+        ],
+        "auth_asym_id": "a",
+        "parent_rcsb_id": "3J7Z",
+        "src_organism_names": [
+            "Staphylococcus aureus"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            1280
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "ErmCL nascent chain",
+        "entity_poly_strand_id": "a",
+        "entity_poly_seq_one_letter_code": "MGIFSIFVISTVHYQPNKK",
+        "entity_poly_seq_one_letter_code_can": "MGIFSIFVISTVHYQPNKK",
+        "entity_poly_seq_length": 19,
+        "entity_poly_polymer_type": "Protein",
+        "entity_poly_entity_type": "polypeptide(L)",
+        "nomenclature": [],
+        "residues": [
+            {
+                "full_id": [
+                    "3J7Z",
+                    0,
+                    "a",
+                    [
+                        " ",
+                        78,
+                        " "
+                    ]
+                ],
+                "resname": "ILE",
+                "seqid": 78,
+                "parent_auth_asym_id": "a"
+            },
+            {
+                "full_id": [
+                    "3J7Z",
+                    0,
+                    "a",
+                    [
+                        " ",
+                        81,
+                        " "
+                    ]
+                ],
+                "resname": "ILE",
+                "seqid": 81,
+                "parent_auth_asym_id": "a"
+            },
+            {
+                "full_id": [
+                    "3J7Z",
+                    0,
+                    "a",
+                    [
+                        " ",
+                        82,
+                        " "
+                    ]
+                ],
+                "resname": "PHE",
+                "seqid": 82,
+                "parent_auth_asym_id": "a"
+            }
+        ]
+    },
+    "A": {
+        "assembly_id": 0,
+        "asym_ids": [
+            "I"
+        ],
+        "auth_asym_id": "A",
+        "parent_rcsb_id": "3J7Z",
+        "src_organism_names": [
+            "Escherichia coli K-12"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            83333
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "23S rRNA",
+        "entity_poly_strand_id": "A",
+        "entity_poly_seq_one_letter_code": "GGUUAAGCGACUAAGCGUACACGGUGGAUGCCCUGGCAGUCAGAGGCGAUGAAGGACGUGCUAAUCUGCGAUAAGCGUCGGUAAGGUGAUAUGAACCGUUAUAACCGGCGAUUUCCGAAUGGGGAAACCCAGUGUGUUUCGACACACUAUCAUUAACUGAAUCCAUAGGUUAAUGAGGCGAACCGGGGGAACUGAAACAUCUAAGUACCCCGAGGAAAAGAAAUCAACCGAGAUUCCCCCAGUAGCGGCGAGCGAACGGGGAGCAGCCCAGAGCCUGAAUCAGUGUGUGUGUUAGUGGAAGCGUCUGGAAAGGCGCGCGAUACAGGGUGACAGCCCCGUACACAAAAAUGCACAUGCUGUGAGCUCGAUGAGUAGGGCGGGACACGUGGUAUCCUGUCUGAAUAUGGGGGGACCAUCCUCCAAGGCUAAAUACUCCUGACUGACCGAUAGUGAACCAGUACCGUGAGGGAAAGGCGAAAAGAACCCCGGCGAGGGGAGUGAAAAAGAACCUGAAACCGUGUACGUACAAGCAGUGGGAGCACGCUUAGGCGUGUGACUGCGUACCUUUUGUAUAAUGGGUCAGCGACUUAUAUUCUGUAGCAAGGUUAACCGAAUAGGGGAGCCGAAGGGAAACCGAGUCUUAACUGGGCGUUAAGUUGCAGGGUAUAGACCCGAAACCCGGUGAUCUAGCCAUGGGCAGGUUGAAGGUUGGGUAACACUAACUGGAGGACCGAACCGACUAAUGUUGAAAAAUUAGCGGAUGACUUGUGGCUGGGGGUGAAAGGCCAAUCAAACCGGGAGAUAGCUGGUUCUCCCCGAAAGCUAUUUAGGUAGCGCCUCGUGAAUUCAUCUCCGGGGGUAGAGCACUGUUUCGGCAAGGGGGUCAUCCCGACUUACCAACCCGAUGCAAACUGCGAAUACCGGAGAAUGUUAUCACGGGAGACACACGGCGGGUGCUAACGUCCGUCGUGAAGAGGGAAACAACCCAGACCGCCAGCUAAGGUCCCAAAGUCAUGGUUAAGUGGGAAACGAUGUGGGAAGGCCCAGACAGCCAGGAUGUUGGCUUAGAAGCAGCCAUCAUUUAAAGAAAGCGUAAUAGCUCACUGGUCGAGUCGGCCUGCGCGGAAGAUGUAACGGGGCUAAACCAUGCACCGAAGCUGCGGCAGCGACGCUUAUGCGUUGUUGGGUAGGGGAGCGUUCUGUAAGCCUGCGAAGGUGUGCUGUGAGGCAUGCUGGAGGUAUCAGAAGUGCGAAUGCUGACAUAAGUAACGAUAAAGCGGGUGAAAAGCCCGCUCGCCGGAAGACCAAGGGUUCCUGUCCAACGUUAAUCGGGGCAGGGUGAGUCGACCCCUAAGGCGAGGCCGAAAGGCGUAGUCGAUGGGAAACAGGUUAAUAUUCCUGUACUUGGUGUUACUGCGAAGGGGGGACGGAGAAGGCUAUGUUGGCCGGGCGACGGUUGUCCCGGUUUAAGCGUGUAGGCUGGUUUUCCAGGCAAAUCCGGAAAAUCAAGGCUGAGGCGUGAUGACGAGGCACUACGGUGCUGAAGCAACAAAUGCCCUGCUUCCAGGAAAAGCCUCUAAGCAUCAGGUAACAUCAAAUCGUACCCCAAACCGACACAGGUGGUCAGGUAGAGAAUACCAAGGCGCUUGAGAGAACUCGGGUGAAGGAACUAGGCAAAAUGGUGCCGUAACUUCGGGAGAAGGCACGCUGAUAUGUAGGUGAGGUCCCUCGCGGAUGGAGCUGAAAUCAGUCGAAGAUACCAGCUGGCUGCAACUGUUUAUUAAAAACACAGCACUGUGCAAACACGAAAGUGGACGUAUACGGUGUGACGCCUGCCCGGUGCCGGAAGGUUAAUUGAUGGGGUUAGCGCAAGCGAAGCUCUUGAUCGAAGCCCCGGUAAACGGCGGCCGUAACUAUAACGGUCCUAAGGUAGCGAAAUUCCUUGUCGGGUAAGUUCCGACCUGCACGAAUGGCGUAAUGAUGGCCAGGCUGUCUCCACCCGAGACUCAGUGAAAUUGAACUCGCUGUGAAGAUGCAGUGUACCCGCGGCAAGACGGAAAGACCCCGUGAACCUUUACUAUAGCUUGACACUGAACAUUGAGCCUUGAUGUGUAGGAUAGGUGGGAGGCUUUGAAGUGUGGACGCCAGUCUGCAUGGAGCCGACCUUGAAAUACCACCCUUUAAUGUUUGAUGUUCUAACGUUGACCCGUAAUCCGGGUUGCGGACAGUGUCUGGUGGGUAGUUUGACUGGGGCGGUCUCCUCCUAAAGAGUAACGGAGGAGCACGAAGGUUGGCUAAUCCUGGUCGGACAUCAGGAGGUUAGUGCAAUGGCAUAAGCCAGCUUGACUGCGAGCGUGACGGCGCGAGCAGGUGCGAAAGCAGGUCAUAGUGAUCCGGUGGUUCUGAAUGGAAGGGCCAUCGCUCAACGGAUAAAAGGUACUCCGGGGAUAACAGGCUGAUACCGCCCAAGAGUUCAUAUCGACGGCGGUGUUUGGCACCUCGAUGUCGGCUCAUCACAUCCUGGGGCUGAAGUAGGUCCCAAGGGUAUGGCUGUUCGCCAUUUAAAGUGGUACGCGAGCUGGGUUUAGAACGUCGUGAGACAGUUCGGUCCCUAUCUGCCGUGGGCGCUGGAGAACUGAGGGGGGCUGCUCCUAGUACGAGAGGACCGGAGUGGACGCAUCACUGGUGUUCGGGUUGUCAUGCCAAUGGCACUGCCCGGUAGCUAAAUGCGGAAGAGAUAAGUGCUGAAAGCAUCUAAGCACGAAACUUGCCCCGAGAUGAGUUCUCCCUGACCCUUUAAGGGUCCUGAAGGAACGUUGAAGACGACGACGUUGAUAGGCCGGGUGUGUAAGCGCAGCGAUGCGUUGAGCUAACCGGUACUAAUGAACCGUGAGGCUUAACCU",
+        "entity_poly_seq_one_letter_code_can": "GGUUAAGCGACUAAGCGUACACGGUGGAUGCCCUGGCAGUCAGAGGCGAUGAAGGACGUGCUAAUCUGCGAUAAGCGUCGGUAAGGUGAUAUGAACCGUUAUAACCGGCGAUUUCCGAAUGGGGAAACCCAGUGUGUUUCGACACACUAUCAUUAACUGAAUCCAUAGGUUAAUGAGGCGAACCGGGGGAACUGAAACAUCUAAGUACCCCGAGGAAAAGAAAUCAACCGAGAUUCCCCCAGUAGCGGCGAGCGAACGGGGAGCAGCCCAGAGCCUGAAUCAGUGUGUGUGUUAGUGGAAGCGUCUGGAAAGGCGCGCGAUACAGGGUGACAGCCCCGUACACAAAAAUGCACAUGCUGUGAGCUCGAUGAGUAGGGCGGGACACGUGGUAUCCUGUCUGAAUAUGGGGGGACCAUCCUCCAAGGCUAAAUACUCCUGACUGACCGAUAGUGAACCAGUACCGUGAGGGAAAGGCGAAAAGAACCCCGGCGAGGGGAGUGAAAAAGAACCUGAAACCGUGUACGUACAAGCAGUGGGAGCACGCUUAGGCGUGUGACUGCGUACCUUUUGUAUAAUGGGUCAGCGACUUAUAUUCUGUAGCAAGGUUAACCGAAUAGGGGAGCCGAAGGGAAACCGAGUCUUAACUGGGCGUUAAGUUGCAGGGUAUAGACCCGAAACCCGGUGAUCUAGCCAUGGGCAGGUUGAAGGUUGGGUAACACUAACUGGAGGACCGAACCGACUAAUGUUGAAAAAUUAGCGGAUGACUUGUGGCUGGGGGUGAAAGGCCAAUCAAACCGGGAGAUAGCUGGUUCUCCCCGAAAGCUAUUUAGGUAGCGCCUCGUGAAUUCAUCUCCGGGGGUAGAGCACUGUUUCGGCAAGGGGGUCAUCCCGACUUACCAACCCGAUGCAAACUGCGAAUACCGGAGAAUGUUAUCACGGGAGACACACGGCGGGUGCUAACGUCCGUCGUGAAGAGGGAAACAACCCAGACCGCCAGCUAAGGUCCCAAAGUCAUGGUUAAGUGGGAAACGAUGUGGGAAGGCCCAGACAGCCAGGAUGUUGGCUUAGAAGCAGCCAUCAUUUAAAGAAAGCGUAAUAGCUCACUGGUCGAGUCGGCCUGCGCGGAAGAUGUAACGGGGCUAAACCAUGCACCGAAGCUGCGGCAGCGACGCUUAUGCGUUGUUGGGUAGGGGAGCGUUCUGUAAGCCUGCGAAGGUGUGCUGUGAGGCAUGCUGGAGGUAUCAGAAGUGCGAAUGCUGACAUAAGUAACGAUAAAGCGGGUGAAAAGCCCGCUCGCCGGAAGACCAAGGGUUCCUGUCCAACGUUAAUCGGGGCAGGGUGAGUCGACCCCUAAGGCGAGGCCGAAAGGCGUAGUCGAUGGGAAACAGGUUAAUAUUCCUGUACUUGGUGUUACUGCGAAGGGGGGACGGAGAAGGCUAUGUUGGCCGGGCGACGGUUGUCCCGGUUUAAGCGUGUAGGCUGGUUUUCCAGGCAAAUCCGGAAAAUCAAGGCUGAGGCGUGAUGACGAGGCACUACGGUGCUGAAGCAACAAAUGCCCUGCUUCCAGGAAAAGCCUCUAAGCAUCAGGUAACAUCAAAUCGUACCCCAAACCGACACAGGUGGUCAGGUAGAGAAUACCAAGGCGCUUGAGAGAACUCGGGUGAAGGAACUAGGCAAAAUGGUGCCGUAACUUCGGGAGAAGGCACGCUGAUAUGUAGGUGAGGUCCCUCGCGGAUGGAGCUGAAAUCAGUCGAAGAUACCAGCUGGCUGCAACUGUUUAUUAAAAACACAGCACUGUGCAAACACGAAAGUGGACGUAUACGGUGUGACGCCUGCCCGGUGCCGGAAGGUUAAUUGAUGGGGUUAGCGCAAGCGAAGCUCUUGAUCGAAGCCCCGGUAAACGGCGGCCGUAACUAUAACGGUCCUAAGGUAGCGAAAUUCCUUGUCGGGUAAGUUCCGACCUGCACGAAUGGCGUAAUGAUGGCCAGGCUGUCUCCACCCGAGACUCAGUGAAAUUGAACUCGCUGUGAAGAUGCAGUGUACCCGCGGCAAGACGGAAAGACCCCGUGAACCUUUACUAUAGCUUGACACUGAACAUUGAGCCUUGAUGUGUAGGAUAGGUGGGAGGCUUUGAAGUGUGGACGCCAGUCUGCAUGGAGCCGACCUUGAAAUACCACCCUUUAAUGUUUGAUGUUCUAACGUUGACCCGUAAUCCGGGUUGCGGACAGUGUCUGGUGGGUAGUUUGACUGGGGCGGUCUCCUCCUAAAGAGUAACGGAGGAGCACGAAGGUUGGCUAAUCCUGGUCGGACAUCAGGAGGUUAGUGCAAUGGCAUAAGCCAGCUUGACUGCGAGCGUGACGGCGCGAGCAGGUGCGAAAGCAGGUCAUAGUGAUCCGGUGGUUCUGAAUGGAAGGGCCAUCGCUCAACGGAUAAAAGGUACUCCGGGGAUAACAGGCUGAUACCGCCCAAGAGUUCAUAUCGACGGCGGUGUUUGGCACCUCGAUGUCGGCUCAUCACAUCCUGGGGCUGAAGUAGGUCCCAAGGGUAUGGCUGUUCGCCAUUUAAAGUGGUACGCGAGCUGGGUUUAGAACGUCGUGAGACAGUUCGGUCCCUAUCUGCCGUGGGCGCUGGAGAACUGAGGGGGGCUGCUCCUAGUACGAGAGGACCGGAGUGGACGCAUCACUGGUGUUCGGGUUGUCAUGCCAAUGGCACUGCCCGGUAGCUAAAUGCGGAAGAGAUAAGUGCUGAAAGCAUCUAAGCACGAAACUUGCCCCGAGAUGAGUUCUCCCUGACCCUUUAAGGGUCCUGAAGGAACGUUGAAGACGACGACGUUGAUAGGCCGGGUGUGUAAGCGCAGCGAUGCGUUGAGCUAACCGGUACUAAUGAACCGUGAGGCUUAACCU",
+        "entity_poly_seq_length": 2903,
+        "entity_poly_polymer_type": "RNA",
+        "entity_poly_entity_type": "polyribonucleotide",
+        "nomenclature": [
+            "23SrRNA"
+        ],
+        "residues": [
+            {
+                "full_id": [
+                    "3J7Z",
+                    0,
+                    "A",
+                    [
+                        " ",
+                        746,
+                        " "
+                    ]
+                ],
+                "resname": "U",
+                "seqid": 746,
+                "parent_auth_asym_id": "A"
+            },
+            {
+                "full_id": [
+                    "3J7Z",
+                    0,
+                    "A",
+                    [
+                        " ",
+                        747,
+                        " "
+                    ]
+                ],
+                "resname": "U",
+                "seqid": 747,
+                "parent_auth_asym_id": "A"
+            },
+            {
+                "full_id": [
+                    "3J7Z",
+                    0,
+                    "A",
+                    [
+                        " ",
+                        2057,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 2057,
+                "parent_auth_asym_id": "A"
+            },
+            {
+                "full_id": [
+                    "3J7Z",
+                    0,
+                    "A",
+                    [
+                        " ",
+                        2058,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 2058,
+                "parent_auth_asym_id": "A"
+            },
+            {
+                "full_id": [
+                    "3J7Z",
+                    0,
+                    "A",
+                    [
+                        " ",
+                        2059,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 2059,
+                "parent_auth_asym_id": "A"
+            },
+            {
+                "full_id": [
+                    "3J7Z",
+                    0,
+                    "A",
+                    [
+                        " ",
+                        2062,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 2062,
+                "parent_auth_asym_id": "A"
+            },
+            {
+                "full_id": [
+                    "3J7Z",
+                    0,
+                    "A",
+                    [
+                        " ",
+                        2503,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 2503,
+                "parent_auth_asym_id": "A"
+            },
+            {
+                "full_id": [
+                    "3J7Z",
+                    0,
+                    "A",
+                    [
+                        " ",
+                        2505,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 2505,
+                "parent_auth_asym_id": "A"
+            },
+            {
+                "full_id": [
+                    "3J7Z",
+                    0,
+                    "A",
+                    [
+                        " ",
+                        2609,
+                        " "
+                    ]
+                ],
+                "resname": "U",
+                "seqid": 2609,
+                "parent_auth_asym_id": "A"
+            },
+            {
+                "full_id": [
+                    "3J7Z",
+                    0,
+                    "A",
+                    [
+                        " ",
+                        2610,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 2610,
+                "parent_auth_asym_id": "A"
+            },
+            {
+                "full_id": [
+                    "3J7Z",
+                    0,
+                    "A",
+                    [
+                        " ",
+                        2611,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 2611,
+                "parent_auth_asym_id": "A"
+            }
+        ]
+    }
+}

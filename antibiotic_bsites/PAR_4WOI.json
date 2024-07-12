@@ -1,0 +1,3470 @@
+{
+    "CA": {
+        "assembly_id": 1,
+        "asym_ids": [
+            "EB",
+            "Y"
+        ],
+        "auth_asym_id": "CA",
+        "parent_rcsb_id": "4WOI",
+        "src_organism_names": [
+            "Escherichia coli str. K-12 substr. MDS42"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            1110693
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "23S ribosomal RNA",
+        "entity_poly_strand_id": "BA,CA",
+        "entity_poly_seq_one_letter_code": "GGUUAAGCGACUAAGCGUACACGGUGGAUGCCCUGGCAGUCAGAGGCGAUGAAGGACGUGCUAAUCUGCGAUAAGCGUCGGUAAGGUGAUAUGAACCGUUAUAACCGGCGAUUUCCGAAUGGGGAAACCCAGUGUGUUUCGACACACUAUCAUUAACUGAAUCCAUAGGUUAAUGAGGCGAACCGGGGGAACUGAAACAUCUAAGUACCCCGAGGAAAAGAAAUCAACCGAGAUUCCCCCAGUAGCGGCGAGCGAACGGGGAGCAGCCCAGAGCCUGAAUCAGUGUGUGUGUUAGUGGAAGCGUCUGGAAAGGCGCGCGAUACAGGGUGACAGCCCCGUACACAAAAAUGCACAUGCUGUGAGCUCGAUGAGUAGGGCGGGACACGUGGUAUCCUGUCUGAAUAUGGGGGGACCAUCCUCCAAGGCUAAAUACUCCUGACUGACCGAUAGUGAACCAGUACCGUGAGGGAAAGGCGAAAAGAACCCCGGCGAGGGGAGUGAAAAAGAACCUGAAACCGUGUACGUACAAGCAGUGGGAGCACGCUUAGGCGUGUGACUGCGUACCUUUUGUAUAAUGGGUCAGCGACUUAUAUUCUGUAGCAAGGUUAACCGAAUAGGGGAGCCGAAGGGAAACCGAGUCUUAACUGGGCGUUAAGUUGCAGGGUAUAGACCCGAAACCCGGUGAUCUAGCCAUGGGCAGGUUGAAGGUUGGGUAACACUAACUGGAGGACCGAACCGACUAAUGUUGAAAAAUUAGCGGAUGACUUGUGGCUGGGGGUGAAAGGCCAAUCAAACCGGGAGAUAGCUGGUUCUCCCCGAAAGCUAUUUAGGUAGCGCCUCGUGAAUUCAUCUCCGGGGGUAGAGCACUGUUUCGGCAAGGGGGUCAUCCCGACUUACCAACCCGAUGCAAACUGCGAAUACCGGAGAAUGUUAUCACGGGAGACACACGGCGGGUGCUAACGUCCGUCGUGAAGAGGGAAACAACCCAGACCGCCAGCUAAGGUCCCAAAGUCAUGGUUAAGUGGGAAACGAUGUGGGAAGGCCCAGACAGCCAGGAUGUUGGCUUAGAAGCAGCCAUCAUUUAAAGAAAGCGUAAUAGCUCACUGGUCGAGUCGGCCUGCGCGGAAGAUGUAACGGGGCUAAACCAUGCACCGAAGCUGCGGCAGCGACGCUUAUGCGUUGUUGGGUAGGGGAGCGUUCUGUAAGCCUGCGAAGGUGUGCUGUGAGGCAUGCUGGAGGUAUCAGAAGUGCGAAUGCUGACAUAAGUAACGAUAAAGCGGGUGAAAAGCCCGCUCGCCGGAAGACCAAGGGUUCCUGUCCAACGUUAAUCGGGGCAGGGUGAGUCGACCCCUAAGGCGAGGCCGAAAGGCGUAGUCGAUGGGAAACAGGUUAAUAUUCCUGUACUUGGUGUUACUGCGAAGGGGGGACGGAGAAGGCUAUGUUGGCCGGGCGACGGUUGUCCCGGUUUAAGCGUGUAGGCUGGUUUUCCAGGCAAAUCCGGAAAAUCAAGGCUGAGGCGUGAUGACGAGGCACUACGGUGCUGAAGCAACAAAUGCCCUGCUUCCAGGAAAAGCCUCUAAGCAUCAGGUAACAUCAAAUCGUACCCCAAACCGACACAGGUGGUCAGGUAGAGAAUACCAAGGCGCUUGAGAGAACUCGGGUGAAGGAACUAGGCAAAAUGGUGCCGUAACUUCGGGAGAAGGCACGCUGAUAUGUAGGUGAGGUCCCUCGCGGAUGGAGCUGAAAUCAGUCGAAGAUACCAGCUGGCUGCAACUGUUUAUUAAAAACACAGCACUGUGCAAACACGAAAGUGGACGUAUACGGUGUGACGCCUGCCCGGUGCCGGAAGGUUAAUUGAUGGGGUUAGCGCAAGCGAAGCUCUUGAUCGAAGCCCCGGUAAACGGCGGCCGUAACUAUAACGGUCCUAAGGUAGCGAAAUUCCUUGUCGGGUAAGUUCCGACCUGCACGAAUGGCGUAAUGAUGGCCAGGCUGUCUCCACCCGAGACUCAGUGAAAUUGAACUCGCUGUGAAGAUGCAGUGUACCCGCGGCAAGACGGAAAGACCCCGUGAACCUUUACUAUAGCUUGACACUGAACAUUGAGCCUUGAUGUGUAGGAUAGGUGGGAGGCUUUGAAGUGUGGACGCCAGUCUGCAUGGAGCCGACCUUGAAAUACCACCCUUUAAUGUUUGAUGUUCUAACGUUGACCCGUAAUCCGGGUUGCGGACAGUGUCUGGUGGGUAGUUUGACUGGGGCGGUCUCCUCCUAAAGAGUAACGGAGGAGCACGAAGGUUGGCUAAUCCUGGUCGGACAUCAGGAGGUUAGUGCAAUGGCAUAAGCCAGCUUGACUGCGAGCGUGACGGCGCGAGCAGGUGCGAAAGCAGGUCAUAGUGAUCCGGUGGUUCUGAAUGGAAGGGCCAUCGCUCAACGGAUAAAAGGUACUCCGGGGAUAACAGGCUGAUACCGCCCAAGAGUUCAUAUCGACGGCGGUGUUUGGCACCUCGAUGUCGGCUCAUCACAUCCUGGGGCUGAAGUAGGUCCCAAGGGUAUGGCUGUUCGCCAUUUAAAGUGGUACGCGAGCUGGGUUUAGAACGUCGUGAGACAGUUCGGUCCCUAUCUGCCGUGGGCGCUGGAGAACUGAGGGGGGCUGCUCCUAGUACGAGAGGACCGGAGUGGACGCAUCACUGGUGUUCGGGUUGUCAUGCCAAUGGCACUGCCCGGUAGCUAAAUGCGGAAGAGAUAAGUGCUGAAAGCAUCUAAGCACGAAACUUGCCCCGAGAUGAGUUCUCCCUGACCCUUUAAGGGUCCUGAAGGAACGUUGAAGACGACGACGUUGAUAGGCCGGGUGUGUAAGCGCAGCGAUGCGUUGAGCUAACCGGUACUAAUGAACCGUGAGGCUUAACCUU",
+        "entity_poly_seq_one_letter_code_can": "GGUUAAGCGACUAAGCGUACACGGUGGAUGCCCUGGCAGUCAGAGGCGAUGAAGGACGUGCUAAUCUGCGAUAAGCGUCGGUAAGGUGAUAUGAACCGUUAUAACCGGCGAUUUCCGAAUGGGGAAACCCAGUGUGUUUCGACACACUAUCAUUAACUGAAUCCAUAGGUUAAUGAGGCGAACCGGGGGAACUGAAACAUCUAAGUACCCCGAGGAAAAGAAAUCAACCGAGAUUCCCCCAGUAGCGGCGAGCGAACGGGGAGCAGCCCAGAGCCUGAAUCAGUGUGUGUGUUAGUGGAAGCGUCUGGAAAGGCGCGCGAUACAGGGUGACAGCCCCGUACACAAAAAUGCACAUGCUGUGAGCUCGAUGAGUAGGGCGGGACACGUGGUAUCCUGUCUGAAUAUGGGGGGACCAUCCUCCAAGGCUAAAUACUCCUGACUGACCGAUAGUGAACCAGUACCGUGAGGGAAAGGCGAAAAGAACCCCGGCGAGGGGAGUGAAAAAGAACCUGAAACCGUGUACGUACAAGCAGUGGGAGCACGCUUAGGCGUGUGACUGCGUACCUUUUGUAUAAUGGGUCAGCGACUUAUAUUCUGUAGCAAGGUUAACCGAAUAGGGGAGCCGAAGGGAAACCGAGUCUUAACUGGGCGUUAAGUUGCAGGGUAUAGACCCGAAACCCGGUGAUCUAGCCAUGGGCAGGUUGAAGGUUGGGUAACACUAACUGGAGGACCGAACCGACUAAUGUUGAAAAAUUAGCGGAUGACUUGUGGCUGGGGGUGAAAGGCCAAUCAAACCGGGAGAUAGCUGGUUCUCCCCGAAAGCUAUUUAGGUAGCGCCUCGUGAAUUCAUCUCCGGGGGUAGAGCACUGUUUCGGCAAGGGGGUCAUCCCGACUUACCAACCCGAUGCAAACUGCGAAUACCGGAGAAUGUUAUCACGGGAGACACACGGCGGGUGCUAACGUCCGUCGUGAAGAGGGAAACAACCCAGACCGCCAGCUAAGGUCCCAAAGUCAUGGUUAAGUGGGAAACGAUGUGGGAAGGCCCAGACAGCCAGGAUGUUGGCUUAGAAGCAGCCAUCAUUUAAAGAAAGCGUAAUAGCUCACUGGUCGAGUCGGCCUGCGCGGAAGAUGUAACGGGGCUAAACCAUGCACCGAAGCUGCGGCAGCGACGCUUAUGCGUUGUUGGGUAGGGGAGCGUUCUGUAAGCCUGCGAAGGUGUGCUGUGAGGCAUGCUGGAGGUAUCAGAAGUGCGAAUGCUGACAUAAGUAACGAUAAAGCGGGUGAAAAGCCCGCUCGCCGGAAGACCAAGGGUUCCUGUCCAACGUUAAUCGGGGCAGGGUGAGUCGACCCCUAAGGCGAGGCCGAAAGGCGUAGUCGAUGGGAAACAGGUUAAUAUUCCUGUACUUGGUGUUACUGCGAAGGGGGGACGGAGAAGGCUAUGUUGGCCGGGCGACGGUUGUCCCGGUUUAAGCGUGUAGGCUGGUUUUCCAGGCAAAUCCGGAAAAUCAAGGCUGAGGCGUGAUGACGAGGCACUACGGUGCUGAAGCAACAAAUGCCCUGCUUCCAGGAAAAGCCUCUAAGCAUCAGGUAACAUCAAAUCGUACCCCAAACCGACACAGGUGGUCAGGUAGAGAAUACCAAGGCGCUUGAGAGAACUCGGGUGAAGGAACUAGGCAAAAUGGUGCCGUAACUUCGGGAGAAGGCACGCUGAUAUGUAGGUGAGGUCCCUCGCGGAUGGAGCUGAAAUCAGUCGAAGAUACCAGCUGGCUGCAACUGUUUAUUAAAAACACAGCACUGUGCAAACACGAAAGUGGACGUAUACGGUGUGACGCCUGCCCGGUGCCGGAAGGUUAAUUGAUGGGGUUAGCGCAAGCGAAGCUCUUGAUCGAAGCCCCGGUAAACGGCGGCCGUAACUAUAACGGUCCUAAGGUAGCGAAAUUCCUUGUCGGGUAAGUUCCGACCUGCACGAAUGGCGUAAUGAUGGCCAGGCUGUCUCCACCCGAGACUCAGUGAAAUUGAACUCGCUGUGAAGAUGCAGUGUACCCGCGGCAAGACGGAAAGACCCCGUGAACCUUUACUAUAGCUUGACACUGAACAUUGAGCCUUGAUGUGUAGGAUAGGUGGGAGGCUUUGAAGUGUGGACGCCAGUCUGCAUGGAGCCGACCUUGAAAUACCACCCUUUAAUGUUUGAUGUUCUAACGUUGACCCGUAAUCCGGGUUGCGGACAGUGUCUGGUGGGUAGUUUGACUGGGGCGGUCUCCUCCUAAAGAGUAACGGAGGAGCACGAAGGUUGGCUAAUCCUGGUCGGACAUCAGGAGGUUAGUGCAAUGGCAUAAGCCAGCUUGACUGCGAGCGUGACGGCGCGAGCAGGUGCGAAAGCAGGUCAUAGUGAUCCGGUGGUUCUGAAUGGAAGGGCCAUCGCUCAACGGAUAAAAGGUACUCCGGGGAUAACAGGCUGAUACCGCCCAAGAGUUCAUAUCGACGGCGGUGUUUGGCACCUCGAUGUCGGCUCAUCACAUCCUGGGGCUGAAGUAGGUCCCAAGGGUAUGGCUGUUCGCCAUUUAAAGUGGUACGCGAGCUGGGUUUAGAACGUCGUGAGACAGUUCGGUCCCUAUCUGCCGUGGGCGCUGGAGAACUGAGGGGGGCUGCUCCUAGUACGAGAGGACCGGAGUGGACGCAUCACUGGUGUUCGGGUUGUCAUGCCAAUGGCACUGCCCGGUAGCUAAAUGCGGAAGAGAUAAGUGCUGAAAGCAUCUAAGCACGAAACUUGCCCCGAGAUGAGUUCUCCCUGACCCUUUAAGGGUCCUGAAGGAACGUUGAAGACGACGACGUUGAUAGGCCGGGUGUGUAAGCGCAGCGAUGCGUUGAGCUAACCGGUACUAAUGAACCGUGAGGCUUAACCUU",
+        "entity_poly_seq_length": 2904,
+        "entity_poly_polymer_type": "RNA",
+        "entity_poly_entity_type": "polyribonucleotide",
+        "nomenclature": [
+            "23SrRNA"
+        ],
+        "residues": [
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        482,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 482,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        483,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 483,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        484,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 484,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        485,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 485,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        486,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 486,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        487,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 487,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        488,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 488,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        491,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 491,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        492,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 492,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        493,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 493,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        494,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 494,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        495,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 495,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        496,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 496,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        497,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 497,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        506,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 506,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        507,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 507,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        508,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 508,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        536,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 536,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        537,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 537,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        538,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 538,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        539,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 539,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        540,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 540,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        549,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 549,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        550,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 550,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        551,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 551,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        552,
+                        " "
+                    ]
+                ],
+                "resname": "U",
+                "seqid": 552,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        554,
+                        " "
+                    ]
+                ],
+                "resname": "U",
+                "seqid": 554,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        555,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 555,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        1690,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 1690,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        1691,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 1691,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        1768,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 1768,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        1857,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1857,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        1858,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 1858,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        1859,
+                        " "
+                    ]
+                ],
+                "resname": "U",
+                "seqid": 1859,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        1860,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1860,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        1861,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1861,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        1862,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1862,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        1863,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1863,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        1877,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 1877,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        1878,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1878,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        1879,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 1879,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        1880,
+                        " "
+                    ]
+                ],
+                "resname": "U",
+                "seqid": 1880,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        1881,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 1881,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        1882,
+                        " "
+                    ]
+                ],
+                "resname": "U",
+                "seqid": 1882,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        1883,
+                        " "
+                    ]
+                ],
+                "resname": "U",
+                "seqid": 1883,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        1884,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1884,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        1906,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1906,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        1907,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1907,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        1908,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 1908,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        1909,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 1909,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        1910,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1910,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        1913,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 1913,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        1919,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 1919,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        1920,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 1920,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        1921,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1921,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        1922,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1922,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        1923,
+                        " "
+                    ]
+                ],
+                "resname": "U",
+                "seqid": 1923,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        1924,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 1924,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        1925,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 1925,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        1929,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1929,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        1930,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1930,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        1931,
+                        " "
+                    ]
+                ],
+                "resname": "U",
+                "seqid": 1931,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        2672,
+                        " "
+                    ]
+                ],
+                "resname": "U",
+                "seqid": 2672,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        2673,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 2673,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        2674,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 2674,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        2675,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 2675,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        2676,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 2676,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        2726,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 2726,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        2727,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 2727,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        2728,
+                        " "
+                    ]
+                ],
+                "resname": "U",
+                "seqid": 2728,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        2729,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 2729,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        2730,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 2730,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        2731,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 2731,
+                "parent_auth_asym_id": "CA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CA",
+                    [
+                        " ",
+                        2732,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 2732,
+                "parent_auth_asym_id": "CA"
+            }
+        ]
+    },
+    "CK": {
+        "assembly_id": 1,
+        "asym_ids": [
+            "IA",
+            "OB"
+        ],
+        "auth_asym_id": "CK",
+        "parent_rcsb_id": "4WOI",
+        "src_organism_names": [
+            "Escherichia coli"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            83333
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "50S ribosomal protein L14",
+        "entity_poly_strand_id": "BK,CK",
+        "entity_poly_seq_one_letter_code": "MIQEQTMLNVADNSGARRVMCIKVLGGSHRRYAGVGDIIKITIKEAIPRGKVKKGDVLKAVVVRTKKGVRRPDGSVIRFDGNACVLLNNNSEQPIGTRIFGPVTRELRSEKFMKIISLAPEVL",
+        "entity_poly_seq_one_letter_code_can": "MIQEQTMLNVADNSGARRVMCIKVLGGSHRRYAGVGDIIKITIKEAIPRGKVKKGDVLKAVVVRTKKGVRRPDGSVIRFDGNACVLLNNNSEQPIGTRIFGPVTRELRSEKFMKIISLAPEVL",
+        "entity_poly_seq_length": 123,
+        "entity_poly_polymer_type": "Protein",
+        "entity_poly_entity_type": "polypeptide(L)",
+        "nomenclature": [
+            "uL14"
+        ],
+        "residues": [
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CK",
+                    [
+                        " ",
+                        32,
+                        " "
+                    ]
+                ],
+                "resname": "TYR",
+                "seqid": 32,
+                "parent_auth_asym_id": "CK"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CK",
+                    [
+                        " ",
+                        70,
+                        " "
+                    ]
+                ],
+                "resname": "ARG",
+                "seqid": 70,
+                "parent_auth_asym_id": "CK"
+            }
+        ]
+    },
+    "DA": {
+        "assembly_id": 1,
+        "asym_ids": [
+            "A",
+            "JC"
+        ],
+        "auth_asym_id": "DA",
+        "parent_rcsb_id": "4WOI",
+        "src_organism_names": [
+            "Escherichia coli str. K-12 substr. MDS42"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            1110693
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "16S ribosomal RNA",
+        "entity_poly_strand_id": "AA,DA",
+        "entity_poly_seq_one_letter_code": "AAAUUGAAGAGUUUGAUCAUGGCUCAGAUUGAACGCUGGCGGCAGGCCUAACACAUGCAAGUCGAACGGUAACAGGAAGAAGCUUGCUUCUUUGCUGACGAGUGGCGGACGGGUGAGUAAUGUCUGGGAAACUGCCUGAUGGAGGGGGAUAACUACUGGAAACGGUAGCUAAUACCGCAUAACGUCGCAAGACCAAAGAGGGGGACCUUCGGGCCUCUUGCCAUCGGAUGUGCCCAGAUGGGAUUAGCUAGUAGGUGGGGUAACGGCUCACCUAGGCGACGAUCCCUAGCUGGUCUGAGAGGAUGACCAGCCACACUGGAACUGAGACACGGUCCAGACUCCUACGGGAGGCAGCAGUGGGGAAUAUUGCACAAUGGGCGCAAGCCUGAUGCAGCCAUGCCGCGUGUAUGAAGAAGGCCUUCGGGUUGUAAAGUACUUUCAGCGGGGAGGAAGGGAGUAAAGUUAAUACCUUUGCUCAUUGACGUUACCCGCAGAAGAAGCACCGGCUAACUCCGUGCCAGCAGCCGCGGUAAUACGGAGGGUGCAAGCGUUAAUCGGAAUUACUGGGCGUAAAGCGCACGCAGGCGGUUUGUUAAGUCAGAUGUGAAAUCCCCGGGCUCAACCUGGGAACUGCAUCUGAUACUGGCAAGCUUGAGUCUCGUAGAGGGGGGUAGAAUUCCAGGUGUAGCGGUGAAAUGCGUAGAGAUCUGGAGGAAUACCGGUGGCGAAGGCGGCCCCCUGGACGAAGACUGACGCUCAGGUGCGAAAGCGUGGGGAGCAAACAGGAUUAGAUACCCUGGUAGUCCACGCCGUAAACGAUGUCGACUUGGAGGUUGUGCCCUUGAGGCGUGGCUUCCGGAGCUAACGCGUUAAGUCGACCGCCUGGGGAGUACGGCCGCAAGGUUAAAACUCAAAUGAAUUGACGGGGGCCCGCACAAGCGGUGGAGCAUGUGGUUUAAUUCGAUGCAACGCGAAGAACCUUACCUGGUCUUGACAUCCACGGAAGUUUUCAGAGAUGAGAAUGUGCCUUCGGGAACCGUGAGACAGGUGCUGCAUGGCUGUCGUCAGCUCGUGUUGUGAAAUGUUGGGUUAAGUCCCGCAACGAGCGCAACCCUUAUCCUUUGUUGCCAGCGGUCCGGCCGGGAACUCAAAGGAGACUGCCAGUGAUAAACUGGAGGAAGGUGGGGAUGACGUCAAGUCAUCAUGGCCCUUACGACCAGGGCUACACACGUGCUACAAUGGCGCAUACAAAGAGAAGCGACCUCGCGAGAGCAAGCGGACCUCAUAAAGUGCGUCGUAGUCCGGAUUGGAGUCUGCAACUCGACUCCAUGAAGUCGGAAUCGCUAGUAAUCGUGGAUCAGAAUGCCACGGUGAAUACGUUCCCGGGCCUUGUACACACCGCCCGUCACACCAUGGGAGUGGGUUGCAAAAGAAGUAGGUAGCUUAACCUUCGGGAGGGCGCUUACCACUUUGUGAUUCAUGACUGGGGUGAAGUCGUAACAAGGUAACCGUAGGGGAACCUGCGGUUGGAUCACCUCCUUA",
+        "entity_poly_seq_one_letter_code_can": "AAAUUGAAGAGUUUGAUCAUGGCUCAGAUUGAACGCUGGCGGCAGGCCUAACACAUGCAAGUCGAACGGUAACAGGAAGAAGCUUGCUUCUUUGCUGACGAGUGGCGGACGGGUGAGUAAUGUCUGGGAAACUGCCUGAUGGAGGGGGAUAACUACUGGAAACGGUAGCUAAUACCGCAUAACGUCGCAAGACCAAAGAGGGGGACCUUCGGGCCUCUUGCCAUCGGAUGUGCCCAGAUGGGAUUAGCUAGUAGGUGGGGUAACGGCUCACCUAGGCGACGAUCCCUAGCUGGUCUGAGAGGAUGACCAGCCACACUGGAACUGAGACACGGUCCAGACUCCUACGGGAGGCAGCAGUGGGGAAUAUUGCACAAUGGGCGCAAGCCUGAUGCAGCCAUGCCGCGUGUAUGAAGAAGGCCUUCGGGUUGUAAAGUACUUUCAGCGGGGAGGAAGGGAGUAAAGUUAAUACCUUUGCUCAUUGACGUUACCCGCAGAAGAAGCACCGGCUAACUCCGUGCCAGCAGCCGCGGUAAUACGGAGGGUGCAAGCGUUAAUCGGAAUUACUGGGCGUAAAGCGCACGCAGGCGGUUUGUUAAGUCAGAUGUGAAAUCCCCGGGCUCAACCUGGGAACUGCAUCUGAUACUGGCAAGCUUGAGUCUCGUAGAGGGGGGUAGAAUUCCAGGUGUAGCGGUGAAAUGCGUAGAGAUCUGGAGGAAUACCGGUGGCGAAGGCGGCCCCCUGGACGAAGACUGACGCUCAGGUGCGAAAGCGUGGGGAGCAAACAGGAUUAGAUACCCUGGUAGUCCACGCCGUAAACGAUGUCGACUUGGAGGUUGUGCCCUUGAGGCGUGGCUUCCGGAGCUAACGCGUUAAGUCGACCGCCUGGGGAGUACGGCCGCAAGGUUAAAACUCAAAUGAAUUGACGGGGGCCCGCACAAGCGGUGGAGCAUGUGGUUUAAUUCGAUGCAACGCGAAGAACCUUACCUGGUCUUGACAUCCACGGAAGUUUUCAGAGAUGAGAAUGUGCCUUCGGGAACCGUGAGACAGGUGCUGCAUGGCUGUCGUCAGCUCGUGUUGUGAAAUGUUGGGUUAAGUCCCGCAACGAGCGCAACCCUUAUCCUUUGUUGCCAGCGGUCCGGCCGGGAACUCAAAGGAGACUGCCAGUGAUAAACUGGAGGAAGGUGGGGAUGACGUCAAGUCAUCAUGGCCCUUACGACCAGGGCUACACACGUGCUACAAUGGCGCAUACAAAGAGAAGCGACCUCGCGAGAGCAAGCGGACCUCAUAAAGUGCGUCGUAGUCCGGAUUGGAGUCUGCAACUCGACUCCAUGAAGUCGGAAUCGCUAGUAAUCGUGGAUCAGAAUGCCACGGUGAAUACGUUCCCGGGCCUUGUACACACCGCCCGUCACACCAUGGGAGUGGGUUGCAAAAGAAGUAGGUAGCUUAACCUUCGGGAGGGCGCUUACCACUUUGUGAUUCAUGACUGGGGUGAAGUCGUAACAAGGUAACCGUAGGGGAACCUGCGGUUGGAUCACCUCCUUA",
+        "entity_poly_seq_length": 1542,
+        "entity_poly_polymer_type": "RNA",
+        "entity_poly_entity_type": "polyribonucleotide",
+        "nomenclature": [
+            "16SrRNA"
+        ],
+        "residues": [
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "DA",
+                    [
+                        " ",
+                        793,
+                        " "
+                    ]
+                ],
+                "resname": "U",
+                "seqid": 793,
+                "parent_auth_asym_id": "DA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "DA",
+                    [
+                        " ",
+                        1404,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 1404,
+                "parent_auth_asym_id": "DA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "DA",
+                    [
+                        " ",
+                        1405,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1405,
+                "parent_auth_asym_id": "DA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "DA",
+                    [
+                        " ",
+                        1406,
+                        " "
+                    ]
+                ],
+                "resname": "U",
+                "seqid": 1406,
+                "parent_auth_asym_id": "DA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "DA",
+                    [
+                        " ",
+                        1407,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 1407,
+                "parent_auth_asym_id": "DA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "DA",
+                    [
+                        " ",
+                        1408,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 1408,
+                "parent_auth_asym_id": "DA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "DA",
+                    [
+                        " ",
+                        1409,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 1409,
+                "parent_auth_asym_id": "DA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "DA",
+                    [
+                        " ",
+                        1417,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1417,
+                "parent_auth_asym_id": "DA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "DA",
+                    [
+                        " ",
+                        1418,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 1418,
+                "parent_auth_asym_id": "DA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "DA",
+                    [
+                        " ",
+                        1419,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1419,
+                "parent_auth_asym_id": "DA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "DA",
+                    [
+                        " ",
+                        1420,
+                        " "
+                    ]
+                ],
+                "resname": "U",
+                "seqid": 1420,
+                "parent_auth_asym_id": "DA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "DA",
+                    [
+                        " ",
+                        1421,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1421,
+                "parent_auth_asym_id": "DA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "DA",
+                    [
+                        " ",
+                        1422,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1422,
+                "parent_auth_asym_id": "DA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "DA",
+                    [
+                        " ",
+                        1475,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1475,
+                "parent_auth_asym_id": "DA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "DA",
+                    [
+                        " ",
+                        1476,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 1476,
+                "parent_auth_asym_id": "DA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "DA",
+                    [
+                        " ",
+                        1477,
+                        " "
+                    ]
+                ],
+                "resname": "U",
+                "seqid": 1477,
+                "parent_auth_asym_id": "DA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "DA",
+                    [
+                        " ",
+                        1478,
+                        " "
+                    ]
+                ],
+                "resname": "U",
+                "seqid": 1478,
+                "parent_auth_asym_id": "DA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "DA",
+                    [
+                        " ",
+                        1479,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 1479,
+                "parent_auth_asym_id": "DA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "DA",
+                    [
+                        " ",
+                        1480,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 1480,
+                "parent_auth_asym_id": "DA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "DA",
+                    [
+                        " ",
+                        1481,
+                        " "
+                    ]
+                ],
+                "resname": "U",
+                "seqid": 1481,
+                "parent_auth_asym_id": "DA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "DA",
+                    [
+                        " ",
+                        1482,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1482,
+                "parent_auth_asym_id": "DA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "DA",
+                    [
+                        " ",
+                        1488,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1488,
+                "parent_auth_asym_id": "DA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "DA",
+                    [
+                        " ",
+                        1489,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1489,
+                "parent_auth_asym_id": "DA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "DA",
+                    [
+                        " ",
+                        1490,
+                        " "
+                    ]
+                ],
+                "resname": "U",
+                "seqid": 1490,
+                "parent_auth_asym_id": "DA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "DA",
+                    [
+                        " ",
+                        1491,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1491,
+                "parent_auth_asym_id": "DA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "DA",
+                    [
+                        " ",
+                        1492,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 1492,
+                "parent_auth_asym_id": "DA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "DA",
+                    [
+                        " ",
+                        1493,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 1493,
+                "parent_auth_asym_id": "DA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "DA",
+                    [
+                        " ",
+                        1494,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1494,
+                "parent_auth_asym_id": "DA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "DA",
+                    [
+                        " ",
+                        1495,
+                        " "
+                    ]
+                ],
+                "resname": "U",
+                "seqid": 1495,
+                "parent_auth_asym_id": "DA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "DA",
+                    [
+                        " ",
+                        1496,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 1496,
+                "parent_auth_asym_id": "DA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "DA",
+                    [
+                        " ",
+                        1516,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1516,
+                "parent_auth_asym_id": "DA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "DA",
+                    [
+                        " ",
+                        1517,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1517,
+                "parent_auth_asym_id": "DA"
+            }
+        ]
+    },
+    "BR": {
+        "assembly_id": 0,
+        "asym_ids": [
+            "PA",
+            "VB"
+        ],
+        "auth_asym_id": "BR",
+        "parent_rcsb_id": "4WOI",
+        "src_organism_names": [
+            "Escherichia coli"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            83333
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "50S ribosomal protein L21",
+        "entity_poly_strand_id": "BR,CR",
+        "entity_poly_seq_one_letter_code": "MYAVFQSGGKQHRVSEGQTVRLEKLDIATGETVEFAEVLMIANGEEVKIGVPFVDGGVIKAEVVAHGRGEKVKIVKFRRRKHYRKQQGHRQWFTDVKITGISA",
+        "entity_poly_seq_one_letter_code_can": "MYAVFQSGGKQHRVSEGQTVRLEKLDIATGETVEFAEVLMIANGEEVKIGVPFVDGGVIKAEVVAHGRGEKVKIVKFRRRKHYRKQQGHRQWFTDVKITGISA",
+        "entity_poly_seq_length": 103,
+        "entity_poly_polymer_type": "Protein",
+        "entity_poly_entity_type": "polypeptide(L)",
+        "nomenclature": [
+            "bL21"
+        ],
+        "residues": [
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BR",
+                    [
+                        " ",
+                        21,
+                        " "
+                    ]
+                ],
+                "resname": "ARG",
+                "seqid": 21,
+                "parent_auth_asym_id": "BR"
+            }
+        ]
+    },
+    "DL": {
+        "assembly_id": 1,
+        "asym_ids": [
+            "L",
+            "UC"
+        ],
+        "auth_asym_id": "DL",
+        "parent_rcsb_id": "4WOI",
+        "src_organism_names": [
+            "Escherichia coli"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            83333
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "30S ribosomal protein S12",
+        "entity_poly_strand_id": "AL,DL",
+        "entity_poly_seq_one_letter_code": "MATVNQLVRKPRARKVAKSNVPALEACPQKRGVCTRVYTTTPKKPNSALRKVCRVRLTNGFEVTSYIGGEGHNLQEHSVILIRGGRVKDLPGVRYHTVRGALDCSGVKDRKQARSKYGVKRPKA",
+        "entity_poly_seq_one_letter_code_can": "MATVNQLVRKPRARKVAKSNVPALEACPQKRGVCTRVYTTTPKKPNSALRKVCRVRLTNGFEVTSYIGGEGHNLQEHSVILIRGGRVKDLPGVRYHTVRGALDCSGVKDRKQARSKYGVKRPKA",
+        "entity_poly_seq_length": 124,
+        "entity_poly_polymer_type": "Protein",
+        "entity_poly_entity_type": "polypeptide(L)",
+        "nomenclature": [
+            "uS12"
+        ],
+        "residues": [
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "DL",
+                    [
+                        " ",
+                        44,
+                        " "
+                    ]
+                ],
+                "resname": "LYS",
+                "seqid": 44,
+                "parent_auth_asym_id": "DL"
+            }
+        ]
+    },
+    "CJ": {
+        "assembly_id": 1,
+        "asym_ids": [
+            "HA",
+            "NB"
+        ],
+        "auth_asym_id": "CJ",
+        "parent_rcsb_id": "4WOI",
+        "src_organism_names": [
+            "Escherichia coli"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            83333
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "50S ribosomal protein L13",
+        "entity_poly_strand_id": "BJ,CJ",
+        "entity_poly_seq_one_letter_code": "MKTFTAKPETVKRDWYVVDATGKTLGRLATELARRLRGKHKAEYTPHVDTGDYIIVLNADKVAVTGNKRTDKVYYHHTGHIGGIKQATFEEMIARRPERVIEIAVKGMLPKGPLGRAMFRKLKVYAGNEHNHAAQQPQVLDI",
+        "entity_poly_seq_one_letter_code_can": "MKTFTAKPETVKRDWYVVDATGKTLGRLATELARRLRGKHKAEYTPHVDTGDYIIVLNADKVAVTGNKRTDKVYYHHTGHIGGIKQATFEEMIARRPERVIEIAVKGMLPKGPLGRAMFRKLKVYAGNEHNHAAQQPQVLDI",
+        "entity_poly_seq_length": 142,
+        "entity_poly_polymer_type": "Protein",
+        "entity_poly_entity_type": "polypeptide(L)",
+        "nomenclature": [
+            "uL13"
+        ],
+        "residues": [
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CJ",
+                    [
+                        " ",
+                        2,
+                        " "
+                    ]
+                ],
+                "resname": "LYS",
+                "seqid": 2,
+                "parent_auth_asym_id": "CJ"
+            }
+        ]
+    },
+    "BA": {
+        "assembly_id": 0,
+        "asym_ids": [
+            "EB",
+            "Y"
+        ],
+        "auth_asym_id": "BA",
+        "parent_rcsb_id": "4WOI",
+        "src_organism_names": [
+            "Escherichia coli str. K-12 substr. MDS42"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            1110693
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "23S ribosomal RNA",
+        "entity_poly_strand_id": "BA,CA",
+        "entity_poly_seq_one_letter_code": "GGUUAAGCGACUAAGCGUACACGGUGGAUGCCCUGGCAGUCAGAGGCGAUGAAGGACGUGCUAAUCUGCGAUAAGCGUCGGUAAGGUGAUAUGAACCGUUAUAACCGGCGAUUUCCGAAUGGGGAAACCCAGUGUGUUUCGACACACUAUCAUUAACUGAAUCCAUAGGUUAAUGAGGCGAACCGGGGGAACUGAAACAUCUAAGUACCCCGAGGAAAAGAAAUCAACCGAGAUUCCCCCAGUAGCGGCGAGCGAACGGGGAGCAGCCCAGAGCCUGAAUCAGUGUGUGUGUUAGUGGAAGCGUCUGGAAAGGCGCGCGAUACAGGGUGACAGCCCCGUACACAAAAAUGCACAUGCUGUGAGCUCGAUGAGUAGGGCGGGACACGUGGUAUCCUGUCUGAAUAUGGGGGGACCAUCCUCCAAGGCUAAAUACUCCUGACUGACCGAUAGUGAACCAGUACCGUGAGGGAAAGGCGAAAAGAACCCCGGCGAGGGGAGUGAAAAAGAACCUGAAACCGUGUACGUACAAGCAGUGGGAGCACGCUUAGGCGUGUGACUGCGUACCUUUUGUAUAAUGGGUCAGCGACUUAUAUUCUGUAGCAAGGUUAACCGAAUAGGGGAGCCGAAGGGAAACCGAGUCUUAACUGGGCGUUAAGUUGCAGGGUAUAGACCCGAAACCCGGUGAUCUAGCCAUGGGCAGGUUGAAGGUUGGGUAACACUAACUGGAGGACCGAACCGACUAAUGUUGAAAAAUUAGCGGAUGACUUGUGGCUGGGGGUGAAAGGCCAAUCAAACCGGGAGAUAGCUGGUUCUCCCCGAAAGCUAUUUAGGUAGCGCCUCGUGAAUUCAUCUCCGGGGGUAGAGCACUGUUUCGGCAAGGGGGUCAUCCCGACUUACCAACCCGAUGCAAACUGCGAAUACCGGAGAAUGUUAUCACGGGAGACACACGGCGGGUGCUAACGUCCGUCGUGAAGAGGGAAACAACCCAGACCGCCAGCUAAGGUCCCAAAGUCAUGGUUAAGUGGGAAACGAUGUGGGAAGGCCCAGACAGCCAGGAUGUUGGCUUAGAAGCAGCCAUCAUUUAAAGAAAGCGUAAUAGCUCACUGGUCGAGUCGGCCUGCGCGGAAGAUGUAACGGGGCUAAACCAUGCACCGAAGCUGCGGCAGCGACGCUUAUGCGUUGUUGGGUAGGGGAGCGUUCUGUAAGCCUGCGAAGGUGUGCUGUGAGGCAUGCUGGAGGUAUCAGAAGUGCGAAUGCUGACAUAAGUAACGAUAAAGCGGGUGAAAAGCCCGCUCGCCGGAAGACCAAGGGUUCCUGUCCAACGUUAAUCGGGGCAGGGUGAGUCGACCCCUAAGGCGAGGCCGAAAGGCGUAGUCGAUGGGAAACAGGUUAAUAUUCCUGUACUUGGUGUUACUGCGAAGGGGGGACGGAGAAGGCUAUGUUGGCCGGGCGACGGUUGUCCCGGUUUAAGCGUGUAGGCUGGUUUUCCAGGCAAAUCCGGAAAAUCAAGGCUGAGGCGUGAUGACGAGGCACUACGGUGCUGAAGCAACAAAUGCCCUGCUUCCAGGAAAAGCCUCUAAGCAUCAGGUAACAUCAAAUCGUACCCCAAACCGACACAGGUGGUCAGGUAGAGAAUACCAAGGCGCUUGAGAGAACUCGGGUGAAGGAACUAGGCAAAAUGGUGCCGUAACUUCGGGAGAAGGCACGCUGAUAUGUAGGUGAGGUCCCUCGCGGAUGGAGCUGAAAUCAGUCGAAGAUACCAGCUGGCUGCAACUGUUUAUUAAAAACACAGCACUGUGCAAACACGAAAGUGGACGUAUACGGUGUGACGCCUGCCCGGUGCCGGAAGGUUAAUUGAUGGGGUUAGCGCAAGCGAAGCUCUUGAUCGAAGCCCCGGUAAACGGCGGCCGUAACUAUAACGGUCCUAAGGUAGCGAAAUUCCUUGUCGGGUAAGUUCCGACCUGCACGAAUGGCGUAAUGAUGGCCAGGCUGUCUCCACCCGAGACUCAGUGAAAUUGAACUCGCUGUGAAGAUGCAGUGUACCCGCGGCAAGACGGAAAGACCCCGUGAACCUUUACUAUAGCUUGACACUGAACAUUGAGCCUUGAUGUGUAGGAUAGGUGGGAGGCUUUGAAGUGUGGACGCCAGUCUGCAUGGAGCCGACCUUGAAAUACCACCCUUUAAUGUUUGAUGUUCUAACGUUGACCCGUAAUCCGGGUUGCGGACAGUGUCUGGUGGGUAGUUUGACUGGGGCGGUCUCCUCCUAAAGAGUAACGGAGGAGCACGAAGGUUGGCUAAUCCUGGUCGGACAUCAGGAGGUUAGUGCAAUGGCAUAAGCCAGCUUGACUGCGAGCGUGACGGCGCGAGCAGGUGCGAAAGCAGGUCAUAGUGAUCCGGUGGUUCUGAAUGGAAGGGCCAUCGCUCAACGGAUAAAAGGUACUCCGGGGAUAACAGGCUGAUACCGCCCAAGAGUUCAUAUCGACGGCGGUGUUUGGCACCUCGAUGUCGGCUCAUCACAUCCUGGGGCUGAAGUAGGUCCCAAGGGUAUGGCUGUUCGCCAUUUAAAGUGGUACGCGAGCUGGGUUUAGAACGUCGUGAGACAGUUCGGUCCCUAUCUGCCGUGGGCGCUGGAGAACUGAGGGGGGCUGCUCCUAGUACGAGAGGACCGGAGUGGACGCAUCACUGGUGUUCGGGUUGUCAUGCCAAUGGCACUGCCCGGUAGCUAAAUGCGGAAGAGAUAAGUGCUGAAAGCAUCUAAGCACGAAACUUGCCCCGAGAUGAGUUCUCCCUGACCCUUUAAGGGUCCUGAAGGAACGUUGAAGACGACGACGUUGAUAGGCCGGGUGUGUAAGCGCAGCGAUGCGUUGAGCUAACCGGUACUAAUGAACCGUGAGGCUUAACCUU",
+        "entity_poly_seq_one_letter_code_can": "GGUUAAGCGACUAAGCGUACACGGUGGAUGCCCUGGCAGUCAGAGGCGAUGAAGGACGUGCUAAUCUGCGAUAAGCGUCGGUAAGGUGAUAUGAACCGUUAUAACCGGCGAUUUCCGAAUGGGGAAACCCAGUGUGUUUCGACACACUAUCAUUAACUGAAUCCAUAGGUUAAUGAGGCGAACCGGGGGAACUGAAACAUCUAAGUACCCCGAGGAAAAGAAAUCAACCGAGAUUCCCCCAGUAGCGGCGAGCGAACGGGGAGCAGCCCAGAGCCUGAAUCAGUGUGUGUGUUAGUGGAAGCGUCUGGAAAGGCGCGCGAUACAGGGUGACAGCCCCGUACACAAAAAUGCACAUGCUGUGAGCUCGAUGAGUAGGGCGGGACACGUGGUAUCCUGUCUGAAUAUGGGGGGACCAUCCUCCAAGGCUAAAUACUCCUGACUGACCGAUAGUGAACCAGUACCGUGAGGGAAAGGCGAAAAGAACCCCGGCGAGGGGAGUGAAAAAGAACCUGAAACCGUGUACGUACAAGCAGUGGGAGCACGCUUAGGCGUGUGACUGCGUACCUUUUGUAUAAUGGGUCAGCGACUUAUAUUCUGUAGCAAGGUUAACCGAAUAGGGGAGCCGAAGGGAAACCGAGUCUUAACUGGGCGUUAAGUUGCAGGGUAUAGACCCGAAACCCGGUGAUCUAGCCAUGGGCAGGUUGAAGGUUGGGUAACACUAACUGGAGGACCGAACCGACUAAUGUUGAAAAAUUAGCGGAUGACUUGUGGCUGGGGGUGAAAGGCCAAUCAAACCGGGAGAUAGCUGGUUCUCCCCGAAAGCUAUUUAGGUAGCGCCUCGUGAAUUCAUCUCCGGGGGUAGAGCACUGUUUCGGCAAGGGGGUCAUCCCGACUUACCAACCCGAUGCAAACUGCGAAUACCGGAGAAUGUUAUCACGGGAGACACACGGCGGGUGCUAACGUCCGUCGUGAAGAGGGAAACAACCCAGACCGCCAGCUAAGGUCCCAAAGUCAUGGUUAAGUGGGAAACGAUGUGGGAAGGCCCAGACAGCCAGGAUGUUGGCUUAGAAGCAGCCAUCAUUUAAAGAAAGCGUAAUAGCUCACUGGUCGAGUCGGCCUGCGCGGAAGAUGUAACGGGGCUAAACCAUGCACCGAAGCUGCGGCAGCGACGCUUAUGCGUUGUUGGGUAGGGGAGCGUUCUGUAAGCCUGCGAAGGUGUGCUGUGAGGCAUGCUGGAGGUAUCAGAAGUGCGAAUGCUGACAUAAGUAACGAUAAAGCGGGUGAAAAGCCCGCUCGCCGGAAGACCAAGGGUUCCUGUCCAACGUUAAUCGGGGCAGGGUGAGUCGACCCCUAAGGCGAGGCCGAAAGGCGUAGUCGAUGGGAAACAGGUUAAUAUUCCUGUACUUGGUGUUACUGCGAAGGGGGGACGGAGAAGGCUAUGUUGGCCGGGCGACGGUUGUCCCGGUUUAAGCGUGUAGGCUGGUUUUCCAGGCAAAUCCGGAAAAUCAAGGCUGAGGCGUGAUGACGAGGCACUACGGUGCUGAAGCAACAAAUGCCCUGCUUCCAGGAAAAGCCUCUAAGCAUCAGGUAACAUCAAAUCGUACCCCAAACCGACACAGGUGGUCAGGUAGAGAAUACCAAGGCGCUUGAGAGAACUCGGGUGAAGGAACUAGGCAAAAUGGUGCCGUAACUUCGGGAGAAGGCACGCUGAUAUGUAGGUGAGGUCCCUCGCGGAUGGAGCUGAAAUCAGUCGAAGAUACCAGCUGGCUGCAACUGUUUAUUAAAAACACAGCACUGUGCAAACACGAAAGUGGACGUAUACGGUGUGACGCCUGCCCGGUGCCGGAAGGUUAAUUGAUGGGGUUAGCGCAAGCGAAGCUCUUGAUCGAAGCCCCGGUAAACGGCGGCCGUAACUAUAACGGUCCUAAGGUAGCGAAAUUCCUUGUCGGGUAAGUUCCGACCUGCACGAAUGGCGUAAUGAUGGCCAGGCUGUCUCCACCCGAGACUCAGUGAAAUUGAACUCGCUGUGAAGAUGCAGUGUACCCGCGGCAAGACGGAAAGACCCCGUGAACCUUUACUAUAGCUUGACACUGAACAUUGAGCCUUGAUGUGUAGGAUAGGUGGGAGGCUUUGAAGUGUGGACGCCAGUCUGCAUGGAGCCGACCUUGAAAUACCACCCUUUAAUGUUUGAUGUUCUAACGUUGACCCGUAAUCCGGGUUGCGGACAGUGUCUGGUGGGUAGUUUGACUGGGGCGGUCUCCUCCUAAAGAGUAACGGAGGAGCACGAAGGUUGGCUAAUCCUGGUCGGACAUCAGGAGGUUAGUGCAAUGGCAUAAGCCAGCUUGACUGCGAGCGUGACGGCGCGAGCAGGUGCGAAAGCAGGUCAUAGUGAUCCGGUGGUUCUGAAUGGAAGGGCCAUCGCUCAACGGAUAAAAGGUACUCCGGGGAUAACAGGCUGAUACCGCCCAAGAGUUCAUAUCGACGGCGGUGUUUGGCACCUCGAUGUCGGCUCAUCACAUCCUGGGGCUGAAGUAGGUCCCAAGGGUAUGGCUGUUCGCCAUUUAAAGUGGUACGCGAGCUGGGUUUAGAACGUCGUGAGACAGUUCGGUCCCUAUCUGCCGUGGGCGCUGGAGAACUGAGGGGGGCUGCUCCUAGUACGAGAGGACCGGAGUGGACGCAUCACUGGUGUUCGGGUUGUCAUGCCAAUGGCACUGCCCGGUAGCUAAAUGCGGAAGAGAUAAGUGCUGAAAGCAUCUAAGCACGAAACUUGCCCCGAGAUGAGUUCUCCCUGACCCUUUAAGGGUCCUGAAGGAACGUUGAAGACGACGACGUUGAUAGGCCGGGUGUGUAAGCGCAGCGAUGCGUUGAGCUAACCGGUACUAAUGAACCGUGAGGCUUAACCUU",
+        "entity_poly_seq_length": 2904,
+        "entity_poly_polymer_type": "RNA",
+        "entity_poly_entity_type": "polyribonucleotide",
+        "nomenclature": [
+            "23SrRNA"
+        ],
+        "residues": [
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        481,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 481,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        482,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 482,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        483,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 483,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        484,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 484,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        485,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 485,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        488,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 488,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        491,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 491,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        492,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 492,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        493,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 493,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        494,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 494,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        495,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 495,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        496,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 496,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        497,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 497,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        507,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 507,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        508,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 508,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        535,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 535,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        536,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 536,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        537,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 537,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        538,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 538,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        539,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 539,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        540,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 540,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        541,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 541,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        542,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 542,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        543,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 543,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        549,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 549,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        550,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 550,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        551,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 551,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        552,
+                        " "
+                    ]
+                ],
+                "resname": "U",
+                "seqid": 552,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        553,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 553,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        554,
+                        " "
+                    ]
+                ],
+                "resname": "U",
+                "seqid": 554,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        555,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 555,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        1857,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1857,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        1858,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 1858,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        1859,
+                        " "
+                    ]
+                ],
+                "resname": "U",
+                "seqid": 1859,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        1860,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1860,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        1861,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1861,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        1862,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1862,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        1863,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1863,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        1877,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 1877,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        1878,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1878,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        1879,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 1879,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        1880,
+                        " "
+                    ]
+                ],
+                "resname": "U",
+                "seqid": 1880,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        1881,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 1881,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        1882,
+                        " "
+                    ]
+                ],
+                "resname": "U",
+                "seqid": 1882,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        1883,
+                        " "
+                    ]
+                ],
+                "resname": "U",
+                "seqid": 1883,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        1906,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1906,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        1907,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1907,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        1908,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 1908,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        1909,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 1909,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        1910,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1910,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        1913,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 1913,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        1919,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 1919,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        1920,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 1920,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        1921,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1921,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        1922,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1922,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        1923,
+                        " "
+                    ]
+                ],
+                "resname": "U",
+                "seqid": 1923,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        1924,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 1924,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        1925,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 1925,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        1929,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1929,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        1930,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1930,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        1931,
+                        " "
+                    ]
+                ],
+                "resname": "U",
+                "seqid": 1931,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        1932,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 1932,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        2672,
+                        " "
+                    ]
+                ],
+                "resname": "U",
+                "seqid": 2672,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        2673,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 2673,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        2674,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 2674,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        2675,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 2675,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        2676,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 2676,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        2677,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 2677,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        2726,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 2726,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        2727,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 2727,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        2728,
+                        " "
+                    ]
+                ],
+                "resname": "U",
+                "seqid": 2728,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        2729,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 2729,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        2730,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 2730,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        2731,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 2731,
+                "parent_auth_asym_id": "BA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BA",
+                    [
+                        " ",
+                        2732,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 2732,
+                "parent_auth_asym_id": "BA"
+            }
+        ]
+    },
+    "BU": {
+        "assembly_id": 0,
+        "asym_ids": [
+            "SA",
+            "YB"
+        ],
+        "auth_asym_id": "BU",
+        "parent_rcsb_id": "4WOI",
+        "src_organism_names": [
+            "Escherichia coli"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            83333
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "50S ribosomal protein L24",
+        "entity_poly_strand_id": "BU,CU",
+        "entity_poly_seq_one_letter_code": "MAAKIRRDDEVIVLTGKDKGKRGKVKNVLSSGKVIVEGINLVKKHQKPVPALNQPGGIVEKEAAIQVSNVAIFNAATGKADRVGFRFEDGKKVRFFKSNSETIK",
+        "entity_poly_seq_one_letter_code_can": "MAAKIRRDDEVIVLTGKDKGKRGKVKNVLSSGKVIVEGINLVKKHQKPVPALNQPGGIVEKEAAIQVSNVAIFNAATGKADRVGFRFEDGKKVRFFKSNSETIK",
+        "entity_poly_seq_length": 104,
+        "entity_poly_polymer_type": "Protein",
+        "entity_poly_entity_type": "polypeptide(L)",
+        "nomenclature": [
+            "uL24"
+        ],
+        "residues": [
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BU",
+                    [
+                        " ",
+                        46,
+                        " "
+                    ]
+                ],
+                "resname": "LYS",
+                "seqid": 46,
+                "parent_auth_asym_id": "BU"
+            }
+        ]
+    },
+    "BJ": {
+        "assembly_id": 0,
+        "asym_ids": [
+            "HA",
+            "NB"
+        ],
+        "auth_asym_id": "BJ",
+        "parent_rcsb_id": "4WOI",
+        "src_organism_names": [
+            "Escherichia coli"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            83333
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "50S ribosomal protein L13",
+        "entity_poly_strand_id": "BJ,CJ",
+        "entity_poly_seq_one_letter_code": "MKTFTAKPETVKRDWYVVDATGKTLGRLATELARRLRGKHKAEYTPHVDTGDYIIVLNADKVAVTGNKRTDKVYYHHTGHIGGIKQATFEEMIARRPERVIEIAVKGMLPKGPLGRAMFRKLKVYAGNEHNHAAQQPQVLDI",
+        "entity_poly_seq_one_letter_code_can": "MKTFTAKPETVKRDWYVVDATGKTLGRLATELARRLRGKHKAEYTPHVDTGDYIIVLNADKVAVTGNKRTDKVYYHHTGHIGGIKQATFEEMIARRPERVIEIAVKGMLPKGPLGRAMFRKLKVYAGNEHNHAAQQPQVLDI",
+        "entity_poly_seq_length": 142,
+        "entity_poly_polymer_type": "Protein",
+        "entity_poly_entity_type": "polypeptide(L)",
+        "nomenclature": [
+            "uL13"
+        ],
+        "residues": [
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BJ",
+                    [
+                        " ",
+                        2,
+                        " "
+                    ]
+                ],
+                "resname": "LYS",
+                "seqid": 2,
+                "parent_auth_asym_id": "BJ"
+            }
+        ]
+    },
+    "AA": {
+        "assembly_id": 0,
+        "asym_ids": [
+            "A",
+            "JC"
+        ],
+        "auth_asym_id": "AA",
+        "parent_rcsb_id": "4WOI",
+        "src_organism_names": [
+            "Escherichia coli str. K-12 substr. MDS42"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            1110693
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "16S ribosomal RNA",
+        "entity_poly_strand_id": "AA,DA",
+        "entity_poly_seq_one_letter_code": "AAAUUGAAGAGUUUGAUCAUGGCUCAGAUUGAACGCUGGCGGCAGGCCUAACACAUGCAAGUCGAACGGUAACAGGAAGAAGCUUGCUUCUUUGCUGACGAGUGGCGGACGGGUGAGUAAUGUCUGGGAAACUGCCUGAUGGAGGGGGAUAACUACUGGAAACGGUAGCUAAUACCGCAUAACGUCGCAAGACCAAAGAGGGGGACCUUCGGGCCUCUUGCCAUCGGAUGUGCCCAGAUGGGAUUAGCUAGUAGGUGGGGUAACGGCUCACCUAGGCGACGAUCCCUAGCUGGUCUGAGAGGAUGACCAGCCACACUGGAACUGAGACACGGUCCAGACUCCUACGGGAGGCAGCAGUGGGGAAUAUUGCACAAUGGGCGCAAGCCUGAUGCAGCCAUGCCGCGUGUAUGAAGAAGGCCUUCGGGUUGUAAAGUACUUUCAGCGGGGAGGAAGGGAGUAAAGUUAAUACCUUUGCUCAUUGACGUUACCCGCAGAAGAAGCACCGGCUAACUCCGUGCCAGCAGCCGCGGUAAUACGGAGGGUGCAAGCGUUAAUCGGAAUUACUGGGCGUAAAGCGCACGCAGGCGGUUUGUUAAGUCAGAUGUGAAAUCCCCGGGCUCAACCUGGGAACUGCAUCUGAUACUGGCAAGCUUGAGUCUCGUAGAGGGGGGUAGAAUUCCAGGUGUAGCGGUGAAAUGCGUAGAGAUCUGGAGGAAUACCGGUGGCGAAGGCGGCCCCCUGGACGAAGACUGACGCUCAGGUGCGAAAGCGUGGGGAGCAAACAGGAUUAGAUACCCUGGUAGUCCACGCCGUAAACGAUGUCGACUUGGAGGUUGUGCCCUUGAGGCGUGGCUUCCGGAGCUAACGCGUUAAGUCGACCGCCUGGGGAGUACGGCCGCAAGGUUAAAACUCAAAUGAAUUGACGGGGGCCCGCACAAGCGGUGGAGCAUGUGGUUUAAUUCGAUGCAACGCGAAGAACCUUACCUGGUCUUGACAUCCACGGAAGUUUUCAGAGAUGAGAAUGUGCCUUCGGGAACCGUGAGACAGGUGCUGCAUGGCUGUCGUCAGCUCGUGUUGUGAAAUGUUGGGUUAAGUCCCGCAACGAGCGCAACCCUUAUCCUUUGUUGCCAGCGGUCCGGCCGGGAACUCAAAGGAGACUGCCAGUGAUAAACUGGAGGAAGGUGGGGAUGACGUCAAGUCAUCAUGGCCCUUACGACCAGGGCUACACACGUGCUACAAUGGCGCAUACAAAGAGAAGCGACCUCGCGAGAGCAAGCGGACCUCAUAAAGUGCGUCGUAGUCCGGAUUGGAGUCUGCAACUCGACUCCAUGAAGUCGGAAUCGCUAGUAAUCGUGGAUCAGAAUGCCACGGUGAAUACGUUCCCGGGCCUUGUACACACCGCCCGUCACACCAUGGGAGUGGGUUGCAAAAGAAGUAGGUAGCUUAACCUUCGGGAGGGCGCUUACCACUUUGUGAUUCAUGACUGGGGUGAAGUCGUAACAAGGUAACCGUAGGGGAACCUGCGGUUGGAUCACCUCCUUA",
+        "entity_poly_seq_one_letter_code_can": "AAAUUGAAGAGUUUGAUCAUGGCUCAGAUUGAACGCUGGCGGCAGGCCUAACACAUGCAAGUCGAACGGUAACAGGAAGAAGCUUGCUUCUUUGCUGACGAGUGGCGGACGGGUGAGUAAUGUCUGGGAAACUGCCUGAUGGAGGGGGAUAACUACUGGAAACGGUAGCUAAUACCGCAUAACGUCGCAAGACCAAAGAGGGGGACCUUCGGGCCUCUUGCCAUCGGAUGUGCCCAGAUGGGAUUAGCUAGUAGGUGGGGUAACGGCUCACCUAGGCGACGAUCCCUAGCUGGUCUGAGAGGAUGACCAGCCACACUGGAACUGAGACACGGUCCAGACUCCUACGGGAGGCAGCAGUGGGGAAUAUUGCACAAUGGGCGCAAGCCUGAUGCAGCCAUGCCGCGUGUAUGAAGAAGGCCUUCGGGUUGUAAAGUACUUUCAGCGGGGAGGAAGGGAGUAAAGUUAAUACCUUUGCUCAUUGACGUUACCCGCAGAAGAAGCACCGGCUAACUCCGUGCCAGCAGCCGCGGUAAUACGGAGGGUGCAAGCGUUAAUCGGAAUUACUGGGCGUAAAGCGCACGCAGGCGGUUUGUUAAGUCAGAUGUGAAAUCCCCGGGCUCAACCUGGGAACUGCAUCUGAUACUGGCAAGCUUGAGUCUCGUAGAGGGGGGUAGAAUUCCAGGUGUAGCGGUGAAAUGCGUAGAGAUCUGGAGGAAUACCGGUGGCGAAGGCGGCCCCCUGGACGAAGACUGACGCUCAGGUGCGAAAGCGUGGGGAGCAAACAGGAUUAGAUACCCUGGUAGUCCACGCCGUAAACGAUGUCGACUUGGAGGUUGUGCCCUUGAGGCGUGGCUUCCGGAGCUAACGCGUUAAGUCGACCGCCUGGGGAGUACGGCCGCAAGGUUAAAACUCAAAUGAAUUGACGGGGGCCCGCACAAGCGGUGGAGCAUGUGGUUUAAUUCGAUGCAACGCGAAGAACCUUACCUGGUCUUGACAUCCACGGAAGUUUUCAGAGAUGAGAAUGUGCCUUCGGGAACCGUGAGACAGGUGCUGCAUGGCUGUCGUCAGCUCGUGUUGUGAAAUGUUGGGUUAAGUCCCGCAACGAGCGCAACCCUUAUCCUUUGUUGCCAGCGGUCCGGCCGGGAACUCAAAGGAGACUGCCAGUGAUAAACUGGAGGAAGGUGGGGAUGACGUCAAGUCAUCAUGGCCCUUACGACCAGGGCUACACACGUGCUACAAUGGCGCAUACAAAGAGAAGCGACCUCGCGAGAGCAAGCGGACCUCAUAAAGUGCGUCGUAGUCCGGAUUGGAGUCUGCAACUCGACUCCAUGAAGUCGGAAUCGCUAGUAAUCGUGGAUCAGAAUGCCACGGUGAAUACGUUCCCGGGCCUUGUACACACCGCCCGUCACACCAUGGGAGUGGGUUGCAAAAGAAGUAGGUAGCUUAACCUUCGGGAGGGCGCUUACCACUUUGUGAUUCAUGACUGGGGUGAAGUCGUAACAAGGUAACCGUAGGGGAACCUGCGGUUGGAUCACCUCCUUA",
+        "entity_poly_seq_length": 1542,
+        "entity_poly_polymer_type": "RNA",
+        "entity_poly_entity_type": "polyribonucleotide",
+        "nomenclature": [
+            "16SrRNA"
+        ],
+        "residues": [
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "AA",
+                    [
+                        " ",
+                        793,
+                        " "
+                    ]
+                ],
+                "resname": "U",
+                "seqid": 793,
+                "parent_auth_asym_id": "AA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "AA",
+                    [
+                        " ",
+                        1404,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 1404,
+                "parent_auth_asym_id": "AA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "AA",
+                    [
+                        " ",
+                        1405,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1405,
+                "parent_auth_asym_id": "AA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "AA",
+                    [
+                        " ",
+                        1406,
+                        " "
+                    ]
+                ],
+                "resname": "U",
+                "seqid": 1406,
+                "parent_auth_asym_id": "AA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "AA",
+                    [
+                        " ",
+                        1407,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 1407,
+                "parent_auth_asym_id": "AA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "AA",
+                    [
+                        " ",
+                        1408,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 1408,
+                "parent_auth_asym_id": "AA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "AA",
+                    [
+                        " ",
+                        1409,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 1409,
+                "parent_auth_asym_id": "AA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "AA",
+                    [
+                        " ",
+                        1488,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1488,
+                "parent_auth_asym_id": "AA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "AA",
+                    [
+                        " ",
+                        1489,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1489,
+                "parent_auth_asym_id": "AA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "AA",
+                    [
+                        " ",
+                        1490,
+                        " "
+                    ]
+                ],
+                "resname": "U",
+                "seqid": 1490,
+                "parent_auth_asym_id": "AA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "AA",
+                    [
+                        " ",
+                        1491,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1491,
+                "parent_auth_asym_id": "AA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "AA",
+                    [
+                        " ",
+                        1492,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 1492,
+                "parent_auth_asym_id": "AA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "AA",
+                    [
+                        " ",
+                        1493,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 1493,
+                "parent_auth_asym_id": "AA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "AA",
+                    [
+                        " ",
+                        1494,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1494,
+                "parent_auth_asym_id": "AA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "AA",
+                    [
+                        " ",
+                        1495,
+                        " "
+                    ]
+                ],
+                "resname": "U",
+                "seqid": 1495,
+                "parent_auth_asym_id": "AA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "AA",
+                    [
+                        " ",
+                        1496,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 1496,
+                "parent_auth_asym_id": "AA"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "AA",
+                    [
+                        " ",
+                        1517,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1517,
+                "parent_auth_asym_id": "AA"
+            }
+        ]
+    },
+    "BK": {
+        "assembly_id": 0,
+        "asym_ids": [
+            "IA",
+            "OB"
+        ],
+        "auth_asym_id": "BK",
+        "parent_rcsb_id": "4WOI",
+        "src_organism_names": [
+            "Escherichia coli"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            83333
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "50S ribosomal protein L14",
+        "entity_poly_strand_id": "BK,CK",
+        "entity_poly_seq_one_letter_code": "MIQEQTMLNVADNSGARRVMCIKVLGGSHRRYAGVGDIIKITIKEAIPRGKVKKGDVLKAVVVRTKKGVRRPDGSVIRFDGNACVLLNNNSEQPIGTRIFGPVTRELRSEKFMKIISLAPEVL",
+        "entity_poly_seq_one_letter_code_can": "MIQEQTMLNVADNSGARRVMCIKVLGGSHRRYAGVGDIIKITIKEAIPRGKVKKGDVLKAVVVRTKKGVRRPDGSVIRFDGNACVLLNNNSEQPIGTRIFGPVTRELRSEKFMKIISLAPEVL",
+        "entity_poly_seq_length": 123,
+        "entity_poly_polymer_type": "Protein",
+        "entity_poly_entity_type": "polypeptide(L)",
+        "nomenclature": [
+            "uL14"
+        ],
+        "residues": [
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BK",
+                    [
+                        " ",
+                        70,
+                        " "
+                    ]
+                ],
+                "resname": "ARG",
+                "seqid": 70,
+                "parent_auth_asym_id": "BK"
+            },
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "BK",
+                    [
+                        " ",
+                        71,
+                        " "
+                    ]
+                ],
+                "resname": "ARG",
+                "seqid": 71,
+                "parent_auth_asym_id": "BK"
+            }
+        ]
+    },
+    "CU": {
+        "assembly_id": 1,
+        "asym_ids": [
+            "SA",
+            "YB"
+        ],
+        "auth_asym_id": "CU",
+        "parent_rcsb_id": "4WOI",
+        "src_organism_names": [
+            "Escherichia coli"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            83333
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "50S ribosomal protein L24",
+        "entity_poly_strand_id": "BU,CU",
+        "entity_poly_seq_one_letter_code": "MAAKIRRDDEVIVLTGKDKGKRGKVKNVLSSGKVIVEGINLVKKHQKPVPALNQPGGIVEKEAAIQVSNVAIFNAATGKADRVGFRFEDGKKVRFFKSNSETIK",
+        "entity_poly_seq_one_letter_code_can": "MAAKIRRDDEVIVLTGKDKGKRGKVKNVLSSGKVIVEGINLVKKHQKPVPALNQPGGIVEKEAAIQVSNVAIFNAATGKADRVGFRFEDGKKVRFFKSNSETIK",
+        "entity_poly_seq_length": 104,
+        "entity_poly_polymer_type": "Protein",
+        "entity_poly_entity_type": "polypeptide(L)",
+        "nomenclature": [
+            "uL24"
+        ],
+        "residues": [
+            {
+                "full_id": [
+                    "4WOI",
+                    0,
+                    "CU",
+                    [
+                        " ",
+                        46,
+                        " "
+                    ]
+                ],
+                "resname": "LYS",
+                "seqid": 46,
+                "parent_auth_asym_id": "CU"
+            }
+        ]
+    }
+}

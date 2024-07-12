@@ -1,0 +1,1437 @@
+{
+    "1A": {
+        "assembly_id": 0,
+        "asym_ids": [
+            "A",
+            "EB"
+        ],
+        "auth_asym_id": "1A",
+        "parent_rcsb_id": "8EV7",
+        "src_organism_names": [
+            "Thermus thermophilus HB8"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            300852
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "23S Ribosomal RNA",
+        "entity_poly_strand_id": "1A,2A",
+        "entity_poly_seq_one_letter_code": "GUCAAGAUGGUAAGGGCCCACGGUGGAUGCCUCGGCACCCGAGCCGAUGAAGGACGUGGCUACCUGCGAUAAGCCAGGGGGAGCCGGUAGCGGGCGUGGAUCCCUGGAUGUCCGAAUGGGGGAACCCGGCCGGCGGGAACGCCGGUCACCGCGCUUUUGCGCGGGGGGAACCUGGGGAACUGAAACAUCUCAGUACCCAGAGGAGAGGAAAGAGAAAUCGACUCCCUGAGUAGCGGCGAGCGAAAGGGGACCAGCCUAAACCGUCCGGCUUGUCCGGGCGGGGUCGUGGGGCCCUCGGACACCGAAUCCCCAGCCUAGCCGAAGCUGUUGGGAAGCAGCGCCAGAGAGGGUGAAAGCCCCGUAGGCGAAAGGUGGGGGGAUAGGUGAGGGUACCCGAGUACCCCGUGGUUCGUGGAGCCAUGGGGGAAUCUGGGCGGACCACCGCCUAAGGCUAAGUACUCCGGGUGACCGAUAGCGCACCAGUACCGUGAGGGAAAGGUGAAAAGAACCCCGGGAGGGGAGUGAAAUAGAGCCUGAAACCGUGGGCUUACAAGCAGUCACGGCCCCGCAAGGGGUUGUGGCGUGCCUAUUGAAGCAUGAGCCGGCGACUCACGGUCGUGGGCGAGCUUAAGCCGUUGAGGCGGAGGCGUAGGGAAACCGAGUCCGAACAGGGCGCAAGCGGGCCGCACGCGGCCCGCAAAGUCCGCGGCCGUGGACCCGAAACCGGGCGAGCUAGCCCUGGCCAGGGUGAAGCUGGGGUGAGACCCAGUGGAGGCCCGAACCGGUGGGGGAUGCAAACCCCUCGGAUGAGCUGGGGCUAGGAGUGAAAAGCUAACCGAGCCCGGAGAUAGCUGGUUCUCCCCGAAAUGACUUUAGGGUCAGCCUCAGGCGCUGACUGGGGCCUGUAGAGCACUGAUAGGGCUAGGGGGCCCACCAGCCUACCAAACCCUGUCAAACUCCGAAGGGUCCCAGGUGGAGCCUGGGAGUGAGGGCGCGAGCGAUAACGUCCGCGUCCGAGCGCGGGAACAACCGAGACCGCCAGCUAAGGCCCCCAAGUCUGGGCUAAGUGGUAAAGGAUGUGGCGCCGCGAAGACAGCCAGGAGGUUGGCUUAGAAGCAGCCAUCCUUUAAAGAGUGCGUAAUAGCUCACUGGUCGAGUGGCGCCGCGCCGAAAAUGAUCGGGGCUUAAGCCCAGCGCCGAAGCUGCGGGUCUGGGGGAUGACCCCAGGCGGUAGGGGAGCGUUCCCGAUGCCGAUGAAGGCCGACCCGCGAGGGCGGCUGGAGGUAAGGGAAGUGCGAAUGCCGGCAUGAGUAACGAUAAAGAGGGUGAGAAUCCCUCUCGCCGUAAGCCCAAGGGUUCCUACGCAAUGGUCGUCAGCGUAGGGUUAGGCGGGACCUAAGGUGAAGCCGAAAGGCGUAGCCGAAGGGCAGCCGGUUAAUAUUCCGGCCCUUCCCGCAGGUGCGAUGGGGGGACGCUCUAGGCUAGGGGGACCGGAGCCAUGGACGAGCCCGGCCAGAAGCGCAGGGUGGGAGGUAGGCAAAUCCGCCUCCCAACAAGCUCUGCGUGGUGGGGAAGCCCGUACGGGUGACAACCCCCCGAAGCCAGGGAGCCAAGAAAAGCCUCUAAGCACAACCUGCGGGAACCCGUACCGCAAACCGACACAGGUGGGCGGGUGCAAGAGCACUCAGGCGCGCGGGAGAACCCUCGCCAAGGAACUCUGCAAGUUGGCCCCGUAACUUCGGGAGAAGGGGUGCUCCCUGGGGUGAUGAGCCCCGGGGAGCCGCAGUGAACAGGCUCUGGCGACUGUUUACCAAAAACACAGCUCUCUGCGAACUCGUAAGAGGAGGUAUAGGGAGCGACGCUUGCCCGGUGCCGGAAGGUCAAGGGGAGGGGUGCAAGCCCCGAACCGAAGCCCCGGUGAACGGCGGCCG(PSU)AAC(5MU)A(PSU)AA(4OC)GGUCCUAAGGUAGCGAAA(5MU)UC(5MC)UUGUCGGGUAAGUUCCGAC(5MC)UGCACGAAAAGCGUAACGACCGGAGCGCUGUCUCGGCGAGGGACCCGGUGAAAUUGAACUGGCCGUGAAGAUGCGGCCUACCCGUGGCAGGACGAAAAGACCCCGUGGAGCUUUACUGCAGCCUGGUGUUGGCUCUUGGUCGCGCCUGCGUAGGAUAGGUGGGAGCCUGUGAACCCCCGCCUCCGGGUGGGGGGGAGGCGCCGGUGAAAUACCACCCUGGCGCGGCUGGGGGCCUAACCCUCGGAUGGGGGGACAGCGCUUGGCGGGCAGUUUGACUG(OMG)GGCGGUCGCCUCCUAAAAGGUAACGGAGGCGCCCAAAGGUCCCCUCAGGCGGGACGGAAAUCCGCCGGAGAGCGCAAGGGUAGAAGGGGGCCUGACUGCGAGGCCUGCAAGCCGAGCAGGGGCGAAAGCCGGGCCUAGUGAACCGGUGGUCCCGUGUGGAAGGGCCAUCGAUCAACGGAUAAAAGUUACCCCGGGGAUAACAGGCUGAUCUCCCCCGAGCGUCCACAGCGGCGGGGAGGUUUGGCACCUCG(2MA)UGUCGGCUCGUCGCAUCCUGGGGCUGAAGAAGGUCCCAAGGGUUGGGC(2MU)GUUCGCCCAUUAAAGCGGCACGCGAGCUGGGUUCAGAACGUCGUGAGACAGU(PSU)CGGUCUCUAUCCGCCACGGGCGCAGGAGGCUUGAGGGGGGCUCUUCCUAGUACGAGAGGACCGGAAGGGACGCACCUCUGGUUUCCCAGCUGUCCCUCCAGGGGCAUAAGCUGGGUAGCCAUGUGCGGAAGGGAUAACCGCUGAAAGCAUCUAAGCGGGAAGCCCGCCCCAAGAUGAGGCCUCCCACGGCGUCAAGCCGGUAAGGACCCGGGAAGACCACCCGGUGGAUGGGCCGGGGGUGUAAGCGCCGCGAGGCGUUGAGCCGACCGGUCCCAAUCGUCCGAGGUCUUGACCCCUCC",
+        "entity_poly_seq_one_letter_code_can": "GUCAAGAUGGUAAGGGCCCACGGUGGAUGCCUCGGCACCCGAGCCGAUGAAGGACGUGGCUACCUGCGAUAAGCCAGGGGGAGCCGGUAGCGGGCGUGGAUCCCUGGAUGUCCGAAUGGGGGAACCCGGCCGGCGGGAACGCCGGUCACCGCGCUUUUGCGCGGGGGGAACCUGGGGAACUGAAACAUCUCAGUACCCAGAGGAGAGGAAAGAGAAAUCGACUCCCUGAGUAGCGGCGAGCGAAAGGGGACCAGCCUAAACCGUCCGGCUUGUCCGGGCGGGGUCGUGGGGCCCUCGGACACCGAAUCCCCAGCCUAGCCGAAGCUGUUGGGAAGCAGCGCCAGAGAGGGUGAAAGCCCCGUAGGCGAAAGGUGGGGGGAUAGGUGAGGGUACCCGAGUACCCCGUGGUUCGUGGAGCCAUGGGGGAAUCUGGGCGGACCACCGCCUAAGGCUAAGUACUCCGGGUGACCGAUAGCGCACCAGUACCGUGAGGGAAAGGUGAAAAGAACCCCGGGAGGGGAGUGAAAUAGAGCCUGAAACCGUGGGCUUACAAGCAGUCACGGCCCCGCAAGGGGUUGUGGCGUGCCUAUUGAAGCAUGAGCCGGCGACUCACGGUCGUGGGCGAGCUUAAGCCGUUGAGGCGGAGGCGUAGGGAAACCGAGUCCGAACAGGGCGCAAGCGGGCCGCACGCGGCCCGCAAAGUCCGCGGCCGUGGACCCGAAACCGGGCGAGCUAGCCCUGGCCAGGGUGAAGCUGGGGUGAGACCCAGUGGAGGCCCGAACCGGUGGGGGAUGCAAACCCCUCGGAUGAGCUGGGGCUAGGAGUGAAAAGCUAACCGAGCCCGGAGAUAGCUGGUUCUCCCCGAAAUGACUUUAGGGUCAGCCUCAGGCGCUGACUGGGGCCUGUAGAGCACUGAUAGGGCUAGGGGGCCCACCAGCCUACCAAACCCUGUCAAACUCCGAAGGGUCCCAGGUGGAGCCUGGGAGUGAGGGCGCGAGCGAUAACGUCCGCGUCCGAGCGCGGGAACAACCGAGACCGCCAGCUAAGGCCCCCAAGUCUGGGCUAAGUGGUAAAGGAUGUGGCGCCGCGAAGACAGCCAGGAGGUUGGCUUAGAAGCAGCCAUCCUUUAAAGAGUGCGUAAUAGCUCACUGGUCGAGUGGCGCCGCGCCGAAAAUGAUCGGGGCUUAAGCCCAGCGCCGAAGCUGCGGGUCUGGGGGAUGACCCCAGGCGGUAGGGGAGCGUUCCCGAUGCCGAUGAAGGCCGACCCGCGAGGGCGGCUGGAGGUAAGGGAAGUGCGAAUGCCGGCAUGAGUAACGAUAAAGAGGGUGAGAAUCCCUCUCGCCGUAAGCCCAAGGGUUCCUACGCAAUGGUCGUCAGCGUAGGGUUAGGCGGGACCUAAGGUGAAGCCGAAAGGCGUAGCCGAAGGGCAGCCGGUUAAUAUUCCGGCCCUUCCCGCAGGUGCGAUGGGGGGACGCUCUAGGCUAGGGGGACCGGAGCCAUGGACGAGCCCGGCCAGAAGCGCAGGGUGGGAGGUAGGCAAAUCCGCCUCCCAACAAGCUCUGCGUGGUGGGGAAGCCCGUACGGGUGACAACCCCCCGAAGCCAGGGAGCCAAGAAAAGCCUCUAAGCACAACCUGCGGGAACCCGUACCGCAAACCGACACAGGUGGGCGGGUGCAAGAGCACUCAGGCGCGCGGGAGAACCCUCGCCAAGGAACUCUGCAAGUUGGCCCCGUAACUUCGGGAGAAGGGGUGCUCCCUGGGGUGAUGAGCCCCGGGGAGCCGCAGUGAACAGGCUCUGGCGACUGUUUACCAAAAACACAGCUCUCUGCGAACUCGUAAGAGGAGGUAUAGGGAGCGACGCUUGCCCGGUGCCGGAAGGUCAAGGGGAGGGGUGCAAGCCCCGAACCGAAGCCCCGGUGAACGGCGGCCGUAACUAUAACGGUCCUAAGGUAGCGAAAUUCCUUGUCGGGUAAGUUCCGACCUGCACGAAAAGCGUAACGACCGGAGCGCUGUCUCGGCGAGGGACCCGGUGAAAUUGAACUGGCCGUGAAGAUGCGGCCUACCCGUGGCAGGACGAAAAGACCCCGUGGAGCUUUACUGCAGCCUGGUGUUGGCUCUUGGUCGCGCCUGCGUAGGAUAGGUGGGAGCCUGUGAACCCCCGCCUCCGGGUGGGGGGGAGGCGCCGGUGAAAUACCACCCUGGCGCGGCUGGGGGCCUAACCCUCGGAUGGGGGGACAGCGCUUGGCGGGCAGUUUGACUGGGGCGGUCGCCUCCUAAAAGGUAACGGAGGCGCCCAAAGGUCCCCUCAGGCGGGACGGAAAUCCGCCGGAGAGCGCAAGGGUAGAAGGGGGCCUGACUGCGAGGCCUGCAAGCCGAGCAGGGGCGAAAGCCGGGCCUAGUGAACCGGUGGUCCCGUGUGGAAGGGCCAUCGAUCAACGGAUAAAAGUUACCCCGGGGAUAACAGGCUGAUCUCCCCCGAGCGUCCACAGCGGCGGGGAGGUUUGGCACCUCGAUGUCGGCUCGUCGCAUCCUGGGGCUGAAGAAGGUCCCAAGGGUUGGGCUGUUCGCCCAUUAAAGCGGCACGCGAGCUGGGUUCAGAACGUCGUGAGACAGUUCGGUCUCUAUCCGCCACGGGCGCAGGAGGCUUGAGGGGGGCUCUUCCUAGUACGAGAGGACCGGAAGGGACGCACCUCUGGUUUCCCAGCUGUCCCUCCAGGGGCAUAAGCUGGGUAGCCAUGUGCGGAAGGGAUAACCGCUGAAAGCAUCUAAGCGGGAAGCCCGCCCCAAGAUGAGGCCUCCCACGGCGUCAAGCCGGUAAGGACCCGGGAAGACCACCCGGUGGAUGGGCCGGGGGUGUAAGCGCCGCGAGGCGUUGAGCCGACCGGUCCCAAUCGUCCGAGGUCUUGACCCCUCC",
+        "entity_poly_seq_length": 2915,
+        "entity_poly_polymer_type": "RNA",
+        "entity_poly_entity_type": "polyribonucleotide",
+        "nomenclature": [
+            "23SrRNA"
+        ],
+        "residues": [
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "1A",
+                    [
+                        " ",
+                        914,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 914,
+                "parent_auth_asym_id": "1A"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "1A",
+                    [
+                        " ",
+                        915,
+                        " "
+                    ]
+                ],
+                "resname": "U",
+                "seqid": 915,
+                "parent_auth_asym_id": "1A"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "1A",
+                    [
+                        " ",
+                        958,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 958,
+                "parent_auth_asym_id": "1A"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "1A",
+                    [
+                        " ",
+                        1025,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1025,
+                "parent_auth_asym_id": "1A"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "1A",
+                    [
+                        " ",
+                        1026,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 1026,
+                "parent_auth_asym_id": "1A"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "1A",
+                    [
+                        " ",
+                        1049,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1049,
+                "parent_auth_asym_id": "1A"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "1A",
+                    [
+                        " ",
+                        1051,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 1051,
+                "parent_auth_asym_id": "1A"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "1A",
+                    [
+                        " ",
+                        1052,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 1052,
+                "parent_auth_asym_id": "1A"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "1A",
+                    [
+                        " ",
+                        1053,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 1053,
+                "parent_auth_asym_id": "1A"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "1A",
+                    [
+                        " ",
+                        1070,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1070,
+                "parent_auth_asym_id": "1A"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "1A",
+                    [
+                        " ",
+                        1071,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1071,
+                "parent_auth_asym_id": "1A"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "1A",
+                    [
+                        " ",
+                        1180,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 1180,
+                "parent_auth_asym_id": "1A"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "1A",
+                    [
+                        " ",
+                        1181,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1181,
+                "parent_auth_asym_id": "1A"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "1A",
+                    [
+                        " ",
+                        1182,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1182,
+                "parent_auth_asym_id": "1A"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "1A",
+                    [
+                        " ",
+                        1183,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1183,
+                "parent_auth_asym_id": "1A"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "1A",
+                    [
+                        " ",
+                        1184,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1184,
+                "parent_auth_asym_id": "1A"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "1A",
+                    [
+                        " ",
+                        1189,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 1189,
+                "parent_auth_asym_id": "1A"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "1A",
+                    [
+                        " ",
+                        1190,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1190,
+                "parent_auth_asym_id": "1A"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "1A",
+                    [
+                        " ",
+                        1191,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 1191,
+                "parent_auth_asym_id": "1A"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "1A",
+                    [
+                        " ",
+                        1893,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1893,
+                "parent_auth_asym_id": "1A"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "1A",
+                    [
+                        " ",
+                        2332,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 2332,
+                "parent_auth_asym_id": "1A"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "1A",
+                    [
+                        " ",
+                        2333,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 2333,
+                "parent_auth_asym_id": "1A"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "1A",
+                    [
+                        " ",
+                        2334,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 2334,
+                "parent_auth_asym_id": "1A"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "1A",
+                    [
+                        " ",
+                        2335,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 2335,
+                "parent_auth_asym_id": "1A"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "1A",
+                    [
+                        " ",
+                        2336,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 2336,
+                "parent_auth_asym_id": "1A"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "1A",
+                    [
+                        " ",
+                        2341,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 2341,
+                "parent_auth_asym_id": "1A"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "1A",
+                    [
+                        " ",
+                        2343,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 2343,
+                "parent_auth_asym_id": "1A"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "1A",
+                    [
+                        " ",
+                        2344,
+                        " "
+                    ]
+                ],
+                "resname": "U",
+                "seqid": 2344,
+                "parent_auth_asym_id": "1A"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "1A",
+                    [
+                        " ",
+                        2410,
+                        " "
+                    ]
+                ],
+                "resname": "U",
+                "seqid": 2410,
+                "parent_auth_asym_id": "1A"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "1A",
+                    [
+                        " ",
+                        2411,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 2411,
+                "parent_auth_asym_id": "1A"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "1A",
+                    [
+                        " ",
+                        2412,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 2412,
+                "parent_auth_asym_id": "1A"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "1A",
+                    [
+                        " ",
+                        2413,
+                        " "
+                    ]
+                ],
+                "resname": "U",
+                "seqid": 2413,
+                "parent_auth_asym_id": "1A"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "1A",
+                    [
+                        " ",
+                        2415,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 2415,
+                "parent_auth_asym_id": "1A"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "1A",
+                    [
+                        " ",
+                        2424,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 2424,
+                "parent_auth_asym_id": "1A"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "1A",
+                    [
+                        " ",
+                        2425,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 2425,
+                "parent_auth_asym_id": "1A"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "1A",
+                    [
+                        " ",
+                        2426,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 2426,
+                "parent_auth_asym_id": "1A"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "1A",
+                    [
+                        " ",
+                        2427,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 2427,
+                "parent_auth_asym_id": "1A"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "1A",
+                    [
+                        " ",
+                        2428,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 2428,
+                "parent_auth_asym_id": "1A"
+            }
+        ]
+    },
+    "2A": {
+        "assembly_id": 1,
+        "asym_ids": [
+            "A",
+            "EB"
+        ],
+        "auth_asym_id": "2A",
+        "parent_rcsb_id": "8EV7",
+        "src_organism_names": [
+            "Thermus thermophilus HB8"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            300852
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "23S Ribosomal RNA",
+        "entity_poly_strand_id": "1A,2A",
+        "entity_poly_seq_one_letter_code": "GUCAAGAUGGUAAGGGCCCACGGUGGAUGCCUCGGCACCCGAGCCGAUGAAGGACGUGGCUACCUGCGAUAAGCCAGGGGGAGCCGGUAGCGGGCGUGGAUCCCUGGAUGUCCGAAUGGGGGAACCCGGCCGGCGGGAACGCCGGUCACCGCGCUUUUGCGCGGGGGGAACCUGGGGAACUGAAACAUCUCAGUACCCAGAGGAGAGGAAAGAGAAAUCGACUCCCUGAGUAGCGGCGAGCGAAAGGGGACCAGCCUAAACCGUCCGGCUUGUCCGGGCGGGGUCGUGGGGCCCUCGGACACCGAAUCCCCAGCCUAGCCGAAGCUGUUGGGAAGCAGCGCCAGAGAGGGUGAAAGCCCCGUAGGCGAAAGGUGGGGGGAUAGGUGAGGGUACCCGAGUACCCCGUGGUUCGUGGAGCCAUGGGGGAAUCUGGGCGGACCACCGCCUAAGGCUAAGUACUCCGGGUGACCGAUAGCGCACCAGUACCGUGAGGGAAAGGUGAAAAGAACCCCGGGAGGGGAGUGAAAUAGAGCCUGAAACCGUGGGCUUACAAGCAGUCACGGCCCCGCAAGGGGUUGUGGCGUGCCUAUUGAAGCAUGAGCCGGCGACUCACGGUCGUGGGCGAGCUUAAGCCGUUGAGGCGGAGGCGUAGGGAAACCGAGUCCGAACAGGGCGCAAGCGGGCCGCACGCGGCCCGCAAAGUCCGCGGCCGUGGACCCGAAACCGGGCGAGCUAGCCCUGGCCAGGGUGAAGCUGGGGUGAGACCCAGUGGAGGCCCGAACCGGUGGGGGAUGCAAACCCCUCGGAUGAGCUGGGGCUAGGAGUGAAAAGCUAACCGAGCCCGGAGAUAGCUGGUUCUCCCCGAAAUGACUUUAGGGUCAGCCUCAGGCGCUGACUGGGGCCUGUAGAGCACUGAUAGGGCUAGGGGGCCCACCAGCCUACCAAACCCUGUCAAACUCCGAAGGGUCCCAGGUGGAGCCUGGGAGUGAGGGCGCGAGCGAUAACGUCCGCGUCCGAGCGCGGGAACAACCGAGACCGCCAGCUAAGGCCCCCAAGUCUGGGCUAAGUGGUAAAGGAUGUGGCGCCGCGAAGACAGCCAGGAGGUUGGCUUAGAAGCAGCCAUCCUUUAAAGAGUGCGUAAUAGCUCACUGGUCGAGUGGCGCCGCGCCGAAAAUGAUCGGGGCUUAAGCCCAGCGCCGAAGCUGCGGGUCUGGGGGAUGACCCCAGGCGGUAGGGGAGCGUUCCCGAUGCCGAUGAAGGCCGACCCGCGAGGGCGGCUGGAGGUAAGGGAAGUGCGAAUGCCGGCAUGAGUAACGAUAAAGAGGGUGAGAAUCCCUCUCGCCGUAAGCCCAAGGGUUCCUACGCAAUGGUCGUCAGCGUAGGGUUAGGCGGGACCUAAGGUGAAGCCGAAAGGCGUAGCCGAAGGGCAGCCGGUUAAUAUUCCGGCCCUUCCCGCAGGUGCGAUGGGGGGACGCUCUAGGCUAGGGGGACCGGAGCCAUGGACGAGCCCGGCCAGAAGCGCAGGGUGGGAGGUAGGCAAAUCCGCCUCCCAACAAGCUCUGCGUGGUGGGGAAGCCCGUACGGGUGACAACCCCCCGAAGCCAGGGAGCCAAGAAAAGCCUCUAAGCACAACCUGCGGGAACCCGUACCGCAAACCGACACAGGUGGGCGGGUGCAAGAGCACUCAGGCGCGCGGGAGAACCCUCGCCAAGGAACUCUGCAAGUUGGCCCCGUAACUUCGGGAGAAGGGGUGCUCCCUGGGGUGAUGAGCCCCGGGGAGCCGCAGUGAACAGGCUCUGGCGACUGUUUACCAAAAACACAGCUCUCUGCGAACUCGUAAGAGGAGGUAUAGGGAGCGACGCUUGCCCGGUGCCGGAAGGUCAAGGGGAGGGGUGCAAGCCCCGAACCGAAGCCCCGGUGAACGGCGGCCG(PSU)AAC(5MU)A(PSU)AA(4OC)GGUCCUAAGGUAGCGAAA(5MU)UC(5MC)UUGUCGGGUAAGUUCCGAC(5MC)UGCACGAAAAGCGUAACGACCGGAGCGCUGUCUCGGCGAGGGACCCGGUGAAAUUGAACUGGCCGUGAAGAUGCGGCCUACCCGUGGCAGGACGAAAAGACCCCGUGGAGCUUUACUGCAGCCUGGUGUUGGCUCUUGGUCGCGCCUGCGUAGGAUAGGUGGGAGCCUGUGAACCCCCGCCUCCGGGUGGGGGGGAGGCGCCGGUGAAAUACCACCCUGGCGCGGCUGGGGGCCUAACCCUCGGAUGGGGGGACAGCGCUUGGCGGGCAGUUUGACUG(OMG)GGCGGUCGCCUCCUAAAAGGUAACGGAGGCGCCCAAAGGUCCCCUCAGGCGGGACGGAAAUCCGCCGGAGAGCGCAAGGGUAGAAGGGGGCCUGACUGCGAGGCCUGCAAGCCGAGCAGGGGCGAAAGCCGGGCCUAGUGAACCGGUGGUCCCGUGUGGAAGGGCCAUCGAUCAACGGAUAAAAGUUACCCCGGGGAUAACAGGCUGAUCUCCCCCGAGCGUCCACAGCGGCGGGGAGGUUUGGCACCUCG(2MA)UGUCGGCUCGUCGCAUCCUGGGGCUGAAGAAGGUCCCAAGGGUUGGGC(2MU)GUUCGCCCAUUAAAGCGGCACGCGAGCUGGGUUCAGAACGUCGUGAGACAGU(PSU)CGGUCUCUAUCCGCCACGGGCGCAGGAGGCUUGAGGGGGGCUCUUCCUAGUACGAGAGGACCGGAAGGGACGCACCUCUGGUUUCCCAGCUGUCCCUCCAGGGGCAUAAGCUGGGUAGCCAUGUGCGGAAGGGAUAACCGCUGAAAGCAUCUAAGCGGGAAGCCCGCCCCAAGAUGAGGCCUCCCACGGCGUCAAGCCGGUAAGGACCCGGGAAGACCACCCGGUGGAUGGGCCGGGGGUGUAAGCGCCGCGAGGCGUUGAGCCGACCGGUCCCAAUCGUCCGAGGUCUUGACCCCUCC",
+        "entity_poly_seq_one_letter_code_can": "GUCAAGAUGGUAAGGGCCCACGGUGGAUGCCUCGGCACCCGAGCCGAUGAAGGACGUGGCUACCUGCGAUAAGCCAGGGGGAGCCGGUAGCGGGCGUGGAUCCCUGGAUGUCCGAAUGGGGGAACCCGGCCGGCGGGAACGCCGGUCACCGCGCUUUUGCGCGGGGGGAACCUGGGGAACUGAAACAUCUCAGUACCCAGAGGAGAGGAAAGAGAAAUCGACUCCCUGAGUAGCGGCGAGCGAAAGGGGACCAGCCUAAACCGUCCGGCUUGUCCGGGCGGGGUCGUGGGGCCCUCGGACACCGAAUCCCCAGCCUAGCCGAAGCUGUUGGGAAGCAGCGCCAGAGAGGGUGAAAGCCCCGUAGGCGAAAGGUGGGGGGAUAGGUGAGGGUACCCGAGUACCCCGUGGUUCGUGGAGCCAUGGGGGAAUCUGGGCGGACCACCGCCUAAGGCUAAGUACUCCGGGUGACCGAUAGCGCACCAGUACCGUGAGGGAAAGGUGAAAAGAACCCCGGGAGGGGAGUGAAAUAGAGCCUGAAACCGUGGGCUUACAAGCAGUCACGGCCCCGCAAGGGGUUGUGGCGUGCCUAUUGAAGCAUGAGCCGGCGACUCACGGUCGUGGGCGAGCUUAAGCCGUUGAGGCGGAGGCGUAGGGAAACCGAGUCCGAACAGGGCGCAAGCGGGCCGCACGCGGCCCGCAAAGUCCGCGGCCGUGGACCCGAAACCGGGCGAGCUAGCCCUGGCCAGGGUGAAGCUGGGGUGAGACCCAGUGGAGGCCCGAACCGGUGGGGGAUGCAAACCCCUCGGAUGAGCUGGGGCUAGGAGUGAAAAGCUAACCGAGCCCGGAGAUAGCUGGUUCUCCCCGAAAUGACUUUAGGGUCAGCCUCAGGCGCUGACUGGGGCCUGUAGAGCACUGAUAGGGCUAGGGGGCCCACCAGCCUACCAAACCCUGUCAAACUCCGAAGGGUCCCAGGUGGAGCCUGGGAGUGAGGGCGCGAGCGAUAACGUCCGCGUCCGAGCGCGGGAACAACCGAGACCGCCAGCUAAGGCCCCCAAGUCUGGGCUAAGUGGUAAAGGAUGUGGCGCCGCGAAGACAGCCAGGAGGUUGGCUUAGAAGCAGCCAUCCUUUAAAGAGUGCGUAAUAGCUCACUGGUCGAGUGGCGCCGCGCCGAAAAUGAUCGGGGCUUAAGCCCAGCGCCGAAGCUGCGGGUCUGGGGGAUGACCCCAGGCGGUAGGGGAGCGUUCCCGAUGCCGAUGAAGGCCGACCCGCGAGGGCGGCUGGAGGUAAGGGAAGUGCGAAUGCCGGCAUGAGUAACGAUAAAGAGGGUGAGAAUCCCUCUCGCCGUAAGCCCAAGGGUUCCUACGCAAUGGUCGUCAGCGUAGGGUUAGGCGGGACCUAAGGUGAAGCCGAAAGGCGUAGCCGAAGGGCAGCCGGUUAAUAUUCCGGCCCUUCCCGCAGGUGCGAUGGGGGGACGCUCUAGGCUAGGGGGACCGGAGCCAUGGACGAGCCCGGCCAGAAGCGCAGGGUGGGAGGUAGGCAAAUCCGCCUCCCAACAAGCUCUGCGUGGUGGGGAAGCCCGUACGGGUGACAACCCCCCGAAGCCAGGGAGCCAAGAAAAGCCUCUAAGCACAACCUGCGGGAACCCGUACCGCAAACCGACACAGGUGGGCGGGUGCAAGAGCACUCAGGCGCGCGGGAGAACCCUCGCCAAGGAACUCUGCAAGUUGGCCCCGUAACUUCGGGAGAAGGGGUGCUCCCUGGGGUGAUGAGCCCCGGGGAGCCGCAGUGAACAGGCUCUGGCGACUGUUUACCAAAAACACAGCUCUCUGCGAACUCGUAAGAGGAGGUAUAGGGAGCGACGCUUGCCCGGUGCCGGAAGGUCAAGGGGAGGGGUGCAAGCCCCGAACCGAAGCCCCGGUGAACGGCGGCCGUAACUAUAACGGUCCUAAGGUAGCGAAAUUCCUUGUCGGGUAAGUUCCGACCUGCACGAAAAGCGUAACGACCGGAGCGCUGUCUCGGCGAGGGACCCGGUGAAAUUGAACUGGCCGUGAAGAUGCGGCCUACCCGUGGCAGGACGAAAAGACCCCGUGGAGCUUUACUGCAGCCUGGUGUUGGCUCUUGGUCGCGCCUGCGUAGGAUAGGUGGGAGCCUGUGAACCCCCGCCUCCGGGUGGGGGGGAGGCGCCGGUGAAAUACCACCCUGGCGCGGCUGGGGGCCUAACCCUCGGAUGGGGGGACAGCGCUUGGCGGGCAGUUUGACUGGGGCGGUCGCCUCCUAAAAGGUAACGGAGGCGCCCAAAGGUCCCCUCAGGCGGGACGGAAAUCCGCCGGAGAGCGCAAGGGUAGAAGGGGGCCUGACUGCGAGGCCUGCAAGCCGAGCAGGGGCGAAAGCCGGGCCUAGUGAACCGGUGGUCCCGUGUGGAAGGGCCAUCGAUCAACGGAUAAAAGUUACCCCGGGGAUAACAGGCUGAUCUCCCCCGAGCGUCCACAGCGGCGGGGAGGUUUGGCACCUCGAUGUCGGCUCGUCGCAUCCUGGGGCUGAAGAAGGUCCCAAGGGUUGGGCUGUUCGCCCAUUAAAGCGGCACGCGAGCUGGGUUCAGAACGUCGUGAGACAGUUCGGUCUCUAUCCGCCACGGGCGCAGGAGGCUUGAGGGGGGCUCUUCCUAGUACGAGAGGACCGGAAGGGACGCACCUCUGGUUUCCCAGCUGUCCCUCCAGGGGCAUAAGCUGGGUAGCCAUGUGCGGAAGGGAUAACCGCUGAAAGCAUCUAAGCGGGAAGCCCGCCCCAAGAUGAGGCCUCCCACGGCGUCAAGCCGGUAAGGACCCGGGAAGACCACCCGGUGGAUGGGCCGGGGGUGUAAGCGCCGCGAGGCGUUGAGCCGACCGGUCCCAAUCGUCCGAGGUCUUGACCCCUCC",
+        "entity_poly_seq_length": 2915,
+        "entity_poly_polymer_type": "RNA",
+        "entity_poly_entity_type": "polyribonucleotide",
+        "nomenclature": [
+            "23SrRNA"
+        ],
+        "residues": [
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "2A",
+                    [
+                        " ",
+                        979,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 979,
+                "parent_auth_asym_id": "2A"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "2A",
+                    [
+                        " ",
+                        980,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 980,
+                "parent_auth_asym_id": "2A"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "2A",
+                    [
+                        " ",
+                        1003,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1003,
+                "parent_auth_asym_id": "2A"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "2A",
+                    [
+                        " ",
+                        1005,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 1005,
+                "parent_auth_asym_id": "2A"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "2A",
+                    [
+                        " ",
+                        1006,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 1006,
+                "parent_auth_asym_id": "2A"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "2A",
+                    [
+                        " ",
+                        1007,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 1007,
+                "parent_auth_asym_id": "2A"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "2A",
+                    [
+                        " ",
+                        1024,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1024,
+                "parent_auth_asym_id": "2A"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "2A",
+                    [
+                        " ",
+                        1025,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1025,
+                "parent_auth_asym_id": "2A"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "2A",
+                    [
+                        " ",
+                        1135,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 1135,
+                "parent_auth_asym_id": "2A"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "2A",
+                    [
+                        " ",
+                        1136,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1136,
+                "parent_auth_asym_id": "2A"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "2A",
+                    [
+                        " ",
+                        1137,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1137,
+                "parent_auth_asym_id": "2A"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "2A",
+                    [
+                        " ",
+                        1138,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1138,
+                "parent_auth_asym_id": "2A"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "2A",
+                    [
+                        " ",
+                        1139,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1139,
+                "parent_auth_asym_id": "2A"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "2A",
+                    [
+                        " ",
+                        1140,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 1140,
+                "parent_auth_asym_id": "2A"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "2A",
+                    [
+                        " ",
+                        1143,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 1143,
+                "parent_auth_asym_id": "2A"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "2A",
+                    [
+                        " ",
+                        1144,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1144,
+                "parent_auth_asym_id": "2A"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "2A",
+                    [
+                        " ",
+                        1145,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 1145,
+                "parent_auth_asym_id": "2A"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "2A",
+                    [
+                        " ",
+                        2398,
+                        " "
+                    ]
+                ],
+                "resname": "U",
+                "seqid": 2398,
+                "parent_auth_asym_id": "2A"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "2A",
+                    [
+                        " ",
+                        2399,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 2399,
+                "parent_auth_asym_id": "2A"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "2A",
+                    [
+                        " ",
+                        2400,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 2400,
+                "parent_auth_asym_id": "2A"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "2A",
+                    [
+                        " ",
+                        2401,
+                        " "
+                    ]
+                ],
+                "resname": "U",
+                "seqid": 2401,
+                "parent_auth_asym_id": "2A"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "2A",
+                    [
+                        " ",
+                        2412,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 2412,
+                "parent_auth_asym_id": "2A"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "2A",
+                    [
+                        " ",
+                        2413,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 2413,
+                "parent_auth_asym_id": "2A"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "2A",
+                    [
+                        " ",
+                        2414,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 2414,
+                "parent_auth_asym_id": "2A"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "2A",
+                    [
+                        " ",
+                        2415,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 2415,
+                "parent_auth_asym_id": "2A"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "2A",
+                    [
+                        " ",
+                        2416,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 2416,
+                "parent_auth_asym_id": "2A"
+            }
+        ]
+    },
+    "2a": {
+        "assembly_id": 1,
+        "asym_ids": [
+            "FA",
+            "JC"
+        ],
+        "auth_asym_id": "2a",
+        "parent_rcsb_id": "8EV7",
+        "src_organism_names": [
+            "Thermus thermophilus HB8"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            300852
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "16S Ribosomal RNA",
+        "entity_poly_strand_id": "1a,2a",
+        "entity_poly_seq_one_letter_code": "UUGUUGGAGAGUUUGAUCCUGGCUCAGGGUGAACGCUGGCGGCGUGCCUAAGACAUGCAAGUCGUGCGGGCCGCGGGGUUUUACUCCGUGGUCAGCGGCGGACGGGUGAGUAACGCGUGGGUGACCUACCCGGAAGAGGGGGACAACCCGGGGAAACUCGGGCUAAUCCCCCAUGUGGACCCGCCCCUUGGGGUGUGUCCAAAGGGCUUUGCCCGCUUCCGGAUGGGCCCGCGUCCCAUCAGCUAGUUGGUGGGGUAAUGGCCCACCAAGGCGACGACGGGUAGCCGGUCUGAGAGGAUGGCCGGCCACAGGGGCACUGAGACACGGGCCCCACUCCUACGGGAGGCAGCAGUUAGGAAUCUUCCGCAAUGGGCGCAAGCCUGACGGAGCGACGCCGCUUGGAGGAAGAAGCCCUUCGGGGUGUAAACUCCUGAACCCGGGACGAAACCCCCGACGAGGGGACUGACGGUACCGGGGUAAUAGCGCCGGCCAACUCCG(PSU)GCCAGCAGCC(7MG)CGGUAAUACGGAGGGCGCGAGCGUUACCCGGAUUCACUGGGCGUAAAGGGCGUGUAGGCGGCCUGGGGCGUCCCAUGUGAAAGACCACGGCUCAACCGUGGGGGAGCGUGGGAUACGCUCAGGCUAGACGGUGGGAGAGGGUGGUGGAAUUCCCGGAGUAGCGGUGAAAUGCGCAGAUACCGGGAGGAACGCCGAUGGCGAAGGCAGCCACCUGGUCCACCCGUGACGCUGAGGCGCGAAAGCGUGGGGAGCAAACCGGAUUAGAUACCCGGGUAGUCCACGCCCUAAACGAUGCGCGCUAGGUCUCUGGGUCUCCUGGGGGCCGAAGCUAACGCGUUAAGCGCGCCGCCUGGGGAGUACGGCCGCAAGGCUGAAACUCAAAGGAAUUGACGGGGGCCCGCACAAGCGGUGGAGCAUGUGGUUUAAUUCGAA(M2G)(5MC)AACGCGAAGAACCUUACCAGGCCUUGACAUGCUAGGGAACCCGGGUGAAAGCCUGGGGUGCCCCGCGAGGGGAGCCCUAGCACAGGUGCUGCAUGGCCGUCGUCAGCUCGUGCCGUGAGGUGUUGGGUUAAGUCCCGCAACGAGCGCAACCCCCGCCGUUAGUUGCCAGCGGUUCGGCCGGGCACUCUAACGGGACUGCCCGCGAAAGCGGGAGGAAGGAGGGGACGACGUCUGGUCAGCAUG(2MG)CCCUUACGGCCUGGGCGACACACGUGCUACAAUGCCCACUACAAAGCGAUGCCACCCGGCAACGGGGAGCUAAUCGCAAAAAGGUGGGCCCAGUUCGGAUUGGGGUCUGCAACCCGACCCCAUGAAGCCGGAAUCGCUAGUAAUCGCGGAUCAGCCAUGCCGCGGUGAAUACGUUCCCGGGCCUUGUACACAC(5MC)G(4OC)C(5MC)GU(5MC)ACGCCAUGGGAGCGGGCUCUACCCGAAGUCGCCGGGAGCCUACGGGCAGGCGCCGAGGGUAGGGCCCGUGACUGGGGCGAAGUCG(UR3)AACAAGGUAGCUGUACCGG(MA6)(MA6)GGUGCGGCUGGAUCACCUCCUUUCU",
+        "entity_poly_seq_one_letter_code_can": "UUGUUGGAGAGUUUGAUCCUGGCUCAGGGUGAACGCUGGCGGCGUGCCUAAGACAUGCAAGUCGUGCGGGCCGCGGGGUUUUACUCCGUGGUCAGCGGCGGACGGGUGAGUAACGCGUGGGUGACCUACCCGGAAGAGGGGGACAACCCGGGGAAACUCGGGCUAAUCCCCCAUGUGGACCCGCCCCUUGGGGUGUGUCCAAAGGGCUUUGCCCGCUUCCGGAUGGGCCCGCGUCCCAUCAGCUAGUUGGUGGGGUAAUGGCCCACCAAGGCGACGACGGGUAGCCGGUCUGAGAGGAUGGCCGGCCACAGGGGCACUGAGACACGGGCCCCACUCCUACGGGAGGCAGCAGUUAGGAAUCUUCCGCAAUGGGCGCAAGCCUGACGGAGCGACGCCGCUUGGAGGAAGAAGCCCUUCGGGGUGUAAACUCCUGAACCCGGGACGAAACCCCCGACGAGGGGACUGACGGUACCGGGGUAAUAGCGCCGGCCAACUCCGUGCCAGCAGCCGCGGUAAUACGGAGGGCGCGAGCGUUACCCGGAUUCACUGGGCGUAAAGGGCGUGUAGGCGGCCUGGGGCGUCCCAUGUGAAAGACCACGGCUCAACCGUGGGGGAGCGUGGGAUACGCUCAGGCUAGACGGUGGGAGAGGGUGGUGGAAUUCCCGGAGUAGCGGUGAAAUGCGCAGAUACCGGGAGGAACGCCGAUGGCGAAGGCAGCCACCUGGUCCACCCGUGACGCUGAGGCGCGAAAGCGUGGGGAGCAAACCGGAUUAGAUACCCGGGUAGUCCACGCCCUAAACGAUGCGCGCUAGGUCUCUGGGUCUCCUGGGGGCCGAAGCUAACGCGUUAAGCGCGCCGCCUGGGGAGUACGGCCGCAAGGCUGAAACUCAAAGGAAUUGACGGGGGCCCGCACAAGCGGUGGAGCAUGUGGUUUAAUUCGAAGCAACGCGAAGAACCUUACCAGGCCUUGACAUGCUAGGGAACCCGGGUGAAAGCCUGGGGUGCCCCGCGAGGGGAGCCCUAGCACAGGUGCUGCAUGGCCGUCGUCAGCUCGUGCCGUGAGGUGUUGGGUUAAGUCCCGCAACGAGCGCAACCCCCGCCGUUAGUUGCCAGCGGUUCGGCCGGGCACUCUAACGGGACUGCCCGCGAAAGCGGGAGGAAGGAGGGGACGACGUCUGGUCAGCAUGGCCCUUACGGCCUGGGCGACACACGUGCUACAAUGCCCACUACAAAGCGAUGCCACCCGGCAACGGGGAGCUAAUCGCAAAAAGGUGGGCCCAGUUCGGAUUGGGGUCUGCAACCCGACCCCAUGAAGCCGGAAUCGCUAGUAAUCGCGGAUCAGCCAUGCCGCGGUGAAUACGUUCCCGGGCCUUGUACACACCGCCCGUCACGCCAUGGGAGCGGGCUCUACCCGAAGUCGCCGGGAGCCUACGGGCAGGCGCCGAGGGUAGGGCCCGUGACUGGGGCGAAGUCGUAACAAGGUAGCUGUACCGGAAGGUGCGGCUGGAUCACCUCCUUUCU",
+        "entity_poly_seq_length": 1521,
+        "entity_poly_polymer_type": "RNA",
+        "entity_poly_entity_type": "polyribonucleotide",
+        "nomenclature": [
+            "16SrRNA"
+        ],
+        "residues": [
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "2a",
+                    [
+                        " ",
+                        1405,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1405,
+                "parent_auth_asym_id": "2a"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "2a",
+                    [
+                        " ",
+                        1406,
+                        " "
+                    ]
+                ],
+                "resname": "U",
+                "seqid": 1406,
+                "parent_auth_asym_id": "2a"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "2a",
+                    [
+                        " ",
+                        1408,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 1408,
+                "parent_auth_asym_id": "2a"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "2a",
+                    [
+                        " ",
+                        1409,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 1409,
+                "parent_auth_asym_id": "2a"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "2a",
+                    [
+                        " ",
+                        1491,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1491,
+                "parent_auth_asym_id": "2a"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "2a",
+                    [
+                        " ",
+                        1492,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 1492,
+                "parent_auth_asym_id": "2a"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "2a",
+                    [
+                        " ",
+                        1493,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 1493,
+                "parent_auth_asym_id": "2a"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "2a",
+                    [
+                        " ",
+                        1494,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1494,
+                "parent_auth_asym_id": "2a"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "2a",
+                    [
+                        " ",
+                        1495,
+                        " "
+                    ]
+                ],
+                "resname": "U",
+                "seqid": 1495,
+                "parent_auth_asym_id": "2a"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "2a",
+                    [
+                        " ",
+                        1496,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 1496,
+                "parent_auth_asym_id": "2a"
+            }
+        ]
+    },
+    "1Q": {
+        "assembly_id": 0,
+        "asym_ids": [
+            "L",
+            "PB"
+        ],
+        "auth_asym_id": "1Q",
+        "parent_rcsb_id": "8EV7",
+        "src_organism_names": [
+            "Thermus thermophilus HB8"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            300852
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "50S ribosomal protein L16",
+        "entity_poly_strand_id": "1Q,2Q",
+        "entity_poly_seq_one_letter_code": "MLMPRRMKYRKQQRGRLKGATKGGDYVAFGDYGLVALEPAWITAQQIEAARVAMVRHFRRGGKIFIRIFPDKPYTKKPLEVRMGKGKGNVEGYVAVVKPGRVMFEVAGVTEEQAMEALRIAGHKLPIKTKIVRRDAYDEAQ",
+        "entity_poly_seq_one_letter_code_can": "MLMPRRMKYRKQQRGRLKGATKGGDYVAFGDYGLVALEPAWITAQQIEAARVAMVRHFRRGGKIFIRIFPDKPYTKKPLEVRMGKGKGNVEGYVAVVKPGRVMFEVAGVTEEQAMEALRIAGHKLPIKTKIVRRDAYDEAQ",
+        "entity_poly_seq_length": 141,
+        "entity_poly_polymer_type": "Protein",
+        "entity_poly_entity_type": "polypeptide(L)",
+        "nomenclature": [
+            "uL16"
+        ],
+        "residues": [
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "1Q",
+                    [
+                        " ",
+                        8,
+                        " "
+                    ]
+                ],
+                "resname": "LYS",
+                "seqid": 8,
+                "parent_auth_asym_id": "1Q"
+            }
+        ]
+    },
+    "1a": {
+        "assembly_id": 0,
+        "asym_ids": [
+            "FA",
+            "JC"
+        ],
+        "auth_asym_id": "1a",
+        "parent_rcsb_id": "8EV7",
+        "src_organism_names": [
+            "Thermus thermophilus HB8"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            300852
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "16S Ribosomal RNA",
+        "entity_poly_strand_id": "1a,2a",
+        "entity_poly_seq_one_letter_code": "UUGUUGGAGAGUUUGAUCCUGGCUCAGGGUGAACGCUGGCGGCGUGCCUAAGACAUGCAAGUCGUGCGGGCCGCGGGGUUUUACUCCGUGGUCAGCGGCGGACGGGUGAGUAACGCGUGGGUGACCUACCCGGAAGAGGGGGACAACCCGGGGAAACUCGGGCUAAUCCCCCAUGUGGACCCGCCCCUUGGGGUGUGUCCAAAGGGCUUUGCCCGCUUCCGGAUGGGCCCGCGUCCCAUCAGCUAGUUGGUGGGGUAAUGGCCCACCAAGGCGACGACGGGUAGCCGGUCUGAGAGGAUGGCCGGCCACAGGGGCACUGAGACACGGGCCCCACUCCUACGGGAGGCAGCAGUUAGGAAUCUUCCGCAAUGGGCGCAAGCCUGACGGAGCGACGCCGCUUGGAGGAAGAAGCCCUUCGGGGUGUAAACUCCUGAACCCGGGACGAAACCCCCGACGAGGGGACUGACGGUACCGGGGUAAUAGCGCCGGCCAACUCCG(PSU)GCCAGCAGCC(7MG)CGGUAAUACGGAGGGCGCGAGCGUUACCCGGAUUCACUGGGCGUAAAGGGCGUGUAGGCGGCCUGGGGCGUCCCAUGUGAAAGACCACGGCUCAACCGUGGGGGAGCGUGGGAUACGCUCAGGCUAGACGGUGGGAGAGGGUGGUGGAAUUCCCGGAGUAGCGGUGAAAUGCGCAGAUACCGGGAGGAACGCCGAUGGCGAAGGCAGCCACCUGGUCCACCCGUGACGCUGAGGCGCGAAAGCGUGGGGAGCAAACCGGAUUAGAUACCCGGGUAGUCCACGCCCUAAACGAUGCGCGCUAGGUCUCUGGGUCUCCUGGGGGCCGAAGCUAACGCGUUAAGCGCGCCGCCUGGGGAGUACGGCCGCAAGGCUGAAACUCAAAGGAAUUGACGGGGGCCCGCACAAGCGGUGGAGCAUGUGGUUUAAUUCGAA(M2G)(5MC)AACGCGAAGAACCUUACCAGGCCUUGACAUGCUAGGGAACCCGGGUGAAAGCCUGGGGUGCCCCGCGAGGGGAGCCCUAGCACAGGUGCUGCAUGGCCGUCGUCAGCUCGUGCCGUGAGGUGUUGGGUUAAGUCCCGCAACGAGCGCAACCCCCGCCGUUAGUUGCCAGCGGUUCGGCCGGGCACUCUAACGGGACUGCCCGCGAAAGCGGGAGGAAGGAGGGGACGACGUCUGGUCAGCAUG(2MG)CCCUUACGGCCUGGGCGACACACGUGCUACAAUGCCCACUACAAAGCGAUGCCACCCGGCAACGGGGAGCUAAUCGCAAAAAGGUGGGCCCAGUUCGGAUUGGGGUCUGCAACCCGACCCCAUGAAGCCGGAAUCGCUAGUAAUCGCGGAUCAGCCAUGCCGCGGUGAAUACGUUCCCGGGCCUUGUACACAC(5MC)G(4OC)C(5MC)GU(5MC)ACGCCAUGGGAGCGGGCUCUACCCGAAGUCGCCGGGAGCCUACGGGCAGGCGCCGAGGGUAGGGCCCGUGACUGGGGCGAAGUCG(UR3)AACAAGGUAGCUGUACCGG(MA6)(MA6)GGUGCGGCUGGAUCACCUCCUUUCU",
+        "entity_poly_seq_one_letter_code_can": "UUGUUGGAGAGUUUGAUCCUGGCUCAGGGUGAACGCUGGCGGCGUGCCUAAGACAUGCAAGUCGUGCGGGCCGCGGGGUUUUACUCCGUGGUCAGCGGCGGACGGGUGAGUAACGCGUGGGUGACCUACCCGGAAGAGGGGGACAACCCGGGGAAACUCGGGCUAAUCCCCCAUGUGGACCCGCCCCUUGGGGUGUGUCCAAAGGGCUUUGCCCGCUUCCGGAUGGGCCCGCGUCCCAUCAGCUAGUUGGUGGGGUAAUGGCCCACCAAGGCGACGACGGGUAGCCGGUCUGAGAGGAUGGCCGGCCACAGGGGCACUGAGACACGGGCCCCACUCCUACGGGAGGCAGCAGUUAGGAAUCUUCCGCAAUGGGCGCAAGCCUGACGGAGCGACGCCGCUUGGAGGAAGAAGCCCUUCGGGGUGUAAACUCCUGAACCCGGGACGAAACCCCCGACGAGGGGACUGACGGUACCGGGGUAAUAGCGCCGGCCAACUCCGUGCCAGCAGCCGCGGUAAUACGGAGGGCGCGAGCGUUACCCGGAUUCACUGGGCGUAAAGGGCGUGUAGGCGGCCUGGGGCGUCCCAUGUGAAAGACCACGGCUCAACCGUGGGGGAGCGUGGGAUACGCUCAGGCUAGACGGUGGGAGAGGGUGGUGGAAUUCCCGGAGUAGCGGUGAAAUGCGCAGAUACCGGGAGGAACGCCGAUGGCGAAGGCAGCCACCUGGUCCACCCGUGACGCUGAGGCGCGAAAGCGUGGGGAGCAAACCGGAUUAGAUACCCGGGUAGUCCACGCCCUAAACGAUGCGCGCUAGGUCUCUGGGUCUCCUGGGGGCCGAAGCUAACGCGUUAAGCGCGCCGCCUGGGGAGUACGGCCGCAAGGCUGAAACUCAAAGGAAUUGACGGGGGCCCGCACAAGCGGUGGAGCAUGUGGUUUAAUUCGAAGCAACGCGAAGAACCUUACCAGGCCUUGACAUGCUAGGGAACCCGGGUGAAAGCCUGGGGUGCCCCGCGAGGGGAGCCCUAGCACAGGUGCUGCAUGGCCGUCGUCAGCUCGUGCCGUGAGGUGUUGGGUUAAGUCCCGCAACGAGCGCAACCCCCGCCGUUAGUUGCCAGCGGUUCGGCCGGGCACUCUAACGGGACUGCCCGCGAAAGCGGGAGGAAGGAGGGGACGACGUCUGGUCAGCAUGGCCCUUACGGCCUGGGCGACACACGUGCUACAAUGCCCACUACAAAGCGAUGCCACCCGGCAACGGGGAGCUAAUCGCAAAAAGGUGGGCCCAGUUCGGAUUGGGGUCUGCAACCCGACCCCAUGAAGCCGGAAUCGCUAGUAAUCGCGGAUCAGCCAUGCCGCGGUGAAUACGUUCCCGGGCCUUGUACACACCGCCCGUCACGCCAUGGGAGCGGGCUCUACCCGAAGUCGCCGGGAGCCUACGGGCAGGCGCCGAGGGUAGGGCCCGUGACUGGGGCGAAGUCGUAACAAGGUAGCUGUACCGGAAGGUGCGGCUGGAUCACCUCCUUUCU",
+        "entity_poly_seq_length": 1521,
+        "entity_poly_polymer_type": "RNA",
+        "entity_poly_entity_type": "polyribonucleotide",
+        "nomenclature": [
+            "16SrRNA"
+        ],
+        "residues": [
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "1a",
+                    [
+                        " ",
+                        1405,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1405,
+                "parent_auth_asym_id": "1a"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "1a",
+                    [
+                        " ",
+                        1406,
+                        " "
+                    ]
+                ],
+                "resname": "U",
+                "seqid": 1406,
+                "parent_auth_asym_id": "1a"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "1a",
+                    [
+                        " ",
+                        1408,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 1408,
+                "parent_auth_asym_id": "1a"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "1a",
+                    [
+                        " ",
+                        1409,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 1409,
+                "parent_auth_asym_id": "1a"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "1a",
+                    [
+                        " ",
+                        1491,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1491,
+                "parent_auth_asym_id": "1a"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "1a",
+                    [
+                        " ",
+                        1492,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 1492,
+                "parent_auth_asym_id": "1a"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "1a",
+                    [
+                        " ",
+                        1493,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 1493,
+                "parent_auth_asym_id": "1a"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "1a",
+                    [
+                        " ",
+                        1494,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1494,
+                "parent_auth_asym_id": "1a"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "1a",
+                    [
+                        " ",
+                        1495,
+                        " "
+                    ]
+                ],
+                "resname": "U",
+                "seqid": 1495,
+                "parent_auth_asym_id": "1a"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "1a",
+                    [
+                        " ",
+                        1496,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 1496,
+                "parent_auth_asym_id": "1a"
+            },
+            {
+                "full_id": [
+                    "8EV7",
+                    0,
+                    "1a",
+                    [
+                        " ",
+                        1497,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1497,
+                "parent_auth_asym_id": "1a"
+            }
+        ]
+    }
+}

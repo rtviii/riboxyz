@@ -1,0 +1,480 @@
+{
+    "AZ": {
+        "assembly_id": 0,
+        "asym_ids": [
+            "AA"
+        ],
+        "auth_asym_id": "AZ",
+        "parent_rcsb_id": "4V68",
+        "src_organism_names": [
+            "Thermus thermophilus"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            274
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "Elongation factor Tu-A",
+        "entity_poly_strand_id": "AZ",
+        "entity_poly_seq_one_letter_code": "AKGEFIRTKPHVNVGTIGHVDHGKTTLTAALTFVTAAENPNVEVKDYGDIDKAPEERARGITINTAHVEYETAKRHYSHVDCPGHADYIKNMITGAAQMDGAILVVSAADGPMPQTREHILLARQVGVPYIVVFMNKVDMVDDPELLDLVEMEVRDLLNQYEFPGDEVPVIRGSALLALEQMHRNPKTRRGENEWVDKIWELLDAIDEYIPTPVRDVDKPFLMPVEDVFTITGRGTVATGRIERGKVKVGDEVEIVGLAPETRKTVVTGVEMHRKTLQEGIAGDNVGVLLRGVSREEVERGQVLAKPGSITPHTKFEASVYVLKKEEGGRHTGFFSGYRPQFYFRTTDVTGVVQLPPGVEMVMPGDNVTFTVELIKPVALEEGLRFAIREGGRTVGAGVVTKILE",
+        "entity_poly_seq_one_letter_code_can": "AKGEFIRTKPHVNVGTIGHVDHGKTTLTAALTFVTAAENPNVEVKDYGDIDKAPEERARGITINTAHVEYETAKRHYSHVDCPGHADYIKNMITGAAQMDGAILVVSAADGPMPQTREHILLARQVGVPYIVVFMNKVDMVDDPELLDLVEMEVRDLLNQYEFPGDEVPVIRGSALLALEQMHRNPKTRRGENEWVDKIWELLDAIDEYIPTPVRDVDKPFLMPVEDVFTITGRGTVATGRIERGKVKVGDEVEIVGLAPETRKTVVTGVEMHRKTLQEGIAGDNVGVLLRGVSREEVERGQVLAKPGSITPHTKFEASVYVLKKEEGGRHTGFFSGYRPQFYFRTTDVTGVVQLPPGVEMVMPGDNVTFTVELIKPVALEEGLRFAIREGGRTVGAGVVTKILE",
+        "entity_poly_seq_length": 405,
+        "entity_poly_polymer_type": "Protein",
+        "entity_poly_entity_type": "polypeptide(L)",
+        "nomenclature": [
+            "EF-Tu"
+        ],
+        "residues": [
+            {
+                "full_id": [
+                    "4V68",
+                    0,
+                    "AZ",
+                    [
+                        " ",
+                        93,
+                        " "
+                    ]
+                ],
+                "resname": "ILE",
+                "seqid": 93,
+                "parent_auth_asym_id": "AZ"
+            },
+            {
+                "full_id": [
+                    "4V68",
+                    0,
+                    "AZ",
+                    [
+                        " ",
+                        97,
+                        " "
+                    ]
+                ],
+                "resname": "ALA",
+                "seqid": 97,
+                "parent_auth_asym_id": "AZ"
+            },
+            {
+                "full_id": [
+                    "4V68",
+                    0,
+                    "AZ",
+                    [
+                        " ",
+                        117,
+                        " "
+                    ]
+                ],
+                "resname": "ARG",
+                "seqid": 117,
+                "parent_auth_asym_id": "AZ"
+            },
+            {
+                "full_id": [
+                    "4V68",
+                    0,
+                    "AZ",
+                    [
+                        " ",
+                        118,
+                        " "
+                    ]
+                ],
+                "resname": "GLU",
+                "seqid": 118,
+                "parent_auth_asym_id": "AZ"
+            },
+            {
+                "full_id": [
+                    "4V68",
+                    0,
+                    "AZ",
+                    [
+                        " ",
+                        121,
+                        " "
+                    ]
+                ],
+                "resname": "LEU",
+                "seqid": 121,
+                "parent_auth_asym_id": "AZ"
+            },
+            {
+                "full_id": [
+                    "4V68",
+                    0,
+                    "AZ",
+                    [
+                        " ",
+                        122,
+                        " "
+                    ]
+                ],
+                "resname": "LEU",
+                "seqid": 122,
+                "parent_auth_asym_id": "AZ"
+            },
+            {
+                "full_id": [
+                    "4V68",
+                    0,
+                    "AZ",
+                    [
+                        " ",
+                        124,
+                        " "
+                    ]
+                ],
+                "resname": "ARG",
+                "seqid": 124,
+                "parent_auth_asym_id": "AZ"
+            },
+            {
+                "full_id": [
+                    "4V68",
+                    0,
+                    "AZ",
+                    [
+                        " ",
+                        125,
+                        " "
+                    ]
+                ],
+                "resname": "GLN",
+                "seqid": 125,
+                "parent_auth_asym_id": "AZ"
+            },
+            {
+                "full_id": [
+                    "4V68",
+                    0,
+                    "AZ",
+                    [
+                        " ",
+                        126,
+                        " "
+                    ]
+                ],
+                "resname": "VAL",
+                "seqid": 126,
+                "parent_auth_asym_id": "AZ"
+            },
+            {
+                "full_id": [
+                    "4V68",
+                    0,
+                    "AZ",
+                    [
+                        " ",
+                        127,
+                        " "
+                    ]
+                ],
+                "resname": "GLY",
+                "seqid": 127,
+                "parent_auth_asym_id": "AZ"
+            },
+            {
+                "full_id": [
+                    "4V68",
+                    0,
+                    "AZ",
+                    [
+                        " ",
+                        160,
+                        " "
+                    ]
+                ],
+                "resname": "GLN",
+                "seqid": 160,
+                "parent_auth_asym_id": "AZ"
+            },
+            {
+                "full_id": [
+                    "4V68",
+                    0,
+                    "AZ",
+                    [
+                        " ",
+                        161,
+                        " "
+                    ]
+                ],
+                "resname": "TYR",
+                "seqid": 161,
+                "parent_auth_asym_id": "AZ"
+            },
+            {
+                "full_id": [
+                    "4V68",
+                    0,
+                    "AZ",
+                    [
+                        " ",
+                        162,
+                        " "
+                    ]
+                ],
+                "resname": "GLU",
+                "seqid": 162,
+                "parent_auth_asym_id": "AZ"
+            },
+            {
+                "full_id": [
+                    "4V68",
+                    0,
+                    "AZ",
+                    [
+                        " ",
+                        321,
+                        " "
+                    ]
+                ],
+                "resname": "TYR",
+                "seqid": 321,
+                "parent_auth_asym_id": "AZ"
+            },
+            {
+                "full_id": [
+                    "4V68",
+                    0,
+                    "AZ",
+                    [
+                        " ",
+                        323,
+                        " "
+                    ]
+                ],
+                "resname": "LEU",
+                "seqid": 323,
+                "parent_auth_asym_id": "AZ"
+            },
+            {
+                "full_id": [
+                    "4V68",
+                    0,
+                    "AZ",
+                    [
+                        " ",
+                        325,
+                        " "
+                    ]
+                ],
+                "resname": "LYS",
+                "seqid": 325,
+                "parent_auth_asym_id": "AZ"
+            },
+            {
+                "full_id": [
+                    "4V68",
+                    0,
+                    "AZ",
+                    [
+                        " ",
+                        326,
+                        " "
+                    ]
+                ],
+                "resname": "GLU",
+                "seqid": 326,
+                "parent_auth_asym_id": "AZ"
+            },
+            {
+                "full_id": [
+                    "4V68",
+                    0,
+                    "AZ",
+                    [
+                        " ",
+                        327,
+                        " "
+                    ]
+                ],
+                "resname": "GLU",
+                "seqid": 327,
+                "parent_auth_asym_id": "AZ"
+            },
+            {
+                "full_id": [
+                    "4V68",
+                    0,
+                    "AZ",
+                    [
+                        " ",
+                        328,
+                        " "
+                    ]
+                ],
+                "resname": "GLY",
+                "seqid": 328,
+                "parent_auth_asym_id": "AZ"
+            },
+            {
+                "full_id": [
+                    "4V68",
+                    0,
+                    "AZ",
+                    [
+                        " ",
+                        343,
+                        " "
+                    ]
+                ],
+                "resname": "TYR",
+                "seqid": 343,
+                "parent_auth_asym_id": "AZ"
+            },
+            {
+                "full_id": [
+                    "4V68",
+                    0,
+                    "AZ",
+                    [
+                        " ",
+                        344,
+                        " "
+                    ]
+                ],
+                "resname": "PHE",
+                "seqid": 344,
+                "parent_auth_asym_id": "AZ"
+            },
+            {
+                "full_id": [
+                    "4V68",
+                    0,
+                    "AZ",
+                    [
+                        " ",
+                        345,
+                        " "
+                    ]
+                ],
+                "resname": "ARG",
+                "seqid": 345,
+                "parent_auth_asym_id": "AZ"
+            },
+            {
+                "full_id": [
+                    "4V68",
+                    0,
+                    "AZ",
+                    [
+                        " ",
+                        385,
+                        " "
+                    ]
+                ],
+                "resname": "ARG",
+                "seqid": 385,
+                "parent_auth_asym_id": "AZ"
+            },
+            {
+                "full_id": [
+                    "4V68",
+                    0,
+                    "AZ",
+                    [
+                        " ",
+                        386,
+                        " "
+                    ]
+                ],
+                "resname": "PHE",
+                "seqid": 386,
+                "parent_auth_asym_id": "AZ"
+            },
+            {
+                "full_id": [
+                    "4V68",
+                    0,
+                    "AZ",
+                    [
+                        " ",
+                        387,
+                        " "
+                    ]
+                ],
+                "resname": "ALA",
+                "seqid": 387,
+                "parent_auth_asym_id": "AZ"
+            },
+            {
+                "full_id": [
+                    "4V68",
+                    0,
+                    "AZ",
+                    [
+                        " ",
+                        389,
+                        " "
+                    ]
+                ],
+                "resname": "ARG",
+                "seqid": 389,
+                "parent_auth_asym_id": "AZ"
+            },
+            {
+                "full_id": [
+                    "4V68",
+                    0,
+                    "AZ",
+                    [
+                        " ",
+                        394,
+                        " "
+                    ]
+                ],
+                "resname": "THR",
+                "seqid": 394,
+                "parent_auth_asym_id": "AZ"
+            },
+            {
+                "full_id": [
+                    "4V68",
+                    0,
+                    "AZ",
+                    [
+                        " ",
+                        396,
+                        " "
+                    ]
+                ],
+                "resname": "GLY",
+                "seqid": 396,
+                "parent_auth_asym_id": "AZ"
+            },
+            {
+                "full_id": [
+                    "4V68",
+                    0,
+                    "AZ",
+                    [
+                        " ",
+                        397,
+                        " "
+                    ]
+                ],
+                "resname": "ALA",
+                "seqid": 397,
+                "parent_auth_asym_id": "AZ"
+            },
+            {
+                "full_id": [
+                    "4V68",
+                    0,
+                    "AZ",
+                    [
+                        " ",
+                        398,
+                        " "
+                    ]
+                ],
+                "resname": "GLY",
+                "seqid": 398,
+                "parent_auth_asym_id": "AZ"
+            }
+        ]
+    }
+}

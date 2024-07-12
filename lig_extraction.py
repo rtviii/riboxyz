@@ -20,12 +20,22 @@ def all_structs_for_lig(chemid:str):
 #! save
 
 
-CHEMID = "TEL"
-for i in  all_structs_for_lig(CHEMID):
-    rcsb_id  = i[0]
-    path = Assets(rcsb_id).paths.binding_site(CHEMID)
-    bsite = bsite_ligand(CHEMID, rcsb_id)
-    with open(path, "w+") as f:
-        json.dump(bsite, f, indent=4)
-        print("Saved: ", path)
+for CHEMID in CHEMIDS:
+    for i in  all_structs_for_lig(CHEMID):
+        rcsb_id = i[0]
+        path    = Assets(rcsb_id).paths.binding_site(CHEMID)
+        bsite   = bsite_ligand(CHEMID, rcsb_id)
+        with open(path, "w+") as f:
+            json.dump(bsite, f, indent=4)
+            print("Saved: ", path)
+
+        path2 = "/home/rtviii/dev/riboxyz/antibiotic_bsites/{}_{}.json".format(CHEMID, rcsb_id)
+        with open(path2, "w+") as f:
+            json.dump(bsite, f, indent=4)
+            print("Saved: ", path2)
+
+
+# subprocess.run(["chimerax", "--script", "/home/rtviii/dev/riboxyz/chimerax/ligand_vis.py", "--", CHEMID])
+
+# x chimerax vis
 

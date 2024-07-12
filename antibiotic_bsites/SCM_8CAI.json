@@ -1,0 +1,283 @@
+{
+    "E": {
+        "assembly_id": 0,
+        "asym_ids": [
+            "E"
+        ],
+        "auth_asym_id": "E",
+        "parent_rcsb_id": "8CAI",
+        "src_organism_names": [
+            "Escherichia coli BW25113"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            679895
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "Small ribosomal subunit protein uS5",
+        "entity_poly_strand_id": "E",
+        "entity_poly_seq_one_letter_code": "MAHIEKQAGELQEKLIAVNRVSKTVKGGRIFSFTALTVVGDGNGRVGFGYGKAREVPAAIQKAMEKARRNMINVALNNGTLQHPVKGVHTGSRVFMQPASEGTGIIAGGAMRAVLEVAGVHNVLAKAYGSTNPINVVRATIDGLENMNSPEMVAAKRGKSVEEILGK",
+        "entity_poly_seq_one_letter_code_can": "MAHIEKQAGELQEKLIAVNRVSKTVKGGRIFSFTALTVVGDGNGRVGFGYGKAREVPAAIQKAMEKARRNMINVALNNGTLQHPVKGVHTGSRVFMQPASEGTGIIAGGAMRAVLEVAGVHNVLAKAYGSTNPINVVRATIDGLENMNSPEMVAAKRGKSVEEILGK",
+        "entity_poly_seq_length": 167,
+        "entity_poly_polymer_type": "Protein",
+        "entity_poly_entity_type": "polypeptide(L)",
+        "nomenclature": [
+            "uS5"
+        ],
+        "residues": [
+            {
+                "full_id": [
+                    "8CAI",
+                    0,
+                    "E",
+                    [
+                        " ",
+                        26,
+                        " "
+                    ]
+                ],
+                "resname": "LYS",
+                "seqid": 26,
+                "parent_auth_asym_id": "E"
+            },
+            {
+                "full_id": [
+                    "8CAI",
+                    0,
+                    "E",
+                    [
+                        " ",
+                        27,
+                        " "
+                    ]
+                ],
+                "resname": "GLY",
+                "seqid": 27,
+                "parent_auth_asym_id": "E"
+            }
+        ]
+    },
+    "A": {
+        "assembly_id": 0,
+        "asym_ids": [
+            "A"
+        ],
+        "auth_asym_id": "A",
+        "parent_rcsb_id": "8CAI",
+        "src_organism_names": [
+            "Escherichia coli BW25113"
+        ],
+        "host_organism_names": [],
+        "src_organism_ids": [
+            679895
+        ],
+        "host_organism_ids": [],
+        "rcsb_pdbx_description": "16S rRNA",
+        "entity_poly_strand_id": "A",
+        "entity_poly_seq_one_letter_code": "AAAUUGAAGAGUUUGAUCAUGGCUCAGAUUGAACGCUGGCGGCAGGCCUAACACAUGCAAGUCGAACGGUAACAGGAAGAAGCUUGCUUCUUUGCUGACGAGUGGCGGACGGGUGAGUAAUGUCUGGGAAACUGCCUGAUGGAGGGGGAUAACUACUGGAAACGGUAGCUAAUACCGCAUAACGUCGCAAGACCAAAGAGGGGGACCUUCGGGCCUCUUGCCAUCGGAUGUGCCCAGAUGGGAUUAGCUAGUAGGUGGGGUAACGGCUCACCUAGGCGACGAUCCCUAGCUGGUCUGAGAGGAUGACCAGCCACACUGGAACUGAGACACGGUCCAGACUCCUACGGGAGGCAGCAGUGGGGAAUAUUGCACAAUGGGCGCAAGCCUGAUGCAGCCAUGCCGCGUGUAUGAAGAAGGCCUUCGGGUUGUAAAGUACUUUCAGCGGGGAGGAAGGGAGUAAAGUUAAUACCUUUGCUCAUUGACGUUACCCGCAGAAGAAGCACCGGCUAACUCCG(PSU)GCCAGCAGCC(G7M)CGGUAAUACGGAGGGUGCAAGCGUUAAUCGGAAUUACUGGGCGUAAAGCGCACGCAGGCGGUUUGUUAAGUCAGAUGUGAAAUCCCCGGGCUCAACCUGGGAACUGCAUCUGAUACUGGCAAGCUUGAGUCUCGUAGAGGGGGGUAGAAUUCCAGGUGUAGCGGUGAAAUGCGUAGAGAUCUGGAGGAAUACCGGUGGCGAAGGCGGCCCCCUGGACGAAGACUGACGCUCAGGUGCGAAAGCGUGGGGAGCAAACAGGAUUAGAUACCCUGGUAGUCCACGCCGUAAACGAUGUCGACUUGGAGGUUGUGCCCUUGAGGCGUGGCUUCCGGAGCUAACGCGUUAAGUCGACCGCCUGGGGAGUACGGCCGCAAGGUUAAAACUCAAAUGAAUUGACGGGGGCCCGCACAAGCGGUGGAGCAUGUGGUUUAAUUCGAU(2MG)(5MC)AACGCGAAGAACCUUACCUGGUCUUGACAUCCACGGAAGUUUUCAGAGAUGAGAAUGUGCCUUCGGGAACCGUGAGACAGGUGCUGCAUGGCUGUCGUCAGCUCGUGUUGUGAAAUGUUGGGUUAAGUCCCGCAACGAGCGCAACCCUUAUCCUUUGUUGCCAGCGGUCCGGCCGGGAACUCAAAGGAGACUGCCAGUGAUAAACUGGAGGAAGGUGGGGAUGACGUCAAGUCAUCAUG(2MG)CCCUUACGACCAGGGCUACACACGUGCUACAAUGGCGCAUACAAAGAGAAGCGACCUCGCGAGAGCAAGCGGACCUCAUAAAGUGCGUCGUAGUCCGGAUUGGAGUCUGCAACUCGACUCCAUGAAGUCGGAAUCGCUAGUAAUCGUGGAUCAGAAUGCCACGGUGAAUACGUUCCCGGGCCUUGUACACACCG(4OC)CCGU(5MC)ACACCAUGGGAGUGGGUUGCAAAAGAAGUAGGUAGCUUAACCUUCGGGAGGGCGCUUACCACUUUGUGAUUCAUGACUGGGGUGAAGUCG(UR3)AACAAGGUAACCGUAGG(2MG)G(MA6)(MA6)CCUGCGGUUGGAUCACCUCCU",
+        "entity_poly_seq_one_letter_code_can": "AAAUUGAAGAGUUUGAUCAUGGCUCAGAUUGAACGCUGGCGGCAGGCCUAACACAUGCAAGUCGAACGGUAACAGGAAGAAGCUUGCUUCUUUGCUGACGAGUGGCGGACGGGUGAGUAAUGUCUGGGAAACUGCCUGAUGGAGGGGGAUAACUACUGGAAACGGUAGCUAAUACCGCAUAACGUCGCAAGACCAAAGAGGGGGACCUUCGGGCCUCUUGCCAUCGGAUGUGCCCAGAUGGGAUUAGCUAGUAGGUGGGGUAACGGCUCACCUAGGCGACGAUCCCUAGCUGGUCUGAGAGGAUGACCAGCCACACUGGAACUGAGACACGGUCCAGACUCCUACGGGAGGCAGCAGUGGGGAAUAUUGCACAAUGGGCGCAAGCCUGAUGCAGCCAUGCCGCGUGUAUGAAGAAGGCCUUCGGGUUGUAAAGUACUUUCAGCGGGGAGGAAGGGAGUAAAGUUAAUACCUUUGCUCAUUGACGUUACCCGCAGAAGAAGCACCGGCUAACUCCGUGCCAGCAGCCGCGGUAAUACGGAGGGUGCAAGCGUUAAUCGGAAUUACUGGGCGUAAAGCGCACGCAGGCGGUUUGUUAAGUCAGAUGUGAAAUCCCCGGGCUCAACCUGGGAACUGCAUCUGAUACUGGCAAGCUUGAGUCUCGUAGAGGGGGGUAGAAUUCCAGGUGUAGCGGUGAAAUGCGUAGAGAUCUGGAGGAAUACCGGUGGCGAAGGCGGCCCCCUGGACGAAGACUGACGCUCAGGUGCGAAAGCGUGGGGAGCAAACAGGAUUAGAUACCCUGGUAGUCCACGCCGUAAACGAUGUCGACUUGGAGGUUGUGCCCUUGAGGCGUGGCUUCCGGAGCUAACGCGUUAAGUCGACCGCCUGGGGAGUACGGCCGCAAGGUUAAAACUCAAAUGAAUUGACGGGGGCCCGCACAAGCGGUGGAGCAUGUGGUUUAAUUCGAUGCAACGCGAAGAACCUUACCUGGUCUUGACAUCCACGGAAGUUUUCAGAGAUGAGAAUGUGCCUUCGGGAACCGUGAGACAGGUGCUGCAUGGCUGUCGUCAGCUCGUGUUGUGAAAUGUUGGGUUAAGUCCCGCAACGAGCGCAACCCUUAUCCUUUGUUGCCAGCGGUCCGGCCGGGAACUCAAAGGAGACUGCCAGUGAUAAACUGGAGGAAGGUGGGGAUGACGUCAAGUCAUCAUGGCCCUUACGACCAGGGCUACACACGUGCUACAAUGGCGCAUACAAAGAGAAGCGACCUCGCGAGAGCAAGCGGACCUCAUAAAGUGCGUCGUAGUCCGGAUUGGAGUCUGCAACUCGACUCCAUGAAGUCGGAAUCGCUAGUAAUCGUGGAUCAGAAUGCCACGGUGAAUACGUUCCCGGGCCUUGUACACACCGCCCGUCACACCAUGGGAGUGGGUUGCAAAAGAAGUAGGUAGCUUAACCUUCGGGAGGGCGCUUACCACUUUGUGAUUCAUGACUGGGGUGAAGUCGUAACAAGGUAACCGUAGGGGAACCUGCGGUUGGAUCACCUCCU",
+        "entity_poly_seq_length": 1540,
+        "entity_poly_polymer_type": "RNA",
+        "entity_poly_entity_type": "polyribonucleotide",
+        "nomenclature": [
+            "16SrRNA"
+        ],
+        "residues": [
+            {
+                "full_id": [
+                    "8CAI",
+                    0,
+                    "A",
+                    [
+                        " ",
+                        1063,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 1063,
+                "parent_auth_asym_id": "A"
+            },
+            {
+                "full_id": [
+                    "8CAI",
+                    0,
+                    "A",
+                    [
+                        " ",
+                        1064,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1064,
+                "parent_auth_asym_id": "A"
+            },
+            {
+                "full_id": [
+                    "8CAI",
+                    0,
+                    "A",
+                    [
+                        " ",
+                        1066,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 1066,
+                "parent_auth_asym_id": "A"
+            },
+            {
+                "full_id": [
+                    "8CAI",
+                    0,
+                    "A",
+                    [
+                        " ",
+                        1068,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1068,
+                "parent_auth_asym_id": "A"
+            },
+            {
+                "full_id": [
+                    "8CAI",
+                    0,
+                    "A",
+                    [
+                        " ",
+                        1069,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 1069,
+                "parent_auth_asym_id": "A"
+            },
+            {
+                "full_id": [
+                    "8CAI",
+                    0,
+                    "A",
+                    [
+                        " ",
+                        1070,
+                        " "
+                    ]
+                ],
+                "resname": "U",
+                "seqid": 1070,
+                "parent_auth_asym_id": "A"
+            },
+            {
+                "full_id": [
+                    "8CAI",
+                    0,
+                    "A",
+                    [
+                        " ",
+                        1191,
+                        " "
+                    ]
+                ],
+                "resname": "A",
+                "seqid": 1191,
+                "parent_auth_asym_id": "A"
+            },
+            {
+                "full_id": [
+                    "8CAI",
+                    0,
+                    "A",
+                    [
+                        " ",
+                        1192,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 1192,
+                "parent_auth_asym_id": "A"
+            },
+            {
+                "full_id": [
+                    "8CAI",
+                    0,
+                    "A",
+                    [
+                        " ",
+                        1193,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1193,
+                "parent_auth_asym_id": "A"
+            },
+            {
+                "full_id": [
+                    "8CAI",
+                    0,
+                    "A",
+                    [
+                        " ",
+                        1194,
+                        " "
+                    ]
+                ],
+                "resname": "U",
+                "seqid": 1194,
+                "parent_auth_asym_id": "A"
+            },
+            {
+                "full_id": [
+                    "8CAI",
+                    0,
+                    "A",
+                    [
+                        " ",
+                        1386,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1386,
+                "parent_auth_asym_id": "A"
+            },
+            {
+                "full_id": [
+                    "8CAI",
+                    0,
+                    "A",
+                    [
+                        " ",
+                        1387,
+                        " "
+                    ]
+                ],
+                "resname": "G",
+                "seqid": 1387,
+                "parent_auth_asym_id": "A"
+            },
+            {
+                "full_id": [
+                    "8CAI",
+                    0,
+                    "A",
+                    [
+                        " ",
+                        1388,
+                        " "
+                    ]
+                ],
+                "resname": "C",
+                "seqid": 1388,
+                "parent_auth_asym_id": "A"
+            }
+        ]
+    }
+}
