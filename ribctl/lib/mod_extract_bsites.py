@@ -111,12 +111,15 @@ def bsite_extrarbx_polymer(auth_asym_id:str, structure:Structure )->BindingSite:
     binding_site_polymer: BindingSite   = get_polymer_nbrs(residues, structure )
     return binding_site_polymer
 
-def bsite_ligand(chemicalId:str, structure:Structure )->BindingSite:
+def bsite_ligand(chemicalId:str, rcsb_id:str )->BindingSite:
+
+    print("Ligand binding site extraction proceeds for ligand: {} in structure: {}".format(chemicalId, rcsb_id))
 
     chemicalId = chemicalId.upper()
 
-    residues           : list[Residue] = get_ligand_residue_ids(chemicalId, structure)
-    binding_site_ligand: BindingSite   = get_ligand_nbrs(residues, structure)
+    _structure_cif_handle :Structure      = utils.open_structure(rcsb_id,'cif')
+    residues              : list[Residue] = get_ligand_residue_ids(chemicalId, _structure_cif_handle)
+    binding_site_ligand   : BindingSite   = get_ligand_nbrs(residues, _structure_cif_handle)
 
     return binding_site_ligand.model_dump()
 
@@ -132,15 +135,8 @@ if __name__ == "__main__":
     _structure_cif_handle :Structure        = utils.open_structure(PDBID,'cif')
     struct_profile_handle:RibosomeStructure = RibosomeStructure.model_validate(utils.open_structure(PDBID,'json'))
 
-    # liglike_polys = struct_polymeric_factor_ids(struct_profile_handle)
     ligands       = struct_ligand_ids(PDBID, struct_profile_handle)
 
-
-    # if liglike_polys != None:
-    #     for polyref in liglike_polys:
-    #         bsite_extrarbx_polymer(polyref.auth_asym_id, _structure_cif_handle)
-
     for l in ligands:
-        # pprint(l.model_dump())
-        bs = bsite_ligand(l.chemicalId , _structure_cif_handle)
+        bs = bsite_ligand(l.chemicalId , PDBID)
         pprint(bs)

@@ -41,6 +41,9 @@ class AssetPath:
         self.rcsb_id = rcsb_id
         pass
 
+    def binding_site(self, chemId:str):
+        return f"{self.dir}/{self.rcsb_id}_{chemId}.json"
+    
     @property
     def dir(self):
         return os.path.join(RIBETL_DATA, self.rcsb_id)
@@ -293,7 +296,7 @@ class Assets:
 
     rcsb_id: str
     ro     : RibosomeOps
-    paths : AssetPath
+    paths  : AssetPath
     
     def __init__(self, rcsb_id: str) -> None:
         self.rcsb_id = rcsb_id
