@@ -12,14 +12,13 @@ from Bio import BiopythonExperimentalWarning, BiopythonWarning, BiopythonDepreca
 with warnings.catch_warnings():
 	warnings.simplefilter('ignore', BiopythonDeprecationWarning)
 	from Bio import pairwise2
-
 from ribctl.lib.schema.types_binding_site import LigandPrediction, PredictedResiduesPolymer
 from ribctl.lib.schema.types_ribosome import PolymerClass, RibosomeStructure
 from ribctl.lib.mod_extract_bsites import  BindingSite, struct_ligand_ids, bsite_extrarbx_polymer
 from ribctl.lib.utils import open_structure
-import numpy as np
 
-n1      = np.array
+
+
 
 class SeqMatch():
 	def __init__(self,
@@ -59,7 +58,7 @@ class SeqMatch():
 		Basically, "count back ignoring gaps"
 		"""
 		if resid > len(alntgt):
-			exit(IndexError(f"Passed residue with invalid index ({resid}) to back-match to target.Seqlen:{len(alntgt)}"))
+			raise IndexError(f"Passed residue with invalid index ({resid}) to back-match to target.Seqlen:{len(alntgt)}")
 		counter_proper = 0
 		for i,char in enumerate(alntgt):
 			if i == resid:
@@ -111,66 +110,52 @@ class SeqMatch():
 
 def struct_bsites(rcsb_id:str):
 	"""Returns a list of binding sites from a structure"""
-	rcsb_id =rcsb_id.upper()
-	struct_profile_handle = RibosomeStructure.parse_obj(open_structure(rcsb_id, 'json'))
-	# liglike_polys = struct_polymeric_factor_ids(struct_profile_handle)
-	ligands       = struct_ligand_ids(rcsb_id, struct_profile_handle)
-	return ligands, liglike_polys
+	rcsb_id               = rcsb_id.upper()
+	struct_profile_handle = RibosomeStructure.model_validate(open_structure(rcsb_id, 'json'))
+	ligands               = struct_ligand_ids(rcsb_id, struct_profile_handle)
+	return ligands
 
 def open_bsite(path:str)->BindingSite:
 	with open(os.path.join(path), 'rb') as infile:
 		data = json.load(infile)
-	return BindingSite.parse_obj(data)
+	return BindingSite.model_validate(data)
 	
-def init_transpose_ligand( 
-		target_profile:RibosomeStructure,
-		binding_site : BindingSite
-	)->LigandPrediction:
+def init_transpose_ligand(target_profile:RibosomeStructure, binding_site: BindingSite)->LigandPrediction:
 	"""returns @LigandPrediction"""
-
 	by_class_origin_polymers:dict[PolymerClass, dict] = {}
-
 	origin_polymers = binding_site.dict()
-
 
 	for ( auth_asym_id, nbr_polymer ) in origin_polymers.items():
 		if len(nbr_polymer['nomenclature']) <1:
 			print("auth asym id " + auth_asym_id + " has no nomenclature:" +  nbr_polymer['nomenclature'] +". Skipping -1")
 			continue
 		else:
+
 			print("auth asym id " + auth_asym_id + " has  nomenclature: " +  nbr_polymer['nomenclature'][0].value)
 			by_class_origin_polymers[nbr_polymer['nomenclature'][0].value ] = {
 				'seq'         : nbr_polymer['entity_poly_seq_one_letter_code_can'],
 				'auth_asym_id': nbr_polymer['auth_asym_id'],
 				'ids'         : [ resid for resid in [*map(lambda x : x['seqid'], nbr_polymer['residues'])] ]
 			}
-
-	
-	
 	by_class_target_polymers:dict[PolymerClass, dict] = {}
 
 	def get_polymer_class(structure:RibosomeStructure, nomenclature_class:PolymerClass):
 
 		target_polymers = [*structure.rnas ,*structure.proteins]
-
 		for tgt_polymer in target_polymers:
 			if  str(nomenclature_class) in list(map(lambda x : x.value,tgt_polymer.nomenclature)):
 				return tgt_polymer
 			else:
-				...
-				# print("Did not find ", nomenclature_class, " in ", tgt_polymer.nomenclature)
+				raise KeyError("Did not find ", nomenclature_class, " in ", tgt_polymer.nomenclature)
 
 		raise Exception("Could not find a polymer class {} in structure {} ".format(nomenclature_class, structure.rcsb_id))
 
 	for nomenclature_class, nbr_polymer in by_class_origin_polymers.items():
+
 			target_polymer        = get_polymer_class(target_profile, nomenclature_class)
 			tgt_poly_seq          = target_polymer.entity_poly_seq_one_letter_code_can
 			tgt_poly_auth_asym_id = target_polymer.auth_asym_id
-
-			by_class_target_polymers[nomenclature_class] ={
-				'seq'         : tgt_poly_seq,
-				'auth_asym_id': tgt_poly_auth_asym_id,
-			}
+			by_class_target_polymers[nomenclature_class] ={ 'seq' : tgt_poly_seq, 'auth_asym_id': tgt_poly_auth_asym_id }
 
 	prediction = {}
 
@@ -189,11 +174,9 @@ def init_transpose_ligand(
 		aln_ids = sq.aligned_ids # <--- ids     corrected   for                                   gaps
 		tgt_ids = sq.tgt_ids     # <--- ids     backtracted to the target polymer (accounting for gaps)
 
-
-
 		prediction = {
 			**prediction,
-			nomenclature_class: PredictedResiduesPolymer.parse_obj({
+			nomenclature_class: PredictedResiduesPolymer.model_validate({
 			"source":{
 				"src"         : src,
 				"src_ids"     : src_ids,
@@ -212,42 +195,40 @@ def init_transpose_ligand(
 		})
 		}
 
-
-	lp = LigandPrediction.parse_obj(prediction)
-
+	lp = LigandPrediction.model_validate(prediction)
 	return  lp
 
 
-if __name__ =="__main__":
+# if __name__ =="__main__":
 
-	from rbxz_bend.settings import RIBETL_DATA
+# 	# from rbxz_bend.settings import RIBETL_DATA
+# 	# def root_self(rootname: str = ''):
+# 	# 	"""Returns the rootpath for the project if it's unique in the current folder tree."""
+# 	# 	root = os.path.abspath(__file__)[:os.path.abspath( __file__).find(rootname)+len(rootname)]
+# 	# 	sys.path.append(root)
+# 	# root_self('ribetl')
 
-	def root_self(rootname: str = ''):
-		"""Returns the rootpath for the project if it's unique in the current folder tree."""
-		root = os.path.abspath(__file__)[:os.path.abspath(
-		__file__).find(rootname)+len(rootname)]
-		sys.path.append(root)
+# 	prs = argparse.ArgumentParser()
 
-	root_self('ribetl')
+# 	prs.add_argument('-src', '--source_structure', type=str, required=True)
+# 	prs.add_argument('-tgt', '--target_structure', type=str, required=True)
+# 	prs.add_argument('-p', '--path', type=str, required=True)
 
-	prs = argparse.ArgumentParser()
+# 	args = prs.parse_args()
 
-	prs.add_argument('-src', '--source_structure', type=str, required=True)
-	prs.add_argument('-tgt', '--target_structure', type=str, required=True)
-	prs.add_argument('-p', '--path', type=str, required=True)
+# 	SRC_STRUCT = args.source_structure.upper()
+# 	TGT_STRUCT = args.target_structure.upper()
+# 	lig_path   = str( args.path )
 
-	args = prs.parse_args()
+# 	target_profile = RibosomeStructure.model_validate(open_structure(TGT_STRUCT,'json'))
+# 	bsite          = open_bsite(lig_path)
 
-	SRC_STRUCT = args.source_structure.upper()
-	TGT_STRUCT = args.target_structure.upper()
-	lig_path = str( args.path )
+# 	_type:typing.Literal["LIGAND","POLYMER"] = "LIGAND" if "ligand" in lig_path.lower()  else "POLYMER"
 
-	target_profile = RibosomeStructure.parse_obj(open_structure(TGT_STRUCT,'json'))
-	bsite      = open_bsite(lig_path)
-	_type:typing.Literal["LIGAND","POLYMER"] = "LIGAND" if "ligand" in lig_path.lower()  else "POLYMER"
 
-	prediction = init_transpose_ligand(target_profile,bsite)
-	fname = f'PREDICTION_{_type}_{SRC_STRUCT}_{TGT_STRUCT}.json'
-	with open(os.path.join(RIBETL_DATA,TGT_STRUCT,fname), 'w') as outfile:
+# 	prediction = init_transpose_ligand(target_profile,bsite)
+
+# 	fname = f'PREDICTION_{_type}_{SRC_STRUCT}_{TGT_STRUCT}.json'
+# 	with open(os.path.join(RIBETL_DATA,TGT_STRUCT,fname), 'w') as outfile:
 		json.dump(prediction.data(),outfile)
 		print("\033[093mSucessfully saved prediction {}\033[0m".format(fname))

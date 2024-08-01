@@ -19,7 +19,6 @@ def get_polymer_residues(auth_asym_id: str, struct: Structure) -> list[Residue]:
     return [*c.get_residues()]
 
 def get_polymer_nbrs( polymer_residues : list[Residue], struct: Structure, ) -> BindingSite: 
-
     """KDTree search the neighbors of a given list of residues(which constitue a ligand)
     and return unique having tagged them with a ban identifier proteins within 5 angstrom of these residues. """
 
@@ -85,7 +84,6 @@ def get_ligand_nbrs(
     return BindingSite.model_validate(nbr_dict)
 
 def get_ligand_residue_ids(ligchemid: str, struct: Structure) -> list[Residue]:
-
     ligandResidues: list[Residue] = list(filter(lambda x: x.get_resname() == ligchemid, list(struct.get_residues())))
     return ligandResidues
 

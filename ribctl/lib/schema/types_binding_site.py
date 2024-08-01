@@ -99,7 +99,6 @@ class BindingSite(RootModel):
         return super().dict()['__root__']
 
 class PredictedResiduesPolymer(BaseModel):
-
     class PredictionSource(BaseModel):
         src: str
         src_ids: list[int]
@@ -121,7 +120,6 @@ class PredictedResiduesPolymer(BaseModel):
 
 class LigandPrediction(RootModel):
     root: typing.Dict[PolymerClass, PredictedResiduesPolymer]
-
 
     def save(self, filename: str):
         print(self.dict())

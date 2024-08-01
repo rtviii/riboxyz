@@ -29,9 +29,6 @@ ribd.add_command(lig)
 ribd.add_command(db)
 ribd.add_command(ls)
 
-
-
-
 @ribd.command()
 def init():
     click.echo('Initializing the application...')
