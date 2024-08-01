@@ -217,6 +217,7 @@ def init_transpose_ligand(
 
 	return  lp
 
+
 if __name__ =="__main__":
 
 	from rbxz_bend.settings import RIBETL_DATA
@@ -241,9 +242,7 @@ if __name__ =="__main__":
 	TGT_STRUCT = args.target_structure.upper()
 	lig_path = str( args.path )
 
-
 	target_profile = RibosomeStructure.parse_obj(open_structure(TGT_STRUCT,'json'))
-
 	bsite      = open_bsite(lig_path)
 	_type:typing.Literal["LIGAND","POLYMER"] = "LIGAND" if "ligand" in lig_path.lower()  else "POLYMER"
 

@@ -3,6 +3,7 @@ import operator
 import argparse
 import itertools
 from pprint import pprint
+from typing import Optional
 from Bio.PDB.NeighborSearch import NeighborSearch
 from Bio.PDB.Residue import Residue
 from Bio.PDB.Structure import Structure
@@ -17,10 +18,7 @@ def get_polymer_residues(auth_asym_id: str, struct: Structure) -> list[Residue]:
     c: Chain = struct[0][auth_asym_id]
     return [*c.get_residues()]
 
-def get_polymer_nbrs(
-      polymer_residues      : list[Residue],
-      struct        : Structure,
-    ) -> BindingSite: 
+def get_polymer_nbrs( polymer_residues : list[Residue], struct: Structure, ) -> BindingSite: 
 
     """KDTree search the neighbors of a given list of residues(which constitue a ligand)
     and return unique having tagged them with a ban identifier proteins within 5 angstrom of these residues. """
@@ -55,6 +53,7 @@ def get_polymer_nbrs(
 def get_ligand_nbrs(
       ligand_residues: list[Residue],
       struct         : Structure,
+      radius:Optional[ float ] = 5,
     ) -> BindingSite : 
     """KDTree search the neighbors of a given list of residues(which constitue a ligand) 
     and return unique having tagged them with a ban identifier proteins within 5 angstrom of these residues. """
@@ -69,7 +68,7 @@ def get_ligand_nbrs(
 
     for lig_res in ligand_residues:
         for atom in lig_res.child_list:
-            nbr_residues.extend(ns.search(atom.get_coord(), 5, level='R'))
+            nbr_residues.extend(ns.search(atom.get_coord(), radius, level='R'))
 
     nbr_residues = list(set([* map(ResidueSummary.from_biopython_residue, nbr_residues)]))
 
@@ -111,12 +110,12 @@ def bsite_extrarbx_polymer(auth_asym_id:str, structure:Structure )->BindingSite:
     binding_site_polymer: BindingSite   = get_polymer_nbrs(residues, structure )
     return binding_site_polymer
 
-def bsite_ligand(chemicalId:str, rcsb_id:str )->BindingSite:
+def bsite_ligand(chemicalId:str, rcsb_id:str, radius:Optional[float]=5)->BindingSite:
 
-    chemicalId = chemicalId.upper()
-    _structure_cif_handle =     RibosomeOps(rcsb_id).biopython_structure()
+    chemicalId                            = chemicalId.upper()
+    _structure_cif_handle                 = RibosomeOps(rcsb_id).biopython_structure()
     residues              : list[Residue] = get_ligand_residue_ids(chemicalId, _structure_cif_handle)
-    binding_site_ligand   : BindingSite   = get_ligand_nbrs(residues, _structure_cif_handle)
+    binding_site_ligand   : BindingSite   = get_ligand_nbrs(residues, _structure_cif_handle, radius)
 
     return binding_site_ligand
 
@@ -128,12 +127,12 @@ if __name__ == "__main__":
     parser.add_argument ('-s'     , '--structure', type=   str   , required=True                                                            )
     parser.add_argument ('--save' ,action          ='store_true'                                                    )
     
-    args  = parser.parse_args()
+    args    = parser.parse_args()
     rcsb_id = args.structure.upper()
 
     _structure_cif_handle :Structure        = utils.open_structure(rcsb_id,'cif')
     struct_profile_handle:RibosomeStructure = RibosomeStructure.model_validate(utils.open_structure(rcsb_id,'json'))
-    ligands       = struct_ligand_ids(rcsb_id, struct_profile_handle)
+    ligands                                 = struct_ligand_ids(rcsb_id, struct_profile_handle)
 
     for l in ligands:
         bs = bsite_ligand(l.chemicalId , rcsb_id)
