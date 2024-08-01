@@ -1,13 +1,12 @@
 from pprint import pprint
 import click
 import sys
-from ribctl.lib.libhmm import PolymerClassFastaRegistry
 sys.dont_write_bytecode = True
-from ribctl.cli.subparsers.ls import ls
+sys.path.append('/home/rtviii/dev/riboxyz')
+from ribctl.cli.subparsers.lig import lig
+from subparsers.ls import ls
 from subparsers.etl import  etl
 from subparsers.db import db
-from ribctl import RIBETL_DATA
-from ribctl.etl.etl_assets_ops import RibosomeOps, Structure
 
 ce = click.echo
 
@@ -26,19 +25,12 @@ def ribd(ctx, debug, config, rcsb_id):
     rcsb_id = ctx.obj['rcsb_id'] = rcsb_id
 
 ribd.add_command(etl)
+ribd.add_command(lig)
 ribd.add_command(db)
 ribd.add_command(ls)
 
 
-@click.command()
-@click.pass_context
-def test(ctx):
-    PolyclassRegistry = PolymerClassFastaRegistry()
-    # s = PolyclassRegistry.get_seed_sequences_for_taxid(9606)
-    # pprint(s)
-    # ...
 
-ribd.add_command(test)
 
 @ribd.command()
 def init():

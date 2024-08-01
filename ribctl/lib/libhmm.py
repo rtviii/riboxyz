@@ -19,10 +19,6 @@ import concurrent.futures
 # logger= get_classification_logger()
 hmm_cachedir = ASSETS['__hmm_cache']
 
-
-
-
-
 def digitize_seq_record(seq_record:SeqRecord, alphabet:Alphabet)->DigitalSequence:
     """Convert a SeqRecord to a DigitalSequence"""
     seq_  = pyhmmer.easel.TextSequence(name=bytes(seq_record.id,'utf-8'), sequence=seq_record.seq)

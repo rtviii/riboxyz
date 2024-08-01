@@ -113,15 +113,14 @@ def bsite_extrarbx_polymer(auth_asym_id:str, structure:Structure )->BindingSite:
 
 def bsite_ligand(chemicalId:str, rcsb_id:str )->BindingSite:
 
-    print("Ligand binding site extraction proceeds for ligand: {} in structure: {}".format(chemicalId, rcsb_id))
-
     chemicalId = chemicalId.upper()
-
-    _structure_cif_handle :Structure      = utils.open_structure(rcsb_id,'cif')
+    _structure_cif_handle =     RibosomeOps(rcsb_id).biopython_structure()
     residues              : list[Residue] = get_ligand_residue_ids(chemicalId, _structure_cif_handle)
     binding_site_ligand   : BindingSite   = get_ligand_nbrs(residues, _structure_cif_handle)
 
-    return binding_site_ligand.model_dump()
+    return binding_site_ligand
+
+
 
 if __name__ == "__main__":
 
@@ -130,13 +129,12 @@ if __name__ == "__main__":
     parser.add_argument ('--save' ,action          ='store_true'                                                    )
     
     args  = parser.parse_args()
-    PDBID = args.structure.upper()
+    rcsb_id = args.structure.upper()
 
-    _structure_cif_handle :Structure        = utils.open_structure(PDBID,'cif')
-    struct_profile_handle:RibosomeStructure = RibosomeStructure.model_validate(utils.open_structure(PDBID,'json'))
-
-    ligands       = struct_ligand_ids(PDBID, struct_profile_handle)
+    _structure_cif_handle :Structure        = utils.open_structure(rcsb_id,'cif')
+    struct_profile_handle:RibosomeStructure = RibosomeStructure.model_validate(utils.open_structure(rcsb_id,'json'))
+    ligands       = struct_ligand_ids(rcsb_id, struct_profile_handle)
 
     for l in ligands:
-        bs = bsite_ligand(l.chemicalId , PDBID)
+        bs = bsite_ligand(l.chemicalId , rcsb_id)
         pprint(bs)
