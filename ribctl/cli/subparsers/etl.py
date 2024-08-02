@@ -11,7 +11,6 @@ from ribctl.logs.loggers import get_etl_logger
 @click.pass_context
 def etl(ctx: Context):
     if ctx.invoked_subcommand is None:
-
         stdin_text = click.get_text_stream("stdin")
         rcsb_id    = ctx.obj["rcsb_id"]
 

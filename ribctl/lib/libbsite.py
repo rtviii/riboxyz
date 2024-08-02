@@ -117,12 +117,15 @@ def bsite_extrarbx_polymer(auth_asym_id:str, structure:Structure )->BindingSite:
     binding_site_polymer: BindingSite   = get_polymer_nbrs(residues, structure )
     return binding_site_polymer
 
-def bsite_ligand(chemicalId:str, rcsb_id:str, radius:Optional[float]=5)->BindingSite:
-
+def bsite_ligand(chemicalId:str, rcsb_id:str, radius:Optional[float]=5, save:bool=False)->BindingSite:
     chemicalId                            = chemicalId.upper()
     _structure_cif_handle                 = RibosomeOps(rcsb_id).biopython_structure()
     residues              : list[Residue] = get_ligand_residue_ids(chemicalId, _structure_cif_handle)
     binding_site_ligand   : BindingSite   = get_ligand_nbrs(residues, _structure_cif_handle, radius)
+
+    if save:
+         with open(RibosomeOps(rcsb_id).paths.binding_site(chemicalId), 'w') as f:
+              json.dump(binding_site_ligand.model_dump(), f)
 
     return binding_site_ligand
 

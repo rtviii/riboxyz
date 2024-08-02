@@ -10,7 +10,7 @@ from ribctl.lib.schema.types_ribosome import RNA, LifecycleFactorClass, Mitochon
 from schema.v0 import BanClassMetadata, ExogenousRNAByStruct,LigandInstance, LigandlikeInstance, NeoStruct, NomenclatureClass, NomenclatureClassMember
 
 classification_router = Router()
-TAG              = "Polymer Classes"
+TAG        = "Polymer Classes"
 
 @classification_router.get('/polynucleotide',  tags=[TAG], response=list[RNA])
 def polynucleotide_class(request,rna_class:PolymerClass):
