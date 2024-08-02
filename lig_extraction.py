@@ -44,7 +44,7 @@ from pprint import pprint
 from neo4j_ribosome.db_lib_builder import Neo4jAdapter
 from neo4j_ribosome.db_lib_reader import dbqueries
 from ribctl.etl.etl_assets_ops import Assets
-from ribctl.lib.mod_extract_bsites import bsite_ligand
+from ribctl.lib.libbsite import bsite_ligand
 
 
 def all_structs_for_lig(chemid: str):

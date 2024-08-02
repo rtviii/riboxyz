@@ -2,20 +2,16 @@
 import json
 import os
 from pprint import pprint
-from typing import Optional
 import click
-from ribctl import RIBETL_DATA
 from ribctl.etl.etl_assets_ops import RibosomeOps, Structure
-from ribctl.lib.mod_extract_bsites import bsite_ligand, BindingSite, BindingSiteChain, init_transpose_ligand
+from ribctl.lib.libbsite import bsite_ligand, BindingSite, BindingSiteChain, init_transpose_ligand
 ce = click.echo
-
 
 
 @click.group()
 @click.pass_context
 def lig(ctx):
     pass
-
 
 @lig.command()
 @click.argument("rcsb_id", required=True, type=str)
@@ -24,7 +20,6 @@ def lig(ctx):
 def nbhd(rcsb_id, chem_id, radius):
     print(bsite_ligand(chem_id, rcsb_id, radius).model_dump_json())
     
-
 @lig.command()
 @click.pass_context
 @click.argument("lig_chem_id", required=True , type=str)

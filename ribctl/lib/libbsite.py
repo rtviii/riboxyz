@@ -126,10 +126,7 @@ def bsite_ligand(chemicalId:str, rcsb_id:str, radius:Optional[float]=5)->Binding
 
     return binding_site_ligand
 
-
-
 #! Transposition methods
-
 class SeqMatch():
 	def __init__(self,
 		sourceseq:str,
@@ -217,7 +214,6 @@ class SeqMatch():
 			if i in ixs: _ += CRED + v +CEND
 			else: 	 	 _ += v
 		return _
-
 	
 def init_transpose_ligand(target_profile:RibosomeStructure, binding_site: BindingSite)->LigandPrediction:
 	"""returns @LigandPrediction"""
@@ -295,21 +291,3 @@ def init_transpose_ligand(target_profile:RibosomeStructure, binding_site: Bindin
 		})
 		}
 	return LigandPrediction.model_validate(prediction)
-
-
-if __name__ == "__main__":
-
-    parser = argparse. ArgumentParser(description='Split structure into constituent polymers and inject new nomencalture into the .cif file')
-    parser.add_argument ('-s'     , '--structure', type=   str   , required=True                                                            )
-    parser.add_argument ('--save' ,action          ='store_true'                                                    )
-    
-    args    = parser.parse_args()
-    rcsb_id = args.structure.upper()
-
-    _structure_cif_handle :Structure        = utils.open_structure(rcsb_id,'cif')
-    struct_profile_handle:RibosomeStructure = RibosomeStructure.model_validate(utils.open_structure(rcsb_id,'json'))
-    ligands                                 = struct_ligand_ids(rcsb_id, struct_profile_handle)
-
-    for l in ligands:
-        bs = bsite_ligand(l.chemicalId , rcsb_id)
-        pprint(bs)
