@@ -223,12 +223,10 @@ def init_transpose_ligand(target_profile:RibosomeStructure, binding_site: Bindin
 	"""returns @LigandPrediction"""
 	by_polymer_class_source_polymers:dict[PolymerClass, dict] = {}
 	source_polymers:BindingSite = binding_site.model_dump()
-
 	for ( auth_asym_id, nbr_polymer ) in source_polymers.items():
-
 		nbr_polymer = BindingSiteChain.model_validate(nbr_polymer)
 		if len(nbr_polymer.nomenclature) <1:
-			print("auth asym id " + auth_asym_id + " has no nomenclature:" +  nbr_polymer.nomenclature +". Skipping -1")
+			# print(target_profile.rcsb_id + "." + auth_asym_id + " has no nomenclature:" +  nbr_polymer.nomenclature +". Skipping -1")
 			continue
 		else:
 			print("auth asym id " + auth_asym_id + " has  nomenclature: " +  nbr_polymer.nomenclature[0])
