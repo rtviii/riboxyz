@@ -13,7 +13,7 @@ from ribctl import AMINO_ACIDS_3_TO_1_CODE, CHAINSPLITTER_PATH, CLASSIFICATION_R
 from ribctl.lib.libtax import PhylogenyNode, PhylogenyRank, Taxid
 from ribctl.lib.tunnel import ptc_resdiues_get, ptc_residues_calculate_midpoint
 from ribctl.lib.utils import download_unpack_place, open_structure
-from ribctl.lib.schema.types_ribosome import ( RNA, PTCInfo, Polymer, PolynucleotideClass, PolynucleotideClass, PolypeptideClass, RibosomeStructure, )
+from ribctl.lib.schema.types_ribosome import ( RNA, PTCInfo, Polymer, PolymerClass, PolynucleotideClass, PolynucleotideClass, PolypeptideClass, RibosomeStructure, )
 from ribctl import RIBETL_DATA
 from ribctl.logs.loggers import get_etl_logger
 
@@ -224,7 +224,7 @@ class RibosomeOps:
         return None
 
     def get_poly_by_polyclass(
-        self, class_: PolynucleotideClass, assembly: int = 0
+        self, class_: PolymerClass, assembly: int = 0
     ) -> RNA | None:
         """@assembly here stands to specify which of the two or more models the rna comes from
         in the case that a structure contains multiple models (ex. 4V4Q XRAY)"""
