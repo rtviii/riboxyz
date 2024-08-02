@@ -6,8 +6,7 @@ from typing import Optional
 import click
 from ribctl import RIBETL_DATA
 from ribctl.etl.etl_assets_ops import RibosomeOps, Structure
-from ribctl.lib.mod_extract_bsites import bsite_ligand, BindingSite, BindingSiteChain
-from ribctl.lib.mod_transpose_bsites import init_transpose_ligand
+from ribctl.lib.mod_extract_bsites import bsite_ligand, BindingSite, BindingSiteChain, init_transpose_ligand
 ce = click.echo
 
 
@@ -22,10 +21,9 @@ def lig(ctx):
 @click.argument("rcsb_id", required=True, type=str)
 @click.argument("chem_id", required=True, type=str)
 @click.argument("radius",  type=float, required=False, default=5)
-def nbhd(ctx,rcsb_id, chem_id, radius):
+def nbhd(rcsb_id, chem_id, radius):
     print(bsite_ligand(chem_id, rcsb_id, radius).model_dump_json())
     
-
 
 @lig.command()
 @click.pass_context
@@ -39,6 +37,6 @@ def transpose(ctx, lig_chem_id, source_struct, target_struct):
         lig = BindingSite.model_validate(data)
 
     target     = RibosomeOps(target_struct).profile()
-    transposed = init_transpose_ligand(target, lig)
+    transposed = init_transpose_ligand(target, lig).model_dump()
 
-    print(transposed)
+    pprint(transposed)

@@ -62,10 +62,10 @@ class ResidueSummary(BaseModel):
         (hetero, seqid, insertion_code) = _
 
         return ResidueSummary(
-            seqid=seqid,
-            resname=r.get_resname(),
-            parent_auth_asym_id=chain_id,
-            full_id=r.get_full_id()
+            seqid               = seqid,
+            resname             = r.get_resname(),
+            parent_auth_asym_id = chain_id,
+            full_id             = r.get_full_id()
         )
 
 class BindingSiteChain(Polymer):
@@ -89,14 +89,6 @@ class BindingSite(RootModel):
             json.dump(json.loads(self.json()), outfile, indent=4)
             print("Saved: ",filename)
 
-    def __getattr__(self, attr):
-        return super().dict()['__root__'].__getattribute__(attr)
-
-    def __getitem__(self, attr):
-        return super().dict()['__root__'].__getitem__(attr)
-
-    def dict(self,):
-        return super().dict()['__root__']
 
 class PredictedResiduesPolymer(BaseModel):
     class PredictionSource(BaseModel):
@@ -114,25 +106,16 @@ class PredictedResiduesPolymer(BaseModel):
         src_aln: str
         tgt_aln: str
 
-    source: PredictionSource
-    target: PredictionTarget
+    source   : PredictionSource
+    target   : PredictionTarget
     alignment: PredictionAlignments
 
 class LigandPrediction(RootModel):
-    root: typing.Dict[PolymerClass, PredictedResiduesPolymer]
+    root: typing.Dict[str, PredictedResiduesPolymer]
+    model_config = { "arbitrary_types_allowed": True }
 
     def save(self, filename: str):
-        print(self.dict())
         with open(filename, 'w') as outfile:
-            json.dump(self.dict(), outfile, indent=4)
+            json.dump(self.model_dump(), outfile, indent=4)
             print("Saved: ",filename)
-
-    def __getattr__(self, attr):
-        return super().dict()['__root__'].__getattribute__(attr)
-
-    def __getitem__(self, attr):
-        return super().dict()['__root__'].__getitem__(attr)
-
-    def dict(self,):
-        return super().dict()['__root__']
 
