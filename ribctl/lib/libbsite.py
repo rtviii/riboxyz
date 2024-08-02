@@ -218,7 +218,8 @@ class SeqMatch():
 			else: 	 	 _ += v
 		return _
 	
-def init_transpose_ligand(target_profile:RibosomeStructure, binding_site: BindingSite)->LigandPrediction:
+# TODO: This signature has to contain info for both soruce and target rcsb_id. This is retarded as it is rn.
+def init_transpose_ligand(target_profile:RibosomeStructure, binding_site: BindingSite, save:bool=False)->LigandPrediction:
 	"""returns @LigandPrediction"""
 	by_polymer_class_source_polymers:dict[PolymerClass, dict] = {}
 	source_polymers:BindingSite = binding_site.model_dump()
