@@ -43,6 +43,9 @@ class AssetPath:
 
     def binding_site(self, chemId:str):
         return f"{self.dir}/{self.rcsb_id}_{chemId}.json"
+
+    def binding_site_prediction(self, chemId:str, source_struct:str):
+        return f"{self.dir}/{self.rcsb_id}_{chemId}_PREDICTION_VIA_{source_struct}.json"
     
     @property
     def dir(self):
