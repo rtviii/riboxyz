@@ -317,7 +317,6 @@ class InitiationFactorClass(str,Enum):
     aIF5A        = "aIF5A"
     aIF5B        = "aIF5B"
 
-
 # LifecycleFactorClass = typing.Union[ElongationFactorClass, InitiationFactorClass]
 LifecycleFactorClass = enum_union(ElongationFactorClass, InitiationFactorClass)
 ProteinClass         = enum_union(CytosolicProteinClass,MitochondrialProteinClass)
