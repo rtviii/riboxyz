@@ -1,7 +1,7 @@
 from io import BytesIO
 from django.http import HttpResponse
 from ninja import Router
-from ribctl.lib.schema.types_ribosome import PolymerClass, CytosolicProteinClass, PolymerClass, RibosomeStructure
+from ribctl.lib.schema.types_ribosome import PolynucleotideClass, CytosolicProteinClass, PolynucleotideClass, RibosomeStructure
 from schema.v0 import BanClassMetadata, ExogenousRNAByStruct,LigandInstance, LigandlikeInstance, NeoStruct, NomenclatureClass, NomenclatureClassMember
 from wsgiref.util import FileWrapper
 

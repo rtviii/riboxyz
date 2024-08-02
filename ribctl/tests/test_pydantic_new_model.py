@@ -3,7 +3,7 @@ import json
 from typing import List, Literal, Optional, Union
 from pydantic import BaseModel, field_serializer
 
-from ribctl.lib.schema.types_ribosome import CytosolicProteinClass, MitochondrialProteinClass, PolymerClass
+from ribctl.lib.schema.types_ribosome import CytosolicProteinClass, MitochondrialProteinClass, PolynucleotideClass
 
 raw_chain = {
             "assembly_id": 1,
@@ -85,9 +85,9 @@ class Polymer(BaseModel):
     entity_poly_entity_type            : str
 
     @field_serializer('nomenclature')
-    def serialize_dt(self, nomenclature:list[PolymerClass], _info):
+    def serialize_dt(self, nomenclature:list[PolynucleotideClass], _info):
         return [x.name for x in nomenclature]
-    nomenclature:  list[PolymerClass]
+    nomenclature:  list[PolynucleotideClass]
 
 class Protein(Polymer):
 

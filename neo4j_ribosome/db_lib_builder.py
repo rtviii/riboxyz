@@ -7,7 +7,7 @@ from neo4j.graph import Node
 from neo4j import Driver, GraphDatabase
 from neo4j_ribosome.node_polymer import  link__polymer_to_polymer_class, link__polymer_to_structure, node__polymer, upsert_polymer_to_protein, upsert_polymer_to_rna,node__polymer_class
 from neo4j_ribosome.node_structure import   link__ligand_to_struct, link__structure_to_lineage_member, link__structure_to_organism, node__ligand, node__structure, struct_exists
-from ribctl.lib.schema.types_ribosome import MitochondrialProteinClass, PolymerClass, PolymerClass, RibosomeStructure
+from ribctl.lib.schema.types_ribosome import MitochondrialProteinClass, PolynucleotideClass, PolynucleotideClass, RibosomeStructure
 from ribctl.etl.etl_assets_ops import RibosomeOps, Structure
 from neo4j import GraphDatabase, Driver, ManagedTransaction, Transaction
 from ribctl.lib.schema.types_ribosome import  NonpolymericLigand,  CytosolicProteinClass, RibosomeStructure
@@ -54,9 +54,9 @@ class Neo4jAdapter():
 
     def init_polymer_classes(self):
         with self.driver.session() as session:
-            for polymer_class in [*list(PolymerClass)]:
+            for polymer_class in [*list(PolynucleotideClass)]:
                 session.execute_write(node__polymer_class(polymer_class.value))
-            print("Added polymer classes: ", [*list(PolymerClass)])
+            print("Added polymer classes: ", [*list(PolynucleotideClass)])
 
     def add_phylogeny_node(self, taxid:int)->Node:
         with self.driver.session() as session:

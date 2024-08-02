@@ -38,7 +38,7 @@ from ribctl.etl.etl_assets_ops import Assetlist, RibosomeOps, Structure
 from ribctl.lib.schema.types_ribosome import (
     LifecycleFactorClass,
     Polymer,
-    PolymerClass,
+    PolynucleotideClass,
 )
 from ribctl import model_subgenuses
 

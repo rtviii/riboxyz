@@ -320,10 +320,12 @@ class InitiationFactorClass(str,Enum):
 
 # LifecycleFactorClass = typing.Union[ElongationFactorClass, InitiationFactorClass]
 LifecycleFactorClass = enum_union(ElongationFactorClass, InitiationFactorClass)
-ProteinClass         = enum_union(CytosolicProteinClass,MitochondrialProteinClass )
+ProteinClass         = enum_union(CytosolicProteinClass,MitochondrialProteinClass)
+
 PolypeptideClass     = enum_union(LifecycleFactorClass, ProteinClass)
-PolymerClass  = enum_union(CytosolicRNAClass, MitochondrialRNAClass, tRNA)
-PolymerClass         = enum_union(PolymerClass, PolypeptideClass)
+PolynucleotideClass  = enum_union(CytosolicRNAClass, MitochondrialRNAClass, tRNA)
+
+PolymerClass         = enum_union(PolynucleotideClass, PolypeptideClass)
 
 # ? ----------------------------------------------{ Object Types }------------------------------------------------
 

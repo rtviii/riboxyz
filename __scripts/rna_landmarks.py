@@ -8,7 +8,7 @@ import numpy as np
 from ribctl.etl.etl_assets_ops import Structure
 from ribctl.lib.libhmm import fasta_phylogenetic_correction
 from ribctl.lib.libmsa import Fasta, muscle_align_N_seq
-from ribctl.lib.schema.types_ribosome import PolymerClass
+from ribctl.lib.schema.types_ribosome import PolynucleotideClass
 from Bio.PDB.Chain import Chain
 from Bio.PDB.Atom import Atom
 from Bio.PDB.Residue import Residue

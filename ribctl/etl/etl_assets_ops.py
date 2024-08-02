@@ -13,7 +13,7 @@ from ribctl import AMINO_ACIDS_3_TO_1_CODE, CHAINSPLITTER_PATH, CLASSIFICATION_R
 from ribctl.lib.libtax import PhylogenyNode, PhylogenyRank, Taxid
 from ribctl.lib.tunnel import ptc_resdiues_get, ptc_residues_calculate_midpoint
 from ribctl.lib.utils import download_unpack_place, open_structure
-from ribctl.lib.schema.types_ribosome import ( RNA, PTCInfo, Polymer, PolymerClass, PolymerClass, PolypeptideClass, RibosomeStructure, )
+from ribctl.lib.schema.types_ribosome import ( RNA, PTCInfo, Polymer, PolynucleotideClass, PolynucleotideClass, PolypeptideClass, RibosomeStructure, )
 from ribctl import RIBETL_DATA
 from ribctl.logs.loggers import get_etl_logger
 
@@ -42,10 +42,10 @@ class AssetPath:
         pass
 
     def binding_site(self, chemId:str):
-        return f"{self.dir}/{self.rcsb_id}_{chemId}.json"
+        return f"{self.dir}/{self.rcsb_id.upper()}_{chemId.upper()}.json"
 
     def binding_site_prediction(self, chemId:str, source_struct:str):
-        return f"{self.dir}/{self.rcsb_id}_{chemId}_PREDICTION_VIA_{source_struct}.json"
+        return f"{self.dir}/{self.rcsb_id.upper()}_{chemId.upper()}_PREDICTION_VIA_{source_struct.upper()}.json"
     
     @property
     def dir(self):
@@ -179,12 +179,12 @@ class RibosomeOps:
         return (p.src_organism_ids, p.host_organism_ids)
 
     def get_chain_by_polymer_class(
-        self, poly_class: PolymerClass, assembly: int = 0
+        self, poly_class: PolynucleotideClass, assembly: int = 0
     ) -> Polymer | None:
 
         profile = self.profile()
 
-        if poly_class in [v.value for v in PolymerClass]:
+        if poly_class in [v.value for v in PolynucleotideClass]:
             if profile.rnas is not None:
                 for rna in profile.rnas:
                     if (
@@ -224,7 +224,7 @@ class RibosomeOps:
         return None
 
     def get_poly_by_polyclass(
-        self, class_: PolymerClass, assembly: int = 0
+        self, class_: PolynucleotideClass, assembly: int = 0
     ) -> RNA | None:
         """@assembly here stands to specify which of the two or more models the rna comes from
         in the case that a structure contains multiple models (ex. 4V4Q XRAY)"""
@@ -248,13 +248,13 @@ class RibosomeOps:
         @returns (seq, auth_asym_id, rna_type)
         """
 
-        rna = self.get_poly_by_polyclass(PolymerClass("23SrRNA"), assembly)
+        rna = self.get_poly_by_polyclass(PolynucleotideClass("23SrRNA"), assembly)
         if rna == None:
-            rna = self.get_poly_by_polyclass(PolymerClass("25SrRNA"), assembly)
+            rna = self.get_poly_by_polyclass(PolynucleotideClass("25SrRNA"), assembly)
         if rna == None:
-            rna = self.get_poly_by_polyclass(PolymerClass("28SrRNA"), assembly)
+            rna = self.get_poly_by_polyclass(PolynucleotideClass("28SrRNA"), assembly)
         if rna == None:
-            rna = self.get_poly_by_polyclass(PolymerClass("mt16SrRNA"), assembly)
+            rna = self.get_poly_by_polyclass(PolynucleotideClass("mt16SrRNA"), assembly)
         if rna == None:
             raise Exception("No LSU rRNA found in structure")
         else:

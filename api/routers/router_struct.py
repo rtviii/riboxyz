@@ -10,7 +10,7 @@ from neo4j_ribosome.db_lib_reader import dbqueries
 from ribctl import ASSETS, ASSETS_PATH
 from ribctl.etl.etl_assets_ops import RibosomeOps, Structure
 from ribctl.lib.info import StructureCompositionStats, run_composition_stats
-from ribctl.lib.schema.types_ribosome import  CytosolicProteinClass, CytosolicRNAClass, ElongationFactorClass, InitiationFactorClass, LifecycleFactorClass, MitochondrialProteinClass, MitochondrialRNAClass, PTCInfo, Polymer, PolymerClass, PolymerClass, PolypeptideClass, Protein, ProteinClass, RibosomeStructure, tRNA
+from ribctl.lib.schema.types_ribosome import  CytosolicProteinClass, CytosolicRNAClass, ElongationFactorClass, InitiationFactorClass, LifecycleFactorClass, MitochondrialProteinClass, MitochondrialRNAClass, PTCInfo, Polymer, PolynucleotideClass, PolynucleotideClass, PolypeptideClass, Protein, ProteinClass, RibosomeStructure, tRNA
 from ribctl.lib.libtax import Taxid 
 
 structure_router = Router()
@@ -61,7 +61,7 @@ def random_profile(request):
 
 @structure_router.get('/list_polymers_filtered_by_polymer_class', response=dict,  tags=[TAG])
 def polymers_by_polymer_class(request,
-      polymer_class: PolymerClass,
+      polymer_class: PolynucleotideClass,
       page  = 1,
       ):
 
@@ -96,7 +96,7 @@ def polymers_by_structure(request,
     resolution      = None if resolution      == "" else list(map(parse_empty_or_float,resolution.split(",")))
     host_taxa       = None if host_taxa       == "" else list(map(parse_empty_or_int,host_taxa.split(","))) if host_taxa else None
     source_taxa     = None if source_taxa     == "" else list(map(parse_empty_or_int,source_taxa.split(","))) if source_taxa else None
-    polymer_classes = None if polymer_classes == "" else list(map(lambda _: PolymerClass(_), polymer_classes.split(",")))
+    polymer_classes = None if polymer_classes == "" else list(map(lambda _: PolynucleotideClass(_), polymer_classes.split(",")))
 
     qreturn =  dbqueries.list_polymers_filtered_by_structure(page, search, year, resolution, polymer_classes, source_taxa, host_taxa)
 
@@ -143,7 +143,7 @@ def filter_list(request,
     resolution      = None if resolution      == "" else list(map(parse_empty_or_float,resolution.split(",")))
     host_taxa       = None if host_taxa       == "" else list(map(parse_empty_or_int,host_taxa.split(","))) if host_taxa else None
     source_taxa     = None if source_taxa     == "" else list(map(parse_empty_or_int,source_taxa.split(","))) if source_taxa else None
-    polymer_classes = None if polymer_classes == "" else list(map(lambda _: PolymerClass(_), polymer_classes.split(",")))
+    polymer_classes = None if polymer_classes == "" else list(map(lambda _: PolynucleotideClass(_), polymer_classes.split(",")))
 
     structures, count    = dbqueries.list_structs_filtered(int(page), search, year, resolution, polymer_classes, source_taxa, host_taxa)[0]
     structures_validated = list(map(lambda r: RibosomeStructure.model_validate(r), structures))
@@ -182,7 +182,7 @@ def structure_ptc(request,rcsb_id:str):
      
 class ChainsByStruct(Schema):
     class PolymerByStruct(Schema):
-        nomenclature: list[PolymerClass]
+        nomenclature: list[PolynucleotideClass]
         auth_asym_id: str
         entity_poly_polymer_type: str
         entity_poly_seq_length: int

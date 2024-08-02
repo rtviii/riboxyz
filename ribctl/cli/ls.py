@@ -4,7 +4,7 @@ from pprint import pprint
 from ribctl import RIBETL_DATA
 from ribctl.etl.etl_assets_ops import Structure
 from ribctl.lib.libmsa import Taxid
-from ribctl.lib.schema.types_ribosome import PolymerClass, PolypeptideClass, RibosomeStructure
+from ribctl.lib.schema.types_ribosome import PolynucleotideClass, PolypeptideClass, RibosomeStructure
 
 
 def cmd_ls(args):
@@ -51,10 +51,10 @@ def cmd_ls(args):
         found   =  []
 
         try:
-            assert(subelem in [_.value for _ in [*list(PolymerClass), *list(PolypeptideClass)]])
+            assert(subelem in [_.value for _ in [*list(PolynucleotideClass), *list(PolypeptideClass)]])
         except AssertionError:
             print("Subelement must be one of the following:")
-            print([_.value for _ in [*list(PolymerClass), *list(PolypeptideClass)]])
+            print([_.value for _ in [*list(PolynucleotideClass), *list(PolypeptideClass)]])
             exit(1)
         for struct in all_structs:
             ra   = Structure(struct)

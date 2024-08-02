@@ -18,8 +18,8 @@ from ribctl.lib.schema.types_ribosome import (
     MitochondrialRNAClass,
     NonpolymericLigand,
     Polymer,
-    PolymerClass,
-    PolymerClass,
+    PolynucleotideClass,
+    PolynucleotideClass,
     Protein,
     CytosolicProteinClass,
     CytosolicProteinClass,
@@ -674,7 +674,7 @@ class ReannotationPipeline:
             protein_classifier.classify_chains()
            
             rna_alphabet             = pyhmmer.easel.Alphabet.rna()
-            rna_classifier           = HMMClassifier(_rna_polynucleotides, rna_alphabet, [p for p in list(PolymerClass)])
+            rna_classifier           = HMMClassifier(_rna_polynucleotides, rna_alphabet, [p for p in list(PolynucleotideClass)])
             rna_classifier.classify_chains()
 
             prot_classification = protein_classifier.produce_classification()
@@ -699,12 +699,12 @@ class ReannotationPipeline:
         for polymer_dict in _rna_polynucleotides:
             if polymer_dict.auth_asym_id in reported_classes.keys():
                 # momentarily converting to the PolymerClass enums to serialize correctly (see Polymer class def)
-                polymer_dict.nomenclature = list(map(PolymerClass, reported_classes[polymer_dict.auth_asym_id])) 
+                polymer_dict.nomenclature = list(map(PolynucleotideClass, reported_classes[polymer_dict.auth_asym_id])) 
  
         for polymer_dict in _prot_polypeptides:
             if polymer_dict.auth_asym_id in reported_classes.keys():
                 # momentarily converting to the PolymerClass enums to serialize correctly (see Polymer class def)
-                polymer_dict.nomenclature = list(map(PolymerClass,reported_classes[polymer_dict.auth_asym_id]))
+                polymer_dict.nomenclature = list(map(PolynucleotideClass,reported_classes[polymer_dict.auth_asym_id]))
         assert (
             len(_rna_polynucleotides)
             + len(_prot_polypeptides)

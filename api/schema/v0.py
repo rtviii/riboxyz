@@ -1,6 +1,6 @@
 import typing
 from ninja import Schema
-from ribctl.lib.schema.types_ribosome import NonpolymericLigand, PolymerClass, Protein, CytosolicProteinClass, RibosomeStructure
+from ribctl.lib.schema.types_ribosome import NonpolymericLigand, PolynucleotideClass, Protein, CytosolicProteinClass, RibosomeStructure
 """This file documents the possible requests that the API can receive."""
 
 
@@ -274,7 +274,7 @@ class RNA(Schema):
     asym_ids: list[str]
 
     auth_asym_id: str
-    nomenclature: list[PolymerClass]
+    nomenclature: list[PolynucleotideClass]
     parent_rcsb_id: str
 
     src_organism_names: list[str]

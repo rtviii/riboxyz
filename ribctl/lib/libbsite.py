@@ -12,7 +12,7 @@ with warnings.catch_warnings():
 	warnings.simplefilter('ignore', BiopythonDeprecationWarning)
 	from Bio import pairwise2
 from ribctl.lib.schema.types_binding_site import BindingSiteChain, LigandPrediction, PredictedResiduesPolymer
-from ribctl.lib.schema.types_ribosome import Polymer, PolymerClass, RibosomeStructure
+from ribctl.lib.schema.types_ribosome import Polymer, PolynucleotideClass, RibosomeStructure
 from Bio.PDB.NeighborSearch import NeighborSearch
 from Bio.PDB.Residue import Residue
 from Bio.PDB.Structure import Structure
@@ -221,7 +221,7 @@ class SeqMatch():
 # TODO: This signature has to contain info for both soruce and target rcsb_id. This is retarded as it is rn.
 def init_transpose_ligand(target_profile:RibosomeStructure, binding_site: BindingSite, save:bool=False)->LigandPrediction:
 	"""returns @LigandPrediction"""
-	by_polymer_class_source_polymers:dict[PolymerClass, dict] = {}
+	by_polymer_class_source_polymers:dict[PolynucleotideClass, dict] = {}
 	source_polymers:BindingSite = binding_site.model_dump()
 
 	for ( auth_asym_id, nbr_polymer ) in source_polymers.items():
@@ -240,7 +240,7 @@ def init_transpose_ligand(target_profile:RibosomeStructure, binding_site: Bindin
 			}
 	# ! at this point we have collected all the source polymers, their sequences and residue ids participating in the binding site
 
-	def get_polymer_class(structure:RibosomeStructure, nomenclature_class:PolymerClass):
+	def get_polymer_class(structure:RibosomeStructure, nomenclature_class:PolynucleotideClass):
 		target_polymers:list[Polymer] = [*structure.rnas ,*structure.proteins]
 		for tgt_polymer in target_polymers:
 			if  str(nomenclature_class) in tgt_polymer.nomenclature:

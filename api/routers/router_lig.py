@@ -9,7 +9,7 @@ from ribctl import RIBETL_DATA
 from ribctl.etl.etl_assets_ops import RibosomeOps, Structure
 from ribctl.lib.libbsite import bsite_ligand, init_transpose_ligand
 from ribctl.lib.schema.types_binding_site import BindingSite
-from ribctl.lib.schema.types_ribosome import RNA, LifecycleFactorClass, MitochondrialProteinClass, Polymer, PolymerClass, CytosolicProteinClass, PolymerClass, PolypeptideClass, Protein, ProteinClass, RibosomeStructure
+from ribctl.lib.schema.types_ribosome import RNA, LifecycleFactorClass, MitochondrialProteinClass, Polymer, PolynucleotideClass, CytosolicProteinClass, PolynucleotideClass, PolypeptideClass, Protein, ProteinClass, RibosomeStructure
 from schema.v0 import BanClassMetadata, ExogenousRNAByStruct,LigandInstance, LigandlikeInstance, NeoStruct, NomenclatureClass, NomenclatureClassMember
 
 router_lig = Router()
@@ -42,6 +42,9 @@ def lig_transpose(request, source_structure:str, target_structure:str, chemical_
             bsite = bsite_ligand(chemical_id, source_structure, radius, save=True)
             if not os.path.exists(prediction_path):
                 prediction = init_transpose_ligand(RibosomeOps(target_structure).profile(),bsite)
+                with open(prediction_path, 'w') as f:
+                    json.dump(prediction.model_dump(), f)
+                    print("Saved {}".format(prediction_path))
                 return JsonResponse(prediction.model_dump(), safe=False)
         except Exception as e:
             return HttpResponseServerError(e)
@@ -50,4 +53,9 @@ def lig_transpose(request, source_structure:str, target_structure:str, chemical_
             data = json.load(f)
             bsite = BindingSite.model_validate(data)
         prediction = init_transpose_ligand(RibosomeOps(target_structure).profile(),bsite)
+
+        with open(prediction_path, 'w') as f:
+            json.dump(prediction.model_dump(), f)
+            print("Saved {}".format(prediction_path))
         return JsonResponse(prediction.model_dump(), safe=False)
+

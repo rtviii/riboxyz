@@ -9,7 +9,7 @@ from Bio.SeqRecord import SeqRecord
 import pyhmmer
 from ribctl import ASSETS
 from ribctl.lib.libmsa import Fasta, muscle_align_N_seq, phylogenetic_neighborhood
-from ribctl.lib.schema.types_ribosome import RNA, ElongationFactorClass, InitiationFactorClass, LifecycleFactorClass, MitochondrialProteinClass, Polymer, PolymerClass, PolymerClass, PolypeptideClass, Protein, CytosolicProteinClass, CytosolicProteinClass, tRNA
+from ribctl.lib.schema.types_ribosome import RNA, ElongationFactorClass, InitiationFactorClass, LifecycleFactorClass, MitochondrialProteinClass, Polymer, PolynucleotideClass, PolynucleotideClass, PolypeptideClass, Protein, CytosolicProteinClass, CytosolicProteinClass, tRNA
 from pyhmmer.easel import Alphabet, DigitalSequenceBlock, TextSequence, SequenceFile, SequenceBlock, TextSequenceBlock, DigitalSequence
 from pyhmmer.plan7 import Pipeline, HMM , TopHits
 from ribctl.logs.loggers import get_classification_logger
@@ -25,7 +25,7 @@ def digitize_seq_record(seq_record:SeqRecord, alphabet:Alphabet)->DigitalSequenc
     return seq_.digitize(alphabet)
 
 
-def pick_best_hmm_hit(matches_dict:dict[PolymerClass, list[float]], chain_info:Polymer)->PolymerClass | None:
+def pick_best_hmm_hit(matches_dict:dict[PolynucleotideClass, list[float]], chain_info:Polymer)->PolynucleotideClass | None:
     """Given a dictionary of sequence-HMMe e-values, pick the best candidate class"""
     results = []
     # if len([ item for x in list(matches_dict.values()) for item in x ]) > 0:
@@ -63,11 +63,11 @@ def hmm_create(name:str, seqs:Iterator[SeqRecord], alphabet:Alphabet)->HMM:
 
     return HMM
 
-def hmm_produce(candidate_class: PolymerClass, organism_taxid:int, seed_sequences:list[SeqRecord], no_cache:bool=False)->Tuple[PolymerClass,HMM]:  # type: ignore
+def hmm_produce(candidate_class: PolynucleotideClass, organism_taxid:int, seed_sequences:list[SeqRecord], no_cache:bool=False)->Tuple[PolynucleotideClass,HMM]:  # type: ignore
     """Produce an organism-specific HMM. Retrieve from cache if exists, otherwise generate and cache."""
 
     prot_classes = [*list(CytosolicProteinClass),*list(LifecycleFactorClass),*list(MitochondrialProteinClass )]
-    rna_classes  = [*list(PolymerClass)]
+    rna_classes  = [*list(PolynucleotideClass)]
 
     if candidate_class in prot_classes:
         alphabet = pyhmmer.easel.Alphabet.amino()
@@ -82,15 +82,15 @@ def hmm_produce(candidate_class: PolymerClass, organism_taxid:int, seed_sequence
 
     return (candidate_class, HMM )
 
-def _obtain_phylogenetic_nbhd_task(base_taxids:list[int], fasta_record:Fasta, polymer_class:PolymerClass, taxid:int, max_n_neighbors:int):
+def _obtain_phylogenetic_nbhd_task(base_taxids:list[int], fasta_record:Fasta, polymer_class:PolynucleotideClass, taxid:int, max_n_neighbors:int):
     phylo_nbhd_ids = phylogenetic_neighborhood(base_taxids, str(taxid), max_n_neighbors)
     seqs           = fasta_record.pick_taxids(phylo_nbhd_ids)
     return polymer_class, iter(seqs)
 
 class PolymerClassFastaRegistry():
     """This is a wrapper around fasta records for all polymer classes. Only a few sequences should be picked from it at a time."""
-    registry_fasta       : dict[PolymerClass, Fasta ]     = {}
-    registry_all_tax_ids : dict[PolymerClass, list[int] ] = {}
+    registry_fasta       : dict[PolynucleotideClass, Fasta ]     = {}
+    registry_all_tax_ids : dict[PolynucleotideClass, list[int] ] = {}
 
     def __init__(self) :
 
@@ -104,7 +104,7 @@ class PolymerClassFastaRegistry():
             self.registry_fasta[candidate_class]   = Fasta(fasta_path)
             self.registry_all_tax_ids[candidate_class] = Fasta(fasta_path).all_taxids("int")
 
-        for candidate_class in PolymerClass:
+        for candidate_class in PolynucleotideClass:
             fasta_path                             = os.path.join(ASSETS["fasta_rna"], f"{candidate_class.value}.fasta")
             self.registry_fasta[candidate_class]   = Fasta(fasta_path)
             self.registry_all_tax_ids[candidate_class] = Fasta(fasta_path).all_taxids("int")
@@ -125,7 +125,7 @@ class PolymerClassFastaRegistry():
             if len( list(fasta_record.records) ) == 0 :
                 raise Exception("Empty fasta file: {}".format(fasta_record))
 
-    def get_seed_sequences_for_taxid(self,taxid:int, max_n_neighbors:int = 5)->dict[PolymerClass, list[SeqRecord]]:
+    def get_seed_sequences_for_taxid(self,taxid:int, max_n_neighbors:int = 5)->dict[PolynucleotideClass, list[SeqRecord]]:
         _ = {}
         with concurrent.futures.ProcessPoolExecutor(max_workers=15) as executor:
             futures = []
@@ -156,12 +156,12 @@ class PolymerClassesOrganismScanner():
 
 
     @property
-    def hmms_amino(self)->list[tuple[PolymerClass,HMM]]:
+    def hmms_amino(self)->list[tuple[PolynucleotideClass,HMM]]:
         return list(filter(lambda x: x[0] in [*list(CytosolicProteinClass),*list(LifecycleFactorClass),*list(MitochondrialProteinClass )], self.hmms_registry.items()))
 
     @property
-    def hmms_rna(self)->list[tuple[PolymerClass,HMM]]:
-        return list(filter(lambda x: x[0] in [*list(PolymerClass)], self.hmms_registry.items()))
+    def hmms_rna(self)->list[tuple[PolynucleotideClass,HMM]]:
+        return list(filter(lambda x: x[0] in [*list(PolynucleotideClass)], self.hmms_registry.items()))
 
     def cache_hmms(self):
         with open(os.path.join(self.filename_hmms_registry), 'wb')  as outfile:
@@ -195,8 +195,8 @@ class PolymerClassesOrganismScanner():
         self.filename_hmms_registry       = os.path.join(ASSETS['__hmm_cache'], "taxid_{}_hmm_scanner".format(organism_taxid))
         self.filename_seed_seqs = os.path.join(ASSETS['__hmm_cache'], "taxid_{}_seed_seqs".format(organism_taxid))
 
-        self.seed_sequences: dict[PolymerClass, list[SeqRecord]] = {}
-        self.hmms_registry : dict[PolymerClass, HMM]             = {}
+        self.seed_sequences: dict[PolynucleotideClass, list[SeqRecord]] = {}
+        self.hmms_registry : dict[PolynucleotideClass, HMM]             = {}
 
         self.cache_load_hmms()
         self.cache_load_seed_seqs()
@@ -222,7 +222,7 @@ class PolymerClassesOrganismScanner():
             self.cache_seed_seqs()
             
 
-    def classify_seq(self, alphabet, target_seq:DigitalSequence)->list[Tuple[PolymerClass, TopHits]]:
+    def classify_seq(self, alphabet, target_seq:DigitalSequence)->list[Tuple[PolynucleotideClass, TopHits]]:
 
         def seq_evaluate_v_hmm(seq:DigitalSequence,alphabet:Alphabet, hmm:HMM, T:int=35)->TopHits:
             """Fit a sequence to a given HMM"""
@@ -266,11 +266,11 @@ class HMMClassifier():
     organism_scanners : dict[int, PolymerClassesOrganismScanner]
     chains            : list[Polymer]
     alphabet          : pyhmmer.easel.Alphabet
-    candidate_classes : list[PolymerClass]
+    candidate_classes : list[PolynucleotideClass]
     bitscore_threshold: int = 35
     report            : dict
 
-    def __init__(self, chains: list[Polymer], alphabet:pyhmmer.easel.Alphabet, candidate_classes:list[PolymerClass]) -> None:
+    def __init__(self, chains: list[Polymer], alphabet:pyhmmer.easel.Alphabet, candidate_classes:list[PolynucleotideClass]) -> None:
         self.alphabet          = alphabet
         self.candidate_classes = candidate_classes
         self.chains            = chains
@@ -278,7 +278,7 @@ class HMMClassifier():
         self.report            = {}
 
     @staticmethod
-    def pick_best_hit(hits:list[dict], bitscore_threshold:float) -> list[PolymerClass]:
+    def pick_best_hit(hits:list[dict], bitscore_threshold:float) -> list[PolynucleotideClass]:
         if len(hits) == 0:
             return []
 

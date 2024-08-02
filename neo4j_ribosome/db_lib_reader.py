@@ -3,8 +3,8 @@ import typing
 import sys
 from neo4j_ribosome import NEO4J_CURRENTDB, NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER
 from ribctl.lib.schema.types_ribosome import (
-    PolymerClass,
-    PolymerClass,
+    PolynucleotideClass,
+    PolynucleotideClass,
     PolypeptideClass,
 )
 
@@ -21,7 +21,7 @@ class FiltersSchema:
     search: str
     year: typing.Tuple[int | None, int | None]
     resolution: typing.Tuple[float | None, float | None]
-    polymer_classes: list[PolymerClass | PolypeptideClass]
+    polymer_classes: list[PolynucleotideClass | PolypeptideClass]
     source_taxa: list[int]
     host_taxa: list[int]
 
@@ -131,7 +131,7 @@ return apoc.map.merge(rib, rest)
 
             return session.execute_read(_)
 
-    def list_polymers_filtered_by_polymer_class(self, page: int, polymer_class: PolymerClass):
+    def list_polymers_filtered_by_polymer_class(self, page: int, polymer_class: PolynucleotideClass):
 
         query_by_polymer_class = """
          match (poly:Polymer)-[]-(pc:PolymerClass {{class_id:"{}" }})
@@ -160,7 +160,7 @@ return apoc.map.merge(rib, rest)
         search: None | str = None,
         year: None | typing.Tuple[int | None, int | None] = None,
         resolution: None | typing.Tuple[float | None, float | None] = None,
-        polymer_classes: None | list[PolymerClass | PolypeptideClass] = None,
+        polymer_classes: None | list[PolynucleotideClass | PolypeptideClass] = None,
         source_taxa: None | list[int] = None,
         host_taxa: None | list[int] = None,
     ):
@@ -319,7 +319,7 @@ with rib order by rib.rcsb_id desc\n"""
         search: None | str = None,
         year: None | typing.Tuple[int | None, int | None] = None,
         resolution: None | typing.Tuple[float | None, float | None] = None,
-        polymer_classes: None | list[PolymerClass | PolypeptideClass] = None,
+        polymer_classes: None | list[PolynucleotideClass | PolypeptideClass] = None,
         source_taxa: None | list[int] = None,
         host_taxa: None | list[int] = None,
     ):
