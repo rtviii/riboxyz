@@ -405,25 +405,26 @@ def init_transpose_ligand(
         ))
 
     purported_binding_site: BindingSite = []
-    for chain in predicted_chains:
-        RibosomeOps(target_struct).get_poly_by_auth_asym_id(chain.target.auth_asym_id)
-        
 
-        BindingSiteChain(
-            *RibosomeOps(target_struct).get_poly_by_auth_asym_id(
-                chain.target.auth_asym_id
-            ),
+    for chain in predicted_chains:
+        poly = RibosomeOps(target_struct).get_poly_by_auth_asym_id(chain.target.auth_asym_id) 
+        if poly == None: raise ValueError("Polymer not found in target structure")
+
+        purported_binding_site.append(BindingSiteChain(
+            **poly.model_dump(),
             residues=[
                 ResidueSummary(
-                    seqid=seqid,
-                    resname=resname,
-                    parent_auth_asym_id=chain.target.auth_asym_id,
-                    full_id=None,
-                )
-                for seqid, resname in zip(
-                    chain.target.target_seq_ids, chain.target.target_seq
-                )
+					seqid               = seqid,
+					resname             = chain.target.target_seq[seqid],
+					parent_auth_asym_id = chain.target.auth_asym_id,
+					full_id             = None
+                ) for  seqid in chain.target.target_seq_ids
             ],
-        )
+        ))
 
-    return LigandTransposition.model_validate(predicted_chains)
+    return LigandTransposition(
+        constituent_chains     = predicted_chains,
+        source                 = source_struct,
+        target                 = target_struct,
+        purported_binding_site = purported_binding_site,
+    )

@@ -31,10 +31,11 @@ AMINO_ACIDS = {
 NUCLEOTIDES = ["A", "T", "C", "G", "U"]
 
 
-class ResidueSummary(BaseModel):
-    full_id: tuple[str, int, str, tuple[str, int, str]]
-    resname: str
-    seqid: int
+class ResidueSummary(BaseModel): 
+
+    full_id            : typing.Optional[tuple[str, int, str, tuple[str, int, str]]]
+    resname            : str
+    seqid              : int
     parent_auth_asym_id: str
 
     def __hash__(self):
