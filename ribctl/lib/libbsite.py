@@ -406,7 +406,8 @@ def init_transpose_ligand(
 
     purported_binding_site: BindingSite = []
     for chain in predicted_chains:
-		chain.target.auth_asym_id
+        RibosomeOps(target_struct).get_poly_by_auth_asym_id(chain.target.auth_asym_id)
+        
 
         BindingSiteChain(
             *RibosomeOps(target_struct).get_poly_by_auth_asym_id(
