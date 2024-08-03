@@ -4,7 +4,7 @@ import typing
 import pydantic
 from pydantic import BaseModel, RootModel
 from Bio.PDB.Residue import Residue
-from ribctl.lib.schema.types_ribosome import Polymer, PolynucleotideClass
+from ribctl.lib.schema.types_ribosome import Polymer, PolymerClass, PolynucleotideClass
 
 AMINO_ACIDS = {
     "ALA": 0,
@@ -34,7 +34,6 @@ AMINO_ACIDS = {
 NUCLEOTIDES = ['A', 'T', 'C', 'G', 'U']
 
 class ResidueSummary(BaseModel):
-
     full_id            : tuple[str, int, str, tuple[str, int, str]]
     resname            : str
     seqid              : int
@@ -71,48 +70,40 @@ class ResidueSummary(BaseModel):
 class BindingSiteChain(Polymer):
     residues: list[ResidueSummary]
 
-class BindingSite(RootModel):
-    root: typing.Dict[str, BindingSiteChain]
-
-    @staticmethod
-    def path_nonpoly_ligand( rcsb_id: str, class_: str):
-        RIBETL_DATA = os.environ.get('RIBETL_DATA')
-        return os.path.join( str(RIBETL_DATA), rcsb_id.upper() , "LIGAND_" + class_.replace(" ", "_").upper() + ".json")
-
-    # @staticmethod
-    # def path_poly_factor( rcsb_id: str, class_: str, auth_asym_id: str):
-    #     RIBETL_DATA = os.environ.get('RIBETL_DATA')
-    #     return os.path.join( str(RIBETL_DATA), rcsb_id.upper(), "POLYMER_"+auth_asym_id +  "_" + class_.replace(" ", "_").upper() + ".json" )
-
-    def save(self, filename: str):
-        with open(filename, 'w') as outfile:
-            json.dump(json.loads(self.json()), outfile, indent=4)
-            print("Saved: ",filename)
+type BindingSite = list[BindingSiteChain]
 
 
+
+
+class PredictionSource(BaseModel): 
+
+  source_seq                 : str
+  source_seq_ids             : list[int]
+  auth_asym_id               : str
+
+class PredictionTarget(BaseModel):
+
+    target_seq         : str
+    target_seq_ids     : list[int]
+    auth_asym_id: str
+
+class PredictionAlignments(BaseModel):
+    aligned_ids: list[int]
+    source_seq_aligned: str
+    target_seq_aligned: str
 class PredictedResiduesPolymer(BaseModel):
-    class PredictionSource(BaseModel):
-        src: str
-        src_ids: list[int]
-        auth_asym_id: str
 
-    class PredictionTarget(BaseModel):
-        tgt: str
-        tgt_ids: list[int]
-        auth_asym_id: str
 
-    class PredictionAlignments(BaseModel):
-        aln_ids: list[int]
-        src_aln: str
-        tgt_aln: str
+    polymer_class         : PolymerClass
+    source                : PredictionSource
+    target                : PredictionTarget
+    alignment             : PredictionAlignments
 
-    source   : PredictionSource
-    target   : PredictionTarget
-    alignment: PredictionAlignments
-
-class LigandPrediction(RootModel):
-    root: typing.Dict[str, PredictedResiduesPolymer]
-    model_config = { "arbitrary_types_allowed": True }
+class LigandTransposition(BaseModel):
+    source: str
+    target: str
+    constituent_chains    : list[PredictedResiduesPolymer]
+    purported_binding_site: BindingSite
 
     def save(self, filename: str):
         with open(filename, 'w') as outfile:

@@ -8,7 +8,7 @@ from ninja import Router
 from ribctl import RIBETL_DATA
 from ribctl.etl.etl_assets_ops import RibosomeOps, Structure
 from ribctl.lib.libbsite import bsite_ligand, init_transpose_ligand
-from ribctl.lib.schema.types_binding_site import BindingSite, LigandPrediction
+from ribctl.lib.schema.types_binding_site import BindingSite, LigandTransposition
 from ribctl.lib.schema.types_ribosome import RNA, LifecycleFactorClass, MitochondrialProteinClass, Polymer, PolynucleotideClass, CytosolicProteinClass, PolynucleotideClass, PolypeptideClass, Protein, ProteinClass, RibosomeStructure
 from schema.v0 import BanClassMetadata, ExogenousRNAByStruct,LigandInstance, LigandlikeInstance, NeoStruct, NomenclatureClass, NomenclatureClassMember
 
@@ -31,7 +31,7 @@ def lig_nbhd(request, source_structure:str, chemical_id:str, radius:int=5):
     with open(path, 'r') as f:
         return JsonResponse(json.load(f), safe=False)
         
-@router_lig.get('/transpose',  tags=[TAG], response=LigandPrediction)
+@router_lig.get('/transpose',  tags=[TAG], response=LigandTransposition)
 def lig_transpose(request, source_structure:str, target_structure:str, chemical_id:str, radius:int=5):
     """All members of the given RNA class: small and large subunit, cytosolic and mitochondrial RNA; tRNA.  """
     bsite_path      = RibosomeOps(source_structure).paths.binding_site(chemical_id)

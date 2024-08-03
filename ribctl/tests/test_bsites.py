@@ -1,6 +1,6 @@
 import os
 from pprint import pprint
-from ribctl.lib.schema.types_binding_site import BindingSite, LigandPrediction
+from ribctl.lib.schema.types_binding_site import BindingSite, LigandTransposition
 from ribctl.lib.mod_transpose_bsites import init_transpose_ligand, open_bsite
 from ribctl.lib.schema.types_ribosome import RibosomeStructure
 from ribctl.lib import utils
@@ -37,7 +37,7 @@ def extract_bsites (rcsb_id):
         if (os.path.isfile(outfile_json)):
             print("Exists already: ", outfile_json)
 
-def predict_bsite(PDBID_target, ligand_id, ligand_type)->LigandPrediction:
+def predict_bsite(PDBID_target, ligand_id, ligand_type)->LigandTransposition:
 
     bsite          = open_bsite(utils.ligand_path(PDBID_target, ligand_id, ligand_type))
     target_profile = RibosomeStructure.parse_obj(utils.open_structure(PDBID_target,'json')  )
