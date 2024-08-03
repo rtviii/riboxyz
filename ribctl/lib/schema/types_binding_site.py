@@ -73,7 +73,9 @@ class BindingSiteChain(Polymer):
     residues: list[ResidueSummary]
 
 
-type BindingSite = list[BindingSiteChain]
+class BindingSite(BaseModel):
+
+    chains: list[BindingSiteChain]
 
 
 class PredictionSource(BaseModel):

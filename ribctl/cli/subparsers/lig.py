@@ -29,9 +29,9 @@ def transpose(ctx, lig_chem_id, source_struct, target_struct):
     ligpath = RibosomeOps(source_struct.upper()).paths.binding_site(lig_chem_id.upper())
     with open(ligpath, 'r') as ligfile:
         data = json.load(ligfile)
-        lig = BindingSite.model_validate(data)
+        lig = data
 
     target     = RibosomeOps(target_struct).profile()
-    transposed = init_transpose_ligand(target, lig).model_dump()
+    transposed = init_transpose_ligand(source_struct,target_struct, lig).model_dump()
 
     pprint(transposed)

@@ -52,89 +52,26 @@ def get_polymer_residues(auth_asym_id: str, struct: Structure) -> list[Residue]:
     return [*c.get_residues()]
 
 
-def get_polymer_nbrs(
-    polymer_residues: list[Residue],
-    struct: Structure,
-) -> BindingSite:
-    """KDTree search the neighbors of a given list of residues(which constitue a ligand)
-    and return unique having tagged them with a ban identifier proteins within 5 angstrom of these residues.
-    """
-
-    pdbid = struct.get_id().upper()
-    ns = NeighborSearch(list(struct.get_atoms()))
-    nbr_residues = []
-    parent_strand = (
-        polymer_residues[0].get_parent().id if len(polymer_residues) > 0 else ...
-    )
-
-    for poly_res in polymer_residues:
-        for atom in poly_res.child_list:
-            nbr_residues.extend(ns.search(atom.get_coord(), 10, level="R"))
-
-    nbr_residues = list(
-        set([*map(ResidueSummary.from_biopython_residue, nbr_residues)])
-    )
-    nbr_residues = list(
-        filter(
-            lambda res: res.parent_auth_asym_id != parent_strand
-            and res.get_resname() in [*AMINO_ACIDS.keys(), *NUCLEOTIDES],
-            nbr_residues,
-        )
-    )
-    nbr_dict = {}
-    chain_names = list(set(map(lambda _: _.parent_auth_asym_id, nbr_residues)))
-
-    profile = RibosomeStructure.from_json_profile(utils.open_structure(pdbid, "json"))
-    poly_entities: list[Polymer] = [
-        *map(
-            lambda _: Polymer(**_.dict()),
-            itertools.chain(profile.proteins, profile.rnas if profile.rnas else []),
-        )
-    ]
-
-    for c in chain_names:
-        for poly_entity in poly_entities:
-            if c == poly_entity.auth_asym_id:
-
-                nbr_dict[c] = BindingSiteChain(
-                    **poly_entity.dict(),
-                    residues=sorted(
-                        [
-                            residue
-                            for residue in nbr_residues
-                            if residue.parent_auth_asym_id == c
-                        ],
-                        key=operator.attrgetter("seqid"),
-                    ),
-                )
-
-    return BindingSite.parse_obj(nbr_dict)
-
-
-def get_ligand_nbrs(
+def get_lig_bsite(
     ligand_residues: list[Residue],
     struct: Structure,
     radius: Optional[float] = 5,
+
 ) -> BindingSite:
     """KDTree search the neighbors of a given list of residues(which constitue a ligand)
     and return unique having tagged them with a ban identifier proteins within 5 angstrom of these residues.
     """
 
-    pdbid = struct.get_id().upper()
-    profile = RibosomeOps(struct.get_id().upper()).profile()
-
-    poly_entities = [*profile.proteins, *profile.rnas]
-    pdbid = struct.get_id()
-    ns = NeighborSearch(list(struct.get_atoms()))
-    nbr_residues = []
+    RO =RibosomeOps(struct.get_id().upper())
+    profile       = RO.profile()
+    ns            = NeighborSearch(list(struct.get_atoms()))
+    nbr_residues  = []
 
     for lig_res in ligand_residues:
         for atom in lig_res.child_list:
             nbr_residues.extend(ns.search(atom.get_coord(), radius, level="R"))
 
-    nbr_residues = list(
-        set([*map(ResidueSummary.from_biopython_residue, nbr_residues)])
-    )
+    nbr_residues = list( set([*map(ResidueSummary.from_biopython_residue, nbr_residues)]) )
 
     # Filter the ligand itself, water and other special residues
     nbr_residues = list(
@@ -143,24 +80,27 @@ def get_ligand_nbrs(
             nbr_residues,
         )
     )
-    nbr_dict = {}
-    chain_names = list(set(map(lambda _: _.get_parent_auth_asym_id(), nbr_residues)))
-    for c in chain_names:
-        for poly_entity in poly_entities:
-            if c == poly_entity.auth_asym_id:
-                nbr_dict[c] = BindingSiteChain(
-                    **json.loads(poly_entity.json()),
-                    residues=sorted(
-                        [
-                            residue
-                            for residue in nbr_residues
-                            if residue.get_parent_auth_asym_id() == c
-                        ],
-                        key=operator.attrgetter("seqid"),
-                    ),
-                )
 
-    return BindingSite.model_validate(nbr_dict)
+    nbr_chains = []
+    chain_auth_asym_ids = list(set(map(lambda _: _.get_parent_auth_asym_id(), nbr_residues)))
+
+    for c in chain_auth_asym_ids:
+
+            polymer= RO.get_poly_by_auth_asym_id(c)
+            if polymer == None:
+                raise ValueError(f"Polymer with auth_asym_id {c} not found in structure")
+            nbr_chains.append(BindingSiteChain(
+                **polymer.model_dump(),
+                residues=sorted(
+                    [
+                        residue
+                        for residue in nbr_residues
+                        if residue.get_parent_auth_asym_id() == c
+                    ],
+                    key=operator.attrgetter("seqid"),
+                ),
+            ))
+    return BindingSite.model_validate({"chains":nbr_chains })
 
 
 def get_ligand_residue_ids(ligchemid: str, struct: Structure) -> list[Residue]:
@@ -203,7 +143,7 @@ def bsite_ligand(
     chemicalId = chemicalId.upper()
     _structure_cif_handle = RibosomeOps(rcsb_id).biopython_structure()
     residues: list[Residue] = get_ligand_residue_ids(chemicalId, _structure_cif_handle)
-    binding_site_ligand: BindingSite = get_ligand_nbrs(
+    binding_site_ligand: BindingSite = get_lig_bsite(
         residues, _structure_cif_handle, radius
     )
 
