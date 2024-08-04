@@ -27,6 +27,28 @@ AMINO_ACIDS = {
     "TRP": {"one_letter_code": "W", "charge": 0},
     "TYR": {"one_letter_code": "Y", "charge": 0},
     "VAL": {"one_letter_code": "V", "charge": 0},
+    # ------------------------
+
+    # "A": {"one_letter_code": "ALA", "charge": 0},
+    # "R": {"one_letter_code": "ARG", "charge": 1},
+    # "N": {"one_letter_code": "ASN", "charge": 0},
+    # "D": {"one_letter_code": "ASP", "charge": -1},
+    # "C": {"one_letter_code": "CYS", "charge": 0},
+    # "E": {"one_letter_code": "GLU", "charge": -1},
+    # "Q": {"one_letter_code": "GLN", "charge": 0},
+    # "G": {"one_letter_code": "GLY", "charge": 0},
+    # "H": {"one_letter_code": "HIS", "charge": 0},
+    # "I": {"one_letter_code": "ILE", "charge": 0},
+    # "L": {"one_letter_code": "LEU", "charge": 0},
+    # "K": {"one_letter_code": "LYS", "charge": 1},
+    # "M": {"one_letter_code": "MET", "charge": 0},
+    # "F": {"one_letter_code": "PHE", "charge": 0},
+    # "P": {"one_letter_code": "PRO", "charge": 0},
+    # "S": {"one_letter_code": "SER", "charge": 0},
+    # "T": {"one_letter_code": "THR", "charge": 0},
+    # "W": {"one_letter_code": "TRP", "charge": 0},
+    # "Y": {"one_letter_code": "TYR", "charge": 0},
+    # "V": {"one_letter_code": "VAL", "charge": 0},
 }
 NUCLEOTIDES = ["A", "T", "C", "G", "U"]
 
