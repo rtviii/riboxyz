@@ -203,13 +203,13 @@ def bsite_transpose(
     binding_site: BindingSite,
     save: bool = False,
 ) -> LigandTransposition:
+
     source_struct, target_struct = source_struct.upper(), target_struct.upper()
 
     by_polymer_class_source_polymers = {}
 
     for nbr_polymer in binding_site.chains:
         nbr_polymer = BindingSiteChain.model_validate(nbr_polymer)
-
         if len(nbr_polymer.nomenclature) < 1:
             continue
 
