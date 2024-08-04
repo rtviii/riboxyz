@@ -262,7 +262,8 @@ def bsite_transpose(
 ) -> LigandTransposition:
 
     by_polymer_class_source_polymers = {}
-    for nbr_polymer in binding_site:
+
+    for nbr_polymer in binding_site.chains:
         nbr_polymer = BindingSiteChain.model_validate(nbr_polymer)
         if len(nbr_polymer.nomenclature) < 1:
             continue
@@ -276,17 +277,13 @@ def bsite_transpose(
             by_polymer_class_source_polymers[nbr_polymer.nomenclature[0].value] = {
                 "seq": nbr_polymer.entity_poly_seq_one_letter_code_can,
                 "auth_asym_id": nbr_polymer.auth_asym_id,
-                "ids": [
-                    resid for resid in [*map(lambda x: x.seqid, nbr_polymer.residues)]
-                ],
+                "ids": [ resid for resid in [*map(lambda x: x.seqid, nbr_polymer.residues)] ],
             }
 
     # ! at this point we have collected all the source polymers, their sequences and residue ids participating in the binding site
     by_class_target_polymers = {}
     for nomenclature_class, nbr_polymer in by_polymer_class_source_polymers.items():
-        target_polymer = RibosomeOps(target_struct).get_poly_by_polyclass(
-            nomenclature_class
-        )
+        target_polymer = RibosomeOps(target_struct).get_poly_by_polyclass( nomenclature_class )
         if target_polymer == None:
             continue
         tgt_poly_seq = target_polymer.entity_poly_seq_one_letter_code_can
@@ -299,48 +296,37 @@ def bsite_transpose(
     predicted_chains: list[PredictedResiduesPolymer] = []
 
     for nomenclature_class, seqstats in by_polymer_class_source_polymers.items():
+        print(">>>>>>",nomenclature_class)
         if nomenclature_class not in by_class_target_polymers:
             continue
 
         src_ids = by_polymer_class_source_polymers[nomenclature_class]["ids"]
-        src = by_polymer_class_source_polymers[nomenclature_class]["seq"]
-        tgt = by_class_target_polymers[nomenclature_class]["seq"]
+        src     = by_polymer_class_source_polymers[nomenclature_class]["seq"]
+        tgt     = by_class_target_polymers[nomenclature_class]["seq"]
 
         sq = SeqMatch(src, tgt, src_ids)
 
-        src_aln = (
-            sq.src_aln
-        )  # <--- aligned source      sequence (with                        gaps)
-        tgt_aln = (
-            sq.tgt_aln
-        )  # <--- aligned tgt         sequence (with                        gaps)
-        aln_ids = (
-            sq.aligned_ids
-        )  # <--- ids     corrected   for                                   gaps
-        tgt_ids = (
-            sq.tgt_ids
-        )  # <--- ids     backtracted to the target polymer (accounting for gaps)
+        src_aln = ( sq.src_aln )  # <--- aligned source      sequence (with                        gaps)
+        tgt_aln = ( sq.tgt_aln )  # <--- aligned tgt         sequence (with                        gaps)
+        aln_ids = ( sq.aligned_ids )  # <--- ids     corrected   for                                   gaps
+        tgt_ids = ( sq.tgt_ids )  # <--- ids     backtracted to the target polymer (accounting for gaps)
 
         predicted_chains.append(
             PredictedResiduesPolymer.model_validate(
                 {
-                    "polymer_class": nomenclature_class,
+                    "polymer_class": nomenclature_class ,
                     "source": {
-                        "source_seq": src,
+                        "source_seq"    : src,
                         "source_seq_ids": src_ids,
-                        "auth_asym_id": by_polymer_class_source_polymers[
-                            nomenclature_class
-                        ].auth_asym_id,
+                        "auth_asym_id"  : by_polymer_class_source_polymers[ nomenclature_class ]["auth_asym_id"]
                     },
                     "target": {
-                        "target_seq": tgt,
+                        "target_seq"    : tgt,
                         "target_seq_ids": tgt_ids,
-                        "auth_asym_id": by_class_target_polymers[nomenclature_class][
-                            "auth_asym_id"
-                        ],
+                        "auth_asym_id"  : by_class_target_polymers[nomenclature_class][ "auth_asym_id" ],
                     },
                     "alignment": {
-                        "aligned_ids": aln_ids,
+                        "aligned_ids"       : aln_ids,
                         "source_seq_aligned": src_aln,
                         "target_seq_aligned": tgt_aln,
                     },
