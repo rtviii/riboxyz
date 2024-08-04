@@ -74,7 +74,9 @@ class BindingSiteChain(Polymer):
 
 
 class BindingSite(BaseModel):
-
+    source:str
+    ligand:str
+    radius:float
     chains: list[BindingSiteChain]
 
 
