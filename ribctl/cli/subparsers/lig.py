@@ -35,11 +35,15 @@ def nbhd(rcsb_id, chem_id, radius, save):
 @click.argument("target_struct", required=True , type=str)
 def transpose(ctx, lig_chem_id, source_struct, target_struct):
     ligpath = RibosomeOps(source_struct.upper()).paths.binding_site(lig_chem_id.upper())
+    if not os.path.exists(ligpath):
+        print("{} does not exist. Invoke nbhd.".format(ligpath))
+
     with open(ligpath, 'r') as ligfile:
-        data = json.load(ligfile)
-        lig = BindingSite(**data)
+        lig  = BindingSite(**json.load(ligfile))
 
-    target     = RibosomeOps(target_struct).profile()
-    transposed = bsite_transpose(source_struct,target_struct, lig).model_dump()
-
-    pprint(transposed)
+    transposed      = bsite_transpose(source_struct,target_struct, lig).model_dump()
+    transposed_path = RibosomeOps(target_struct).paths.binding_site_prediction(lig_chem_id, source_struct)
+    with open(transposed_path, 'w') as outfile:
+        json.dump(transposed, outfile, indent=4)
+        ce("Saved: {}".format(transposed_path))
+    return transposed

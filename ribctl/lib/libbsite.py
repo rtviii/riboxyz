@@ -139,8 +139,6 @@ def bsite_extrarbx_polymer(auth_asym_id: str, structure: Structure) -> BindingSi
     binding_site_polymer: BindingSite = get_polymer_nbrs(residues, structure)
     return binding_site_polymer
 
-
-
 #! Transposition methods
 class SeqMatch:
     def __init__(self, sourceseq: str, targetseq: str, source_residues: list[int]):
@@ -238,8 +236,6 @@ class SeqMatch:
         return _
 
 
-
-
 def bsite_ligand(
     chemicalId: str, rcsb_id: str, radius: Optional[float] = 5, save: bool = False
 ) -> BindingSite:
@@ -268,12 +264,6 @@ def bsite_transpose(
         if len(nbr_polymer.nomenclature) < 1:
             continue
         else:
-            print(
-                "auth asym id "
-                + nbr_polymer.auth_asym_id
-                + " has  nomenclature: "
-                + nbr_polymer.nomenclature[0]
-            )
             by_polymer_class_source_polymers[nbr_polymer.nomenclature[0].value] = {
                 "seq": nbr_polymer.entity_poly_seq_one_letter_code_can,
                 "auth_asym_id": nbr_polymer.auth_asym_id,
@@ -296,7 +286,6 @@ def bsite_transpose(
     predicted_chains: list[PredictedResiduesPolymer] = []
 
     for nomenclature_class, seqstats in by_polymer_class_source_polymers.items():
-        print(">>>>>>",nomenclature_class)
         if nomenclature_class not in by_class_target_polymers:
             continue
 
