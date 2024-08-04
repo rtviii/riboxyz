@@ -68,9 +68,8 @@ class ResidueSummary(BaseModel):
             full_id=r.get_full_id(),
         )
 
-
 class BindingSiteChain(Polymer):
-    residues: list[ResidueSummary]
+    bound_residues: list[ResidueSummary]
 
 class BindingSite(BaseModel):
     source:str
@@ -81,15 +80,15 @@ class BindingSite(BaseModel):
 
 class PredictionSource(BaseModel):
 
-    source_seq: str
-    source_seq_ids: list[int]
-    auth_asym_id: str
+    source_seq    : str
+    source_bound_residues: list[ResidueSummary]
+    auth_asym_id  : str
 
 
 class PredictionTarget(BaseModel):
 
     target_seq: str
-    target_seq_ids: list[int]
+    target_bound_residues: list[ResidueSummary]
     auth_asym_id: str
 
 

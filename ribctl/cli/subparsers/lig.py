@@ -37,7 +37,6 @@ def transpose(ctx, lig_chem_id, source_struct, target_struct):
     ligpath = RibosomeOps(source_struct.upper()).paths.binding_site(lig_chem_id.upper())
     if not os.path.exists(ligpath):
         print("{} does not exist. Invoke nbhd.".format(ligpath))
-
     with open(ligpath, 'r') as ligfile:
         lig  = BindingSite(**json.load(ligfile))
 
