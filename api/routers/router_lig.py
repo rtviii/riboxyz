@@ -10,7 +10,6 @@ from ribctl.etl.etl_assets_ops import RibosomeOps, Structure
 from ribctl.lib.libbsite import bsite_ligand, bsite_transpose
 from ribctl.lib.schema.types_binding_site import BindingSite, LigandTransposition
 from ribctl.lib.schema.types_ribosome import RNA, LifecycleFactorClass, MitochondrialProteinClass, Polymer, PolynucleotideClass, CytosolicProteinClass, PolynucleotideClass, PolypeptideClass, Protein, ProteinClass, RibosomeStructure
-from schema.v0 import BanClassMetadata, ExogenousRNAByStruct,LigandInstance, LigandlikeInstance, NeoStruct, NomenclatureClass, NomenclatureClassMember
 
 router_lig = Router()
 TAG                   = "Ligands, Antibitics & Small Molecules"
@@ -41,7 +40,7 @@ def lig_transpose(request, source_structure:str, target_structure:str, chemical_
         try:
             bsite = bsite_ligand(chemical_id, source_structure, radius, save=True)
             if not os.path.exists(prediction_path):
-                prediction = bsite_transpose(RibosomeOps(target_structure).profile(),bsite)
+                prediction = bsite_transpose(source_structure, target_structure,bsite)
                 with open(prediction_path, 'w') as f:
                     json.dump(prediction.model_dump(), f)
                     print("Saved {}".format(prediction_path))
@@ -52,7 +51,7 @@ def lig_transpose(request, source_structure:str, target_structure:str, chemical_
         with open(bsite_path, 'r') as f:
             data = json.load(f)
             bsite = BindingSite.model_validate(data)
-        prediction = bsite_transpose(RibosomeOps(target_structure).profile(),bsite)
+        prediction = bsite_transpose(source_structure, target_structure,bsite)
 
         with open(prediction_path, 'w') as f:
             json.dump(prediction.model_dump(), f)
