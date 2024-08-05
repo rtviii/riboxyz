@@ -84,10 +84,10 @@ class ResidueSummary(BaseModel):
         (hetero, seqid, insertion_code) = _
 
         return ResidueSummary(
-            seqid=seqid,
-            resname=r.get_resname(),
-            parent_auth_asym_id=chain_id,
-            full_id=r.get_full_id(),
+            seqid               = seqid,
+            resname             = r.get_resname(),
+            parent_auth_asym_id = chain_id,
+            full_id             = r.get_full_id(),
         )
 
 class BindingSiteChain(Polymer):
