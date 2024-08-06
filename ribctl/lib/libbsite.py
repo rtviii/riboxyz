@@ -240,6 +240,9 @@ def bsite_transpose(
                 seq = seq + ResidueSummary.three_letter_code_to_one(residue.resname)
             elif residue.resname in [*NUCLEOTIDES]:
                 seq = seq + residue.resname
+            else:
+                seq =  seq + "-"
+
         return seq
 
     def extract_contiguous_motifs(bound_residues:list[tuple[int,str]])->list[list[tuple[int, str]]]:
@@ -275,12 +278,13 @@ def bsite_transpose(
         if len(nbr_polymer.nomenclature) < 1:
             continue
         else:
-            chain = source_struct[0][nbr_polymer.auth_asym_id]
+            biopython_chain:Chain = source_struct[0][nbr_polymer.auth_asym_id]
+            bound_residues_ids = [ ( resid, resname ) for ( resid,resname)  in [ *map(lambda x: ( x.auth_seq_id, x.resname ), nbr_polymer.bound_residues) ] ]
             source_polymers_by_poly_class[nbr_polymer.nomenclature[0].value] = {
                 "seq"           : nbr_polymer.entity_poly_seq_one_letter_code_can,
                 "auth_asym_id"  : nbr_polymer.auth_asym_id,
-                "bound_residues": [ ( resid, resname ) for ( resid,resname)  in [ *map(lambda x: ( x.auth_seq_id, x.resname ), nbr_polymer.bound_residues) ] ],
-                "motifs"        : extract_contiguous_motifs(chain['bound_residues'])
+                "bound_residues": bound_residues_ids,
+                "motifs"        : extract_contiguous_motifs(bound_residues_ids)
             }
 
     #! Target polymers
@@ -298,6 +302,9 @@ def bsite_transpose(
 
         print("Matched source chain {}.{} to target_polymer.auth_asym_id {}".format(nomenclature_class,source_polymers_by_poly_class[nomenclature_class]['auth_asym_id'], target_polymer.auth_asym_id))
         seq = BiopythonChain_to_sequence(target_struct[0][target_polymer.auth_asym_id])
+        pprint(seq)
+        # for motif in nbr_polymer['motifs']:
+        #     find_near_matches()
 
 
 
@@ -379,9 +386,9 @@ def bsite_transpose(
 
     chains: list[BindingSiteChain] = []
 
-    for chain in predicted_chains:
+    for biopython_chain in predicted_chains:
         poly = RibosomeOps(target_rcsb_id).get_poly_by_auth_asym_id(
-            chain.target.auth_asym_id
+            biopython_chain.target.auth_asym_id
         )
         if poly == None:
             raise ValueError("Polymer not found in target structure")
@@ -389,7 +396,7 @@ def bsite_transpose(
         chains.append(
             BindingSiteChain(
                 **poly.model_dump(),
-                bound_residues=chain.target.target_bound_residues,
+                bound_residues=biopython_chain.target.target_bound_residues,
             )
         )
 
