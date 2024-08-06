@@ -310,13 +310,12 @@ def bsite_transpose(
         pprint(seq_src)
         pprint(seq_tgt)
         for motif in nbr_polymer['motifs']:
-            print("motif itself is composed of ",  motif)
-            
+            # print("motif itself is composed of ",  motif)
             motif_str = ''.join([ ResidueSummary.three_letter_code_to_one(amino) for _, amino in motif ])
             if len(motif_str) <= 5:
                 continue
             print("Matches for ", motif_str)
-            print(find_near_matches(motif_str, seq_tgt, max_substitutions=0, max_l_dist=1, max_insertions=1, max_deletions=0))
+            print(find_near_matches(motif_str, seq_tgt, max_substitutions=0, max_l_dist=1, max_insertions=2, max_deletions=0))
             # if len(motif_str) > 10:
             #     print("Matches for ", motif_str)
             #     print(find_near_matches(motif_str, seq_tgt, max_substitutions=0, max_l_dist=2, max_insertions=0, max_deletions=0))
