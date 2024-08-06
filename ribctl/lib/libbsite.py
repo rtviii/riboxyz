@@ -243,13 +243,13 @@ def bsite_transpose(
         for idx,residue in enumerate( res ):
             if residue.resname in [*AMINO_ACIDS.keys()]:
                 seq = seq + ResidueSummary.three_letter_code_to_one(residue.resname)
-                idx_auth_seq_id_map[idx] = residue.get_id()[1]
+                idx_auth_seq_id_map[idx] = residue
             elif residue.resname in [*NUCLEOTIDES]:
                 seq = seq + residue.resname
-                idx_auth_seq_id_map[idx] = residue.get_id()[1]
+                idx_auth_seq_id_map[idx] = residue
             else:
                 seq =  seq + "-"
-                idx_auth_seq_id_map[idx] = -1
+                idx_auth_seq_id_map[idx] = residue
 
         return  seq,idx_auth_seq_id_map 
 
@@ -309,17 +309,24 @@ def bsite_transpose(
 
         print("\n\nMatched source chain {}.{} to target_polymer.auth_asym_id {}".format(nomenclature_class,source_polymers_by_poly_class[nomenclature_class]['auth_asym_id'], target_polymer.auth_asym_id))
 
-        seq_src = BiopythonChain_to_sequence(source_struct[0][nbr_polymer['auth_asym_id']])
-        seq_tgt = BiopythonChain_to_sequence(target_struct[0][target_polymer.auth_asym_id])
-        pprint(seq_src)
-        pprint(seq_tgt)
+        seq_src,idx_auth_map_src = BiopythonChain_to_sequence(source_struct[0][nbr_polymer['auth_asym_id']])
+        seq_tgt,idx_auth_map_tgt = BiopythonChain_to_sequence(target_struct[0][target_polymer.auth_asym_id])
         for motif in nbr_polymer['motifs']:
-            # print("motif itself is composed of ",  motif)
+            # ! -------------------------------------------- SEARCH PARAMS --------------------------------------------------
             motif_str = ''.join([ ResidueSummary.three_letter_code_to_one(amino) for _, amino in motif ])
             if len(motif_str) <= 5:
                 continue
-            print("Matches for ", motif_str)
-            print(find_near_matches(motif_str, seq_tgt, max_substitutions=0, max_l_dist=1, max_insertions=2, max_deletions=0))
+            matches = find_near_matches(motif_str, seq_tgt, max_substitutions=0, max_l_dist=1, max_insertions=2, max_deletions=0)
+            # ! -------------------------------------------- SEARCH PARAMS --------------------------------------------------
+            #TODO : Don't discard matches. The clustering should take care of this.
+            if len(matches) != 1: 
+                continue
+
+            match = matches[0]
+
+            target_motif_residues = []
+            for i in range(match.start, match.end):
+                target_motif_residues.append(idx_auth_map_tgt[i] )
             # if len(motif_str) > 10:
             #     print("Matches for ", motif_str)
             #     print(find_near_matches(motif_str, seq_tgt, max_substitutions=0, max_l_dist=2, max_insertions=0, max_deletions=0))
