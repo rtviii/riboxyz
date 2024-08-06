@@ -236,18 +236,22 @@ def bsite_transpose(
 ) -> LigandTransposition:
 
 
-    def BiopythonChain_to_sequence(chain: Chain) -> str:
+    def BiopythonChain_to_sequence(chain: Chain) -> tuple[str,dict[int,int]]:
         res:list[Residue] = [ *chain.get_residues() ]
+        idx_auth_seq_id_map = {}
         seq = ''
-        for residue in res:
+        for idx,residue in enumerate( res ):
             if residue.resname in [*AMINO_ACIDS.keys()]:
                 seq = seq + ResidueSummary.three_letter_code_to_one(residue.resname)
+                idx_auth_seq_id_map[idx] = residue.get_id()[1]
             elif residue.resname in [*NUCLEOTIDES]:
                 seq = seq + residue.resname
+                idx_auth_seq_id_map[idx] = residue.get_id()[1]
             else:
                 seq =  seq + "-"
+                idx_auth_seq_id_map[idx] = -1
 
-        return seq
+        return  seq,idx_auth_seq_id_map 
 
     def extract_contiguous_motifs(bound_residues:list[tuple[int,str]])->list[list[tuple[int, str]]]:
         bound_residues = sorted( bound_residues, key=lambda x: x[0], )
