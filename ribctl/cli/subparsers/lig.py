@@ -41,12 +41,14 @@ def nbhd(chem_id, rcsb_id,  radius, save):
 @click.argument("radius", required=True , type=float)
 @click.option("--save", is_flag=True,default=False)
 def transpose(ctx, chem_id, source_struct, target_struct, radius, save):
-    bsite =  bsite_ligand(chem_id, source_struct, radius)
-    transposed      = bsite_transpose(source_struct,target_struct, bsite).model_dump()
+
+    bsite      = bsite_ligand(chem_id, source_struct, radius)
+    transposed = bsite_transpose(source_struct,target_struct, bsite).model_dump()
 
     if save:
         transposed_path = RibosomeOps(target_struct).paths.binding_site_prediction(chem_id, source_struct)
         with open(transposed_path, 'w') as outfile:
             json.dump(transposed, outfile, indent=4)
             ce("Saved: {}".format(transposed_path))
+    pprint(transposed)
     return transposed

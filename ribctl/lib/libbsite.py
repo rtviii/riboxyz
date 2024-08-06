@@ -1,7 +1,5 @@
 import json
 import operator
-import argparse
-import itertools
 from pprint import pprint
 from typing import Optional
 import re
@@ -25,11 +23,8 @@ from ribctl.lib.schema.types_binding_site import (
 from Bio.PDB.NeighborSearch import NeighborSearch
 from Bio.PDB.Residue import Residue
 from Bio.PDB.Structure import Structure
-from Bio.PDB.Chain import Chain
-from ribctl.etl.etl_assets_ops import Assets, RibosomeOps
+from ribctl.etl.etl_assets_ops import  RibosomeOps
 from ribctl.lib.schema.types_binding_site import (
-    AMINO_ACIDS,
-    NUCLEOTIDES,
     BindingSite,
     BindingSiteChain,
     ResidueSummary,
@@ -309,11 +304,11 @@ def bsite_transpose(
                     auth_asym_id=src_auth_asym_id,
                     source_bound_residues=[
                         ResidueSummary(
-                            auth_seq_id=src_seqid,
-                            resname=src[src_seqid],
-                            parent_auth_asym_id=src_auth_asym_id,
-                            label_seq_id = None,
-                            full_id=None,
+                            auth_seq_id         = src_seqid,
+                            resname             = None,
+                            parent_auth_asym_id = src_auth_asym_id,
+                            label_seq_id        = None,
+                            full_id             = None,
                         )
                         for src_seqid in src_ids
                     ],
@@ -323,11 +318,12 @@ def bsite_transpose(
                     auth_asym_id=tgt_auth_asym_id,
                     target_bound_residues=[
                         ResidueSummary(
-                            auth_seq_id=tgt_seqid,
-                            resname=tgt[tgt_seqid],
-                            label_seq_id = None,
-                            parent_auth_asym_id=tgt_auth_asym_id,
-                            full_id=None,
+                            auth_seq_id         = tgt_seqid,
+                            # resname             = tgt[tgt_seqid],
+                            resname             = None,
+                            label_seq_id        = None,
+                            parent_auth_asym_id = tgt_auth_asym_id,
+                            full_id             = None,
                         )
                         for tgt_seqid in tgt_ids
                     ],

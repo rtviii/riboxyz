@@ -56,13 +56,13 @@ NUCLEOTIDES = ["A", "T", "C", "G", "U"]
 class ResidueSummary(BaseModel): 
 
     full_id            : typing.Optional[tuple[str, int, str, tuple[str, int, str]]]
-    resname            : str
+    resname            : str | None
     auth_seq_id              : int
     label_seq_id              : int  | None
     parent_auth_asym_id: str
 
     def __hash__(self):
-        return hash( self.get_resname() + str(self.get_seqid()) + self.get_parent_auth_asym_id() )
+        return hash( self.get_resname() if self.get_resname() is not None else "" + str(self.get_seqid()) + self.get_parent_auth_asym_id() )
 
     def get_resname(self):
         return self.resname
