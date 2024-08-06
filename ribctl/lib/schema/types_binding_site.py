@@ -57,20 +57,19 @@ class ResidueSummary(BaseModel):
 
     full_id            : typing.Optional[tuple[str, int, str, tuple[str, int, str]]]
     resname            : str
-    seqid              : int
+    auth_seq_id              : int
+    label_seq_id              : int  | None
     parent_auth_asym_id: str
 
     def __hash__(self):
-        return hash(
-            self.get_resname() + str(self.get_seqid()) + self.get_parent_auth_asym_id()
-        )
+        return hash( self.get_resname() + str(self.get_seqid()) + self.get_parent_auth_asym_id() )
 
     def get_resname(self):
         return self.resname
 
     def get_seqid(self):
         (structure_id, model_id, chain_id, _) = self.full_id
-        (hetero, seqid, insertion_code) = _
+        (hetero, seqid, insertion_code)       = _
         return seqid
 
     def get_parent_auth_asym_id(self):
@@ -84,7 +83,8 @@ class ResidueSummary(BaseModel):
         (hetero, seqid, insertion_code) = _
 
         return ResidueSummary(
-            seqid               = seqid,
+            auth_seq_id         = seqid,
+            label_seq_id        = None,
             resname             = r.get_resname(),
             parent_auth_asym_id = chain_id,
             full_id             = r.get_full_id(),
