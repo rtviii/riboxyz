@@ -28,6 +28,7 @@ from ribctl.lib.schema.types_binding_site import (
 from Bio.PDB.NeighborSearch import NeighborSearch
 from Bio.PDB.Residue import Residue
 from Bio.PDB.Chain import Chain
+from Bio.PDB.Model import Model
 from Bio.PDB.Structure import Structure
 from ribctl.etl.etl_assets_ops import  RibosomeOps
 from ribctl.lib.schema.types_binding_site import (
@@ -143,17 +144,23 @@ def get_lig_bsite(
     and return unique
     """
     # i guess we do the stupid thing and try to get label_seq_id  via arithmetic
+    pprint(struct.get_id())
+    md:Model = [* struct.get_models() ][0]
+    print(md.child_list)
+    pprint(RibosomeOps(struct.get_id().upper()).profile().assembly_map)
 
-    ns = NeighborSearch(list(struct.get_atoms()))
-    nbr_residues = []
-    ligand_residues: list[Residue] = list(
-        filter(lambda x: x.get_resname() == lig_chemid, list(struct.get_residues()))
-    )
+    only_first_assembly_chains = [* struct.get_models() ][0]
+    
+    ns              = NeighborSearch(list(struct.get_atoms()))
+    nbr_residues    = []
+    ligand_residues = list( filter(lambda x: x.get_resname() == lig_chemid, list(struct.get_residues())) )
+    pprint(ligand_residues)
+    exit()
+
 
     for lig_res in ligand_residues:
         for atom in lig_res.child_list:
             found_nbrs = ns.search(atom.get_coord(), radius, level="R")
-
             nbr_residues.extend(found_nbrs)
 
     nbr_residues: list[Residue] = list(set(nbr_residues))
@@ -212,9 +219,9 @@ def bsite_ligand(
     chemicalId: str, rcsb_id: str, radius: float, save: bool = False
 ) -> BindingSite:
 
-    chemicalId = chemicalId.upper()
+    chemicalId            = chemicalId.upper()
     _structure_cif_handle = RibosomeOps(rcsb_id).biopython_structure()
-    binding_site_ligand = get_lig_bsite(chemicalId, _structure_cif_handle, radius)
+    binding_site_ligand   = get_lig_bsite(chemicalId, _structure_cif_handle, radius)
 
     if save:
         with open(RibosomeOps(rcsb_id).paths.binding_site(chemicalId), "w") as f:
@@ -233,7 +240,6 @@ def bsite_transpose(
 
     def BiopythonChain_to_sequence(chain: Chain) -> str:
         res:list[Residue] = [ *chain.get_residues() ]
-        pprint(res)
         seq = ''
         for residue in res:
             if residue.resname in [*AMINO_ACIDS.keys()]:
@@ -266,12 +272,11 @@ def bsite_transpose(
 
     source_rcsb_id, target_rcsb_id = source_rcsb_id.upper(), target_rcsb_id.upper()
     source_polymers_by_poly_class = {}
+
     target_struct = RibosomeOps( target_rcsb_id ).biopython_structure()
     source_struct = RibosomeOps( source_rcsb_id ).biopython_structure()
     #! Source polymers
 
-    # for nomenclature_class, chain in source_polymers_by_poly_class.items():
-    #     pprint(motifs)
 
     for nbr_polymer in binding_site.chains:
         nbr_polymer = BindingSiteChain.model_validate(nbr_polymer)
@@ -290,7 +295,7 @@ def bsite_transpose(
     #! Target polymers
     target_polymers_by_poly_class = {}
     for nomenclature_class, nbr_polymer in source_polymers_by_poly_class.items():
-        target_polymer = RibosomeOps(target_rcsb_id).get_poly_by_polyclass(nomenclature_class )
+        target_polymer = RibosomeOps(target_rcsb_id).get_poly_by_polyclass(nomenclature_class ,0)
         if target_polymer == None:
             continue
         # tgt_poly_seq                                      = target_polymer.entity_poly_seq_one_letter_code_can
@@ -300,12 +305,21 @@ def bsite_transpose(
         #     "auth_asym_id": tgt_poly_auth_asym_id,
         # }
 
-        print("Matched source chain {}.{} to target_polymer.auth_asym_id {}".format(nomenclature_class,source_polymers_by_poly_class[nomenclature_class]['auth_asym_id'], target_polymer.auth_asym_id))
-        seq = BiopythonChain_to_sequence(target_struct[0][target_polymer.auth_asym_id])
-        pprint(seq)
-        # for motif in nbr_polymer['motifs']:
-        #     find_near_matches()
+        print("\n\nMatched source chain {}.{} to target_polymer.auth_asym_id {}".format(nomenclature_class,source_polymers_by_poly_class[nomenclature_class]['auth_asym_id'], target_polymer.auth_asym_id))
 
+        seq_src = BiopythonChain_to_sequence(source_struct[0][nbr_polymer['auth_asym_id']])
+        seq_tgt = BiopythonChain_to_sequence(target_struct[0][target_polymer.auth_asym_id])
+        pprint(seq_src)
+        pprint(seq_tgt)
+        for motif in nbr_polymer['motifs']:
+            motif_str = ''.join([ ResidueSummary.three_letter_code_to_one(amino) for _, amino in motif ])
+            if len(motif_str) <= 5:
+                continue
+            print("Matches for ", motif_str)
+            print(find_near_matches(motif_str, seq_tgt, max_substitutions=0, max_l_dist=0, max_insertions=0, max_deletions=0))
+            if len(motif_str) > 10:
+                print("Matches for ", motif_str)
+                print(find_near_matches(motif_str, seq_tgt, max_substitutions=0, max_l_dist=2, max_insertions=0, max_deletions=0))
 
 
     exit()
@@ -411,3 +425,7 @@ def bsite_transpose(
             source=binding_site.source,
         ),
     )
+# 'PTINQLVRKGREKVRKKSKVPALKGAPFRRGVCTVVRTVTPKKPNSALRKVAKVRLTSGYEVTAYIPGEGHNLQEHSVVLIRGGRVKDLPGVRYHIVRGVYDAAGVKDRKKSRSKYGTKKPKEAA'
+# 'PTINQLVRKGREKVRKKSKVPALKGAPFRRGVCTVVRTVTPKKPNSALRKVAKVRLTSGYEVTAYIPGEGHNLQEHSVVLIRGGRVK-LPGVRYHIVRGVYDAAGVKDRKKSRSKYGTKKPKEAA-'
+# Matches for  VTPKKPNSA
+# [Match(start=38, end=47, dist=0, matched='VTPKKPNSA')]

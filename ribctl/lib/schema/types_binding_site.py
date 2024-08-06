@@ -42,13 +42,24 @@ class ResidueSummary(BaseModel):
 
     @staticmethod
     def three_letter_code_to_one(resname: str):
-        return AMINO_ACIDS[resname]["one_letter_code"]
+        if resname in AMINO_ACIDS:
+            return AMINO_ACIDS[resname]["one_letter_code"]
+        elif resname in NUCLEOTIDES:
+                return resname
+        else:
+            return '-'
+
 
     @staticmethod
     def one_letter_code_to_three(resname: str):
-        for tlk, d in AMINO_ACIDS.items():
-            if d["one_letter_code"] == resname:
-                return tlk
+        if resname in [*map(lambda x: x[1]['one_letter_code'], AMINO_ACIDS.items())]:
+            for tlk, d in AMINO_ACIDS.items():
+                if d["one_letter_code"] == resname:
+                    return tlk
+        elif resname in NUCLEOTIDES:
+                return resname
+        else:
+            return '-'
 
     def __hash__(self):
         return hash( self.get_resname() if self.get_resname() is not None else "" + str(self.get_seqid()) + self.get_parent_auth_asym_id() )
