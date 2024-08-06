@@ -161,6 +161,7 @@ def get_lig_bsite(
     auth_seq_ids = {}
 
     for residue in nbr_residues:
+
         parent_chain = residue.get_parent()
         auth_asym_id = parent_chain.get_id()
 
@@ -194,10 +195,10 @@ def get_lig_bsite(
         nbr_chains.append( BindingSiteChain(**polymer.model_dump(), bound_residues=bound_residues) )
 
     return BindingSite(
-        chains=nbr_chains,
-        ligand=lig_chemid,
-        radius=radius,
-        source=struct.get_id().upper(),
+        chains = nbr_chains,
+        ligand = lig_chemid,
+        radius = radius,
+        source = struct.get_id().upper(),
     )
 
 
@@ -226,6 +227,8 @@ def bsite_transpose(
     source_struct, target_struct = source_struct.upper(), target_struct.upper()
     source_polymers_by_poly_class = {}
 
+
+
     for nbr_polymer in binding_site.chains:
         nbr_polymer = BindingSiteChain.model_validate(nbr_polymer)
         if len(nbr_polymer.nomenclature) < 1:
@@ -234,12 +237,7 @@ def bsite_transpose(
             source_polymers_by_poly_class[nbr_polymer.nomenclature[0].value] = {
                 "seq": nbr_polymer.entity_poly_seq_one_letter_code_can,
                 "auth_asym_id": nbr_polymer.auth_asym_id,
-                "ids": [
-                    resid
-                    for resid in [
-                        *map(lambda x: x.auth_seq_id, nbr_polymer.bound_residues)
-                    ]
-                ],
+                "bound_residues": [ ( resid, resname ) for ( resid,resname)  in [ *map(lambda x: ( x.auth_seq_id, x.resname ), nbr_polymer.bound_residues) ] ],
             }
 
     target_polymers_by_poly_class = {}
@@ -260,40 +258,27 @@ def bsite_transpose(
     # ! at this point we have collected all the source polymers and corresponding target polymers.
 
     predicted_chains: list[PredictedResiduesPolymer] = []
+
+    pprint(source_polymers_by_poly_class)
+    exit()
     for nomenclature_class, _ in source_polymers_by_poly_class.items():
         if nomenclature_class not in target_polymers_by_poly_class:
             continue
 
-        # print("source_polymers_by_poly_class[nomenclature_class] yields ", source_polymers_by_poly_class[nomenclature_class])
-        # pprint(src_ids)
-        # exit()
         src_ids = source_polymers_by_poly_class[nomenclature_class]["ids"]
-        src = source_polymers_by_poly_class[nomenclature_class]["seq"]
+        src     = source_polymers_by_poly_class[nomenclature_class]["seq"]
 
-        tgt = target_polymers_by_poly_class[nomenclature_class]["seq"]
+        tgt     = target_polymers_by_poly_class[nomenclature_class]["seq"]
 
-        src_auth_asym_id = source_polymers_by_poly_class[nomenclature_class][
-            "auth_asym_id"
-        ]
-        tgt_auth_asym_id = target_polymers_by_poly_class[nomenclature_class][
-            "auth_asym_id"
-        ]
+        src_auth_asym_id = source_polymers_by_poly_class[nomenclature_class][ "auth_asym_id" ]
+        tgt_auth_asym_id = target_polymers_by_poly_class[nomenclature_class][ "auth_asym_id" ]
 
-        sq = SeqMatch(src, tgt, src_ids)
+        sq               = SeqMatch(src, tgt, src_ids)
 
-        src_aln = (
-            sq.src_aln
-        )  # <--- aligned source      sequence (with                        gaps)
-        tgt_aln = (
-            sq.tgt_aln
-        )  # <--- aligned tgt         sequence (with                        gaps)
-
-        aln_ids = (
-            sq.aligned_ids
-        )  # <--- ids     corrected   for                                   gaps
-        tgt_ids = (
-            sq.tgt_ids
-        )  # <--- ids     backtracted to the target polymer (accounting for gaps)
+        src_aln = ( sq.src_aln )  # <--- aligned source      sequence (with                        gaps)
+        tgt_aln = ( sq.tgt_aln )  # <--- aligned tgt         sequence (with                        gaps)
+        aln_ids = ( sq.aligned_ids )  # <--- ids     corrected   for                                   gaps
+        tgt_ids = ( sq.tgt_ids )  # <--- ids     backtracted to the target polymer (accounting for gaps)
 
 
         predicted_chains.append(

@@ -22,7 +22,7 @@ def nbhd(chem_id, rcsb_id,  radius, save):
     # with open(RibosomeOps(rcsb_id).paths.binding_site(chem_id), 'r') as f:
     #     bsite =BindingSite.model_validate(json.load(f))
 
-    bsite =  bsite_ligand(chem_id, rcsb_id, radius)
+    bsite = bsite_ligand(chem_id, rcsb_id, radius)
     if save:
         with open(RibosomeOps(rcsb_id).paths.binding_site(chem_id), 'w') as outfile:
             json.dump(bsite.model_dump(), outfile, indent=4)
