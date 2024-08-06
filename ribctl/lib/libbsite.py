@@ -296,6 +296,8 @@ def bsite_transpose(
 
     #! Target polymers
     target_polymers_by_poly_class = {}
+    predicted_chains: list[PredictedResiduesPolymer] = []
+
     for nomenclature_class, nbr_polymer in source_polymers_by_poly_class.items():
         target_polymer = RibosomeOps(target_rcsb_id).get_poly_by_polyclass(nomenclature_class ,0)
         if target_polymer == None:
@@ -311,6 +313,8 @@ def bsite_transpose(
 
         seq_src,idx_auth_map_src = BiopythonChain_to_sequence(source_struct[0][nbr_polymer['auth_asym_id']])
         seq_tgt,idx_auth_map_tgt = BiopythonChain_to_sequence(target_struct[0][target_polymer.auth_asym_id])
+
+        all_motifs_residues = []
         for motif in nbr_polymer['motifs']:
             # ! -------------------------------------------- SEARCH PARAMS --------------------------------------------------
             motif_str = ''.join([ ResidueSummary.three_letter_code_to_one(amino) for _, amino in motif ])
@@ -318,131 +322,139 @@ def bsite_transpose(
                 continue
             matches = find_near_matches(motif_str, seq_tgt, max_substitutions=0, max_l_dist=1, max_insertions=2, max_deletions=0)
             # ! -------------------------------------------- SEARCH PARAMS --------------------------------------------------
-            #TODO : Don't discard matches. The clustering should take care of this.
+            #TODO : Use all matches.
+            #TODO : Don't discard matches. The clustering should take care of this. 
             if len(matches) != 1: 
                 continue
 
             match = matches[0]
-
             target_motif_residues = []
             for i in range(match.start, match.end):
                 target_motif_residues.append(idx_auth_map_tgt[i] )
-            # if len(motif_str) > 10:
-            #     print("Matches for ", motif_str)
-            #     print(find_near_matches(motif_str, seq_tgt, max_substitutions=0, max_l_dist=2, max_insertions=0, max_deletions=0))
-
-
-    exit()
-    # ! at this point we have collected all the source polymers and corresponding target polymers.
-
-    predicted_chains: list[PredictedResiduesPolymer] = []
-
-    # find_near_matches()
-
-
-
     
-    
-    
-   
-
-
-
-    for nomenclature_class, _ in source_polymers_by_poly_class.items():
-        if nomenclature_class not in target_polymers_by_poly_class:
-            continue
-
-        src_ids = source_polymers_by_poly_class[nomenclature_class]["ids"]
-        src     = source_polymers_by_poly_class[nomenclature_class]["seq"]
-
-        tgt     = target_polymers_by_poly_class[nomenclature_class]["seq"]
-
-        src_auth_asym_id = source_polymers_by_poly_class[nomenclature_class][ "auth_asym_id" ]
-        tgt_auth_asym_id = target_polymers_by_poly_class[nomenclature_class][ "auth_asym_id" ]
-
-        sq               = SeqMatch(src, tgt, src_ids)
-
-        src_aln = ( sq.src_aln )  # <--- aligned source      sequence (with                        gaps)
-        tgt_aln = ( sq.tgt_aln )  # <--- aligned tgt         sequence (with                        gaps)
-        aln_ids = ( sq.aligned_ids )  # <--- ids     corrected   for                                   gaps
-        tgt_ids = ( sq.tgt_ids )  # <--- ids     backtracted to the target polymer (accounting for gaps)
-
-
         predicted_chains.append(
             PredictedResiduesPolymer(
-                polymer_class=nomenclature_class,
-                source=PredictionSource(
-                    source_seq=src,
-                    auth_asym_id=src_auth_asym_id,
-                    source_bound_residues=[
+                polymer_class = nomenclature_class,
+                source        = PredictionSource(
+                    source_seq            = seq_src,
+                    auth_asym_id          = nbr_polymer['auth_asym_id'],
+                    source_bound_residues = [
                         ResidueSummary(
-                            auth_seq_id         = src_seqid,
-                            resname             = None,
-                            parent_auth_asym_id = src_auth_asym_id,
+                            auth_seq_id         = residue.get_id()[1],
+                            resname             = residue.resname,
+                            parent_auth_asym_id = nbr_polymer['auth_asym_id'],
                             label_seq_id        = None,
                             full_id             = None,
                         )
-                        for src_seqid in src_ids
-                    ],
+                        for residue in nbr_polymer['bound_residues']],
                 ),
                 target=PredictionTarget(
-                    target_seq=tgt,
-                    auth_asym_id=tgt_auth_asym_id,
-                    target_bound_residues=[
+                    target_seq            = seq_tgt,
+                    auth_asym_id          = target_polymer.auth_asym_id,
+                    target_bound_residues = [
                         ResidueSummary(
-                            auth_seq_id         = tgt_seqid,
-                            # resname             = tgt[tgt_seqid],
-                            resname             = None,
+                            auth_seq_id         = residue.get_id()[1],
+                            resname             = residue.resname,
                             label_seq_id        = None,
-                            parent_auth_asym_id = tgt_auth_asym_id,
+                            parent_auth_asym_id = target_polymer.auth_asym_id,
                             full_id             = None,
                         )
-                        for tgt_seqid in tgt_ids
-                    ],
+                        for residue in all_motifs_residues ],
                 ),
-                alignment=PredictionAlignments(
-                    aligned_ids=aln_ids,
-                    source_seq_aligned=src_aln,
-                    target_seq_aligned=tgt_aln,
-                ),
+                # alignment=PredictionAlignments(
+                #     aligned_ids=aln_ids,
+                #     source_seq_aligned=src_aln,
+                #     target_seq_aligned=tgt_aln,
+                # ),
             )
         )
 
-    chains: list[BindingSiteChain] = []
+# ! at this point we have collected all the source polymers and corresponding target polymers.
 
-    for biopython_chain in predicted_chains:
-        poly = RibosomeOps(target_rcsb_id).get_poly_by_auth_asym_id(
-            biopython_chain.target.auth_asym_id
-        )
-        if poly == None:
-            raise ValueError("Polymer not found in target structure")
+    # for nomenclature_class, _ in source_polymers_by_poly_class.items():
+    #     if nomenclature_class not in target_polymers_by_poly_class:
+    #         continue
 
-        chains.append(
-            BindingSiteChain(
-                **poly.model_dump(),
-                bound_residues=biopython_chain.target.target_bound_residues,
-            )
-        )
+        # src_ids = source_polymers_by_poly_class[nomenclature_class]["ids"]
+        # src     = source_polymers_by_poly_class[nomenclature_class]["seq"]
+
+        # tgt     = target_polymers_by_poly_class[nomenclature_class]["seq"]
+
+        # src_auth_asym_id = source_polymers_by_poly_class[nomenclature_class][ "auth_asym_id" ]
+        # tgt_auth_asym_id = target_polymers_by_poly_class[nomenclature_class][ "auth_asym_id" ]
+
+        # sq               = SeqMatch(src, tgt, src_ids)
+
+        # src_aln = ( sq.src_aln )  # <--- aligned source      sequence (with                        gaps)
+        # tgt_aln = ( sq.tgt_aln )  # <--- aligned tgt         sequence (with                        gaps)
+        # aln_ids = ( sq.aligned_ids )  # <--- ids     corrected   for                                   gaps
+        # tgt_ids = ( sq.tgt_ids )  # <--- ids     backtracted to the target polymer (accounting for gaps)
+
+
+        # predicted_chains.append(
+        #     PredictedResiduesPolymer(
+        #         polymer_class = nomenclature_class,
+        #         source        = PredictionSource(
+        #             source_seq            = src,
+        #             auth_asym_id          = src_auth_asym_id,
+        #             source_bound_residues = [
+        #                 ResidueSummary(
+        #                     auth_seq_id         = src_seqid,
+        #                     resname             = None,
+        #                     parent_auth_asym_id = src_auth_asym_id,
+        #                     label_seq_id        = None,
+        #                     full_id             = None,
+        #                 )
+        #                 for src_seqid in src_ids
+        #             ],
+        #         ),
+        #         target=PredictionTarget(
+        #             target_seq            = tgt,
+        #             auth_asym_id          = tgt_auth_asym_id,
+        #             target_bound_residues = [
+        #                 ResidueSummary(
+        #                     auth_seq_id         = tgt_seqid,
+        #                     # resname             = tgt[tgt_seqid],
+        #                     resname             = None,
+        #                     label_seq_id        = None,
+        #                     parent_auth_asym_id = tgt_auth_asym_id,
+        #                     full_id             = None,
+        #                 )
+        #                 for tgt_seqid in tgt_ids
+        #             ],
+        #         ),
+        #         # alignment=PredictionAlignments(
+        #         #     aligned_ids=aln_ids,
+        #         #     source_seq_aligned=src_aln,
+        #         #     target_seq_aligned=tgt_aln,
+        #         # ),
+        #     )
+        # )
+# 
+    # chains: list[BindingSiteChain] = []
+
+    # for biopython_chain in predicted_chains:
+    #     poly = RibosomeOps(target_rcsb_id).get_poly_by_auth_asym_id(
+    #         biopython_chain.target.auth_asym_id
+    #     )
+    #     if poly == None:
+    #         raise ValueError("Polymer not found in target structure")
+
+    #     chains.append(
+    #         BindingSiteChain(
+    #             **poly.model_dump(),
+    #             bound_residues=biopython_chain.target.target_bound_residues,
+    #         )
+    #     )
 
     return LigandTransposition(
-        constituent_chains=predicted_chains,
-        source=source_rcsb_id,
-        target=target_rcsb_id,
-        purported_binding_site=BindingSite(
+        constituent_chains     = predicted_chains, #this is the info about each individual pair of polymers manipulations
+        source                 = source_rcsb_id, 
+        target                 = target_rcsb_id,
+        purported_binding_site = BindingSite(      #this is the result, the datastructure that gets sent the fronted
             chains=chains,
             ligand=binding_site.ligand,
             radius=binding_site.radius,
             source=binding_site.source,
         ),
     )
-# 'PTINQLVRKGREKVRKKSKVPALKGAPFRRGVCTVVRTVTPKKPNSALRKVAKVRLTSGYEVTAYIPGEGHNLQEHSVVLIRGGRVKDLPGVRYHIVRGVYDAAGVKDRKKSRSKYGTKKPKEAA'
-# 'PTINQLVRKGREKVRKKSKVPALKGAPFRRGVCTVVRTVTPKKPNSALRKVAKVRLTSGYEVTAYIPGEGHNLQEHSVVLIRGGRVK-LPGVRYHIVRGVYDAAGVKDRKKSRSKYGTKKPKEAA-'
-# Matches for  VTPKKPNSA
-# [Match(start=38, end=47, dist=0, matched='VTPKKPNSA')]
-
-# 'PTINQLVRKGREKVRKKSKVPALKGAPFRRGVCTVVRTVTPKKPNSALRKVAKVRLTSGYEVTAYIPGEGHNLQEHSVVLIRGGRVKDLPGVRYHIVRGVYDAAGVKDRKKSRSKYGTKKPKEAA'
-# 'PTINQLVRKGREKVRKKSKVPALKGAPFRRGVCTVVRTVTPKKPNSALRKVAKVRLTSGYEVTAYIPGEGHNLQEHSVVLIRGGRVK-LPGVRYHIVRGVYDAAGVKDRKKSRSKYGTKKPKEAA-'
-# Matches for  RVTPKKPNSAL
-# []
-# Matches for  RVTPKKPNSAL
-# []

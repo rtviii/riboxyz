@@ -125,7 +125,7 @@ class PredictedResiduesPolymer(BaseModel):
     polymer_class: PolymerClass
     source       : PredictionSource
     target       : PredictionTarget
-    alignment    : PredictionAlignments
+    # alignment    : PredictionAlignments
 
     @field_serializer('polymer_class')
     def serialize_nomenclature(self, polymer_class:PolymerClass ):
