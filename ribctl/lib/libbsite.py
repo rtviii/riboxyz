@@ -143,20 +143,18 @@ def get_lig_bsite(
     """KDTree search the neighbors of a given list of residues (which constitue a ligand)
     and return unique
     """
-    # i guess we do the stupid thing and try to get label_seq_id  via arithmetic
-    pprint(struct.get_id())
+    # Make sure only the first assembly is used if multiple are in the file.
     md:Model = [* struct.get_models() ][0]
-    print(md.child_list)
-    pprint(RibosomeOps(struct.get_id().upper()).profile().assembly_map)
+    assemblies = RibosomeOps(struct.get_id().upper()).profile().get_polymers_by_assembly()
+    # If there are two or more assemblies, delete chains belonging to all but the first one.
+    if len(assemblies.items()) >1:
+        for i in range(len(assemblies.items())-1):
+            for chain_aaid in [ *assemblies.items() ][i+1][1]:
+                md.detach_child(chain_aaid)
 
-    only_first_assembly_chains = [* struct.get_models() ][0]
-    
-    ns              = NeighborSearch(list(struct.get_atoms()))
-    nbr_residues    = []
-    ligand_residues = list( filter(lambda x: x.get_resname() == lig_chemid, list(struct.get_residues())) )
-    pprint(ligand_residues)
-    exit()
-
+    ns                         = NeighborSearch(list(struct.get_atoms()))
+    nbr_residues               = []
+    ligand_residues            = list( filter(lambda x: x.get_resname() == lig_chemid, list(struct.get_residues())) )
 
     for lig_res in ligand_residues:
         for atom in lig_res.child_list:
@@ -312,14 +310,16 @@ def bsite_transpose(
         pprint(seq_src)
         pprint(seq_tgt)
         for motif in nbr_polymer['motifs']:
+            print("motif itself is composed of ",  motif)
+            
             motif_str = ''.join([ ResidueSummary.three_letter_code_to_one(amino) for _, amino in motif ])
             if len(motif_str) <= 5:
                 continue
             print("Matches for ", motif_str)
-            print(find_near_matches(motif_str, seq_tgt, max_substitutions=0, max_l_dist=0, max_insertions=0, max_deletions=0))
-            if len(motif_str) > 10:
-                print("Matches for ", motif_str)
-                print(find_near_matches(motif_str, seq_tgt, max_substitutions=0, max_l_dist=2, max_insertions=0, max_deletions=0))
+            print(find_near_matches(motif_str, seq_tgt, max_substitutions=0, max_l_dist=1, max_insertions=1, max_deletions=0))
+            # if len(motif_str) > 10:
+            #     print("Matches for ", motif_str)
+            #     print(find_near_matches(motif_str, seq_tgt, max_substitutions=0, max_l_dist=2, max_insertions=0, max_deletions=0))
 
 
     exit()
@@ -429,3 +429,10 @@ def bsite_transpose(
 # 'PTINQLVRKGREKVRKKSKVPALKGAPFRRGVCTVVRTVTPKKPNSALRKVAKVRLTSGYEVTAYIPGEGHNLQEHSVVLIRGGRVK-LPGVRYHIVRGVYDAAGVKDRKKSRSKYGTKKPKEAA-'
 # Matches for  VTPKKPNSA
 # [Match(start=38, end=47, dist=0, matched='VTPKKPNSA')]
+
+# 'PTINQLVRKGREKVRKKSKVPALKGAPFRRGVCTVVRTVTPKKPNSALRKVAKVRLTSGYEVTAYIPGEGHNLQEHSVVLIRGGRVKDLPGVRYHIVRGVYDAAGVKDRKKSRSKYGTKKPKEAA'
+# 'PTINQLVRKGREKVRKKSKVPALKGAPFRRGVCTVVRTVTPKKPNSALRKVAKVRLTSGYEVTAYIPGEGHNLQEHSVVLIRGGRVK-LPGVRYHIVRGVYDAAGVKDRKKSRSKYGTKKPKEAA-'
+# Matches for  RVTPKKPNSAL
+# []
+# Matches for  RVTPKKPNSAL
+# []

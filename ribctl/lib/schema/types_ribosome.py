@@ -540,6 +540,15 @@ class PTCInfo(BaseModel):
 
 class RibosomeStructure(BaseModel):
 
+    def get_polymers_by_assembly(self)->dict[str,list[str]]:
+        if self.assembly_map:
+            _ = {}
+            for assembly in self.assembly_map:
+                _[assembly.rcsb_id] = [poly.rcsb_polymer_entity_instance_container_identifiers.auth_asym_id for poly in assembly.polymer_entity_instances]
+            return _
+        else:
+            raise Exception("No assembly map found")
+
     def get_nomenclature_map(self) -> dict[str, list[Polymer]]:
         "Return a map from auth_asym_id to nomenclatures of all polymers in the structure"
         _ = {}
