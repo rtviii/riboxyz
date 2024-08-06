@@ -141,8 +141,8 @@ def ptc_residues_to_atom_coordinates(
 
         atom: Atom
         for atom in res.child_list:
-            atom_name = atom.name
-            atom_coords = atom.get_coord()
+            atom_name                             = atom.name
+            atom_coords                           = atom.get_coord()
             ptc_coordinates[res.id[1]][atom_name] = list(
                 map(lambda x: float(x), list(atom_coords))
             )

@@ -28,27 +28,6 @@ AMINO_ACIDS = {
     "TYR": {"one_letter_code": "Y", "charge": 0},
     "VAL": {"one_letter_code": "V", "charge": 0},
     # ------------------------
-
-    # "A": {"one_letter_code": "ALA", "charge": 0},
-    # "R": {"one_letter_code": "ARG", "charge": 1},
-    # "N": {"one_letter_code": "ASN", "charge": 0},
-    # "D": {"one_letter_code": "ASP", "charge": -1},
-    # "C": {"one_letter_code": "CYS", "charge": 0},
-    # "E": {"one_letter_code": "GLU", "charge": -1},
-    # "Q": {"one_letter_code": "GLN", "charge": 0},
-    # "G": {"one_letter_code": "GLY", "charge": 0},
-    # "H": {"one_letter_code": "HIS", "charge": 0},
-    # "I": {"one_letter_code": "ILE", "charge": 0},
-    # "L": {"one_letter_code": "LEU", "charge": 0},
-    # "K": {"one_letter_code": "LYS", "charge": 1},
-    # "M": {"one_letter_code": "MET", "charge": 0},
-    # "F": {"one_letter_code": "PHE", "charge": 0},
-    # "P": {"one_letter_code": "PRO", "charge": 0},
-    # "S": {"one_letter_code": "SER", "charge": 0},
-    # "T": {"one_letter_code": "THR", "charge": 0},
-    # "W": {"one_letter_code": "TRP", "charge": 0},
-    # "Y": {"one_letter_code": "TYR", "charge": 0},
-    # "V": {"one_letter_code": "VAL", "charge": 0},
 }
 NUCLEOTIDES = ["A", "T", "C", "G", "U"]
 
@@ -60,6 +39,16 @@ class ResidueSummary(BaseModel):
     auth_seq_id              : int
     label_seq_id              : int  | None
     parent_auth_asym_id: str
+
+    @staticmethod
+    def three_letter_code_to_one(resname: str):
+        return AMINO_ACIDS[resname]["one_letter_code"]
+
+    @staticmethod
+    def one_letter_code_to_three(resname: str):
+        for tlk, d in AMINO_ACIDS.items():
+            if d["one_letter_code"] == resname:
+                return tlk
 
     def __hash__(self):
         return hash( self.get_resname() if self.get_resname() is not None else "" + str(self.get_seqid()) + self.get_parent_auth_asym_id() )

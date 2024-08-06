@@ -8,11 +8,16 @@ import warnings
 from Bio import (
     BiopythonDeprecationWarning,
 )
+from fuzzysearch import find_near_matches
+
+from ribctl.lib.schema.types_ribosome import Polymer
 
 with warnings.catch_warnings():
     warnings.simplefilter("ignore", BiopythonDeprecationWarning)
     from Bio import pairwise2
 from ribctl.lib.schema.types_binding_site import (
+    AMINO_ACIDS,
+    NUCLEOTIDES,
     BindingSiteChain,
     LigandTransposition,
     PredictedResiduesPolymer,
@@ -22,6 +27,7 @@ from ribctl.lib.schema.types_binding_site import (
 )
 from Bio.PDB.NeighborSearch import NeighborSearch
 from Bio.PDB.Residue import Residue
+from Bio.PDB.Chain import Chain
 from Bio.PDB.Structure import Structure
 from ribctl.etl.etl_assets_ops import  RibosomeOps
 from ribctl.lib.schema.types_binding_site import (
@@ -218,49 +224,99 @@ def bsite_ligand(
 
 
 def bsite_transpose(
-    source_struct: str,
-    target_struct: str,
+    source_rcsb_id: str,
+    target_rcsb_id: str,
     binding_site: BindingSite,
     save: bool = False,
 ) -> LigandTransposition:
 
-    source_struct, target_struct = source_struct.upper(), target_struct.upper()
+
+    def BiopythonChain_to_sequence(chain: Chain) -> str:
+        res:list[Residue] = [ *chain.get_residues() ]
+        pprint(res)
+        seq = ''
+        for residue in res:
+            if residue.resname in [*AMINO_ACIDS.keys()]:
+                seq = seq + ResidueSummary.three_letter_code_to_one(residue.resname)
+            elif residue.resname in [*NUCLEOTIDES]:
+                seq = seq + residue.resname
+        return seq
+
+    def extract_contiguous_motifs(bound_residues:list[tuple[int,str]])->list[list[tuple[int, str]]]:
+        bound_residues = sorted( bound_residues, key=lambda x: x[0], )
+        motifs = []
+        current_motif = []
+        for i, (num, amino) in [* enumerate(bound_residues) ]:
+            if not current_motif:
+                current_motif.append((num, amino))
+            else:
+                last_num = current_motif[-1][0]
+                if num - last_num <= 3:  # Allow for up to 2 skipped numbers
+                    current_motif.append((num, amino))
+                else:
+                    motifs.append(current_motif)
+                    current_motif = [(num, amino)]
+        
+        if current_motif:
+            motifs.append(current_motif)
+        return motifs
+
+    source_rcsb_id, target_rcsb_id = source_rcsb_id.upper(), target_rcsb_id.upper()
     source_polymers_by_poly_class = {}
+    target_struct = RibosomeOps( target_rcsb_id ).biopython_structure()
+    source_struct = RibosomeOps( source_rcsb_id ).biopython_structure()
+    #! Source polymers
 
-
+    # for nomenclature_class, chain in source_polymers_by_poly_class.items():
+    #     pprint(motifs)
 
     for nbr_polymer in binding_site.chains:
         nbr_polymer = BindingSiteChain.model_validate(nbr_polymer)
         if len(nbr_polymer.nomenclature) < 1:
             continue
         else:
+            chain = source_struct[0][nbr_polymer.auth_asym_id]
             source_polymers_by_poly_class[nbr_polymer.nomenclature[0].value] = {
-                "seq": nbr_polymer.entity_poly_seq_one_letter_code_can,
-                "auth_asym_id": nbr_polymer.auth_asym_id,
+                "seq"           : nbr_polymer.entity_poly_seq_one_letter_code_can,
+                "auth_asym_id"  : nbr_polymer.auth_asym_id,
                 "bound_residues": [ ( resid, resname ) for ( resid,resname)  in [ *map(lambda x: ( x.auth_seq_id, x.resname ), nbr_polymer.bound_residues) ] ],
+                "motifs"        : extract_contiguous_motifs(chain['bound_residues'])
             }
 
+    #! Target polymers
     target_polymers_by_poly_class = {}
     for nomenclature_class, nbr_polymer in source_polymers_by_poly_class.items():
-        target_polymer = RibosomeOps(target_struct).get_poly_by_polyclass(
-            nomenclature_class
-        )
-        # print("Retrieved {} from target structure".format(nomenclature_class))
+        target_polymer = RibosomeOps(target_rcsb_id).get_poly_by_polyclass(nomenclature_class )
         if target_polymer == None:
             continue
-        tgt_poly_seq = target_polymer.entity_poly_seq_one_letter_code_can
-        tgt_poly_auth_asym_id = target_polymer.auth_asym_id
-        target_polymers_by_poly_class[nomenclature_class] = {
-            "seq": tgt_poly_seq,
-            "auth_asym_id": tgt_poly_auth_asym_id,
-        }
+        # tgt_poly_seq                                      = target_polymer.entity_poly_seq_one_letter_code_can
+        # tgt_poly_auth_asym_id                             = target_polymer.auth_asym_id
+        # target_polymers_by_poly_class[nomenclature_class] = {
+        #     "seq": tgt_poly_seq,
+        #     "auth_asym_id": tgt_poly_auth_asym_id,
+        # }
 
+        print("Matched source chain {}.{} to target_polymer.auth_asym_id {}".format(nomenclature_class,source_polymers_by_poly_class[nomenclature_class]['auth_asym_id'], target_polymer.auth_asym_id))
+        seq = BiopythonChain_to_sequence(target_struct[0][target_polymer.auth_asym_id])
+
+
+
+    exit()
     # ! at this point we have collected all the source polymers and corresponding target polymers.
 
     predicted_chains: list[PredictedResiduesPolymer] = []
 
-    pprint(source_polymers_by_poly_class)
-    exit()
+    # find_near_matches()
+
+
+
+    
+    
+    
+   
+
+
+
     for nomenclature_class, _ in source_polymers_by_poly_class.items():
         if nomenclature_class not in target_polymers_by_poly_class:
             continue
@@ -324,7 +380,7 @@ def bsite_transpose(
     chains: list[BindingSiteChain] = []
 
     for chain in predicted_chains:
-        poly = RibosomeOps(target_struct).get_poly_by_auth_asym_id(
+        poly = RibosomeOps(target_rcsb_id).get_poly_by_auth_asym_id(
             chain.target.auth_asym_id
         )
         if poly == None:
@@ -339,8 +395,8 @@ def bsite_transpose(
 
     return LigandTransposition(
         constituent_chains=predicted_chains,
-        source=source_struct,
-        target=target_struct,
+        source=source_rcsb_id,
+        target=target_rcsb_id,
         purported_binding_site=BindingSite(
             chains=chains,
             ligand=binding_site.ligand,
