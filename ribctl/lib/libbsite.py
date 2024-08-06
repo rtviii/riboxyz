@@ -312,7 +312,7 @@ def bsite_transpose(
                             auth_seq_id=src_seqid,
                             resname=src[src_seqid],
                             parent_auth_asym_id=src_auth_asym_id,
-                            label_seq_id = None
+                            label_seq_id = None,
                             full_id=None,
                         )
                         for src_seqid in src_ids
