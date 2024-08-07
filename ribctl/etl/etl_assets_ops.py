@@ -225,7 +225,7 @@ class RibosomeOps:
 
     def get_poly_by_polyclass(
         self, class_: PolymerClass, assembly: int = 0
-    ) -> RNA | None:
+    ) ->Polymer | None:
         """@assembly here stands to specify which of the two or more models the rna comes from
         in the case that a structure contains multiple models (ex. 4V4Q XRAY)"""
 

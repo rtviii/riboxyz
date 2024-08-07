@@ -288,50 +288,45 @@ def bsite_transpose(
 
     target_struct = RibosomeOps(target_rcsb_id).biopython_structure()
     source_struct = RibosomeOps(source_rcsb_id).biopython_structure()
-    #! Source polymers
 
+    #! Source polymers
     for nbr_polymer in binding_site.chains:
         nbr_polymer = BindingSiteChain.model_validate(nbr_polymer)
+        #! Skip if no nomenclature present ( can't do anything with it )
         if len(nbr_polymer.nomenclature) < 1:
             continue
         else:
-            biopython_chain: Chain = source_struct[0][nbr_polymer.auth_asym_id]
             bound_residues_ids = [
                 (resid, resname)
                 for (resid, resname) in [
-                    *map(
-                        lambda x: (x.auth_seq_id, x.label_comp_id),
-                        nbr_polymer.bound_residues,
-                    )
+                    *map( lambda x: (x.auth_seq_id, x.label_comp_id), nbr_polymer.bound_residues )
                 ]
             ]
             source_polymers_by_poly_class[nbr_polymer.nomenclature[0].value] = {
-                "seq": nbr_polymer.entity_poly_seq_one_letter_code_can,
-                "auth_asym_id": nbr_polymer.auth_asym_id,
-                "bound_residues": bound_residues_ids,
-                "motifs": extract_contiguous_motifs(bound_residues_ids),
+                # "seq"           : nbr_polymer.entity_poly_seq_one_letter_code_can,
+                # "auth_asym_id"  : nbr_polymer.auth_asym_id,
+                # "bound_residues": nbr_polymer.bound_residues,
+                "polymer": nbr_polymer,
+                #! Collect contiguous motifs for each polymer (to possibly seek them in the target)
+                "motifs"        : extract_contiguous_motifs(bound_residues_ids),
             }
 
     #! Target polymers
+    target_polymers   : list[PredictedResiduesPolymer] = []
+    for nomenclature_class, source_polymer in source_polymers_by_poly_class.items(): 
 
-    predicted_chains: list[PredictedResiduesPolymer] = []
-    for nomenclature_class, nbr_polymer in source_polymers_by_poly_class.items():
-        target_polymer = RibosomeOps(target_rcsb_id).get_poly_by_polyclass(
-            nomenclature_class, 0
-        )
+        target_polymer    : Polymer | None = RibosomeOps(target_rcsb_id).get_poly_by_polyclass( nomenclature_class, 0 )
+        source_polymer    : BindingSiteChain = source_polymers_by_poly_class[nomenclature_class]["polymer"]
+        #! If no polymer of corresponding class is found, move on.
         if target_polymer == None:
             continue
 
-        seq_src, idx_auth_map_src = BiopythonChain_to_sequence(
-            source_struct[0][nbr_polymer["auth_asym_id"]]
-        )
-        seq_tgt, idx_auth_map_tgt = BiopythonChain_to_sequence(
-            target_struct[0][target_polymer.auth_asym_id]
-        )
+        seq_src, idx_auth_map_src = BiopythonChain_to_sequence( source_struct[0][source_polymer.auth_asym_id] )
+        seq_tgt, idx_auth_map_tgt = BiopythonChain_to_sequence( target_struct[0][target_polymer.auth_asym_id] )
 
         chain_motif_residues = []
 
-        for motif in nbr_polymer["motifs"]:
+        for motif in source_polymer["motifs"]:
             # ! -------------------------------------------- SEARCH PARAMS --------------------------------------------------
             motif_str = "".join(
                 [ResidueSummary.three_letter_code_to_one(amino) for _, amino in motif]
@@ -360,7 +355,7 @@ def bsite_transpose(
                 print("Extending chain_motif_residues")
                 chain_motif_residues = [*chain_motif_residues, *target_motif_residues]
 
-        predicted_chains.append(
+        target_polymers.append(
             PredictedResiduesPolymer(
                 polymer_class=nomenclature_class,
                 source=PredictionSource(
@@ -399,7 +394,7 @@ def bsite_transpose(
     # ! at this point we have collected all the source polymers and corresponding target polymers.
     chains: list[BindingSiteChain] = []
 
-    for c in predicted_chains:
+    for c in target_polymers:
         poly = RibosomeOps(target_rcsb_id).get_poly_by_auth_asym_id(
             c.target.auth_asym_id
         )
@@ -411,7 +406,7 @@ def bsite_transpose(
         chains.append(bsite_chain)
 
     return LigandTransposition(
-        constituent_chains=predicted_chains,  # this is the info about each individual pair of polymers manipulations
+        constituent_chains=target_polymers,  # this is the info about each individual pair of polymers manipulations
         source=source_rcsb_id,
         target=target_rcsb_id,
         purported_binding_site=BindingSite(  # this is the result, the datastructure that gets sent the fronted
