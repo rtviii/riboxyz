@@ -33,12 +33,12 @@ NUCLEOTIDES = ["A", "T", "C", "G", "U"]
 
 
 class ResidueSummary(BaseModel): 
-
-    full_id            : typing.Optional[tuple[str, int, str, tuple[str, int, str]]]
-    resname            : str | None
-    auth_seq_id              : int
-    label_seq_id              : int  | None
-    parent_auth_asym_id: str
+    label_seq_id : typing.Optional[int] = None
+    label_comp_id: typing.Optional[str] = None
+    auth_asym_id : str
+    auth_seq_id  : int
+    rcsb_id:str
+    full_id      : typing.Optional[tuple[str, int, str, tuple[str, int, str]]]
 
     @staticmethod
     def three_letter_code_to_one(resname: str):
@@ -65,7 +65,7 @@ class ResidueSummary(BaseModel):
         return hash( self.get_resname() if self.get_resname() is not None else "" + str(self.get_seqid()) + self.get_parent_auth_asym_id() )
 
     def get_resname(self):
-        return self.resname
+        return self.label_comp_id
 
     def get_seqid(self):
         (structure_id, model_id, chain_id, _) = self.full_id
@@ -83,20 +83,22 @@ class ResidueSummary(BaseModel):
         (hetero, seqid, insertion_code) = _
 
         return ResidueSummary(
-            auth_seq_id         = seqid,
-            label_seq_id        = None,
-            resname             = r.get_resname(),
-            parent_auth_asym_id = chain_id,
-            full_id             = r.get_full_id(),
+            auth_seq_id   = seqid,
+            label_seq_id  = None,
+            label_comp_id = r.get_resname(),
+            auth_asym_id  = chain_id,
+            full_id       = r.get_full_id(),
+            rcsb_id       = r.get_full_id()[0]
         )
 
 class BindingSiteChain(Polymer):
     bound_residues: list[ResidueSummary]
 
 class BindingSite(BaseModel):
-    source:str
-    ligand:str
-    radius:float
+
+    source: str
+    ligand: str
+    radius: float
     chains: list[BindingSiteChain]
 
 

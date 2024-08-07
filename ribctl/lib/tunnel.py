@@ -40,7 +40,7 @@ def pick_match(matches, rna_length: int):
 
 
 def residue_labels(res: Residue | ResidueSummary) -> bool:
-    return res.resname in [*AMINO_ACIDS.keys(), *NUCLEOTIDES]
+    return res.label_comp_id in [*AMINO_ACIDS.keys(), *NUCLEOTIDES]
 
 
 def ptc_fuzzyfind_subseq_in_chain(
