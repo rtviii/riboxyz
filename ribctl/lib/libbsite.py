@@ -197,12 +197,12 @@ def get_lig_bsite(
         bound_residues = sorted(
             [
                 ResidueSummary(
-                    full_id       = None,
-                    auth_asym_id  = chain_aaid,
-                    label_comp_id = residue.resname,
-                    auth_seq_id   = residue.get_id()[1],
-                    label_seq_id  = None,
-                    rcsb_id       = struct.get_id().upper(),
+                    full_id=None,
+                    auth_asym_id=chain_aaid,
+                    label_comp_id=residue.resname,
+                    auth_seq_id=residue.get_id()[1],
+                    label_seq_id=None,
+                    rcsb_id=struct.get_id().upper(),
                 )
                 for residue in bound_residues
             ],
@@ -213,10 +213,10 @@ def get_lig_bsite(
         )
 
     return BindingSite(
-        chains = nbr_chains,
-        ligand = lig_chemid,
-        radius = radius,
-        source = struct.get_id().upper(),
+        chains=nbr_chains,
+        ligand=lig_chemid,
+        radius=radius,
+        source=struct.get_id().upper(),
     )
 
 
@@ -300,7 +300,8 @@ def bsite_transpose(
                 (resid, resname)
                 for (resid, resname) in [
                     *map(
-                        lambda x: (x.auth_seq_id, x.label_comp_id), nbr_polymer.bound_residues
+                        lambda x: (x.auth_seq_id, x.label_comp_id),
+                        nbr_polymer.bound_residues,
                     )
                 ]
             ]
@@ -329,17 +330,30 @@ def bsite_transpose(
         #     )
         # )
 
-        seq_src, idx_auth_map_src = BiopythonChain_to_sequence( source_struct[0][nbr_polymer["auth_asym_id"]] )
-        seq_tgt, idx_auth_map_tgt = BiopythonChain_to_sequence( target_struct[0][target_polymer.auth_asym_id] )
+        seq_src, idx_auth_map_src = BiopythonChain_to_sequence(
+            source_struct[0][nbr_polymer["auth_asym_id"]]
+        )
+        seq_tgt, idx_auth_map_tgt = BiopythonChain_to_sequence(
+            target_struct[0][target_polymer.auth_asym_id]
+        )
 
         chain_motif_residues = []
 
         for motif in nbr_polymer["motifs"]:
             # ! -------------------------------------------- SEARCH PARAMS --------------------------------------------------
-            motif_str = "".join( [ResidueSummary.three_letter_code_to_one(amino) for _, amino in motif] )
+            motif_str = "".join(
+                [ResidueSummary.three_letter_code_to_one(amino) for _, amino in motif]
+            )
             if len(motif_str) <= 5:
                 continue
-            matches = find_near_matches( motif_str, seq_tgt, max_substitutions=0, max_l_dist=1, max_insertions=2, max_deletions=0, )
+            matches = find_near_matches(
+                motif_str,
+                seq_tgt,
+                max_substitutions=0,
+                max_l_dist=1,
+                max_insertions=2,
+                max_deletions=0,
+            )
             # ! -------------------------------------------- SEARCH PARAMS --------------------------------------------------
 
             # TODO : Use all matches.
@@ -354,8 +368,6 @@ def bsite_transpose(
                 print("Extending chain_motif_residues")
                 chain_motif_residues = [*chain_motif_residues, *target_motif_residues]
 
-            
-
         predicted_chains.append(
             PredictedResiduesPolymer(
                 polymer_class=nomenclature_class,
@@ -364,23 +376,23 @@ def bsite_transpose(
                     auth_asym_id=nbr_polymer["auth_asym_id"],
                     source_bound_residues=[
                         ResidueSummary(
-                            auth_seq_id         = residue[0],
-                            label_comp_id             = residue[1],
-                            auth_asym_id = nbr_polymer["auth_asym_id"],
-                            label_seq_id        = None,
-                            full_id             = None,
-                            rcsb_id=source_rcsb_id,
+                            auth_seq_id   = residue[0],
+                            label_comp_id = residue[1],
+                            auth_asym_id  = nbr_polymer["auth_asym_id"],
+                            label_seq_id  = None,
+                            full_id       = None,
+                            rcsb_id       = source_rcsb_id,
                         )
                         for residue in nbr_polymer["bound_residues"]
                     ],
                 ),
                 target=PredictionTarget(
-                    target_seq            = seq_tgt,
-                    auth_asym_id          = target_polymer.auth_asym_id,
-                    target_bound_residues = [
+                    target_seq=seq_tgt,
+                    auth_asym_id=target_polymer.auth_asym_id,
+                    target_bound_residues=[
                         ResidueSummary(
                             auth_seq_id   = residue.get_id()[1],
-                            label_comp_id = ResidueSummary.three_letter_code_to_one(residue.resname),
+                            label_comp_id = ResidueSummary.three_letter_code_to_one( residue.resname ),
                             label_seq_id  = None,
                             auth_asym_id  = target_polymer.auth_asym_id,
                             full_id       = None,
@@ -396,11 +408,15 @@ def bsite_transpose(
     chains: list[BindingSiteChain] = []
 
     for c in predicted_chains:
-        poly = RibosomeOps(target_rcsb_id).get_poly_by_auth_asym_id( c.target.auth_asym_id )
+        poly = RibosomeOps(target_rcsb_id).get_poly_by_auth_asym_id(
+            c.target.auth_asym_id
+        )
         if poly == None:
             raise ValueError("Polymer not found in target structure")
-        bsite_chain = BindingSiteChain( **poly.model_dump(), bound_residues=c.target.target_bound_residues )
-        chains.append(bsite_chain )
+        bsite_chain = BindingSiteChain(
+            **poly.model_dump(), bound_residues=c.target.target_bound_residues
+        )
+        chains.append(bsite_chain)
 
     return LigandTransposition(
         constituent_chains=predicted_chains,  # this is the info about each individual pair of polymers manipulations
