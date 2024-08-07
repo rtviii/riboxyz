@@ -341,10 +341,10 @@ def bsite_transpose(
             matches = find_near_matches(
                 motif_str,
                 seq_tgt,
-                max_substitutions=0,
-                max_l_dist=1,
-                max_insertions=2,
-                max_deletions=0,
+                max_substitutions = 0,
+                max_l_dist        = 1,
+                max_insertions    = 2,
+                max_deletions     = 0,
             )
             # ! -------------------------------------------- SEARCH PARAMS --------------------------------------------------
 
