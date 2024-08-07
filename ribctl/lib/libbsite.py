@@ -313,22 +313,14 @@ def bsite_transpose(
             }
 
     #! Target polymers
-    target_polymers_by_poly_class = {}
-    predicted_chains: list[PredictedResiduesPolymer] = []
 
+    predicted_chains: list[PredictedResiduesPolymer] = []
     for nomenclature_class, nbr_polymer in source_polymers_by_poly_class.items():
         target_polymer = RibosomeOps(target_rcsb_id).get_poly_by_polyclass(
             nomenclature_class, 0
         )
         if target_polymer == None:
             continue
-        # print(
-        #     "\n\nMatched source chain {}.{} to target_polymer.auth_asym_id {}".format(
-        #         nomenclature_class,
-        #         source_polymers_by_poly_class[nomenclature_class]["auth_asym_id"],
-        #         target_polymer.auth_asym_id,
-        #     )
-        # )
 
         seq_src, idx_auth_map_src = BiopythonChain_to_sequence(
             source_struct[0][nbr_polymer["auth_asym_id"]]
@@ -392,7 +384,7 @@ def bsite_transpose(
                     target_bound_residues=[
                         ResidueSummary(
                             auth_seq_id   = residue.get_id()[1],
-                            label_comp_id = ResidueSummary.three_letter_code_to_one( residue.resname ),
+                            label_comp_id = residue.resname ,
                             label_seq_id  = None,
                             auth_asym_id  = target_polymer.auth_asym_id,
                             full_id       = None,
