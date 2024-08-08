@@ -40,23 +40,24 @@ from ribctl.lib.schema.types_binding_site import (
 
 
 #! Transposition methods
+
 class SeqMatch:
     def __init__(self, sourceseq: str, targetseq: str, source_residues: list[int]):
-        """A container for origin and target sequences when matching the resiudes of a ligand binding site
-        to another protein's sequence through BioSeq's Align
-        """
+        """A container for origin and target sequences when matching residue indices in the source sequence to the target sequence."""
+        #* IMPORTANT: BOTH SEQUENCES ARE ASSUMED TO HAVE NO GAPS ( at least not represeneted as "-"). That will screw up the arithmetic.
 
-        # *  indices of the ligand-facing residues in the source sequence.
-        self.src: str = sourceseq
+        # *  indices of the given residues in the source sequence.
+        self.src    : str       = sourceseq
         self.src_ids: list[int] = source_residues
 
-        # * Indices of predicted residues in target sequence. To be filled.
-        self.tgt: str = targetseq
+        # * Indices of the corresponding residues in target sequence. To be filled.
+        self.tgt    : str       = targetseq
         self.tgt_ids: list[int] = []
 
-        _ = pairwise2.align.globalxx(self.src, self.tgt, one_alignment_only=True)
+        _            = pairwise2.align.globalxx(self.src, self.tgt, one_alignment_only=True)
         self.src_aln = _[0].seqA
         self.tgt_aln = _[0].seqB
+        #! The only thing that can happen hence is the insertion of gaps in the source sequence.
 
         self.aligned_ids = []
 
@@ -235,7 +236,7 @@ def bsite_ligand(
 
     return binding_site_ligand
 
-def bsite_transpose(
+def bsite_transpose_motifs(
     source_rcsb_id: str,
     target_rcsb_id: str,
     binding_site: BindingSite,
@@ -438,7 +439,7 @@ def bsite_transpose(
     print("Elapsed time: ", end - start)
     return _
 
-def bsite_transpose_motifs(
+def bsite_transpose(
     source_rcsb_id: str,
     target_rcsb_id: str,
     binding_site: BindingSite,
@@ -448,7 +449,11 @@ def bsite_transpose_motifs(
     start = time()
 
     def BiopythonChain_to_sequence(chain: Chain) -> tuple[str, dict[int, int]]:
+        print("Chain with id", chain.get_id())
+
         res: list[Residue] = [*chain.get_residues()]
+
+        pprint(res[:2000])
         idx_auth_seq_id_map = {}
         seq = ""
         for idx, residue in enumerate(res):
@@ -462,38 +467,31 @@ def bsite_transpose_motifs(
                 seq = seq + "-"
                 idx_auth_seq_id_map[idx] = residue
 
+        pprint("Returning bioptyhon seq")
+        pprint(seq)
         return seq, idx_auth_seq_id_map
 
-    def extract_contiguous_motifs(
-        bound_residues: list[tuple[int, str]]
-    ) -> list[list[tuple[int, str]]]:
-        bound_residues = sorted(
-            bound_residues,
-            key=lambda x: x[0],
-        )
-        motifs = []
-        current_motif = []
-        for i, (num, amino) in [*enumerate(bound_residues)]:
-            if not current_motif:
-                current_motif.append((num, amino))
-            else:
-                last_num = current_motif[-1][0]
-                if num - last_num <= 3:  # Allow for up to 2 skipped numbers
-                    current_motif.append((num, amino))
-                else:
-                    motifs.append(current_motif)
-                    current_motif = [(num, amino)]
-
-        if current_motif:
-            motifs.append(current_motif)
-        return motifs
-
     source_rcsb_id, target_rcsb_id = source_rcsb_id.upper(), target_rcsb_id.upper()
+
     source_polymers_by_poly_class = {}
 
     target_struct = RibosomeOps(target_rcsb_id).biopython_structure()
     source_struct = RibosomeOps(source_rcsb_id).biopython_structure()
 
+    target_profile = RibosomeOps(target_rcsb_id).profile()
+    source_profile = RibosomeOps(source_rcsb_id).profile()
+
+    #* Work out a mapping between the structural and the canonical sequences
+
+    def structure_vs_canonical_sequence_map(structural_seq:str, canonical_seq:str):
+        # TODO
+        ...
+
+
+
+
+
+    #* Work out a mapping between the structural and the canonical sequences
     #! Source polymers
     for nbr_polymer in binding_site.chains:
         nbr_polymer = BindingSiteChain.model_validate(nbr_polymer)
@@ -501,46 +499,36 @@ def bsite_transpose_motifs(
         if len(nbr_polymer.nomenclature) < 1:
             continue
         else:
-            bound_residues_ids = [
-                (resid, resname)
-                for (resid, resname) in [
-                    *map(
-                        lambda x: (x.auth_seq_id, x.label_comp_id),
-                        nbr_polymer.bound_residues,
-                    )
-                ]
-            ]
+            # ! Bound residues  [in STRUCTURE SPACE]
+            bound_residues_ids = [ (resid, resname) for (resid, resname) in [ *map( lambda x: (x.auth_seq_id, x.label_comp_id), nbr_polymer.bound_residues)]]
+
+
+            structure_vs_canonical_sequence_map("","")
+            seq_src, idx_auth_map_src = BiopythonChain_to_sequence(source_struct[0][nbr_polymer.auth_asym_id] )
+
+            exit()
+
             source_polymers_by_poly_class[nbr_polymer.nomenclature[0].value] = {
                 # "seq"           : nbr_polymer.entity_poly_seq_one_letter_code_can,
                 # "auth_asym_id"  : nbr_polymer.auth_asym_id,
                 # "bound_residues": nbr_polymer.bound_residues,
                 "polymer": nbr_polymer,
                 #! Collect contiguous motifs for each polymer (to possibly seek them in the target)
-                "motifs": extract_contiguous_motifs(bound_residues_ids),
+                # "motifs": extract_contiguous_motifs(bound_residues_ids),
             }
 
     #! Target polymers
     target_polymers: list[PredictedResiduesPolymer] = []
-    for (
-        nomenclature_class,
-        source_polymer_with_motifs,
-    ) in sorted(source_polymers_by_poly_class.items(), key=lambda x: x[0]):
-
+    for ( nomenclature_class, source_polymer_with_motifs, ) in sorted(source_polymers_by_poly_class.items(), key=lambda x: x[0]):
         print("Processing chain [{}]".format(nomenclature_class))
-        target_polymer: Polymer | None = RibosomeOps(
-            target_rcsb_id
-        ).get_poly_by_polyclass(nomenclature_class, 0)
+        target_polymer: Polymer | None = RibosomeOps( target_rcsb_id ).get_poly_by_polyclass(nomenclature_class, 0)
         source_polymer: BindingSiteChain = source_polymers_by_poly_class[ nomenclature_class ]["polymer"]
         #! If no polymer of corresponding class is found, move on.
         if target_polymer == None:
             continue
 
-        seq_src, idx_auth_map_src = BiopythonChain_to_sequence(
-            source_struct[0][source_polymer.auth_asym_id]
-        )
-        seq_tgt, idx_auth_map_tgt = BiopythonChain_to_sequence(
-            target_struct[0][target_polymer.auth_asym_id]
-        )
+        seq_src, idx_auth_map_src = BiopythonChain_to_sequence( source_struct[0][source_polymer.auth_asym_id] )
+        seq_tgt, idx_auth_map_tgt = BiopythonChain_to_sequence( target_struct[0][target_polymer.auth_asym_id] )
 
         target_polymer_all_residues = []
 
@@ -548,7 +536,6 @@ def bsite_transpose_motifs(
 
             # ! -------------------------------------------- SEARCH PARAMS --------------------------------------------------
             motif_str = ""
-
             for _, residue_label in motif:
                 motif_str = motif_str + ResidueSummary.three_letter_code_to_one( residue_label )
 
