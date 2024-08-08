@@ -270,14 +270,27 @@ def create_residue_mapping_mask(canonical: str, structure: str) -> dict[int, int
 
 class SeqMap:
 
-    mapping :dict[int, int]
+    mapping       : dict[int, int]
+
+    seq_canonical : str
+    seq_structural: str
+
+    seq_canonical_aligned : str
+    seq_structural_aligned: str
+
 
     def __init__(self, canonical: str, structure: str):
-        alignments = pairwise2.align.globalxx(Seq(canonical), Seq(structure))
-        
+        self.seq_canonical  = canonical
+        self.seq_structural = structure
+        alignments          = pairwise2.align.globalxx(Seq(canonical), Seq(structure))
+
         aligned_canonical, aligned_structure = alignments[0][0], alignments[0][1]
         
+        self.seq_canonical_aligned  = aligned_canonical
+        self.seq_structural_aligned = aligned_structure
+
         mapping         = {}
+
         canonical_index = 0
         structure_index = 0
         
@@ -295,11 +308,17 @@ class SeqMap:
             if struct_char != '-':
                 structure_index += 1
         
+
         self.mapping = mapping
 
-    def __getitem__(self, key) ->int | None:
+    def get_index(self, key:int) ->int | None:
         "Get the STRUCTURAL sequence index corresponding to the CANONICAL sequence index <key> if any, otherwise None"
-        return self.mapping[key] if self.mapping[key] != -1 else None
+        if key not in self.mapping:
+            raise KeyError(f"Key {key} not found in mapping")
+        if self.mapping[key] == -1:
+            return None
+        return self.mapping[key]
+        
 
 def bsite_ligand(
     chemicalId: str, rcsb_id: str, radius: float, save: bool = False
@@ -562,6 +581,8 @@ def bsite_transpose(
     #* Work out a mapping between the structural and the canonical sequences
     #! Source polymers
     for nbr_polymer in binding_site.chains:
+        if "uS12" not in nbr_polymer.nomenclature :
+            continue
         nbr_polymer = BindingSiteChain.model_validate(nbr_polymer)
         #! Skip if no nomenclature present ( can't do anything with it )
         if len(nbr_polymer.nomenclature) < 1:
@@ -569,17 +590,71 @@ def bsite_transpose(
         else:
             # ! Bound residues  [in STRUCTURE SPACE]
             # bound_residues_ids = [ (resid, resname) for (resid, resname) in [ *map( lambda x: (x.auth_seq_id, x.label_comp_id), nbr_polymer.bound_residues)]]
-            structural_seq_src = BiopythonChain_to_sequence(source_struct[0][nbr_polymer.auth_asym_id] )
             canonical_seq_src  = RibosomeOps(source_rcsb_id).get_poly_by_auth_asym_id(nbr_polymer.auth_asym_id).entity_poly_seq_one_letter_code_can
-            pprint(canonical_seq_src[:40])
-            pprint(structural_seq_src[:40])
-            M = SeqMap( canonical_seq_src, structural_seq_src)
+            structural_seq_src = BiopythonChain_to_sequence(source_struct[0][nbr_polymer.auth_asym_id] )
 
-            pprint("".join([ canonical_seq_src[x] for x in range(0,20) ]))
-            try:
-                pprint("".join([ structural_seq_src[M[x]] for x in range(0,20) ]))
-            except:
-                pprint([*M.items()][:20])
+            # pprint(structural_seq_src[:40])
+            M = SeqMap( canonical_seq_src, structural_seq_src)
+            print("\n\nCanonical sequence")
+            pprint(M.seq_canonical)
+            print("Structural sequence")
+            pprint(M.seq_structural)
+            print("\n Both, aligned:")
+            print(M.seq_canonical_aligned)
+            print(M.seq_structural_aligned)
+            print("\t\t\t\t*************")
+
+            sub_ixs       = [5,6,7,8,9,10]
+            can_subseq    = ""
+            struct_subseq = ""
+
+            pprint(M.mapping)
+            for i in sub_ixs:
+                can_subseq = can_subseq + canonical_seq_src[i]
+                struct_index = M.get_index(i)
+                print("retrieved index {} for canonicla {}".format(struct_index, i))
+                if struct_index == None:
+                    struct_subseq = struct_subseq + "-"
+                elif struct_index  != None:
+                    struct_subseq = struct_subseq + structural_seq_src[M.get_index(i)]
+
+            print("Expecting QLVRK or something like that")
+            print("Canonical")
+            pprint(can_subseq)
+            print("STructural")
+            pprint(struct_subseq)
+
+
+
+
+            # subseq = canonical_seq_src[:20]
+            # print("Original subsequence", subseq)
+            # print("mapping is")
+            # pprint(M.mapping)
+
+
+            # structural_subseq = ""
+            # canonical_subseq =""
+            # for index in range(20):
+            #     canonical_subseq = canonical_subseq + canonical_seq_src[index]
+            #     retrieved_residue_ix = M[index]
+            #     if retrieved_residue_ix == -1:
+            #         structural_subseq += "-"
+            #     else:
+            #         structural_subseq += structural_seq_src[retrieved_residue_ix]
+
+
+            # print("Orginal       canonical  subsequence:", canonical_subseq)
+            # print("Reconstructed structural subsequence:", structural_subseq)
+            # exit()
+
+
+
+            # pprint("".join([ canonical_seq_src[x] for x in range(0,20) ]))
+            # try:
+            #     pprint("".join([ structural_seq_src[M[x]] for x in range(0,20) ]))
+            # except:
+            #     pprint([*M.items()][:20])
 
 
             source_polymers_by_poly_class[nbr_polymer.nomenclature[0].value] = {
