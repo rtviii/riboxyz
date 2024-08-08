@@ -238,41 +238,68 @@ def get_lig_bsite(
 
 
 def create_residue_mapping_mask(canonical: str, structure: str) -> dict[int, int]:
+    # Perform a global alignment
     alignments = pairwise2.align.globalxx(Seq(canonical), Seq(structure))
     aligned_canonical, aligned_structure = alignments[0][0], alignments[0][1]
     
+    print('------------------------------------_***')
+    pprint(aligned_canonical)
+    pprint(aligned_structure)
+    print('------------------------------------_***')
+    # Convert aligned sequences to NumPy arrays
     can_array    = np.array(list(aligned_canonical))
     struct_array = np.array(list(aligned_structure))
-
-    can_indices    = np.cumsum(can_array != '-') - 1
+    
+    # Create indices for non-gap positions
+    can_indices    = np.arange(len(can_array))[can_array != '-']
     struct_indices = np.cumsum(struct_array != '-') - 1
     
-    mask = (can_array != '-') & (struct_array != '-')
+    # Create a mask for positions where both sequences have residues
+    mask = (can_array != '-') 
     
-    return dict(zip(can_indices[mask], struct_indices[mask]))
-
-def create_residue_mapping(canonical: str, structure: str) -> dict[int, int]:
-    alignments     = pairwise2.align.globalxx(Seq(canonical), Seq(structure))
-    best_alignment = alignments[0]
-
-    aligned_canonical, aligned_structure = best_alignment[0], best_alignment[1]
+    # Initialize the mapping dictionary with all canonical indices mapped to -1
+    mapping = {i: -1 for i in range(len(canonical))}
     
-    # Create the mapping
-    mapping = {}
-    canonical_index = 0
-    structure_index = 0
-    
-    for i in range(len(aligned_canonical)):
-        if aligned_canonical[i] != '-' and aligned_structure[i] != '-':
-            mapping[canonical_index] = structure_index
-            canonical_index += 1
-            structure_index += 1
-        elif aligned_canonical[i] != '-':
-            canonical_index += 1
-        elif aligned_structure[i] != '-':
-            structure_index += 1
+    # Update the mapping for positions where both sequences have residues
+    mapping.update(zip(can_indices[mask], struct_indices[mask]))
     
     return mapping
+
+
+
+
+class SeqMap:
+
+    mapping :dict[int, int]
+
+    def __init__(self, canonical: str, structure: str):
+        alignments = pairwise2.align.globalxx(Seq(canonical), Seq(structure))
+        
+        aligned_canonical, aligned_structure = alignments[0][0], alignments[0][1]
+        
+        mapping         = {}
+        canonical_index = 0
+        structure_index = 0
+        
+        for can_char, struct_char in zip(aligned_canonical, aligned_structure):
+            if can_char != '-':
+                if struct_char != '-':
+                    mapping[canonical_index] = structure_index
+                    structure_index += 1
+                else:
+                    mapping[canonical_index] = -1
+                canonical_index += 1
+            elif can_char == '-':
+                warnings.warn(f"Unexpected gap in canonical sequence at aligned position {canonical_index}. This shouldn't happen with the original canonical sequence.")
+            
+            if struct_char != '-':
+                structure_index += 1
+        
+        self.mapping = mapping
+
+    def __getitem__(self, key) ->int | None:
+        "Get the STRUCTURAL sequence index corresponding to the CANONICAL sequence index <key> if any, otherwise None"
+        return self.mapping[key] if self.mapping[key] != -1 else None
 
 def bsite_ligand(
     chemicalId: str, rcsb_id: str, radius: float, save: bool = False
@@ -493,11 +520,11 @@ def __bsite_transpose_motifs(
     return _
 
 def bsite_transpose(
-    source_rcsb_id: str,
-    target_rcsb_id: str,
-    binding_site: BindingSite,
-    save: bool = False,
-) -> LigandTransposition:
+  source_rcsb_id        : str,
+  target_rcsb_id        : str,
+  binding_site          : BindingSite,
+  save                  : bool = False,
+) -> LigandTransposition: 
 
     start = time()
 
@@ -543,12 +570,18 @@ def bsite_transpose(
             # ! Bound residues  [in STRUCTURE SPACE]
             # bound_residues_ids = [ (resid, resname) for (resid, resname) in [ *map( lambda x: (x.auth_seq_id, x.label_comp_id), nbr_polymer.bound_residues)]]
             structural_seq_src = BiopythonChain_to_sequence(source_struct[0][nbr_polymer.auth_asym_id] )
-            canonical_seq_src = RibosomeOps(source_rcsb_id).get_poly_by_auth_asym_id(nbr_polymer.auth_asym_id).entity_poly_seq_one_letter_code_can
+            canonical_seq_src  = RibosomeOps(source_rcsb_id).get_poly_by_auth_asym_id(nbr_polymer.auth_asym_id).entity_poly_seq_one_letter_code_can
+            pprint(canonical_seq_src[:40])
+            pprint(structural_seq_src[:40])
+            M = SeqMap( canonical_seq_src, structural_seq_src)
 
-            mapping = create_residue_mapping_mask( canonical_seq_src, structural_seq_src)
-            pprint(mapping)
+            pprint("".join([ canonical_seq_src[x] for x in range(0,20) ]))
+            try:
+                pprint("".join([ structural_seq_src[M[x]] for x in range(0,20) ]))
+            except:
+                pprint([*M.items()][:20])
 
-            pprint("------------")
+
             source_polymers_by_poly_class[nbr_polymer.nomenclature[0].value] = {
                 # "seq"           : nbr_polymer.entity_poly_seq_one_letter_code_can,
                 # "auth_asym_id"  : nbr_polymer.auth_asym_id,
