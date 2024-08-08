@@ -236,7 +236,8 @@ def bsite_ligand(
 
     return binding_site_ligand
 
-def bsite_transpose_motifs(
+#! Deperecated
+def __bsite_transpose_motifs(
     source_rcsb_id: str,
     target_rcsb_id: str,
     binding_site: BindingSite,
@@ -448,28 +449,19 @@ def bsite_transpose(
 
     start = time()
 
-    def BiopythonChain_to_sequence(chain: Chain) -> tuple[str, dict[int, int]]:
-        print("Chain with id", chain.get_id())
-
+    def BiopythonChain_to_sequence(chain: Chain) -> str:
         res: list[Residue] = [*chain.get_residues()]
-
-        pprint(res[:2000])
-        idx_auth_seq_id_map = {}
         seq = ""
         for idx, residue in enumerate(res):
             if residue.resname in [*AMINO_ACIDS.keys()]:
                 seq = seq + ResidueSummary.three_letter_code_to_one(residue.resname)
-                idx_auth_seq_id_map[idx] = residue
             elif residue.resname in [*NUCLEOTIDES]:
                 seq = seq + residue.resname
-                idx_auth_seq_id_map[idx] = residue
             else:
+                continue
                 seq = seq + "-"
-                idx_auth_seq_id_map[idx] = residue
 
-        pprint("Returning bioptyhon seq")
-        pprint(seq)
-        return seq, idx_auth_seq_id_map
+        return seq
 
     source_rcsb_id, target_rcsb_id = source_rcsb_id.upper(), target_rcsb_id.upper()
 
@@ -485,6 +477,8 @@ def bsite_transpose(
 
     def structure_vs_canonical_sequence_map(structural_seq:str, canonical_seq:str):
         # TODO
+        # We need a map between two numbering schemes
+        SeqMatch(structural_seq, canonical_seq, [])
         ...
 
 
@@ -500,11 +494,12 @@ def bsite_transpose(
             continue
         else:
             # ! Bound residues  [in STRUCTURE SPACE]
-            bound_residues_ids = [ (resid, resname) for (resid, resname) in [ *map( lambda x: (x.auth_seq_id, x.label_comp_id), nbr_polymer.bound_residues)]]
+            # bound_residues_ids = [ (resid, resname) for (resid, resname) in [ *map( lambda x: (x.auth_seq_id, x.label_comp_id), nbr_polymer.bound_residues)]]
+            seq_src            = BiopythonChain_to_sequence(source_struct[0][nbr_polymer.auth_asym_id] )
+            canonical_sequence = RibosomeOps(source_rcsb_id).get_poly_by_auth_asym_id(nbr_polymer.auth_asym_id).entity_poly_seq_one_letter_code_can
 
 
-            structure_vs_canonical_sequence_map("","")
-            seq_src, idx_auth_map_src = BiopythonChain_to_sequence(source_struct[0][nbr_polymer.auth_asym_id] )
+            structure_vs_canonical_sequence_map(seq_src, canonical_sequence)
 
             exit()
 
@@ -601,14 +596,10 @@ def bsite_transpose(
     chains: list[BindingSiteChain] = []
 
     for c in target_polymers:
-        poly = RibosomeOps(target_rcsb_id).get_poly_by_auth_asym_id(
-            c.target.auth_asym_id
-        )
+        poly = RibosomeOps(target_rcsb_id).get_poly_by_auth_asym_id( c.target.auth_asym_id )
         if poly == None:
             raise ValueError("Polymer not found in target structure")
-        bsite_chain = BindingSiteChain(
-            **poly.model_dump(), bound_residues=c.target.target_bound_residues
-        )
+        bsite_chain = BindingSiteChain( **poly.model_dump(), bound_residues=c.target.target_bound_residues )
         chains.append(bsite_chain)
 
     end = time()

@@ -214,14 +214,13 @@ class RibosomeOps:
                     return polyf
         return None
 
-    def get_poly_by_auth_asym_id( self, auth_asym_id: str ) -> Polymer |None:
+    def get_poly_by_auth_asym_id( self, auth_asym_id: str ) -> Polymer :
 
         profile = self.profile()
-
         for chain in [ *profile.proteins, *profile.rnas, *profile.other_polymers]:
             if chain.auth_asym_id == auth_asym_id:
                 return chain
-        return None
+        raise KeyError("No chain found with auth_asym_id: {}".format(auth_asym_id))
 
     def get_poly_by_polyclass(
         self, class_: PolymerClass, assembly: int = 0
