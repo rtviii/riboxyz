@@ -50,5 +50,4 @@ def transpose(ctx, chem_id, source_struct, target_struct, radius, save):
         with open(transposed_path, 'w') as outfile:
             json.dump(transposed, outfile, indent=4)
             ce("Saved: {}".format(transposed_path))
-    pprint(transposed)
     return transposed
