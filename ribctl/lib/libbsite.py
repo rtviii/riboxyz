@@ -10,6 +10,7 @@ from Bio import (
     BiopythonDeprecationWarning,
 )
 from fuzzysearch import find_near_matches
+import numpy as np
 
 from ribctl.lib.schema.types_ribosome import Polymer
 
@@ -30,6 +31,7 @@ from Bio.PDB.NeighborSearch import NeighborSearch
 from Bio.PDB.Residue import Residue
 from Bio.PDB.Chain import Chain
 from Bio.PDB.Model import Model
+from Bio.Seq import Seq
 from Bio.PDB.Structure import Structure
 from ribctl.etl.etl_assets_ops import RibosomeOps
 from ribctl.lib.schema.types_binding_site import (
@@ -43,8 +45,19 @@ from ribctl.lib.schema.types_binding_site import (
 
 class SeqMatch:
     def __init__(self, sourceseq: str, targetseq: str, source_residues: list[int]):
-        """A container for origin and target sequences when matching residue indices in the source sequence to the target sequence."""
-        #* IMPORTANT: BOTH SEQUENCES ARE ASSUMED TO HAVE NO GAPS ( at least not represeneted as "-"). That will screw up the arithmetic.
+        """A container for origin and target sequences when matching residue indices in the source sequence to the target sequence.
+        - return the map {int:int} between the two sequences
+                CASE 1. The first one is longer:
+                    Initial
+
+       Common ix    0 1 2 3 4 5 6 7 8 9             Aligned ix   0 1 2 3 4 5 6 7 8 9
+       Canonical    X Y G G H A S D S D    ----->   Canonical    X Y G G H A S D S D
+       Structure    Y G G H A S D                   Structure    - Y G G H A S D - -
+
+        
+        
+        IMPORTANT: BOTH SEQUENCES ARE ASSUMED TO HAVE NO GAPS ( at least not represeneted as "-"). That will screw up the arithmetic.
+        """
 
         # *  indices of the given residues in the source sequence.
         self.src    : str       = sourceseq
@@ -53,6 +66,8 @@ class SeqMatch:
         # * Indices of the corresponding residues in target sequence. To be filled.
         self.tgt    : str       = targetseq
         self.tgt_ids: list[int] = []
+        pprint(sourceseq)
+        pprint(targetseq)
 
         _            = pairwise2.align.globalxx(self.src, self.tgt, one_alignment_only=True)
         self.src_aln = _[0].seqA
@@ -221,6 +236,43 @@ def get_lig_bsite(
         source=struct.get_id().upper(),
     )
 
+
+def create_residue_mapping_mask(canonical: str, structure: str) -> dict[int, int]:
+    alignments = pairwise2.align.globalxx(Seq(canonical), Seq(structure))
+    aligned_canonical, aligned_structure = alignments[0][0], alignments[0][1]
+    
+    can_array    = np.array(list(aligned_canonical))
+    struct_array = np.array(list(aligned_structure))
+
+    can_indices    = np.cumsum(can_array != '-') - 1
+    struct_indices = np.cumsum(struct_array != '-') - 1
+    
+    mask = (can_array != '-') & (struct_array != '-')
+    
+    return dict(zip(can_indices[mask], struct_indices[mask]))
+
+def create_residue_mapping(canonical: str, structure: str) -> dict[int, int]:
+    alignments     = pairwise2.align.globalxx(Seq(canonical), Seq(structure))
+    best_alignment = alignments[0]
+
+    aligned_canonical, aligned_structure = best_alignment[0], best_alignment[1]
+    
+    # Create the mapping
+    mapping = {}
+    canonical_index = 0
+    structure_index = 0
+    
+    for i in range(len(aligned_canonical)):
+        if aligned_canonical[i] != '-' and aligned_structure[i] != '-':
+            mapping[canonical_index] = structure_index
+            canonical_index += 1
+            structure_index += 1
+        elif aligned_canonical[i] != '-':
+            canonical_index += 1
+        elif aligned_structure[i] != '-':
+            structure_index += 1
+    
+    return mapping
 
 def bsite_ligand(
     chemicalId: str, rcsb_id: str, radius: float, save: bool = False
@@ -475,11 +527,6 @@ def bsite_transpose(
 
     #* Work out a mapping between the structural and the canonical sequences
 
-    def structure_vs_canonical_sequence_map(structural_seq:str, canonical_seq:str):
-        # TODO
-        # We need a map between two numbering schemes
-        SeqMatch(structural_seq, canonical_seq, [])
-        ...
 
 
 
@@ -495,14 +542,13 @@ def bsite_transpose(
         else:
             # ! Bound residues  [in STRUCTURE SPACE]
             # bound_residues_ids = [ (resid, resname) for (resid, resname) in [ *map( lambda x: (x.auth_seq_id, x.label_comp_id), nbr_polymer.bound_residues)]]
-            seq_src            = BiopythonChain_to_sequence(source_struct[0][nbr_polymer.auth_asym_id] )
-            canonical_sequence = RibosomeOps(source_rcsb_id).get_poly_by_auth_asym_id(nbr_polymer.auth_asym_id).entity_poly_seq_one_letter_code_can
+            structural_seq_src = BiopythonChain_to_sequence(source_struct[0][nbr_polymer.auth_asym_id] )
+            canonical_seq_src = RibosomeOps(source_rcsb_id).get_poly_by_auth_asym_id(nbr_polymer.auth_asym_id).entity_poly_seq_one_letter_code_can
 
+            mapping = create_residue_mapping_mask( canonical_seq_src, structural_seq_src)
+            pprint(mapping)
 
-            structure_vs_canonical_sequence_map(seq_src, canonical_sequence)
-
-            exit()
-
+            pprint("------------")
             source_polymers_by_poly_class[nbr_polymer.nomenclature[0].value] = {
                 # "seq"           : nbr_polymer.entity_poly_seq_one_letter_code_can,
                 # "auth_asym_id"  : nbr_polymer.auth_asym_id,
@@ -512,6 +558,7 @@ def bsite_transpose(
                 # "motifs": extract_contiguous_motifs(bound_residues_ids),
             }
 
+    exit()
     #! Target polymers
     target_polymers: list[PredictedResiduesPolymer] = []
     for ( nomenclature_class, source_polymer_with_motifs, ) in sorted(source_polymers_by_poly_class.items(), key=lambda x: x[0]):
@@ -522,7 +569,7 @@ def bsite_transpose(
         if target_polymer == None:
             continue
 
-        seq_src, idx_auth_map_src = BiopythonChain_to_sequence( source_struct[0][source_polymer.auth_asym_id] )
+        structural_seq_src, idx_auth_map_src = BiopythonChain_to_sequence( source_struct[0][source_polymer.auth_asym_id] )
         seq_tgt, idx_auth_map_tgt = BiopythonChain_to_sequence( target_struct[0][target_polymer.auth_asym_id] )
 
         target_polymer_all_residues = []
@@ -560,7 +607,7 @@ def bsite_transpose(
             PredictedResiduesPolymer(
                 polymer_class=nomenclature_class,
                 source=PredictionSource(
-                    source_seq=seq_src,
+                    source_seq=structural_seq_src,
                     auth_asym_id=source_polymer.auth_asym_id,
                     source_bound_residues=[
                         ResidueSummary(
