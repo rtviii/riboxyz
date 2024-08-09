@@ -43,7 +43,7 @@ from ribctl.lib.schema.types_binding_site import (
 
 #! Transposition methods
 
-class SeqMatch:
+class SeqPairwise:
     def __init__(self, sourceseq: str, targetseq: str, source_residues: list[int]):
         """A container for origin and target sequences when matching residue indices in the source sequence to the target sequence.
         - return the map {int:int} between the two sequences
@@ -214,20 +214,18 @@ def get_lig_bsite(
         bound_residues = sorted(
             [
                 ResidueSummary(
-                    full_id=None,
-                    auth_asym_id=chain_aaid,
-                    label_comp_id=residue.resname,
-                    auth_seq_id=residue.get_id()[1],
-                    label_seq_id=None,
-                    rcsb_id=struct.get_id().upper(),
+                    full_id       = None,
+                    auth_asym_id  = chain_aaid,
+                    label_comp_id = residue.resname,
+                    auth_seq_id   = residue.get_id()[1],
+                    label_seq_id  = None,
+                    rcsb_id       = struct.get_id().upper(),
                 )
                 for residue in bound_residues
             ],
             key=operator.attrgetter("auth_seq_id"),
         )
-        nbr_chains.append(
-            BindingSiteChain(**polymer.model_dump(), bound_residues=bound_residues)
-        )
+        nbr_chains.append( BindingSiteChain(**polymer.model_dump(), bound_residues=bound_residues) )
 
     return BindingSite(
         chains=nbr_chains,
@@ -308,7 +306,8 @@ class SeqMap:
                     mapping[canonical_index] = -1
                 canonical_index +=1
             elif canonical_char == '-':
-                warnings.warn(f"Unexpected gap in canonical sequence at aligned position {canonical_index}. This shouldn't happen with the original canonical sequence.")
+                continue
+                # warnings.warn(f"Unexpected gap in canonical sequence at aligned position {canonical_index}. This shouldn't happen with the original canonical sequence.")
 
         self.mapping = mapping
 
@@ -562,29 +561,42 @@ def bsite_transpose(
 
     start = time()
 
-    def BiopythonChain_to_sequence(chain: Chain) -> str:
-        res: list[Residue] = [*chain.get_residues()]
-        seq = ""
-        for idx, residue in enumerate(res):
+    def BiopythonChain_to_sequence(chain: Chain) -> tuple[ str, dict, dict ]:
+        res:list[Residue]             = [*chain.get_residues()]
+        flat_index_to_residue_map     = {}
+        auth_seq_id_to_flat_index_map = {}
+        seq                           = ""
+        index                         = 0
+
+        for residue in res:
             if residue.resname in [*AMINO_ACIDS.keys()]:
                 seq = seq + ResidueSummary.three_letter_code_to_one(residue.resname)
+                index+=1
+                flat_index_to_residue_map[index] = residue
+                auth_seq_id_to_flat_index_map[residue.get_id()[1]] = index
             elif residue.resname in [*NUCLEOTIDES]:
                 seq = seq + residue.resname
+                index +=1
+                flat_index_to_residue_map[index] = residue
+                auth_seq_id_to_flat_index_map[residue.get_id()[1]] = index
             else:
                 continue
                 seq = seq + "-"
 
-        return seq
+        return seq, flat_index_to_residue_map, auth_seq_id_to_flat_index_map
+
 
     source_rcsb_id, target_rcsb_id = source_rcsb_id.upper(), target_rcsb_id.upper()
-
     source_polymers_by_poly_class = {}
 
     target_struct = RibosomeOps(target_rcsb_id).biopython_structure()
     source_struct = RibosomeOps(source_rcsb_id).biopython_structure()
 
-    target_profile = RibosomeOps(target_rcsb_id).profile()
-    source_profile = RibosomeOps(source_rcsb_id).profile()
+    source_ops = RibosomeOps(source_rcsb_id)
+    source_profile = source_ops.profile()
+
+    target_ops = RibosomeOps(target_rcsb_id)
+    target_profile = target_ops.profile()
 
     #* Work out a mapping between the structural and the canonical sequences
 
@@ -596,50 +608,69 @@ def bsite_transpose(
     #* Work out a mapping between the structural and the canonical sequences
     #! Source polymers
     for nbr_polymer in binding_site.chains:
-        if "uS12" not in nbr_polymer.nomenclature :
-            continue
         nbr_polymer = BindingSiteChain.model_validate(nbr_polymer)
         #! Skip if no nomenclature present ( can't do anything with it )
         if len(nbr_polymer.nomenclature) < 1:
             continue
-        else:
-            # ! Bound residues  [in STRUCTURE SPACE]
-            # bound_residues_ids = [ (resid, resname) for (resid, resname) in [ *map( lambda x: (x.auth_seq_id, x.label_comp_id), nbr_polymer.bound_residues)]]
-            canonical_seq_src  = RibosomeOps(source_rcsb_id).get_poly_by_auth_asym_id(nbr_polymer.auth_asym_id).entity_poly_seq_one_letter_code_can
-            structural_seq_src = BiopythonChain_to_sequence(source_struct[0][nbr_polymer.auth_asym_id] )
+        target_polymer = target_ops.get_chain_by_polymer_class(nbr_polymer.nomenclature[0], 0)
+        if target_polymer == None:
+            continue
 
-            # pprint(structural_seq_src[:40])
-            M = SeqMap( canonical_seq_src, structural_seq_src)
-            print("\n\nCanonical sequence")
-            pprint(M.seq_canonical)
-            print("Structural sequence")
-            pprint(M.seq_structural)
-            print("\n Both, aligned:")
-            print(M.seq_canonical_aligned)
-            print(M.seq_structural_aligned)
-            print("\t\t\t\t*************")
+        # ! Bound residues  [in STRUCTURE SPACE]
+        bound_residues_ids = [ (resid, resname) for (resid, resname) in [ *map( lambda x: (x.auth_seq_id, x.label_comp_id), nbr_polymer.bound_residues)]]
+        print("".join([resname for _, resname in bound_residues_ids]))
+        # ! Bound residues  [in STRUCTURE SPACE]
 
-            sub_ixs       = [120, 50, 22, 33, 44]
-            can_subseq    = ""
-            struct_subseq = ""
+        [structural_seq_source,flat_idx_to_residue_map_source,auth_seq_id_to_flat_index_map_source] = BiopythonChain_to_sequence(source_struct[0][nbr_polymer.auth_asym_id] )
+        [structural_seq_target,flat_idx_to_residue_map_target,auth_seq_id_to_flat_index_map_target] = BiopythonChain_to_sequence(target_struct[0][target_polymer.auth_asym_id] )
 
-            pprint(M.mapping)
+        bound_residues_source_ids_flat = [ auth_seq_id_to_flat_index_map_source[resid] for ( resid, resname ) in bound_residues_ids] 
 
-            can, stru = M.retrieve_motif(sub_ixs)
-            print("Canonical subsequence", )
-            print(can)
-            print("structu")
-            print(stru)
+        M = SeqMap(structural_seq_source, structural_seq_target)
 
 
-            source_polymers_by_poly_class[nbr_polymer.nomenclature[0].value] = {
-                # "seq"           : nbr_polymer.entity_poly_seq_one_letter_code_can,
-                # "auth_asym_id"  : nbr_polymer.auth_asym_id,
-                # "bound_residues": nbr_polymer.bound_residues,
-                "polymer": nbr_polymer,
-                #! Collect contiguous motifs for each polymer (to possibly seek them in the target)
-                # "motifs": extract_contiguous_motifs(bound_residues_ids),
-            }
+        bound_residues_target_ids_flat = []
+        for resid  in bound_residues_source_ids_flat:
+            _ = M.retrieve_index(resid) 
+            if _ == None:
+                continue
+            bound_residues_target_ids_flat.append(_)
+            
+        bound_residues_target = [ flat_idx_to_residue_map_target[resid] for resid in bound_residues_target_ids_flat]
+           
+            
+        pprint(bound_residues_target)
+
+
+        exit()
+        
+
+
+        
+        # Now align the two biopython sequences 
+        # # pprint(structural_seq_src[:40])
+        print("\n\nCanonical sequence")
+        pprint(M.seq_canonical)
+        print("Structural sequence")
+        pprint(M.seq_structural)
+        print("\n Both, aligned:")
+        print(M.seq_canonical_aligned)
+        print(M.seq_structural_aligned)
+        print("\t\t\t\t*************")
+        
+
+
+        # can_subseq    = ""
+        # struct_subseq = ""
+        can, stru = M.retrieve_motif(sub_ixs)
+        source_polymers_by_poly_class[nbr_polymer.nomenclature[0].value] = {
+            # "seq"           : nbr_polymer.entity_poly_seq_one_letter_code_can,
+            # "auth_asym_id"  : nbr_polymer.auth_asym_id,
+            # "bound_residues": nbr_polymer.bound_residues,
+            "polymer": nbr_polymer,
+            #! Collect contiguous motifs for each polymer (to possibly seek them in the target)
+            # "motifs": extract_contiguous_motifs(bound_residues_ids),
+        }
 
     exit()
     #! Target polymers
