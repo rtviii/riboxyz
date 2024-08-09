@@ -43,33 +43,34 @@ from ribctl.lib.schema.types_binding_site import (
 
 #! Transposition methods
 
+
 class SeqPairwise:
     def __init__(self, sourceseq: str, targetseq: str, source_residues: list[int]):
         """A container for origin and target sequences when matching residue indices in the source sequence to the target sequence.
-        - return the map {int:int} between the two sequences
-                CASE 1. The first one is longer:
-                    Initial
+         - return the map {int:int} between the two sequences
+                 CASE 1. The first one is longer:
+                     Initial
 
-       Common ix    0 1 2 3 4 5 6 7 8 9             Aligned ix   0 1 2 3 4 5 6 7 8 9
-       Canonical    X Y G G H A S D S D    ----->   Canonical    X Y G G H A S D S D
-       Structure    Y G G H A S D                   Structure    - Y G G H A S D - -
+        Common ix    0 1 2 3 4 5 6 7 8 9             Aligned ix   0 1 2 3 4 5 6 7 8 9
+        Canonical    X Y G G H A S D S D    ----->   Canonical    X Y G G H A S D S D
+        Structure    Y G G H A S D                   Structure    - Y G G H A S D - -
 
-        
-        
-        IMPORTANT: BOTH SEQUENCES ARE ASSUMED TO HAVE NO GAPS ( at least not represeneted as "-"). That will screw up the arithmetic.
+
+
+         IMPORTANT: BOTH SEQUENCES ARE ASSUMED TO HAVE NO GAPS ( at least not represeneted as "-"). That will screw up the arithmetic.
         """
 
         # *  indices of the given residues in the source sequence.
-        self.src    : str       = sourceseq
+        self.src: str = sourceseq
         self.src_ids: list[int] = source_residues
 
         # * Indices of the corresponding residues in target sequence. To be filled.
-        self.tgt    : str       = targetseq
+        self.tgt: str = targetseq
         self.tgt_ids: list[int] = []
         pprint(sourceseq)
         pprint(targetseq)
 
-        _            = pairwise2.align.globalxx(self.src, self.tgt, one_alignment_only=True)
+        _ = pairwise2.align.globalxx(self.src, self.tgt, one_alignment_only=True)
         self.src_aln = _[0].seqA
         self.tgt_aln = _[0].seqB
         #! The only thing that can happen hence is the insertion of gaps in the source sequence.
@@ -201,7 +202,6 @@ def get_lig_bsite(
         else:
             nbr_residues_by_chain_aaid[auth_asym_id].append(residue)
 
-
     RO = RibosomeOps(struct.get_id().upper())
 
     # pprint(sorted( nbr_residues_by_chain_aaid['L'], key=lambda x: x.get_id()[1] ))
@@ -211,26 +211,23 @@ def get_lig_bsite(
             raise ValueError(
                 f"Polymer with auth_asym_id {chain_aaid} not found in structure. Logic error."
             )
-<<<<<<< HEAD
-        bound_residues = sorted( [ ResidueSummary( full_id       = None, auth_asym_id  = chain_aaid, label_comp_id = residue.resname, auth_seq_id   = residue.get_id()[1], label_seq_id  = None, rcsb_id       = struct.get_id().upper(), ) for residue in bound_residues ], key=operator.attrgetter("auth_seq_id"), )
-=======
-
         bound_residues = sorted(
             [
                 ResidueSummary(
-                    full_id       = None,
-                    auth_asym_id  = chain_aaid,
-                    label_comp_id = residue.resname,
-                    auth_seq_id   = residue.get_id()[1],
-                    label_seq_id  = None,
-                    rcsb_id       = struct.get_id().upper(),
+                    full_id=None,
+                    auth_asym_id=chain_aaid,
+                    label_comp_id=residue.resname,
+                    auth_seq_id=residue.get_id()[1],
+                    label_seq_id=None,
+                    rcsb_id=struct.get_id().upper(),
                 )
                 for residue in bound_residues
             ],
             key=operator.attrgetter("auth_seq_id"),
         )
->>>>>>> auth_seq_id_vs_canonical_pairwise
-        nbr_chains.append( BindingSiteChain(**polymer.model_dump(), bound_residues=bound_residues) )
+        nbr_chains.append(
+            BindingSiteChain(**polymer.model_dump(), bound_residues=bound_residues)
+        )
 
     return BindingSite(
         chains=nbr_chains,
@@ -242,26 +239,25 @@ def get_lig_bsite(
 
 class SeqMap:
 
-    mapping       : dict[int, int]
+    mapping: dict[int, int]
 
-    seq_canonical : str
+    seq_canonical: str
     seq_structural: str
 
-    seq_canonical_aligned : str
+    seq_canonical_aligned: str
     seq_structural_aligned: str
 
-
     def __init__(self, canonical: str, structure: str):
-        self.seq_canonical  = canonical
+        self.seq_canonical = canonical
         self.seq_structural = structure
-        alignments          = pairwise2.align.globalxx(Seq(canonical), Seq(structure))
+        alignments = pairwise2.align.globalxx(Seq(canonical), Seq(structure))
 
         aligned_canonical, aligned_structure = alignments[0][0], alignments[0][1]
-        
-        self.seq_canonical_aligned  = aligned_canonical
+
+        self.seq_canonical_aligned = aligned_canonical
         self.seq_structural_aligned = aligned_structure
 
-        mapping         = {}
+        mapping = {}
 
         # print("inspecting")
         # print(self.seq_canonical_aligned)
@@ -270,30 +266,32 @@ class SeqMap:
 
         canonical_index = 0
         structure_index = 0
-        for canonical_char, structural_char in zip(aligned_canonical, aligned_structure):
-            if canonical_char != '-':
-                if structural_char != '-':
+        for canonical_char, structural_char in zip(
+            aligned_canonical, aligned_structure
+        ):
+            if canonical_char != "-":
+                if structural_char != "-":
                     mapping[canonical_index] = structure_index
-                    structure_index +=1  
+                    structure_index += 1
                 else:
                     mapping[canonical_index] = -1
-                canonical_index +=1
-            elif canonical_char == '-':
+                canonical_index += 1
+            elif canonical_char == "-":
                 continue
                 # warnings.warn(f"Unexpected gap in canonical sequence at aligned position {canonical_index}. This shouldn't happen with the original canonical sequence.")
 
         self.mapping = mapping
 
-    def retrieve_index(self, key:int) ->int | None:
+    def retrieve_index(self, key: int) -> int | None:
         "Get the STRUCTURAL sequence index corresponding to the CANONICAL sequence index <key> if any, otherwise None"
         if key not in self.mapping:
             raise KeyError(f"Key {key} not found in mapping")
         if self.mapping[key] == -1:
             return None
         return self.mapping[key]
-        
-    def retrieve_motif(self, keys:list[int]) -> tuple[str,str]:
-        can_subseq    = ""
+
+    def retrieve_motif(self, keys: list[int]) -> tuple[str, str]:
+        can_subseq = ""
         struct_subseq = ""
 
         for i in keys:
@@ -301,11 +299,14 @@ class SeqMap:
             struct_index = self.retrieve_index(i)
             if struct_index == None:
                 struct_subseq = struct_subseq + "-"
-            elif struct_index  != None:
+            elif struct_index != None:
                 struct_subseq = struct_subseq + self.seq_structural[struct_index]
         if struct_subseq == "" or list(set(list(struct_subseq)))[0] == "-":
-            raise ValueError("No structural sequence found for the given canonical sequence")
+            raise ValueError(
+                "No structural sequence found for the given canonical sequence"
+            )
         return can_subseq, struct_subseq
+
 
 def bsite_ligand(
     chemicalId: str, rcsb_id: str, radius: float, save: bool = False
@@ -320,6 +321,7 @@ def bsite_ligand(
             json.dump(binding_site_ligand.model_dump(), f)
 
     return binding_site_ligand
+
 
 #! Deperecated
 def __bsite_transpose_motifs(
@@ -414,7 +416,9 @@ def __bsite_transpose_motifs(
         target_polymer: Polymer | None = RibosomeOps(
             target_rcsb_id
         ).get_poly_by_polyclass(nomenclature_class, 0)
-        source_polymer: BindingSiteChain = source_polymers_by_poly_class[ nomenclature_class ]["polymer"]
+        source_polymer: BindingSiteChain = source_polymers_by_poly_class[
+            nomenclature_class
+        ]["polymer"]
         #! If no polymer of corresponding class is found, move on.
         if target_polymer == None:
             continue
@@ -434,7 +438,9 @@ def __bsite_transpose_motifs(
             motif_str = ""
 
             for _, residue_label in motif:
-                motif_str = motif_str + ResidueSummary.three_letter_code_to_one( residue_label )
+                motif_str = motif_str + ResidueSummary.three_letter_code_to_one(
+                    residue_label
+                )
 
             if len(motif_str) <= 5:
                 continue
@@ -442,10 +448,10 @@ def __bsite_transpose_motifs(
             matches = find_near_matches(
                 motif_str,
                 seq_tgt,
-                max_substitutions = 0,
-                max_l_dist        = 1,
-                max_insertions    = 2,
-                max_deletions     = 0,
+                max_substitutions=0,
+                max_l_dist=1,
+                max_insertions=2,
+                max_deletions=0,
             )
             # ! -------------------------------------------- SEARCH PARAMS --------------------------------------------------
 
@@ -454,9 +460,26 @@ def __bsite_transpose_motifs(
 
                 for i in range(match.start, match.end):
                     target_motif_residues.append(idx_auth_map_tgt[i])
-                print( "\t\tTarget-motif match {}: {}".format( j, "".join( list( map( lambda x: ResidueSummary.three_letter_code_to_one( x.resname ), target_motif_residues)))))
+                print(
+                    "\t\tTarget-motif match {}: {}".format(
+                        j,
+                        "".join(
+                            list(
+                                map(
+                                    lambda x: ResidueSummary.three_letter_code_to_one(
+                                        x.resname
+                                    ),
+                                    target_motif_residues,
+                                )
+                            )
+                        ),
+                    )
+                )
 
-                target_polymer_all_residues = [ *target_polymer_all_residues, *target_motif_residues, ]
+                target_polymer_all_residues = [
+                    *target_polymer_all_residues,
+                    *target_motif_residues,
+                ]
 
         target_polymers.append(
             PredictedResiduesPolymer(
@@ -525,31 +548,32 @@ def __bsite_transpose_motifs(
     print("Elapsed time: ", end - start)
     return _
 
+
 def bsite_transpose(
-  source_rcsb_id        : str,
-  target_rcsb_id        : str,
-  binding_site          : BindingSite,
-  save                  : bool = False,
-) -> LigandTransposition: 
+    source_rcsb_id: str,
+    target_rcsb_id: str,
+    binding_site: BindingSite,
+    save: bool = False,
+) -> LigandTransposition:
 
     start = time()
 
-    def BiopythonChain_to_sequence(chain: Chain) -> tuple[ str, dict, dict ]:
-        res:list[Residue]             = [*chain.get_residues()]
-        flat_index_to_residue_map     = {}
+    def BiopythonChain_to_sequence(chain: Chain) -> tuple[str, dict, dict]:
+        res: list[Residue] = [*chain.get_residues()]
+        flat_index_to_residue_map = {}
         auth_seq_id_to_flat_index_map = {}
-        seq                           = ""
-        index                         = 0
+        seq = ""
+        index = 0
 
         for residue in res:
             if residue.resname in [*AMINO_ACIDS.keys()]:
                 seq = seq + ResidueSummary.three_letter_code_to_one(residue.resname)
-                index+=1
+                index += 1
                 flat_index_to_residue_map[index] = residue
                 auth_seq_id_to_flat_index_map[residue.get_id()[1]] = index
             elif residue.resname in [*NUCLEOTIDES]:
                 seq = seq + residue.resname
-                index +=1
+                index += 1
                 flat_index_to_residue_map[index] = residue
                 auth_seq_id_to_flat_index_map[residue.get_id()[1]] = index
             else:
@@ -557,7 +581,6 @@ def bsite_transpose(
                 seq = seq + "-"
 
         return seq, flat_index_to_residue_map, auth_seq_id_to_flat_index_map
-
 
     source_rcsb_id, target_rcsb_id = source_rcsb_id.upper(), target_rcsb_id.upper()
     source_polymers_by_poly_class = {}
@@ -571,90 +594,122 @@ def bsite_transpose(
     target_ops = RibosomeOps(target_rcsb_id)
     target_profile = target_ops.profile()
 
-    #* Work out a mapping between the structural and the canonical sequences
+    # * Work out a mapping between the structural and the canonical sequences
 
-
-
-
-
-
-    #* Work out a mapping between the structural and the canonical sequences
+    # * Work out a mapping between the structural and the canonical sequences
     #! Source polymers
     for nbr_polymer in binding_site.chains:
-<<<<<<< HEAD
         if "uS12" not in nbr_polymer.nomenclature:
             continue
-=======
->>>>>>> auth_seq_id_vs_canonical_pairwise
         nbr_polymer = BindingSiteChain.model_validate(nbr_polymer)
         #! Skip if no nomenclature present ( can't do anything with it )
         if len(nbr_polymer.nomenclature) < 1:
             continue
-        target_polymer = target_ops.get_chain_by_polymer_class(nbr_polymer.nomenclature[0], 0)
+        target_polymer = target_ops.get_chain_by_polymer_class(
+            nbr_polymer.nomenclature[0], 0
+        )
         if target_polymer == None:
             continue
 
         # ! Bound residues  [in STRUCTURE SPACE]
-<<<<<<< HEAD
-        source_auth_seq_idx = [ ( residue.auth_seq_id, residue.label_comp_id ) for residue in  filter(lambda residue: residue.label_comp_id in [*NUCLEOTIDES, *AMINO_ACIDS.keys()] ,nbr_polymer.bound_residues)  ]
+        source_auth_seq_idx = [
+            (residue.auth_seq_id, residue.label_comp_id)
+            for residue in filter(
+                lambda residue: residue.label_comp_id
+                in [*NUCLEOTIDES, *AMINO_ACIDS.keys()],
+                nbr_polymer.bound_residues,
+            )
+        ]
         # ! Bound residues  [in STRUCTURE SPACE]
-        pprint([ (x,y) for x,y in zip(  nbr_polymer.bound_residues , list(map(lambda x: x.auth_seq_id, nbr_polymer.bound_residues)) ) ])
+
         #! SOURCE MAPS
-        [structural_seq_source,flat_idx_to_residue_map_source,auth_seq_id_to_flat_index_map_source] = BiopythonChain_to_sequence(source_struct[0][nbr_polymer.auth_asym_id] )
+        [
+            structural_seq_source,
+            flat_idx_to_residue_map_source,
+            auth_seq_id_to_flat_index_map_source,
+        ] = BiopythonChain_to_sequence(source_struct[0][nbr_polymer.auth_asym_id])
         #! SOURCE MAPS
 
-        print("__---------Source maps-----------____")
+        pprint(nbr_polymer.bound_residues)
+        print("Source structural sequence flat.")
+        pprint(structural_seq_source)
+
+        print("---------authseqid to flat index map -----------____")
         pprint(auth_seq_id_to_flat_index_map_source)
-        source_flat_indices = [ auth_seq_id_to_flat_index_map_source[resid] for resid, label in source_auth_seq_idx]
+        print("---------authseqid to flat index map -----------____")
 
-        print("Got flat indices")
-        pprint(source_flat_indices)
+        for initial_index, label in source_auth_seq_idx:
+            # print("Initial auth seq index {} got mapped to a flat index {}, which is residue {}".format(initial_index, auth_seq_id_to_flat_index_map_source[initial_index], flat_idx_to_residue_map_source[auth_seq_id_to_flat_index_map_source[initial_index]]))
+            print(
+                "Initial auth seq index {} got mapped to a flat index {}, which is residue {}".format(
+                    initial_index,
+                    auth_seq_id_to_flat_index_map_source[initial_index],
+                    ResidueSummary.three_letter_code_to_one(
+                        flat_idx_to_residue_map_source[
+                            auth_seq_id_to_flat_index_map_source[initial_index]
+                        ].resname
+                    ),
+                )
+            )
+
+        source_flat_indices = [
+            auth_seq_id_to_flat_index_map_source[resid]
+            for resid, label in source_auth_seq_idx
+        ]
+        # pprint(source_flat_indices)
+
         source_flat_subseq = ""
         for ix in source_flat_indices:
-            source_flat_subseq = source_flat_subseq + structural_seq_source[ix]
+            source_flat_subseq = (
+                source_flat_subseq
+                + ResidueSummary.three_letter_code_to_one(
+                    flat_idx_to_residue_map_source[ix].resname
+                )
+            )
 
         print("Initial sequence")
-        print("".join([ResidueSummary.three_letter_code_to_one(label) for ix,label in source_auth_seq_idx]))
+        print(
+            "".join(
+                [
+                    ResidueSummary.three_letter_code_to_one(label)
+                    for ix, label in source_auth_seq_idx
+                ]
+            )
+        )
         print("Source flat subsequence")
         print(source_flat_subseq)
         exit()
-        
 
+        [
+            structural_seq_target,
+            flat_idx_to_residue_map_target,
+            auth_seq_id_to_flat_index_map_target,
+        ] = BiopythonChain_to_sequence(target_struct[0][target_polymer.auth_asym_id])
 
-
-=======
-        bound_residues_ids = [ (resid, resname) for (resid, resname) in [ *map( lambda x: (x.auth_seq_id, x.label_comp_id), nbr_polymer.bound_residues)]]
-        print("".join([resname for _, resname in bound_residues_ids]))
-        # ! Bound residues  [in STRUCTURE SPACE]
-
-        [structural_seq_source,flat_idx_to_residue_map_source,auth_seq_id_to_flat_index_map_source] = BiopythonChain_to_sequence(source_struct[0][nbr_polymer.auth_asym_id] )
->>>>>>> auth_seq_id_vs_canonical_pairwise
-        [structural_seq_target,flat_idx_to_residue_map_target,auth_seq_id_to_flat_index_map_target] = BiopythonChain_to_sequence(target_struct[0][target_polymer.auth_asym_id] )
-
-        bound_residues_source_ids_flat = [ auth_seq_id_to_flat_index_map_source[resid] for ( resid, resname ) in bound_residues_ids] 
+        bound_residues_source_ids_flat = [
+            auth_seq_id_to_flat_index_map_source[resid]
+            for (resid, resname) in bound_residues_ids
+        ]
 
         M = SeqMap(structural_seq_source, structural_seq_target)
 
-
         bound_residues_target_ids_flat = []
-        for resid  in bound_residues_source_ids_flat:
-            _ = M.retrieve_index(resid) 
+        for resid in bound_residues_source_ids_flat:
+            _ = M.retrieve_index(resid)
             if _ == None:
                 continue
             bound_residues_target_ids_flat.append(_)
-            
-        bound_residues_target = [ flat_idx_to_residue_map_target[resid] for resid in bound_residues_target_ids_flat]
-           
-            
+
+        bound_residues_target = [
+            flat_idx_to_residue_map_target[resid]
+            for resid in bound_residues_target_ids_flat
+        ]
+
         pprint(bound_residues_target)
 
-
         exit()
-        
 
-
-        
-        # Now align the two biopython sequences 
+        # Now align the two biopython sequences
         # # pprint(structural_seq_src[:40])
         print("\n\nCanonical sequence")
         pprint(M.seq_canonical)
@@ -664,8 +719,6 @@ def bsite_transpose(
         print(M.seq_canonical_aligned)
         print(M.seq_structural_aligned)
         print("\t\t\t\t*************")
-        
-
 
         # can_subseq    = ""
         # struct_subseq = ""
@@ -679,19 +732,29 @@ def bsite_transpose(
             # "motifs": extract_contiguous_motifs(bound_residues_ids),
         }
 
-    exit()
     #! Target polymers
     target_polymers: list[PredictedResiduesPolymer] = []
-    for ( nomenclature_class, source_polymer_with_motifs, ) in sorted(source_polymers_by_poly_class.items(), key=lambda x: x[0]):
+    for (
+        nomenclature_class,
+        source_polymer_with_motifs,
+    ) in sorted(source_polymers_by_poly_class.items(), key=lambda x: x[0]):
         print("Processing chain [{}]".format(nomenclature_class))
-        target_polymer: Polymer | None = RibosomeOps( target_rcsb_id ).get_poly_by_polyclass(nomenclature_class, 0)
-        source_polymer: BindingSiteChain = source_polymers_by_poly_class[ nomenclature_class ]["polymer"]
+        target_polymer: Polymer | None = RibosomeOps(
+            target_rcsb_id
+        ).get_poly_by_polyclass(nomenclature_class, 0)
+        source_polymer: BindingSiteChain = source_polymers_by_poly_class[
+            nomenclature_class
+        ]["polymer"]
         #! If no polymer of corresponding class is found, move on.
         if target_polymer == None:
             continue
 
-        structural_seq_src, idx_auth_map_src = BiopythonChain_to_sequence( source_struct[0][source_polymer.auth_asym_id] )
-        seq_tgt, idx_auth_map_tgt = BiopythonChain_to_sequence( target_struct[0][target_polymer.auth_asym_id] )
+        structural_seq_src, idx_auth_map_src = BiopythonChain_to_sequence(
+            source_struct[0][source_polymer.auth_asym_id]
+        )
+        seq_tgt, idx_auth_map_tgt = BiopythonChain_to_sequence(
+            target_struct[0][target_polymer.auth_asym_id]
+        )
 
         target_polymer_all_residues = []
 
@@ -700,7 +763,9 @@ def bsite_transpose(
             # ! -------------------------------------------- SEARCH PARAMS --------------------------------------------------
             motif_str = ""
             for _, residue_label in motif:
-                motif_str = motif_str + ResidueSummary.three_letter_code_to_one( residue_label )
+                motif_str = motif_str + ResidueSummary.three_letter_code_to_one(
+                    residue_label
+                )
 
             if len(motif_str) <= 5:
                 continue
@@ -708,10 +773,10 @@ def bsite_transpose(
             matches = find_near_matches(
                 motif_str,
                 seq_tgt,
-                max_substitutions = 0,
-                max_l_dist        = 1,
-                max_insertions    = 2,
-                max_deletions     = 0,
+                max_substitutions=0,
+                max_l_dist=1,
+                max_insertions=2,
+                max_deletions=0,
             )
             # ! -------------------------------------------- SEARCH PARAMS --------------------------------------------------
 
@@ -720,9 +785,26 @@ def bsite_transpose(
 
                 for i in range(match.start, match.end):
                     target_motif_residues.append(idx_auth_map_tgt[i])
-                print( "\t\tTarget-motif match {}: {}".format( j, "".join( list( map( lambda x: ResidueSummary.three_letter_code_to_one( x.resname ), target_motif_residues)))))
+                print(
+                    "\t\tTarget-motif match {}: {}".format(
+                        j,
+                        "".join(
+                            list(
+                                map(
+                                    lambda x: ResidueSummary.three_letter_code_to_one(
+                                        x.resname
+                                    ),
+                                    target_motif_residues,
+                                )
+                            )
+                        ),
+                    )
+                )
 
-                target_polymer_all_residues = [ *target_polymer_all_residues, *target_motif_residues, ]
+                target_polymer_all_residues = [
+                    *target_polymer_all_residues,
+                    *target_motif_residues,
+                ]
 
         target_polymers.append(
             PredictedResiduesPolymer(
@@ -764,10 +846,14 @@ def bsite_transpose(
     chains: list[BindingSiteChain] = []
 
     for c in target_polymers:
-        poly = RibosomeOps(target_rcsb_id).get_poly_by_auth_asym_id( c.target.auth_asym_id )
+        poly = RibosomeOps(target_rcsb_id).get_poly_by_auth_asym_id(
+            c.target.auth_asym_id
+        )
         if poly == None:
             raise ValueError("Polymer not found in target structure")
-        bsite_chain = BindingSiteChain( **poly.model_dump(), bound_residues=c.target.target_bound_residues )
+        bsite_chain = BindingSiteChain(
+            **poly.model_dump(), bound_residues=c.target.target_bound_residues
+        )
         chains.append(bsite_chain)
 
     end = time()
