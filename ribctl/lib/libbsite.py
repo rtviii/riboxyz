@@ -312,7 +312,7 @@ class SeqMap:
 
         self.mapping = mapping
 
-    def get_index(self, key:int) ->int | None:
+    def retrieve_index(self, key:int) ->int | None:
         "Get the STRUCTURAL sequence index corresponding to the CANONICAL sequence index <key> if any, otherwise None"
         if key not in self.mapping:
             raise KeyError(f"Key {key} not found in mapping")
@@ -320,6 +320,20 @@ class SeqMap:
             return None
         return self.mapping[key]
         
+    def retrieve_motif(self, keys:list[int]) -> tuple[str,str]:
+        can_subseq    = ""
+        struct_subseq = ""
+
+        for i in keys:
+            can_subseq = can_subseq + self.seq_canonical[i]
+            struct_index = self.retrieve_index(i)
+            if struct_index == None:
+                struct_subseq = struct_subseq + "-"
+            elif struct_index  != None:
+                struct_subseq = struct_subseq + self.seq_structural[struct_index]
+        if struct_subseq == "" or list(set(list(struct_subseq)))[0] == "-":
+            raise ValueError("No structural sequence found for the given canonical sequence")
+        return can_subseq, struct_subseq
 
 def bsite_ligand(
     chemicalId: str, rcsb_id: str, radius: float, save: bool = False
@@ -605,57 +619,17 @@ def bsite_transpose(
             print(M.seq_structural_aligned)
             print("\t\t\t\t*************")
 
-            sub_ixs       = [5,6,7,8,9,10]
+            sub_ixs       = [120, 50, 22, 33, 44]
             can_subseq    = ""
             struct_subseq = ""
 
             pprint(M.mapping)
-            for i in sub_ixs:
-                can_subseq = can_subseq + canonical_seq_src[i]
-                struct_index = M.get_index(i)
-                print("retrieved index {} for canonicla {}".format(struct_index, i))
-                if struct_index == None:
-                    struct_subseq = struct_subseq + "-"
-                elif struct_index  != None:
-                    struct_subseq = struct_subseq + structural_seq_src[M.get_index(i)]
 
-            print("Expecting QLVRK or something like that")
-            print("Canonical")
-            pprint(can_subseq)
-            print("STructural")
-            pprint(struct_subseq)
-
-
-
-
-            # subseq = canonical_seq_src[:20]
-            # print("Original subsequence", subseq)
-            # print("mapping is")
-            # pprint(M.mapping)
-
-
-            # structural_subseq = ""
-            # canonical_subseq =""
-            # for index in range(20):
-            #     canonical_subseq = canonical_subseq + canonical_seq_src[index]
-            #     retrieved_residue_ix = M[index]
-            #     if retrieved_residue_ix == -1:
-            #         structural_subseq += "-"
-            #     else:
-            #         structural_subseq += structural_seq_src[retrieved_residue_ix]
-
-
-            # print("Orginal       canonical  subsequence:", canonical_subseq)
-            # print("Reconstructed structural subsequence:", structural_subseq)
-            # exit()
-
-
-
-            # pprint("".join([ canonical_seq_src[x] for x in range(0,20) ]))
-            # try:
-            #     pprint("".join([ structural_seq_src[M[x]] for x in range(0,20) ]))
-            # except:
-            #     pprint([*M.items()][:20])
+            can, stru = M.retrieve_motif(sub_ixs)
+            print("Canonical subsequence", )
+            print(can)
+            print("structu")
+            print(stru)
 
 
             source_polymers_by_poly_class[nbr_polymer.nomenclature[0].value] = {
