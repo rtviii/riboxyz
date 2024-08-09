@@ -190,41 +190,28 @@ def get_lig_bsite(
     # TODO: Just try constructing the sequence from the biopython one and aligning (with pairwise2) into the canonical one.
     # TODO:          (then just subtract the gaps from the canonical one)
     # auth_seq_id_to_label_seq_id_mapping_by_chain = {}
-    auth_seq_ids = {}
+    nbr_residues_by_chain_aaid = {}
 
     for residue in nbr_residues:
 
         parent_chain = residue.get_parent()
         auth_asym_id = parent_chain.get_id()
-
-        if auth_asym_id not in auth_seq_ids:
-            auth_seq_ids[auth_asym_id] = [residue]
+        if auth_asym_id not in nbr_residues_by_chain_aaid:
+            nbr_residues_by_chain_aaid[auth_asym_id] = [residue]
         else:
-            auth_seq_ids[auth_asym_id].append(residue)
+            nbr_residues_by_chain_aaid[auth_asym_id].append(residue)
+
 
     RO = RibosomeOps(struct.get_id().upper())
 
-    for chain_aaid, bound_residues in auth_seq_ids.items():
+    # pprint(sorted( nbr_residues_by_chain_aaid['L'], key=lambda x: x.get_id()[1] ))
+    for chain_aaid, bound_residues in nbr_residues_by_chain_aaid.items():
         polymer = RO.get_poly_by_auth_asym_id(chain_aaid)
         if polymer == None:
             raise ValueError(
                 f"Polymer with auth_asym_id {chain_aaid} not found in structure. Logic error."
             )
-
-        bound_residues = sorted(
-            [
-                ResidueSummary(
-                    full_id       = None,
-                    auth_asym_id  = chain_aaid,
-                    label_comp_id = residue.resname,
-                    auth_seq_id   = residue.get_id()[1],
-                    label_seq_id  = None,
-                    rcsb_id       = struct.get_id().upper(),
-                )
-                for residue in bound_residues
-            ],
-            key=operator.attrgetter("auth_seq_id"),
-        )
+        bound_residues = sorted( [ ResidueSummary( full_id       = None, auth_asym_id  = chain_aaid, label_comp_id = residue.resname, auth_seq_id   = residue.get_id()[1], label_seq_id  = None, rcsb_id       = struct.get_id().upper(), ) for residue in bound_residues ], key=operator.attrgetter("auth_seq_id"), )
         nbr_chains.append( BindingSiteChain(**polymer.model_dump(), bound_residues=bound_residues) )
 
     return BindingSite(
@@ -233,37 +220,6 @@ def get_lig_bsite(
         radius=radius,
         source=struct.get_id().upper(),
     )
-
-
-def create_residue_mapping_mask(canonical: str, structure: str) -> dict[int, int]:
-    # Perform a global alignment
-    alignments = pairwise2.align.globalxx(Seq(canonical), Seq(structure))
-    aligned_canonical, aligned_structure = alignments[0][0], alignments[0][1]
-    
-    print('------------------------------------_***')
-    pprint(aligned_canonical)
-    pprint(aligned_structure)
-    print('------------------------------------_***')
-    # Convert aligned sequences to NumPy arrays
-    can_array    = np.array(list(aligned_canonical))
-    struct_array = np.array(list(aligned_structure))
-    
-    # Create indices for non-gap positions
-    can_indices    = np.arange(len(can_array))[can_array != '-']
-    struct_indices = np.cumsum(struct_array != '-') - 1
-    
-    # Create a mask for positions where both sequences have residues
-    mask = (can_array != '-') 
-    
-    # Initialize the mapping dictionary with all canonical indices mapped to -1
-    mapping = {i: -1 for i in range(len(canonical))}
-    
-    # Update the mapping for positions where both sequences have residues
-    mapping.update(zip(can_indices[mask], struct_indices[mask]))
-    
-    return mapping
-
-
 
 
 class SeqMap:
@@ -289,12 +245,11 @@ class SeqMap:
 
         mapping         = {}
 
-        print("inspecting")
-        print(self.seq_canonical_aligned)
-        print(self.seq_structural_aligned)
-        print(*zip(aligned_canonical, aligned_structure))
-        # exit()
-        
+        # print("inspecting")
+        # print(self.seq_canonical_aligned)
+        # print(self.seq_structural_aligned)
+        # print(*zip(aligned_canonical, aligned_structure))
+
         canonical_index = 0
         structure_index = 0
         for canonical_char, structural_char in zip(aligned_canonical, aligned_structure):
@@ -608,6 +563,8 @@ def bsite_transpose(
     #* Work out a mapping between the structural and the canonical sequences
     #! Source polymers
     for nbr_polymer in binding_site.chains:
+        if "uS12" not in nbr_polymer.nomenclature:
+            continue
         nbr_polymer = BindingSiteChain.model_validate(nbr_polymer)
         #! Skip if no nomenclature present ( can't do anything with it )
         if len(nbr_polymer.nomenclature) < 1:
@@ -617,11 +574,32 @@ def bsite_transpose(
             continue
 
         # ! Bound residues  [in STRUCTURE SPACE]
-        bound_residues_ids = [ (resid, resname) for (resid, resname) in [ *map( lambda x: (x.auth_seq_id, x.label_comp_id), nbr_polymer.bound_residues)]]
-        print("".join([resname for _, resname in bound_residues_ids]))
+        source_auth_seq_idx = [ ( residue.auth_seq_id, residue.label_comp_id ) for residue in  filter(lambda residue: residue.label_comp_id in [*NUCLEOTIDES, *AMINO_ACIDS.keys()] ,nbr_polymer.bound_residues)  ]
         # ! Bound residues  [in STRUCTURE SPACE]
-
+        pprint([ (x,y) for x,y in zip(  nbr_polymer.bound_residues , list(map(lambda x: x.auth_seq_id, nbr_polymer.bound_residues)) ) ])
+        #! SOURCE MAPS
         [structural_seq_source,flat_idx_to_residue_map_source,auth_seq_id_to_flat_index_map_source] = BiopythonChain_to_sequence(source_struct[0][nbr_polymer.auth_asym_id] )
+        #! SOURCE MAPS
+
+        print("__---------Source maps-----------____")
+        pprint(auth_seq_id_to_flat_index_map_source)
+        source_flat_indices = [ auth_seq_id_to_flat_index_map_source[resid] for resid, label in source_auth_seq_idx]
+
+        print("Got flat indices")
+        pprint(source_flat_indices)
+        source_flat_subseq = ""
+        for ix in source_flat_indices:
+            source_flat_subseq = source_flat_subseq + structural_seq_source[ix]
+
+        print("Initial sequence")
+        print("".join([ResidueSummary.three_letter_code_to_one(label) for ix,label in source_auth_seq_idx]))
+        print("Source flat subsequence")
+        print(source_flat_subseq)
+        exit()
+        
+
+
+
         [structural_seq_target,flat_idx_to_residue_map_target,auth_seq_id_to_flat_index_map_target] = BiopythonChain_to_sequence(target_struct[0][target_polymer.auth_asym_id] )
 
         bound_residues_source_ids_flat = [ auth_seq_id_to_flat_index_map_source[resid] for ( resid, resname ) in bound_residues_ids] 
