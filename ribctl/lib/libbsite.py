@@ -58,6 +58,7 @@ class SeqPairwise:
          IMPORTANT: BOTH SEQUENCES ARE ASSUMED TO HAVE NO GAPS ( at least not represeneted as "-"). That will screw up the arithmetic.
         """
 
+        print("\n\n=======================Entered seq pairwse =======================")
         # *  indices of the given residues in the source sequence.
         self.src    : str       = sourceseq
         self.src_ids: list[int] = source_residues
@@ -65,25 +66,22 @@ class SeqPairwise:
         # * Indices of the corresponding residues in target sequence. To be filled.
         self.tgt    : str       = targetseq
         self.tgt_ids: list[int] = []
-        print("Source sequence is the flattened structural sequence of the source polymer")
-        pprint(sourceseq)
-        print("Target sequence is the flattened structural sequence of the targer polymer")
-        pprint(targetseq)
+        # print("Source sequence is the flattened structural sequence of the source polymer")
+        # pprint(sourceseq)
+        # print("Target sequence is the flattened structural sequence of the targer polymer")
+        # pprint(targetseq)
 
         _ = pairwise2.align.globalxx(self.src, self.tgt, one_alignment_only=True)
         self.src_aln = _[0].seqA
         self.tgt_aln = _[0].seqB
-        print("Aligned flattened sequences")
-        pprint(self.src_aln)
-        pprint(self.tgt_aln)
         #! The only thing that can happen hence is the insertion of gaps in the source sequence.
+
+        print("Received indices of residues in the source sequence: ", source_residues)
 
         self.aligned_ids = []
 
         for src_resid in self.src_ids:
             self.aligned_ids.append(self.forwards_match(self.src_aln, src_resid) )
-
-        # self.aligned_ids = list(filter(lambda x: x != None, self.aligned_ids))
 
         for aln_resid in self.aligned_ids:
             tgt_aln_index = self.backwards_match(self.tgt_aln, aln_resid)
@@ -91,6 +89,12 @@ class SeqPairwise:
                 continue
             else:
                 self.tgt_ids.append(tgt_aln_index)
+        
+        print("Aligned flattened sequences")
+        print(self.hl_ixs(self.src_aln, ixs=self.aligned_ids))
+        print(self.hl_ixs(self.tgt_aln, ixs=self.tgt_ids))
+
+        
 
     def forwards_match(self, aligned_source_sequence: str, original_residue_index: int)->int:
         """Returns the index of a source-sequence residue in the aligned source sequence. Basically, "count forward including gaps"
@@ -107,7 +111,6 @@ class SeqPairwise:
             if original_residues_count == original_residue_index:
                 return aligned_ix  
         raise ValueError(f"Residue with index {original_residue_index} not found in the aligned source sequence after full search. Logical errory, likely.")
-
 
     def backwards_match(self, aligned_target_sequence: str, aligned_residue_index: int)->int|None:
         """Returns the target-sequence index of a residue in the [aligned] target sequence. Basically, "count back ignoring gaps"
@@ -558,6 +561,10 @@ def __bsite_transpose_motifs(
     return _
 
 
+class BiopythonChain(Chain):
+    def __init__(self, chain:Chain):
+        super().__init__(id)
+
 def bsite_transpose(
     source_rcsb_id: str,
     target_rcsb_id: str,
@@ -621,6 +628,8 @@ def bsite_transpose(
         # ! Bound residues  [in STRUCTURE SPACE]
         src_bound_auth_seq_idx = [ (residue.auth_seq_id, residue.label_comp_id) for residue in filter( lambda residue: residue.label_comp_id in [*NUCLEOTIDES, *AMINO_ACIDS.keys()], nbr_polymer.bound_residues, ) ]
         # ! Bound residues  [in STRUCTURE SPACE]
+
+        
 
         #! SOURCE MAPS
         [
