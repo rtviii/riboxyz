@@ -291,23 +291,24 @@ class SeqMap:
 
         mapping         = {}
 
+        print("inspecting")
+        print(self.seq_canonical_aligned)
+        print(self.seq_structural_aligned)
+        print(*zip(aligned_canonical, aligned_structure))
+        # exit()
+        
         canonical_index = 0
         structure_index = 0
-        
-        for can_char, struct_char in zip(aligned_canonical, aligned_structure):
-            if can_char != '-':
-                if struct_char != '-':
+        for canonical_char, structural_char in zip(aligned_canonical, aligned_structure):
+            if canonical_char != '-':
+                if structural_char != '-':
                     mapping[canonical_index] = structure_index
-                    structure_index += 1
+                    structure_index +=1  
                 else:
                     mapping[canonical_index] = -1
-                canonical_index += 1
-            elif can_char == '-':
+                canonical_index +=1
+            elif canonical_char == '-':
                 warnings.warn(f"Unexpected gap in canonical sequence at aligned position {canonical_index}. This shouldn't happen with the original canonical sequence.")
-            
-            if struct_char != '-':
-                structure_index += 1
-        
 
         self.mapping = mapping
 
