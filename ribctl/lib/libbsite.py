@@ -55,68 +55,77 @@ class SeqPairwise:
         Canonical    X Y G G H A S D S D    ----->   Canonical    X Y G G H A S D S D
         Structure    Y G G H A S D                   Structure    - Y G G H A S D - -
 
-
-
          IMPORTANT: BOTH SEQUENCES ARE ASSUMED TO HAVE NO GAPS ( at least not represeneted as "-"). That will screw up the arithmetic.
         """
 
         # *  indices of the given residues in the source sequence.
-        self.src: str = sourceseq
+        self.src    : str       = sourceseq
         self.src_ids: list[int] = source_residues
 
         # * Indices of the corresponding residues in target sequence. To be filled.
-        self.tgt: str = targetseq
+        self.tgt    : str       = targetseq
         self.tgt_ids: list[int] = []
+        print("Source sequence is the flattened structural sequence of the source polymer")
         pprint(sourceseq)
+        print("Target sequence is the flattened structural sequence of the targer polymer")
         pprint(targetseq)
 
         _ = pairwise2.align.globalxx(self.src, self.tgt, one_alignment_only=True)
         self.src_aln = _[0].seqA
         self.tgt_aln = _[0].seqB
+        print("Aligned flattened sequences")
+        pprint(self.src_aln)
+        pprint(self.tgt_aln)
         #! The only thing that can happen hence is the insertion of gaps in the source sequence.
 
         self.aligned_ids = []
 
         for src_resid in self.src_ids:
-            self.aligned_ids.append(self.forwards_match(self.src_aln, src_resid))
+            self.aligned_ids.append(self.forwards_match(self.src_aln, src_resid) )
 
-        self.aligned_ids = list(filter(lambda x: x != None, self.aligned_ids))
+        # self.aligned_ids = list(filter(lambda x: x != None, self.aligned_ids))
 
         for aln_resid in self.aligned_ids:
-            if self.tgt_aln[aln_resid] == "-":
+            tgt_aln_index = self.backwards_match(self.tgt_aln, aln_resid)
+            if tgt_aln_index == None:
                 continue
-            self.tgt_ids.append(self.backwards_match(self.tgt_aln, aln_resid))
+            else:
+                self.tgt_ids.append(tgt_aln_index)
 
-    def backwards_match(self, alntgt: str, resid: int):
-        """Returns the target-sequence index of a residue in the (aligned) target sequence
-        Basically, "count back ignoring gaps"
+    def forwards_match(self, aligned_source_sequence: str, original_residue_index: int)->int:
+        """Returns the index of a source-sequence residue in the aligned source sequence. Basically, "count forward including gaps"
         """
-        if resid > len(alntgt):
-            raise IndexError(
-                f"Passed residue with invalid index ({resid}) to back-match to target.Seqlen:{len(alntgt)}"
-            )
-        counter_proper = 0
-        for i, char in enumerate(alntgt):
-            if i == resid:
-                return counter_proper
+        if original_residue_index > len(aligned_source_sequence):
+            raise IndexError( f"Passed residue with invalid index ({original_residue_index}) to back-match to target.Seqlen aligned:{len(aligned_source_sequence)}" )
+        original_residues_count = 0
+
+        for aligned_ix, char in enumerate(aligned_source_sequence):
             if char == "-":
                 continue
             else:
-                counter_proper += 1
+                original_residues_count += 1
+            if original_residues_count == original_residue_index:
+                return aligned_ix  
+        raise ValueError(f"Residue with index {original_residue_index} not found in the aligned source sequence after full search. Logical errory, likely.")
 
-    def forwards_match(self, alnsrc: str, resid: int):
-        """Returns the index of a source-sequence residue in the aligned source sequence.
-        Basically, "count forward including gaps"
+
+    def backwards_match(self, aligned_target_sequence: str, aligned_residue_index: int)->int|None:
+        """Returns the target-sequence index of a residue in the [aligned] target sequence. Basically, "count back ignoring gaps"
         """
+        if aligned_residue_index > len(aligned_target_sequence):
+            raise IndexError( f"Passed residue with invalid index ({aligned_residue_index}) to back-match to target.Seqlen:{len(aligned_target_sequence)}" )
 
-        count_proper = 0
-        for alignment_indx, char in enumerate(alnsrc):
-            if count_proper == resid:
-                return alignment_indx
+        if aligned_target_sequence[aligned_residue_index] == "-":
+            return None
+
+        original_residues_index = 0
+        for aligned_ix, char in enumerate(aligned_target_sequence):
+            if aligned_ix == aligned_residue_index:
+                return original_residues_index
             if char == "-":
                 continue
             else:
-                count_proper += 1
+                original_residues_index += 1
 
     @staticmethod
     def hl_subseq(sequence: str, subsequence: str, index: int = None):
@@ -605,124 +614,85 @@ def bsite_transpose(
         #! Skip if no nomenclature present ( can't do anything with it )
         if len(nbr_polymer.nomenclature) < 1:
             continue
-        target_polymer = target_ops.get_chain_by_polymer_class(
-            nbr_polymer.nomenclature[0], 0
-        )
+        target_polymer = target_ops.get_chain_by_polymer_class( nbr_polymer.nomenclature[0], 0 )
         if target_polymer == None:
             continue
 
         # ! Bound residues  [in STRUCTURE SPACE]
-        source_auth_seq_idx = [
-            (residue.auth_seq_id, residue.label_comp_id)
-            for residue in filter(
-                lambda residue: residue.label_comp_id
-                in [*NUCLEOTIDES, *AMINO_ACIDS.keys()],
-                nbr_polymer.bound_residues,
-            )
-        ]
+        src_bound_auth_seq_idx = [ (residue.auth_seq_id, residue.label_comp_id) for residue in filter( lambda residue: residue.label_comp_id in [*NUCLEOTIDES, *AMINO_ACIDS.keys()], nbr_polymer.bound_residues, ) ]
         # ! Bound residues  [in STRUCTURE SPACE]
 
         #! SOURCE MAPS
         [
-            structural_seq_source,
-            flat_idx_to_residue_map_source,
-            auth_seq_id_to_flat_index_map_source,
+            src_flat_structural_seq,
+            src_flat_idx_to_residue_map,
+            src_auth_seq_id_to_flat_index_map,
         ] = BiopythonChain_to_sequence(source_struct[0][nbr_polymer.auth_asym_id])
         #! SOURCE MAPS
 
-        pprint(nbr_polymer.bound_residues)
-        print("Source structural sequence flat.")
-        pprint(structural_seq_source)
-
-        print("---------authseqid to flat index map -----------____")
-        pprint(auth_seq_id_to_flat_index_map_source)
-        print("---------authseqid to flat index map -----------____")
-
-        for initial_index, label in source_auth_seq_idx:
-            # print("Initial auth seq index {} got mapped to a flat index {}, which is residue {}".format(initial_index, auth_seq_id_to_flat_index_map_source[initial_index], flat_idx_to_residue_map_source[auth_seq_id_to_flat_index_map_source[initial_index]]))
-            print(
-                "Initial auth seq index {} got mapped to a flat index {}, which is residue {}".format(
-                    initial_index,
-                    auth_seq_id_to_flat_index_map_source[initial_index],
-                    ResidueSummary.three_letter_code_to_one(
-                        flat_idx_to_residue_map_source[
-                            auth_seq_id_to_flat_index_map_source[initial_index]
-                        ].resname
-                    ),
-                )
-            )
-
-        source_flat_indices = [
-            auth_seq_id_to_flat_index_map_source[resid]
-            for resid, label in source_auth_seq_idx
-        ]
-        # pprint(source_flat_indices)
-
-        source_flat_subseq = ""
-        for ix in source_flat_indices:
-            source_flat_subseq = (
-                source_flat_subseq
-                + ResidueSummary.three_letter_code_to_one(
-                    flat_idx_to_residue_map_source[ix].resname
-                )
-            )
-
-        print("Initial sequence")
-        print(
-            "".join(
-                [
-                    ResidueSummary.three_letter_code_to_one(label)
-                    for ix, label in source_auth_seq_idx
-                ]
-            )
-        )
-        print("Source flat subsequence")
-        print(source_flat_subseq)
-        exit()
-
-        [
-            structural_seq_target,
-            flat_idx_to_residue_map_target,
-            auth_seq_id_to_flat_index_map_target,
+        [ 
+            tgt_flat_structural_seq,
+            tgt_flat_idx_to_residue_map,
+            tgt_auth_seq_id_to_flat_index_map
         ] = BiopythonChain_to_sequence(target_struct[0][target_polymer.auth_asym_id])
 
-        bound_residues_source_ids_flat = [
-            auth_seq_id_to_flat_index_map_source[resid]
-            for (resid, resname) in bound_residues_ids
-        ]
 
-        M = SeqMap(structural_seq_source, structural_seq_target)
+        # #* TEST
+        src_bound_flat_indices = [ src_auth_seq_id_to_flat_index_map[resid] for resid, label in src_bound_auth_seq_idx ]
+        src_bound_flat_seq = "".join([ ResidueSummary.three_letter_code_to_one(label) for resid, label in src_bound_auth_seq_idx ])
+         ## #* TEST
 
-        bound_residues_target_ids_flat = []
-        for resid in bound_residues_source_ids_flat:
-            _ = M.retrieve_index(resid)
-            if _ == None:
-                continue
-            bound_residues_target_ids_flat.append(_)
+        M                      = SeqPairwise(src_flat_structural_seq, tgt_flat_structural_seq, src_bound_flat_indices)
+        tgt_bound_flat_indices = M.tgt_ids
+        tgt_bound_auth_seq_idx = [ ( tgt_flat_idx_to_residue_map[ idx ].get_id()[1], tgt_flat_idx_to_residue_map[ idx ].resname ) for idx in tgt_bound_flat_indices ]
 
-        bound_residues_target = [
-            flat_idx_to_residue_map_target[resid]
-            for resid in bound_residues_target_ids_flat
-        ]
+        pprint(tgt_bound_auth_seq_idx)
+        tgt_bound_flat_subseq  = ""
 
-        pprint(bound_residues_target)
+
+
+        for ix, resname in tgt_bound_auth_seq_idx:
+            tgt_bound_flat_subseq =  tgt_bound_flat_subseq + ResidueSummary.three_letter_code_to_one( tgt_flat_idx_to_residue_map[ix].resname ) 
+
+        print("Initial flat subsequence")
+        print(src_bound_flat_seq)
+
+        print("Target flat subsequence")
+        print(tgt_bound_flat_subseq)
+
 
         exit()
+
+        # bound_residues_target_ids_flat = []
+        # for resid in bound_residues_source_ids_flat:
+        #     _ = M.retrieve_index(resid)
+        #     if _ == None:
+        #         continue
+        #     bound_residues_target_ids_flat.append(_)
+
+        # bound_residues_target = [
+        #     tgt_flat_idx_to_residue_map[resid]
+        #     for resid in bound_residues_target_ids_flat
+        # ]
+
+        # pprint(bound_residues_target)
+
+        # exit()
 
         # Now align the two biopython sequences
         # # pprint(structural_seq_src[:40])
-        print("\n\nCanonical sequence")
-        pprint(M.seq_canonical)
-        print("Structural sequence")
-        pprint(M.seq_structural)
-        print("\n Both, aligned:")
-        print(M.seq_canonical_aligned)
-        print(M.seq_structural_aligned)
-        print("\t\t\t\t*************")
+        # print("\n\nCanonical sequence")
+        # pprint(M.seq_canonical)
+        # print("Structural sequence")
+        # pprint(M.seq_structural)
+        # print("\n Both, aligned:")
+        # print(M.seq_canonical_aligned)
+        # print(M.seq_structural_aligned)
+        # print("\t\t\t\t*************")
 
-        # can_subseq    = ""
-        # struct_subseq = ""
-        can, stru = M.retrieve_motif(sub_ixs)
+        # # can_subseq    = ""
+        # # struct_subseq = ""
+        # can, stru = M.retrieve_motif(sub_ixs)
         source_polymers_by_poly_class[nbr_polymer.nomenclature[0].value] = {
             # "seq"           : nbr_polymer.entity_poly_seq_one_letter_code_can,
             # "auth_asym_id"  : nbr_polymer.auth_asym_id,
