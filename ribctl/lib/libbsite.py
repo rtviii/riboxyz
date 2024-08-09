@@ -211,7 +211,25 @@ def get_lig_bsite(
             raise ValueError(
                 f"Polymer with auth_asym_id {chain_aaid} not found in structure. Logic error."
             )
+<<<<<<< HEAD
         bound_residues = sorted( [ ResidueSummary( full_id       = None, auth_asym_id  = chain_aaid, label_comp_id = residue.resname, auth_seq_id   = residue.get_id()[1], label_seq_id  = None, rcsb_id       = struct.get_id().upper(), ) for residue in bound_residues ], key=operator.attrgetter("auth_seq_id"), )
+=======
+
+        bound_residues = sorted(
+            [
+                ResidueSummary(
+                    full_id       = None,
+                    auth_asym_id  = chain_aaid,
+                    label_comp_id = residue.resname,
+                    auth_seq_id   = residue.get_id()[1],
+                    label_seq_id  = None,
+                    rcsb_id       = struct.get_id().upper(),
+                )
+                for residue in bound_residues
+            ],
+            key=operator.attrgetter("auth_seq_id"),
+        )
+>>>>>>> auth_seq_id_vs_canonical_pairwise
         nbr_chains.append( BindingSiteChain(**polymer.model_dump(), bound_residues=bound_residues) )
 
     return BindingSite(
@@ -563,8 +581,11 @@ def bsite_transpose(
     #* Work out a mapping between the structural and the canonical sequences
     #! Source polymers
     for nbr_polymer in binding_site.chains:
+<<<<<<< HEAD
         if "uS12" not in nbr_polymer.nomenclature:
             continue
+=======
+>>>>>>> auth_seq_id_vs_canonical_pairwise
         nbr_polymer = BindingSiteChain.model_validate(nbr_polymer)
         #! Skip if no nomenclature present ( can't do anything with it )
         if len(nbr_polymer.nomenclature) < 1:
@@ -574,6 +595,7 @@ def bsite_transpose(
             continue
 
         # ! Bound residues  [in STRUCTURE SPACE]
+<<<<<<< HEAD
         source_auth_seq_idx = [ ( residue.auth_seq_id, residue.label_comp_id ) for residue in  filter(lambda residue: residue.label_comp_id in [*NUCLEOTIDES, *AMINO_ACIDS.keys()] ,nbr_polymer.bound_residues)  ]
         # ! Bound residues  [in STRUCTURE SPACE]
         pprint([ (x,y) for x,y in zip(  nbr_polymer.bound_residues , list(map(lambda x: x.auth_seq_id, nbr_polymer.bound_residues)) ) ])
@@ -600,6 +622,13 @@ def bsite_transpose(
 
 
 
+=======
+        bound_residues_ids = [ (resid, resname) for (resid, resname) in [ *map( lambda x: (x.auth_seq_id, x.label_comp_id), nbr_polymer.bound_residues)]]
+        print("".join([resname for _, resname in bound_residues_ids]))
+        # ! Bound residues  [in STRUCTURE SPACE]
+
+        [structural_seq_source,flat_idx_to_residue_map_source,auth_seq_id_to_flat_index_map_source] = BiopythonChain_to_sequence(source_struct[0][nbr_polymer.auth_asym_id] )
+>>>>>>> auth_seq_id_vs_canonical_pairwise
         [structural_seq_target,flat_idx_to_residue_map_target,auth_seq_id_to_flat_index_map_target] = BiopythonChain_to_sequence(target_struct[0][target_polymer.auth_asym_id] )
 
         bound_residues_source_ids_flat = [ auth_seq_id_to_flat_index_map_source[resid] for ( resid, resname ) in bound_residues_ids] 
