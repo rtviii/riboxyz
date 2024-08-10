@@ -51,17 +51,21 @@ class BiopythonChain(Chain):
         self.chain = chain
 
     @property
-    def primary_sequence(self) -> str:
+    def primary_sequence(self) -> tuple[str, dict]:
+
         represent_noncanonical_as:Optional[str]="."
         seq = ""
-        for residue in self.chain.get_residues():
+        auth_seq_id_to_primary_ix = {}
+        for ix,residue in enumerate( self.chain.get_residues() ):
             if residue.resname in [*AMINO_ACIDS.keys()]:
                 seq = seq + ResidueSummary.three_letter_code_to_one(residue.resname)
             elif residue.resname in [*NUCLEOTIDES]:
                 seq = seq + residue.resname
             else:
                 seq = seq + represent_noncanonical_as
-        return seq 
+            auth_seq_id_to_primary_ix[residue.get_id()[1]] = ix
+
+        return seq, auth_seq_id_to_primary_ix
 
     @property
     def flat_sequence(self) -> tuple[str, dict, dict]:
@@ -674,19 +678,30 @@ def bsite_transpose(
 
 
 
+        bpchain_source = BiopythonChain(source_struct[0][nbr_polymer.auth_asym_id])
+        bpchain_target = BiopythonChain(target_struct[0][target_polymer.auth_asym_id])
+
+
         #! SOURCE MAPS
         [
             src_flat_structural_seq,
             src_flat_idx_to_residue_map,
             src_auth_seq_id_to_flat_index_map,
-        ] = BiopythonChain(source_struct[0][nbr_polymer.auth_asym_id]).flat_sequence
+        ] = bpchain_source.flat_sequence
         #! SOURCE MAPS
-
+        #! TARGET MAPS
         [ 
             tgt_flat_structural_seq,
             tgt_flat_idx_to_residue_map,
             tgt_auth_seq_id_to_flat_index_map
-        ] = BiopythonChain(target_struct[0][target_polymer.auth_asym_id]).flat_sequence
+        ] = bpchain_target.flat_sequence
+        #! TARGET MAPS
+
+        
+        primary_seq_source, auth_seq_to_primary_ix_source = bpchain_source.primary_sequence
+        print("Initial Pocket:")
+        print(SeqPairwise.hl_ixs(primary_seq_source, [ auth_seq_to_primary_ix_source[index] for index, label in src_bound_auth_seq_idx]))
+        
 
 
         # #* TEST
