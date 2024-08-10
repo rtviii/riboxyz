@@ -666,9 +666,6 @@ def bsite_transpose(
 
         
         print("\n\n\t\t <<<<CHAIN [{}]>>>> ".format(nbr_polymer.nomenclature[0]))
-        # ! Bound residues  [in STRUCTURE SPACE]
-        src_bound_auth_seq_idx = [ (residue.auth_seq_id, residue.label_comp_id) for residue in filter( lambda residue: residue.label_comp_id in [*NUCLEOTIDES, *AMINO_ACIDS.keys()], nbr_polymer.bound_residues, ) ]
-        # ! Bound residues  [in STRUCTURE SPACE]
 
 
 
@@ -691,13 +688,18 @@ def bsite_transpose(
         ] = bpchain_target.flat_sequence
         #! TARGET MAPS
 
+        # ! Bound residues  [in STRUCTURE SPACE]
+        src_bound_auth_seq_idx = [ (residue.auth_seq_id, residue.label_comp_id) for residue in nbr_polymer.bound_residues ]
+        # ! Bound residues  [in STRUCTURE SPACE]
         
         primary_seq_source, auth_seq_to_primary_ix_source = bpchain_source.primary_sequence
         primary_seq_target, auth_seq_to_primary_ix_target = bpchain_target.primary_sequence
         print("[Source Primary]\t",SeqPairwise.hl_ixs(primary_seq_source, [ auth_seq_to_primary_ix_source[index] for index, label in src_bound_auth_seq_idx]))
-        print("[Source Flat   ]\t",SeqPairwise.hl_ixs(src_flat_structural_seq, [ src_auth_seq_id_to_flat_index_map[index] for index, label in src_bound_auth_seq_idx]))
 
-        src_bound_flat_indices = [ src_auth_seq_id_to_flat_index_map[index] for index, label in src_bound_auth_seq_idx]
+        src_bound_flat_indices = [ src_auth_seq_id_to_flat_index_map[index] for index, label in filter( lambda x: x[1] in [*NUCLEOTIDES, *AMINO_ACIDS.keys()],src_bound_auth_seq_idx)]
+        print("[Source Flat   ]\t",SeqPairwise.hl_ixs(src_flat_structural_seq, src_bound_flat_indices))
+
+        
 
 
         print("- - - - Alignment- - - ")
