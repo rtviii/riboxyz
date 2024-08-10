@@ -655,8 +655,7 @@ def bsite_transpose(
     # * Work out a mapping between the structural and the canonical sequences
     #! Source polymers
     for nbr_polymer in binding_site.chains:
-        if "uS12" not in nbr_polymer.nomenclature:
-            continue
+
         nbr_polymer = BindingSiteChain.model_validate(nbr_polymer)
         #! Skip if no nomenclature present ( can't do anything with it )
         if len(nbr_polymer.nomenclature) < 1:
@@ -665,6 +664,8 @@ def bsite_transpose(
         if target_polymer == None:
             continue
 
+        
+        print("\n\n\t\t <<<<CHAIN [{}]>>>> ".format(nbr_polymer.nomenclature[0]))
         # ! Bound residues  [in STRUCTURE SPACE]
         src_bound_auth_seq_idx = [ (residue.auth_seq_id, residue.label_comp_id) for residue in filter( lambda residue: residue.label_comp_id in [*NUCLEOTIDES, *AMINO_ACIDS.keys()], nbr_polymer.bound_residues, ) ]
         # ! Bound residues  [in STRUCTURE SPACE]
@@ -709,38 +710,6 @@ def bsite_transpose(
         print("[Target Flat   ]\t", SeqPairwise.hl_ixs(tgt_flat_structural_seq, tgt_bound_residues))
         print("[Target Primary]\t", SeqPairwise.hl_ixs(primary_seq_target,[auth_seq_to_primary_ix_target[residue.get_id()[1]] for residue in tgt_bound_residues] ))
 
-        exit()
-
-        # bound_residues_target_ids_flat = []
-        # for resid in bound_residues_source_ids_flat:
-        #     _ = M.retrieve_index(resid)
-        #     if _ == None:
-        #         continue
-        #     bound_residues_target_ids_flat.append(_)
-
-        # bound_residues_target = [
-        #     tgt_flat_idx_to_residue_map[resid]
-        #     for resid in bound_residues_target_ids_flat
-        # ]
-
-        # pprint(bound_residues_target)
-
-        # exit()
-
-        # Now align the two biopython sequences
-        # # pprint(structural_seq_src[:40])
-        # print("\n\nCanonical sequence")
-        # pprint(M.seq_canonical)
-        # print("Structural sequence")
-        # pprint(M.seq_structural)
-        # print("\n Both, aligned:")
-        # print(M.seq_canonical_aligned)
-        # print(M.seq_structural_aligned)
-        # print("\t\t\t\t*************")
-
-        # # can_subseq    = ""
-        # # struct_subseq = ""
-        # can, stru = M.retrieve_motif(sub_ixs)
         source_polymers_by_poly_class[nbr_polymer.nomenclature[0].value] = {
             # "seq"           : nbr_polymer.entity_poly_seq_one_letter_code_can,
             # "auth_asym_id"  : nbr_polymer.auth_asym_id,
@@ -750,6 +719,7 @@ def bsite_transpose(
             # "motifs": extract_contiguous_motifs(bound_residues_ids),
         }
 
+    exit()
     #! Target polymers
     target_polymers: list[PredictedResiduesPolymer] = []
     for (
