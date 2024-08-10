@@ -134,7 +134,7 @@ class SeqPairwise:
                 self.tgt_ids.append(tgt_aln_index)
         
         print("[Source Aligned]\t",self.hl_ixs(self.src_aln, ixs=self.aligned_ids))
-        print("[Target Aligned]\t",self.hl_ixs(self.tgt_aln, ixs=self.tgt_ids))
+        print("[Target Aligned]\t",self.hl_ixs(self.tgt_aln, ixs=self.aligned_ids))
 
         
 
@@ -710,7 +710,8 @@ def bsite_transpose(
         tgt_bound_flat_indices = M.tgt_ids
         tgt_bound_residues     = [ tgt_flat_idx_to_residue_map[idx] for idx in tgt_bound_flat_indices ]
 
-        print("[Target Flat   ]\t", SeqPairwise.hl_ixs(tgt_flat_structural_seq, tgt_bound_residues))
+       
+        print("[Target Flat   ]\t", SeqPairwise.hl_ixs(tgt_flat_structural_seq, tgt_bound_flat_indices))
         print("[Target Primary]\t", SeqPairwise.hl_ixs(primary_seq_target,[auth_seq_to_primary_ix_target[residue.get_id()[1]] for residue in tgt_bound_residues] ))
 
         source_polymers_by_poly_class[nbr_polymer.nomenclature[0].value] = {
