@@ -74,21 +74,15 @@ class BiopythonChain(Chain):
         flat_index_to_residue_map     = {}
         auth_seq_id_to_flat_index_map = {}
         seq                           = ""
-        index                         = 0
+        flat_index                         = 0
         for residue in res:
-            if residue.resname in [*AMINO_ACIDS.keys()]:
-                seq = seq + ResidueSummary.three_letter_code_to_one(residue.resname)
-                index += 1
-                flat_index_to_residue_map[index] = residue
-                auth_seq_id_to_flat_index_map[residue.get_id()[1]] = index
-            elif residue.resname in [*NUCLEOTIDES]:
-                seq = seq + residue.resname
-                index += 1
-                flat_index_to_residue_map[index] = residue
-                auth_seq_id_to_flat_index_map[residue.get_id()[1]] = index
+            if residue.resname in [*AMINO_ACIDS.keys(), *NUCLEOTIDES]:
+                seq                                                = seq + ResidueSummary.three_letter_code_to_one(residue.resname)
+                flat_index_to_residue_map[flat_index]              = residue
+                auth_seq_id_to_flat_index_map[residue.get_id()[1]] = flat_index
+                flat_index +=1
             else:
                 continue
-                seq = seq + "-"
         return seq, flat_index_to_residue_map, auth_seq_id_to_flat_index_map
 
     
@@ -701,7 +695,9 @@ def bsite_transpose(
         primary_seq_source, auth_seq_to_primary_ix_source = bpchain_source.primary_sequence
         print("Initial Pocket:")
         print(SeqPairwise.hl_ixs(primary_seq_source, [ auth_seq_to_primary_ix_source[index] for index, label in src_bound_auth_seq_idx]))
-        
+        print("Removing noncanonical residues and water:")
+        print(SeqPairwise.hl_ixs(src_flat_structural_seq, [ src_auth_seq_id_to_flat_index_map[index] for index, label in src_bound_auth_seq_idx]))
+        exit()
 
 
         # #* TEST
