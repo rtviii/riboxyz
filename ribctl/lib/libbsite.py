@@ -115,9 +115,9 @@ class SeqPairwise:
         # pprint(targetseq)
 
         _ = pairwise2.align.globalxx(self.src, self.tgt, one_alignment_only=True)
+
         self.src_aln = _[0].seqA
         self.tgt_aln = _[0].seqB
-        #! The only thing that can happen hence is the insertion of gaps in the source sequence.
 
         # print("Received indices of residues in the source sequence: ", source_residues)
 
@@ -144,14 +144,17 @@ class SeqPairwise:
         if original_residue_index > len(aligned_source_sequence):
             raise IndexError( f"Passed residue with invalid index ({original_residue_index}) to back-match to target.Seqlen aligned:{len(aligned_source_sequence)}" )
         original_residues_count = 0
-
         for aligned_ix, char in enumerate(aligned_source_sequence):
+            if original_residues_count == original_residue_index:
+                if char == "-":
+                    continue
+                else:
+                    return aligned_ix  
             if char == "-":
                 continue
             else:
                 original_residues_count += 1
-            if original_residues_count == original_residue_index:
-                return aligned_ix  
+
         raise ValueError(f"Residue with index {original_residue_index} not found in the aligned source sequence after full search. Logical errory, likely.")
 
     def backwards_match(self, aligned_target_sequence: str, aligned_residue_index: int)->int|None:
@@ -698,8 +701,6 @@ def bsite_transpose(
 
         src_bound_flat_indices = [ src_auth_seq_id_to_flat_index_map[index] for index, label in filter( lambda x: x[1] in [*NUCLEOTIDES, *AMINO_ACIDS.keys()],src_bound_auth_seq_idx)]
         print("[Source Flat   ]\t",SeqPairwise.hl_ixs(src_flat_structural_seq, src_bound_flat_indices))
-
-        
 
 
         print("- - - - Alignment- - - ")
