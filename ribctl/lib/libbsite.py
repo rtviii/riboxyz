@@ -42,7 +42,52 @@ from ribctl.lib.schema.types_binding_site import (
 
 
 #! Transposition methods
+class BiopythonChain(Chain):
+    chain:Chain 
+    flat_index_to_residue_map    : dict[int, Residue]
+    auth_seq_id_to_flat_index_map: dict[int, int]
 
+    def __init__(self, chain:Chain):
+        self.chain = chain
+
+    @property
+    def primary_sequence(self) -> str:
+        represent_noncanonical_as:Optional[str]="."
+        seq = ""
+        for residue in self.chain.get_residues():
+            if residue.resname in [*AMINO_ACIDS.keys()]:
+                seq = seq + ResidueSummary.three_letter_code_to_one(residue.resname)
+            elif residue.resname in [*NUCLEOTIDES]:
+                seq = seq + residue.resname
+            else:
+                seq = seq + represent_noncanonical_as
+        return seq 
+
+    @property
+    def flat_sequence(self) -> tuple[str, dict, dict]:
+        res: list[Residue] = [*self.chain.get_residues()]
+
+        flat_index_to_residue_map     = {}
+        auth_seq_id_to_flat_index_map = {}
+        seq                           = ""
+        index                         = 0
+        for residue in res:
+            if residue.resname in [*AMINO_ACIDS.keys()]:
+                seq = seq + ResidueSummary.three_letter_code_to_one(residue.resname)
+                index += 1
+                flat_index_to_residue_map[index] = residue
+                auth_seq_id_to_flat_index_map[residue.get_id()[1]] = index
+            elif residue.resname in [*NUCLEOTIDES]:
+                seq = seq + residue.resname
+                index += 1
+                flat_index_to_residue_map[index] = residue
+                auth_seq_id_to_flat_index_map[residue.get_id()[1]] = index
+            else:
+                continue
+                seq = seq + "-"
+        return seq, flat_index_to_residue_map, auth_seq_id_to_flat_index_map
+
+    
 
 class SeqPairwise:
     def __init__(self, sourceseq: str, targetseq: str, source_residues: list[int]):
@@ -164,6 +209,76 @@ class SeqPairwise:
                 _ += v
         return _
 
+class SeqMap:
+
+    mapping: dict[int, int]
+
+    seq_canonical: str
+    seq_structural: str
+
+    seq_canonical_aligned: str
+    seq_structural_aligned: str
+
+    def __init__(self, canonical: str, structure: str):
+        self.seq_canonical = canonical
+        self.seq_structural = structure
+        alignments = pairwise2.align.globalxx(Seq(canonical), Seq(structure))
+
+        aligned_canonical, aligned_structure = alignments[0][0], alignments[0][1]
+
+        self.seq_canonical_aligned = aligned_canonical
+        self.seq_structural_aligned = aligned_structure
+
+        mapping = {}
+
+        # print("inspecting")
+        # print(self.seq_canonical_aligned)
+        # print(self.seq_structural_aligned)
+        # print(*zip(aligned_canonical, aligned_structure))
+
+        canonical_index = 0
+        structure_index = 0
+        for canonical_char, structural_char in zip(
+            aligned_canonical, aligned_structure
+        ):
+            if canonical_char != "-":
+                if structural_char != "-":
+                    mapping[canonical_index] = structure_index
+                    structure_index += 1
+                else:
+                    mapping[canonical_index] = -1
+                canonical_index += 1
+            elif canonical_char == "-":
+                continue
+                # warnings.warn(f"Unexpected gap in canonical sequence at aligned position {canonical_index}. This shouldn't happen with the original canonical sequence.")
+
+        self.mapping = mapping
+
+    def retrieve_index(self, key: int) -> int | None:
+        "Get the STRUCTURAL sequence index corresponding to the CANONICAL sequence index <key> if any, otherwise None"
+        if key not in self.mapping:
+            raise KeyError(f"Key {key} not found in mapping")
+        if self.mapping[key] == -1:
+            return None
+        return self.mapping[key]
+
+    def retrieve_motif(self, keys: list[int]) -> tuple[str, str]:
+        can_subseq = ""
+        struct_subseq = ""
+
+        for i in keys:
+            can_subseq = can_subseq + self.seq_canonical[i]
+            struct_index = self.retrieve_index(i)
+            if struct_index == None:
+                struct_subseq = struct_subseq + "-"
+            elif struct_index != None:
+                struct_subseq = struct_subseq + self.seq_structural[struct_index]
+        if struct_subseq == "" or list(set(list(struct_subseq)))[0] == "-":
+            raise ValueError(
+                "No structural sequence found for the given canonical sequence"
+            )
+        return can_subseq, struct_subseq
+
 
 def get_lig_bsite(
     lig_chemid: str,
@@ -247,77 +362,7 @@ def get_lig_bsite(
         radius=radius,
         source=struct.get_id().upper(),
     )
-
-
-class SeqMap:
-
-    mapping: dict[int, int]
-
-    seq_canonical: str
-    seq_structural: str
-
-    seq_canonical_aligned: str
-    seq_structural_aligned: str
-
-    def __init__(self, canonical: str, structure: str):
-        self.seq_canonical = canonical
-        self.seq_structural = structure
-        alignments = pairwise2.align.globalxx(Seq(canonical), Seq(structure))
-
-        aligned_canonical, aligned_structure = alignments[0][0], alignments[0][1]
-
-        self.seq_canonical_aligned = aligned_canonical
-        self.seq_structural_aligned = aligned_structure
-
-        mapping = {}
-
-        # print("inspecting")
-        # print(self.seq_canonical_aligned)
-        # print(self.seq_structural_aligned)
-        # print(*zip(aligned_canonical, aligned_structure))
-
-        canonical_index = 0
-        structure_index = 0
-        for canonical_char, structural_char in zip(
-            aligned_canonical, aligned_structure
-        ):
-            if canonical_char != "-":
-                if structural_char != "-":
-                    mapping[canonical_index] = structure_index
-                    structure_index += 1
-                else:
-                    mapping[canonical_index] = -1
-                canonical_index += 1
-            elif canonical_char == "-":
-                continue
-                # warnings.warn(f"Unexpected gap in canonical sequence at aligned position {canonical_index}. This shouldn't happen with the original canonical sequence.")
-
-        self.mapping = mapping
-
-    def retrieve_index(self, key: int) -> int | None:
-        "Get the STRUCTURAL sequence index corresponding to the CANONICAL sequence index <key> if any, otherwise None"
-        if key not in self.mapping:
-            raise KeyError(f"Key {key} not found in mapping")
-        if self.mapping[key] == -1:
-            return None
-        return self.mapping[key]
-
-    def retrieve_motif(self, keys: list[int]) -> tuple[str, str]:
-        can_subseq = ""
-        struct_subseq = ""
-
-        for i in keys:
-            can_subseq = can_subseq + self.seq_canonical[i]
-            struct_index = self.retrieve_index(i)
-            if struct_index == None:
-                struct_subseq = struct_subseq + "-"
-            elif struct_index != None:
-                struct_subseq = struct_subseq + self.seq_structural[struct_index]
-        if struct_subseq == "" or list(set(list(struct_subseq)))[0] == "-":
-            raise ValueError(
-                "No structural sequence found for the given canonical sequence"
-            )
-        return can_subseq, struct_subseq
+    
 
 
 def bsite_ligand(
@@ -561,9 +606,6 @@ def __bsite_transpose_motifs(
     return _
 
 
-class BiopythonChain(Chain):
-    def __init__(self, chain:Chain):
-        super().__init__(id)
 
 def bsite_transpose(
     source_rcsb_id: str,
@@ -576,10 +618,11 @@ def bsite_transpose(
 
     def BiopythonChain_to_sequence(chain: Chain) -> tuple[str, dict, dict]:
         res: list[Residue] = [*chain.get_residues()]
-        flat_index_to_residue_map = {}
+        
+        flat_index_to_residue_map     = {}
         auth_seq_id_to_flat_index_map = {}
-        seq = ""
-        index = 0
+        seq                           = ""
+        index                         = 0
 
         for residue in res:
             if residue.resname in [*AMINO_ACIDS.keys()]:
@@ -629,21 +672,21 @@ def bsite_transpose(
         src_bound_auth_seq_idx = [ (residue.auth_seq_id, residue.label_comp_id) for residue in filter( lambda residue: residue.label_comp_id in [*NUCLEOTIDES, *AMINO_ACIDS.keys()], nbr_polymer.bound_residues, ) ]
         # ! Bound residues  [in STRUCTURE SPACE]
 
-        
+
 
         #! SOURCE MAPS
         [
             src_flat_structural_seq,
             src_flat_idx_to_residue_map,
             src_auth_seq_id_to_flat_index_map,
-        ] = BiopythonChain_to_sequence(source_struct[0][nbr_polymer.auth_asym_id])
+        ] = BiopythonChain(source_struct[0][nbr_polymer.auth_asym_id]).flat_sequence
         #! SOURCE MAPS
 
         [ 
             tgt_flat_structural_seq,
             tgt_flat_idx_to_residue_map,
             tgt_auth_seq_id_to_flat_index_map
-        ] = BiopythonChain_to_sequence(target_struct[0][target_polymer.auth_asym_id])
+        ] = BiopythonChain(target_struct[0][target_polymer.auth_asym_id]).flat_sequence
 
 
         # #* TEST
