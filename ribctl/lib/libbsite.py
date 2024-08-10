@@ -109,17 +109,12 @@ class SeqPairwise:
         # * Indices of the corresponding residues in target sequence. To be filled.
         self.tgt    : str       = targetseq
         self.tgt_ids: list[int] = []
-        # print("Source sequence is the flattened structural sequence of the source polymer")
-        # pprint(sourceseq)
-        # print("Target sequence is the flattened structural sequence of the targer polymer")
-        # pprint(targetseq)
 
         _ = pairwise2.align.globalxx(self.src, self.tgt, one_alignment_only=True)
 
         self.src_aln = _[0].seqA
         self.tgt_aln = _[0].seqB
 
-        # print("Received indices of residues in the source sequence: ", source_residues)
 
         self.aligned_ids = []
 
