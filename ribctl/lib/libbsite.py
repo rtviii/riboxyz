@@ -101,7 +101,7 @@ class SeqPairwise:
          IMPORTANT: BOTH SEQUENCES ARE ASSUMED TO HAVE NO GAPS ( at least not represeneted as "-"). That will screw up the arithmetic.
         """
 
-        print("\n\n=======================Entered seq pairwse =======================")
+        # print("\n\n=======================Entered seq pairwse =======================")
         # *  indices of the given residues in the source sequence.
         self.src    : str       = sourceseq
         self.src_ids: list[int] = source_residues
@@ -119,7 +119,7 @@ class SeqPairwise:
         self.tgt_aln = _[0].seqB
         #! The only thing that can happen hence is the insertion of gaps in the source sequence.
 
-        print("Received indices of residues in the source sequence: ", source_residues)
+        # print("Received indices of residues in the source sequence: ", source_residues)
 
         self.aligned_ids = []
 
@@ -133,9 +133,8 @@ class SeqPairwise:
             else:
                 self.tgt_ids.append(tgt_aln_index)
         
-        print("Aligned flattened sequences")
-        print(self.hl_ixs(self.src_aln, ixs=self.aligned_ids))
-        print(self.hl_ixs(self.tgt_aln, ixs=self.tgt_ids))
+        print("[Source Aligned]\t",self.hl_ixs(self.src_aln, ixs=self.aligned_ids))
+        print("[Target Aligned]\t",self.hl_ixs(self.tgt_aln, ixs=self.tgt_ids))
 
         
 
@@ -693,36 +692,22 @@ def bsite_transpose(
 
         
         primary_seq_source, auth_seq_to_primary_ix_source = bpchain_source.primary_sequence
-        print("Initial Pocket:")
-        print(SeqPairwise.hl_ixs(primary_seq_source, [ auth_seq_to_primary_ix_source[index] for index, label in src_bound_auth_seq_idx]))
-        print("Removing noncanonical residues and water:")
-        print(SeqPairwise.hl_ixs(src_flat_structural_seq, [ src_auth_seq_id_to_flat_index_map[index] for index, label in src_bound_auth_seq_idx]))
-        exit()
+        primary_seq_target, auth_seq_to_primary_ix_target = bpchain_target.primary_sequence
+        print("[Source Primary]\t",SeqPairwise.hl_ixs(primary_seq_source, [ auth_seq_to_primary_ix_source[index] for index, label in src_bound_auth_seq_idx]))
+        print("[Source Flat   ]\t",SeqPairwise.hl_ixs(src_flat_structural_seq, [ src_auth_seq_id_to_flat_index_map[index] for index, label in src_bound_auth_seq_idx]))
+
+        src_bound_flat_indices = [ src_auth_seq_id_to_flat_index_map[index] for index, label in src_bound_auth_seq_idx]
 
 
-        # #* TEST
-        src_bound_flat_indices = [ src_auth_seq_id_to_flat_index_map[resid] for resid, label in src_bound_auth_seq_idx ]
-        src_bound_flat_seq = "".join([ ResidueSummary.three_letter_code_to_one(label) for resid, label in src_bound_auth_seq_idx ])
-         ## #* TEST
-
+        print("- - - - Alignment- - - ")
         M                      = SeqPairwise(src_flat_structural_seq, tgt_flat_structural_seq, src_bound_flat_indices)
+        print("- - - - Alignment- - - ")
+
         tgt_bound_flat_indices = M.tgt_ids
-        tgt_bound_auth_seq_idx = [ ( tgt_flat_idx_to_residue_map[ idx ].get_id()[1], tgt_flat_idx_to_residue_map[ idx ].resname ) for idx in tgt_bound_flat_indices ]
+        tgt_bound_residues     = [ tgt_flat_idx_to_residue_map[idx] for idx in tgt_bound_flat_indices ]
 
-        pprint(tgt_bound_auth_seq_idx)
-        tgt_bound_flat_subseq  = ""
-
-
-
-        for ix, resname in tgt_bound_auth_seq_idx:
-            tgt_bound_flat_subseq =  tgt_bound_flat_subseq + ResidueSummary.three_letter_code_to_one( tgt_flat_idx_to_residue_map[ix].resname ) 
-
-        print("Initial flat subsequence")
-        print(src_bound_flat_seq)
-
-        print("Target flat subsequence")
-        print(tgt_bound_flat_subseq)
-
+        print("[Target Flat   ]\t", SeqPairwise.hl_ixs(tgt_flat_structural_seq, tgt_bound_residues))
+        print("[Target Primary]\t", SeqPairwise.hl_ixs(primary_seq_target,[auth_seq_to_primary_ix_target[residue.get_id()[1]] for residue in tgt_bound_residues] ))
 
         exit()
 
