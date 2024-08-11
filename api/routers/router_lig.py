@@ -37,7 +37,7 @@ def lig_transpose(request, source_structure:str, target_structure:str, chemical_
     prediction_path = RibosomeOps(target_structure).paths.binding_site_prediction(chemical_id, source_structure)
 
     bsite           = bsite_ligand(chemical_id, source_structure, radius)
-    prediction      = bsite_transpose(source_structure, target_structure,bsite)
+    prediction      = bsite_transpose(source_structure,target_structure,bsite)
 
     return JsonResponse(prediction.model_dump(), safe=False)
 
