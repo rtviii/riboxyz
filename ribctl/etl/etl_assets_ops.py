@@ -42,10 +42,10 @@ class AssetPath:
         pass
 
     def binding_site(self, chemId:str):
-        return f"{self.dir}/{self.rcsb_id.upper()}_{chemId.upper()}.json"
+        return f"{self.dir}/{self.rcsb_id.upper()}_LIG_{chemId.upper()}.json"
 
     def binding_site_prediction(self, chemId:str, source_struct:str):
-        return f"{self.dir}/{self.rcsb_id.upper()}_{chemId.upper()}_PREDICTION_VIA_{source_struct.upper()}.json"
+        return f"{self.dir}/{self.rcsb_id.upper()}_LIG_{chemId.upper()}_PREDICTION_VIA_{source_struct.upper()}.json"
     
     @property
     def dir(self):
@@ -214,18 +214,17 @@ class RibosomeOps:
                     return polyf
         return None
 
-    def get_poly_by_auth_asym_id( self, auth_asym_id: str ) -> Polymer |None:
+    def get_poly_by_auth_asym_id( self, auth_asym_id: str ) -> Polymer :
 
         profile = self.profile()
-
         for chain in [ *profile.proteins, *profile.rnas, *profile.other_polymers]:
             if chain.auth_asym_id == auth_asym_id:
                 return chain
-        return None
+        raise KeyError("No chain found with auth_asym_id: {}".format(auth_asym_id))
 
     def get_poly_by_polyclass(
         self, class_: PolymerClass, assembly: int = 0
-    ) -> RNA | None:
+    ) ->Polymer | None:
         """@assembly here stands to specify which of the two or more models the rna comes from
         in the case that a structure contains multiple models (ex. 4V4Q XRAY)"""
 

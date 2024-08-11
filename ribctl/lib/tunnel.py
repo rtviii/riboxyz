@@ -40,7 +40,7 @@ def pick_match(matches, rna_length: int):
 
 
 def residue_labels(res: Residue | ResidueSummary) -> bool:
-    return res.resname in [*AMINO_ACIDS.keys(), *NUCLEOTIDES]
+    return res.label_comp_id in [*AMINO_ACIDS.keys(), *NUCLEOTIDES]
 
 
 def ptc_fuzzyfind_subseq_in_chain(
@@ -141,8 +141,8 @@ def ptc_residues_to_atom_coordinates(
 
         atom: Atom
         for atom in res.child_list:
-            atom_name = atom.name
-            atom_coords = atom.get_coord()
+            atom_name                             = atom.name
+            atom_coords                           = atom.get_coord()
             ptc_coordinates[res.id[1]][atom_name] = list(
                 map(lambda x: float(x), list(atom_coords))
             )
@@ -194,3 +194,10 @@ def ptc_residues_calculate_midpoint(
     return midpoint
 
 
+
+# 'PTINQLVRKGREKVRKKSKVPALKGAPFRRGVCTVVRTVTPKKPNSALRKVAKVRLTSGYEVTAYIPGEGHNLQEHSVVLIRGGRVKDLPGVRYHIVRGVYDAAGVKDRKKSRSKYGTKKPKEAA'
+# 'PTINQLVRKGREKVRKKSKVPALKGAPFRRGVCTVVRTVTPKKPNSALRKVAKVRLTSGYEVTAYIPGEGHNLQEHSVVLIRGGRVK-LPGVRYHIVRGVYDAAGVKDRKKSRSKYGTKKPKEAA-'
+# ARGVALTHRPROLYSLYSPROASNSERALALEU
+# []
+# LYSASPLEUPRO
+# []

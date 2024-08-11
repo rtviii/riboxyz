@@ -1,4 +1,3 @@
-import json
 from typing import Dict, Optional
 from enum import Enum
 import typing
@@ -11,6 +10,9 @@ from ribctl.lib.enumunion import enum_union
 # |********************************************************************************************************|
 # | https://docs.google.com/spreadsheets/d/1mapshbn1ArofPN-Omu8GG5QdcwlJ0ym0BlN252kkUBU/edit#gid=815712128 |
 # |********************************************************************************************************|
+
+# ? ----------------------------------------------{ Primary Types }------------------------------------------------
+
 class tRNA(str,Enum):
     tRNA = "tRNA"
 
@@ -230,7 +232,7 @@ class CytosolicProteinClass(str,Enum):
 class MitochondrialRNAClass(str,Enum):
     mtrRNA12S = "mt12SrRNA"  # mitochondrial
     mtrRNA16S = "mt16SrRNA"  # mitochondrial
-
+    
 class CytosolicRNAClass(str,Enum):
     rRNA_5S   = "5SrRNA"  #  bacterial or eykaryotic
     rRNA_16S  = "16SrRNA"  #  c-bacterial or mitochondrial
@@ -326,7 +328,11 @@ PolynucleotideClass  = enum_union(CytosolicRNAClass, MitochondrialRNAClass, tRNA
 
 PolymerClass         = enum_union(PolynucleotideClass, PolypeptideClass)
 
-# ? ----------------------------------------------{ Object Types }------------------------------------------------
+
+# ? ----------------------------------------------{ Primary Types }------------------------------------------------
+
+
+# ? ----------------------------------------------{ Object Models }------------------------------------------------
 
 
 class Polymer(BaseModel):
@@ -532,8 +538,16 @@ class PTCInfo(BaseModel):
     midpoint_coordinates : tuple[float, float, float]
     nomenclature_table   : NomenclatureTable
 
-
 class RibosomeStructure(BaseModel):
+
+    def get_polymers_by_assembly(self)->dict[str,list[str]]:
+        if self.assembly_map:
+            _ = {}
+            for assembly in self.assembly_map:
+                _[assembly.rcsb_id] = [poly.rcsb_polymer_entity_instance_container_identifiers.auth_asym_id for poly in assembly.polymer_entity_instances]
+            return _
+        else:
+            raise Exception("No assembly map found")
 
     def get_nomenclature_map(self) -> dict[str, list[Polymer]]:
         "Return a map from auth_asym_id to nomenclatures of all polymers in the structure"

@@ -4,7 +4,7 @@ import os
 from pprint import pprint
 import click
 from ribctl.etl.etl_assets_ops import RibosomeOps, Structure
-from ribctl.lib.libbsite import bsite_ligand, BindingSite, BindingSiteChain, init_transpose_ligand
+from ribctl.lib.libbsite import bsite_ligand, BindingSite, BindingSiteChain, bsite_transpose
 ce = click.echo
 
 
@@ -14,24 +14,40 @@ def lig(ctx):
     pass
 
 @lig.command()
-@click.argument("rcsb_id", required=True, type=str)
 @click.argument("chem_id", required=True, type=str)
+@click.argument("rcsb_id", required=True, type=str)
 @click.argument("radius",  type=float, required=False, default=5)
-def nbhd(rcsb_id, chem_id, radius):
-    print(bsite_ligand(chem_id, rcsb_id, radius).model_dump_json())
+@click.option("--save", is_flag=True,default=False)
+def nbhd(chem_id, rcsb_id,  radius, save):
+    # with open(RibosomeOps(rcsb_id).paths.binding_site(chem_id), 'r') as f:
+    #     bsite =BindingSite.model_validate(json.load(f))
+
+    bsite = bsite_ligand(chem_id, rcsb_id, radius)
+    if save:
+        with open(RibosomeOps(rcsb_id).paths.binding_site(chem_id), 'w') as outfile:
+            json.dump(bsite.model_dump(), outfile, indent=4)
+            ce("Saved: {}".format( RibosomeOps(rcsb_id).paths.binding_site(chem_id)))
+
+    pprint(bsite.model_dump())
+
+        
+
     
 @lig.command()
 @click.pass_context
-@click.argument("lig_chem_id", required=True , type=str)
+@click.argument("chem_id", required=True , type=str)
 @click.argument("source_struct", required=True , type=str)
 @click.argument("target_struct", required=True , type=str)
-def transpose(ctx, lig_chem_id, source_struct, target_struct):
-    ligpath = RibosomeOps(source_struct.upper()).paths.binding_site(lig_chem_id.upper())
-    with open(ligpath, 'r') as ligfile:
-        data = json.load(ligfile)
-        lig = BindingSite.model_validate(data)
+@click.argument("radius", required=True , type=float)
+@click.option("--save", is_flag=True,default=False)
+def transpose(ctx, chem_id, source_struct, target_struct, radius, save):
 
-    target     = RibosomeOps(target_struct).profile()
-    transposed = init_transpose_ligand(target, lig).model_dump()
+    bsite      = bsite_ligand(chem_id, source_struct, radius)
+    transposed = bsite_transpose(source_struct,target_struct, bsite).model_dump()
 
-    pprint(transposed)
+    if save:
+        transposed_path = RibosomeOps(target_struct).paths.binding_site_prediction(chem_id, source_struct)
+        with open(transposed_path, 'w') as outfile:
+            json.dump(transposed, outfile, indent=4)
+            ce("Saved: {}".format(transposed_path))
+    return transposed
