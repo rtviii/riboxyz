@@ -18,12 +18,14 @@ DO NOT put validation logic/schema here. This is a pure interface to the databas
 
 
 class FiltersSchema:
-    search: str
-    year: typing.Tuple[int | None, int | None]
-    resolution: typing.Tuple[float | None, float | None]
-    polymer_classes: list[PolynucleotideClass | PolypeptideClass]
-    source_taxa: list[int]
-    host_taxa: list[int]
+
+    search          : str
+    subunit_presence: typing.Literal['lsu' , 'ssu' , 'both']
+    year            : typing.Tuple[int | None, int | None]
+    resolution      : typing.Tuple[float | None, float | None]
+    polymer_classes : list[PolynucleotideClass | PolypeptideClass]
+    source_taxa     : list[int]
+    host_taxa       : list[int]
 
     def __init__(self) -> None:
         pass
@@ -107,7 +109,6 @@ return apoc.map.merge(rib, rest)
                 ).value()
 
             return session.execute_read(_)
-
 
     def structures_overview(self):
         with self.adapter.driver.session() as session:
@@ -322,6 +323,7 @@ with rib order by rib.rcsb_id desc\n"""
         polymer_classes: None | list[PolynucleotideClass | PolypeptideClass] = None,
         source_taxa: None | list[int] = None,
         host_taxa: None | list[int] = None,
+        subunit_presence = 'both',
     ):
 
         query = (
@@ -378,8 +380,7 @@ with rib order by rib.rcsb_id desc\n"""
                 if polymer_classes is not None
                 else ""
             )
-            +(
-                "{} exists{{ MATCH (rib)-[:belongs_to_lineage_source]-(p:PhylogenyNode ) where p.ncbi_tax_id in {} }}\n".format(
+            +("{} exists{{ MATCH (rib)-[:belongs_to_lineage_source]-(p:PhylogenyNode ) where p.ncbi_tax_id in {} }}\n".format(
                     (
                         "and"
                         if search != ""
@@ -394,8 +395,7 @@ with rib order by rib.rcsb_id desc\n"""
                 else ""
             )
 
-            +(
-                "{} exists{{ MATCH (rib)-[:belongs_to_lineage_host]-(p:PhylogenyNode ) where p.ncbi_tax_id in {} }}\n".format(
+            +("{} exists{{ MATCH (rib)-[:belongs_to_lineage_host]-(p:PhylogenyNode ) where p.ncbi_tax_id in {} }}\n".format(
                     (
                         "and"
                         if search != ""
@@ -409,6 +409,24 @@ with rib order by rib.rcsb_id desc\n"""
                 if host_taxa is not None
                 else ""
             )
+            
+            # +  
+            
+            # ( ("{}".format((
+            #             "and"
+            #             if search != ""
+            #             or year != None
+            #             or resolution != None
+            #             or polymer_classes != None
+            #             or host_taxa != None
+            #             or source_taxa != None
+            #             else ""
+            #         ))) if subunit_presence is not None else '' + ' "lsu" in rib.subunit_presence and "ssu" in rib.subunit_presence\n' if subunit_presence == 'both'
+            #    else 
+            #         '"lsu" in rib.subunit_presence and not "ssu" in rib.subunit_presence \n' if subunit_presence == 'lsu' else '"ssu" in rib.subunit_presence and not "lsu" in rib.subunit_presence\n' if subunit_presence == 'ssu' 
+            #    else ''
+            # ) if subunit_presence is not None else ''
+
             + """
 with collect(rib)[{}..{}] as rib, count(rib) as total_count 
 unwind rib as ribosomes
