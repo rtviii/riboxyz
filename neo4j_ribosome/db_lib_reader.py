@@ -317,15 +317,17 @@ with rib order by rib.rcsb_id desc\n"""
     
     def list_structs_filtered(
         self,
-        page           : int,
-        search         : None | str = None,
-        year           : None | typing.Tuple[int | None, int | None] = None,
-        resolution     : None | typing.Tuple[float | None, float | None] = None,
-        polymer_classes: None | list[PolynucleotideClass | PolypeptideClass] = None,
-        source_taxa    : None | list[int] = None,
-        host_taxa      : None | list[int] = None,
-
+        page            : int,
+        search          : None | str = None,
+        year            : None | typing.Tuple[int | None, int | None] = None,
+        resolution      : None | typing.Tuple[float | None, float | None] = None,
+        polymer_classes : None | list[PolynucleotideClass | PolypeptideClass] = None,
+        source_taxa     : None | list[int] = None,
+        host_taxa       : None | list[int] = None,
+        subunit_presence: None | typing.Literal['SSU+LSU', "LSU","SSU"] = None,
     ):
+
+        print("Got subunit_presence ", subunit_presence)
         query_parts = [ "MATCH (rib:RibosomeStructure)", "WITH rib ORDER BY rib.rcsb_id DESC" ]
         where_clauses = []
         params = {}
@@ -370,13 +372,13 @@ with rib order by rib.rcsb_id desc\n"""
             where_clauses.append(""" \nEXISTS{ MATCH (rib)-[:belongs_to_lineage_host]-(p:PhylogenyNode) WHERE p.ncbi_tax_id IN $host_taxa } """)
             params["host_taxa"] = host_taxa
 
-        # if subunit_presence:
-        #     if subunit_presence == 'both':
-        #         where_clauses.append('"lsu" IN rib.subunit_presence AND "ssu" IN rib.subunit_presence')
-        #     elif subunit_presence == 'lsu':
-        #         where_clauses.append('"lsu" IN rib.subunit_presence AND NOT "ssu" IN rib.subunit_presence')
-        #     elif subunit_presence == 'ssu':
-        #         where_clauses.append('"ssu" IN rib.subunit_presence AND NOT "lsu" IN rib.subunit_presence')
+        if subunit_presence:
+            if subunit_presence == 'SSU+LSU':
+                where_clauses.append('"lsu" IN rib.subunit_presence AND "ssu" IN rib.subunit_presence')
+            elif subunit_presence == 'LSU':
+                where_clauses.append('"lsu" IN rib.subunit_presence AND NOT "ssu" IN rib.subunit_presence')
+            elif subunit_presence == 'SSU':
+                where_clauses.append('"ssu" IN rib.subunit_presence AND NOT "lsu" IN rib.subunit_presence')
 
         if where_clauses:
             query_parts.append("WHERE " + " AND ".join(where_clauses))
@@ -403,147 +405,6 @@ with rib order by rib.rcsb_id desc\n"""
         with self.adapter.driver.session() as session:
             def _(tx: Transaction | ManagedTransaction):
                 return tx.run(query, params).values()
-            return session.execute_read(_)
-
-
-
-    def list_structs_filtered_safe(
-        self,
-        page: int,
-        search: None | str = None,
-        year: None | typing.Tuple[int | None, int | None] = None,
-        resolution: None | typing.Tuple[float | None, float | None] = None,
-        polymer_classes: None | list[PolynucleotideClass | PolypeptideClass] = None,
-        source_taxa: None | list[int] = None,
-        host_taxa: None | list[int] = None,
-        subunit_presence = 'both',
-    ):
-
-        query = (
-            """match (rib:RibosomeStructure)
-with rib order by rib.rcsb_id desc\n"""
-            + (
-                "\nwhere\n"
-                if list(
-                    map(
-                        lambda x: x is not None,
-                        [
-                            search,
-                            year,
-                            resolution,
-                            polymer_classes,
-                            source_taxa,
-                            host_taxa,
-                        ],
-                    )
-                ).count(True)
-                > 0
-                else ""
-            )
-            + (
-                "toLower(rib.citation_title) + toLower(rib.rcsb_id) + toLower(rib.pdbx_keywords_text) + toLower(reduce(acc = '', str IN rib.src_organism_names | acc + str)) + toLower(reduce(acc = '', str IN rib.host_organism_names | acc + str))  contains '{}' \n".format(
-                    search
-                )
-                if search != ""
-                else ""
-            )
-            + (
-                "{} ({} <= rib.citation_year and rib.citation_year <= {} or rib.citation_year is null)\n".format(
-                    "and" if search != "" else "",
-                    year[0] if year[0] is not None else 0,
-                    year[1] if year[1] is not None else 9999,
-                )
-                if year is not None
-                else ""
-            )
-            + (
-                "{} {} < rib.resolution and rib.resolution < {}\n".format(
-                    "and" if search != "" or year != None else "",
-                    resolution[0] if resolution[0] is not None else 0,
-                    resolution[1] if resolution[1] is not None else 9999,
-                )
-                if resolution is not None
-                else ""
-            )
-            + (
-                "{} ALL(x in [ {} ] where x in apoc.coll.flatten(collect{{ match (rib)-[]-(p:Polymer) return p.nomenclature }}))\n".format(
-                    "and" if search != "" or year != None or resolution != None else "",
-                    ", ".join(['"%s"' % w.value for w in polymer_classes]),
-                )
-                if polymer_classes is not None
-                else ""
-            )
-            +("{} exists{{ MATCH (rib)-[:belongs_to_lineage_source]-(p:PhylogenyNode ) where p.ncbi_tax_id in {} }}\n".format(
-                    (
-                        "and"
-                        if search != ""
-                        or year != None
-                        or resolution != None
-                        or polymer_classes != None
-                        else ""
-                    ),
-                    source_taxa,
-                )
-                if source_taxa is not None
-                else ""
-            )
-
-            +("{} exists{{ MATCH (rib)-[:belongs_to_lineage_host]-(p:PhylogenyNode ) where p.ncbi_tax_id in {} }}\n".format(
-                    (
-                        "and"
-                        if search != ""
-                        or year != None
-                        or resolution != None
-                        or polymer_classes != None
-                        else ""
-                    ),
-                    host_taxa,
-                )
-                if host_taxa is not None
-                else ""
-            )
-            
-            # +  
-            
-            # ( ("{}".format((
-            #             "and"
-            #             if search != ""
-            #             or year != None
-            #             or resolution != None
-            #             or polymer_classes != None
-            #             or host_taxa != None
-            #             or source_taxa != None
-            #             else ""
-            #         ))) if subunit_presence is not None else '' + ' "lsu" in rib.subunit_presence and "ssu" in rib.subunit_presence\n' if subunit_presence == 'both'
-            #    else 
-            #         '"lsu" in rib.subunit_presence and not "ssu" in rib.subunit_presence \n' if subunit_presence == 'lsu' else '"ssu" in rib.subunit_presence and not "lsu" in rib.subunit_presence\n' if subunit_presence == 'ssu' 
-            #    else ''
-            # ) if subunit_presence is not None else ''
-
-            + """
-with collect(rib)[{}..{}] as rib, count(rib) as total_count 
-unwind rib as ribosomes
-
-optional match (l:Ligand)-[]-(ribosomes) 
-with collect(PROPERTIES(l)) as ligands, ribosomes, total_count
-match (rps:Protein)-[]-(ribosomes) 
-with collect(PROPERTIES(rps)) as proteins, ligands, ribosomes, total_count
-optional match (rna:RNA)-[]-(ribosomes) 
-with collect(PROPERTIES(rna)) as rnas, proteins, ligands, ribosomes, total_count
-
-with apoc.map.mergeList([{{proteins:proteins}},{{nonpolymeric_ligands:ligands}},{{rnas:rnas}},{{other_polymers:[]}}]) as rest, ribosomes, total_count
-return collect(apoc.map.merge(ribosomes, rest)),  collect(distinct total_count)[0]
-""".format( (page - 1) * 20, page * 20 ) )
-
-        print("=======Executing filtered structures query:==========")
-        print("\033[96m" + query + "\033[0m")
-        print("=====================================================")
-
-        with self.adapter.driver.session() as session:
-
-            def _(tx: Transaction | ManagedTransaction):
-                return tx.run(query).values()
-
             return session.execute_read(_)
 
     def get_taxa(self, src_host:typing.Literal['source', 'host'])-> list[int]:
