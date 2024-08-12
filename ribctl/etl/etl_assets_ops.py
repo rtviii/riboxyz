@@ -11,8 +11,10 @@ from loguru import logger
 import requests
 from ribctl import AMINO_ACIDS_3_TO_1_CODE, CHAINSPLITTER_PATH, CLASSIFICATION_REPORTS
 from ribctl.lib.libtax import PhylogenyNode, PhylogenyRank, Taxid
+from Bio.PDB.Structure import Structure
+from Bio.PDB.MMCIFParser import FastMMCIFParser
 from ribctl.lib.tunnel import ptc_resdiues_get, ptc_residues_calculate_midpoint
-from ribctl.lib.utils import download_unpack_place, open_structure
+from ribctl.lib.utils import download_unpack_place
 from ribctl.lib.schema.types_ribosome import ( RNA, PTCInfo, Polymer, PolymerClass, PolynucleotideClass, PolynucleotideClass, PolypeptideClass, RibosomeStructure, )
 from ribctl import RIBETL_DATA
 from ribctl.logs.loggers import get_etl_logger
@@ -160,8 +162,9 @@ class RibosomeOps:
             return RibosomeStructure.model_validate(json.load(f))
 
     #! I
-    def biopython_structure(self):
-        return open_structure(self.rcsb_id, "cif")
+    def biopython_structure(self)-> Structure:
+        cifpath = RibosomeOps(self.rcsb_id).paths.cif
+        return FastMMCIFParser(QUIET=True).get_structure(self.rcsb_id, cifpath)
 
     #! I
     def write_own_json_profile(self, new_profile: dict, overwrite: bool = False):
