@@ -1,2 +1,0 @@
-- ligand interfaces pic:
-projection

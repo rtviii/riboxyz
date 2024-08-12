@@ -118,7 +118,6 @@ def list_ligands(request):
 
 @structure_router.get('/list', response=dict,  tags=[TAG])
 def filter_list(request,
-      subunit_presence ,
       page             = 1,
       search           = None,
       year             = None,
@@ -126,6 +125,7 @@ def filter_list(request,
       polymer_classes  = None,
       source_taxa      = None,
       host_taxa        = None,
+      subunit_presence =None
       ):
 
     def parse_empty_or_int(_:str):
