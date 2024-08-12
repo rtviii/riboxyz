@@ -147,7 +147,6 @@ def filter_list(request,
     polymer_classes = None if polymer_classes == "" else list(map(lambda _: PolymerClass(_), polymer_classes.split(",")))
 
     structures, count    = dbqueries.list_structs_filtered(int(page), search, year, resolution, polymer_classes, source_taxa, host_taxa, subunit_presence)[0]
-
     structures_validated = []
     for i in structures:
         try:
@@ -155,8 +154,6 @@ def filter_list(request,
         except Exception as e:
             print("Failed to validate structure", i['rcsb_id'], e)
             continue
-    # structures_validated = list(map(lambda r: RibosomeStructure.model_validate(r), structures))
-
     return { "structures":structures_validated, "count": count }
 
 @structure_router.get('/structures_overview', response=list[dict], tags=[TAG])
