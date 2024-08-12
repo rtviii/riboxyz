@@ -101,7 +101,6 @@ class SeqPairwise:
          IMPORTANT: BOTH SEQUENCES ARE ASSUMED TO HAVE NO GAPS ( at least not represeneted as "-"). That will screw up the arithmetic.
         """
 
-        # print("\n\n=======================Entered seq pairwse =======================")
         # *  indices of the given residues in the source sequence.
         self.src    : str       = sourceseq
         self.src_ids: list[int] = source_residues
@@ -274,7 +273,6 @@ class SeqMap:
             )
         return can_subseq, struct_subseq
 
-
 def get_lig_bsite(
     lig_chemid: str,
     struct: Structure,
@@ -357,8 +355,6 @@ def get_lig_bsite(
         radius=radius,
         source=struct.get_id().upper(),
     )
-    
-
 
 def bsite_ligand(
     chemicalId: str, rcsb_id: str, radius: float, save: bool = False
@@ -373,7 +369,6 @@ def bsite_ligand(
             json.dump(binding_site_ligand.model_dump(), f)
 
     return binding_site_ligand
-
 
 #! Deperecated
 def __bsite_transpose_motifs(
@@ -600,7 +595,6 @@ def __bsite_transpose_motifs(
     print("Elapsed time: ", end - start)
     return _
 
-
 def bsite_transpose(
     source_rcsb_id: str,
     target_rcsb_id: str,
@@ -664,7 +658,7 @@ def bsite_transpose(
         if target_polymer == None:
             continue
         
-        print("\n\n\t\t <<<<CHAIN [{}]>>>> ".format(nbr_polymer.nomenclature[0]))
+        print("\n\n\t\t [{}] ".format(nbr_polymer.nomenclature[0]))
         bpchain_source = BiopythonChain(source_struct[0][nbr_polymer.auth_asym_id])
         bpchain_target = BiopythonChain(target_struct[0][target_polymer.auth_asym_id])
         #! SOURCE MAPS

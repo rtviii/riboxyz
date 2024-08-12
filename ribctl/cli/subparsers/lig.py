@@ -11,7 +11,7 @@ ce = click.echo
 @click.group()
 @click.pass_context
 def lig(ctx):
-    pass
+        pass
 
 @lig.command()
 @click.argument("chem_id", required=True, type=str)
@@ -19,20 +19,15 @@ def lig(ctx):
 @click.argument("radius",  type=float, required=False, default=5)
 @click.option("--save", is_flag=True,default=False)
 def nbhd(chem_id, rcsb_id,  radius, save):
-    # with open(RibosomeOps(rcsb_id).paths.binding_site(chem_id), 'r') as f:
-    #     bsite =BindingSite.model_validate(json.load(f))
-
     bsite = bsite_ligand(chem_id, rcsb_id, radius)
     if save:
         with open(RibosomeOps(rcsb_id).paths.binding_site(chem_id), 'w') as outfile:
             json.dump(bsite.model_dump(), outfile, indent=4)
             ce("Saved: {}".format( RibosomeOps(rcsb_id).paths.binding_site(chem_id)))
-
     pprint(bsite.model_dump())
 
-        
 
-    
+
 @lig.command()
 @click.pass_context
 @click.argument("chem_id", required=True , type=str)
