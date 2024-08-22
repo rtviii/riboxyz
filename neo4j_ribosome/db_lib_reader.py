@@ -116,7 +116,7 @@ return apoc.map.merge(rib, rest)
                 return tx.run(
     """//
     match (n:RibosomeStructure)-[:source]-(p:PhylogenyNode) 
-    return collect({rcsb_id:n.rcsb_id, tax_id: p.ncbi_tax_id, tax_name:p.scientific_name, mitochondrial:n.mitochondrial})""").value()[0]
+    return collect({rcsb_id:n.rcsb_id, tax_id: p.ncbi_tax_id, tax_name:p.scientific_name, mitochondrial:n.mitochondrial, title:n.citation_title})""").value()[0]
             return session.execute_read(_)
 
     def list_ligands(self):
@@ -157,14 +157,14 @@ return apoc.map.merge(rib, rest)
 
     def list_polymers_filtered_by_structure(
         self,
-        page: int,
-        search: None | str = None,
-        year: None | typing.Tuple[int | None, int | None] = None,
-        resolution: None | typing.Tuple[float | None, float | None] = None,
-        polymer_classes: None | list[PolynucleotideClass | PolypeptideClass] = None,
-        source_taxa: None | list[int] = None,
-        host_taxa: None | list[int] = None,
-    ):
+                page           : int,
+                search         : None | str = None,
+                year           : None | typing.Tuple[int | None, int | None] = None,
+                resolution     : None | typing.Tuple[float | None, float | None] = None,
+                polymer_classes: None | list[PolynucleotideClass | PolypeptideClass] = None,
+                source_taxa    : None | list[int] = None,
+                host_taxa      : None | list[int] = None,
+    ): 
 
         query_by_structure = (
             """match (rib:RibosomeStructure)
