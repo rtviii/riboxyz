@@ -20,6 +20,7 @@ from ribctl.lib.schema.types_ribosome import (
     Polymer,
     PolynucleotideClass,
     PolynucleotideClass,
+    PolypeptideClass,
     Protein,
     CytosolicProteinClass,
     CytosolicProteinClass,
@@ -704,7 +705,7 @@ class ReannotationPipeline:
         for polymer_dict in _prot_polypeptides:
             if polymer_dict.auth_asym_id in reported_classes.keys():
                 # momentarily converting to the PolymerClass enums to serialize correctly (see Polymer class def)
-                polymer_dict.nomenclature = list(map(PolynucleotideClass,reported_classes[polymer_dict.auth_asym_id]))
+                polymer_dict.nomenclature = list(map(PolypeptideClass,reported_classes[polymer_dict.auth_asym_id]))
         assert (
             len(_rna_polynucleotides)
             + len(_prot_polypeptides)
@@ -724,7 +725,6 @@ class ReannotationPipeline:
         [externalRefs, pub, kwords_text, kwords] = self.process_metadata()
         organisms                                = self.infer_organisms_from_polymers([*_prot_polypeptides, *_rna_polynucleotides])
         subunit_presence                         = lsu_ssu_presence(_rna_polynucleotides, is_mitochondrial)
-        print(rcsb_id, " ogt lsu ssu:", subunit_presence)
 
         reshaped                                 = RibosomeStructure(
             rcsb_id                = self.rcsb_data_dict["rcsb_id"],

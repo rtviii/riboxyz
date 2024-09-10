@@ -47,6 +47,7 @@ def assets(ctx: Context, assets, overwrite, rcsb_sync, all_structs):
     logger = get_etl_logger()
     rcsb_id = ctx.obj['rcsb_id']
     assets = list(map(AssetClass.from_str, assets))
+
     if rcsb_id is not None:
         routines = etl_obtain.asset_routines(rcsb_id, assets , overwrite)
         asyncio.run(etl_obtain.execute_asset_task_pool(routines))

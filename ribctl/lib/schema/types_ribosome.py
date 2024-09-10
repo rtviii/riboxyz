@@ -325,7 +325,6 @@ ProteinClass         = enum_union(CytosolicProteinClass,MitochondrialProteinClas
 
 PolypeptideClass     = enum_union(LifecycleFactorClass, ProteinClass)
 PolynucleotideClass  = enum_union(CytosolicRNAClass, MitochondrialRNAClass, tRNA)
-
 PolymerClass         = enum_union(PolynucleotideClass, PolypeptideClass)
 
 
