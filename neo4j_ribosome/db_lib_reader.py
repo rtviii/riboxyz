@@ -126,7 +126,7 @@ return apoc.map.merge(rib, rest)
                     """//
     match (l:Ligand)-[]-(r:RibosomeStructure) where not toLower(l.chemicalName) contains "ion" with l, r
     match (r)-[:source]-(p:PhylogenyNode)
-    return properties(l), collect({rcsb_id: r.rcsb_id, tax_node: properties(p)})
+    return properties(l), collect({rcsb_id: r.rcsb_id , tax_node: properties(p)})
     """
                 ).values()
 

@@ -5,13 +5,26 @@ from pprint import pprint
 import click
 from ribctl.etl.etl_assets_ops import RibosomeOps, Structure
 from ribctl.lib.libbsite import bsite_ligand, BindingSite, BindingSiteChain, bsite_transpose
+from neo4j_ribosome.db_lib_reader import Neo4jReader
 ce = click.echo
 
 
 @click.group()
 @click.pass_context
 def lig(ctx):
-        pass
+    pass
+
+
+
+@lig.command()
+def list_ligands(limit):
+    """Display all ligand-structure pairs from the neo4j database."""
+    reader  = Neo4jReader()
+    results = reader.list_ligands()
+
+
+
+    
 
 @lig.command()
 @click.argument("chem_id", required=True, type=str)
@@ -37,7 +50,6 @@ def nbhd(chem_id, rcsb_id,  radius, save):
 @click.argument("radius", required=True , type=float)
 @click.option("--save", is_flag=True,default=False)
 def transpose(ctx, chem_id, source_struct, target_struct, radius, save):
-
     bsite      = bsite_ligand(chem_id, source_struct, radius)
     transposed = bsite_transpose(source_struct,target_struct, bsite).model_dump()
 

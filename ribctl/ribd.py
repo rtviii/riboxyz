@@ -4,9 +4,9 @@ import sys
 sys.dont_write_bytecode = True
 sys.path.append('/home/rtviii/dev/riboxyz')
 from ribctl.cli.subparsers.lig import lig
-from subparsers.ls import ls
-from subparsers.etl import  etl
-from subparsers.db import db
+from cli.subparsers.ls import ls
+from cli.subparsers.etl import  etl
+from cli.subparsers.db import db
 
 ce = click.echo
 
