@@ -4,10 +4,10 @@ import os
 from pprint import pprint
 import typing
 from django.http import  JsonResponse, HttpResponseServerError
-from ninja import Router, Schema
+from ninja import Path, Router, Schema
 from pydantic import BaseModel
 from neo4j_ribosome.db_lib_reader import dbqueries
-from ribctl import ASSETS, ASSETS_PATH
+from ribctl import ASSETS, ASSETS_PATH, RIBETL_DATA
 from ribctl.etl.etl_assets_ops import RibosomeOps, Structure
 from ribctl.lib.info import StructureCompositionStats, run_composition_stats
 from ribctl.lib.schema.types_ribosome import  CytosolicProteinClass, CytosolicRNAClass, ElongationFactorClass, InitiationFactorClass, LifecycleFactorClass, MitochondrialProteinClass, MitochondrialRNAClass, PTCInfo, Polymer, PolymerClass, PolynucleotideClass, PolynucleotideClass, PolypeptideClass, Protein, ProteinClass, RibosomeStructure, tRNA
@@ -265,3 +265,21 @@ def list_source_taxa(request, source_or_host:typing.Literal["source", "host"]):
        
     
     return normalize_tax_list_to_dict(tax_ids)
+
+
+from django.http import FileResponse
+from ninja.responses import Response
+@structure_router.get("/tunnel_geometry")
+def get_shape(request, rcsb_id: str, is_ascii:bool=False):
+    rcsb_id   = rcsb_id.upper()
+    filename  = "{}_poisson_recon.ply".format(rcsb_id) if not is_ascii else "{}_poisson_recon_ascii.ply".format(rcsb_id)
+    file_path = os.path.join(RIBETL_DATA ,rcsb_id, 'TUNNELS', filename)
+    
+    if not os.path.exists(file_path):
+        return Response({"error": "Shape file not found"}, status=404)
+    
+    try:
+        file = open(file_path, 'rb')
+        return FileResponse(file, content_type='application/octet-stream', filename=filename)
+    except IOError:
+        return Response({"error": "Error reading the shape file"}, status=500)

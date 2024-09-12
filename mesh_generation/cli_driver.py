@@ -1,12 +1,14 @@
 import argparse
 from pprint import pprint
+import sys
+sys.path.append('/home/rtviii/dev/riboxyz')
 from matplotlib import pyplot as plt
 import numpy as np
 from sklearn.cluster import DBSCAN
-from mesh_generation.bbox_extraction import ( encode_atoms, open_tunnel_csv, parse_struct_via_bbox, parse_struct_via_centerline)
-from mesh_generation.paths import *
-from mesh_generation.full_pipeline import pipeline
-from mesh_generation.visualization import plot_with_landmarks
+from bbox_extraction import ( encode_atoms, open_tunnel_csv, parse_struct_via_bbox, parse_struct_via_centerline)
+from paths import *
+from full_pipeline import pipeline
+from visualization import plot_with_landmarks
 
 
 DBSCAN_METRICS        = [
