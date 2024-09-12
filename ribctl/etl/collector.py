@@ -10,12 +10,13 @@
 import functools
 import json
 import os
+from pprint import pprint
 
 from loguru import logger
 import pyhmmer
 import requests
 from ribctl.etl.etl_assets_ops import RibosomeOps
-from ribctl.etl.gql_querystrings import AssemblyInfoString, EntryInfoString, NonpolymerEntitiesString, PolymerEntitiesString
+from ribctl.etl.gql_querystrings import AssemblyIdentificationString, EntryInfoString, NonpolymerEntitiesString, PolymerEntitiesString
 from ribctl.lib.schema.types_ribosome import RNA, AssemblyInstancesMap, CytosolicProteinClass, NonpolymericLigand, Polymer, PolynucleotideClass, PolypeptideClass, Protein, RibosomeStructure
 from ribctl.lib.libhmm import HMM, HMMClassifier
 
@@ -36,6 +37,12 @@ def query_rcsb_api(gql_string: str) -> dict:
 class StructureNode:
     rcsb_data:dict
     asm_maps                 : list[AssemblyInstancesMap]
+
+    def __init__(self,data:dict) -> None:
+        ...
+
+    def process(self)->dict:
+        ...
 
     def process_metadata(self):
         externalRefs = self.extract_external_refs( self.rcsb_data_dict["rcsb_external_references"] )
@@ -65,7 +72,6 @@ class StructureNode:
 
         return [ externalRefs, pub, kwords_text, kwords]
 
-
     def extract_external_refs(self, external_refs):
         """
         external_refs: list[{ link: string; type: string; id: string }]
@@ -85,11 +91,18 @@ class StructureNode:
 
         return [externalRefIds, externalRefTypes, externalRefLinks]
 
+
 class PolymersNode:
     # ? Initialized classification resources:
     rcsb_polymers            : int
 
     hmm_ribosomal_proteins: dict[CytosolicProteinClass, HMM]
+
+    def __init__(self,data:dict) -> None:
+        ...
+
+    def process(self)->dict:
+        ...
 
     def infer_organisms_from_polymers(self, polymers: list[Polymer]):
         #? A hack and should be differentiated
@@ -531,6 +544,12 @@ class PolymersNode:
 class NonpolymerNode:
     rcsb_nonpolymers         : int
 
+    def __init__(self,data:dict) -> None:
+        ...
+
+    def process(self)->dict:
+        ...
+
     def process_nonpolymers(self) -> list[NonpolymericLigand]:
         nonpoly_entities = self.rcsb_data_dict["nonpolymer_entities"]
         reshaped_nonpoly = (
@@ -589,13 +608,10 @@ class ETLCollector:
         # self.rcsb_polymers    = len(self.rcsb_data_dict["polymer_entities"])
         # self.rcsb_nonpolymers = (len(self.rcsb_data_dict["nonpolymer_entities"]) if self.rcsb_data_dict["nonpolymer_entities"] != None else 0)
 
-        structure_data   = query_rcsb_api(EntryInfoString)
-        assemblies_data  = query_rcsb_api(AssemblyInfoString)
-        polymers_data    = query_rcsb_api(PolymerEntitiesString)
-        nonpolymers_data = query_rcsb_api(NonpolymerEntitiesString)
-        # TODO: This needs to be a lambda over nonpolymer chem ids.
-        # ligands_chem_info   = query_rcsb_api(NonpolymerEntitiesString)
-        pass
+        structure_data   = query_rcsb_api(EntryInfoString.replace("$RCSB_ID", rcsb_id_str))
+        assemblies_data  = query_rcsb_api(AssemblyIdentificationString.replace("$RCSB_ID", rcsb_id_str))
+        polymers_data    = query_rcsb_api(PolymerEntitiesString.replace("$RCSB_ID", rcsb_id_str))
+        nonpolymers_data = query_rcsb_api(NonpolymerEntitiesString.replace("$RCSB_ID", rcsb_id_str))
 
     def asm_parse(self, dictionaries: list[dict]) -> list[AssemblyInstancesMap]:
         return list(map(AssemblyInstancesMap.model_validate, dictionaries))
@@ -617,6 +633,7 @@ class ETLCollector:
 
 
     async def process_structure(self, overwrite: bool = False)->RibosomeStructure:
+
         # TODO : 
         # 1. parse assemblies
         # 2. process structure node
