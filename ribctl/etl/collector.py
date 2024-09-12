@@ -578,32 +578,24 @@ class ETLCollector:
 
     # ? Housekeeping
     asm_maps                 : list[AssemblyInstancesMap]
+    polymers_target_count: int
     # rcsb_polymers            : int
     # rcsb_nonpolymers         : int
-    polymers_target_count: int
 
-    def __init__(self, response: dict):
+    def __init__(self, rcsb_id_str):
         # self.rcsb_data_dict = response
         # self.hmm_ribosomal_proteins = hmm_dict_init__candidates_per_organism(ProteinClassEnum, response["rcsb_id"])
 
-        self.asm_maps         = self.asm_parse(response["assemblies"])
         # self.rcsb_polymers    = len(self.rcsb_data_dict["polymer_entities"])
         # self.rcsb_nonpolymers = (len(self.rcsb_data_dict["nonpolymer_entities"]) if self.rcsb_data_dict["nonpolymer_entities"] != None else 0)
 
-        # What is this garbage, you ask? Let me tell you.
-        self.polymers_target_count = functools.reduce( lambda count, poly: count + len(poly["rcsb_polymer_entity_container_identifiers"]["asym_ids"]), self.rcsb_data_dict["polymer_entities"], 0)
-        # The rcsb_data_dict contains a list of polymer entities, each of which has 4 properties (in ..._container_identifiers):
-
-        # - auth_asym_ids  : this is the closest you have to an id of the polymer in the structure, but if there are multiple assemblies, this is an array of the two chains that are the same polymer in each assembly.
-        # - asym_ids       : this is the ids of the this AND all other chains that are the same assymteric unit as the given polymer. So, useless for purposes of identification:
-        # - entity_id      : so far as I can tell, this only serves to connect a polymer to its assembly container ( why this is not done via auth_asym_id directly is beyond me, legacy reasons this and that probably)
-        # - pdbx_strand_id : confusing piece of garbage that sometimes overlaps with auth_asym_id
-
-        # Ex. 4V8E.DD
-        # assembly_id=1 asym_ids=['BB', 'CD', 'ED', 'ZA'] auth_asym_id='DD' parent_rcsb_id='4V8E' src_organism_names=[] host_organism_names=[] src_organism_ids=[] host_organism_ids=[] rcsb_pdbx_description='TRNA-TYR' entity_poly_strand_id='BB,BD,DB,DD' entity_poly_seq_one_letter_code='GGUGGGGUUCCCGAGCGGCCAAAGGGAGCAGACUGUA(MIA)AUCUGCCGUCAUCGACUUCGAAGGUUCGAAUCCUUCCCCCACCACCA' entity_poly_seq_one_letter_code_can='GGUGGGGUUCCCGAGCGGCCAAAGGGAGCAGACUGUAAAUCUGCCGUCAUCGACUUCGAAGGUUCGAAUCCUUCCCCCACCACCA' entity_poly_seq_length=85 entity_poly_polymer_type='RNA' entity_poly_entity_type='polyribonucleotide' nomenclature=['tRNA']
-
-        # Given this state of affairs, if we want to be able to uniquely (coordinate-wise) identify each chain, we need to account for cases where RCSB has provided two and sometimes four polymer collapsed into one representation.
-        # We do this by counting assymetric_ids of each polymer and hold that as a
+        structure_data   = query_rcsb_api(EntryInfoString)
+        assemblies_data  = query_rcsb_api(AssemblyInfoString)
+        polymers_data    = query_rcsb_api(PolymerEntitiesString)
+        nonpolymers_data = query_rcsb_api(NonpolymerEntitiesString)
+        # TODO: This needs to be a lambda over nonpolymer chem ids.
+        # ligands_chem_info   = query_rcsb_api(NonpolymerEntitiesString)
+        pass
 
     def asm_parse(self, dictionaries: list[dict]) -> list[AssemblyInstancesMap]:
         return list(map(AssemblyInstancesMap.model_validate, dictionaries))
@@ -624,17 +616,16 @@ class ETLCollector:
             else: raise LookupError("Could not assign chain {} to any assembly".format(auth_asym_id))
 
 
-
     async def process_structure(self, overwrite: bool = False)->RibosomeStructure:
+        # TODO : 
+        # 1. parse assemblies
+        # 2. process structure node
+        # 3. process polymers
+        # 4. infer species from polymers (rewrite)
+        # 5. process ligands (incorporate chem info)
 
-        structure_data   = query_rcsb_api(EntryInfoString)
-        assemblies_data  = query_rcsb_api(AssemblyInfoString)
-        polymers_data    = query_rcsb_api(PolymerEntitiesString)
-        nonpolymers_data = query_rcsb_api(NonpolymerEntitiesString)
-        # TODO: This needs to be a lambda over nonpolymer chem ids.
-        # ligands_chem_info   = query_rcsb_api(NonpolymerEntitiesString)
-        
-
+        self.asm_maps         = self.asm_parse(response["assemblies"])
+        self.polymers_target_count = functools.reduce( lambda count, poly: count + len(poly["rcsb_polymer_entity_container_identifiers"]["asym_ids"]), self.rcsb_data_dict["polymer_entities"], 0)
 
         rcsb_id = self.rcsb_data_dict["rcsb_id"]
         RA      = RibosomeOps(rcsb_id)
@@ -762,5 +753,7 @@ class ETLCollector:
             subunit_presence       = subunit_presence
         )
 
-        RA.write_own_json_profile(reshaped.model_dump(), overwrite=True)
+        print("Succeeded")
+        exit(738)
+        RA.write_own_json_profile(reshaped.model_dump(), overwrite=False)
         return reshaped
