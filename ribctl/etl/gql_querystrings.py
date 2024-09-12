@@ -1,4 +1,4 @@
-entry_info_string = """
+EntryInfoString = """
   rcsb_accession_info{
     deposit_date
   }
@@ -30,7 +30,7 @@ entry_info_string = """
 """
 
 
-assembly_identification_string = """
+AssemblyIdentificationString = """
 assemblies{
     rcsb_id 
    	nonpolymer_entity_instances{
@@ -53,9 +53,12 @@ assemblies{
     }
   }"""
 
-single_structure_graphql_template = """{
+StructureGraphQLTemplate = """{
   entry(entry_id: "$RCSB_ID") {
-    rcsb_id
+
+
+
+
 
     assemblies{
         rcsb_id 
@@ -76,7 +79,11 @@ single_structure_graphql_template = """{
       }
 
 
+      
 
+
+
+    rcsb_id
       rcsb_accession_info{
         deposit_date
       }
@@ -106,6 +113,10 @@ single_structure_graphql_template = """{
         text
       }
 
+
+
+
+      
 
 
     polymer_entities {
@@ -197,7 +208,7 @@ single_structure_graphql_template = """{
   }
 }"""
 
-polymer_entities_string = """{
+PolymerEntitiesString = """{
   entry(entry_id: "$RCSB_ID") {
    assemblies {
       polymer_entity_instances {
@@ -253,7 +264,7 @@ polymer_entities_string = """{
   }
 }"""
 
-nonpolymer_entities_string = """{
+NonpolymerEntitiesString = """{
   entry(entry_id: "$RCSB_ID") {
      nonpolymer_entities {
       pdbx_entity_nonpoly {
@@ -300,86 +311,86 @@ nonpolymer_entities_string = """{
   }
 }"""
 
-structure_string = """{
-  entry(entry_id:"$RCSB_ID"){
-    rcsb_id
-    struct_keywords {
-      pdbx_keywords
-      text
-    }
-    rcsb_entry_info {
-      resolution_combined
-    }
-    rcsb_external_references {
-      link
-      type
-      id
-    }
-    exptl {
-      method
-    }
-    citation {
-      rcsb_authors
-      year
-      title
-      pdbx_database_id_DOI
-    }
-    struct_keywords {
-      pdbx_keywords
-      text
-    }
-    assemblies{
+# structure_string = """{
+#   entry(entry_id:"$RCSB_ID"){
+#     rcsb_id
+#     struct_keywords {
+#       pdbx_keywords
+#       text
+#     }
+#     rcsb_entry_info {
+#       resolution_combined
+#     }
+#     rcsb_external_references {
+#       link
+#       type
+#       id
+#     }
+#     exptl {
+#       method
+#     }
+#     citation {
+#       rcsb_authors
+#       year
+#       title
+#       pdbx_database_id_DOI
+#     }
+#     struct_keywords {
+#       pdbx_keywords
+#       text
+#     }
+#     assemblies{
 
 
-      rcsb_assembly_info {
-        assembly_id
-        atom_count
-        branched_atom_count
-        branched_entity_count
-        branched_entity_instance_count
-        hydrogen_atom_count
-        modeled_polymer_monomer_count
-        na_polymer_entity_types
-        nonpolymer_atom_count
-        nonpolymer_entity_count
-        nonpolymer_entity_instance_count
-        num_heterologous_interface_entities
-        num_heteromeric_interface_entities
-        num_homomeric_interface_entities
-        num_interface_entities
-        num_interfaces
-        num_isologous_interface_entities
-        num_na_interface_entities
-        num_prot_na_interface_entities
-        num_protein_interface_entities
-        polymer_atom_count
-        polymer_composition
-        polymer_entity_count
-        polymer_entity_count_DNA
-        polymer_entity_count_RNA
-        polymer_entity_count_nucleic_acid
-        polymer_entity_count_nucleic_acid_hybrid
-        polymer_entity_count_protein
-        polymer_entity_instance_count
-        polymer_entity_instance_count_DNA
-        polymer_entity_instance_count_RNA
-        polymer_entity_instance_count_nucleic_acid
-        polymer_entity_instance_count_nucleic_acid_hybrid
-        polymer_entity_instance_count_protein
-        polymer_monomer_count
-        selected_polymer_entity_types
-        solvent_atom_count
-        solvent_entity_count
-        solvent_entity_instance_count
-        total_assembly_buried_surface_area
-        total_number_interface_residues
-        unmodeled_polymer_monomer_count
-      }
-    }
-  }
-}"""
+#       rcsb_assembly_info {
+#         assembly_id
+#         atom_count
+#         branched_atom_count
+#         branched_entity_count
+#         branched_entity_instance_count
+#         hydrogen_atom_count
+#         modeled_polymer_monomer_count
+#         na_polymer_entity_types
+#         nonpolymer_atom_count
+#         nonpolymer_entity_count
+#         nonpolymer_entity_instance_count
+#         num_heterologous_interface_entities
+#         num_heteromeric_interface_entities
+#         num_homomeric_interface_entities
+#         num_interface_entities
+#         num_interfaces
+#         num_isologous_interface_entities
+#         num_na_interface_entities
+#         num_prot_na_interface_entities
+#         num_protein_interface_entities
+#         polymer_atom_count
+#         polymer_composition
+#         polymer_entity_count
+#         polymer_entity_count_DNA
+#         polymer_entity_count_RNA
+#         polymer_entity_count_nucleic_acid
+#         polymer_entity_count_nucleic_acid_hybrid
+#         polymer_entity_count_protein
+#         polymer_entity_instance_count
+#         polymer_entity_instance_count_DNA
+#         polymer_entity_instance_count_RNA
+#         polymer_entity_instance_count_nucleic_acid
+#         polymer_entity_instance_count_nucleic_acid_hybrid
+#         polymer_entity_instance_count_protein
+#         polymer_monomer_count
+#         selected_polymer_entity_types
+#         solvent_atom_count
+#         solvent_entity_count
+#         solvent_entity_instance_count
+#         total_assembly_buried_surface_area
+#         total_number_interface_residues
+#         unmodeled_polymer_monomer_count
+#       }
+#     }
+#   }
+# }"""
 
-ligands_chem_info = """{
+LigandsChemInfo = """{
   chem_comps(comp_ids: $COMP_IDS) {
     rcsb_chem_comp_descriptor {
       SMILES
