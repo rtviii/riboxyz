@@ -3,10 +3,9 @@ from rdkit.Chem import AllChem
 import requests
 import json
 
-
 def get_compound_class(smiles):
     # Generate InChI from SMILES using RDKit
-    mol = Chem.MolFromSmiles(smiles)
+    mol   = Chem.MolFromSmiles(smiles)
     inchi = Chem.MolToInchi(mol)
 
     # Use ClassyFire API to get classification
@@ -15,6 +14,7 @@ def get_compound_class(smiles):
     headers = {"Content-Type": "application/json"}
 
     response = requests.post(url, data=json.dumps(payload), headers=headers)
+
     data = response.json()
 
     # Get the query ID and wait for results
@@ -35,7 +35,6 @@ def get_compound_class(smiles):
 smiles = "CC1[C@H]([C@@H]([C@H]([C@@H]([C@H]1N)O[C@@H]2[C@@H]([C@H]([C@@H]([C@H](O2)CO)O)O)N)O[C@H]3[C@@H]([C@@H]([C@H](O3)CO)O[C@@H]4[C@@H]([C@H]([C@@H]([C@@H](O4)CN)O)O)N)O)O)N"  # SMILES for Paromomycin
 compound_class = get_compound_class(smiles)
 print(f"The class of the compound is: {compound_class}")
-
 
 
 LigandChemInfo = """
