@@ -27,7 +27,7 @@ class AssetClass(enum.StrEnum):
     profile   = auto()
     cif       = auto()
     ptc       = auto()
-    chains    = auto()
+    # chains    = auto()
     thumbnail = auto()
 
     @staticmethod
@@ -65,9 +65,9 @@ class AssetPath:
     def profile(self):
         return os.path.join(self.dir, f"{self.rcsb_id}.json")
 
-    @property
-    def chains_dir(self):
-        return f"{self.dir}/CHAINS"
+    # @property
+    # def chains_dir(self):
+    #     return f"{self.dir}/CHAINS"
 
     @property
     def classification_report(self):
@@ -404,8 +404,8 @@ class Assets:
                 return os.path.exists(self.paths.cif)
             case AssetClass.ptc:
                 return os.path.exists(self.paths.ptc)
-            case AssetClass.chains:
-                return os.path.exists(self.paths.chains_dir) and len(os.listdir(self.paths.chains_dir))> 0
+            # case AssetClass.chains:
+            #     return os.path.exists(self.paths.chains_dir) and len(os.listdir(self.paths.chains_dir))> 0
             case AssetClass.thumbnail:
                 return os.path.exists(self.paths.thumbnail)
             case _:
