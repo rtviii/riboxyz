@@ -37,6 +37,28 @@ compound_class = get_compound_class(smiles)
 print(f"The class of the compound is: {compound_class}")
 
 
+
+LigandChemInfo = """
+{
+  chem_comps(comp_ids: ["SPD", "SPM", "PAR"]) {
+    rcsb_chem_comp_descriptor {
+      SMILES
+      comp_id
+      SMILES_stereo
+    }
+    drugbank {
+      drugbank_info {
+        description
+        indication
+        name
+      }
+    }
+  }
+}
+"""
+
+
+
 # curl  -H "Accept: application/json" -H "Content-type: application/json" -d '{"label":"test", "query_input":"MOL1\\tCCCOCC\\nMOL2\\tCOCC=CCCC", "query_type":"STRUCTURE"}' -X POST http://classyfire.wishartlab.com/queries
 
 # curl  -H "Accept: application/json" -H "Content-type: application/json" -d '{"label":"test", "query_input":"PAR\tCC1[C@H]([C@@H]([C@H]([C@@H]([C@H]1N)O[C@@H]2[C@@H]([C@H]([C@@H]([C@H](O2)CO)O)O)N)O[C@H]3[C@@H]([C@@H]([C@H](O3)CO)O[C@@H]4[C@@H]([C@H]([C@@H]([C@@H](O4)CN)O)O)N)O)O)N\nKSG\tC[C@@H]1[C@H](C[C@@H]([C@H](O1)OC2[C@@H]([C@H](C([C@@H]([C@@H]2O)O)O)O)O)N)N=C(C(=O)O)N", "query_type":"STRUCTURE"}' -X POST http://classyfire.wishartlab.com/queries
