@@ -1,5 +1,4 @@
 entry_info_string = """
-
   rcsb_accession_info{
     deposit_date
   }
@@ -30,6 +29,7 @@ entry_info_string = """
     }
 """
 
+
 assembly_identification_string = """
 assemblies{
     rcsb_id 
@@ -52,7 +52,6 @@ assemblies{
       }
     }
   }"""
-
 
 single_structure_graphql_template = """{
   entry(entry_id: "$RCSB_ID") {
@@ -379,3 +378,21 @@ structure_string = """{
     }
   }
 }"""
+
+ligands_chem_info = """{
+  chem_comps(comp_ids: $COMP_IDS) {
+    rcsb_chem_comp_descriptor {
+      SMILES
+      comp_id
+      SMILES_stereo
+    }
+    drugbank {
+      drugbank_info {
+        description
+        indication
+        name
+      }
+    }
+  }
+}
+"""

@@ -14,17 +14,11 @@ ce = click.echo
 def lig(ctx):
     pass
 
-
-
 @lig.command()
 def list_ligands(limit):
     """Display all ligand-structure pairs from the neo4j database."""
     reader  = Neo4jReader()
     results = reader.list_ligands()
-
-
-
-    
 
 @lig.command()
 @click.argument("chem_id", required=True, type=str)
