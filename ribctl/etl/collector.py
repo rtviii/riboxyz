@@ -624,7 +624,7 @@ class ETLCollector:
         # 4. infer species from polymers (rewrite)
         # 5. process ligands (incorporate chem info)
 
-        self.asm_maps         = self.asm_parse(response["assemblies"])
+        self.asm_maps              = self.asm_parse(response["assemblies"])
         self.polymers_target_count = functools.reduce( lambda count, poly: count + len(poly["rcsb_polymer_entity_container_identifiers"]["asym_ids"]), self.rcsb_data_dict["polymer_entities"], 0)
 
         rcsb_id = self.rcsb_data_dict["rcsb_id"]

@@ -28,7 +28,7 @@ from ribctl.lib.schema.types_ribosome import (
 )
 
 
-from ribctl.etl.gql_querystrings import StructureGraphQLTemplate
+from ribctl.etl.gql_querystrings import WholeStructureTemplate
 from ribctl.logs.loggers import get_etl_logger
 logger = get_etl_logger()
 
@@ -46,7 +46,7 @@ def query_rcsb_api(gql_string: str) -> dict:
         raise Exception("No data found for query: {}".format(gql_string))
 
 def rcsb_single_structure_graphql(rcsb_id):
-    return StructureGraphQLTemplate.replace("$RCSB_ID", rcsb_id.upper())
+    return WholeStructureTemplate.replace("$RCSB_ID", rcsb_id.upper())
 
 class ReannotationPipeline:
     """
