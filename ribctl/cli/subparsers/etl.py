@@ -10,10 +10,23 @@ from ribctl.logs.loggers import get_etl_logger
 @click.group(invoke_without_command=True)
 @click.pass_context
 def etl(ctx: Context):
-    if ctx.invoked_subcommand is None:
-        stdin_text = click.get_text_stream("stdin")
-        rcsb_id    = ctx.obj["rcsb_id"]
+    # if ctx.invoked_subcommand is None:
+    #     stdin_text = click.get_text_stream("stdin")
+    #     rcsb_id    = ctx.obj["rcsb_id"]
+    pass
 
+
+        # - which assets are missing,
+        # - how up-to date with RCSB are we
+        # - last error logs.
+        # click.echo("Hi! You ran the 'etl' command without any subcommands.")
+
+
+
+
+@etl.command()
+@click.pass_context
+def all(ctx:Context):
         global_status = Assets.global_status()
         list(map(lambda a: a.name, list(AssetClass)))
         header = (
@@ -29,11 +42,6 @@ def etl(ctx: Context):
                 ["| {}  ".format("X" if v[a] else " ") for a in list(AssetClass)]
             )
             click.echo(assets_row)
-
-        # - which assets are missing,
-        # - how up-to date with RCSB are we
-        # - last error logs.
-        # click.echo("Hi! You ran the 'etl' command without any subcommands.")
 
 
 @etl.command()

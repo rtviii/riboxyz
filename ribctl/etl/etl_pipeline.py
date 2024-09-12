@@ -53,7 +53,7 @@ class ReannotationPipeline:
     ETL Pipeline as it currently stands takes care of injesting a graphql profile from RCSB and reshaping it into a RibosomeStructure.
     This is the class that oversees all of the annotations that added/edited on the _semantic profile_(as opposed to the structural files) by us, including:
 
-    - metadat reshaping
+    - metadata reshaping
     - rRNA classification
     - rProtein classification
     - factors annotation
