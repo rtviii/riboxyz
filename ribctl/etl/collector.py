@@ -29,13 +29,12 @@ class StructureNode:
 
         self.rcsb_data_entry  = data
 
-    def process(self)->dict:
-        ...
+    # def process(self)->list[dict]:
+    #      = self.process_metadata()
 
-    def process_metadata(self):
+    def process(self)->list:
 
         externalRefs = self.extract_external_refs( self.rcsb_data_entry["rcsb_external_references"] )
-
         if ( self.rcsb_data_entry["citation"] != None and len(self.rcsb_data_entry["citation"]) > 0 ):
             pub = self.rcsb_data_entry["citation"][0]
         else:
@@ -57,7 +56,7 @@ class StructureNode:
         external_refs: list[{ link: string; type: string; id: string }]
         """
 
-        externalRefIds: list[str] = []
+        externalRefIds  : list[str] = []
         externalRefTypes: list[str] = []
         externalRefLinks: list[str] = []
 
@@ -736,8 +735,9 @@ class ETLCollector:
                 o.assembly_id = self.poly_assign_to_asm(o.auth_asym_id) 
 
         structure_data   = self.query_rcsb_api(EntryInfoString.replace("$RCSB_ID", self.rcsb_id))['entry']
-        structure = StructureNode(structure_data).process()
-
+        [externalRefs, pub, kwords_text, kwords] = StructureNode(structure_data).process()
+        #  = StructureNode
+        print([externalRefs, pub, kwords_text, kwords])
         exit()
 
 
@@ -754,7 +754,6 @@ class ETLCollector:
                     is_mitochondrial=True
                     break
 
-        [externalRefs, pub, kwords_text, kwords] = self.process_metadata()
 
         organisms                                = self.infer_organisms_from_polymers([*_prot_polypeptides, *_rna_polynucleotides])
         reshaped_nonpolymers                     = self.process_nonpolymers()
