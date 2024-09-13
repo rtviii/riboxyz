@@ -627,18 +627,32 @@ class ETLCollector:
             else: raise LookupError("Could not assign chain {} to any assembly".format(auth_asym_id))
 
     def asm_parse(self, dictionaries: list[dict]) -> list[AssemblyInstancesMap]:
-        print(dictionaries)
-        AssemblyInstancesMap.model_validate(dictionaries[0])
-        exit(00)
-        # return list(map(AssemblyInstancesMap.model_validate, dictionaries))
+        return list(map(AssemblyInstancesMap.model_validate, dictionaries))
 
     async def process_structure(self, overwrite: bool = False)->RibosomeStructure:
+        RA = RibosomeOps(self.rcsb_id)
+        if os.path.isfile(RA.paths.profile):
+            logger.debug( "Profile already exists for {}.".format(self.rcsb_id))
+            if not overwrite:
+                return RA.profile()
         # TODO : 
         # 1. parse assemblies
         # 2. process structure node
         # 3. process polymers
         # 4. infer species from polymers (rewrite)
         # 5. process ligands (incorporate chem info)
+
+
+        assemblies_data  = query_rcsb_api(AssemblyIdentificationString.replace("$RCSB_ID", self.rcsb_id))['entry']['assemblies']
+        self.asm_maps              = self.asm_parse(assemblies_data)
+
+        # This says "accumlate over all LENGTHS of "asym_ids" field (generally 1 or 2) of each polymer in `polymer_entities`  
+        # TODO: So we need to return this from POLYMER DATA
+        self.polymers_target_count = functools.reduce( lambda count, poly: count + len(poly["rcsb_polymer_entity_container_identifiers"]["asym_ids"]), self.rcsb_data_dict["polymer_entities"], 0)
+
+
+
+
 
         structure_data   = query_rcsb_api(EntryInfoString.replace("$RCSB_ID", self.rcsb_id))
         polymers_data    = query_rcsb_api(PolymerEntitiesString.replace("$RCSB_ID", self.rcsb_id))
@@ -647,28 +661,6 @@ class ETLCollector:
         metadata = StructureNode(structure_data).process()
         polymers = PolymersNode(polymers_data).process()
         ligands  = NonpolymersNode(nonpolymers_data).process()
-
-
-        assemblies_data  = query_rcsb_api(AssemblyIdentificationString.replace("$RCSB_ID", self.rcsb_id))['entry']['assemblies']
-        
-        pprint(assemblies_data[0]['nonpolymer_entity_instances'])
-        # exit(0)
-        self.asm_maps              = self.asm_parse(assemblies_data)
-
-        # pprint(assemblies_data)
-        exit(1)
-        self.polymers_target_count = functools.reduce( lambda count, poly: count + len(poly["rcsb_polymer_entity_container_identifiers"]["asym_ids"]), self.rcsb_data_dict["polymer_entities"], 0)
-
-        rcsb_id = self.rcsb_data_dict["rcsb_id"]
-        RA      = RibosomeOps(rcsb_id)
-
-        if os.path.isfile(RA.paths.profile):
-            logger.debug( "Profile already exists for {}.".format(rcsb_id))
-            if overwrite:
-                print("Overwrite")
-            else:
-                return RA.profile()
-
 
 
         # # ! According to RCSB schema, polymer_entites include "Protein", "RNA" but also "DNA", N"A-Hybrids" and "Other".
