@@ -62,6 +62,8 @@ AssemblyIdentificationString = """
 
 PolymerEntitiesString = """{
   entry(entry_id: "$RCSB_ID") {
+    
+    rcsb_id
     assemblies {
       polymer_entity_instances {
         rcsb_id

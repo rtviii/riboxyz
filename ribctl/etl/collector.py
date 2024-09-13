@@ -5,19 +5,18 @@
 # 3. return the intermediate types and combine 
 
 # Let's have a collector class that will orchestrate this and do the housekeeping (assembly ids and shit like that).
-
-
 import functools
 import json
 import os
 from pprint import pprint
+from typing import Any, Optional
 
 from loguru import logger
 import pyhmmer
 import requests
 from ribctl.etl.etl_assets_ops import RibosomeOps
 from ribctl.etl.gql_querystrings import AssemblyIdentificationString, EntryInfoString, NonpolymerEntitiesString, PolymerEntitiesString
-from ribctl.lib.schema.types_ribosome import RNA, AssemblyInstancesMap, CytosolicProteinClass, NonpolymericLigand, Polymer, PolynucleotideClass, PolypeptideClass, Protein, RibosomeStructure
+from ribctl.lib.schema.types_ribosome import RNA, AssemblyInstancesMap, CytosolicProteinClass, LifecycleFactorClass, MitochondrialProteinClass, NonpolymericLigand, Polymer, PolynucleotideClass, PolypeptideClass, Protein, RibosomeStructure
 from ribctl.lib.libhmm import HMM, HMMClassifier
 
 
@@ -93,15 +92,98 @@ class StructureNode:
 
 class PolymersNode:
     # ? Initialized classification resources:
-    rcsb_polymers            : int
 
+    rcsb_polymers         : int
     hmm_ribosomal_proteins: dict[CytosolicProteinClass, HMM]
+    rcsb_data_polymers    : dict
+    rcsb_data_assemblies  : dict
+    rcsb_id               : str
 
     def __init__(self,data:dict) -> None:
-        ...
+        self.rcsb_data_polymers   = data['polymer_entities']
+        self.rcsb_data_assemblies = data['assemblies']
+        self.rcsb_id   = data['rcsb_id']
 
-    def process(self)->dict:
-        ...
+    def process(self)->list[list[Polymer]]:
+        # This says "accumlate over all LENGTHS of "asym_ids" field (generally 1 or 2) of each polymer in `polymer_entities`  
+        # TODO: So we need to return this from POLYMER DATA
+        # self.polymers_target_count = functools.reduce( lambda count, poly: count + len(poly["rcsb_polymer_entity_container_identifiers"]["asym_ids"]), self.rcsb_data_dict["polymer_entities"], 0)
+        self.polymers_target_count = functools.reduce( lambda count, poly: count + len(poly["rcsb_polymer_entity_container_identifiers"]["asym_ids"]), self.rcsb_data_polymers, 0)
+        print("Polymers target count:", self.polymers_target_count)
+        # # ! According to RCSB schema, polymer_entites include "Protein", "RNA" but also "DNA", N"A-Hybrids" and "Other".
+        # # ! We only make the distinction between Proteins and RNA and Other for purposes of simplicity
+        # def is_protein(poly:Polymer)->bool:
+        #     return poly.entity_poly_polymer_type == "Protein"
+        # def is_rna(poly:Polymer)->bool:
+        #     return poly.entity_poly_entity_type == "RNA"
+
+        _prot_polypeptides  :list[Protein] = []
+        _rna_polynucleotides:list[RNA]     = []
+        _other_polymers     :list[Polymer] = []
+
+        for polymer_dict in self.rcsb_data_polymers:
+            polys = self.raw_to_polymer(polymer_dict, self.rcsb_id)
+            for poly in polys:
+                match poly.entity_poly_polymer_type:
+                    case "Protein":
+                        prot = Protein.from_polymer(poly,**polymer_dict)
+                        _prot_polypeptides.append(prot)
+                    case "RNA":
+                        rna = RNA.model_validate(({**polymer_dict, **poly.model_dump()}))
+                        _rna_polynucleotides.append(rna)
+                    case _:
+                        _other_polymers.append(poly)
+
+        print("Converted to polymers successfully")
+        logger.debug("Classifying {}: {} polypeptides, {} polynucleotides, {} other.".format(self.rcsb_id, len(_prot_polypeptides), len(_rna_polynucleotides), len(_other_polymers)))
+
+        RA  = RibosomeOps(self.rcsb_id)
+        if not os.path.exists(RA.paths.classification_report) :
+            print("Creating new classifciation report.")
+            protein_alphabet      = pyhmmer.easel.Alphabet.amino()
+            protein_classifier    = HMMClassifier(_prot_polypeptides, protein_alphabet, [p for p in [ *list(CytosolicProteinClass),*list(LifecycleFactorClass) , *list(MitochondrialProteinClass)] ])
+            protein_classifier.classify_chains()
+           
+            rna_alphabet             = pyhmmer.easel.Alphabet.rna()
+            rna_classifier           = HMMClassifier(_rna_polynucleotides, rna_alphabet, [p for p in list(PolynucleotideClass)])
+            rna_classifier.classify_chains()
+
+            prot_classification = protein_classifier.produce_classification()
+            rna_classification  = rna_classifier.produce_classification()
+
+            full_report      = { **rna_classifier.report, **protein_classifier.report }
+            reported_classes = { k:v for ( k,v ) in [*prot_classification.items(), *rna_classification.items()] }
+            report_path      = RA.paths.classification_report
+
+            with open(report_path, "w") as outfile:
+                json.dump(full_report, outfile, indent=4)
+                logger.debug("Saved classification report to {}".format(report_path))
+
+        else:
+            # * Make sure you pick the "best_hit". The reports are saved with multiple possible class assignments for each chain (for the record/debugging).
+            print("Using existing classification report: {}".format(RA.paths.classification_report))
+            with open(RA.paths.classification_report, "r") as infile:
+                full_report      = json.load(infile)
+                reported_classes = { auth_asym_id:HMMClassifier.pick_best_hit(polymer_class_hits, 35) for ( auth_asym_id,polymer_class_hits ) in full_report.items() }
+
+        #! PROPAGATE NOMENCLATUERE FROM HMM REPORT TO POLYMERS
+        for polymer_dict in _rna_polynucleotides:
+            if polymer_dict.auth_asym_id in reported_classes.keys():
+                # momentarily converting to the PolymerClass enums to serialize correctly (see Polymer class def)
+                polymer_dict.nomenclature = list(map(PolynucleotideClass, reported_classes[polymer_dict.auth_asym_id])) 
+ 
+        for polymer_dict in _prot_polypeptides:
+            if polymer_dict.auth_asym_id in reported_classes.keys():
+                # momentarily converting to the PolymerClass enums to serialize correctly (see Polymer class def)
+                polymer_dict.nomenclature = list(map(PolypeptideClass,reported_classes[polymer_dict.auth_asym_id]))
+        assert (
+            len(_rna_polynucleotides)
+            + len(_prot_polypeptides)
+            + len(_other_polymers)
+        ) == self.polymers_target_count
+        print("Assertion passed")
+
+        return [_prot_polypeptides, _rna_polynucleotides, _other_polymers]
 
     def infer_organisms_from_polymers(self, polymers: list[Polymer]):
         #? A hack and should be differentiated
@@ -385,10 +467,10 @@ class PolymersNode:
             for auth_asym_id in rpotein_polymer_obj[ "rcsb_polymer_entity_container_identifiers" ]["auth_asym_ids"] 
             ]
 
-    def raw_to_polymer(self,data_dict:dict)->list[Polymer]:
+    def raw_to_polymer(self,polymer_entity:dict, parent_rcsb_id:str)->list[Polymer]:
 
-        host_organisms: list[Any] | None = data_dict[ "rcsb_entity_host_organism" ]
-        source_organisms: list[Any] | None = data_dict[ "rcsb_entity_source_organism" ]
+        host_organisms  : list[Any] | None = polymer_entity[ "rcsb_entity_host_organism" ]
+        source_organisms: list[Any] | None = polymer_entity[ "rcsb_entity_source_organism" ]
 
         host_organism_ids   = []
         host_organism_names = []
@@ -415,24 +497,26 @@ class PolymersNode:
         src_organism_names  = list(map(str, set(src_organism_names)))
 
         return [Polymer(
-            assembly_id                         = self.poly_assign_to_asm(auth_asym_id) ,
+            # assembly_id                         = self.poly_assign_to_asm(auth_asym_id) ,
+
+            assembly_id                         = -1, # This is a hack to complete the model. The assemblies are later assigned at the Collector levek.
             nomenclature                        = [] ,                                                                   # Nomenclature does not exist for arbitrary polymers
-            asym_ids                            = data_dict["rcsb_polymer_entity_container_identifiers"][ "asym_ids" ] ,
+            asym_ids                            = polymer_entity["rcsb_polymer_entity_container_identifiers"][ "asym_ids" ] ,
             auth_asym_id                        = auth_asym_id ,
-            parent_rcsb_id                      = data_dict["entry"]["rcsb_id"] ,
+            parent_rcsb_id                      = parent_rcsb_id,
             host_organism_ids                   = host_organism_ids ,
             host_organism_names                 = host_organism_names ,
             src_organism_ids                    = src_organism_ids ,
             src_organism_names                  = src_organism_names ,
-            rcsb_pdbx_description               = "" if data_dict["rcsb_polymer_entity"]["pdbx_description"] == None else data_dict["rcsb_polymer_entity"]["pdbx_description"],
-            entity_poly_strand_id               = data_dict["entity_poly"]["pdbx_strand_id"] ,
-            entity_poly_seq_one_letter_code     = data_dict["entity_poly"]["pdbx_seq_one_letter_code"] ,
-            entity_poly_seq_one_letter_code_can = data_dict["entity_poly"]["pdbx_seq_one_letter_code_can" ],
-            entity_poly_seq_length              = data_dict["entity_poly"]["rcsb_sample_sequence_length" ],
-            entity_poly_entity_type             = data_dict["entity_poly"]["type"],
-            entity_poly_polymer_type            = data_dict["entity_poly"]["rcsb_entity_polymer_type"]
+            rcsb_pdbx_description               = "" if polymer_entity["rcsb_polymer_entity"]["pdbx_description"] == None else polymer_entity["rcsb_polymer_entity"]["pdbx_description"],
+            entity_poly_strand_id               = polymer_entity["entity_poly"]["pdbx_strand_id"] ,
+            entity_poly_seq_one_letter_code     = polymer_entity["entity_poly"]["pdbx_seq_one_letter_code"] ,
+            entity_poly_seq_one_letter_code_can = polymer_entity["entity_poly"]["pdbx_seq_one_letter_code_can" ],
+            entity_poly_seq_length              = polymer_entity["entity_poly"]["rcsb_sample_sequence_length" ],
+            entity_poly_entity_type             = polymer_entity["entity_poly"]["type"],
+            entity_poly_polymer_type            = polymer_entity["entity_poly"]["rcsb_entity_polymer_type"]
         )
-        for auth_asym_id in data_dict[ "rcsb_polymer_entity_container_identifiers" ]["auth_asym_ids"]]
+        for auth_asym_id in polymer_entity[ "rcsb_polymer_entity_container_identifiers" ]["auth_asym_ids"]]
 
     def poly_reshape_to_factor(self, factor_polymer_obj) -> list[Protein]:
         host_organisms: list[Any] | None = factor_polymer_obj[ "rcsb_entity_host_organism" ]
@@ -596,7 +680,7 @@ class ETLCollector:
     # hmm_ribosomal_proteins: dict[CytosolicProteinClass, HMM]
 
     # ? Housekeeping
-    asm_maps                 : list[AssemblyInstancesMap]
+    asm_maps            : list[AssemblyInstancesMap]
     polymers_target_count: int
     # rcsb_polymers            : int
     # rcsb_nonpolymers         : int
@@ -608,7 +692,6 @@ class ETLCollector:
 
         # self.rcsb_polymers    = len(self.rcsb_data_dict["polymer_entities"])
         # self.rcsb_nonpolymers = (len(self.rcsb_data_dict["nonpolymer_entities"]) if self.rcsb_data_dict["nonpolymer_entities"] != None else 0)
-
 
 
     def poly_assign_to_asm(self, auth_asym_id: str) -> int:
@@ -643,101 +726,28 @@ class ETLCollector:
         # 5. process ligands (incorporate chem info)
 
 
-        assemblies_data  = query_rcsb_api(AssemblyIdentificationString.replace("$RCSB_ID", self.rcsb_id))['entry']['assemblies']
-        self.asm_maps              = self.asm_parse(assemblies_data)
+        #! Assemblies metadata
+        assemblies_data = query_rcsb_api(AssemblyIdentificationString.replace("$RCSB_ID", self.rcsb_id))['entry']['assemblies']
 
-        # This says "accumlate over all LENGTHS of "asym_ids" field (generally 1 or 2) of each polymer in `polymer_entities`  
-        # TODO: So we need to return this from POLYMER DATA
-        self.polymers_target_count = functools.reduce( lambda count, poly: count + len(poly["rcsb_polymer_entity_container_identifiers"]["asym_ids"]), self.rcsb_data_dict["polymer_entities"], 0)
-
-
-
+        #! Polymers
+        polymers_data   = query_rcsb_api(PolymerEntitiesString.replace("$RCSB_ID", self.rcsb_id))['entry']
+        polymers        = PolymersNode(polymers_data).process()
+        #TODO :Assign polymers to assemblies 
+        # for each polymer:
+        #         assembly_id                         = self.poly_assign_to_asm(auth_asym_id) ,
+        exit(1)
 
 
         structure_data   = query_rcsb_api(EntryInfoString.replace("$RCSB_ID", self.rcsb_id))
-        polymers_data    = query_rcsb_api(PolymerEntitiesString.replace("$RCSB_ID", self.rcsb_id))
-        nonpolymers_data = query_rcsb_api(NonpolymerEntitiesString.replace("$RCSB_ID", self.rcsb_id))
+        structure = StructureNode(structure_data).process()
 
-        metadata = StructureNode(structure_data).process()
-        polymers = PolymersNode(polymers_data).process()
+
+        nonpolymers_data = query_rcsb_api(NonpolymerEntitiesString.replace("$RCSB_ID", self.rcsb_id))
         ligands  = NonpolymersNode(nonpolymers_data).process()
 
 
-        # # ! According to RCSB schema, polymer_entites include "Protein", "RNA" but also "DNA", N"A-Hybrids" and "Other".
-        # # ! We only make the distinction between Proteins and RNA and Other for purposes of simplicity
-        # def is_protein(poly:Polymer)->bool:
-        #     return poly.entity_poly_polymer_type == "Protein"
-        # def is_rna(poly:Polymer)->bool:
-        #     return poly.entity_poly_entity_type == "RNA"
 
-
-        poly_entities = self.rcsb_data_dict["polymer_entities"]
-        # polymers      = [*mitt.flatten([self.raw_to_polymer(_) for _ in poly_entities])]
-
-        _prot_polypeptides  :list[Protein] = []
-        _rna_polynucleotides:list[RNA]     = []
-        _other_polymers     :list[Polymer] = []
-
-        for polymer_dict in poly_entities:
-            polys = self.raw_to_polymer(polymer_dict)
-            for poly in polys:
-                match poly.entity_poly_polymer_type:
-                    case "Protein":
-                        prot = Protein.from_polymer(poly,**polymer_dict)
-                        _prot_polypeptides.append(prot)
-                    case "RNA":
-                        rna = RNA.model_validate(({**polymer_dict, **poly.model_dump()}))
-                        _rna_polynucleotides.append(rna)
-                    case _:
-                        _other_polymers.append(poly)
-
-        logger.debug("Classifying {}: {} polypeptides, {} polynucleotides, {} other.".format(rcsb_id, len(_prot_polypeptides), len(_rna_polynucleotides), len(_other_polymers)))
-
-        if not os.path.exists(RA.paths.classification_report) :
-            print("Creating new classifciation report.")
-            protein_alphabet      = pyhmmer.easel.Alphabet.amino()
-            protein_classifier    = HMMClassifier(_prot_polypeptides, protein_alphabet, [p for p in [ *list(CytosolicProteinClass),*list(LifecycleFactorClass) , *list(MitochondrialProteinClass)] ])
-            protein_classifier.classify_chains()
-           
-            rna_alphabet             = pyhmmer.easel.Alphabet.rna()
-            rna_classifier           = HMMClassifier(_rna_polynucleotides, rna_alphabet, [p for p in list(PolynucleotideClass)])
-            rna_classifier.classify_chains()
-
-            prot_classification = protein_classifier.produce_classification()
-            rna_classification  = rna_classifier.produce_classification()
-
-            full_report      = { **rna_classifier.report, **protein_classifier.report }
-            reported_classes = { k:v for ( k,v ) in [*prot_classification.items(), *rna_classification.items()] }
-            report_path      = RA.paths.classification_report
-
-            with open(report_path, "w") as outfile:
-                json.dump(full_report, outfile, indent=4)
-                logger.debug("Saved classification report to {}".format(report_path))
-
-        else:
-            # * Make sure you pick the "best_hit". The reports are saved with multiple possible class assignments for each chain (for the record/debugging).
-            print("Using existing classification report: {}".format(RA.paths.classification_report))
-            with open(RA.paths.classification_report, "r") as infile:
-                full_report      = json.load(infile)
-                reported_classes = { auth_asym_id:HMMClassifier.pick_best_hit(polymer_class_hits, 35) for ( auth_asym_id,polymer_class_hits ) in full_report.items() }
-
-        #! PROPAGATE NOMENCLATUERE FROM HMM REPORT TO POLYMERS
-        for polymer_dict in _rna_polynucleotides:
-            if polymer_dict.auth_asym_id in reported_classes.keys():
-                # momentarily converting to the PolymerClass enums to serialize correctly (see Polymer class def)
-                polymer_dict.nomenclature = list(map(PolynucleotideClass, reported_classes[polymer_dict.auth_asym_id])) 
- 
-        for polymer_dict in _prot_polypeptides:
-            if polymer_dict.auth_asym_id in reported_classes.keys():
-                # momentarily converting to the PolymerClass enums to serialize correctly (see Polymer class def)
-                polymer_dict.nomenclature = list(map(PolypeptideClass,reported_classes[polymer_dict.auth_asym_id]))
-        assert (
-            len(_rna_polynucleotides)
-            + len(_prot_polypeptides)
-            + len(_other_polymers)
-        ) == self.polymers_target_count
-
-
+        # --------------------------
         is_mitochondrial=False
         for rna_d in _rna_polynucleotides:
             if len( rna_d.nomenclature )>0 :
