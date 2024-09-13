@@ -727,17 +727,21 @@ class ETLCollector:
 
 
         #! Assemblies metadata
-        assemblies_data = query_rcsb_api(AssemblyIdentificationString.replace("$RCSB_ID", self.rcsb_id))['entry']['assemblies']
+        self.asm_maps = query_rcsb_api(AssemblyIdentificationString.replace("$RCSB_ID", self.rcsb_id))['entry']['assemblies']
+
 
         #! Polymers
         polymers_data   = query_rcsb_api(PolymerEntitiesString.replace("$RCSB_ID", self.rcsb_id))['entry']
-        polymers        = PolymersNode(polymers_data).process()
-        #TODO :Assign polymers to assemblies 
-        # for each polymer:
-        #         assembly_id                         = self.poly_assign_to_asm(auth_asym_id) ,
-        exit(1)
+        proteins,rna,other        = PolymersNode(polymers_data).process()
+        #! Assign polymers to assemblies 
+        for p in proteins:
+                p.assembly_id = self.poly_assign_to_asm(p.auth_asym_id) 
+        for r in rna:
+                r.assembly_id = self.poly_assign_to_asm(r.auth_asym_id) 
+        for o in other:
+                o.assembly_id = self.poly_assign_to_asm(o.auth_asym_id) 
 
-
+        exit()
         structure_data   = query_rcsb_api(EntryInfoString.replace("$RCSB_ID", self.rcsb_id))
         structure = StructureNode(structure_data).process()
 
