@@ -1,6 +1,7 @@
 EntryInfoString = """
 {
   entry(entry_id: "$RCSB_ID") {
+  rcsb_id
   rcsb_accession_info{
     deposit_date
   }

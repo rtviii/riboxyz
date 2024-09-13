@@ -21,33 +21,23 @@ from ribctl.lib.libhmm import HMM, HMMClassifier
 
 
 
-def query_rcsb_api(gql_string: str) -> dict:
-    """This defines a query in the RCSB search language that identifies the structures we view as 'current' i.e. 40+ proteins, smaller than 4A resolution etc."""
-
-    reqstring = "https://data.rcsb.org/graphql?query={}".format(gql_string)
-    _resp     = requests.get(reqstring)
-    resp      = _resp.json()
-
-    if "data" in resp and "entry" in resp["data"]:
-        return resp["data"]
-    else:
-        raise Exception("No data found for query: {}".format(gql_string))
-
 class StructureNode:
-    rcsb_data:dict
+    rcsb_data_entry:dict
     asm_maps                 : list[AssemblyInstancesMap]
 
     def __init__(self,data:dict) -> None:
-        ...
+
+        self.rcsb_data_entry  = data
 
     def process(self)->dict:
         ...
 
     def process_metadata(self):
-        externalRefs = self.extract_external_refs( self.rcsb_data_dict["rcsb_external_references"] )
 
-        if ( self.rcsb_data_dict["citation"] != None and len(self.rcsb_data_dict["citation"]) > 0 ):
-            pub = self.rcsb_data_dict["citation"][0]
+        externalRefs = self.extract_external_refs( self.rcsb_data_entry["rcsb_external_references"] )
+
+        if ( self.rcsb_data_entry["citation"] != None and len(self.rcsb_data_entry["citation"]) > 0 ):
+            pub = self.rcsb_data_entry["citation"][0]
         else:
             pub = {
                 "year"                   : None,
@@ -57,17 +47,8 @@ class StructureNode:
                 "pdbx_database_id_PubMed": None,
             }
 
-        kwords_text = (
-            self.rcsb_data_dict["struct_keywords"]["text"]
-            if self.rcsb_data_dict["struct_keywords"] != None
-            else None
-        )
-
-        kwords = (
-            self.rcsb_data_dict["struct_keywords"]["pdbx_keywords"]
-            if self.rcsb_data_dict["struct_keywords"] != None
-            else None
-        )
+        kwords_text = ( self.rcsb_data_entry["struct_keywords"]["text"] if self.rcsb_data_entry["struct_keywords"] != None else None )
+        kwords = ( self.rcsb_data_entry["struct_keywords"]["pdbx_keywords"] if self.rcsb_data_entry["struct_keywords"] != None else None )
 
         return [ externalRefs, pub, kwords_text, kwords]
 
@@ -102,7 +83,7 @@ class PolymersNode:
     def __init__(self,data:dict) -> None:
         self.rcsb_data_polymers   = data['polymer_entities']
         self.rcsb_data_assemblies = data['assemblies']
-        self.rcsb_id   = data['rcsb_id']
+        self.rcsb_id              = data['rcsb_id']
 
     def process(self)->list[list[Polymer]]:
         # This says "accumlate over all LENGTHS of "asym_ids" field (generally 1 or 2) of each polymer in `polymer_entities`  
@@ -685,6 +666,19 @@ class ETLCollector:
     # rcsb_polymers            : int
     # rcsb_nonpolymers         : int
 
+    def query_rcsb_api(self,gql_string: str) -> dict:
+        """This defines a query in the RCSB search language that identifies the structures we view as 'current' i.e. 40+ proteins, smaller than 4A resolution etc."""
+
+        reqstring = "https://data.rcsb.org/graphql?query={}".format(gql_string)
+        _resp     = requests.get(reqstring)
+        resp      = _resp.json()
+
+        if "data" in resp and "entry" in resp["data"]:
+            return resp["data"]
+        else:
+            raise Exception("No data found for query: {}".format(gql_string))
+
+
     def __init__(self, rcsb_id:str):
         self.rcsb_id = rcsb_id
         # self.rcsb_data_dict = response
@@ -727,11 +721,11 @@ class ETLCollector:
 
 
         #! Assemblies metadata
-        self.asm_maps = query_rcsb_api(AssemblyIdentificationString.replace("$RCSB_ID", self.rcsb_id))['entry']['assemblies']
+        self.asm_maps = self.query_rcsb_api(AssemblyIdentificationString.replace("$RCSB_ID", self.rcsb_id))['entry']['assemblies']
 
 
         #! Polymers
-        polymers_data   = query_rcsb_api(PolymerEntitiesString.replace("$RCSB_ID", self.rcsb_id))['entry']
+        polymers_data   = self.query_rcsb_api(PolymerEntitiesString.replace("$RCSB_ID", self.rcsb_id))['entry']
         proteins,rna,other        = PolymersNode(polymers_data).process()
         #! Assign polymers to assemblies 
         for p in proteins:
@@ -741,13 +735,14 @@ class ETLCollector:
         for o in other:
                 o.assembly_id = self.poly_assign_to_asm(o.auth_asym_id) 
 
-        exit()
-        structure_data   = query_rcsb_api(EntryInfoString.replace("$RCSB_ID", self.rcsb_id))
+        structure_data   = self.query_rcsb_api(EntryInfoString.replace("$RCSB_ID", self.rcsb_id))['entry']
         structure = StructureNode(structure_data).process()
+
+        exit()
 
 
         nonpolymers_data = query_rcsb_api(NonpolymerEntitiesString.replace("$RCSB_ID", self.rcsb_id))
-        ligands  = NonpolymersNode(nonpolymers_data).process()
+        ligands          = NonpolymersNode(nonpolymers_data).process()
 
 
 
@@ -759,11 +754,11 @@ class ETLCollector:
                     is_mitochondrial=True
                     break
 
-        reshaped_nonpolymers                     = self.process_nonpolymers()
         [externalRefs, pub, kwords_text, kwords] = self.process_metadata()
-        organisms                                = self.infer_organisms_from_polymers([*_prot_polypeptides, *_rna_polynucleotides])
-        subunit_presence                         = lsu_ssu_presence(_rna_polynucleotides, is_mitochondrial)
 
+        organisms                                = self.infer_organisms_from_polymers([*_prot_polypeptides, *_rna_polynucleotides])
+        reshaped_nonpolymers                     = self.process_nonpolymers()
+        subunit_presence                         = lsu_ssu_presence(_rna_polynucleotides, is_mitochondrial)
         reshaped                                 = RibosomeStructure(
             rcsb_id                = self.rcsb_data_dict["rcsb_id"],
             expMethod              = self.rcsb_data_dict["exptl"][0]["method"],
