@@ -517,12 +517,11 @@ class AssemblyInstancesMap(BaseModel):
         class PolymerEntityInstanceContainerIdentifiers(BaseModel):
             entity_id: str
             auth_asym_id: str
-
         rcsb_polymer_entity_instance_container_identifiers: PolymerEntityInstanceContainerIdentifiers
 
-    rcsb_id: str  # ex. 5AFI-1
+    rcsb_id                    : str  # ex. 5AFI-1
     nonpolymer_entity_instances: Optional[list[NonpolymerEntityInstance]] =None
-    polymer_entity_instances: list[PolymerEntityInstance]
+    polymer_entity_instances   : list[PolymerEntityInstance]
 
 class NomenclatureItem(BaseModel):
     nomenclature: list[str]

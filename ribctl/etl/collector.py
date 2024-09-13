@@ -30,7 +30,7 @@ def query_rcsb_api(gql_string: str) -> dict:
     resp      = _resp.json()
 
     if "data" in resp and "entry" in resp["data"]:
-        return resp["data"]["entry"]
+        return resp["data"]
     else:
         raise Exception("No data found for query: {}".format(gql_string))
 
@@ -90,7 +90,6 @@ class StructureNode:
                 externalRefLinks.append(ref["link"])
 
         return [externalRefIds, externalRefTypes, externalRefLinks]
-
 
 class PolymersNode:
     # ? Initialized classification resources:
@@ -541,7 +540,7 @@ class PolymersNode:
             for auth_asym_id in other_polymer_obj[ "rcsb_polymer_entity_container_identifiers" ]["auth_asym_ids"]
         ]
 
-class NonpolymerNode:
+class NonpolymersNode:
     rcsb_nonpolymers         : int
 
     def __init__(self,data:dict) -> None:
@@ -583,6 +582,7 @@ class ETLCollector:
     - ligand annotation
     """
 
+    rcsb_id : str
     node_structure: dict
     node_polymers : dict
     node_ligands  : dict
@@ -601,20 +601,15 @@ class ETLCollector:
     # rcsb_polymers            : int
     # rcsb_nonpolymers         : int
 
-    def __init__(self, rcsb_id_str):
+    def __init__(self, rcsb_id:str):
+        self.rcsb_id = rcsb_id
         # self.rcsb_data_dict = response
         # self.hmm_ribosomal_proteins = hmm_dict_init__candidates_per_organism(ProteinClassEnum, response["rcsb_id"])
 
         # self.rcsb_polymers    = len(self.rcsb_data_dict["polymer_entities"])
         # self.rcsb_nonpolymers = (len(self.rcsb_data_dict["nonpolymer_entities"]) if self.rcsb_data_dict["nonpolymer_entities"] != None else 0)
 
-        structure_data   = query_rcsb_api(EntryInfoString.replace("$RCSB_ID", rcsb_id_str))
-        assemblies_data  = query_rcsb_api(AssemblyIdentificationString.replace("$RCSB_ID", rcsb_id_str))
-        polymers_data    = query_rcsb_api(PolymerEntitiesString.replace("$RCSB_ID", rcsb_id_str))
-        nonpolymers_data = query_rcsb_api(NonpolymerEntitiesString.replace("$RCSB_ID", rcsb_id_str))
 
-    def asm_parse(self, dictionaries: list[dict]) -> list[AssemblyInstancesMap]:
-        return list(map(AssemblyInstancesMap.model_validate, dictionaries))
 
     def poly_assign_to_asm(self, auth_asym_id: str) -> int:
         """
@@ -631,9 +626,13 @@ class ETLCollector:
                         return int(assembly_map.rcsb_id.split("-")[1]) - 1
             else: raise LookupError("Could not assign chain {} to any assembly".format(auth_asym_id))
 
+    def asm_parse(self, dictionaries: list[dict]) -> list[AssemblyInstancesMap]:
+        print(dictionaries)
+        AssemblyInstancesMap.model_validate(dictionaries[0])
+        exit(00)
+        # return list(map(AssemblyInstancesMap.model_validate, dictionaries))
 
     async def process_structure(self, overwrite: bool = False)->RibosomeStructure:
-
         # TODO : 
         # 1. parse assemblies
         # 2. process structure node
@@ -641,7 +640,23 @@ class ETLCollector:
         # 4. infer species from polymers (rewrite)
         # 5. process ligands (incorporate chem info)
 
-        self.asm_maps              = self.asm_parse(response["assemblies"])
+        structure_data   = query_rcsb_api(EntryInfoString.replace("$RCSB_ID", self.rcsb_id))
+        polymers_data    = query_rcsb_api(PolymerEntitiesString.replace("$RCSB_ID", self.rcsb_id))
+        nonpolymers_data = query_rcsb_api(NonpolymerEntitiesString.replace("$RCSB_ID", self.rcsb_id))
+
+        metadata = StructureNode(structure_data).process()
+        polymers = PolymersNode(polymers_data).process()
+        ligands  = NonpolymersNode(nonpolymers_data).process()
+
+
+        assemblies_data  = query_rcsb_api(AssemblyIdentificationString.replace("$RCSB_ID", self.rcsb_id))['entry']['assemblies']
+        
+        pprint(assemblies_data[0]['nonpolymer_entity_instances'])
+        # exit(0)
+        self.asm_maps              = self.asm_parse(assemblies_data)
+
+        # pprint(assemblies_data)
+        exit(1)
         self.polymers_target_count = functools.reduce( lambda count, poly: count + len(poly["rcsb_polymer_entity_container_identifiers"]["asym_ids"]), self.rcsb_data_dict["polymer_entities"], 0)
 
         rcsb_id = self.rcsb_data_dict["rcsb_id"]

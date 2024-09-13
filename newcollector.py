@@ -1,5 +1,8 @@
+import asyncio
 from ribctl.etl.collector  import ETLCollector
 
 
 
-ETLCollector('5AFI')
+asyncio.run(ETLCollector('7k00').process_structure())
+
+# ETLCollector('5AFI').process_structure()

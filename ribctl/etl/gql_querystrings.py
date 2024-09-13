@@ -1,6 +1,6 @@
 EntryInfoString = """
 {
-  entry(entry_id: "5afi") {
+  entry(entry_id: "$RCSB_ID") {
   rcsb_accession_info{
     deposit_date
   }
@@ -35,7 +35,7 @@ EntryInfoString = """
 
 AssemblyIdentificationString = """
 {
-  entry(entry_id: "5afi") {
+  entry(entry_id: "$RCSB_ID") {
     assemblies {
       rcsb_id
       nonpolymer_entity_instances {
@@ -44,6 +44,7 @@ AssemblyIdentificationString = """
           auth_asym_id
           rcsb_id
           auth_seq_id
+          entity_id
         }
       }
       polymer_entity_instances {
@@ -60,7 +61,7 @@ AssemblyIdentificationString = """
 """
 
 PolymerEntitiesString = """{
-  entry(entry_id: "5afi") {
+  entry(entry_id: "$RCSB_ID") {
     assemblies {
       polymer_entity_instances {
         rcsb_id
@@ -114,7 +115,7 @@ PolymerEntitiesString = """{
 """
 
 NonpolymerEntitiesString = """{
-  entry(entry_id: "5afi") {
+  entry(entry_id: "$RCSB_ID") {
     nonpolymer_entities {
       pdbx_entity_nonpoly {
         comp_id
