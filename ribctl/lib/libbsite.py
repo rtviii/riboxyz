@@ -526,3 +526,15 @@ def bsite_transpose(
     return _
 
 
+# -----
+# Projection workflows 
+# The idea is to highlight the residues in the target structure based on a number of extant
+#
+# - we shouldn't reuse the same ligand twice (if there are multiple ligand instances available across structures -- select the closest taxonomically)
+# Thinking about the ligands now. Last time we spoke, i think we landed on this idea of a "global" ligand chart i.e. given a random structure --  point out "hot pockets" given all the ligands we already have on hand. Did i get that right?
+# How do i present that in practice?  Given that classes of ligands bind to ~the same locus ptc/tunnel lower/tunnel upper/decoding) i'll combine these predictions into "classes". The user would be able to select an individual ligand as they can now, but now also a class of ligands simultaneously from multiple structures, say "aminoglycosides" or "tetracyclines" and so on.
+# It's not suuper taxing to classify the stuff we have, someone has already done the work : https://jcheminf.biomedcentral.com/articles/10.1186/s13321-016-0174-y
+# Optics of it aside, i want to press you for why this is a potentially useful feature to have? I'll do it for sure, I think it is a very nice idea.
+# I'm just wondering -- what's the next step to make it practical, open a door for people to build on it? Concrete example: we have 10 antibiotics in the class "Aminoglycosides" across 10 structures of 5-7 different species . I do the msa, mapping stuff. Now 10 extant (source) binding pockets are mapped into 1 target sequence. There is some overlap between source pockets, but also some spread in terms of what residues they get mapped into. How to "export" that? Does it tell anyone anything useful? Which ones are more relevant for drug design? (edited) 
+
+
