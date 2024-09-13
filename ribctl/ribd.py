@@ -15,14 +15,15 @@ ce = click.echo
 @click.option('--config', type=click.Path(exists=True), help='Path to the configuration file')
 @click.option('--rcsb_id','-s', required=False, help='RCSB ID')
 @click.pass_context
-def ribd(ctx, debug, config, rcsb_id):
+def ribd(ctx, debug, config, rcsb_id:str):
     if debug:
         click.echo('Debug mode is on')
     if config:
         click.echo(f'Using configuration file: {config}')
-
     ctx.ensure_object(dict)
-    ctx.obj['rcsb_id'] = rcsb_id.upper()
+    if rcsb_id is not None:
+
+        ctx.obj['rcsb_id'] = rcsb_id.upper()
 
 ribd.add_command(etl)
 ribd.add_command(lig)
