@@ -85,8 +85,6 @@ class BiopythonChain(Chain):
                 continue
         return seq, flat_index_to_residue_map, auth_seq_id_to_flat_index_map
 
-    
-
 class SeqPairwise:
     def __init__(self, sourceseq: str, targetseq: str, source_residues: list[int]):
         """A container for origin and target sequences when matching residue indices in the source sequence to the target sequence.
@@ -370,231 +368,6 @@ def bsite_ligand(
 
     return binding_site_ligand
 
-#! Deperecated
-def __bsite_transpose_motifs(
-    source_rcsb_id: str,
-    target_rcsb_id: str,
-    binding_site: BindingSite,
-    save: bool = False,
-) -> LigandTransposition:
-
-    start = time()
-
-    def BiopythonChain_to_sequence(chain: Chain) -> tuple[str, dict[int, int]]:
-        res: list[Residue] = [*chain.get_residues()]
-        idx_auth_seq_id_map = {}
-        seq = ""
-        for idx, residue in enumerate(res):
-            if residue.resname in [*AMINO_ACIDS.keys()]:
-                seq = seq + ResidueSummary.three_letter_code_to_one(residue.resname)
-                idx_auth_seq_id_map[idx] = residue
-            elif residue.resname in [*NUCLEOTIDES]:
-                seq = seq + residue.resname
-                idx_auth_seq_id_map[idx] = residue
-            else:
-                seq = seq + "-"
-                idx_auth_seq_id_map[idx] = residue
-
-        return seq, idx_auth_seq_id_map
-
-    def extract_contiguous_motifs(
-        bound_residues: list[tuple[int, str]]
-    ) -> list[list[tuple[int, str]]]:
-        bound_residues = sorted(
-            bound_residues,
-            key=lambda x: x[0],
-        )
-        motifs = []
-        current_motif = []
-        for i, (num, amino) in [*enumerate(bound_residues)]:
-            if not current_motif:
-                current_motif.append((num, amino))
-            else:
-                last_num = current_motif[-1][0]
-                if num - last_num <= 3:  # Allow for up to 2 skipped numbers
-                    current_motif.append((num, amino))
-                else:
-                    motifs.append(current_motif)
-                    current_motif = [(num, amino)]
-
-        if current_motif:
-            motifs.append(current_motif)
-        return motifs
-
-    source_rcsb_id, target_rcsb_id = source_rcsb_id.upper(), target_rcsb_id.upper()
-    source_polymers_by_poly_class = {}
-
-    target_struct = RibosomeOps(target_rcsb_id).biopython_structure()
-    source_struct = RibosomeOps(source_rcsb_id).biopython_structure()
-
-    #! Source polymers
-    for nbr_polymer in binding_site.chains:
-        nbr_polymer = BindingSiteChain.model_validate(nbr_polymer)
-        #! Skip if no nomenclature present ( can't do anything with it )
-        if len(nbr_polymer.nomenclature) < 1:
-            continue
-        else:
-            bound_residues_ids = [
-                (resid, resname)
-                for (resid, resname) in [
-                    *map(
-                        lambda x: (x.auth_seq_id, x.label_comp_id),
-                        nbr_polymer.bound_residues,
-                    )
-                ]
-            ]
-            source_polymers_by_poly_class[nbr_polymer.nomenclature[0].value] = {
-                # "seq"           : nbr_polymer.entity_poly_seq_one_letter_code_can,
-                # "auth_asym_id"  : nbr_polymer.auth_asym_id,
-                # "bound_residues": nbr_polymer.bound_residues,
-                "polymer": nbr_polymer,
-                #! Collect contiguous motifs for each polymer (to possibly seek them in the target)
-                "motifs": extract_contiguous_motifs(bound_residues_ids),
-            }
-
-    #! Target polymers
-    target_polymers: list[PredictedResiduesPolymer] = []
-    for (
-        nomenclature_class,
-        source_polymer_with_motifs,
-    ) in sorted(source_polymers_by_poly_class.items(), key=lambda x: x[0]):
-
-        print("Processing chain [{}]".format(nomenclature_class))
-        target_polymer: Polymer | None = RibosomeOps(
-            target_rcsb_id
-        ).get_poly_by_polyclass(nomenclature_class, 0)
-        source_polymer: BindingSiteChain = source_polymers_by_poly_class[
-            nomenclature_class
-        ]["polymer"]
-        #! If no polymer of corresponding class is found, move on.
-        if target_polymer == None:
-            continue
-
-        seq_src, idx_auth_map_src = BiopythonChain_to_sequence(
-            source_struct[0][source_polymer.auth_asym_id]
-        )
-        seq_tgt, idx_auth_map_tgt = BiopythonChain_to_sequence(
-            target_struct[0][target_polymer.auth_asym_id]
-        )
-
-        target_polymer_all_residues = []
-
-        for i, motif in enumerate(source_polymer_with_motifs["motifs"]):
-
-            # ! -------------------------------------------- SEARCH PARAMS --------------------------------------------------
-            motif_str = ""
-
-            for _, residue_label in motif:
-                motif_str = motif_str + ResidueSummary.three_letter_code_to_one(
-                    residue_label
-                )
-
-            if len(motif_str) <= 5:
-                continue
-            print("\tSource-motif {}: {}".format(i, motif_str))
-            matches = find_near_matches(
-                motif_str,
-                seq_tgt,
-                max_substitutions=0,
-                max_l_dist=1,
-                max_insertions=2,
-                max_deletions=0,
-            )
-            # ! -------------------------------------------- SEARCH PARAMS --------------------------------------------------
-
-            for j, match in enumerate(matches):
-                target_motif_residues = []
-
-                for i in range(match.start, match.end):
-                    target_motif_residues.append(idx_auth_map_tgt[i])
-                print(
-                    "\t\tTarget-motif match {}: {}".format(
-                        j,
-                        "".join(
-                            list(
-                                map(
-                                    lambda x: ResidueSummary.three_letter_code_to_one(
-                                        x.resname
-                                    ),
-                                    target_motif_residues,
-                                )
-                            )
-                        ),
-                    )
-                )
-
-                target_polymer_all_residues = [
-                    *target_polymer_all_residues,
-                    *target_motif_residues,
-                ]
-
-        target_polymers.append(
-            PredictedResiduesPolymer(
-                polymer_class=nomenclature_class,
-                source=PredictionSource(
-                    source_seq=seq_src,
-                    auth_asym_id=source_polymer.auth_asym_id,
-                    source_bound_residues=[
-                        ResidueSummary(
-                            auth_seq_id=residue.auth_seq_id,
-                            label_comp_id=residue.label_comp_id,
-                            auth_asym_id=source_polymer.auth_asym_id,
-                            label_seq_id=None,
-                            full_id=None,
-                            rcsb_id=source_rcsb_id,
-                        )
-                        for residue in source_polymer.bound_residues
-                    ],
-                ),
-                target=PredictionTarget(
-                    target_seq=seq_tgt,
-                    auth_asym_id=target_polymer.auth_asym_id,
-                    target_bound_residues=[
-                        ResidueSummary(
-                            auth_seq_id=residue.get_id()[1],
-                            label_comp_id=residue.resname,
-                            label_seq_id=None,
-                            auth_asym_id=target_polymer.auth_asym_id,
-                            full_id=None,
-                            rcsb_id=target_rcsb_id,
-                        )
-                        for residue in target_polymer_all_residues
-                    ],
-                ),
-            )
-        )
-
-    # ! at this point we have collected all the source polymers and corresponding target polymers.
-    chains: list[BindingSiteChain] = []
-
-    for c in target_polymers:
-        poly = RibosomeOps(target_rcsb_id).get_poly_by_auth_asym_id(
-            c.target.auth_asym_id
-        )
-        if poly == None:
-            raise ValueError("Polymer not found in target structure")
-        bsite_chain = BindingSiteChain(
-            **poly.model_dump(), bound_residues=c.target.target_bound_residues
-        )
-        chains.append(bsite_chain)
-
-    end = time()
-
-    _ = LigandTransposition(
-        constituent_chains=target_polymers,  # this is the info about each individual pair of polymers manipulations
-        source=source_rcsb_id,
-        target=target_rcsb_id,
-        purported_binding_site=BindingSite(  # this is the result, the datastructure that gets sent the fronted
-            chains=chains,
-            ligand=binding_site.ligand,
-            radius=binding_site.radius,
-            source=binding_site.source,
-        ),
-    )
-    # pprint(_)
-    print("Elapsed time: ", end - start)
-    return _
-
 def bsite_transpose(
     source_rcsb_id: str,
     target_rcsb_id: str,
@@ -751,5 +524,18 @@ def bsite_transpose(
         ),
     )
     return _
+
+
+# -----
+# Projection workflows 
+# The idea is to highlight the residues in the target structure based on a number of extant
+#
+# - we shouldn't reuse the same ligand twice (if there are multiple ligand instances available across structures -- select the closest taxonomically)
+# Thinking about the ligands now. Last time we spoke, i think we landed on this idea of a "global" ligand chart i.e. given a random structure --  point out "hot pockets" given all the ligands we already have on hand. Did i get that right?
+# How do i present that in practice?  Given that classes of ligands bind to ~the same locus ptc/tunnel lower/tunnel upper/decoding) i'll combine these predictions into "classes". The user would be able to select an individual ligand as they can now, but now also a class of ligands simultaneously from multiple structures, say "aminoglycosides" or "tetracyclines" and so on.
+# It's not suuper taxing to classify the stuff we have, someone has already done the work : https://jcheminf.biomedcentral.com/articles/10.1186/s13321-016-0174-y
+# Optics of it aside, i want to press you for why this is a potentially useful feature to have? I'll do it for sure, I think it is a very nice idea.
+# I'm just wondering -- what's the next step to make it practical, open a door for people to build on it? Concrete example: we have 10 antibiotics in the class "Aminoglycosides" across 10 structures of 5-7 different species . I do the msa, mapping stuff. Now 10 extant (source) binding pockets are mapped into 1 target sequence. There is some overlap between source pockets, but also some spread in terms of what residues they get mapped into. How to "export" that? Does it tell anyone anything useful? Which ones are more relevant for drug design? (edited) 
+
 
 

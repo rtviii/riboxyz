@@ -82,7 +82,6 @@ def link__structure_to_organism(
     return _
 
 
-# Transaction
 def node__structure(
     _rib: RibosomeStructure,
 ) -> Callable[[Transaction | ManagedTransaction], Record | None]:
@@ -116,49 +115,43 @@ def node__structure(
     return _
 
 
-# Transaction
 def node__ligand(
     _ligand: NonpolymericLigand,
 ) -> Callable[[Transaction | ManagedTransaction], Node]:
-    L = _ligand.model_dump()
-
     def _(tx: Transaction | ManagedTransaction):
-        drugbank_id = None
-        drugbank_description = None
-        try:
-            drugbank_id = (
-                _ligand.nonpolymer_comp.drugbank.drugbank_container_identifiers.drugbank_id
-            )
-        except:
-            ...
-        try:
-            drugbank_description = (
-                _ligand.nonpolymer_comp.drugbank.drugbank_info.description
-            )
-        except:
-            ...
+            # Prepare the properties dictionary
+            properties = {
+                "chemicalId"          : _ligand.chemicalId,
+                "chemicalName"        : _ligand.chemicalName,
+                "formula_weight"      : _ligand.formula_weight,
+                "pdbx_description"    : _ligand.pdbx_description,
+                "number_of_instances" : _ligand.number_of_instances,
+                "drugbank_id"         : None,
+                "drugbank_description": None,
+                "SMILES"              : _ligand.SMILES,
+                "SMILES_stereo"       : _ligand.SMILES_stereo,
+                "InChI"               : _ligand.InChI,
+                "InChIKey"            : _ligand.InChIKey,
+            }
 
-        return tx.run(
-            """//
-    MERGE (ligand:Ligand {chemicalId: $chemicalId })
-    ON CREATE SET   ligand.chemicalName        = $chemicalName      ,
- 	                ligand.formula_weight      = $formula_weight    ,
- 	                ligand.pdbx_description    = $pdbx_description  ,
- 	                ligand.number_of_instances = $number_of_instances,
-                    ligand.drugbank_id          =  CASE WHEN $drugbank_id = null then \"null\" else $drugbank_id END,
-                    ligand.drugbank_description =  CASE WHEN $drugbank_description = null then \"null\" else $drugbank_description END
-               RETURN ligand       
-        """,
-            {
-                "chemicalId": _ligand.chemicalId,
-                "chemicalName": _ligand.chemicalName,
-                "formula_weight": _ligand.formula_weight,
-                "pdbx_description": _ligand.pdbx_description,
-                "number_of_instances": _ligand.number_of_instances,
-                "drugbank_id": drugbank_id,
-                "drugbank_description": drugbank_description,
-            },
-        ).single(strict=True)["ligand"]
+            # this is just to get the props from multiple nullable nestings
+            if _ligand.nonpolymer_comp:
+                    if _ligand.nonpolymer_comp.drugbank:
+                        if _ligand.nonpolymer_comp.drugbank.drugbank_container_identifiers:
+                            properties["drugbank_id"] = _ligand.nonpolymer_comp.drugbank.drugbank_container_identifiers.drugbank_id
+                        if _ligand.nonpolymer_comp.drugbank.drugbank_info:
+                            properties["drugbank_description"] = _ligand.nonpolymer_comp.drugbank.drugbank_info.description
+
+            
+
+            properties = {k: v for k, v in properties.items() if v is not None}
+            query = """
+            MERGE (ligand:Ligand {chemicalId: $chemicalId})
+            SET ligand += $properties
+            RETURN ligand
+            """
+            result = tx.run(query, {"chemicalId": _ligand.chemicalId, "properties": properties})
+            return result.single(strict=True)["ligand"]
 
     return _
 

@@ -1,7 +1,7 @@
 import asyncio
 from typing import Coroutine
 from ribctl.etl.etl_assets_ops import AssetClass, Assets, RibosomeOps, Structure
-from ribctl.etl.etl_pipeline import ( ReannotationPipeline )
+from ribctl.etl.collector import ( ETLCollector )
 import asyncio
 
 
@@ -18,8 +18,7 @@ def asset_routines(
 
     coroutines = []
     if AssetClass.profile in assetlist:
-        coroutines.append(
-            ReannotationPipeline( ReannotationPipeline.rcsb_request_struct(rcsb_id) ).process_structure(overwrite) )
+        coroutines.append( ETLCollector(rcsb_id).process_structure(overwrite) )
 
     if AssetClass.cif in assetlist:
         coroutines.append(RA.upsert_cif(overwrite))
@@ -27,8 +26,8 @@ def asset_routines(
     if AssetClass.ptc in assetlist:
         coroutines.append(RA.upsert_ptc(overwrite))
 
-    if AssetClass.chains in assetlist:
-        coroutines.append(RA.upsert_chains())  # todo: chimerax split chains (get 1.8 build)
+    # if AssetClass.chains in assetlist:
+    #     coroutines.append(RA.upsert_chains())  # todo: chimerax split chains (get 1.8 build)
 
     return coroutines
 
