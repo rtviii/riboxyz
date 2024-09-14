@@ -1,5 +1,8 @@
+from pprint import pprint
 import sys
+
 sys.path.append("/home/rtviii/dev/riboxyz")
+from neo4j_ribosome.db_lib_reader import Neo4jReader
 import operator
 import json
 from time import time
@@ -13,10 +16,10 @@ from Bio import (
 from fuzzysearch import find_near_matches
 import pandas as pd
 from ribctl.lib.schema.types_ribosome import Polymer
+
 with warnings.catch_warnings():
     warnings.simplefilter("ignore", BiopythonDeprecationWarning)
     from Bio import pairwise2
-
 from ribctl.lib.schema.types_binding_site import (
     AMINO_ACIDS,
     NUCLEOTIDES,
@@ -25,7 +28,8 @@ from ribctl.lib.schema.types_binding_site import (
     PredictedResiduesPolymer,
     PredictionAlignments,
     PredictionSource,
-    PredictionTarget)
+    PredictionTarget,
+)
 
 from Bio.PDB.NeighborSearch import NeighborSearch
 from Bio.PDB.Residue import Residue
@@ -37,38 +41,43 @@ from ribctl.etl.etl_assets_ops import RibosomeOps
 from ribctl.lib.schema.types_binding_site import (
     BindingSite,
     BindingSiteChain,
-    ResidueSummary)
+    ResidueSummary,
+)
 import os
 from collections import defaultdict
 from ribctl import ASSETS_PATH
 
+
 def lig_get_chemical_categories():
-    ligands_classification_path = os.path.join(ASSETS_PATH, "ligands", "ligand_chemical_categories.csv")
-    df           = pd.read_csv(ligands_classification_path)
+    ligands_classification_path = os.path.join(
+        ASSETS_PATH, "ligands", "ligand_chemical_categories.csv"
+    )
+    df = pd.read_csv(ligands_classification_path)
     reverse_dict = defaultdict(list)
     for _, row in df.iterrows():
-        ligand = row['Ligand']
-        category = row['Category']
+        ligand = row["Ligand"]
+        category = row["Category"]
         reverse_dict[category].append(ligand)
-    
+
     return dict(reverse_dict)
+
 
 #! Transposition methods
 class BiopythonChain(Chain):
-    chain:Chain 
-    flat_index_to_residue_map    : dict[int, Residue]
+    chain: Chain
+    flat_index_to_residue_map: dict[int, Residue]
     auth_seq_id_to_flat_index_map: dict[int, int]
 
-    def __init__(self, chain:Chain):
+    def __init__(self, chain: Chain):
         self.chain = chain
 
     @property
     def primary_sequence(self) -> tuple[str, dict]:
 
-        represent_noncanonical_as:Optional[str]="."
+        represent_noncanonical_as: Optional[str] = "."
         seq = ""
         auth_seq_id_to_primary_ix = {}
-        for ix,residue in enumerate( self.chain.get_residues() ):
+        for ix, residue in enumerate(self.chain.get_residues()):
             if residue.resname in [*AMINO_ACIDS.keys()]:
                 seq = seq + ResidueSummary.three_letter_code_to_one(residue.resname)
             elif residue.resname in [*NUCLEOTIDES]:
@@ -83,19 +92,20 @@ class BiopythonChain(Chain):
     def flat_sequence(self) -> tuple[str, dict, dict]:
         res: list[Residue] = [*self.chain.get_residues()]
 
-        flat_index_to_residue_map     = {}
+        flat_index_to_residue_map = {}
         auth_seq_id_to_flat_index_map = {}
-        seq                           = ""
-        flat_index                         = 0
+        seq = ""
+        flat_index = 0
         for residue in res:
             if residue.resname in [*AMINO_ACIDS.keys(), *NUCLEOTIDES]:
-                seq                                                = seq + ResidueSummary.three_letter_code_to_one(residue.resname)
-                flat_index_to_residue_map[flat_index]              = residue
+                seq = seq + ResidueSummary.three_letter_code_to_one(residue.resname)
+                flat_index_to_residue_map[flat_index] = residue
                 auth_seq_id_to_flat_index_map[residue.get_id()[1]] = flat_index
-                flat_index +=1
+                flat_index += 1
             else:
                 continue
         return seq, flat_index_to_residue_map, auth_seq_id_to_flat_index_map
+
 
 class SeqPairwise:
     def __init__(self, sourceseq: str, targetseq: str, source_residues: list[int]):
@@ -112,11 +122,11 @@ class SeqPairwise:
         """
 
         # *  indices of the given residues in the source sequence.
-        self.src    : str       = sourceseq
+        self.src: str = sourceseq
         self.src_ids: list[int] = source_residues
 
         # * Indices of the corresponding residues in target sequence. To be filled.
-        self.tgt    : str       = targetseq
+        self.tgt: str = targetseq
         self.tgt_ids: list[int] = []
 
         _ = pairwise2.align.globalxx(self.src, self.tgt, one_alignment_only=True)
@@ -124,11 +134,10 @@ class SeqPairwise:
         self.src_aln = _[0].seqA
         self.tgt_aln = _[0].seqB
 
-
         self.aligned_ids = []
 
         for src_resid in self.src_ids:
-            self.aligned_ids.append(self.forwards_match(self.src_aln, src_resid) )
+            self.aligned_ids.append(self.forwards_match(self.src_aln, src_resid))
 
         for aln_resid in self.aligned_ids:
             tgt_aln_index = self.backwards_match(self.tgt_aln, aln_resid)
@@ -136,36 +145,42 @@ class SeqPairwise:
                 continue
             else:
                 self.tgt_ids.append(tgt_aln_index)
-        
-        print("[Source Aligned]\t",self.hl_ixs(self.src_aln, ixs=self.aligned_ids))
-        print("[Target Aligned]\t",self.hl_ixs(self.tgt_aln, ixs=self.aligned_ids))
 
-        
+        print("[Source Aligned]\t", self.hl_ixs(self.src_aln, ixs=self.aligned_ids))
+        print("[Target Aligned]\t", self.hl_ixs(self.tgt_aln, ixs=self.aligned_ids))
 
-    def forwards_match(self, aligned_source_sequence: str, original_residue_index: int)->int:
-        """Returns the index of a source-sequence residue in the aligned source sequence. Basically, "count forward including gaps"
-        """
+    def forwards_match(
+        self, aligned_source_sequence: str, original_residue_index: int
+    ) -> int:
+        """Returns the index of a source-sequence residue in the aligned source sequence. Basically, "count forward including gaps" """
         if original_residue_index > len(aligned_source_sequence):
-            raise IndexError( f"Passed residue with invalid index ({original_residue_index}) to back-match to target.Seqlen aligned:{len(aligned_source_sequence)}" )
+            raise IndexError(
+                f"Passed residue with invalid index ({original_residue_index}) to back-match to target.Seqlen aligned:{len(aligned_source_sequence)}"
+            )
         original_residues_count = 0
         for aligned_ix, char in enumerate(aligned_source_sequence):
             if original_residues_count == original_residue_index:
                 if char == "-":
                     continue
                 else:
-                    return aligned_ix  
+                    return aligned_ix
             if char == "-":
                 continue
             else:
                 original_residues_count += 1
 
-        raise ValueError(f"Residue with index {original_residue_index} not found in the aligned source sequence after full search. Logical errory, likely.")
+        raise ValueError(
+            f"Residue with index {original_residue_index} not found in the aligned source sequence after full search. Logical errory, likely."
+        )
 
-    def backwards_match(self, aligned_target_sequence: str, aligned_residue_index: int)->int|None:
-        """Returns the target-sequence index of a residue in the [aligned] target sequence. Basically, "count back ignoring gaps"
-        """
+    def backwards_match(
+        self, aligned_target_sequence: str, aligned_residue_index: int
+    ) -> int | None:
+        """Returns the target-sequence index of a residue in the [aligned] target sequence. Basically, "count back ignoring gaps" """
         if aligned_residue_index > len(aligned_target_sequence):
-            raise IndexError( f"Passed residue with invalid index ({aligned_residue_index}) to back-match to target.Seqlen:{len(aligned_target_sequence)}" )
+            raise IndexError(
+                f"Passed residue with invalid index ({aligned_residue_index}) to back-match to target.Seqlen:{len(aligned_target_sequence)}"
+            )
 
         if aligned_target_sequence[aligned_residue_index] == "-":
             return None
@@ -212,6 +227,7 @@ class SeqPairwise:
             else:
                 _ += v
         return _
+
 
 class SeqMap:
 
@@ -282,6 +298,7 @@ class SeqMap:
                 "No structural sequence found for the given canonical sequence"
             )
         return can_subseq, struct_subseq
+
 
 def get_lig_bsite(
     lig_chemid: str,
@@ -366,6 +383,7 @@ def get_lig_bsite(
         source=struct.get_id().upper(),
     )
 
+
 def bsite_ligand(
     chemicalId: str, rcsb_id: str, radius: float, save: bool = False
 ) -> BindingSite:
@@ -380,6 +398,7 @@ def bsite_ligand(
 
     return binding_site_ligand
 
+
 def bsite_transpose(
     source_rcsb_id: str,
     target_rcsb_id: str,
@@ -387,15 +406,13 @@ def bsite_transpose(
     save: bool = False,
 ) -> LigandTransposition:
 
-    start = time()
-
     def BiopythonChain_to_sequence(chain: Chain) -> tuple[str, dict, dict]:
         res: list[Residue] = [*chain.get_residues()]
-        
-        flat_index_to_residue_map     = {}
+
+        flat_index_to_residue_map = {}
         auth_seq_id_to_flat_index_map = {}
-        seq                           = ""
-        index                         = 0
+        seq = ""
+        index = 0
 
         for residue in res:
             if residue.resname in [*AMINO_ACIDS.keys()]:
@@ -431,7 +448,7 @@ def bsite_transpose(
     # * Work out a mapping between the structural and the canonical sequences
     #! Source polymers
 
-    chain_mappings      = []
+    chain_mappings = []
     bindign_site_chains = []
 
     for nbr_polymer in binding_site.chains:
@@ -439,10 +456,12 @@ def bsite_transpose(
         #! Skip if no nomenclature present ( can't do anything with it )
         if len(nbr_polymer.nomenclature) < 1:
             continue
-        target_polymer = target_ops.get_chain_by_polymer_class( nbr_polymer.nomenclature[0], 0 )
+        target_polymer = target_ops.get_chain_by_polymer_class(
+            nbr_polymer.nomenclature[0], 0
+        )
         if target_polymer == None:
             continue
-        
+
         print("\n\n\t\t [{}] ".format(nbr_polymer.nomenclature[0]))
         bpchain_source = BiopythonChain(source_struct[0][nbr_polymer.auth_asym_id])
         bpchain_target = BiopythonChain(target_struct[0][target_polymer.auth_asym_id])
@@ -453,76 +472,120 @@ def bsite_transpose(
             src_auth_seq_id_to_flat_index_map,
         ] = bpchain_source.flat_sequence
         #! TARGET MAPS
-        [ 
+        [
             tgt_flat_structural_seq,
             tgt_flat_idx_to_residue_map,
-            tgt_auth_seq_id_to_flat_index_map
+            tgt_auth_seq_id_to_flat_index_map,
         ] = bpchain_target.flat_sequence
 
         # ! Bound residues  [in STRUCTURE SPACE]
-        src_bound_auth_seq_idx = [ (residue.auth_seq_id, residue.label_comp_id) for residue in nbr_polymer.bound_residues ]
+        src_bound_auth_seq_idx = [
+            (residue.auth_seq_id, residue.label_comp_id)
+            for residue in nbr_polymer.bound_residues
+        ]
         # ! Bound residues  [in STRUCTURE SPACE]
-        
-        primary_seq_source, auth_seq_to_primary_ix_source = bpchain_source.primary_sequence
-        primary_seq_target, auth_seq_to_primary_ix_target = bpchain_target.primary_sequence
-        print("[Source Primary]\t",SeqPairwise.hl_ixs(primary_seq_source, [ auth_seq_to_primary_ix_source[index] for index, label in src_bound_auth_seq_idx]))
-        src_bound_flat_indices = [ src_auth_seq_id_to_flat_index_map[index] for index, label in filter( lambda x: x[1] in [*NUCLEOTIDES, *AMINO_ACIDS.keys()],src_bound_auth_seq_idx)]
-        print("[Source Flat   ]\t",SeqPairwise.hl_ixs(src_flat_structural_seq, src_bound_flat_indices))
+
+        primary_seq_source, auth_seq_to_primary_ix_source = (
+            bpchain_source.primary_sequence
+        )
+        primary_seq_target, auth_seq_to_primary_ix_target = (
+            bpchain_target.primary_sequence
+        )
+        print(
+            "[Source Primary]\t",
+            SeqPairwise.hl_ixs(
+                primary_seq_source,
+                [
+                    auth_seq_to_primary_ix_source[index]
+                    for index, label in src_bound_auth_seq_idx
+                ],
+            ),
+        )
+        src_bound_flat_indices = [
+            src_auth_seq_id_to_flat_index_map[index]
+            for index, label in filter(
+                lambda x: x[1] in [*NUCLEOTIDES, *AMINO_ACIDS.keys()],
+                src_bound_auth_seq_idx,
+            )
+        ]
+        print(
+            "[Source Flat   ]\t",
+            SeqPairwise.hl_ixs(src_flat_structural_seq, src_bound_flat_indices),
+        )
         print("- - - - Alignment- - - ")
-        M                      = SeqPairwise(src_flat_structural_seq, tgt_flat_structural_seq, src_bound_flat_indices)
+        M = SeqPairwise(
+            src_flat_structural_seq, tgt_flat_structural_seq, src_bound_flat_indices
+        )
         print("- - - - Alignment- - - ")
         tgt_bound_flat_indices = M.tgt_ids
-        tgt_bound_residues     = [ tgt_flat_idx_to_residue_map[idx] for idx in tgt_bound_flat_indices ]
-        print("[Target Flat   ]\t", SeqPairwise.hl_ixs(tgt_flat_structural_seq, tgt_bound_flat_indices))
-        print("[Target Primary]\t", SeqPairwise.hl_ixs(primary_seq_target,[auth_seq_to_primary_ix_target[residue.get_id()[1]] for residue in tgt_bound_residues] ))
+        tgt_bound_residues = [
+            tgt_flat_idx_to_residue_map[idx] for idx in tgt_bound_flat_indices
+        ]
+        print(
+            "[Target Flat   ]\t",
+            SeqPairwise.hl_ixs(tgt_flat_structural_seq, tgt_bound_flat_indices),
+        )
+        print(
+            "[Target Primary]\t",
+            SeqPairwise.hl_ixs(
+                primary_seq_target,
+                [
+                    auth_seq_to_primary_ix_target[residue.get_id()[1]]
+                    for residue in tgt_bound_residues
+                ],
+            ),
+        )
 
-
-        polymer_pair =PredictedResiduesPolymer(
+        polymer_pair = PredictedResiduesPolymer(
             polymer_class=nbr_polymer.nomenclature[0],
             source=PredictionSource(
-                    source_seq            = primary_seq_source,
-                    auth_asym_id          = nbr_polymer.auth_asym_id,
-                    source_bound_residues = [
-                        ResidueSummary(
-                            auth_seq_id   = residue.auth_seq_id,
-                            label_comp_id = residue.label_comp_id,
-                            auth_asym_id  = nbr_polymer.auth_asym_id,
-                            label_seq_id  = None,
-                            full_id       = None,
-                            rcsb_id       = source_rcsb_id,
-                        )
-                        for residue in nbr_polymer.bound_residues
-                    ],
-                ),
-                target=PredictionTarget(
-                    target_seq            = primary_seq_target,
-                    auth_asym_id          = target_polymer.auth_asym_id,
-                    target_bound_residues = [
-                        ResidueSummary(
-                            auth_seq_id   = residue.get_id()[1],
-                            label_comp_id = residue.resname,
-                            label_seq_id  = None,
-                            auth_asym_id  = target_polymer.auth_asym_id,
-                            full_id       = None,
-                            rcsb_id       = target_rcsb_id,
-                        )
-                        for residue in tgt_bound_residues
-                    ],
-                )
-
+                source_seq=primary_seq_source,
+                auth_asym_id=nbr_polymer.auth_asym_id,
+                source_bound_residues=[
+                    ResidueSummary(
+                        auth_seq_id=residue.auth_seq_id,
+                        label_comp_id=residue.label_comp_id,
+                        auth_asym_id=nbr_polymer.auth_asym_id,
+                        label_seq_id=None,
+                        full_id=None,
+                        rcsb_id=source_rcsb_id,
+                    )
+                    for residue in nbr_polymer.bound_residues
+                ],
+            ),
+            target=PredictionTarget(
+                target_seq=primary_seq_target,
+                auth_asym_id=target_polymer.auth_asym_id,
+                target_bound_residues=[
+                    ResidueSummary(
+                        auth_seq_id=residue.get_id()[1],
+                        label_comp_id=residue.resname,
+                        label_seq_id=None,
+                        auth_asym_id=target_polymer.auth_asym_id,
+                        full_id=None,
+                        rcsb_id=target_rcsb_id,
+                    )
+                    for residue in tgt_bound_residues
+                ],
+            ),
         )
         chain_mappings.append(polymer_pair)
-        bindign_site_chains.append(BindingSiteChain(**target_polymer.model_dump(), bound_residues=[
-                        ResidueSummary(
-                            auth_seq_id   = residue.get_id()[1],
-                            label_comp_id = residue.resname,
-                            label_seq_id  = None,
-                            auth_asym_id  = target_polymer.auth_asym_id,
-                            full_id       = None,
-                            rcsb_id       = target_rcsb_id,
-                        )
-                        for residue in tgt_bound_residues
-                    ]))
+        bindign_site_chains.append(
+            BindingSiteChain(
+                **target_polymer.model_dump(),
+                bound_residues=[
+                    ResidueSummary(
+                        auth_seq_id=residue.get_id()[1],
+                        label_comp_id=residue.resname,
+                        label_seq_id=None,
+                        auth_asym_id=target_polymer.auth_asym_id,
+                        full_id=None,
+                        rcsb_id=target_rcsb_id,
+                    )
+                    for residue in tgt_bound_residues
+                ],
+            )
+        )
 
     _ = LigandTransposition(
         source=source_rcsb_id,
@@ -539,7 +602,7 @@ def bsite_transpose(
 
 
 # -----
-# Projection workflows 
+# Projection workflows
 # The idea is to highlight the residues in the target structure based on a number of extant
 #
 # - we shouldn't reuse the same ligand twice (if there are multiple ligand instances available across structures -- select the closest taxonomically)
@@ -547,10 +610,397 @@ def bsite_transpose(
 # How do i present that in practice?  Given that classes of ligands bind to ~the same locus ptc/tunnel lower/tunnel upper/decoding) i'll combine these predictions into "classes". The user would be able to select an individual ligand as they can now, but now also a class of ligands simultaneously from multiple structures, say "aminoglycosides" or "tetracyclines" and so on.
 # It's not suuper taxing to classify the stuff we have, someone has already done the work : https://jcheminf.biomedcentral.com/articles/10.1186/s13321-016-0174-y
 # Optics of it aside, i want to press you for why this is a potentially useful feature to have? I'll do it for sure, I think it is a very nice idea.
-# I'm just wondering -- what's the next step to make it practical, open a door for people to build on it? Concrete example: we have 10 antibiotics in the class "Aminoglycosides" across 10 structures of 5-7 different species . I do the msa, mapping stuff. Now 10 extant (source) binding pockets are mapped into 1 target sequence. There is some overlap between source pockets, but also some spread in terms of what residues they get mapped into. How to "export" that? Does it tell anyone anything useful? Which ones are more relevant for drug design? (edited) 
+# I'm just wondering -- what's the next step to make it practical, open a door for people to build on it? Concrete example: we have 10 antibiotics in the class "Aminoglycosides" across 10 structures of 5-7 different species . I do the msa, mapping stuff. Now 10 extant (source) binding pockets are mapped into 1 target sequence. There is some overlap between source pockets, but also some spread in terms of what residues they get mapped into. How to "export" that? Does it tell anyone anything useful? Which ones are more relevant for drug design? (edited)
 # -----
 
 
-# def retrieve_ligands():
+def retrieve_ligands():
+    chemcat = lig_get_chemical_categories()["Tetracyclines"]
+    pprint(chemcat)
+    ligands = Neo4jReader().list_ligands()
+
+    def filter_by_category(lig_structs: tuple[dict, list[dict]]):
+        return lig_structs[0]["chemicalId"] in chemcat
+
+    return list(filter(filter_by_category, ligands))
 
 
+""" 
+At this point we have N ligands with multiple structures per ligand.
+Some picking criteria ought to exist to select the "best" structure for each ligand, implemnet that later:
+- the closest taxonomic neighbor to the target structure
+- the one with the highest resolution
+"""
+
+tetracycline_structs = [
+    [
+        {
+            "InChI": "InChI=1S/C21H25ClN2O7/c1-24(2)15-6-5-7-11(17(27)10(6)19(29)14(20(15)30)21(23)31)18(28)13-9(25)4-3-8(22)12(13)16(7)26/h3-4,6-7,10-11,14-18,25-28H,5H2,1-2H3,(H2,23,31)/t6-,7+,10-,11+,14+,15+,16+,17+,18-/m1/s1",
+            "InChIKey": "DMSXRSJJYGANOR-VAVXRSHRSA-N",
+            "SMILES": "CN(C)C1C2CC3C(c4c(ccc(c4C(C3C(C2C(=O)C(C1=O)C(=O)N)O)O)O)Cl)O",
+            "SMILES_stereo": "CN(C)[C@H]1[C@@H]2C[C@@H]3[C@@H](c4c(ccc(c4C(C3C([C@@H]2C(=O)C(C1=O)C(=O)N)O)O)O)Cl)O",
+            "chemicalId": "D2C",
+            "chemicalName": "(2S,4S,4AR,5AS,6S,11R,11AS,12R,12AR)-7-CHLORO-4-(DIMETHYLAMINO)-6,10,11,12-TETRAHYDROXY-1,3-DIOXO-1,2,3,4,4A,5,5A,6,11,11A,12,12A-DODECAHYDROTETRACENE-2-CARBOXAMIDE",
+            "formula_weight": 0.453,
+            "number_of_instances": 1,
+            "pdbx_description": "(2S,4S,4AR,5AS,6S,11R,11AS,12R,12AR)-7-CHLORO-4-(DIMETHYLAMINO)-6,10,11,12-TETRAHYDROXY-1,3-DIOXO-1,2,3,4,4A,5,5A,6,11,11A,12,12A-DODECAHYDROTETRACENE-2-CARBOXAMIDE",
+        },
+        [
+            {
+                "rcsb_id": "2F4V",
+                "tax_node": {
+                    "ncbi_tax_id": 274,
+                    "rank": "species",
+                    "scientific_name": "Thermus thermophilus",
+                },
+            }
+        ],
+    ],
+    [
+        {
+            "InChI": "InChI=1S/C22H24N2O8/c1-21(31)8-5-4-6-11(25)12(8)16(26)13-9(21)7-10-15(24(2)3)17(27)14(20(23)30)19(29)22(10,32)18(13)28/h4-6,9-10,15,25,27-28,31-32H,7H2,1-3H3,(H2,23,30)/t9-,10-,15-,21+,22-/m0/s1",
+            "InChIKey": "OFVLGDICTFRJMM-WESIUVDSSA-N",
+            "SMILES": "CC1(c2cccc(c2C(=O)C3=C(C4(C(CC31)C(C(=C(C4=O)C(=O)N)O)N(C)C)O)O)O)O",
+            "SMILES_stereo": "C[C@]1(c2cccc(c2C(=O)C3=C([C@]4([C@@H](C[C@@H]31)C(C(=C(C4=O)C(=O)N)O)N(C)C)O)O)O)O",
+            "chemicalId": "TAC",
+            "chemicalName": "TETRACYCLINE",
+            "drugbank_description": "Tetracycline is a broad spectrum polyketide "
+            "antibiotic produced by the Streptomyces genus of "
+            "Actinobacteria. It exerts a bacteriostatic effect "
+            "on bacteria by binding reversible to the bacterial "
+            "30S ribosomal subunit and blocking incoming "
+            "aminoacyl tRNA from binding to the ribosome "
+            "acceptor site. It also binds to some extent to the "
+            "bacterial 50S ribosomal subunit and may alter the "
+            "cytoplasmic membrane causing intracellular "
+            "components to leak from bacterial cells.  The FDA "
+            "withdrew its approval for the use of all liquid "
+            "oral drug products formulated for pediatric use "
+            "containing tetracycline in a concentration greater "
+            "than 25 mg/ml.[L43942] Other formulations of "
+            "tetracycline continue to be used.",
+            "drugbank_id": "DB00759",
+            "formula_weight": 0.444,
+            "number_of_instances": 2,
+            "pdbx_description": "TETRACYCLINE",
+        },
+        [
+            {
+                "rcsb_id": "1HNW",
+                "tax_node": {
+                    "ncbi_tax_id": 274,
+                    "rank": "species",
+                    "scientific_name": "Thermus thermophilus",
+                },
+            },
+            {
+                "rcsb_id": "5J5B",
+                "tax_node": {
+                    "ncbi_tax_id": 83333,
+                    "rank": "strain",
+                    "scientific_name": "Escherichia coli K-12",
+                },
+            },
+            {
+                "rcsb_id": "1I97",
+                "tax_node": {
+                    "ncbi_tax_id": 274,
+                    "rank": "species",
+                    "scientific_name": "Thermus thermophilus",
+                },
+            },
+            {
+                "rcsb_id": "4V9A",
+                "tax_node": {
+                    "ncbi_tax_id": 300852,
+                    "rank": "strain",
+                    "scientific_name": "Thermus thermophilus HB8",
+                },
+            },
+            {
+                "rcsb_id": "8CGJ",
+                "tax_node": {
+                    "ncbi_tax_id": 679895,
+                    "rank": "no rank",
+                    "scientific_name": "Escherichia coli BW25113",
+                },
+            },
+            {
+                "rcsb_id": "5J7L",
+                "tax_node": {
+                    "ncbi_tax_id": 83333,
+                    "rank": "strain",
+                    "scientific_name": "Escherichia coli K-12",
+                },
+            },
+        ],
+    ],
+    [
+        {
+            "InChI": "InChI=1S/C27H31FN4O8/c1-31(2)20-13-8-11-7-12-14(28)9-15(30-16(33)10-32-5-3-4-6-32)21(34)18(12)22(35)17(11)24(37)27(13,40)25(38)19(23(20)36)26(29)39/h9,11,13,20,34-35,38,40H,3-8,10H2,1-2H3,(H2,29,39)(H,30,33)/t11-,13-,20-,27-/m0/s1",
+            "InChIKey": "AKLMFDDQCHURPW-ISIOAQNYSA-N",
+            "SMILES": "CN(C)C1C2CC3Cc4c(cc(c(c4C(=C3C(=O)C2(C(=C(C1=O)C(=O)N)O)O)O)O)NC(=O)CN5CCCC5)F",
+            "SMILES_stereo": "CN(C)[C@H]1[C@@H]2C[C@@H]3Cc4c(cc(c(c4C(=C3C(=O)[C@@]2(C(=C(C1=O)C(=O)N)O)O)O)O)NC(=O)CN5CCCC5)F",
+            "chemicalId": "YQM",
+            "chemicalName": "Eravacycline",
+            "formula_weight": 0.559,
+            "number_of_instances": 1,
+            "pdbx_description": "Eravacycline",
+        },
+        [
+            {
+                "rcsb_id": "7M4U",
+                "tax_node": {
+                    "ncbi_tax_id": 480119,
+                    "rank": "strain",
+                    "scientific_name": "Acinetobacter baumannii AB0057",
+                },
+            },
+            {
+                "rcsb_id": "7M4Y",
+                "tax_node": {
+                    "ncbi_tax_id": 480119,
+                    "rank": "strain",
+                    "scientific_name": "Acinetobacter baumannii AB0057",
+                },
+            },
+            {
+                "rcsb_id": "7M4Z",
+                "tax_node": {
+                    "ncbi_tax_id": 480119,
+                    "rank": "strain",
+                    "scientific_name": "Acinetobacter baumannii AB0057",
+                },
+            },
+            {
+                "rcsb_id": "7M4V",
+                "tax_node": {
+                    "ncbi_tax_id": 480119,
+                    "rank": "strain",
+                    "scientific_name": "Acinetobacter baumannii AB0057",
+                },
+            },
+            {
+                "rcsb_id": "7M4W",
+                "tax_node": {
+                    "ncbi_tax_id": 480119,
+                    "rank": "strain",
+                    "scientific_name": "Acinetobacter baumannii AB0057",
+                },
+            },
+            {
+                "rcsb_id": "7M4X",
+                "tax_node": {
+                    "ncbi_tax_id": 480119,
+                    "rank": "strain",
+                    "scientific_name": "Acinetobacter baumannii AB0057",
+                },
+            },
+        ],
+    ],
+    [
+        {
+            "InChI": "InChI=1S/C28H32F3N3O7/c1-3-34(4-2)21-14-9-11-8-13-18(16(35)10-12(15-6-5-7-33-15)20(13)28(29,30)31)22(36)17(11)24(38)27(14,41)25(39)19(23(21)37)26(32)40/h10-11,14-15,21,33,35,37-38,41H,3-9H2,1-2H3,(H2,32,40)/t11-,14-,15-,21-,27-/m0/s1",
+            "InChIKey": "IDWTZCZXXFOLNV-DOYYSQEVSA-N",
+            "SMILES": "CCN(CC)C1C2CC3Cc4c(c(cc(c4C(F)(F)F)C5CCCN5)O)C(=O)C3=C(C2(C(=O)C(=C1O)C(=O)N)O)O",
+            "SMILES_stereo": "CCN(CC)[C@H]1[C@@H]2C[C@@H]3Cc4c(c(cc(c4C(F)(F)F)[C@@H]5CCCN5)O)C(=O)C3=C([C@@]2(C(=O)C(=C1O)C(=O)N)O)O",
+            "chemicalId": "80P",
+            "chemicalName": "(4S,4aS,5aR,12aS)-4-(diethylamino)-3,10,12,12a-tetrahydroxy-1,11-dioxo-8-[(2S)-pyrrolidin-2-yl]-7-(trifluoromethyl)-1,4,4a,5,5a,6,11,12a-octahydrotetracene-2-carboxamide",
+            "formula_weight": 0.58,
+            "number_of_instances": 3,
+            "pdbx_description": "(4S,4aS,5aR,12aS)-4-(diethylamino)-3,10,12,12a-tetrahydroxy-1,11-dioxo-8-[(2S)-pyrrolidin-2-yl]-7-(trifluoromethyl)-1,4,4a,5,5a,6,11,12a-octahydrotetracene-2-carboxamide",
+        },
+        [
+            {
+                "rcsb_id": "7RYG",
+                "tax_node": {
+                    "ncbi_tax_id": 480119,
+                    "rank": "strain",
+                    "scientific_name": "Acinetobacter baumannii AB0057",
+                },
+            },
+            {
+                "rcsb_id": "7RYF",
+                "tax_node": {
+                    "ncbi_tax_id": 480119,
+                    "rank": "strain",
+                    "scientific_name": "Acinetobacter baumannii AB0057",
+                },
+            },
+            {
+                "rcsb_id": "7RYH",
+                "tax_node": {
+                    "ncbi_tax_id": 480119,
+                    "rank": "strain",
+                    "scientific_name": "Acinetobacter baumannii AB0057",
+                },
+            },
+        ],
+    ],
+    [
+        {
+            "InChI": "InChI=1S/C29H39N5O8/c1-28(2,3)31-11-17(35)32-15-10-16(33(4)5)13-8-12-9-14-21(34(6)7)24(38)20(27(30)41)26(40)29(14,42)25(39)18(12)23(37)19(13)22(15)36/h10,12,14,21,31,36,38-39,42H,8-9,11H2,1-7H3,(H2,30,41)(H,32,35)/p+2/t12-,14-,21-,29-/m0/s1",
+            "InChIKey": "FPZLLRFZJZRHSY-HJYUBDRYSA-P",
+            "SMILES": "CC(C)(C)NCC(=O)Nc1cc(c2c(c1O)C(=O)C3=C(C4(C(CC3C2)C(C(=C(C4=O)C(=O)N)O)[NH+](C)C)O)O)[NH+](C)C",
+            "SMILES_stereo": "CC(C)(C)NCC(=O)Nc1cc(c2c(c1O)C(=O)C3=C([C@]4([C@@H](C[C@@H]3C2)[C@@H](C(=C(C4=O)C(=O)N)O)[NH+](C)C)O)O)[NH+](C)C",
+            "chemicalId": "T1C",
+            "chemicalName": "TIGECYCLINE",
+            "formula_weight": 0.588,
+            "number_of_instances": 2,
+            "pdbx_description": "TIGECYCLINE",
+        },
+        [
+            {
+                "rcsb_id": "5J91",
+                "tax_node": {
+                    "ncbi_tax_id": 83333,
+                    "rank": "strain",
+                    "scientific_name": "Escherichia coli K-12",
+                },
+            },
+            {
+                "rcsb_id": "6YSI",
+                "tax_node": {
+                    "ncbi_tax_id": 575584,
+                    "rank": "strain",
+                    "scientific_name": "Acinetobacter baumannii ATCC 19606 = CIP "
+                    "70.34 = JCM 6841",
+                },
+            },
+            {
+                "rcsb_id": "5J8A",
+                "tax_node": {
+                    "ncbi_tax_id": 83333,
+                    "rank": "strain",
+                    "scientific_name": "Escherichia coli K-12",
+                },
+            },
+            {
+                "rcsb_id": "4V9B",
+                "tax_node": {
+                    "ncbi_tax_id": 300852,
+                    "rank": "strain",
+                    "scientific_name": "Thermus thermophilus HB8",
+                },
+            },
+            {
+                "rcsb_id": "4YHH",
+                "tax_node": {
+                    "ncbi_tax_id": 300852,
+                    "rank": "strain",
+                    "scientific_name": "Thermus thermophilus HB8",
+                },
+            },
+        ],
+    ],
+    [
+        {
+            "InChI": "InChI=1S/C29H30FN3O7/c1-32(2)22-18-8-15-7-14-6-13-4-3-12(9-33-10-16(30)11-33)5-17(13)23(34)19(14)24(35)20(15)26(37)29(18,40)27(38)21(25(22)36)28(31)39/h3-6,15-16,18,22,34,36-37,40H,7-11H2,1-2H3,(H2,31,39)/t15-,18-,22-,29-/m0/s1",
+            "InChIKey": "DAUIQSOIFWOKJQ-MGVDVOGZSA-N",
+            "SMILES": "CN(C)C1C2CC3Cc4cc5ccc(cc5c(c4C(=O)C3=C(C2(C(=O)C(=C1O)C(=O)N)O)O)O)CN6CC(C6)F",
+            "SMILES_stereo": "CN(C)[C@H]1[C@@H]2C[C@@H]3Cc4cc5ccc(cc5c(c4C(=O)C3=C([C@@]2(C(=O)C(=C1O)C(=O)N)O)O)O)CN6CC(C6)F",
+            "chemicalId": "P8F",
+            "chemicalName": "Pentacycline",
+            "formula_weight": 0.552,
+            "number_of_instances": 2,
+            "pdbx_description": "Pentacycline",
+        },
+        [
+            {
+                "rcsb_id": "8CGV",
+                "tax_node": {
+                    "ncbi_tax_id": 679895,
+                    "rank": "no rank",
+                    "scientific_name": "Escherichia coli BW25113",
+                },
+            }
+        ],
+    ],
+    [
+        {
+            "InChI": "InChI=1S/C24H29N3O8/c1-26(2)18-13-8-11-7-12-10(9-27(3)35-4)5-6-14(28)16(12)19(29)15(11)21(31)24(13,34)22(32)17(20(18)30)23(25)33/h5-6,11,13,18,28,30-31,34H,7-9H2,1-4H3,(H2,25,33)/t11-,13-,18-,24-/m0/s1",
+            "InChIKey": "PQJQFLNBMSCUSH-SBAJWEJLSA-N",
+            "SMILES": "CN(C)C1C2CC3Cc4c(ccc(c4C(=O)C3=C(C2(C(=O)C(=C1O)C(=O)N)O)O)O)CN(C)OC",
+            "SMILES_stereo": "CN(C)[C@H]1[C@@H]2C[C@@H]3Cc4c(ccc(c4C(=O)C3=C([C@@]2(C(=O)C(=C1O)C(=O)N)O)O)O)CN(C)OC",
+            "chemicalId": "V7A",
+            "chemicalName": "Sarecycline",
+            "drugbank_description": "Sarecycline is a semi-synthetic derivative of "
+            "tetracycline that was initially discovered by "
+            "Paratek Pharmaceuticals from Boston, MA but then "
+            "licensed to Warner Chilcott of Rockaway, NJ in "
+            "July of 2007 [A40005]. After completing various "
+            "phase-II and phase-III trials demonstrating its "
+            "effectiveness in treating moderate to severe "
+            "facial acne vulgaris [A39993, A39994] the US Food "
+            "and Drug Administration approved Barcelona based "
+            "Almirall, S.A.'s Seysara (sarecylcine) as a new "
+            "first in class narrow spectrum tetracycline "
+            "derived oral antibiotic for the treatment of "
+            "inflammatory lesions of non-nodular moderate to "
+            "severe acne vulgaris in patients nine years of age "
+            "and older [L4814]. Seysara (sarecycline) was "
+            "originally part of Allergan's US Medical "
+            "Dermatology portfolio, before Almirall acquired "
+            "the portfolio in the second half of 2018 as a "
+            "means of consolidating and reinforcing the "
+            "dermatology-focused pharmaceutical company's "
+            "presence in the United States [L4815].  Acne "
+            "vulgaris itself is a common chronic skin condition "
+            "associated with the blockage and/or inflammation "
+            "of hair follicles and their accompanying sebaceous "
+            "glands [L4814]. The acne often presents physically "
+            "as a mixture of non-inflammatory and inflammatory "
+            "lesions mainly on the face but on the back and "
+            "chest as well [L4814]. Based upon data from Global "
+            "Burden of Disease studies, the acne vulgaris "
+            "condition affects up to 85% of young adults aged "
+            "12 to 25 years globally - with the possibility of "
+            "permanent physical and mental scarring resulting "
+            "from cases of severe acne [L4814].  Subsequently, "
+            "while a number of first line tetracycline "
+            "therapies like doxycycline and minocycline do "
+            "exist for treating acne vulgaris, sarecycline "
+            "presents a new and innovative therapy choice "
+            "because it exhibits the necessary antibacterial "
+            "activity against relevant pathogens that cause "
+            "acne vulgaris but also possesses a low propensity "
+            "for resistance development in such pathogens and a "
+            "narrower, more specific spectrum of antibacterial "
+            "activity, resulting in fewer off-target "
+            "antibacterial effects on endogenous intestinal "
+            "flora and consequently fewer resultant adverse "
+            "effects associated with diarrhea, fungal "
+            "overgrowth, etc.",
+            "drugbank_id": "DB12035",
+            "formula_weight": 0.488,
+            "number_of_instances": 2,
+            "pdbx_description": "Sarecycline",
+        },
+        [
+            {
+                "rcsb_id": "6XQD",
+                "tax_node": {
+                    "ncbi_tax_id": 300852,
+                    "rank": "strain",
+                    "scientific_name": "Thermus thermophilus HB8",
+                },
+            },
+            {
+                "rcsb_id": "6XQE",
+                "tax_node": {
+                    "ncbi_tax_id": 300852,
+                    "rank": "strain",
+                    "scientific_name": "Thermus thermophilus HB8",
+                },
+            },
+        ],
+    ],
+]
+
+
+
+# 1. retrieve binding sites
+# for every polymer
+#     2. align polymers to target (pairwise and in parallel, no massive msas please thanks)
+#     3. combined predictions into a single pool w    3. combined predictions into a single pool w    3. combined predictions into a single pool with each target residue weighed proportionally to the number of source residues that map to it.
+#     Voila
