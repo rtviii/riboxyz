@@ -16,7 +16,7 @@ import pyhmmer
 import requests
 from ribctl.etl.etl_assets_ops import RibosomeOps
 from ribctl.etl.gql_querystrings import AssemblyIdentificationString, EntryInfoString, LigandsChemInfo, NonpolymerEntitiesString, PolymerEntitiesString
-from ribctl.lib.schema.types_ribosome import RNA, AssemblyInstancesMap, CytosolicProteinClass, LifecycleFactorClass, MitochondrialProteinClass, NonpolymericLigand, Polymer, PolynucleotideClass, PolypeptideClass, Protein, RibosomeStructure
+from ribctl.lib.schema.types_ribosome import RNA, AssemblyInstancesMap, CytosolicProteinClass, LifecycleFactorClass, MitochondrialProteinClass, MitochondrialRNAClass, NonpolymericLigand, Polymer, PolynucleotideClass, PolypeptideClass, Protein, RibosomeStructure
 from ribctl.lib.libhmm import HMM, HMMClassifier
 
 
@@ -85,7 +85,6 @@ class PolymersNode:
         # TODO: So we need to return this from POLYMER DATA
         # self.polymers_target_count = functools.reduce( lambda count, poly: count + len(poly["rcsb_polymer_entity_container_identifiers"]["asym_ids"]), self.rcsb_data_dict["polymer_entities"], 0)
         self.polymers_target_count = functools.reduce( lambda count, poly: count + len(poly["rcsb_polymer_entity_container_identifiers"]["asym_ids"]), self.rcsb_data_polymers, 0)
-        print("Polymers target count:", self.polymers_target_count)
         # # ! According to RCSB schema, polymer_entites include "Protein", "RNA" but also "DNA", N"A-Hybrids" and "Other".
         # # ! We only make the distinction between Proteins and RNA and Other for purposes of simplicity
         # def is_protein(poly:Polymer)->bool:
@@ -110,7 +109,6 @@ class PolymersNode:
                     case _:
                         _other_polymers.append(poly)
 
-        print("Converted to polymers successfully")
         logger.debug("Classifying {}: {} polypeptides, {} polynucleotides, {} other.".format(self.rcsb_id, len(_prot_polypeptides), len(_rna_polynucleotides), len(_other_polymers)))
 
         RA  = RibosomeOps(self.rcsb_id)
@@ -157,7 +155,6 @@ class PolymersNode:
             + len(_prot_polypeptides)
             + len(_other_polymers)
         ) == self.polymers_target_count
-        print("Assertion passed")
 
         return [_prot_polypeptides, _rna_polynucleotides, _other_polymers]
 
@@ -259,7 +256,6 @@ class PolymersNode:
                     # TODO: MOVE TO HMM BASED CLASSIFICATION METHOD
                     reshaped_proteins.extend(self.poly_reshape_to_rprotein(poly))
             else:
-                print("Filtered out a protein")
                 ...
 
         self.rProteins = reshaped_proteins
@@ -614,7 +610,6 @@ class NonpolymersNode:
             if nonpoly_entities != None and len(nonpoly_entities) > 0
             else []
         )
-
         return reshaped_nonpoly
 
     def nonpoly_reshape_to_ligand(self, nonpoly: dict) -> NonpolymericLigand:
@@ -665,7 +660,6 @@ class ETLCollector:
         reqstring = "https://data.rcsb.org/graphql?query={}".format(gql_string)
         _resp     = requests.get(reqstring)
         resp      = _resp.json()
-        print(resp)
 
         if "data" in resp:
             return resp["data"]
@@ -735,27 +729,24 @@ class ETLCollector:
 
 
         #! Ligands 
-        nonpolymers_data = self.query_rcsb_api(NonpolymerEntitiesString.replace("$RCSB_ID", self.rcsb_id))['entry']
-        ligands          = NonpolymersNode(nonpolymers_data).process()
-        non_ions         = []
+        nonpolymers_data          = self.query_rcsb_api(NonpolymerEntitiesString.replace("$RCSB_ID", self.rcsb_id))['entry']
+        ligands                   = NonpolymersNode(nonpolymers_data).process()
+        ligands                   = list(filter(lambda x: "ion" not in x.chemicalName.lower(), ligands))
+        ligands_chem_info_qstring = LigandsChemInfo.replace("$COMP_IDS", str(list(map(lambda x: x.chemicalId, ligands))).replace('\'', "\""))
+        chemical_info = self.query_rcsb_api(ligands_chem_info_qstring)['chem_comps']
+
         for lig in ligands:
-            if not "ion" in lig.chemicalName.lower():
-                non_ions.append(lig.chemicalId)
+            for chem_comp in chemical_info:
+                if chem_comp['chem_comp']['id'] == lig.chemicalId:
+                       lig.InChIKey      = chem_comp['rcsb_chem_comp_descriptor']['InChIKey']
+                       lig.InChI         = chem_comp['rcsb_chem_comp_descriptor']['InChI']
+                       lig.SMILES        = chem_comp['rcsb_chem_comp_descriptor']['SMILES']
+                       lig.SMILES_stereo = chem_comp['rcsb_chem_comp_descriptor']['SMILES_stereo']
 
-        print("Querying cheminfo for {}".format(non_ions))
-        print(str(non_ions))
-        print(LigandsChemInfo.replace("$COMP_IDS", str(non_ions)))
-        # exit()
-        chemical_info = self.query_rcsb_api(LigandsChemInfo.replace("$COMP_IDS", str(non_ions)).replace('\'', "\""))
-        
-
-
-        pprint(chemical_info)
-        exit()
         
         # --------------------------
         is_mitochondrial=False
-        for rna_d in _rna_polynucleotides:
+        for rna_d in rna:
             if len(rna_d.nomenclature )>0 :
                if (rna_d.nomenclature[0] in [k.value for k in list(MitochondrialRNAClass)] ):
                     is_mitochondrial = True
