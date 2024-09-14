@@ -1,5 +1,7 @@
-import json
+import sys
+sys.path.append("/home/rtviii/dev/riboxyz")
 import operator
+import json
 from time import time
 from typing import Optional
 import re
@@ -11,7 +13,6 @@ from Bio import (
 from fuzzysearch import find_near_matches
 import pandas as pd
 from ribctl.lib.schema.types_ribosome import Polymer
-sys.path.append("/home/rtviii/dev/riboxyz")
 with warnings.catch_warnings():
     warnings.simplefilter("ignore", BiopythonDeprecationWarning)
     from Bio import pairwise2
@@ -38,7 +39,6 @@ from ribctl.lib.schema.types_binding_site import (
     BindingSiteChain,
     ResidueSummary)
 import os
-import sys
 from collections import defaultdict
 from ribctl import ASSETS_PATH
 

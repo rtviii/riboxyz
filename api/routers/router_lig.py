@@ -7,7 +7,7 @@ from django.http import HttpResponse, JsonResponse, HttpResponseServerError
 from ninja import Router
 from ribctl import RIBETL_DATA
 from ribctl.etl.etl_assets_ops import RibosomeOps, Structure
-from ribctl.lib.libbsite import bsite_ligand, bsite_transpose
+from ribctl.lib.libbsite import bsite_ligand, bsite_transpose, lig_get_chemical_categories
 from ribctl.lib.schema.types_binding_site import BindingSite, LigandTransposition
 from ribctl.lib.schema.types_ribosome import RNA, LifecycleFactorClass, MitochondrialProteinClass, Polymer, PolynucleotideClass, CytosolicProteinClass, PolynucleotideClass, PolypeptideClass, Protein, ProteinClass, RibosomeStructure
 
@@ -40,4 +40,11 @@ def lig_transpose(request, source_structure:str, target_structure:str, chemical_
     prediction      = bsite_transpose(source_structure,target_structure,bsite)
 
     return JsonResponse(prediction.model_dump(), safe=False)
+
+@router_lig.get('/chemical_classification',  tags=[TAG], response=dict)
+def lig_chemical_categories(request,):
+    """All members of the given RNA class: small and large subunit, cytosolic and mitochondrial RNA; tRNA.  """
+    return JsonResponse(lig_get_chemical_categories(), safe=False)
+
+
 

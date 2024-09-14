@@ -688,14 +688,12 @@ class NonpolymersNode:
 
     def nonpoly_reshape_to_ligand(self, nonpoly: dict) -> NonpolymericLigand:
         return NonpolymericLigand(
-            nonpolymer_comp=nonpoly["nonpolymer_comp"],
-            chemicalId=nonpoly["pdbx_entity_nonpoly"]["comp_id"],
-            chemicalName=nonpoly["pdbx_entity_nonpoly"]["name"],
-            pdbx_description=nonpoly["rcsb_nonpolymer_entity"]["pdbx_description"],
-            formula_weight=nonpoly["rcsb_nonpolymer_entity"]["formula_weight"],
-            number_of_instances=nonpoly["rcsb_nonpolymer_entity"][
-                "pdbx_number_of_molecules"
-            ],
+            nonpolymer_comp     = nonpoly["nonpolymer_comp"],
+            chemicalId          = nonpoly["pdbx_entity_nonpoly"]["comp_id"],
+            chemicalName        = nonpoly["pdbx_entity_nonpoly"]["name"],
+            pdbx_description    = nonpoly["rcsb_nonpolymer_entity"]["pdbx_description"],
+            formula_weight      = nonpoly["rcsb_nonpolymer_entity"]["formula_weight"],
+            number_of_instances = nonpoly["rcsb_nonpolymer_entity"][ "pdbx_number_of_molecules"],
         )
 
 
