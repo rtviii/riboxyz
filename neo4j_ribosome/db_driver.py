@@ -1,3 +1,4 @@
+import asyncio
 from concurrent.futures import ALL_COMPLETED, Future, ThreadPoolExecutor, wait
 from functools import partial
 import sys
@@ -40,3 +41,11 @@ def upsert_all_structures():
             fut = executor.submit(partial(adapter.upsert_structure_node, rcsb_id))
             futures.append(fut)
     wait(futures, return_when=ALL_COMPLETED)
+
+def upsert_all_ligands():
+    adapter = Neo4jAdapter(NEO4J_URI, NEO4J_USER, NEO4J_CURRENTDB)
+    futures: list[Future] = []
+    with ThreadPoolExecutor(max_workers=10) as executor:
+        for rcsb_id in sorted(Assets.list_all_structs()):
+            fut = executor.submit(partial(adapter.upsert_ligands, rcsb_id))
+            futures.append(fut)

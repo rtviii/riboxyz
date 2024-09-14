@@ -418,7 +418,6 @@ with rib order by rib.rcsb_id desc\n"""
             return session.execute_read(_)
 
 
-
 dbqueries = Neo4jReader()
 
 
