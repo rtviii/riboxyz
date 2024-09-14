@@ -818,9 +818,6 @@ class ETLCollector:
             return 0
         else:
             for assembly_map in self.asm_maps:
-                print(assembly_map.rcsb_id)
-                # pprint(assembly_map)
-                # exit()
                 for polymer_instance in assembly_map.polymer_entity_instances:
                     if ( polymer_instance.rcsb_polymer_entity_instance_container_identifiers.auth_asym_id == auth_asym_id ):
                         return int(assembly_map.rcsb_id.split("-")[1]) - 1
