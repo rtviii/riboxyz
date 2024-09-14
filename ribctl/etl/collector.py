@@ -49,35 +49,23 @@ class StructureNode:
 
     def process(self) -> list:
 
-        externalRefs = self.extract_external_refs(
-            self.rcsb_data_entry["rcsb_external_references"]
-        )
-        if (
-            self.rcsb_data_entry["citation"] != None
-            and len(self.rcsb_data_entry["citation"]) > 0
-        ):
+        externalRefs = self.extract_external_refs( self.rcsb_data_entry["rcsb_external_references"] )
+
+        if ( self.rcsb_data_entry["citation"] != None and len(self.rcsb_data_entry["citation"]) > 0 ):
             pub = self.rcsb_data_entry["citation"][0]
         else:
             pub = {
-                "year": None,
-                "rcsb_authors": None,
-                "title": None,
-                "pdbx_database_id_DOI": None,
+                "year"                   : None,
+                "rcsb_authors"           : None,
+                "title"                  : None,
+                "pdbx_database_id_DOI"   : None,
                 "pdbx_database_id_PubMed": None,
             }
 
-        kwords_text = (
-            self.rcsb_data_entry["struct_keywords"]["text"]
-            if self.rcsb_data_entry["struct_keywords"] != None
-            else None
-        )
-        kwords = (
-            self.rcsb_data_entry["struct_keywords"]["pdbx_keywords"]
-            if self.rcsb_data_entry["struct_keywords"] != None
-            else None
-        )
-
-        return [externalRefs, pub, kwords_text, kwords]
+        kwords_text = ( self.rcsb_data_entry["struct_keywords"]["text"] if self.rcsb_data_entry["struct_keywords"] != None else None )
+        kwords      = ( self.rcsb_data_entry["struct_keywords"]["pdbx_keywords"] if self.rcsb_data_entry["struct_keywords"] != None else None )
+        year = self.rcsb_data_entry["rcsb_accession_info"]["deposit_date"].split("-")[0]
+        return [externalRefs, pub, kwords_text, kwords, year]
 
     def extract_external_refs(self, external_refs):
         """
@@ -868,22 +856,12 @@ class ETLCollector:
             logger.debug("Profile already exists for {}.".format(self.rcsb_id))
             if not overwrite:
                 return RA.profile()
-        # TODO :
-        # 1. parse assemblies
-        # 2. process structure node
-        # 3. process polymers
-        # 4. infer species from polymers (rewrite)
-        # 5. process ligands (incorporate chem info)
 
         #! Assemblies metadata
-        self.asm_maps = self.query_rcsb_api(
-            AssemblyIdentificationString.replace("$RCSB_ID", self.rcsb_id)
-        )["entry"]["assemblies"]
+        self.asm_maps = self.query_rcsb_api( AssemblyIdentificationString.replace("$RCSB_ID", self.rcsb_id) )["entry"]["assemblies"]
 
         #! Polymers
-        polymers_data = self.query_rcsb_api(
-            PolymerEntitiesString.replace("$RCSB_ID", self.rcsb_id)
-        )["entry"]
+        polymers_data = self.query_rcsb_api( PolymerEntitiesString.replace("$RCSB_ID", self.rcsb_id) )["entry"]
         proteins, rna, other = PolymersNode(polymers_data).process()
         #! Assign polymers to assemblies
         for p in proteins:
@@ -894,12 +872,8 @@ class ETLCollector:
             o.assembly_id = self.poly_assign_to_asm(o.auth_asym_id)
 
         #! Structure Metadata
-        structure_data = self.query_rcsb_api(
-            EntryInfoString.replace("$RCSB_ID", self.rcsb_id)
-        )["entry"]
-        [externalRefs, pub, kwords_text, kwords] = StructureNode(
-            structure_data
-        ).process()
+        structure_data = self.query_rcsb_api( EntryInfoString.replace("$RCSB_ID", self.rcsb_id) )["entry"]
+        [externalRefs, pub, kwords_text, kwords, year] = StructureNode( structure_data ).process()
 
         #! Ligands
         nonpolymers_data = self.query_rcsb_api(
@@ -944,7 +918,7 @@ class ETLCollector:
             rcsb_external_ref_id   = externalRefs[0],
             rcsb_external_ref_type = externalRefs[1],
             rcsb_external_ref_link = externalRefs[2],
-            citation_year          = pub["year"],
+            citation_year          = year,
             citation_rcsb_authors  = pub["rcsb_authors"],
             citation_title         = pub["title"],
             citation_pdbx_doi      = pub["pdbx_database_id_DOI"],
