@@ -165,17 +165,14 @@ NonpolymerEntitiesString = """{
 
 LigandsChemInfo = """{
   chem_comps(comp_ids: $COMP_IDS) {
+    chem_comp{
+      id
+    }
     rcsb_chem_comp_descriptor {
       SMILES
-      comp_id
+      InChI
+      InChIKey
       SMILES_stereo
-    }
-    drugbank {
-      drugbank_info {
-        description
-        indication
-        name
-      }
     }
   }
 }

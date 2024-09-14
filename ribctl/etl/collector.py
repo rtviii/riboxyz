@@ -15,7 +15,7 @@ from loguru import logger
 import pyhmmer
 import requests
 from ribctl.etl.etl_assets_ops import RibosomeOps
-from ribctl.etl.gql_querystrings import AssemblyIdentificationString, EntryInfoString, NonpolymerEntitiesString, PolymerEntitiesString
+from ribctl.etl.gql_querystrings import AssemblyIdentificationString, EntryInfoString, LigandsChemInfo, NonpolymerEntitiesString, PolymerEntitiesString
 from ribctl.lib.schema.types_ribosome import RNA, AssemblyInstancesMap, CytosolicProteinClass, LifecycleFactorClass, MitochondrialProteinClass, NonpolymericLigand, Polymer, PolynucleotideClass, PolypeptideClass, Protein, RibosomeStructure
 from ribctl.lib.libhmm import HMM, HMMClassifier
 
@@ -26,11 +26,7 @@ class StructureNode:
     asm_maps                 : list[AssemblyInstancesMap]
 
     def __init__(self,data:dict) -> None:
-
         self.rcsb_data_entry  = data
-
-    # def process(self)->list[dict]:
-    #      = self.process_metadata()
 
     def process(self)->list:
 
@@ -605,16 +601,14 @@ class PolymersNode:
         ]
 
 class NonpolymersNode:
-    rcsb_nonpolymers         : int
+    rcsb_nonpolymers         : dict
 
     def __init__(self,data:dict) -> None:
-        ...
+        self.rcsb_data_nonpolymer_entities = data['nonpolymer_entities']
 
-    def process(self)->dict:
-        ...
 
-    def process_nonpolymers(self) -> list[NonpolymericLigand]:
-        nonpoly_entities = self.rcsb_data_dict["nonpolymer_entities"]
+    def process(self) -> list[NonpolymericLigand]:
+        nonpoly_entities = self.rcsb_data_nonpolymer_entities
         reshaped_nonpoly = (
             [self.nonpoly_reshape_to_ligand(nonpoly) for nonpoly in nonpoly_entities]
             if nonpoly_entities != None and len(nonpoly_entities) > 0
@@ -671,8 +665,9 @@ class ETLCollector:
         reqstring = "https://data.rcsb.org/graphql?query={}".format(gql_string)
         _resp     = requests.get(reqstring)
         resp      = _resp.json()
+        print(resp)
 
-        if "data" in resp and "entry" in resp["data"]:
+        if "data" in resp:
             return resp["data"]
         else:
             raise Exception("No data found for query: {}".format(gql_string))
@@ -734,31 +729,43 @@ class ETLCollector:
         for o in other:
                 o.assembly_id = self.poly_assign_to_asm(o.auth_asym_id) 
 
+        #! Structure Metadata
         structure_data   = self.query_rcsb_api(EntryInfoString.replace("$RCSB_ID", self.rcsb_id))['entry']
         [externalRefs, pub, kwords_text, kwords] = StructureNode(structure_data).process()
-        #  = StructureNode
-        print([externalRefs, pub, kwords_text, kwords])
-        exit()
 
 
-        nonpolymers_data = query_rcsb_api(NonpolymerEntitiesString.replace("$RCSB_ID", self.rcsb_id))
+        #! Ligands 
+        nonpolymers_data = self.query_rcsb_api(NonpolymerEntitiesString.replace("$RCSB_ID", self.rcsb_id))['entry']
         ligands          = NonpolymersNode(nonpolymers_data).process()
+        non_ions         = []
+        for lig in ligands:
+            if not "ion" in lig.chemicalName.lower():
+                non_ions.append(lig.chemicalId)
+
+        print("Querying cheminfo for {}".format(non_ions))
+        print(str(non_ions))
+        print(LigandsChemInfo.replace("$COMP_IDS", str(non_ions)))
+        # exit()
+        chemical_info = self.query_rcsb_api(LigandsChemInfo.replace("$COMP_IDS", str(non_ions)).replace('\'', "\""))
+        
 
 
-
+        pprint(chemical_info)
+        exit()
+        
         # --------------------------
         is_mitochondrial=False
         for rna_d in _rna_polynucleotides:
-            if len( rna_d.nomenclature )>0 :
-               if ( rna_d.nomenclature[0] in [k.value for k in list(MitochondrialRNAClass)] ):
-                    is_mitochondrial=True
+            if len(rna_d.nomenclature )>0 :
+               if (rna_d.nomenclature[0] in [k.value for k in list(MitochondrialRNAClass)] ):
+                    is_mitochondrial = True
                     break
 
+        organisms                  = self.infer_organisms_from_polymers([*_prot_polypeptides, *_rna_polynucleotides])
+        reshaped_nonpolymers       = self.process_nonpolymers()
+        subunit_presence           = lsu_ssu_presence(_rna_polynucleotides, is_mitochondrial)
+        reshaped                   = RibosomeStructure(
 
-        organisms                                = self.infer_organisms_from_polymers([*_prot_polypeptides, *_rna_polynucleotides])
-        reshaped_nonpolymers                     = self.process_nonpolymers()
-        subunit_presence                         = lsu_ssu_presence(_rna_polynucleotides, is_mitochondrial)
-        reshaped                                 = RibosomeStructure(
             rcsb_id                = self.rcsb_data_dict["rcsb_id"],
             expMethod              = self.rcsb_data_dict["exptl"][0]["method"],
             resolution             = self.rcsb_data_dict["rcsb_entry_info"]["resolution_combined"][0],
@@ -783,9 +790,11 @@ class ETLCollector:
             assembly_map           = self.asm_maps,
             mitochondrial          = is_mitochondrial,
             subunit_presence       = subunit_presence
+
         )
 
         print("Succeeded")
         exit(738)
         RA.write_own_json_profile(reshaped.model_dump(), overwrite=False)
+        #TODO : Switch new data format here.
         return reshaped
