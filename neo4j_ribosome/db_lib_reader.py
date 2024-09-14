@@ -119,16 +119,17 @@ return apoc.map.merge(rib, rest)
     return collect({rcsb_id:n.rcsb_id, tax_id: p.ncbi_tax_id, tax_name:p.scientific_name, mitochondrial:n.mitochondrial, title:n.citation_title})""").value()[0]
             return session.execute_read(_)
 
-    def list_ligands(self):
+    def list_ligands(self, nodes_only:bool=False):
         with self.adapter.driver.session() as session:
+
             def _(tx: Transaction | ManagedTransaction):
-                return tx.run(
-                    """//
-    match (l:Ligand)-[]-(r:RibosomeStructure) where not toLower(l.chemicalName) contains "ion" with l, r
-    match (r)-[:source]-(p:PhylogenyNode)
-    return properties(l), collect({rcsb_id: r.rcsb_id , tax_node: properties(p)})
-    """
-                ).values()
+                if nodes_only:
+                    return tx.run("""match (l:Ligand) where not toLower(l.chemicalName) contains "ion" with l return collect(properties(l)) """ ).values()
+                else:
+                    return tx.run( """match (l:Ligand)-[]-(r:RibosomeStructure) where not toLower(l.chemicalName) contains "ion" 
+                                  with l, r 
+                                  match (r)-[:source]-(p:PhylogenyNode) 
+                                  return properties(l), collect({rcsb_id: r.rcsb_id , tax_node: properties(p)})""" ).values()
 
             return session.execute_read(_)
 
@@ -416,7 +417,6 @@ with rib order by rib.rcsb_id desc\n"""
 
         with self.adapter.driver.session() as session:
             return session.execute_read(_)
-
 
 
 dbqueries = Neo4jReader()
