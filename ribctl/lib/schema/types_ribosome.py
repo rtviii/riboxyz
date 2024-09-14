@@ -453,6 +453,13 @@ class NonpolymericLigand(BaseModel):
 
     nonpolymer_comp: Optional[NonpolymerComp] = None
 
+    SMILES       : Optional[str] =None
+    SMILES_stereo: Optional[str] =None
+    InChI        : Optional[str] =None
+    InChIKey     : Optional[str] =None
+
+
+
     # nonpoly["nonpolymer_comp"]["chem_comp"]["id"]
     # nonpoly["nonpolymer_comp"]["chem_comp"]["name"]
     # nonpoly["nonpolymer_comp"]["chem_comp"]["three_letter_code"]

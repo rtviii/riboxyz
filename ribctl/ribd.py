@@ -21,7 +21,7 @@ def ribd(ctx, debug, config, rcsb_id:str):
     if config:
         click.echo(f'Using configuration file: {config}')
     ctx.ensure_object(dict)
-    if rcsb_id is not None:
+        ctx.obj['rcsb_id'] = rcsb_id.upper()
 
         ctx.obj['rcsb_id'] = rcsb_id.upper()
 

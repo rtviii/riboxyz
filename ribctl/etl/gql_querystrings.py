@@ -1,6 +1,7 @@
 EntryInfoString = """
 {
   entry(entry_id: "$RCSB_ID") {
+  rcsb_id
   rcsb_accession_info{
     deposit_date
   }
@@ -62,6 +63,8 @@ AssemblyIdentificationString = """
 
 PolymerEntitiesString = """{
   entry(entry_id: "$RCSB_ID") {
+    
+    rcsb_id
     assemblies {
       polymer_entity_instances {
         rcsb_id
@@ -162,17 +165,14 @@ NonpolymerEntitiesString = """{
 
 LigandsChemInfo = """{
   chem_comps(comp_ids: $COMP_IDS) {
+    chem_comp{
+      id
+    }
     rcsb_chem_comp_descriptor {
       SMILES
-      comp_id
+      InChI
+      InChIKey
       SMILES_stereo
-    }
-    drugbank {
-      drugbank_info {
-        description
-        indication
-        name
-      }
     }
   }
 }
