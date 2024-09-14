@@ -1,15 +1,8 @@
-# the basic recipe should be:
-
-# 1. fetch whatever data you need from rcsb
-# 2. perform transfomrations on it
-# 3. return the intermediate types and combine
-
-# Let's have a collector class that will orchestrate this and do the housekeeping (assembly ids and shit like that).
 import functools
 import json
 import os
 from pprint import pprint
-from typing import Any, Optional
+from typing import Any
 
 from loguru import logger
 import pyhmmer
@@ -723,19 +716,9 @@ class ETLCollector:
     node_polymers: dict
     node_ligands: dict
 
-    # * -------------
-
-    # ? Input data:
-    # rcsb_data_dict: dict
-
-    # # ? Initialized classification resources:
-    # hmm_ribosomal_proteins: dict[CytosolicProteinClass, HMM]
-
     # ? Housekeeping
     asm_maps: list[AssemblyInstancesMap]
     polymers_target_count: int
-    # rcsb_polymers            : int
-    # rcsb_nonpolymers         : int
 
     def query_rcsb_api(self, gql_string: str) -> dict:
         """This defines a query in the RCSB search language that identifies the structures we view as 'current' i.e. 40+ proteins, smaller than 4A resolution etc."""
@@ -831,16 +814,15 @@ class ETLCollector:
         Every structure in PDB might have 1 or more "assemblies", i.e. *almost* identical models sitting next to each other in space.
         The purpose of this method is to assign a polymer to the correct assembly, given its auth_asym_id.
         """
-
         if len(self.asm_maps) == 1:
             return 0
         else:
             for assembly_map in self.asm_maps:
+                print(assembly_map.rcsb_id)
+                # pprint(assembly_map)
+                # exit()
                 for polymer_instance in assembly_map.polymer_entity_instances:
-                    if (
-                        polymer_instance.rcsb_polymer_entity_instance_container_identifiers.auth_asym_id
-                        == auth_asym_id
-                    ):
+                    if ( polymer_instance.rcsb_polymer_entity_instance_container_identifiers.auth_asym_id == auth_asym_id ):
                         return int(assembly_map.rcsb_id.split("-")[1]) - 1
             else:
                 raise LookupError(
@@ -858,11 +840,14 @@ class ETLCollector:
                 return RA.profile()
 
         #! Assemblies metadata
-        self.asm_maps = self.query_rcsb_api( AssemblyIdentificationString.replace("$RCSB_ID", self.rcsb_id) )["entry"]["assemblies"]
+        assmebly_maps = self.query_rcsb_api(AssemblyIdentificationString.replace("$RCSB_ID", self.rcsb_id) )["entry"]["assemblies"]
+        self.asm_maps = list(map(AssemblyInstancesMap.model_validate, assmebly_maps))
+        # pprint(self.asm_maps)
 
         #! Polymers
-        polymers_data = self.query_rcsb_api( PolymerEntitiesString.replace("$RCSB_ID", self.rcsb_id) )["entry"]
+        polymers_data        = self.query_rcsb_api( PolymerEntitiesString.replace("$RCSB_ID", self.rcsb_id) )["entry"]
         proteins, rna, other = PolymersNode(polymers_data).process()
+
         #! Assign polymers to assemblies
         for p in proteins:
             p.assembly_id = self.poly_assign_to_asm(p.auth_asym_id)
@@ -876,39 +861,28 @@ class ETLCollector:
         [externalRefs, pub, kwords_text, kwords, year] = StructureNode( structure_data ).process()
 
         #! Ligands
-        nonpolymers_data = self.query_rcsb_api(
-            NonpolymerEntitiesString.replace("$RCSB_ID", self.rcsb_id)
-        )["entry"]
-        ligands = NonpolymersNode(nonpolymers_data).process()
-        ligands = list(filter(lambda x: "ion" not in x.chemicalName.lower(), ligands))
-        ligands_chem_info_qstring = LigandsChemInfo.replace(
-            "$COMP_IDS",
-            str(list(map(lambda x: x.chemicalId, ligands))).replace("'", '"'),
-        )
-        chemical_info = self.query_rcsb_api(ligands_chem_info_qstring)["chem_comps"]
+        nonpolymers_data          = self.query_rcsb_api( NonpolymerEntitiesString.replace("$RCSB_ID", self.rcsb_id) )["entry"]
+        ligands                   = NonpolymersNode(nonpolymers_data).process()
+        ligands                   = list(filter(lambda x: "ion" not in x.chemicalName.lower(), ligands))
+        ligands_chem_info_qstring = LigandsChemInfo.replace( "$COMP_IDS", str(list(map(lambda x: x.chemicalId, ligands))).replace("'", '"'), )
+        chemical_info             = self.query_rcsb_api(ligands_chem_info_qstring)["chem_comps"]
 
         for lig in ligands:
             for chem_comp in chemical_info:
                 if chem_comp["chem_comp"]["id"] == lig.chemicalId:
-                    lig.InChIKey = chem_comp["rcsb_chem_comp_descriptor"]["InChIKey"]
-                    lig.InChI = chem_comp["rcsb_chem_comp_descriptor"]["InChI"]
-                    lig.SMILES = chem_comp["rcsb_chem_comp_descriptor"]["SMILES"]
-                    lig.SMILES_stereo = chem_comp["rcsb_chem_comp_descriptor"][
-                        "SMILES_stereo"
-                    ]
+                   lig.InChIKey                  = chem_comp["rcsb_chem_comp_descriptor"]["InChIKey"]
+                   lig.InChI                     = chem_comp["rcsb_chem_comp_descriptor"]["InChI"]
+                   lig.SMILES                    = chem_comp["rcsb_chem_comp_descriptor"]["SMILES"]
+                   lig.SMILES_stereo             = chem_comp["rcsb_chem_comp_descriptor"]["SMILES_stereo"]
 
         # --------------------------
         is_mitochondrial = False
         for rna_d in rna:
             if len(rna_d.nomenclature) > 0:
-                if rna_d.nomenclature[0] in [
-                    k.value for k in list(MitochondrialRNAClass)
-                ]:
+                if rna_d.nomenclature[0] in [ k.value for k in list(MitochondrialRNAClass) ]:
                     is_mitochondrial = True
                     break
-
         organisms            = self.infer_organisms_from_polymers([*proteins, *rna, *other] )
-        # reshaped_nonpolymers = self.process_nonpolymers()
         subunit_presence     = lsu_ssu_presence(rna, is_mitochondrial)
         reshaped             = RibosomeStructure(
             rcsb_id                = structure_data["rcsb_id"],
@@ -936,9 +910,5 @@ class ETLCollector:
             mitochondrial          = is_mitochondrial,
             subunit_presence       = subunit_presence,
         )
-
-        print("Succeeded")
-        exit(738)
-        RA.write_own_json_profile(reshaped.model_dump(), overwrite=False)
-        # TODO : Switch new data format here.
+        RA.write_own_json_profile(reshaped.model_dump(), overwrite=overwrite)
         return reshaped

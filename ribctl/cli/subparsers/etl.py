@@ -36,12 +36,8 @@ def all(ctx:Context):
 @click.option("--display", required=False, is_flag=True, default=False)
 def assets(ctx: Context, assets, overwrite, rcsb_sync, all_structs, display):
 
-    logger  = get_etl_logger()
-    rcsb_id = ctx.obj['rcsb_id'].upper()
-    assets  = list(map(AssetClass.from_str, assets))
-
-    if rcsb_id is not None:
-
+    if 'rcsb_id' in ctx.obj:
+        rcsb_id = ctx.obj['rcsb_id'].upper()
         routines = etl_obtain.asset_routines(rcsb_id, assets , overwrite)
         asyncio.run(etl_obtain.execute_asset_task_pool(routines))
         return 
@@ -49,7 +45,7 @@ def assets(ctx: Context, assets, overwrite, rcsb_sync, all_structs, display):
     if rcsb_sync:
         for rcsb_id in Assets.status_vs_rcsb():
             print("RCSB Sync: Fetching assets for {}".format(rcsb_id))
-            routines = etl_obtain.asset_routines(rcsb_id, [AssetClass.profile, AssetClass.cif] )
+            routines = etl_obtain.asset_routines(rcsb_id, [AssetClass.profile, AssetClass.cif] , overwrite)
             asyncio.run(etl_obtain.execute_asset_task_pool(routines))
         return
 
