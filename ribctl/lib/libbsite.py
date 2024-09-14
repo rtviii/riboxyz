@@ -1,6 +1,5 @@
 import json
 import operator
-from pprint import pprint
 from time import time
 from typing import Optional
 import re
@@ -10,10 +9,9 @@ from Bio import (
     BiopythonDeprecationWarning,
 )
 from fuzzysearch import find_near_matches
-import numpy as np
-
+import pandas as pd
 from ribctl.lib.schema.types_ribosome import Polymer
-
+sys.path.append("/home/rtviii/dev/riboxyz")
 with warnings.catch_warnings():
     warnings.simplefilter("ignore", BiopythonDeprecationWarning)
     from Bio import pairwise2
@@ -39,6 +37,22 @@ from ribctl.lib.schema.types_binding_site import (
     BindingSiteChain,
     ResidueSummary,
 )
+import os
+import sys
+from collections import defaultdict
+from ribctl import ASSETS_PATH
+
+
+def lig_get_chemical_categories():
+    ligands_classification_path = os.path.join(ASSETS_PATH, "ligands", "ligand_chemical_categories.csv")
+    df           = pd.read_csv(ligands_classification_path)
+    reverse_dict = defaultdict(list)
+    for _, row in df.iterrows():
+        ligand = row['Ligand']
+        category = row['Category']
+        reverse_dict[category].append(ligand)
+    
+    return dict(reverse_dict)
 
 
 #! Transposition methods
@@ -536,6 +550,8 @@ def bsite_transpose(
 # It's not suuper taxing to classify the stuff we have, someone has already done the work : https://jcheminf.biomedcentral.com/articles/10.1186/s13321-016-0174-y
 # Optics of it aside, i want to press you for why this is a potentially useful feature to have? I'll do it for sure, I think it is a very nice idea.
 # I'm just wondering -- what's the next step to make it practical, open a door for people to build on it? Concrete example: we have 10 antibiotics in the class "Aminoglycosides" across 10 structures of 5-7 different species . I do the msa, mapping stuff. Now 10 extant (source) binding pockets are mapped into 1 target sequence. There is some overlap between source pockets, but also some spread in terms of what residues they get mapped into. How to "export" that? Does it tell anyone anything useful? Which ones are more relevant for drug design? (edited) 
+# -----
 
 
+def retrieve_ligands():
 
