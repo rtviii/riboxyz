@@ -538,3 +538,4 @@ def bsite_transpose(
 # I'm just wondering -- what's the next step to make it practical, open a door for people to build on it? Concrete example: we have 10 antibiotics in the class "Aminoglycosides" across 10 structures of 5-7 different species . I do the msa, mapping stuff. Now 10 extant (source) binding pockets are mapped into 1 target sequence. There is some overlap between source pockets, but also some spread in terms of what residues they get mapped into. How to "export" that? Does it tell anyone anything useful? Which ones are more relevant for drug design? (edited) 
 
 
+

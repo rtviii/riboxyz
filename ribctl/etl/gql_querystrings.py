@@ -178,7 +178,7 @@ LigandsChemInfo = """{
 }
 """
 
-
+# https://data.rcsb.org/graphql/index.html
 #///////////////////////////////////////////////////////////////////////////////////////////////
 
 #!DEPRECATED - Use each subcomponent query separately.

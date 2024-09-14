@@ -123,18 +123,16 @@ def node__ligand(
     L = _ligand.model_dump()
 
     def _(tx: Transaction | ManagedTransaction):
-        drugbank_id = None
+        drugbank_id          = None
         drugbank_description = None
+
         try:
-            drugbank_id = (
-                _ligand.nonpolymer_comp.drugbank.drugbank_container_identifiers.drugbank_id
-            )
+            drugbank_id = ( _ligand.nonpolymer_comp.drugbank.drugbank_container_identifiers.drugbank_id )
         except:
             ...
+
         try:
-            drugbank_description = (
-                _ligand.nonpolymer_comp.drugbank.drugbank_info.description
-            )
+            drugbank_description = ( _ligand.nonpolymer_comp.drugbank.drugbank_info.description )
         except:
             ...
 
@@ -147,15 +145,17 @@ def node__ligand(
  	                ligand.number_of_instances = $number_of_instances,
                     ligand.drugbank_id          =  CASE WHEN $drugbank_id = null then \"null\" else $drugbank_id END,
                     ligand.drugbank_description =  CASE WHEN $drugbank_description = null then \"null\" else $drugbank_description END
+
                RETURN ligand       
         """,
             {
-                "chemicalId": _ligand.chemicalId,
-                "chemicalName": _ligand.chemicalName,
-                "formula_weight": _ligand.formula_weight,
-                "pdbx_description": _ligand.pdbx_description,
-                "number_of_instances": _ligand.number_of_instances,
-                "drugbank_id": drugbank_id,
+                "chemicalId"          : _ligand.chemicalId,
+                "chemicalName"        : _ligand.chemicalName,
+                "formula_weight"      : _ligand.formula_weight,
+                "pdbx_description"    : _ligand.pdbx_description,
+                "number_of_instances" : _ligand.number_of_instances,
+
+                "drugbank_id"         : drugbank_id,
                 "drugbank_description": drugbank_description,
             },
         ).single(strict=True)["ligand"]
