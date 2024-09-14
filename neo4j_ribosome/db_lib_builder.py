@@ -117,11 +117,11 @@ class Neo4jAdapter():
         with self.driver.session() as session:
             return session.execute_read(struct_exists(rcsb_id))
 
-    def upsert_ligand_node(self, ligand:NonpolymericLigand, parent_rcsb_id:str):
-
+    def upsert_ligand_node(self, ligand:NonpolymericLigand, parent_rcsb_id:str|None=None):
         with self.driver.session() as s:
             ligand_node = s.execute_write(node__ligand(ligand))
-            s.execute_write(link__ligand_to_struct(ligand_node, parent_rcsb_id))
+            if parent_rcsb_id is not None:
+                s.execute_write(link__ligand_to_struct(ligand_node, parent_rcsb_id))
 
     def add_total_structure(self, rcsb_id:str, disable_exists_check:bool=False):
         rcsb_id = rcsb_id.upper()
