@@ -15,6 +15,7 @@ sys.path.append("/home/rtviii/dev/riboxyz")
 with warnings.catch_warnings():
     warnings.simplefilter("ignore", BiopythonDeprecationWarning)
     from Bio import pairwise2
+
 from ribctl.lib.schema.types_binding_site import (
     AMINO_ACIDS,
     NUCLEOTIDES,
@@ -23,8 +24,8 @@ from ribctl.lib.schema.types_binding_site import (
     PredictedResiduesPolymer,
     PredictionAlignments,
     PredictionSource,
-    PredictionTarget,
-)
+    PredictionTarget)
+
 from Bio.PDB.NeighborSearch import NeighborSearch
 from Bio.PDB.Residue import Residue
 from Bio.PDB.Chain import Chain
@@ -35,13 +36,11 @@ from ribctl.etl.etl_assets_ops import RibosomeOps
 from ribctl.lib.schema.types_binding_site import (
     BindingSite,
     BindingSiteChain,
-    ResidueSummary,
-)
+    ResidueSummary)
 import os
 import sys
 from collections import defaultdict
 from ribctl import ASSETS_PATH
-
 
 def lig_get_chemical_categories():
     ligands_classification_path = os.path.join(ASSETS_PATH, "ligands", "ligand_chemical_categories.csv")
@@ -53,7 +52,6 @@ def lig_get_chemical_categories():
         reverse_dict[category].append(ligand)
     
     return dict(reverse_dict)
-
 
 #! Transposition methods
 class BiopythonChain(Chain):
@@ -553,5 +551,6 @@ def bsite_transpose(
 # -----
 
 
-def retrieve_ligands():
+# def retrieve_ligands():
+
 
