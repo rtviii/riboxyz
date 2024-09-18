@@ -19,12 +19,7 @@ from ribctl.lib.libtax import  Taxid, ncbi
 class Fasta:
     records: list[SeqRecord]
 
-    def __init__(
-        self,
-        path: str | None = None,
-        records: list[SeqRecord] | None = None,
-        # taxid_getter: Callable[[SeqRecord], int] | None = None,
-    ) -> None:
+    def __init__( self, path: str | None = None, records: list[SeqRecord] | None = None ) -> None:
         if path is not None:
             try:
                 with open(path, "r") as fasta_in:
@@ -43,9 +38,7 @@ class Fasta:
 
     def pick_descendants_of_taxid(self, taxid: int) -> list[SeqRecord]:
         """Given a taxid, return the subset of records that are descendants of that taxid"""
-        return self._yield_subset(
-            lambda record: Taxid.is_descendant_of(taxid, int(record.id))
-        )
+        return self._yield_subset( lambda record: Taxid.is_descendant_of(taxid, int(record.id)))
 
     @staticmethod
     def write_fasta(seqrecords: list[SeqRecord], outfile: str):
@@ -103,8 +96,7 @@ class Fasta:
             raise Exception("Invalid type passed to all_taxids")
 
 def generate_consensus(records):
-    # Convert the list of sequence records to a MultipleSeqAlignment object
-    alignment = MultipleSeqAlignment(records)
+    alignment     = MultipleSeqAlignment(records)
     summary_align = AlignInfo.SummaryInfo(alignment)
     summary_align.dumb_consensus()
     return summary_align
@@ -167,9 +159,7 @@ def phylogenetic_neighborhood( _taxids_base: list[int], taxid_target: str, n_nei
     else:
         return list(map(lambda x : int(x), nbr_taxids[1 : n_neighbors + 1]))
 
-def muscle_align_N_seq(
-    seq_records: list[SeqRecord], vvv: bool = False
-) -> Iterator[SeqRecord]:
+def muscle_align_N_seq( seq_records: list[SeqRecord], vvv: bool = False ) -> Iterator[SeqRecord]:
     """Given a MSA of a protein class, and a fasta string of a chain, return a new MSA with the chain added to the class MSA."""
 
     with tempfile.NamedTemporaryFile(delete=False, mode="w") as temp_file:
@@ -183,10 +173,12 @@ def muscle_align_N_seq(
         muscle_cmd = [MUSCLE_BIN, "-in", temp_filename, "-quiet"]
         try:
             process = subprocess.run(muscle_cmd, stdout=subprocess.PIPE, text=True)
+
             if process.returncode == 0:
-                muscle_out = process.stdout
+
+                muscle_out           = process.stdout
                 muscle_output_handle = StringIO(muscle_out)
-                seq_records_a = SeqIO.parse(muscle_output_handle, "fasta")
+                seq_records_a        = SeqIO.parse(muscle_output_handle, "fasta")
 
                 if vvv:
                     pprint("Done.")
