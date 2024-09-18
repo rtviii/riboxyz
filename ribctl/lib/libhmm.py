@@ -95,28 +95,28 @@ class PolymerClassFastaRegistry():
     def __init__(self) :
 
         for candidate_class in CytosolicProteinClass:
-            fasta_path                             = os.path.join(ASSETS["fasta_proteins_cytosolic"], f"{candidate_class.value}.fasta")
-            self.registry_fasta[candidate_class]   = Fasta(fasta_path)
+            fasta_path                                 = os.path.join(ASSETS["fasta_proteins_cytosolic"], f"{candidate_class.value}.fasta")
+            self.registry_fasta[candidate_class]       = Fasta(fasta_path)
             self.registry_all_tax_ids[candidate_class] = Fasta(fasta_path).all_taxids("int")
 
         for candidate_class in MitochondrialProteinClass:
-            fasta_path                             = os.path.join(ASSETS["fasta_proteins_mitochondrial"], f"{candidate_class.value}.fasta")
-            self.registry_fasta[candidate_class]   = Fasta(fasta_path)
+            fasta_path                                 = os.path.join(ASSETS["fasta_proteins_mitochondrial"], f"{candidate_class.value}.fasta")
+            self.registry_fasta[candidate_class]       = Fasta(fasta_path)
             self.registry_all_tax_ids[candidate_class] = Fasta(fasta_path).all_taxids("int")
 
         for candidate_class in PolynucleotideClass:
-            fasta_path                             = os.path.join(ASSETS["fasta_rna"], f"{candidate_class.value}.fasta")
-            self.registry_fasta[candidate_class]   = Fasta(fasta_path)
+            fasta_path                                 = os.path.join(ASSETS["fasta_rna"], f"{candidate_class.value}.fasta")
+            self.registry_fasta[candidate_class]       = Fasta(fasta_path)
             self.registry_all_tax_ids[candidate_class] = Fasta(fasta_path).all_taxids("int")
 
         for candidate_class in ElongationFactorClass:
-            fasta_path                             = os.path.join(ASSETS["fasta_factors_elongation"], f"{candidate_class.value}.fasta")
-            self.registry_fasta[candidate_class]   = Fasta(fasta_path)
+            fasta_path                                 = os.path.join(ASSETS["fasta_factors_elongation"], f"{candidate_class.value}.fasta")
+            self.registry_fasta[candidate_class]       = Fasta(fasta_path)
             self.registry_all_tax_ids[candidate_class] = Fasta(fasta_path).all_taxids("int")
 
         for candidate_class in InitiationFactorClass:
-            fasta_path                             = os.path.join(ASSETS["fasta_factors_initiation"], f"{candidate_class.value}.fasta")
-            self.registry_fasta[candidate_class]   = Fasta(fasta_path)
+            fasta_path                                 = os.path.join(ASSETS["fasta_factors_initiation"], f"{candidate_class.value}.fasta")
+            self.registry_fasta[candidate_class]       = Fasta(fasta_path)
             self.registry_all_tax_ids[candidate_class] = Fasta(fasta_path).all_taxids("int")
             
         #-------------------- Initated all polymer class sequences. Check that they are not empty.

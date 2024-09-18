@@ -11,7 +11,7 @@ from functools import reduce
 import os
 import subprocess
 from typing import Callable, Iterator
-from ribctl import MUSCLE_BIN
+from ribctl import ASSETS, MUSCLE_BIN
 import os
 from ribctl.lib.libtax import  Taxid, ncbi
 from ribctl.lib.schema.types_ribosome import PolymerClass
@@ -27,12 +27,31 @@ class Fasta:
                     self.records: list[SeqRecord] = [*SeqIO.parse(fasta_in, "fasta")]
             except FileNotFoundError:
                 print(f"File not found: {path}")
+
             except Exception as e:
                 print(f"An error occurred: {str(e)}")
                 exit(-1)
 
         elif records is not None:
             self.records = records
+
+    @staticmethod
+    def polymer_class_msa(candidate_class:PolymerClass):
+        if candidate_class in CytosolicProteinClass:
+            fasta_path = os.path.join(ASSETS["fasta_proteins_cytosolic"], f"{candidate_class.value}.fasta")
+        elif candidate_class in MitochondrialProteinClass:
+            fasta_path = os.path.join(ASSETS["fasta_proteins_mitochondrial"], f"{candidate_class.value}.fasta")
+
+        elif candidate_class in PolynucleotideClass:
+            fasta_path = os.path.join(ASSETS["fasta_rna"], f"{candidate_class.value}.fasta")
+        elif candidate_class in ElongationFactorClass:
+            fasta_path = os.path.join(ASSETS["fasta_factors_elongation"], f"{candidate_class.value}.fasta")
+        elif candidate_class in InitiationFactorClass:
+            fasta_path = os.path.join(ASSETS["fasta_factors_initiation"], f"{candidate_class.value}.fasta")
+        else:
+            raise KeyError(f"Class {candidate_class} not found in any of the fasta archives. Something went terribly wrong.")
+        fasta_path = os.path.join(ASSETS["fasta_proteins_cytosolic"], f"{candidate_class.value}.fasta")
+        return Fasta(fasta_path)
 
 
     def _yield_subset(self, predicate: Callable[[SeqRecord], bool]) -> list[SeqRecord]:
@@ -98,9 +117,7 @@ class Fasta:
         else:
             raise Exception("Invalid type passed to all_taxids")
     
-    @staticmethod
-    def polymer_class_msa(pc:PolymerClass)->Fasta:
-
+    
     
 
 
