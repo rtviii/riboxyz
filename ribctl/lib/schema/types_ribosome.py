@@ -6,12 +6,11 @@ from Bio.Seq import Seq
 from pydantic import BaseModel, field_serializer
 from ribctl.lib.enumunion import enum_union
 
-# TODO:
 # |********************************************************************************************************|
 # | https://docs.google.com/spreadsheets/d/1mapshbn1ArofPN-Omu8GG5QdcwlJ0ym0BlN252kkUBU/edit#gid=815712128 |
 # |********************************************************************************************************|
 
-# ? ----------------------------------------------{ Primary Types }------------------------------------------------
+# ? ----------------------------------------------{ Polymer Types }------------------------------------------------
 
 class tRNA(str,Enum):
     tRNA = "tRNA"
@@ -319,7 +318,6 @@ class InitiationFactorClass(str,Enum):
     aIF5A        = "aIF5A"
     aIF5B        = "aIF5B"
 
-# LifecycleFactorClass = typing.Union[ElongationFactorClass, InitiationFactorClass]
 LifecycleFactorClass = enum_union(ElongationFactorClass, InitiationFactorClass)
 ProteinClass         = enum_union(CytosolicProteinClass,MitochondrialProteinClass)
 
@@ -328,11 +326,7 @@ PolynucleotideClass  = enum_union(CytosolicRNAClass, MitochondrialRNAClass, tRNA
 PolymerClass         = enum_union(PolynucleotideClass, PolypeptideClass)
 
 
-# ? ----------------------------------------------{ Primary Types }------------------------------------------------
-
-
-# ? ----------------------------------------------{ Object Models }------------------------------------------------
-
+# ? ----------------------------------------------{ Composite Models }------------------------------------------------
 
 class Polymer(BaseModel):
     def __hash__(self):
@@ -543,6 +537,7 @@ class PTCInfo(BaseModel):
     midpoint_coordinates : tuple[float, float, float]
     nomenclature_table   : NomenclatureTable
 
+# ? ----------------------------------------------{ Structure Model }------------------------------------------------
 class RibosomeStructure(BaseModel):
 
     def get_polymers_by_assembly(self)->dict[str,list[str]]:
@@ -587,8 +582,6 @@ class RibosomeStructure(BaseModel):
     citation_title        :None| Optional[str]      = None
     citation_pdbx_doi     :None| Optional[str]      = None
 
-    # deposition_date    : Optional[int] = None #TODO <-- This is a better source than citation_year
-
     src_organism_ids  : list[int]
     src_organism_names: list[str]
 
@@ -599,20 +592,8 @@ class RibosomeStructure(BaseModel):
     mitochondrial   : bool
     subunit_presence: Optional[list[typing.Literal['ssu','lsu']]] = None
 
-    # proteins            : list[Any]
-    # rnas                : list[Any]
-    # nonpolymeric_ligands: list[Any]
-    # polymeric_factors   : list[Any]
-
     proteins: list[Protein]
     rnas    : list[RNA]
 
-    # polymeric_factors   : list[LifecycleFactor]
-    # ? This includes DNA-RNA hybrid strands, DNA and all other polymers
     other_polymers      : list[Polymer]
     nonpolymeric_ligands: list[NonpolymericLigand]
-
-    # TODO: Deprecate this
-    # @staticmethod
-    # def from_json_profile(d: Any):
-    #     return RibosomeStructure(**d)

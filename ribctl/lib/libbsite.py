@@ -26,7 +26,6 @@ from ribctl.lib.schema.types_binding_site import (
     BindingSiteChain,
     LigandTransposition,
     PredictedResiduesPolymer,
-    PredictionAlignments,
     PredictionSource,
     PredictionTarget,
 )
@@ -997,10 +996,12 @@ tetracycline_structs = [
     ],
 ]
 
-
-
 # 1. retrieve binding sites
 # for every polymer
 #     2. align polymers to target (pairwise and in parallel, no massive msas please thanks)
 #     3. combined predictions into a single pool w    3. combined predictions into a single pool w    3. combined predictions into a single pool with each target residue weighed proportionally to the number of source residues that map to it.
 #     Voila
+
+
+# def multiple_source_prediction():
+
