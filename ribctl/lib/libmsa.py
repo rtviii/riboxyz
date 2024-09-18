@@ -14,6 +14,7 @@ from typing import Callable, Iterator
 from ribctl import MUSCLE_BIN
 import os
 from ribctl.lib.libtax import  Taxid, ncbi
+from ribctl.lib.schema.types_ribosome import PolymerClass
 
 
 class Fasta:
@@ -33,6 +34,7 @@ class Fasta:
         elif records is not None:
             self.records = records
 
+
     def _yield_subset(self, predicate: Callable[[SeqRecord], bool]) -> list[SeqRecord]:
         return [*filter(predicate, self.records)]
 
@@ -49,10 +51,11 @@ class Fasta:
     def fasta_display_species(taxids: list[int]):
         taxids = Taxid.coerce_all_to_rank(taxids, "species")
         tree   = ncbi.get_topology(taxids)
+
         for node in tree.traverse():
-            taxid = int(node.name)
+            taxid           = int(node.name)
             scientific_name = ncbi.get_taxid_translator([taxid]).get(taxid, "Unknown")
-            node.name = scientific_name
+            node.name       = scientific_name
         print(tree.get_ascii(attributes=["name", "sci_name"]))
 
     def pick_taxids(self, _taxids_int: list[int]) -> list[SeqRecord]:
@@ -94,6 +97,12 @@ class Fasta:
             return list(map(lambda _: int(_), taxids))
         else:
             raise Exception("Invalid type passed to all_taxids")
+    
+    @staticmethod
+    def polymer_class_msa(pc:PolymerClass)->Fasta:
+
+    
+
 
 def generate_consensus(records):
     alignment     = MultipleSeqAlignment(records)
@@ -194,4 +203,11 @@ def muscle_align_N_seq( seq_records: list[SeqRecord], vvv: bool = False ) -> Ite
             temp_file.close()
             os.remove(temp_filename)
             raise Exception("Error running muscle.")
+
+
+
+
+
+
+
 
