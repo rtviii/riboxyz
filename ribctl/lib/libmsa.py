@@ -14,7 +14,7 @@ from typing import Callable, Iterator
 from ribctl import ASSETS, MUSCLE_BIN
 import os
 from ribctl.lib.libtax import  Taxid, ncbi
-from ribctl.lib.schema.types_ribosome import PolymerClass
+from ribctl.lib.schema.types_ribosome import CytosolicProteinClass, ElongationFactorClass, InitiationFactorClass, MitochondrialProteinClass, PolymerClass, PolynucleotideClass
 
 
 class Fasta:
@@ -36,12 +36,12 @@ class Fasta:
             self.records = records
 
     @staticmethod
-    def polymer_class_msa(candidate_class:PolymerClass):
+    def poly_class_all_seq(candidate_class:PolymerClass):
+        
         if candidate_class in CytosolicProteinClass:
             fasta_path = os.path.join(ASSETS["fasta_proteins_cytosolic"], f"{candidate_class.value}.fasta")
         elif candidate_class in MitochondrialProteinClass:
             fasta_path = os.path.join(ASSETS["fasta_proteins_mitochondrial"], f"{candidate_class.value}.fasta")
-
         elif candidate_class in PolynucleotideClass:
             fasta_path = os.path.join(ASSETS["fasta_rna"], f"{candidate_class.value}.fasta")
         elif candidate_class in ElongationFactorClass:
@@ -50,9 +50,9 @@ class Fasta:
             fasta_path = os.path.join(ASSETS["fasta_factors_initiation"], f"{candidate_class.value}.fasta")
         else:
             raise KeyError(f"Class {candidate_class} not found in any of the fasta archives. Something went terribly wrong.")
+
         fasta_path = os.path.join(ASSETS["fasta_proteins_cytosolic"], f"{candidate_class.value}.fasta")
         return Fasta(fasta_path)
-
 
     def _yield_subset(self, predicate: Callable[[SeqRecord], bool]) -> list[SeqRecord]:
         return [*filter(predicate, self.records)]
@@ -190,18 +190,16 @@ def muscle_align_N_seq( seq_records: list[SeqRecord], vvv: bool = False ) -> Ite
 
     with tempfile.NamedTemporaryFile(delete=False, mode="w") as temp_file:
         temp_filename = temp_file.name
-
         if vvv:
             pprint("Aligning sequences with muscle...")
             pprint([*seq_records])
 
         SeqIO.write([*seq_records], temp_filename, "fasta")
         muscle_cmd = [MUSCLE_BIN, "-in", temp_filename, "-quiet"]
+
         try:
             process = subprocess.run(muscle_cmd, stdout=subprocess.PIPE, text=True)
-
             if process.returncode == 0:
-
                 muscle_out           = process.stdout
                 muscle_output_handle = StringIO(muscle_out)
                 seq_records_a        = SeqIO.parse(muscle_output_handle, "fasta")
