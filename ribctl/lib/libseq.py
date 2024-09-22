@@ -12,15 +12,27 @@ from ribctl.lib.schema.types_binding_site import (
     AMINO_ACIDS,
     NUCLEOTIDES,
 )
-
 from Bio.PDB.Residue import Residue
 from Bio.PDB.Chain import Chain
-from Bio.Seq import Seq
 from ribctl.lib.schema.types_binding_site import ( ResidueSummary, )
 
-#! Transposition methods
-class BiopythonChain(Chain):
 
+class BiopythonChain(Chain):
+    """ 
+    A container for keeping track of the correspondence between the structural and sequence indices within a give polymer chain.
+    \nStructural data(`mmcif`) frequently has unresolved and modified residues adheres to the author's numbering (which is arbitrary for all intents and purposes, ex. starts at, say, 7).
+    More here:https://proteopedia.org/wiki/index.php/Unusual_sequence_numbering
+    
+    This container keeps pointers between the naive (convenient) indices and the structural residues. 
+    I refer to the following in the code:
+
+    - **auth_seq_id** is the author-assigned residue number and is frequently used to refer to structural components. (ex. in Molstar)
+    - **flat_index** is the the straightforward arithmetic (0-start) numbering. I produce it by removing all the modified residues from the "primary sequence"
+    - **primary_sequence** is the sequence of structural residues (as packed into the BioPython `Chain` object) represented as a string.
+    - **flat_sequence** is the **primary_sequence** with the modified residues removed, represented as a string.
+    
+
+    """
     chain                        : Chain
     flat_index_to_residue_map    : dict[int, Residue]
     auth_seq_id_to_flat_index_map: dict[int, int]
@@ -181,70 +193,70 @@ class SeqPairwise:
                 _ += v
         return _
 
-class SeqMap:
+# class SeqMap:
 
-    mapping: dict[int, int]
+#     mapping: dict[int, int]
 
-    seq_canonical: str
-    seq_structural: str
+#     seq_canonical: str
+#     seq_structural: str
 
-    seq_canonical_aligned: str
-    seq_structural_aligned: str
+#     seq_canonical_aligned: str
+#     seq_structural_aligned: str
 
-    def __init__(self, canonical: str, structure: str):
-        self.seq_canonical  = canonical
-        self.seq_structural = structure
+#     def __init__(self, canonical: str, structure: str):
+#         self.seq_canonical  = canonical
+#         self.seq_structural = structure
 
-        alignments = pairwise2.align.globalxx(Seq(canonical), Seq(structure))
-        aligned_canonical, aligned_structure = alignments[0][0], alignments[0][1]
+#         alignments = pairwise2.align.globalxx(Seq(canonical), Seq(structure))
+#         aligned_canonical, aligned_structure = alignments[0][0], alignments[0][1]
 
-        self.seq_canonical_aligned  = aligned_canonical
-        self.seq_structural_aligned = aligned_structure
+#         self.seq_canonical_aligned  = aligned_canonical
+#         self.seq_structural_aligned = aligned_structure
 
-        mapping = {}
+#         mapping = {}
 
-        # print("inspecting")
-        # print(self.seq_canonical_aligned)
-        # print(self.seq_structural_aligned)
-        # print(*zip(aligned_canonical, aligned_structure))
+#         # print("inspecting")
+#         # print(self.seq_canonical_aligned)
+#         # print(self.seq_structural_aligned)
+#         # print(*zip(aligned_canonical, aligned_structure))
 
-        canonical_index = 0
-        structure_index = 0
-        for canonical_char, structural_char in zip(
-            aligned_canonical, aligned_structure
-        ):
-            if canonical_char != "-":
-                if structural_char != "-":
-                    mapping[canonical_index] = structure_index
-                    structure_index += 1
-                else:
-                    mapping[canonical_index] = -1
-                canonical_index += 1
-            elif canonical_char == "-":
-                continue
-                # warnings.warn(f"Unexpected gap in canonical sequence at aligned position {canonical_index}. This shouldn't happen with the original canonical sequence.")
+#         canonical_index = 0
+#         structure_index = 0
+#         for canonical_char, structural_char in zip(
+#             aligned_canonical, aligned_structure
+#         ):
+#             if canonical_char != "-":
+#                 if structural_char != "-":
+#                     mapping[canonical_index] = structure_index
+#                     structure_index += 1
+#                 else:
+#                     mapping[canonical_index] = -1
+#                 canonical_index += 1
+#             elif canonical_char == "-":
+#                 continue
+#                 # warnings.warn(f"Unexpected gap in canonical sequence at aligned position {canonical_index}. This shouldn't happen with the original canonical sequence.")
 
-        self.mapping = mapping
+#         self.mapping = mapping
 
-    def retrieve_index(self, key: int) -> int | None:
-        "Get the STRUCTURAL sequence index corresponding to the CANONICAL sequence index <key> if any, otherwise None"
-        if key not in self.mapping:
-            raise KeyError(f"Key {key} not found in mapping")
-        if self.mapping[key] == -1:
-            return None
-        return self.mapping[key]
+#     def retrieve_index(self, key: int) -> int | None:
+#         "Get the STRUCTURAL sequence index corresponding to the CANONICAL sequence index <key> if any, otherwise None"
+#         if key not in self.mapping:
+#             raise KeyError(f"Key {key} not found in mapping")
+#         if self.mapping[key] == -1:
+#             return None
+#         return self.mapping[key]
 
-    def retrieve_motif(self, keys: list[int]) -> tuple[str, str]:
-        can_subseq    = ""
-        struct_subseq = ""
+#     def retrieve_motif(self, keys: list[int]) -> tuple[str, str]:
+#         can_subseq    = ""
+#         struct_subseq = ""
 
-        for i in keys:
-            can_subseq = can_subseq + self.seq_canonical[i]
-            struct_index = self.retrieve_index(i)
-            if struct_index == None:
-                struct_subseq = struct_subseq + "-"
-            elif struct_index != None:
-                struct_subseq = struct_subseq + self.seq_structural[struct_index]
-        if struct_subseq == "" or list(set(list(struct_subseq)))[0] == "-":
-            raise ValueError( "No structural sequence found for the given canonical sequence" )
-        return can_subseq, struct_subseq
+#         for i in keys:
+#             can_subseq = can_subseq + self.seq_canonical[i]
+#             struct_index = self.retrieve_index(i)
+#             if struct_index == None:
+#                 struct_subseq = struct_subseq + "-"
+#             elif struct_index != None:
+#                 struct_subseq = struct_subseq + self.seq_structural[struct_index]
+#         if struct_subseq == "" or list(set(list(struct_subseq)))[0] == "-":
+#             raise ValueError( "No structural sequence found for the given canonical sequence" )
+#         return can_subseq, struct_subseq
