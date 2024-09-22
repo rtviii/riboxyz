@@ -31,8 +31,17 @@ class BiopythonChain(Chain):
     - **primary_sequence** is the sequence of structural residues (as packed into the BioPython `Chain` object) represented as a string.
     - **flat_sequence** is the **primary_sequence** with the modified residues removed, represented as a string.
     
-
+    There is lots to optimize in this code (it builds index->Residue<object> maps by enumeration),
+    but ideally this is taken care of at the parser level or at the deposition level.
+    Again, see more: 
+    - https://proteopedia.org/wiki/index.php/Unusual_sequence_numbering
+    - https://bioinformatics.stackexchange.com/questions/14210/pdb-residue-numbering
+    - https://bioinformatics.stackexchange.com/questions/20458/how-is-the-canonical-version-entity-poly-pdbx-seq-one-letter-code-obtaine
+    - https://www.biostars.org/p/9588718/
+    - https://stackoverflow.com/questions/45466408/biopython-resseq-doesnt-match-pdb-file
+    
     """
+
     chain                        : Chain
     flat_index_to_residue_map    : dict[int, Residue]
     auth_seq_id_to_flat_index_map: dict[int, int]
@@ -41,9 +50,7 @@ class BiopythonChain(Chain):
         self.chain = chain
 
     @property
-    def primary_sequence(self) -> tuple[str, dict]:
-
-        represent_noncanonical_as: Optional[str] = "."
+    def primary_sequence(self, represent_noncanonical_as:str=".") -> tuple[str, dict]:
         seq = ""
         auth_seq_id_to_primary_ix = {}
         for ix, residue in enumerate(self.chain.get_residues()):
