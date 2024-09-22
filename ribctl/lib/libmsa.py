@@ -19,7 +19,6 @@ from ribctl.lib.schema.types_ribosome import CytosolicProteinClass, ElongationFa
 
 class Fasta:
     records: list[SeqRecord]
-
     def __init__( self, path: str | None = None, records: list[SeqRecord] | None = None ) -> None:
         if path is not None:
             try:
@@ -117,49 +116,18 @@ class Fasta:
         else:
             raise Exception("Invalid type passed to all_taxids")
     
-    
-
 def generate_consensus(records):
     alignment     = MultipleSeqAlignment(records)
     summary_align = AlignInfo.SummaryInfo(alignment)
     summary_align.dumb_consensus()
     return summary_align
 
-def util__backwards_match(aligned_target: str, resid: int):
-    """Returns the target-sequence index of a residue in the (aligned) target sequence
-    Basically, "count back ignoring gaps" until you arrive at @resid
-    """
-    if resid > len(aligned_target):
-        raise IndexError( f"Passed residue with invalid index ({resid}) to back-match to target.Seqlen:{len(aligned_target)}" ) 
-    counter_proper = 0
-    for i, char in enumerate(aligned_target):
-        if i == resid:
-            return counter_proper
-        if char == "-":
-            continue
-        else:
-            counter_proper += 1
-
-def util__forwards_match(aligned_seq: str, resid: int):
-    """Returns the index of a source-sequence residue in the aligned source sequence.
-    Basically, "count forward including gaps until you reach @resid"
-    """
-
-    count_proper = 0
-    for alignment_indx, char in enumerate(aligned_seq):
-        if count_proper == resid:
-            return alignment_indx
-        if char == "-":
-            continue
-        else:
-            count_proper += 1
 
 def barr2str(bArr):
     return "".join([x.decode("utf-8") for x in bArr])
 
 def seq_to_fasta(rcsb_id: str, _seq: str, outfile: str):
     from Bio.Seq import Seq
-
     _seq = _seq.replace("\n", "")
     seq_record = SeqRecord(Seq(_seq).upper())
     seq_record.id = seq_record.description = rcsb_id
