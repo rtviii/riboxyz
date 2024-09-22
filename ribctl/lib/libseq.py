@@ -16,6 +16,14 @@ from Bio.PDB.Residue import Residue
 from Bio.PDB.Chain import Chain
 from ribctl.lib.schema.types_binding_site import ( ResidueSummary, )
 
+# Don't want to lose my own rant, but this should be moved out to a blog post or somethign.
+"""
+Ex. here are guys from model-angelo ( GNN for model building that chenwei looked at) fixing this on their onw : https://github.com/3dem/model-angelo/issues/51
+Here is Deep Mind implementing their own parser https://huggingface.co/spaces/simonduerr/ProteinMPNN/blob/f969e9cfb6f11ba299c7108aadff124e9cf38b1f/alphafold/alphafold/data/mmcif_parsing.py
+Here the  gemmi guy trying to connect his work to chimerax and stumbling over this : https://mail.cgl.ucsf.edu/mailman/archives/list/chimerax-users@cgl.ucsf.edu/thread/XOO3G5MUOHLQBHSVF2NENWYNG3SOUF2O/
+https://bioinformatics.stackexchange.com/questions/14210/pdb-residue-numbering
+https://proteopedia.org/wiki/index.php/Unusual_sequence_numbering
+"""
 
 class BiopythonChain(Chain):
     """ 
@@ -33,6 +41,7 @@ class BiopythonChain(Chain):
     
     There is lots to optimize in this code (it builds index->Residue<object> maps by enumeration),
     but ideally this is taken care of at the parser level or at the deposition level.
+
     Again, see more: 
     - https://proteopedia.org/wiki/index.php/Unusual_sequence_numbering
     - https://bioinformatics.stackexchange.com/questions/14210/pdb-residue-numbering
@@ -43,11 +52,9 @@ class BiopythonChain(Chain):
     """
 
     chain                        : Chain
+
     flat_index_to_residue_map    : dict[int, Residue]
     auth_seq_id_to_flat_index_map: dict[int, int]
-
-    def __init__(self, chain: Chain):
-        self.chain = chain
 
     @property
     def primary_sequence(self, represent_noncanonical_as:str=".") -> tuple[str, dict]:
@@ -81,6 +88,9 @@ class BiopythonChain(Chain):
             else:
                 continue
         return seq, flat_index_to_residue_map, auth_seq_id_to_flat_index_map
+
+    def __init__(self, chain: Chain):
+        self.chain = chain
 
 class SeqPairwise:
     def __init__(self, sourceseq: str, targetseq: str, source_residues: list[int]):
@@ -199,71 +209,3 @@ class SeqPairwise:
             else:
                 _ += v
         return _
-
-# class SeqMap:
-
-#     mapping: dict[int, int]
-
-#     seq_canonical: str
-#     seq_structural: str
-
-#     seq_canonical_aligned: str
-#     seq_structural_aligned: str
-
-#     def __init__(self, canonical: str, structure: str):
-#         self.seq_canonical  = canonical
-#         self.seq_structural = structure
-
-#         alignments = pairwise2.align.globalxx(Seq(canonical), Seq(structure))
-#         aligned_canonical, aligned_structure = alignments[0][0], alignments[0][1]
-
-#         self.seq_canonical_aligned  = aligned_canonical
-#         self.seq_structural_aligned = aligned_structure
-
-#         mapping = {}
-
-#         # print("inspecting")
-#         # print(self.seq_canonical_aligned)
-#         # print(self.seq_structural_aligned)
-#         # print(*zip(aligned_canonical, aligned_structure))
-
-#         canonical_index = 0
-#         structure_index = 0
-#         for canonical_char, structural_char in zip(
-#             aligned_canonical, aligned_structure
-#         ):
-#             if canonical_char != "-":
-#                 if structural_char != "-":
-#                     mapping[canonical_index] = structure_index
-#                     structure_index += 1
-#                 else:
-#                     mapping[canonical_index] = -1
-#                 canonical_index += 1
-#             elif canonical_char == "-":
-#                 continue
-#                 # warnings.warn(f"Unexpected gap in canonical sequence at aligned position {canonical_index}. This shouldn't happen with the original canonical sequence.")
-
-#         self.mapping = mapping
-
-#     def retrieve_index(self, key: int) -> int | None:
-#         "Get the STRUCTURAL sequence index corresponding to the CANONICAL sequence index <key> if any, otherwise None"
-#         if key not in self.mapping:
-#             raise KeyError(f"Key {key} not found in mapping")
-#         if self.mapping[key] == -1:
-#             return None
-#         return self.mapping[key]
-
-#     def retrieve_motif(self, keys: list[int]) -> tuple[str, str]:
-#         can_subseq    = ""
-#         struct_subseq = ""
-
-#         for i in keys:
-#             can_subseq = can_subseq + self.seq_canonical[i]
-#             struct_index = self.retrieve_index(i)
-#             if struct_index == None:
-#                 struct_subseq = struct_subseq + "-"
-#             elif struct_index != None:
-#                 struct_subseq = struct_subseq + self.seq_structural[struct_index]
-#         if struct_subseq == "" or list(set(list(struct_subseq)))[0] == "-":
-#             raise ValueError( "No structural sequence found for the given canonical sequence" )
-#         return can_subseq, struct_subseq
