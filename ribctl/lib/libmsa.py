@@ -118,8 +118,6 @@ class Fasta:
             raise Exception("Invalid type passed to all_taxids")
     
     
-    
-
 
 def generate_consensus(records):
     alignment     = MultipleSeqAlignment(records)
