@@ -145,8 +145,6 @@ class SeqPairwise:
             else:
                 self.tgt_ids.append(tgt_aln_index)
 
-        print("[Source Aligned]\t", self.hl_ixs(self.src_aln, ixs=self.aligned_ids))
-        print("[Target Aligned]\t", self.hl_ixs(self.tgt_aln, ixs=self.aligned_ids))
 
     def forwards_match(
         self, aligned_source_sequence: str, original_residue_index: int
@@ -491,7 +489,7 @@ def bsite_transpose(
             bpchain_target.primary_sequence
         )
         print(
-            "[Source Primary]\t",
+            "[\033[95mSource\033[0m Primary]\t",
             SeqPairwise.hl_ixs(
                 primary_seq_source,
                 [
@@ -508,24 +506,23 @@ def bsite_transpose(
             )
         ]
         print(
-            "[Source Flat   ]\t",
+            "[\033[95mSource\033[0m Flat   ]\t",
             SeqPairwise.hl_ixs(src_flat_structural_seq, src_bound_flat_indices),
         )
-        print("- - - - Alignment- - - ")
-        M = SeqPairwise(
-            src_flat_structural_seq, tgt_flat_structural_seq, src_bound_flat_indices
-        )
-        print("- - - - Alignment- - - ")
+        M = SeqPairwise( src_flat_structural_seq, tgt_flat_structural_seq, src_bound_flat_indices )
+
+        print("[\033[95mSource\033[0m Aligned]\t", M.hl_ixs(M.src_aln, ixs=M.aligned_ids))
+        print("[\033[96mTarget\033[0m Aligned]\t", M.hl_ixs(M.tgt_aln, ixs=M.aligned_ids))
+
         tgt_bound_flat_indices = M.tgt_ids
         tgt_bound_residues = [
             tgt_flat_idx_to_residue_map[idx] for idx in tgt_bound_flat_indices
         ]
         print(
-            "[Target Flat   ]\t",
-            SeqPairwise.hl_ixs(tgt_flat_structural_seq, tgt_bound_flat_indices),
-        )
+              "[\033[96mTarget\033[0m Flat   ]\t",
+            SeqPairwise.hl_ixs(tgt_flat_structural_seq, tgt_bound_flat_indices))
         print(
-            "[Target Primary]\t",
+            "[\033[96mTarget\033[0m Primary]\t",
             SeqPairwise.hl_ixs(
                 primary_seq_target,
                 [

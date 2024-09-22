@@ -20,8 +20,9 @@ def ribd(ctx, debug, config, rcsb_id:str):
         click.echo('Debug mode is on')
     if config:
         click.echo(f'Using configuration file: {config}')
+
     ctx.ensure_object(dict)
-    ctx.obj['rcsb_id'] = rcsb_id.upper()
+    # ctx.obj['rcsb_id'] = rcsb_id.upper()
 
 ribd.add_command(etl)
 ribd.add_command(lig)
