@@ -136,9 +136,8 @@ class SeqPairwise:
     ) -> int:
         """Returns the index of a source-sequence residue in the aligned source sequence. Basically, "count forward including gaps" """
         if original_residue_index > len(aligned_source_sequence):
-            raise IndexError(
-                f"Passed residue with invalid index ({original_residue_index}) to back-match to target.Seqlen aligned:{len(aligned_source_sequence)}"
-            )
+            raise IndexError( f"Passed residue with invalid index ({original_residue_index}) to back-match to target.Seqlen aligned:{len(aligned_source_sequence)}" )
+
         original_residues_count = 0
         for aligned_ix, char in enumerate(aligned_source_sequence):
             if original_residues_count == original_residue_index:
@@ -160,9 +159,7 @@ class SeqPairwise:
     ) -> int | None:
         """Returns the target-sequence index of a residue in the [aligned] target sequence. Basically, "count back ignoring gaps" """
         if aligned_residue_index > len(aligned_target_sequence):
-            raise IndexError(
-                f"Passed residue with invalid index ({aligned_residue_index}) to back-match to target.Seqlen:{len(aligned_target_sequence)}"
-            )
+            raise IndexError( f"Passed residue with invalid index ({aligned_residue_index}) to back-match to target.Seqlen:{len(aligned_target_sequence)}" )
 
         if aligned_target_sequence[aligned_residue_index] == "-":
             return None

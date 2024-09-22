@@ -152,10 +152,7 @@ def bsite_ligand(
     return binding_site_ligand
 
 
-
-
-
-def map_motifs(source_chain:BiopythonChain, target_chain:BiopythonChain, bound_residues:list[ResidueSummary], polymer_class:str, verbose:bool=False):
+def map_motifs(source_chain:BiopythonChain, target_chain:BiopythonChain, bound_residues:list[ResidueSummary], polymer_class:str, verbose:bool=False)->tuple[str,str,list[Residue]]:
 
     bpchain_source = source_chain
     bpchain_target = target_chain
@@ -188,7 +185,6 @@ def map_motifs(source_chain:BiopythonChain, target_chain:BiopythonChain, bound_r
         print( "[\033[96mTarget\033[0m Primary]\t", SeqPairwise.hl_ixs( primary_seq_target, [ auth_seq_to_primary_ix_target[residue.get_id()[1]] for residue in tgt_bound_residues ], ), )
 
     return primary_seq_source, primary_seq_target, tgt_bound_residues
-
 
 
 def bsite_transpose(
