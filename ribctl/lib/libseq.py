@@ -57,7 +57,7 @@ class BiopythonChain(Chain):
     auth_seq_id_to_flat_index_map: dict[int, int]
 
     @property
-    def primary_sequence(self, represent_noncanonical_as:str=".") -> tuple[str, dict]:
+    def primary_sequence(self, represent_noncanonical_as:str=".") -> tuple[str, dict[int,int]]:
         seq = ""
         auth_seq_id_to_primary_ix = {}
         for ix, residue in enumerate(self.chain.get_residues()):
@@ -72,13 +72,14 @@ class BiopythonChain(Chain):
         return seq, auth_seq_id_to_primary_ix
 
     @property
-    def flat_sequence(self) -> tuple[str, dict, dict]:
+    def flat_sequence(self) -> tuple[str, dict[int,Residue], dict[int,int]]:
         res: list[Residue] = [*self.chain.get_residues()]
 
-        flat_index_to_residue_map = {}
+        flat_index_to_residue_map     = {}
         auth_seq_id_to_flat_index_map = {}
-        seq = ""
-        flat_index = 0
+        seq                           = ""
+        flat_index                    = 0
+
         for residue in res:
             if residue.resname in [*AMINO_ACIDS.keys(), *NUCLEOTIDES]:
                 seq = seq + ResidueSummary.three_letter_code_to_one(residue.resname)
