@@ -177,12 +177,12 @@ def map_motifs(source_chain:BiopythonChain, target_chain:BiopythonChain, bound_r
 
     if verbose:
         print("\n\n\t\t [{}] ".format(polymer_class))
-        print( "[\033[95mSource\033[0m Primary]\t", SeqPairwise.hl_ixs( primary_seq_source, [ auth_seq_to_primary_ix_source[index] for index, label in src_bound_auth_seq_idx ]))
-        print( "[\033[95mSource\033[0m Flat   ]\t", SeqPairwise.hl_ixs(src_flat_structural_seq, src_bound_flat_indices), )
-        print( "[\033[95mSource\033[0m Aligned]\t", M.hl_ixs(M.src_aln, ixs=M.aligned_ids) )
-        print( "[\033[96mTarget\033[0m Aligned]\t", M.hl_ixs(M.tgt_aln, ixs=M.aligned_ids) )
-        print( "[\033[96mTarget\033[0m Flat   ]\t", SeqPairwise.hl_ixs(tgt_flat_structural_seq, tgt_bound_flat_indices), )
-        print( "[\033[96mTarget\033[0m Primary]\t", SeqPairwise.hl_ixs( primary_seq_target, [ auth_seq_to_primary_ix_target[residue.get_id()[1]] for residue in tgt_bound_residues ], ), )
+        print( "[\033[95mSource\033[0m Primary]\t", SeqPairwise.highlight_indices( primary_seq_source, [ auth_seq_to_primary_ix_source[index] for index, label in src_bound_auth_seq_idx ]))
+        print( "[\033[95mSource\033[0m Flat   ]\t", SeqPairwise.highlight_indices(src_flat_structural_seq, src_bound_flat_indices), )
+        print( "[\033[95mSource\033[0m Aligned]\t", M.highlight_indices(M.src_aln, ixs=M.aligned_ids) )
+        print( "[\033[96mTarget\033[0m Aligned]\t", M.highlight_indices(M.tgt_aln, ixs=M.aligned_ids) )
+        print( "[\033[96mTarget\033[0m Flat   ]\t", SeqPairwise.highlight_indices(tgt_flat_structural_seq, tgt_bound_flat_indices), )
+        print( "[\033[96mTarget\033[0m Primary]\t", SeqPairwise.highlight_indices( primary_seq_target, [ auth_seq_to_primary_ix_target[residue.get_id()[1]] for residue in tgt_bound_residues ], ), )
 
     return primary_seq_source, primary_seq_target, tgt_bound_residues
 

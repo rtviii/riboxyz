@@ -135,9 +135,10 @@ class PredictedResiduesPolymer(BaseModel):
 
 
 class LigandTransposition(BaseModel):
-    source: str
-    target: str
-    constituent_chains: list[PredictedResiduesPolymer]
+
+    source                : str
+    target                : str
+    constituent_chains    : list[PredictedResiduesPolymer]
     purported_binding_site: BindingSite
 
     def save(self, filename: str):

@@ -175,7 +175,7 @@ class SeqPairwise:
                 original_residues_index += 1
 
     @staticmethod
-    def hl_subseq(sequence: str, subsequence: str, index: int = None):
+    def highlight_subseq(sequence: str, subsequence: str, index: int = None):
         """Highlight subsequence"""
         CRED = "\033[91m"
         CEND = "\033[0m"
@@ -196,7 +196,7 @@ class SeqPairwise:
         return "".join(_)
 
     @staticmethod
-    def hl_ixs(sequence: str, ixs: List[int], color: int = 91):
+    def highlight_indices(sequence: str, ixs: List[int], color: int = 91):
         """Highlight indices"""
         CRED = "\033[{}m".format(color)
         CEND = "\033[0m"
