@@ -188,7 +188,6 @@ def map_motifs(source_chain:BiopythonChain, target_chain:BiopythonChain, bound_r
 
 
 def bsite_transpose(
-
     source_rcsb_id: str,
     target_rcsb_id: str,
     binding_site  : BindingSite,
@@ -208,37 +207,38 @@ def bsite_transpose(
     chain_mappings      = []
     bindign_site_chains = []
 
-    for nbr_polymer in binding_site.chains:
+    for source_polymer in binding_site.chains:
 
-        nbr_polymer = BindingSiteChain.model_validate(nbr_polymer)
+        source_polymer = BindingSiteChain.model_validate(source_polymer)
+
         #! Skip if no nomenclature present ( can't do anything with it )
-        if len(nbr_polymer.nomenclature) < 1:
+        if len(source_polymer.nomenclature) < 1:
             continue
 
-        target_polymer = target_ops.get_chain_by_polymer_class( nbr_polymer.nomenclature[0], 0 )
+        target_polymer = target_ops.get_chain_by_polymer_class( source_polymer.nomenclature[0], 0 )
         if target_polymer == None:
             continue
 
-        bpchain_source = BiopythonChain(source_struct[0][nbr_polymer.auth_asym_id])
+        bpchain_source = BiopythonChain(source_struct[0][source_polymer.auth_asym_id])
         bpchain_target = BiopythonChain(target_struct[0][target_polymer.auth_asym_id])
 
-        primary_seq_source, primary_seq_target, tgt_bound_residues =  map_motifs(bpchain_source, bpchain_target, nbr_polymer.bound_residues, nbr_polymer.nomenclature[0], verbose=True)
+        primary_seq_source, primary_seq_target, tgt_bound_residues =  map_motifs(bpchain_source, bpchain_target, source_polymer.bound_residues, source_polymer.nomenclature[0], verbose=True)
 
         polymer_pair = PredictedResiduesPolymer(
-            polymer_class = nbr_polymer.nomenclature[0],
+            polymer_class = source_polymer.nomenclature[0],
             source        = PredictionSource(
                 source_seq            = primary_seq_source,
-                auth_asym_id          = nbr_polymer.auth_asym_id,
+                auth_asym_id          = source_polymer.auth_asym_id,
                 source_bound_residues = [
                     ResidueSummary(
                         auth_seq_id   = residue.auth_seq_id,
                         label_comp_id = residue.label_comp_id,
-                        auth_asym_id  = nbr_polymer.auth_asym_id,
+                        auth_asym_id  = source_polymer.auth_asym_id,
                         label_seq_id  = None,
                         full_id       = None,
                         rcsb_id       = source_rcsb_id,
                     )
-                    for residue in nbr_polymer.bound_residues
+                    for residue in source_polymer.bound_residues
                 ],
             ),
             target=PredictionTarget(
