@@ -3,7 +3,7 @@ import sys
 from Bio.PDB.Residue import Residue
 from ribctl.lib.libbsite import map_motifs,bsite_ligand,bsite_transpose
 from ribctl.lib.libseq import BiopythonChain
-from ribctl.lib.schema.types_binding_site import ResidueSummary
+from ribctl.lib.schema.types_binding_site import PredictedResiduesPolymer, ResidueSummary
 from ribctl.lib.schema.types_ribosome import PolymerClass
 from functools import partial
 sys.path.append('/home/rtviii/dev/riboxyz')
@@ -442,13 +442,28 @@ bsites        = {}
 target_struct = "7K00"
 RADIUS        = 10
 
+
+# Given a number of records(ligand-structure pairs)
+# - retrieve binding site
+# - transpose each binding site to the target structure
+            # ---> split the bsite transpotion into chains
+# - collect per-chain mappings into weights
+# - collect weights into a composite bsite prediction
+
 for record in tetracycline_structs:
+
     ligand, structures = record
 
-    chemical_id   = ligand['chemicalId']
-    rcsb_id       = structures[0]['rcsb_id']
-    bsite         = bsite_ligand(chemical_id, rcsb_id, RADIUS)
-    lig_transpose = bsite_transpose(rcsb_id, target_struct,bsite)
+    chemical_id     = ligand['chemicalId']
+    rcsb_id         = structures[0]['rcsb_id']
+    bsite_source    = bsite_ligand(chemical_id, rcsb_id, RADIUS)
+    bsite_target    = bsite_transpose(rcsb_id, target_struct,bsite_source)
+    chains:list[PredictedResiduesPolymer] = bsite_target.constituent_chains
+
+    for chain in chains:
+        chain.polymer_class
+        chain.source
+        chain.target
 
     bsites[rcsb_id] = lig_transpose.purported_binding_site
 
