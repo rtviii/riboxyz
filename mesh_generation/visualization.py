@@ -1114,14 +1114,8 @@ def plot_with_landmarks( rcsb_id: str, poisson_recon_custom_path:str|None=None, 
         - the second row is the deviations of the normalized coordinate set
         (to be used to reverse the normalization process or to travel to this coordinate frame)
     """
-
-    print(rcsb_id)
-    # src_taxid = RibosomeOps(rcsb_id).get_taxids()[0][0]
     src_taxid = RibosomeOps(rcsb_id).get_taxids()[0][0]
-    print(src_taxid)
     taxname   = list( Taxid.get_name(str(src_taxid)) )[0]
-    print(taxname)
-
 
     ptc_midpoint,atom_coordinates_by_chain= retrieve_ptc_and_chain_atoms(rcsb_id)
 
@@ -1132,38 +1126,19 @@ def plot_with_landmarks( rcsb_id: str, poisson_recon_custom_path:str|None=None, 
 
     print("Opened poisson recon file at \033[32m{}\033[0m".format(poisson_recon))
     mesh_   = pv.read(poisson_recon)
-    plotter = pv.Plotter()
+    plotter = pv.Plotter(off_screen=True)
     plotter.add_mesh(mesh_, opacity=1)
 
 
     for i, ( chain_name, coords ) in enumerate(atom_coordinates_by_chain.items()):
-        # print("Plotting " + chain_name, "with index", i ,)
         # ? Adding coordinates to the plotter for each chain( coordinates and color )
         plotter.add_points(
-            # move_cords_to_normalized_cord_frame(grid_dimensions, mean_abs_vectors, np.array(coords)),
-                np.array(coords),
+              np.array(coords),
               point_size               = 8 if chain_name in ["eL39","uL4","uL22", "uL23"] else 2 if "rRNA" in chain_name else 4 ,
               color                    =  'gray' if "rRNA" in chain_name else "cyan" if chain_name == "eL39" else 'pink' if chain_name=='uL23' else "lightgreen" if chain_name == "uL4" else "gold" if chain_name =="uL22" else CHAIN_LANDMARK_COLORS[i],
               opacity                  = 0.1 if chain_name not in ["eL39","uL4","uL22", 'uL23'] else 1 ,
               render_points_as_spheres = True ,
         )
-        #!ALL CHAINS
-        # plotter.add_points(
-        #     move_cords_to_normalized_cord_frame(grid_dimensions, mean_abs_vectors, np.array(coords)),
-        #       point_size               = 7,
-        #       color                    =  'gray' if "rRNA" in chain_name else "cyan" if chain_name == "eL39" else "lightgreen" if chain_name == "uL4" else "gold" if chain_name =="uL22" else CHAIN_LANDMARK_COLORS[i],
-        #       opacity                  = 0.9,
-        #       render_points_as_spheres = True ,
-        # )
-        # #! RNA ONLY
-        # if "rRNA" in chain_name:
-        #     plotter.add_points(
-        #         move_cords_to_normalized_cord_frame(grid_dimensions, mean_abs_vectors, np.array(coords)),
-        #           point_size               = 8 ,
-        #           color                    =  'blue' ,
-        #           opacity                  = 1,
-        #           render_points_as_spheres = True ,
-        #     )
 
     for i, (label, color) in enumerate([( 'eL39','cyan' ),( 'uL4','lightgreen' ),( 'uL22','gold' )]):
         offset   = i * 50  # Adjust the offset as needed
@@ -1182,4 +1157,35 @@ def plot_with_landmarks( rcsb_id: str, poisson_recon_custom_path:str|None=None, 
     plotter.add_text('{}'.format(taxname), position='lower_right', font_size=8, shadow=True, font=FONT, color='black') 
 
 
-    plotter.show(auto_close=False)
+    output_gif ="{}.tunnel.gif".format(rcsb_id.upper())
+
+    center = mesh_.center
+    direction = center - np.array(ptc_midpoint)
+    direction /= np.linalg.norm(direction)
+    
+    up    = np.array([1, 0, 0])  # Default up direction
+    right = np.cross(direction, up)
+    up    = np.cross(right, direction)
+    
+    camera_position = center + direction * plotter.camera.position[1]
+    focal_point = center
+    
+    plotter.camera.up          = up
+    plotter.camera.focal_point = focal_point
+    plotter.camera.position    = camera_position
+
+    # Set up the camera
+    plotter.camera.zoom(1.5)
+
+    # Open a GIF file
+    plotter.open_gif(output_gif)
+
+    # Rotate the camera 360 degrees
+    for angle in range(0, 360, 5):  # 5 degree steps
+        plotter.camera.azimuth = angle
+        plotter.write_frame()
+
+    # Close the plotter
+    plotter.close()
+
+    print(f"GIF saved as {output_gif}")
