@@ -49,7 +49,6 @@ class ResidueSummary(BaseModel):
         else:
             return '-'
 
-
     @staticmethod
     def one_letter_code_to_three(resname: str):
         if resname in [*map(lambda x: x[1]['one_letter_code'], AMINO_ACIDS.items())]:
@@ -103,7 +102,6 @@ class BindingSite(BaseModel):
 
 
 #TODO: The following four classes can be collapsed into one
-
 class PredictionSource(BaseModel):
 
     source_seq    : str
@@ -115,7 +113,6 @@ class PredictionTarget(BaseModel):
     target_seq: str
     target_bound_residues: list[ResidueSummary]
     auth_asym_id: str
-
 
 class PredictionAlignments(BaseModel):
 
