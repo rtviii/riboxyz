@@ -27,7 +27,6 @@ AMINO_ACIDS = {
     "TRP": {"one_letter_code": "W", "charge": 0},
     "TYR": {"one_letter_code": "Y", "charge": 0},
     "VAL": {"one_letter_code": "V", "charge": 0},
-    # ------------------------
 }
 NUCLEOTIDES = ["A", "T", "C", "G", "U"]
 
@@ -94,12 +93,10 @@ class BindingSiteChain(Polymer):
     bound_residues: list[ResidueSummary]
 
 class BindingSite(BaseModel):
-
     source: str
     ligand: str
     radius: float
     chains: list[BindingSiteChain]
-
 
 #TODO: The following four classes can be collapsed into one
 class PredictionSource(BaseModel):
