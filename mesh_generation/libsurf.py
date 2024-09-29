@@ -98,7 +98,7 @@ def estimate_normals(convex_hull_surface_pts: np.ndarray, output_path: str, kdtr
     pcd.points = o3d.utility.Vector3dVector(convex_hull_surface_pts)
     pcd.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=kdtree_radius, max_nn=kdtree_max_nn) )
     pcd.orient_normals_consistent_tangent_plane(k=correction_tangent_planes_n)
-    o3d.visualization.draw_geometries([pcd], point_show_normal=True)
+    # o3d.visualization.draw_geometries([pcd], point_show_normal=True)
     o3d.io.write_point_cloud(output_path, pcd)
     return pcd
 

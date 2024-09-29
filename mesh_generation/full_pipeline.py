@@ -1,6 +1,3 @@
-from pprint import pprint
-from matplotlib import pyplot as plt
-import matplotlib
 import pyvista as pv
 import json
 import os
@@ -12,10 +9,8 @@ from mesh_generation.libsurf import apply_poisson_reconstruction, estimate_norma
 from mesh_generation.visualization import DBSCAN_CLUSTERS_visualize_largest, custom_cluster_recon_path, plot_multiple_by_kingdom, plot_multiple_surfaces, plot_with_landmarks, visualize_DBSCAN_CLUSTERS_particular_eps_minnbrs, visualize_mesh, visualize_pointcloud, visualize_pointclouds 
 from mesh_generation.paths import *
 from mesh_generation.voxelize import (expand_atomcenters_to_spheres_threadpool, index_grid)
-from ribctl import EXIT_TUNNEL_WORK
 import numpy as np
 import matplotlib.pyplot as plt
-
 
 def expand_bbox_atoms_to_spheres(atom_coordinates:np.ndarray, sphere_vdw_radii:np.ndarray, rcsb_id: str):
     sphere_sources = zip(atom_coordinates, sphere_vdw_radii)
@@ -84,16 +79,15 @@ def pipeline(RCSB_ID,args):
     _u_MIN_SAMPLES = 600 if args.dbscan_tuple is None else int(args.dbscan_tuple.split(",")[1])
     _u_METRIC      = "euclidean"
 
-    d3d_alpha   = args.D3D_alpha   if args.D3D_alpha   is not None else 2
-    d3d_tol     = args.D3D_tol     if args.D3D_tol     is not None else 1
-    PR_depth    = args.PR_depth    if args.PR_depth    is not None else 6
-    PR_ptweight = args.PR_ptweight if args.PR_ptweight is not None else 3
+    d3d_alpha         = args.D3D_alpha   if args.D3D_alpha   is not None else 2
+    d3d_tol           = args.D3D_tol     if args.D3D_tol     is not None else 1
+    PR_depth          = args.PR_depth    if args.PR_depth    is not None else 6
+    PR_ptweight       = args.PR_ptweight if args.PR_ptweight is not None else 3
 
     struct_tunnel_dir = Assets(RCSB_ID).paths.tunnel_dir
 
     if not os.path.exists(struct_tunnel_dir):
         os.mkdir(struct_tunnel_dir)
-
 
     if not os.path.exists(tunnel_atom_encoding_path(RCSB_ID)):
         extract_bbox_atoms(RCSB_ID)
@@ -121,7 +115,7 @@ def pipeline(RCSB_ID,args):
         bbox_atoms_expanded = np.load(spheres_expanded_pointset_path(RCSB_ID))
 
 
-    visualize_pointcloud(bbox_atoms_expanded, RCSB_ID, GIF_INTERMEDIATES, "{}.bbox_atoms_expanded.gif".format(RCSB_ID))
+    # visualize_pointcloud(bbox_atoms_expanded, RCSB_ID, GIF_INTERMEDIATES, "{}.bbox_atoms_expanded.gif".format(RCSB_ID))
     # ! [ Bounding Box Atoms are transformed into an Index Grid ]
     # _, xyz_negative, _ , translation_vectors = index_grid(bbox_atoms_expanded)
     initial_grid, grid_dimensions, translation_vectors = index_grid(bbox_atoms_expanded)
@@ -135,7 +129,7 @@ def pipeline(RCSB_ID,args):
     #! [ Capture DBSCAN clusters within the "negative" space]
     db, clusters_container = DBSCAN_capture(inverted_grid, _u_EPSILON, _u_MIN_SAMPLES, _u_METRIC ) 
     #! [ Extract the largest cluster from the DBSCAN clustering ]
-    visualize_DBSCAN_CLUSTERS_particular_eps_minnbrs(clusters_container, _u_EPSILON, _u_MIN_SAMPLES, GIF_INTERMEDIATES, "{}.dbscan.clusters.gif".format(RCSB_ID))
+    # visualize_DBSCAN_CLUSTERS_particular_eps_minnbrs(clusters_container, _u_EPSILON, _u_MIN_SAMPLES, GIF_INTERMEDIATES, "{}.dbscan.clusters.gif".format(RCSB_ID))
     largest_cluster = DBSCAN_pick_largest_cluster(clusters_container)
     
 
@@ -158,9 +152,7 @@ def pipeline(RCSB_ID,args):
                 print("You have to enter three truncation parameters for x, y, and z axes. (ex. ||20:50 or to skip x and y axes,  or |40:-| to cut y from 40 to the 'end' np style)")
 
             x_tuple = [ int(xx) if xx != '' else None for xx  in truncation_strings[0].split(":") ] if ":" in truncation_strings[0] else None
-
             y_tuple = [ int(yy) if yy != '' else None for yy  in truncation_strings[1].split(":") ] if ":" in truncation_strings[1] else None
-
             z_tuple = [ int(zz) if zz != '' else None for zz  in truncation_strings[2].split(":") ] if ":" in truncation_strings[2] else None
             
         except Exception as e:
@@ -218,7 +210,7 @@ def pipeline(RCSB_ID,args):
 
 
     # Visualize
-    visualize_pointcloud(trimmed_cluster, RCSB_ID, GIF_INTERMEDIATES, "{}.ptcloud_trimmed.gif".format(RCSB_ID))
+    # visualize_pointcloud(trimmed_cluster, RCSB_ID, GIF_INTERMEDIATES, "{}.ptcloud_trimmed.gif".format(RCSB_ID))
     # ! ----------
     # ! [ Extract the largest DBSCAN cluster with more restrictive parameters so as to capture the geometry more precisely and avoid trimmed the merging of trimmed parts into the main cluster   ]
     # ! Second pass of dbscan is needed to pick up the largest part of the trimmed cluster. 
@@ -238,11 +230,10 @@ def pipeline(RCSB_ID,args):
 
     #! [ Transform the cluster back into original coordinate frame ]
     surface_pts = ptcloud_convex_hull_points(coordinates_in_the_original_frame, d3d_alpha,d3d_tol)
-    visualize_pointcloud(surface_pts, RCSB_ID, GIF_INTERMEDIATES, "{}.surface_pts.gif".format(RCSB_ID))
+    # visualize_pointcloud(surface_pts, RCSB_ID, GIF_INTERMEDIATES, "{}.surface_pts.gif".format(RCSB_ID))
 
     #! [ Transform the cluster back into Original Coordinate Frame ]
     np.save(convex_hull_cluster_path(RCSB_ID), surface_pts)
-
     estimate_normals(surface_pts, surface_with_normals_path(RCSB_ID), kdtree_radius=10, kdtree_max_nn=15, correction_tangent_planes_n=10)
     apply_poisson_reconstruction(surface_with_normals_path(RCSB_ID), poisson_recon_path(RCSB_ID), recon_depth=PR_depth, recon_pt_weight=PR_ptweight)
 
