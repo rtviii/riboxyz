@@ -1094,7 +1094,6 @@ def visualize_mesh(mesh, rcsb_id:str|None=None, gif:bool=False, gif_name:str|Non
     else:
         plotter.show()
 
-
 def visualize_pointcloud(ptcloud,  rcsb_id:str|None=None, gif:bool=False, gif_name:str|None=None):
     plotter              = pv.Plotter(off_screen=gif)
     plotter.add_axes(line_width=2,cone_radius=0.3, shaft_length=2, tip_length=1, ambient=1, label_size=(0.2, 0.6))

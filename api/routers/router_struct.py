@@ -5,6 +5,7 @@ from pprint import pprint
 import typing
 from django.http import  JsonResponse, HttpResponseServerError
 from ninja import Path, Router, Schema
+import pandas
 from pydantic import BaseModel
 from neo4j_ribosome.db_lib_reader import dbqueries
 from ribctl import ASSETS, ASSETS_PATH, RIBETL_DATA
@@ -281,5 +282,26 @@ def get_shape(request, rcsb_id: str, is_ascii:bool=False):
     try:
         file = open(file_path, 'rb')
         return FileResponse(file, content_type='application/octet-stream', filename=filename)
+    except IOError:
+        return Response({"error": "Error reading the shape file"}, status=500)
+
+
+@structure_router.get("/tunnel_radial")
+def get_radial(request, rcsb_id: str):
+    rcsb_id   = rcsb_id.upper()
+    file_path = os.path.join(ASSETS_PATH,"exit_tunnel_work", "mole_tunnels", f"tunnel_{rcsb_id}.csv")
+    pprint(file_path)
+    
+    
+    try:
+        df = pandas.read_csv(file_path)
+        result = [
+            {
+                'radius': float(row['Radius']),
+                'coordinate': [float(row['X']), float(row['Y']), float(row['Z'])]
+            }
+            for _, row in df.iterrows()
+        ]
+        return Response(result)
     except IOError:
         return Response({"error": "Error reading the shape file"}, status=500)
