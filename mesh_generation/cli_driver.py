@@ -49,13 +49,8 @@ def main():
 
     # visualization options
     parser.add_argument( "--result",   action='store_true')
-    # parser.add_argument( "--dbscan",   action='store_true')
-    # parser.add_argument( "--multisurf",   action='store_true')
-    # parser.add_argument( "--kingdom",   choices=['bacteria','archaea','eukaryota'])
+    parser.add_argument( "--gif_intermediates",   action='store_true')
 
-    parser.add_argument( "--metric", choices=DBSCAN_METRICS, help="Choose a metric from the provided options", )
-    # truncation
-    # parser.add_argument( "--lsu_alpha",   action='store_true')
 
     # pipeline parameters
     parser.add_argument( "--rcsb_id", type=str, help="Specify the value for eps (float)", required=True )
@@ -84,7 +79,7 @@ def main():
         pipeline(RCSB_ID, args)
         exit(0)
     if args.result:
-        plot_with_landmarks(RCSB_ID)
+        plot_with_landmarks(RCSB_ID,None,args.gif_intermediates, "{}.result.gif".format(RCSB_ID))
 
 
 

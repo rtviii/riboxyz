@@ -8,8 +8,8 @@ import numpy as np
 from sklearn.cluster import DBSCAN
 from mesh_generation.bbox_extraction import ( encode_atoms, extract_bbox_atoms, open_tunnel_csv, parse_struct_via_bbox, parse_struct_via_centerline)
 from compas.geometry import bounding_box
-from mesh_generation.libsurf import apply_poisson_reconstruction, estimate_normals, ptcloud_convex_hull_points
-from mesh_generation.visualization import DBSCAN_CLUSTERS_visualize_largest, custom_cluster_recon_path, plot_multiple_by_kingdom, plot_multiple_surfaces, plot_with_landmarks, DBSCAN_CLUSTERS_particular_eps_minnbrs, visualize_mesh, visualize_pointcloud, visualize_pointclouds
+from mesh_generation.libsurf import apply_poisson_reconstruction, estimate_normals, estimate_normals_and_create_gif, ptcloud_convex_hull_points, ptcloud_convex_hull_points_and_gif
+from mesh_generation.visualization import DBSCAN_CLUSTERS_visualize_largest, custom_cluster_recon_path, plot_multiple_by_kingdom, plot_multiple_surfaces, plot_with_landmarks, visualize_DBSCAN_CLUSTERS_particular_eps_minnbrs, visualize_mesh, visualize_pointcloud, visualize_pointclouds 
 from mesh_generation.paths import *
 from mesh_generation.voxelize import (expand_atomcenters_to_spheres_threadpool, index_grid)
 from ribctl import EXIT_TUNNEL_WORK
@@ -31,7 +31,6 @@ def DBSCAN_capture(
     metric        : str = "euclidean",
 ): 
 
-
     u_EPSILON     = eps
     u_MIN_SAMPLES = min_samples
     u_METRIC      = metric
@@ -48,7 +47,6 @@ def DBSCAN_capture(
         CLUSTERS_CONTAINER[label].append(point)
 
     CLUSTERS_CONTAINER = dict(sorted(CLUSTERS_CONTAINER.items()))
-
     return db, CLUSTERS_CONTAINER
 
 def DBSCAN_pick_largest_cluster(clusters_container:dict[int,list])->np.ndarray:
@@ -78,6 +76,8 @@ def load_trimming_parameters( RCSB_ID:str, file_path=TRIMMING_PARAMS_DICT_PATH):
     return data[RCSB_ID] if RCSB_ID in data else None
 
 def pipeline(RCSB_ID,args):
+    GIF_INTERMEDIATES = args.gif_intermediates
+
 
     #! [ Pipeline Parameters ]
     _u_EPSILON     = 5.5 if args.dbscan_tuple is None else float(args.dbscan_tuple.split(",")[0])
@@ -121,24 +121,27 @@ def pipeline(RCSB_ID,args):
         bbox_atoms_expanded = np.load(spheres_expanded_pointset_path(RCSB_ID))
 
 
-
-    pprint(bbox_atoms_expanded)
+    visualize_pointcloud(bbox_atoms_expanded, RCSB_ID, GIF_INTERMEDIATES, "{}.bbox_atoms_expanded.gif".format(RCSB_ID))
     # ! [ Bounding Box Atoms are transformed into an Index Grid ]
     # _, xyz_negative, _ , translation_vectors = index_grid(bbox_atoms_expanded)
     initial_grid, grid_dimensions, translation_vectors = index_grid(bbox_atoms_expanded)
+
+
+    # visualize_pointcloud(initial_grid, RCSB_ID, GIF_INTERMEDIATES, "{}.initial.grid.gif".format(RCSB_ID))
     # ? Here no trimming has yet occurred.
 
-
+    #! [ Invert the grid ]
+    inverted_grid = np.asarray(np.where(initial_grid != 1)).T
+    #! [ Capture DBSCAN clusters within the "negative" space]
+    db, clusters_container = DBSCAN_capture(inverted_grid, _u_EPSILON, _u_MIN_SAMPLES, _u_METRIC ) 
     #! [ Extract the largest cluster from the DBSCAN clustering ]
-    db, clusters_container = DBSCAN_capture(np.asarray(np.where(initial_grid != 1)).T, _u_EPSILON, _u_MIN_SAMPLES, _u_METRIC )
-    DBSCAN_CLUSTERS_particular_eps_minnbrs(clusters_container, _u_EPSILON, _u_MIN_SAMPLES)
-
-
+    visualize_DBSCAN_CLUSTERS_particular_eps_minnbrs(clusters_container, _u_EPSILON, _u_MIN_SAMPLES, GIF_INTERMEDIATES, "{}.dbscan.clusters.gif".format(RCSB_ID))
     largest_cluster = DBSCAN_pick_largest_cluster(clusters_container)
+    
 
     # #! [ Visualize the largest DBSCAN cluster to establish whether trimming is required ]
     # DBSCAN_CLUSTERS_visualize_largest(np.asarray(np.where(initial_grid == 1)).T, clusters_container, largest_cluster)
-    visualize_pointcloud(largest_cluster, RCSB_ID)
+    visualize_pointcloud(largest_cluster, RCSB_ID, GIF_INTERMEDIATES, "{}.ptcloud.gif".format(RCSB_ID))
 
     # TODO : refactor this trimming logic out
     TRUNCATION_TUPLES = load_trimming_parameters(RCSB_ID)
@@ -166,8 +169,6 @@ def pipeline(RCSB_ID,args):
 
         TRUNCATION_TUPLES = [x_tuple, y_tuple, z_tuple]
         cache_trimming_parameters(RCSB_ID, TRUNCATION_TUPLES)
-    
-
     if TRUNCATION_TUPLES is not None:
         if len(TRUNCATION_TUPLES) != 3:
             raise IndexError("You have to enter three truncation parameters for x, y, and z axes. (ex. ||20:50 to skip x and y axes )")
@@ -209,14 +210,15 @@ def pipeline(RCSB_ID,args):
                         return False
 
             return True
-
     if args.trim:
         trimmed_cluster = np.array(list(filter(trim_pt_filter,list(largest_cluster))))
     else:
         trimmed_cluster = largest_cluster
+    # TODO : refactor this trimming logic out
 
 
-    visualize_pointcloud(trimmed_cluster, RCSB_ID)
+    # Visualize
+    visualize_pointcloud(trimmed_cluster, RCSB_ID, GIF_INTERMEDIATES, "{}.ptcloud_trimmed.gif".format(RCSB_ID))
     # ! ----------
     # ! [ Extract the largest DBSCAN cluster with more restrictive parameters so as to capture the geometry more precisely and avoid trimmed the merging of trimmed parts into the main cluster   ]
     # ! Second pass of dbscan is needed to pick up the largest part of the trimmed cluster. 
@@ -227,7 +229,8 @@ def pipeline(RCSB_ID,args):
     for (k,v) in dbscan_container.items():
         print(k, len(v))
     main_cluster = DBSCAN_pick_largest_cluster(dbscan_container)
-    visualize_pointcloud(main_cluster)
+    # visualize_pointcloud(main_cluster, RCSB_ID, GIF_INTERMEDIATES, "{}.ptcloud_trimmed_sharpened.gif".format(RCSB_ID))
+    visualize_DBSCAN_CLUSTERS_particular_eps_minnbrs(dbscan_container, 3, 123, GIF_INTERMEDIATES, "{}.ptcloud_trimmed_sharpened.gif".format(RCSB_ID))
     # ! ----------
 
     #! [ Transform the cluster back into Original Coordinate Frame ]
@@ -235,6 +238,7 @@ def pipeline(RCSB_ID,args):
 
     #! [ Transform the cluster back into original coordinate frame ]
     surface_pts = ptcloud_convex_hull_points(coordinates_in_the_original_frame, d3d_alpha,d3d_tol)
+    visualize_pointcloud(surface_pts, RCSB_ID, GIF_INTERMEDIATES, "{}.surface_pts.gif".format(RCSB_ID))
 
     #! [ Transform the cluster back into Original Coordinate Frame ]
     np.save(convex_hull_cluster_path(RCSB_ID), surface_pts)
@@ -242,4 +246,4 @@ def pipeline(RCSB_ID,args):
     estimate_normals(surface_pts, surface_with_normals_path(RCSB_ID), kdtree_radius=10, kdtree_max_nn=15, correction_tangent_planes_n=10)
     apply_poisson_reconstruction(surface_with_normals_path(RCSB_ID), poisson_recon_path(RCSB_ID), recon_depth=PR_depth, recon_pt_weight=PR_ptweight)
 
-    visualize_mesh(pv.read(poisson_recon_path(RCSB_ID)), RCSB_ID)
+    visualize_mesh(pv.read(poisson_recon_path(RCSB_ID)), RCSB_ID, GIF_INTERMEDIATES, "{}.reconstruction.gif".format(RCSB_ID))

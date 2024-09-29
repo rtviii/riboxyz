@@ -6,7 +6,7 @@ import concurrent.futures
 
 def sphere_task(container_sink:list, atom_center_coordinate:np.ndarray, vdw_R=2):
     #TODO: Differentiate between atoms sizes
-    result  = get_sphere_indices_voxelized(atom_center_coordinate, 2)
+    result  = atompos_to_voxelized_sphere(atom_center_coordinate, 2)
     container_sink.extend(result)
     return result
 
@@ -45,7 +45,7 @@ def plt_plot(x_ix, y_ix, z_ix, filled_grid):
     plt.show()
     exit()
 
-def get_sphere_indices_voxelized(center: np.ndarray, radius: int):
+def atompos_to_voxelized_sphere(center: np.ndarray, radius: int):
     """Make sure radius reflects the size of the underlying voxel grid"""
     x0, y0, z0 = center
 
