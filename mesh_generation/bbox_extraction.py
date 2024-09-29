@@ -134,14 +134,10 @@ def encode_atoms(rcsb_id: str, atoms_list: list[Atom], write=False, writepath=No
 
     return aggregate
 
-
-
 def create_pcd_from_atoms( positions: np.ndarray, atom_types: np.ndarray, save_path: str ):
     pcd        = o3d.geometry.PointCloud(o3d.utility.Vector3dVector(positions))
     pcd.colors = o3d.utility.Vector3dVector(atom_types)
     o3d.io.write_point_cloud(save_path, pcd)
-
-
 
 def bounding_box(points: np.ndarray):
     """Computes the axis-aligned minimum bounding box of a list of points.
@@ -175,7 +171,6 @@ def bounding_box(points: np.ndarray):
         [max_x, max_y, max_z],
         [min_x, max_y, max_z],
     ]
-
 
 def extract_bbox_atoms(rcsb_id: str) -> list:
     print("Extracting tunnel bounding box atoms for {}".format(rcsb_id))

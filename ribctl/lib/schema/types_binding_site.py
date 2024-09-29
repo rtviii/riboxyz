@@ -27,7 +27,6 @@ AMINO_ACIDS = {
     "TRP": {"one_letter_code": "W", "charge": 0},
     "TYR": {"one_letter_code": "Y", "charge": 0},
     "VAL": {"one_letter_code": "V", "charge": 0},
-    # ------------------------
 }
 NUCLEOTIDES = ["A", "T", "C", "G", "U"]
 
@@ -48,7 +47,6 @@ class ResidueSummary(BaseModel):
                 return resname
         else:
             return '-'
-
 
     @staticmethod
     def one_letter_code_to_three(resname: str):
@@ -95,32 +93,29 @@ class BindingSiteChain(Polymer):
     bound_residues: list[ResidueSummary]
 
 class BindingSite(BaseModel):
-
     source: str
     ligand: str
     radius: float
     chains: list[BindingSiteChain]
 
-
+#TODO: The following four classes can be collapsed into one
 class PredictionSource(BaseModel):
 
     source_seq    : str
     source_bound_residues: list[ResidueSummary]
     auth_asym_id  : str
 
-
+#TODO: these two should just b ea single class tagged extending Polymer with "TARGET"| "SOURCE" and "bound residues"
 class PredictionTarget(BaseModel):
-
     target_seq: str
     target_bound_residues: list[ResidueSummary]
     auth_asym_id: str
 
-
 class PredictionAlignments(BaseModel):
-    aligned_ids: list[int]
+
+    aligned_ids       : list[int]
     source_seq_aligned: str
     target_seq_aligned: str
-
 
 class PredictedResiduesPolymer(BaseModel):
 
@@ -133,11 +128,11 @@ class PredictedResiduesPolymer(BaseModel):
     def serialize_nomenclature(self, polymer_class:PolymerClass ):
         return polymer_class.value
 
-
 class LigandTransposition(BaseModel):
-    source: str
-    target: str
-    constituent_chains: list[PredictedResiduesPolymer]
+
+    source                : str
+    target                : str
+    constituent_chains    : list[PredictedResiduesPolymer]
     purported_binding_site: BindingSite
 
     def save(self, filename: str):

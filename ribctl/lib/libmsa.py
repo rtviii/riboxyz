@@ -11,14 +11,14 @@ from functools import reduce
 import os
 import subprocess
 from typing import Callable, Iterator
-from ribctl import MUSCLE_BIN
+from ribctl import ASSETS, MUSCLE_BIN
 import os
 from ribctl.lib.libtax import  Taxid, ncbi
+from ribctl.lib.schema.types_ribosome import CytosolicProteinClass, ElongationFactorClass, InitiationFactorClass, MitochondrialProteinClass, PolymerClass, PolynucleotideClass
 
 
 class Fasta:
     records: list[SeqRecord]
-
     def __init__( self, path: str | None = None, records: list[SeqRecord] | None = None ) -> None:
         if path is not None:
             try:
@@ -26,12 +26,32 @@ class Fasta:
                     self.records: list[SeqRecord] = [*SeqIO.parse(fasta_in, "fasta")]
             except FileNotFoundError:
                 print(f"File not found: {path}")
+
             except Exception as e:
                 print(f"An error occurred: {str(e)}")
                 exit(-1)
 
         elif records is not None:
             self.records = records
+
+    @staticmethod
+    def poly_class_all_seq(candidate_class:PolymerClass):
+        
+        if candidate_class in CytosolicProteinClass:
+            fasta_path = os.path.join(ASSETS["fasta_proteins_cytosolic"], f"{candidate_class.value}.fasta")
+        elif candidate_class in MitochondrialProteinClass:
+            fasta_path = os.path.join(ASSETS["fasta_proteins_mitochondrial"], f"{candidate_class.value}.fasta")
+        elif candidate_class in PolynucleotideClass:
+            fasta_path = os.path.join(ASSETS["fasta_rna"], f"{candidate_class.value}.fasta")
+        elif candidate_class in ElongationFactorClass:
+            fasta_path = os.path.join(ASSETS["fasta_factors_elongation"], f"{candidate_class.value}.fasta")
+        elif candidate_class in InitiationFactorClass:
+            fasta_path = os.path.join(ASSETS["fasta_factors_initiation"], f"{candidate_class.value}.fasta")
+        else:
+            raise KeyError(f"Class {candidate_class} not found in any of the fasta archives. Something went terribly wrong.")
+
+        fasta_path = os.path.join(ASSETS["fasta_proteins_cytosolic"], f"{candidate_class.value}.fasta")
+        return Fasta(fasta_path)
 
     def _yield_subset(self, predicate: Callable[[SeqRecord], bool]) -> list[SeqRecord]:
         return [*filter(predicate, self.records)]
@@ -49,10 +69,11 @@ class Fasta:
     def fasta_display_species(taxids: list[int]):
         taxids = Taxid.coerce_all_to_rank(taxids, "species")
         tree   = ncbi.get_topology(taxids)
+
         for node in tree.traverse():
-            taxid = int(node.name)
+            taxid           = int(node.name)
             scientific_name = ncbi.get_taxid_translator([taxid]).get(taxid, "Unknown")
-            node.name = scientific_name
+            node.name       = scientific_name
         print(tree.get_ascii(attributes=["name", "sci_name"]))
 
     def pick_taxids(self, _taxids_int: list[int]) -> list[SeqRecord]:
@@ -94,48 +115,19 @@ class Fasta:
             return list(map(lambda _: int(_), taxids))
         else:
             raise Exception("Invalid type passed to all_taxids")
-
+    
 def generate_consensus(records):
     alignment     = MultipleSeqAlignment(records)
     summary_align = AlignInfo.SummaryInfo(alignment)
     summary_align.dumb_consensus()
     return summary_align
 
-def util__backwards_match(aligned_target: str, resid: int):
-    """Returns the target-sequence index of a residue in the (aligned) target sequence
-    Basically, "count back ignoring gaps" until you arrive at @resid
-    """
-    if resid > len(aligned_target):
-        raise IndexError( f"Passed residue with invalid index ({resid}) to back-match to target.Seqlen:{len(aligned_target)}" ) 
-    counter_proper = 0
-    for i, char in enumerate(aligned_target):
-        if i == resid:
-            return counter_proper
-        if char == "-":
-            continue
-        else:
-            counter_proper += 1
-
-def util__forwards_match(aligned_seq: str, resid: int):
-    """Returns the index of a source-sequence residue in the aligned source sequence.
-    Basically, "count forward including gaps until you reach @resid"
-    """
-
-    count_proper = 0
-    for alignment_indx, char in enumerate(aligned_seq):
-        if count_proper == resid:
-            return alignment_indx
-        if char == "-":
-            continue
-        else:
-            count_proper += 1
 
 def barr2str(bArr):
     return "".join([x.decode("utf-8") for x in bArr])
 
 def seq_to_fasta(rcsb_id: str, _seq: str, outfile: str):
     from Bio.Seq import Seq
-
     _seq = _seq.replace("\n", "")
     seq_record = SeqRecord(Seq(_seq).upper())
     seq_record.id = seq_record.description = rcsb_id
@@ -164,18 +156,16 @@ def muscle_align_N_seq( seq_records: list[SeqRecord], vvv: bool = False ) -> Ite
 
     with tempfile.NamedTemporaryFile(delete=False, mode="w") as temp_file:
         temp_filename = temp_file.name
-
         if vvv:
             pprint("Aligning sequences with muscle...")
             pprint([*seq_records])
 
         SeqIO.write([*seq_records], temp_filename, "fasta")
         muscle_cmd = [MUSCLE_BIN, "-in", temp_filename, "-quiet"]
+
         try:
             process = subprocess.run(muscle_cmd, stdout=subprocess.PIPE, text=True)
-
             if process.returncode == 0:
-
                 muscle_out           = process.stdout
                 muscle_output_handle = StringIO(muscle_out)
                 seq_records_a        = SeqIO.parse(muscle_output_handle, "fasta")
@@ -194,4 +184,11 @@ def muscle_align_N_seq( seq_records: list[SeqRecord], vvv: bool = False ) -> Ite
             temp_file.close()
             os.remove(temp_filename)
             raise Exception("Error running muscle.")
+
+
+
+
+
+
+
 

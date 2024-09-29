@@ -60,7 +60,7 @@ diagram_tunnels = {
 }
 FONT                  = 'courier'
 CHAIN_PT_SIZE         = 8
-PTC_PT_SIZE           = 20
+PTC_PT_SIZE           = 40
 CHAIN_LANDMARK_COLORS = ["purple","orange", "cornflowerblue", "cornsilk", "crimson", "darkblue", "darkcyan", "darkgoldenrod", "darkgray", "darkgreen", "darkkhaki", "darkmagenta", "darkolivegreen", "darkorange", "darkorchid", "darkred",
 "rebeccapurple",
 "rosybrown",
@@ -872,14 +872,11 @@ def retrieve_ptc_and_chain_atoms(rcsb_id):
         return ptc_midpoint, atom_coordinates_by_chain
 
 #! For figure only
-def DBSCAN_CLUSTERS_particular_eps_minnbrs( dbscan_cluster_dict: dict[int, list], eps, min_nbrs):
-    plotter               = pv.Plotter()
-    pickle.dump(dbscan_cluster_dict, open("dbscan_cluster_dict.pkl", "wb"))
-
-    pickle.load(open("dbscan_cluster_dict.pkl", "rb"))
-
+def visualize_DBSCAN_CLUSTERS_particular_eps_minnbrs( dbscan_cluster_dict: dict[int, list], eps, min_nbrs, gif:bool=False, gif_name:str|None=None):
+    plotter               = pv.Plotter(off_screen=gif)
+    # pickle.dump(dbscan_cluster_dict, open("dbscan_cluster_dict.pkl", "wb"))
+    # pickle.load(open("dbscan_cluster_dict.pkl", "rb"))
     plotter.subplot(0,0)
-    #? Visualize all clusters
     for k, v in dbscan_cluster_dict.items():
         print("Cluster {} has {} points.".format(k, len(v)))
     clusters_palette = dict(zip(range(-1, 60), plt.cm.terrain(np.linspace(0, 1, 60))))
@@ -897,12 +894,23 @@ def DBSCAN_CLUSTERS_particular_eps_minnbrs( dbscan_cluster_dict: dict[int, list]
     ptcloud_all_clusters["rgba"] = combined_cluster_colors
 
     plotter.add_mesh(ptcloud_all_clusters, scalars="rgba", rgb=True, show_scalar_bar=False)
-
     plotter.add_text('eps: {} \nmin_nbrs: {}'.format(eps, min_nbrs), position='upper_left', font_size=20, shadow=True, font=FONT, color='black')
-    plotter.show()
+    if gif:
+        output_gif = gif_name
+        # plotter.camera.zoom(1.5)
+        plotter.open_gif(output_gif)
 
-def DBSCAN_CLUSTERS_visualize_largest(positive_space: np.ndarray, dbscan_cluster_dict: dict[int, list], selected_cluster: np.ndarray):
-    plotter               = pv.Plotter(shape=(1, 2))
+        # Rotate the camera 360 degrees
+        for angle in range(0, 360, 5):  # 5 degree steps
+            plotter.camera.azimuth = angle
+            plotter.write_frame()
+        plotter.close()
+        print(f"GIF saved as {output_gif}")
+    else:
+        plotter.show()
+
+def DBSCAN_CLUSTERS_visualize_largest(positive_space: np.ndarray, dbscan_cluster_dict: dict[int, list], selected_cluster: np.ndarray, gif:bool=False, gif_name:str|None=None):
+    plotter               = pv.Plotter(shape=(1, 2), off_screen=True)
     plotter.subplot(0,0)
     n_labels = 7
     plotter.add_axes(line_width=2,cone_radius=0.3, shaft_length=2, tip_length=1, ambient=1, label_size=(0.2, 0.6))
@@ -955,7 +963,19 @@ def DBSCAN_CLUSTERS_visualize_largest(positive_space: np.ndarray, dbscan_cluster
     point_cloud         = pv.PolyData(container_points)
     # point_cloud["rgba"] = container_rgbas
     plotter.add_points(point_cloud, rgb=True, show_scalar_bar=True)
-    plotter.show()
+    if gif:
+        output_gif = gif_name
+        # plotter.camera.zoom(1.5)
+        plotter.open_gif(output_gif)
+
+        # Rotate the camera 360 degrees
+        for angle in range(0, 360, 2):  # 5 degree steps
+            plotter.camera.azimuth = angle
+            plotter.write_frame()
+        plotter.close()
+        print(f"GIF saved as {output_gif}")
+    else:
+        plotter.show()
 
 def plot_multiple_surfaces(rcsb_id:str):
 
@@ -1053,27 +1073,52 @@ def plot_multiple_by_kingdom(kingdom:typing.Literal['bacteria','archaea','eukary
 
     plotter.show()
 
-def visualize_mesh(mesh, rcsb_id:str|None=None):
-    pl                        = pv.Plotter()
-    _ = pl.add_mesh(mesh, opacity=0.8)
-    pl.add_axes(line_width=2,cone_radius=0.7, shaft_length=0.7, tip_length=0.3, ambient=0.5, label_size=(0.2, 0.8))
-    pl.add_text('RCSB_ID:{}'.format(rcsb_id if rcsb_id is not None else "" ), position='upper_right', font_size=14, shadow=True, font='courier', color='black')
-    pl.show_grid( n_xlabels=8, n_ylabels=8, n_zlabels=8, font_size = 8)
-    pl.show()
+def visualize_mesh(mesh, rcsb_id:str|None=None, gif:bool=False, gif_name:str|None=None):
+    plotter                        = pv.Plotter(off_screen=gif)
+    _ = plotter.add_mesh(mesh, opacity=0.8)
+    plotter.add_axes(line_width=2,cone_radius=0.7, shaft_length=0.7, tip_length=0.3, ambient=0.5, label_size=(0.2, 0.8))
+    plotter.add_text('RCSB_ID:{}'.format(rcsb_id if rcsb_id is not None else "" ), position='upper_right', font_size=14, shadow=True, font='courier', color='black')
+    plotter.show_grid( n_xlabels=8, n_ylabels=8, n_zlabels=8, font_size = 8)
 
-def visualize_pointcloud(ptcloud, rcsb_id:str|None=None):
-    pl              = pv.Plotter()
-    # pl.x_axis.tick_count = 20
-    pl.add_axes(line_width=2,cone_radius=0.3, shaft_length=2, tip_length=1, ambient=1, label_size=(0.2, 0.6))
-    pl.add_text('RCSB_ID:{}'.format(rcsb_id if rcsb_id is not None else "" ), position='upper_right', font_size=14, shadow=True, font='courier', color='black')
+    if gif:
+        output_gif = gif_name
+        # plotter.camera.zoom(1.5)
+        plotter.open_gif(output_gif)
+
+        # Rotate the camera 360 degrees
+        for angle in range(0, 360, 2):  # 5 degree steps
+            plotter.camera.azimuth = angle
+            plotter.write_frame()
+        plotter.close()
+        print(f"GIF saved as {output_gif}")
+    else:
+        plotter.show()
+
+
+def visualize_pointcloud(ptcloud,  rcsb_id:str|None=None, gif:bool=False, gif_name:str|None=None):
+    plotter              = pv.Plotter(off_screen=gif)
+    plotter.add_axes(line_width=2,cone_radius=0.3, shaft_length=2, tip_length=1, ambient=1, label_size=(0.2, 0.6))
+    plotter.add_text('RCSB_ID:{}'.format(rcsb_id if rcsb_id is not None else "" ), position='upper_right', font_size=14, shadow=True, font='courier', color='black')
     n_labels = 7
-    pl.show_grid( n_xlabels=n_labels, n_ylabels=n_labels, n_zlabels=n_labels, font_size = 8)
+    plotter.show_grid( n_xlabels=n_labels, n_ylabels=n_labels, n_zlabels=n_labels, font_size = 8)
+    plotter.add_points(ptcloud, color='b', point_size=5, render_points_as_spheres=True)
 
-    pl.add_points(ptcloud, color='b', point_size=5, render_points_as_spheres=True)
-    pl.show()
+    if gif:
+        output_gif = gif_name
+        # plotter.camera.zoom(1.5)
+        plotter.open_gif(output_gif)
 
-def visualize_pointclouds(ptcloud1:np.ndarray, ptcloud2:np.ndarray, background_positive:np.ndarray):
-    plotter               = pv.Plotter(shape=(1, 2))
+        # Rotate the camera 360 degrees
+        for angle in range(0, 360, 5):  # 5 degree steps
+            plotter.camera.azimuth = angle
+            plotter.write_frame()
+        plotter.close()
+        print(f"GIF saved as {output_gif}")
+    else:
+        plotter.show()
+
+def visualize_pointclouds(ptcloud1:np.ndarray, ptcloud2:np.ndarray, background_positive:np.ndarray, gif:bool=False, gif_name:str|None=None):
+    plotter               = pv.Plotter(shape=(1, 2), off_screen=gif)
     plotter.subplot(0,0)
     n_labels = 7
     plotter.add_axes(line_width=2,cone_radius=0.3, shaft_length=2, tip_length=1, ambient=1, label_size=(0.2, 0.6))
@@ -1105,23 +1150,33 @@ def visualize_pointclouds(ptcloud1:np.ndarray, ptcloud2:np.ndarray, background_p
     point_cloud2["rgba"] = rgbas_combined2
     plotter.add_points(point_cloud2, scalars="rgba", rgb=True, show_scalar_bar=False)
 
+
+    if gif:
+        output_gif = gif_name
+        # plotter.camera.zoom(1.5)
+        plotter.open_gif(output_gif)
+
+        # Rotate the camera 360 degrees
+        for angle in range(0, 360, 2):  # 5 degree steps
+            plotter.camera.azimuth = angle
+            plotter.write_frame()
+        plotter.close()
+        print(f"GIF saved as {output_gif}")
+    else:
+        plotter.show()
+
+
     plotter.show()
 
-def plot_with_landmarks( rcsb_id: str, poisson_recon_custom_path:str|None=None, ):
+def plot_with_landmarks( rcsb_id: str, poisson_recon_custom_path:str|None=None, gif:bool=False, gif_name:str|None=None):
     """
     @translation_vectors is a np.ndarray of shape (2,3) where
         - the first row is the means of the coordinate set
         - the second row is the deviations of the normalized coordinate set
         (to be used to reverse the normalization process or to travel to this coordinate frame)
     """
-
-    print(rcsb_id)
-    # src_taxid = RibosomeOps(rcsb_id).get_taxids()[0][0]
     src_taxid = RibosomeOps(rcsb_id).get_taxids()[0][0]
-    print(src_taxid)
     taxname   = list( Taxid.get_name(str(src_taxid)) )[0]
-    print(taxname)
-
 
     ptc_midpoint,atom_coordinates_by_chain= retrieve_ptc_and_chain_atoms(rcsb_id)
 
@@ -1132,44 +1187,27 @@ def plot_with_landmarks( rcsb_id: str, poisson_recon_custom_path:str|None=None, 
 
     print("Opened poisson recon file at \033[32m{}\033[0m".format(poisson_recon))
     mesh_   = pv.read(poisson_recon)
-    plotter = pv.Plotter()
+    plotter = pv.Plotter(off_screen=gif)
     plotter.add_mesh(mesh_, opacity=1)
 
 
     for i, ( chain_name, coords ) in enumerate(atom_coordinates_by_chain.items()):
-        # print("Plotting " + chain_name, "with index", i ,)
         # ? Adding coordinates to the plotter for each chain( coordinates and color )
         plotter.add_points(
-            # move_cords_to_normalized_cord_frame(grid_dimensions, mean_abs_vectors, np.array(coords)),
-                np.array(coords),
+              np.array(coords),
               point_size               = 8 if chain_name in ["eL39","uL4","uL22", "uL23"] else 2 if "rRNA" in chain_name else 4 ,
               color                    =  'gray' if "rRNA" in chain_name else "cyan" if chain_name == "eL39" else 'pink' if chain_name=='uL23' else "lightgreen" if chain_name == "uL4" else "gold" if chain_name =="uL22" else CHAIN_LANDMARK_COLORS[i],
               opacity                  = 0.1 if chain_name not in ["eL39","uL4","uL22", 'uL23'] else 1 ,
               render_points_as_spheres = True ,
         )
-        #!ALL CHAINS
-        # plotter.add_points(
-        #     move_cords_to_normalized_cord_frame(grid_dimensions, mean_abs_vectors, np.array(coords)),
-        #       point_size               = 7,
-        #       color                    =  'gray' if "rRNA" in chain_name else "cyan" if chain_name == "eL39" else "lightgreen" if chain_name == "uL4" else "gold" if chain_name =="uL22" else CHAIN_LANDMARK_COLORS[i],
-        #       opacity                  = 0.9,
-        #       render_points_as_spheres = True ,
-        # )
-        # #! RNA ONLY
-        # if "rRNA" in chain_name:
-        #     plotter.add_points(
-        #         move_cords_to_normalized_cord_frame(grid_dimensions, mean_abs_vectors, np.array(coords)),
-        #           point_size               = 8 ,
-        #           color                    =  'blue' ,
-        #           opacity                  = 1,
-        #           render_points_as_spheres = True ,
-        #     )
 
     for i, (label, color) in enumerate([( 'eL39','cyan' ),( 'uL4','lightgreen' ),( 'uL22','gold' )]):
         offset   = i * 50  # Adjust the offset as needed
         position = (20, 200 - offset, 0)
         plotter.add_text( label, position=position, font_size=20, font=FONT,color=color, shadow=True )
 
+    plotter.add_text( "rRNA ", position=(20, 250, 0), font_size=20, font=FONT,color='gray', shadow=False )
+    plotter.add_text( "PTC ", position=(20, 300, 0), font_size=20, font=FONT,color='red', shadow=True )
     plotter.add_points( 
         # move_cords_to_normalized_cord_frame( grid_dimensions, mean_abs_vectors, np.array([ptc_midpoint]) ),
         np.array([ptc_midpoint]),
@@ -1181,5 +1219,16 @@ def plot_with_landmarks( rcsb_id: str, poisson_recon_custom_path:str|None=None, 
     plotter.add_text('Tunnel Mesh Volume: {}'.format(round(mesh_.volume, 3)), position='lower_left', font_size=8, shadow=True, font=FONT, color='black')
     plotter.add_text('{}'.format(taxname), position='lower_right', font_size=8, shadow=True, font=FONT, color='black') 
 
+    if gif:
+        output_gif = gif_name
+        # plotter.camera.zoom(1.5)
+        plotter.open_gif(output_gif)
 
-    plotter.show(auto_close=False)
+        # Rotate the camera 360 degrees
+        for angle in range(0, 360, 2):  # 5 degree steps
+            plotter.camera.azimuth = angle
+            plotter.write_frame()
+        plotter.close()
+        print(f"GIF saved as {output_gif}")
+    else:
+        plotter.show()
