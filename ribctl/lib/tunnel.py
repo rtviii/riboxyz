@@ -193,3 +193,4 @@ def ptc_residues_calculate_midpoint(
 
     return midpoint
 
+
