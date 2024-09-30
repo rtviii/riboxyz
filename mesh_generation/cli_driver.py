@@ -69,8 +69,9 @@ def main():
     parser.add_argument( "--PR_depth",  type=int)
     parser.add_argument( "--PR_ptweight",  type=int)
 
-    #! Interactive / Visualization
+    #! Interactive / processing
     parser.add_argument( "--trim",  action='store_true',required=False)
+    parser.add_argument( "--nascent_chain",  action='store_true',required=False)
 
     args          = parser.parse_args()
     RCSB_ID       = args.rcsb_id.upper()

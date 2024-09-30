@@ -85,23 +85,16 @@ def pipeline(RCSB_ID,args):
     PR_ptweight       = args.PR_ptweight if args.PR_ptweight is not None else 3
 
     struct_tunnel_dir = Assets(RCSB_ID).paths.tunnel_dir
-
     if not os.path.exists(struct_tunnel_dir):
         os.mkdir(struct_tunnel_dir)
 
-    if not os.path.exists(tunnel_atom_encoding_path(RCSB_ID)):
+    if args.bbox or  ( not os.path.exists(tunnel_atom_encoding_path(RCSB_ID)) ):
         extract_bbox_atoms(RCSB_ID)
 
     #! [ Bounding Box Atoms ]
     if args.bbox or ( not os.path.exists(spheres_expanded_pointset_path(RCSB_ID)) ) :
         "the data arrives here as *bound_box around the centerline expansion* atom coordinates extracted from the biopython model "
 
-        # if not os.path.exists(tunnel_atom_encoding_path(RCSB_ID)) and args.bbox_radius != None:
-        #     bbox_atoms          = extract_bbox_atoms(RCSB_ID)
-        #     _atom_centers       = np.array(list(map(lambda x: x["coord"], bbox_atoms)))
-        #     _vdw_radii          = np.array(list(map(lambda x: x["vdw_radius"], bbox_atoms)))
-        #     bbox_atoms_expanded = expand_bbox_atoms_to_spheres(_atom_centers,_vdw_radii, RCSB_ID)
-        # else:
         with open( tunnel_atom_encoding_path(RCSB_ID), "r", ) as infile: 
             bbox_atoms = json.load(infile)
         _atom_centers       = np.array(list(map(lambda x: x["coord"], bbox_atoms)))
@@ -114,8 +107,8 @@ def pipeline(RCSB_ID,args):
         print("Opened atoms in the bounding box")
         bbox_atoms_expanded = np.load(spheres_expanded_pointset_path(RCSB_ID))
 
-
-    # visualize_pointcloud(bbox_atoms_expanded, RCSB_ID, GIF_INTERMEDIATES, "{}.bbox_atoms_expanded.gif".format(RCSB_ID))
+    
+    visualize_pointcloud(bbox_atoms_expanded, RCSB_ID, GIF_INTERMEDIATES, "{}.bbox_atoms_expanded.gif".format(RCSB_ID))
     # ! [ Bounding Box Atoms are transformed into an Index Grid ]
     # _, xyz_negative, _ , translation_vectors = index_grid(bbox_atoms_expanded)
     initial_grid, grid_dimensions, translation_vectors = index_grid(bbox_atoms_expanded)

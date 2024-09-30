@@ -65,7 +65,6 @@ def atompos_to_voxelized_sphere(center: np.ndarray, radius: int):
     indices      += np.array([x_range.start, y_range.start, z_range.start])[ :, np.newaxis, np.newaxis, np.newaxis ]
     indices       = indices.transpose(1, 2, 3, 0)
     indices_list  = list(map(tuple, indices.reshape(-1, 3)))
-    print("Got indices list around ", center, " with radius ", radius, " and length: ", len(indices_list))
     #!------ Generate indices of a voxel cube of side 2r+2  around the centerpoint
 
     sphere_active_ix = []
