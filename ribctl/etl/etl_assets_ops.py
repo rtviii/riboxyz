@@ -3,6 +3,7 @@ from enum import   auto
 import enum
 import json
 import os
+from pprint import pprint
 import subprocess
 import typing
 from Bio.PDB.Structure import Structure
@@ -154,7 +155,10 @@ class RibosomeOps:
     #! I
     def ptc(self) -> PTCInfo:
         with open(self.paths.ptc, "r") as infile:
+            pprint(json.load(infile))
+
             return PTCInfo.model_validate(json.load(infile))
+
 
     #! I
     def profile(self) -> RibosomeStructure:

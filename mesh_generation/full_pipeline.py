@@ -4,13 +4,11 @@ import os
 import numpy as np
 from sklearn.cluster import DBSCAN
 from mesh_generation.bbox_extraction import ( encode_atoms, extract_bbox_atoms, open_tunnel_csv, parse_struct_via_bbox, parse_struct_via_centerline)
-from compas.geometry import bounding_box
 from mesh_generation.libsurf import apply_poisson_reconstruction, estimate_normals, estimate_normals_and_create_gif, ptcloud_convex_hull_points, ptcloud_convex_hull_points_and_gif
 from mesh_generation.visualization import DBSCAN_CLUSTERS_visualize_largest, custom_cluster_recon_path, plot_multiple_by_kingdom, plot_multiple_surfaces, plot_with_landmarks, visualize_DBSCAN_CLUSTERS_particular_eps_minnbrs, visualize_mesh, visualize_pointcloud, visualize_pointclouds 
 from mesh_generation.paths import *
 from mesh_generation.voxelize import (expand_atomcenters_to_spheres_threadpool, index_grid)
 import numpy as np
-import matplotlib.pyplot as plt
 
 def expand_bbox_atoms_to_spheres(atom_coordinates:np.ndarray, sphere_vdw_radii:np.ndarray, rcsb_id: str):
     sphere_sources = zip(atom_coordinates, sphere_vdw_radii)

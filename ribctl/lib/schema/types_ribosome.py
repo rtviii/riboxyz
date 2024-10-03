@@ -532,7 +532,7 @@ class NomenclatureTable(BaseModel):
 
 class PTCInfo(BaseModel):
 
-    site_9_residues      : list[tuple[str, int]]
+    # site_9_residues      : list[tuple[str, int]]
     LSU_rRNA_auth_asym_id: str
     midpoint_coordinates : tuple[float, float, float]
     nomenclature_table   : NomenclatureTable

@@ -108,10 +108,10 @@ def polymers_by_structure(request,
         print("RETURNING POLYMERS actual len", len( polymers ), count)
         return { "polymers":polymers, "count": count }
 
-@structure_router.get('/ptc',  tags=[TAG], response=PTCInfo)
-def ptc(request, rcsb_id:str):
-    rcsb_id = str.upper(rcsb_id)
-    return RibosomeOps(rcsb_id).ptc()
+# @structure_router.get('/ptc',  tags=[TAG], response=PTCInfo)
+# def ptc(request, rcsb_id:str):
+#     rcsb_id = str.upper(rcsb_id)
+#     return RibosomeOps(rcsb_id).ptc()
 
 @structure_router.get('/list_ligands',response=list[tuple[dict,list[dict]]] , tags=[TAG])
 def list_ligands(request):
@@ -178,14 +178,15 @@ def structure_profile(request,rcsb_id:str):
 
 @structure_router.get('/ptc', response=dict, tags=[TAG],)
 def structure_ptc(request,rcsb_id:str):
-    """Return a `.json` profile of the given RCSB_ID structure."""
-
     params      = dict(request.GET)
     rcsb_id     = str.upper(params['rcsb_id'][0])
     try:
         ptc = RibosomeOps(rcsb_id).ptc()
+        print("parse ptc scuce",ptc)
+        
+        return Response(ptc.model_dump())
     except Exception as e:
-        return HttpResponseServerError("Failed to find structure profile {}:\n\n{}".format(rcsb_id, e))
+        return HttpResponseServerError(e)
      
 class ChainsByStruct(Schema):
     class PolymerByStruct(Schema):
@@ -278,7 +279,6 @@ def get_shape(request, rcsb_id: str, is_ascii:bool=False):
     
     if not os.path.exists(file_path):
         return Response({"error": "Shape file not found"}, status=404)
-    
     try:
         file = open(file_path, 'rb')
         return FileResponse(file, content_type='application/octet-stream', filename=filename)
@@ -290,14 +290,11 @@ def get_shape(request, rcsb_id: str, is_ascii:bool=False):
 def get_radial(request, rcsb_id: str):
     rcsb_id   = rcsb_id.upper()
     file_path = os.path.join(ASSETS_PATH,"exit_tunnel_work", "mole_tunnels", f"tunnel_{rcsb_id}.csv")
-    pprint(file_path)
-    
-    
     try:
         df = pandas.read_csv(file_path)
         result = [
             {
-                'radius': float(row['Radius']),
+                'radius'    : float(row['Radius']),
                 'coordinate': [float(row['X']), float(row['Y']), float(row['Z'])]
             }
             for _, row in df.iterrows()
