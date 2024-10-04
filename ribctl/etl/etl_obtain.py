@@ -7,7 +7,8 @@ import asyncio
 
 # This should be in the RibosomeAssets module
 def asset_routines(
-    rcsb_id: str, assetlist: list[AssetClass], overwrite: bool = False
+    rcsb_id: str, assetlist: list[AssetClass], overwrite: bool = False,
+    reclassify = False
 ) -> list[Coroutine]:
     """This should return an array of Futures for acquisition routines for each A  in asset type."""
 
@@ -18,16 +19,13 @@ def asset_routines(
 
     coroutines = []
     if AssetClass.profile in assetlist:
-        coroutines.append( ETLCollector(rcsb_id).process_structure(overwrite) )
+        coroutines.append( ETLCollector(rcsb_id).process_structure(overwrite, reclassify) )
 
     if AssetClass.cif in assetlist:
         coroutines.append(RA.upsert_cif(overwrite))
 
     if AssetClass.ptc in assetlist:
         coroutines.append(RA.upsert_ptc(overwrite))
-
-    # if AssetClass.chains in assetlist:
-    #     coroutines.append(RA.upsert_chains())  # todo: chimerax split chains (get 1.8 build)
 
     return coroutines
 

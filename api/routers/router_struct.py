@@ -182,9 +182,9 @@ def structure_ptc(request,rcsb_id:str):
     rcsb_id     = str.upper(params['rcsb_id'][0])
     try:
         ptc = RibosomeOps(rcsb_id).ptc()
-        print("parse ptc scuce",ptc)
-        
-        return Response(ptc.model_dump())
+        _ =  ptc.model_dump()
+        print("SENDING:", _)
+        return JsonResponse(_)
     except Exception as e:
         return HttpResponseServerError(e)
      

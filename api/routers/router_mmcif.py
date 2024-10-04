@@ -9,7 +9,6 @@ from ribctl.lib.schema.types_ribosome import RNA, LifecycleFactorClass, Mitochon
 mmcif_router = Router();
 tag = "mmcif"
 
-# E  E - ul4
 @mmcif_router.get('/polymer',  tags=[tag])
 def polymer(request, rcsb_id:str, auth_asym_id:str):
     rcsb_id        = rcsb_id.upper()

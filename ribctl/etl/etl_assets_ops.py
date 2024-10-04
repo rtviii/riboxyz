@@ -93,23 +93,6 @@ class RibosomeOps:
         self.paths   = AssetPath(self.rcsb_id)
 
 
-    #TODO: 
-    # def chains_by_subunits(self):
-    #     _ = {
-    #         "ssu":[],
-    #         "lsu":[]
-    #     }
-    #     profile = self.profile()
-
-    #     chain:Polymer
-
-    #     for chain in [ *profile.rnas, *profile.proteins, *profile.other_polymers ]:
-    #         if len( chain.nomenclature )<1: continue
-    #         # if chain.nomenclature[0]
-
-    #! [I] for Individual structure methods. Brew on this for a little bit, maybe should be a separate namespace.
-
-    #! I
     def nomenclature_table(self, verbose: bool = False) -> dict[str, dict]:
         prof = self.profile()
         m    = {}
@@ -152,25 +135,20 @@ class RibosomeOps:
 
         return m
 
-    #! I
     def ptc(self) -> PTCInfo:
         with open(self.paths.ptc, "r") as infile:
-            pprint(json.load(infile))
+            _ = json.load(infile)
+            return PTCInfo.model_validate(_)
 
-            return PTCInfo.model_validate(json.load(infile))
 
-
-    #! I
     def profile(self) -> RibosomeStructure:
         with open(self.paths.profile, "r") as f:
             return RibosomeStructure.model_validate(json.load(f))
 
-    #! I
     def biopython_structure(self)-> Structure:
         cifpath = RibosomeOps(self.rcsb_id).paths.cif
         return FastMMCIFParser(QUIET=True).get_structure(self.rcsb_id, cifpath)
 
-    #! I
     def write_own_json_profile(self, new_profile: dict, overwrite: bool = False):
         """Update self, basically."""
         if os.path.exists(self.paths.profile) and not overwrite:

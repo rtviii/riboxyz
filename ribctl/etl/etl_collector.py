@@ -94,7 +94,7 @@ class PolymersNode:
         self.rcsb_data_assemblies = data["assemblies"]
         self.rcsb_id = data["rcsb_id"]
 
-    def process(self) -> list[list[Polymer]]:
+    def process(self, override_classification:bool=False) -> list[list[Polymer]]:
         # This says "accumlate over all LENGTHS of "asym_ids" field (generally 1 or 2) of each polymer in `polymer_entities`
         # TODO: So we need to return this from POLYMER DATA
         # self.polymers_target_count = functools.reduce( lambda count, poly: count + len(poly["rcsb_polymer_entity_container_identifiers"]["asym_ids"]), self.rcsb_data_dict["polymer_entities"], 0)
@@ -130,9 +130,7 @@ class PolymersNode:
                     case _:
                         _other_polymers.append(poly)
 
-        logger.debug(
-            "Classifying {}: {} polypeptides, {} polynucleotides, {} other.".format(
-                self.rcsb_id,
+        logger.debug( "Classifying {}: {} polypeptides, {} polynucleotides, {} other.".format( self.rcsb_id,
                 len(_prot_polypeptides),
                 len(_rna_polynucleotides),
                 len(_other_polymers),
@@ -140,12 +138,10 @@ class PolymersNode:
         )
 
         RA = RibosomeOps(self.rcsb_id)
-        if not os.path.exists(RA.paths.classification_report):
+        if ( not os.path.exists(RA.paths.classification_report) ) or override_classification :
             print("Creating new classifciation report.")
             protein_alphabet = pyhmmer.easel.Alphabet.amino()
-            protein_classifier = HMMClassifier(
-                _prot_polypeptides,
-                protein_alphabet,
+            protein_classifier = HMMClassifier(_prot_polypeptides, protein_alphabet,
                 [
                     p
                     for p in [
@@ -157,7 +153,7 @@ class PolymersNode:
             )
             protein_classifier.classify_chains()
 
-            rna_alphabet = pyhmmer.easel.Alphabet.rna()
+            rna_alphabet   = pyhmmer.easel.Alphabet.rna()
             rna_classifier = HMMClassifier(
                 _rna_polynucleotides,
                 rna_alphabet,
@@ -738,7 +734,6 @@ class ETLCollector:
         # self.rcsb_polymers    = len(self.rcsb_data_dict["polymer_entities"])
         # self.rcsb_nonpolymers = (len(self.rcsb_data_dict["nonpolymer_entities"]) if self.rcsb_data_dict["nonpolymer_entities"] != None else 0)
 
-
     def infer_organisms_from_polymers(self, polymers: list[Polymer]):
         # ? A hack and should be differentiated
         """Grabbing taxid from every polymer in the structure to see which taxid prevails proportionally.
@@ -827,7 +822,7 @@ class ETLCollector:
     def asm_parse(self, dictionaries: list[dict]) -> list[AssemblyInstancesMap]:
         return list(map(AssemblyInstancesMap.model_validate, dictionaries))
 
-    async def process_structure(self, overwrite: bool = False) -> RibosomeStructure:
+    async def process_structure(self, overwrite: bool = False, reclassify:bool=False) -> RibosomeStructure:
         RA = RibosomeOps(self.rcsb_id)
         if os.path.isfile(RA.paths.profile):
             logger.debug("Profile already exists for {}.".format(self.rcsb_id))
@@ -841,7 +836,7 @@ class ETLCollector:
 
         #! Polymers
         polymers_data        = self.query_rcsb_api( PolymerEntitiesString.replace("$RCSB_ID", self.rcsb_id) )["entry"]
-        proteins, rna, other = PolymersNode(polymers_data).process()
+        proteins, rna, other = PolymersNode(polymers_data).process(override_classification=reclassify)
 
         #! Assign polymers to assemblies
         for p in proteins:

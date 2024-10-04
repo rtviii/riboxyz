@@ -31,17 +31,19 @@ def all(ctx:Context):
 @click.pass_context
 @click.argument("assets", required=True, nargs=-1, type=click.Choice(AssetClass._member_names_) )
 @click.option("--overwrite"  , required=False, is_flag=True, default=False)
+@click.option("--reclassify"  , required=False, is_flag=True, default=False)
 @click.option("--rcsb_sync"  , required=False, is_flag=True, default=False)
 @click.option("--all_structs", required=False, is_flag=True, default=False)
 @click.option("--display", required=False, is_flag=True, default=False)
-def assets(ctx: Context, assets, overwrite, rcsb_sync, all_structs, display):
+def assets(ctx: Context, assets,reclassify, overwrite, rcsb_sync, all_structs, display):
 
     if 'rcsb_id' in ctx.obj:
         rcsb_id = ctx.obj['rcsb_id'].upper()
-        routines = etl_obtain.asset_routines(rcsb_id, assets , overwrite)
+        routines = etl_obtain.asset_routines(rcsb_id, assets , overwrite, reclassify)
         asyncio.run(etl_obtain.execute_asset_task_pool(routines))
         return 
 
+    
     if rcsb_sync:
         for rcsb_id in Assets.status_vs_rcsb():
             print("RCSB Sync: Fetching assets for {}".format(rcsb_id))

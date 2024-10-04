@@ -287,6 +287,8 @@ class HMMClassifier():
 
     def classify_chains(self)->None:
         for chain in self.chains:
+                if chain.auth_asym_id == 'S27A':
+                    print("Classifying chain" , chain.auth_asym_id)
                 # --- If the the scanner for this taxid is present, use it. Otherwise create it.
                 if len(chain.src_organism_ids)< 1:
                     continue
@@ -301,7 +303,11 @@ class HMMClassifier():
                 self.report[chain.auth_asym_id] = []
                 seq_record                      = chain.to_SeqRecord()
                 query_seq                       = pyhmmer.easel.TextSequence(name=bytes(seq_record.id,'utf-8'), sequence=str( seq_record.seq )).digitize(self.alphabet)
+                if chain.auth_asym_id == 'S27A':
+                    print("Query seq" , query_seq)
                 cls_hits_tuples                 = hmmscanner.classify_seq(self.alphabet, query_seq)
+                if chain.auth_asym_id == 'S27A':
+                    print("Hits:" , cls_hits_tuples)
 
                 for ( candidate_class, tophits ) in cls_hits_tuples:
                     for hit in tophits:
