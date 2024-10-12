@@ -406,10 +406,17 @@ with rib order by rib.rcsb_id desc\n"""
                 return result["structures"], result["next_cursor"], result["total_count"]
             return session.execute_read(_)
 
+
+# {
+#   "limit"          : 5,
+#   "search"         : "polikanov",
+#   "year"           : [ 2018, 2024 ],
+#   "polymer_classes": [ "23SrRNA", "uL4" ]
+# }
+
     
     #!--------------------------------------]]]]]]]
     #*--------------------------------------]]]]]]]
-    # ! Old implementation
     #!--------------------------------------]]]]]]]
     # def list_structs_filtered(
     #     self,

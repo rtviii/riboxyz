@@ -1,5 +1,6 @@
 import datetime
 import json
+from urllib.request import Request
 from ninja import Router, Body
 import os
 from pprint import pprint
@@ -142,6 +143,11 @@ def list_ligands(request):
 
 @structure_router.post('/list', response=dict, tags=[TAG])
 def filter_list(request, filters: FilterParams):
+    try:
+        body_dict = json.loads(request.body)
+        print("Request body as dict:", json.dumps(body_dict, indent=2))
+    except json.JSONDecodeError:
+        print("Failed to parse request body as JSON")
     structures, next_cursor, total_count = dbqueries.list_structs_filtered(filters)
     structures_validated = [RibosomeStructure.model_validate(s) for s in structures]
     return {
