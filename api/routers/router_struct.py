@@ -1,11 +1,14 @@
 import datetime
 import json
+from ninja import Router, Body
 import os
 from pprint import pprint
 import typing
 from django.http import  JsonResponse, HttpResponseServerError
 from ninja import Path, Router, Schema
 import pandas
+from pydantic import BaseModel, Field
+from typing import Optional, List
 from pydantic import BaseModel
 from neo4j_ribosome.db_lib_reader import dbqueries
 from ribctl import ASSETS, ASSETS_PATH, RIBETL_DATA
@@ -112,45 +115,91 @@ def polymers_by_structure(request,
 def list_ligands(request):
     return dbqueries.list_ligands()
 
-@structure_router.get('/list', response=dict,  tags=[TAG])
-def filter_list(request,
-      page             = 1,
-      search           = None,
-      year             = None,
-      resolution       = None,
-      polymer_classes  = None,
-      source_taxa      = None,
-      host_taxa        = None,
-      subunit_presence =None
-      ):
 
-    def parse_empty_or_int(_:str):
-        if _ != '':
-            return int(_)
-        else:
-            return None
 
-    def parse_empty_or_float(_:str):
-        if _ != '':
-            return float(_)
-        else:
-            return None
 
-    year            = None if year            == "" else list(map(parse_empty_or_int,year.split(",")))
-    resolution      = None if resolution      == "" else list(map(parse_empty_or_float,resolution.split(",")))
-    host_taxa       = None if host_taxa       == "" else list(map(parse_empty_or_int,host_taxa.split(","))) if host_taxa else None
-    source_taxa     = None if source_taxa     == "" else list(map(parse_empty_or_int,source_taxa.split(","))) if source_taxa else None
-    polymer_classes = None if polymer_classes == "" else list(map(lambda _: PolymerClass(_), polymer_classes.split(",")))
+class FilterParams(BaseModel):
 
-    structures, count    = dbqueries.list_structs_filtered(int(page), search, year, resolution, polymer_classes, source_taxa, host_taxa, subunit_presence)[0]
-    structures_validated = []
-    for i in structures:
-        try:
-            structures_validated.append(RibosomeStructure.model_validate(i))
-        except Exception as e:
-            print("Failed to validate structure", i['rcsb_id'], e)
-            continue
-    return { "structures":structures_validated, "count": count }
+    cursor          : Optional[str]                   = None
+    limit           : int                             = Field(default=20, ge=1, le=100)
+    search          : Optional[str]                   = None
+    year            : Optional[List[Optional[int]]]   = None
+    resolution      : Optional[List[Optional[float]]] = None
+    polymer_classes : Optional[List[PolymerClass]]    = None
+    source_taxa     : Optional[List[int]]             = None
+    host_taxa       : Optional[List[int]]             = None
+    subunit_presence: Optional[str]                   = None
+
+# @structure_router.get('/list', response=dict, tags=[TAG])
+# def filter_list(request, params: FilterParams):
+    # structures, next_cursor, total_count = dbqueries.list_structs_filtered(**params.dict())
+#     structures_validated = [RibosomeStructure.model_validate(s) for s in structures]
+#     return {
+#         "structures": structures_validated,
+#         "next_cursor": next_cursor,
+#         "total_count": total_count
+#     }
+
+@structure_router.post('/list', response=dict, tags=[TAG])
+def filter_list(request, params: FilterParams):
+    # structures, next_cursor, total_count = dbqueries.list_structs_filtered(
+    #     cursor           = params.cursor,
+    #     limit            = params.limit,
+    #     search           = params.search,
+    #     year             = params.year,
+    #     resolution       = params.resolution,
+    #     polymer_classes  = params.polymer_classes,
+    #     source_taxa      = params.source_taxa,
+    #     host_taxa        = params.host_taxa,
+    #     subunit_presence = params.subunit_presence
+    # )
+
+    structures, next_cursor, total_count = dbqueries.list_structs_filtered(**params.model_dump())
+    structures_validated = [RibosomeStructure.model_validate(s) for s in structures]
+    return {
+        "structures": structures_validated,
+        "next_cursor": next_cursor,
+        "total_count": total_count
+    }
+# @structure_router.get('/list', response=dict,  tags=[TAG])
+# def filter_list(request,
+#       page             = 1,
+#       search           = None,
+#       year             = None,
+#       resolution       = None,
+#       polymer_classes  = None,
+#       source_taxa      = None,
+#       host_taxa        = None,
+#       subunit_presence =None
+#       ):
+
+#     def parse_empty_or_int(_:str):
+#         if _ != '':
+#             return int(_)
+#         else:
+#             return None
+
+#     def parse_empty_or_float(_:str):
+#         if _ != '':
+#             return float(_)
+#         else:
+#             return None
+
+#     year            = None if year            == "" else list(map(parse_empty_or_int,year.split(",")))
+#     resolution      = None if resolution      == "" else list(map(parse_empty_or_float,resolution.split(",")))
+#     host_taxa       = None if host_taxa       == "" else list(map(parse_empty_or_int,host_taxa.split(","))) if host_taxa else None
+#     source_taxa     = None if source_taxa     == "" else list(map(parse_empty_or_int,source_taxa.split(","))) if source_taxa else None
+#     polymer_classes = None if polymer_classes == "" else list(map(lambda _: PolymerClass(_), polymer_classes.split(",")))
+
+#     structures, count    = dbqueries.list_structs_filtered(int(page), search, year, resolution, polymer_classes, source_taxa, host_taxa, subunit_presence)[0]
+#     structures_validated = []
+#     for i in structures:
+#         try:
+#             structures_validated.append(RibosomeStructure.model_validate(i))
+#         except Exception as e:
+#             print("Failed to validate structure", i['rcsb_id'], e)
+#             continue
+#     return { "structures":structures_validated, "count": count }
 
 @structure_router.get('/structures_overview', response=list[dict], tags=[TAG])
 def overview(request):

@@ -315,10 +315,10 @@ with rib order by rib.rcsb_id desc\n"""
 
             return session.execute_read(_)
 
-    
     def list_structs_filtered(
         self,
-        page            : int,
+        cursor          : None | str = None,
+        limit           : int = 20,
         search          : None | str = None,
         year            : None | typing.Tuple[int | None, int | None] = None,
         resolution      : None | typing.Tuple[float | None, float | None] = None,
@@ -326,16 +326,20 @@ with rib order by rib.rcsb_id desc\n"""
         source_taxa     : None | list[int] = None,
         host_taxa       : None | list[int] = None,
         subunit_presence: None | typing.Literal['SSU+LSU', "LSU","SSU"] = None,
+ **filters
     ):
-
         print("Got subunit_presence ", subunit_presence)
-        query_parts = [ "MATCH (rib:RibosomeStructure)", "WITH rib ORDER BY rib.rcsb_id DESC" ]
+        query_parts = ["MATCH (rib:RibosomeStructure)"]
         where_clauses = []
-        params = {}
+        params = {"limit": int(limit)}
+
+        if cursor:
+            where_clauses.append("rib.rcsb_id < $cursor")
+            params["cursor"] = cursor
 
         if search:
             where_clauses.append("""
-                \ntoLower(rib.citation_title) + toLower(rib.rcsb_id) + 
+                toLower(rib.citation_title) + toLower(rib.rcsb_id) + 
                 toLower(rib.pdbx_keywords_text) + 
                 toLower(reduce(acc = '', str IN rib.src_organism_names | acc + str)) + 
                 toLower(reduce(acc = '', str IN rib.host_organism_names | acc + str)) +
@@ -345,33 +349,33 @@ with rib order by rib.rcsb_id desc\n"""
             params["search"] = search.lower()
 
         if year:
-            [ start, end ] = year
+            [start, end] = year
             if start is not None:
-                where_clauses.append("\nrib.citation_year >= $year_start OR rib.citation_year IS NULL")
+                where_clauses.append("rib.citation_year >= $year_start OR rib.citation_year IS NULL")
                 params["year_start"] = start
             if end is not None:
-                where_clauses.append("\nrib.citation_year <= $year_end OR rib.citation_year IS NULL")
+                where_clauses.append("rib.citation_year <= $year_end OR rib.citation_year IS NULL")
                 params["year_end"] = end
 
         if resolution:
-            [start,end] = resolution
+            [start, end] = resolution
             if start is not None:
-                where_clauses.append("\nrib.resolution > $resolution_start")
-                params["resolution_start"] = float(start) 
+                where_clauses.append("rib.resolution > $resolution_start")
+                params["resolution_start"] = float(start)
             if end is not None:
-                where_clauses.append("\nrib.resolution < $resolution_end")
-                params["resolution_end"] = float(end) 
+                where_clauses.append("rib.resolution < $resolution_end")
+                params["resolution_end"] = float(end)
 
         if polymer_classes:
-            where_clauses.append("""\n ALL(x IN $polymer_classes WHERE x IN apoc.coll.flatten(collect{ MATCH (rib)-[]-(p:Polymer) RETURN p.nomenclature }) ) """)
+            where_clauses.append("ALL(x IN $polymer_classes WHERE x IN apoc.coll.flatten(collect{ MATCH (rib)-[]-(p:Polymer) RETURN p.nomenclature }))")
             params["polymer_classes"] = [pc.value for pc in polymer_classes]
 
         if source_taxa:
-            where_clauses.append(""" \nEXISTS{ MATCH (rib)-[:belongs_to_lineage_source]-(p:PhylogenyNode) WHERE p.ncbi_tax_id IN $source_taxa } """)
+            where_clauses.append("EXISTS{ MATCH (rib)-[:belongs_to_lineage_source]-(p:PhylogenyNode) WHERE p.ncbi_tax_id IN $source_taxa }")
             params["source_taxa"] = source_taxa
 
         if host_taxa:
-            where_clauses.append(""" \nEXISTS{ MATCH (rib)-[:belongs_to_lineage_host]-(p:PhylogenyNode) WHERE p.ncbi_tax_id IN $host_taxa } """)
+            where_clauses.append("EXISTS{ MATCH (rib)-[:belongs_to_lineage_host]-(p:PhylogenyNode) WHERE p.ncbi_tax_id IN $host_taxa }")
             params["host_taxa"] = host_taxa
 
         if subunit_presence:
@@ -386,8 +390,10 @@ with rib order by rib.rcsb_id desc\n"""
             query_parts.append("WHERE " + " AND ".join(where_clauses))
 
         query_parts.extend([
-            f"\n\nWITH collect(rib)[{(page - 1) * 20}..{page * 20}] AS rib, count(rib) AS total_count",
-            "UNWIND rib AS ribosomes",
+            "WITH rib ORDER BY rib.rcsb_id DESC",
+            "LIMIT $limit",
+            "WITH collect(rib) AS rib_list, count(rib) AS total_count",
+            "UNWIND rib_list AS ribosomes",
             "OPTIONAL MATCH (l:Ligand)-[]-(ribosomes)",
             "WITH collect(PROPERTIES(l)) AS ligands, ribosomes, total_count",
             "MATCH (rps:Protein)-[]-(ribosomes)",
@@ -395,7 +401,8 @@ with rib order by rib.rcsb_id desc\n"""
             "OPTIONAL MATCH (rna:RNA)-[]-(ribosomes)",
             "WITH collect(PROPERTIES(rna)) AS rnas, proteins, ligands, ribosomes, total_count",
             "WITH apoc.map.mergeList([{proteins:proteins},{nonpolymeric_ligands:ligands},{rnas:rnas},{other_polymers:[]}]) AS rest, ribosomes, total_count",
-            "RETURN collect(apoc.map.merge(ribosomes, rest)), collect(DISTINCT total_count)[0]"
+            "WITH collect(apoc.map.merge(ribosomes, rest)) AS structures, min(ribosomes.rcsb_id) AS next_cursor, total_count",
+            "RETURN structures, next_cursor, total_count"
         ])
 
         query = "\n".join(query_parts)
@@ -406,8 +413,103 @@ with rib order by rib.rcsb_id desc\n"""
 
         with self.adapter.driver.session() as session:
             def _(tx: Transaction | ManagedTransaction):
-                return tx.run(query, params).values()
+                result = tx.run(query, params).single()
+                return result["structures"], result["next_cursor"], result["total_count"]
             return session.execute_read(_)
+
+    
+    # def list_structs_filtered(
+    #     self,
+    #     page            : int,
+    #     search          : None | str = None,
+    #     year            : None | typing.Tuple[int | None, int | None] = None,
+    #     resolution      : None | typing.Tuple[float | None, float | None] = None,
+    #     polymer_classes : None | list[PolynucleotideClass | PolypeptideClass] = None,
+    #     source_taxa     : None | list[int] = None,
+    #     host_taxa       : None | list[int] = None,
+    #     subunit_presence: None | typing.Literal['SSU+LSU', "LSU","SSU"] = None,
+    # ):
+
+    #     print("Got subunit_presence ", subunit_presence)
+    #     query_parts = [ "MATCH (rib:RibosomeStructure)", "WITH rib ORDER BY rib.rcsb_id DESC" ]
+    #     where_clauses = []
+    #     params = {}
+
+    #     if search:
+    #         where_clauses.append("""
+    #             \ntoLower(rib.citation_title) + toLower(rib.rcsb_id) + 
+    #             toLower(rib.pdbx_keywords_text) + 
+    #             toLower(reduce(acc = '', str IN rib.src_organism_names | acc + str)) + 
+    #             toLower(reduce(acc = '', str IN rib.host_organism_names | acc + str)) +
+    #             toLower(reduce(acc = '', str IN rib.citation_rcsb_authors | acc + str))
+    #             CONTAINS $search
+    #         """)
+    #         params["search"] = search.lower()
+
+    #     if year:
+    #         [ start, end ] = year
+    #         if start is not None:
+    #             where_clauses.append("\nrib.citation_year >= $year_start OR rib.citation_year IS NULL")
+    #             params["year_start"] = start
+    #         if end is not None:
+    #             where_clauses.append("\nrib.citation_year <= $year_end OR rib.citation_year IS NULL")
+    #             params["year_end"] = end
+
+    #     if resolution:
+    #         [start,end] = resolution
+    #         if start is not None:
+    #             where_clauses.append("\nrib.resolution > $resolution_start")
+    #             params["resolution_start"] = float(start) 
+    #         if end is not None:
+    #             where_clauses.append("\nrib.resolution < $resolution_end")
+    #             params["resolution_end"] = float(end) 
+
+    #     if polymer_classes:
+    #         where_clauses.append("""\n ALL(x IN $polymer_classes WHERE x IN apoc.coll.flatten(collect{ MATCH (rib)-[]-(p:Polymer) RETURN p.nomenclature }) ) """)
+    #         params["polymer_classes"] = [pc.value for pc in polymer_classes]
+
+    #     if source_taxa:
+    #         where_clauses.append(""" \nEXISTS{ MATCH (rib)-[:belongs_to_lineage_source]-(p:PhylogenyNode) WHERE p.ncbi_tax_id IN $source_taxa } """)
+    #         params["source_taxa"] = source_taxa
+
+    #     if host_taxa:
+    #         where_clauses.append(""" \nEXISTS{ MATCH (rib)-[:belongs_to_lineage_host]-(p:PhylogenyNode) WHERE p.ncbi_tax_id IN $host_taxa } """)
+    #         params["host_taxa"] = host_taxa
+
+    #     if subunit_presence:
+    #         if subunit_presence == 'SSU+LSU':
+    #             where_clauses.append('"lsu" IN rib.subunit_presence AND "ssu" IN rib.subunit_presence')
+    #         elif subunit_presence == 'LSU':
+    #             where_clauses.append('"lsu" IN rib.subunit_presence AND NOT "ssu" IN rib.subunit_presence')
+    #         elif subunit_presence == 'SSU':
+    #             where_clauses.append('"ssu" IN rib.subunit_presence AND NOT "lsu" IN rib.subunit_presence')
+
+    #     if where_clauses:
+    #         query_parts.append("WHERE " + " AND ".join(where_clauses))
+
+    #     query_parts.extend([
+    #         f"\n\nWITH collect(rib)[{(page - 1) * 20}..{page * 20}] AS rib, count(rib) AS total_count",
+    #         "UNWIND rib AS ribosomes",
+    #         "OPTIONAL MATCH (l:Ligand)-[]-(ribosomes)",
+    #         "WITH collect(PROPERTIES(l)) AS ligands, ribosomes, total_count",
+    #         "MATCH (rps:Protein)-[]-(ribosomes)",
+    #         "WITH collect(PROPERTIES(rps)) AS proteins, ligands, ribosomes, total_count",
+    #         "OPTIONAL MATCH (rna:RNA)-[]-(ribosomes)",
+    #         "WITH collect(PROPERTIES(rna)) AS rnas, proteins, ligands, ribosomes, total_count",
+    #         "WITH apoc.map.mergeList([{proteins:proteins},{nonpolymeric_ligands:ligands},{rnas:rnas},{other_polymers:[]}]) AS rest, ribosomes, total_count",
+    #         "RETURN collect(apoc.map.merge(ribosomes, rest)), collect(DISTINCT total_count)[0]"
+    #     ])
+
+    #     query = "\n".join(query_parts)
+
+    #     print("=======Executing filtered structures query:==========")
+    #     print("\033[96m" + query + "\033[0m")
+    #     print("=====================================================")
+
+    #     with self.adapter.driver.session() as session:
+    #         def _(tx: Transaction | ManagedTransaction):
+    #             return tx.run(query, params).values()
+    #         return session.execute_read(_)
 
     def get_taxa(self, src_host:typing.Literal['source', 'host'])-> list[int]:
         def _(tx: Transaction | ManagedTransaction):
@@ -419,6 +521,12 @@ with rib order by rib.rcsb_id desc\n"""
         with self.adapter.driver.session() as session:
             return session.execute_read(_)
 
+{
+  "limit"          : 5,
+  "search"         : "polikanov",
+  "year"           : [ 2018, 2024 ],
+  "polymer_classes": [ "23SrRNA", "uL4" ]
+}
 
 dbqueries = Neo4jReader()
 
