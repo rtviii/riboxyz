@@ -112,15 +112,17 @@ def pipeline(RCSB_ID,args):
     initial_grid, grid_dimensions, translation_vectors = index_grid(bbox_atoms_expanded)
 
 
-    # visualize_pointcloud(initial_grid, RCSB_ID, GIF_INTERMEDIATES, "{}.initial.grid.gif".format(RCSB_ID))
+    visualize_pointcloud(initial_grid, RCSB_ID, False, "{}.initial.grid.gif".format(RCSB_ID))
     # ? Here no trimming has yet occurred.
 
     #! [ Invert the grid ]
     inverted_grid = np.asarray(np.where(initial_grid != 1)).T
+    
+    visualize_pointcloud(inverted_grid, RCSB_ID, False, "{}.initial.grid.gif".format(RCSB_ID))
     #! [ Capture DBSCAN clusters within the "negative" space]
     db, clusters_container = DBSCAN_capture(inverted_grid, _u_EPSILON, _u_MIN_SAMPLES, _u_METRIC ) 
     #! [ Extract the largest cluster from the DBSCAN clustering ]
-    # visualize_DBSCAN_CLUSTERS_particular_eps_minnbrs(clusters_container, _u_EPSILON, _u_MIN_SAMPLES, GIF_INTERMEDIATES, "{}.dbscan.clusters.gif".format(RCSB_ID))
+    visualize_DBSCAN_CLUSTERS_particular_eps_minnbrs(clusters_container, _u_EPSILON, _u_MIN_SAMPLES, GIF_INTERMEDIATES, "{}.dbscan.clusters.gif".format(RCSB_ID))
     largest_cluster = DBSCAN_pick_largest_cluster(clusters_container)
     
 
@@ -221,7 +223,7 @@ def pipeline(RCSB_ID,args):
 
     #! [ Transform the cluster back into original coordinate frame ]
     surface_pts = ptcloud_convex_hull_points(coordinates_in_the_original_frame, d3d_alpha,d3d_tol)
-    # visualize_pointcloud(surface_pts, RCSB_ID, GIF_INTERMEDIATES, "{}.surface_pts.gif".format(RCSB_ID))
+    visualize_pointcloud(surface_pts, RCSB_ID, False, "{}.surface_pts.gif".format(RCSB_ID))
 
     #! [ Transform the cluster back into Original Coordinate Frame ]
     np.save(convex_hull_cluster_path(RCSB_ID), surface_pts)

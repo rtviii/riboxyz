@@ -18,7 +18,6 @@ def expand_atomcenters_to_spheres_threadpool(sink_container:list, sphere_sources
             future = executor.submit(partial_task)
             futures.append(future)
         concurrent.futures.wait(futures)
-
   return sink_container
 
 def visualize_source_coordinates(
