@@ -10,7 +10,7 @@ import pandas
 from pydantic import BaseModel, Field
 from typing import Optional, List
 from pydantic import BaseModel
-from neo4j_ribosome.db_lib_reader import dbqueries
+from neo4j_ribosome.db_lib_reader import FilterParams, dbqueries
 from ribctl import ASSETS, ASSETS_PATH, RIBETL_DATA
 from ribctl.etl.etl_assets_ops import RibosomeOps, Structure
 from ribctl.lib.info import StructureCompositionStats, run_composition_stats
@@ -118,17 +118,17 @@ def list_ligands(request):
 
 
 
-class FilterParams(BaseModel):
+# class FilterParams(BaseModel):
 
-    cursor          : Optional[str]                   = None
-    limit           : int                             = Field(default=20, ge=1, le=100)
-    search          : Optional[str]                   = None
-    year            : Optional[List[Optional[int]]]   = None
-    resolution      : Optional[List[Optional[float]]] = None
-    polymer_classes : Optional[List[PolymerClass]]    = None
-    source_taxa     : Optional[List[int]]             = None
-    host_taxa       : Optional[List[int]]             = None
-    subunit_presence: Optional[str]                   = None
+#     cursor          : Optional[str]                   = None
+#     limit           : int                             = Field(default=20, ge=1, le=100)
+#     search          : Optional[str]                   = None
+#     year            : Optional[List[Optional[int]]]   = None
+#     resolution      : Optional[List[Optional[float]]] = None
+#     polymer_classes : Optional[List[PolymerClass]]    = None
+#     source_taxa     : Optional[List[int]]             = None
+#     host_taxa       : Optional[List[int]]             = None
+#     subunit_presence: Optional[str]                   = None
 
 # @structure_router.get('/list', response=dict, tags=[TAG])
 # def filter_list(request, params: FilterParams):
@@ -141,26 +141,19 @@ class FilterParams(BaseModel):
 #     }
 
 @structure_router.post('/list', response=dict, tags=[TAG])
-def filter_list(request, params: FilterParams):
-    # structures, next_cursor, total_count = dbqueries.list_structs_filtered(
-    #     cursor           = params.cursor,
-    #     limit            = params.limit,
-    #     search           = params.search,
-    #     year             = params.year,
-    #     resolution       = params.resolution,
-    #     polymer_classes  = params.polymer_classes,
-    #     source_taxa      = params.source_taxa,
-    #     host_taxa        = params.host_taxa,
-    #     subunit_presence = params.subunit_presence
-    # )
-
-    structures, next_cursor, total_count = dbqueries.list_structs_filtered(**params.model_dump())
+def filter_list(request, filters: FilterParams):
+    structures, next_cursor, total_count = dbqueries.list_structs_filtered(filters)
     structures_validated = [RibosomeStructure.model_validate(s) for s in structures]
     return {
-        "structures": structures_validated,
+        "structures" : structures_validated,
         "next_cursor": next_cursor,
         "total_count": total_count
     }
+
+    #!--------------------------------------]]]]]]]
+    #*--------------------------------------]]]]]]]
+    # ! Old implementation
+    #!--------------------------------------]]]]]]]
 # @structure_router.get('/list', response=dict,  tags=[TAG])
 # def filter_list(request,
 #       page             = 1,

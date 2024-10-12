@@ -16,19 +16,20 @@ from neo4j_ribosome.db_lib_builder import Neo4jAdapter
 DO NOT put validation logic/schema here. This is a pure interface to the database. All the conversions are done in the API layer.
 """
 
+from pydantic import BaseModel, Field
+from typing import Optional, List, Literal
 
-class FiltersSchema:
+class FilterParams(BaseModel):
+    cursor: Optional[str] = None
+    limit: int = Field(default=20, ge=1, le=100)
+    search: Optional[str] = None
+    year: Optional[tuple[Optional[int], Optional[int]]] = None
+    resolution: Optional[tuple[Optional[float], Optional[float]]] = None
+    polymer_classes: Optional[List[PolynucleotideClass | PolypeptideClass]] = None
+    source_taxa: Optional[List[int]] = None
+    host_taxa: Optional[List[int]] = None
+    subunit_presence: Optional[Literal['SSU+LSU', 'LSU', 'SSU']] = None
 
-    search          : str
-    subunit_presence: typing.Literal['lsu' , 'ssu' , 'both']
-    year            : typing.Tuple[int | None, int | None]
-    resolution      : typing.Tuple[float | None, float | None]
-    polymer_classes : list[PolynucleotideClass | PolypeptideClass]
-    source_taxa     : list[int]
-    host_taxa       : list[int]
-
-    def __init__(self) -> None:
-        pass
 
 class Neo4jReader:
 
@@ -315,29 +316,17 @@ with rib order by rib.rcsb_id desc\n"""
 
             return session.execute_read(_)
 
-    def list_structs_filtered(
-        self,
-        cursor          : None | str = None,
-        limit           : int = 20,
-        search          : None | str = None,
-        year            : None | typing.Tuple[int | None, int | None] = None,
-        resolution      : None | typing.Tuple[float | None, float | None] = None,
-        polymer_classes : None | list[PolynucleotideClass | PolypeptideClass] = None,
-        source_taxa     : None | list[int] = None,
-        host_taxa       : None | list[int] = None,
-        subunit_presence: None | typing.Literal['SSU+LSU', "LSU","SSU"] = None,
- **filters
-    ):
-        print("Got subunit_presence ", subunit_presence)
-        query_parts = ["MATCH (rib:RibosomeStructure)"]
+
+    def list_structs_filtered(self, filters: FilterParams):
+        query_parts   = ["MATCH (rib:RibosomeStructure)"]
         where_clauses = []
-        params = {"limit": int(limit)}
+        params        = {"limit": filters.limit}
 
-        if cursor:
+        if filters.cursor:
             where_clauses.append("rib.rcsb_id < $cursor")
-            params["cursor"] = cursor
+            params["cursor"] = filters.cursor
 
-        if search:
+        if filters.search:
             where_clauses.append("""
                 toLower(rib.citation_title) + toLower(rib.rcsb_id) + 
                 toLower(rib.pdbx_keywords_text) + 
@@ -346,10 +335,10 @@ with rib order by rib.rcsb_id desc\n"""
                 toLower(reduce(acc = '', str IN rib.citation_rcsb_authors | acc + str))
                 CONTAINS $search
             """)
-            params["search"] = search.lower()
+            params["search"] = filters.search.lower()
 
-        if year:
-            [start, end] = year
+        if filters.year:
+            start, end = filters.year
             if start is not None:
                 where_clauses.append("rib.citation_year >= $year_start OR rib.citation_year IS NULL")
                 params["year_start"] = start
@@ -357,8 +346,8 @@ with rib order by rib.rcsb_id desc\n"""
                 where_clauses.append("rib.citation_year <= $year_end OR rib.citation_year IS NULL")
                 params["year_end"] = end
 
-        if resolution:
-            [start, end] = resolution
+        if filters.resolution:
+            start, end = filters.resolution
             if start is not None:
                 where_clauses.append("rib.resolution > $resolution_start")
                 params["resolution_start"] = float(start)
@@ -366,24 +355,24 @@ with rib order by rib.rcsb_id desc\n"""
                 where_clauses.append("rib.resolution < $resolution_end")
                 params["resolution_end"] = float(end)
 
-        if polymer_classes:
+        if filters.polymer_classes:
             where_clauses.append("ALL(x IN $polymer_classes WHERE x IN apoc.coll.flatten(collect{ MATCH (rib)-[]-(p:Polymer) RETURN p.nomenclature }))")
-            params["polymer_classes"] = [pc.value for pc in polymer_classes]
+            params["polymer_classes"] = [pc.value for pc in filters.polymer_classes]
 
-        if source_taxa:
+        if filters.source_taxa:
             where_clauses.append("EXISTS{ MATCH (rib)-[:belongs_to_lineage_source]-(p:PhylogenyNode) WHERE p.ncbi_tax_id IN $source_taxa }")
-            params["source_taxa"] = source_taxa
+            params["source_taxa"] = filters.source_taxa
 
-        if host_taxa:
+        if filters.host_taxa:
             where_clauses.append("EXISTS{ MATCH (rib)-[:belongs_to_lineage_host]-(p:PhylogenyNode) WHERE p.ncbi_tax_id IN $host_taxa }")
-            params["host_taxa"] = host_taxa
+            params["host_taxa"] = filters.host_taxa
 
-        if subunit_presence:
-            if subunit_presence == 'SSU+LSU':
+        if filters.subunit_presence:
+            if filters.subunit_presence == 'SSU+LSU':
                 where_clauses.append('"lsu" IN rib.subunit_presence AND "ssu" IN rib.subunit_presence')
-            elif subunit_presence == 'LSU':
+            elif filters.subunit_presence == 'LSU':
                 where_clauses.append('"lsu" IN rib.subunit_presence AND NOT "ssu" IN rib.subunit_presence')
-            elif subunit_presence == 'SSU':
+            elif filters.subunit_presence == 'SSU':
                 where_clauses.append('"ssu" IN rib.subunit_presence AND NOT "lsu" IN rib.subunit_presence')
 
         if where_clauses:
@@ -418,6 +407,10 @@ with rib order by rib.rcsb_id desc\n"""
             return session.execute_read(_)
 
     
+    #!--------------------------------------]]]]]]]
+    #*--------------------------------------]]]]]]]
+    # ! Old implementation
+    #!--------------------------------------]]]]]]]
     # def list_structs_filtered(
     #     self,
     #     page            : int,
@@ -521,12 +514,7 @@ with rib order by rib.rcsb_id desc\n"""
         with self.adapter.driver.session() as session:
             return session.execute_read(_)
 
-{
-  "limit"          : 5,
-  "search"         : "polikanov",
-  "year"           : [ 2018, 2024 ],
-  "polymer_classes": [ "23SrRNA", "uL4" ]
-}
+
 
 dbqueries = Neo4jReader()
 
