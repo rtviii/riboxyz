@@ -338,7 +338,8 @@ with rib order by rib.rcsb_id desc\n"""
                 \ntoLower(rib.citation_title) + toLower(rib.rcsb_id) + 
                 toLower(rib.pdbx_keywords_text) + 
                 toLower(reduce(acc = '', str IN rib.src_organism_names | acc + str)) + 
-                toLower(reduce(acc = '', str IN rib.host_organism_names | acc + str)) 
+                toLower(reduce(acc = '', str IN rib.host_organism_names | acc + str)) +
+                toLower(reduce(acc = '', str IN rib.citation_rcsb_authors | acc + str))
                 CONTAINS $search
             """)
             params["search"] = search.lower()

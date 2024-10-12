@@ -26,8 +26,7 @@ from concurrent.futures import ProcessPoolExecutor
 s = Fasta.poly_class_all_seq(PolymerClass("uL4"))
 
 type ResidiueIndices = list[int]
-type RCSB_ID = str
-
+type RCSB_ID         = str
 
 class SequenceProjection_ManyToOne:
     """Given multiple sequences and residue ranges within them, project the ranges onto a single sequence"""

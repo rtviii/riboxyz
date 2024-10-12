@@ -108,11 +108,6 @@ def polymers_by_structure(request,
         print("RETURNING POLYMERS actual len", len( polymers ), count)
         return { "polymers":polymers, "count": count }
 
-# @structure_router.get('/ptc',  tags=[TAG], response=PTCInfo)
-# def ptc(request, rcsb_id:str):
-#     rcsb_id = str.upper(rcsb_id)
-#     return RibosomeOps(rcsb_id).ptc()
-
 @structure_router.get('/list_ligands',response=list[tuple[dict,list[dict]]] , tags=[TAG])
 def list_ligands(request):
     return dbqueries.list_ligands()
