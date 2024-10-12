@@ -20,15 +20,16 @@ from pydantic import BaseModel, Field
 from typing import Optional, List, Literal
 
 class FilterParams(BaseModel):
-    cursor: Optional[str] = None
-    limit: int = Field(default=20, ge=1, le=100)
-    search: Optional[str] = None
-    year: Optional[tuple[Optional[int], Optional[int]]] = None
-    resolution: Optional[tuple[Optional[float], Optional[float]]] = None
-    polymer_classes: Optional[List[PolynucleotideClass | PolypeptideClass]] = None
-    source_taxa: Optional[List[int]] = None
-    host_taxa: Optional[List[int]] = None
-    subunit_presence: Optional[Literal['SSU+LSU', 'LSU', 'SSU']] = None
+
+    cursor          : Optional[str]                                          = None
+    limit           : int                                                    = Field(default=20, ge=1, le=100)
+    search          : Optional[str]                                          = None
+    year            : Optional[tuple[Optional[int], Optional[int]]]          = None
+    resolution      : Optional[tuple[Optional[float], Optional[float]]]      = None
+    polymer_classes : Optional[List[PolynucleotideClass | PolypeptideClass]] = None
+    source_taxa     : Optional[List[int]]                                    = None
+    host_taxa       : Optional[List[int]]                                    = None
+    subunit_presence: Optional[Literal['SSU+LSU', 'LSU', 'SSU']]             = None
 
 
 class Neo4jReader:

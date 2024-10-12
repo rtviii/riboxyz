@@ -577,7 +577,7 @@ class RibosomeStructure(BaseModel):
     rcsb_external_ref_type: list[str]
     rcsb_external_ref_link: list[str]
 
-    citation_year         : None| Optional[int]     = None
+    citation_year         : None| Optional[int|str]     = None
     citation_rcsb_authors: None|Optional[list[str]] = None
     citation_title        :None| Optional[str]      = None
     citation_pdbx_doi     :None| Optional[str]      = None

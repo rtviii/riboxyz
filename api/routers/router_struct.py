@@ -8,7 +8,7 @@ import typing
 from django.http import  JsonResponse, HttpResponseServerError
 from ninja import Path, Router, Schema
 import pandas
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ValidationError
 from typing import Optional, List
 from pydantic import BaseModel
 from neo4j_ribosome.db_lib_reader import FilterParams, dbqueries
@@ -144,11 +144,18 @@ def list_ligands(request):
 @structure_router.post('/list', response=dict, tags=[TAG])
 def filter_list(request, filters: FilterParams):
     try:
-        body_dict = json.loads(request.body)
-        print("Request body as dict:", json.dumps(body_dict, indent=2))
-    except json.JSONDecodeError:
-        print("Failed to parse request body as JSON")
-    structures, next_cursor, total_count = dbqueries.list_structs_filtered(filters)
+        print("Received data:", json.dumps(json.loads(request.body), indent=2))
+        parsed_filters = FilterParams(**json.loads(request.body))
+        print("Parsed FilterParams:", parsed_filters.dict())
+    except ValidationError as e:
+        print("Validation error:", e.json())
+        return {"detail": e.errors()}, 422
+    except Exception as e:
+        print("Unexpected error:", str(e))
+        return {"detail": str(e)}, 500
+
+    structures, next_cursor, total_count = dbqueries.list_structs_filtered(parsed_filters)
+    pprint(structures)
     structures_validated = [RibosomeStructure.model_validate(s) for s in structures]
     return {
         "structures" : structures_validated,
