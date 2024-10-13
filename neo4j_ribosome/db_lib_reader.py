@@ -319,9 +319,9 @@ with rib order by rib.rcsb_id desc\n"""
 
 
     def list_structs_filtered(self, filters: FilterParams):
-        query_parts   = ["MATCH (rib:RibosomeStructure)"]
+        query_parts = ["MATCH (rib:RibosomeStructure)"]
         where_clauses = []
-        params        = {"limit": filters.limit}
+        params = {"limit": filters.limit}
 
         if filters.cursor:
             where_clauses.append("rib.rcsb_id < $cursor")
@@ -380,19 +380,21 @@ with rib order by rib.rcsb_id desc\n"""
             query_parts.append("WHERE " + " AND ".join(where_clauses))
 
         query_parts.extend([
-            "WITH rib ORDER BY rib.rcsb_id DESC",
-            "LIMIT $limit",
-            "WITH collect(rib) AS rib_list, count(rib) AS total_count",
-            "UNWIND rib_list AS ribosomes",
+            "WITH rib",
+            "ORDER BY rib.rcsb_id DESC",
+            "WITH collect(rib) AS all_structures, count(rib) AS total_count,",
+            "CASE WHEN count(rib) > 0 THEN min(rib.rcsb_id) ELSE null END AS global_next_cursor",
+            f"WITH all_structures[0..$limit] AS truncated_structures, total_count, global_next_cursor",
+            "UNWIND truncated_structures AS ribosomes",
             "OPTIONAL MATCH (l:Ligand)-[]-(ribosomes)",
-            "WITH collect(PROPERTIES(l)) AS ligands, ribosomes, total_count",
+            "WITH collect(PROPERTIES(l)) AS ligands, ribosomes, total_count, global_next_cursor",
             "MATCH (rps:Protein)-[]-(ribosomes)",
-            "WITH collect(PROPERTIES(rps)) AS proteins, ligands, ribosomes, total_count",
+            "WITH collect(PROPERTIES(rps)) AS proteins, ligands, ribosomes, total_count, global_next_cursor",
             "OPTIONAL MATCH (rna:RNA)-[]-(ribosomes)",
-            "WITH collect(PROPERTIES(rna)) AS rnas, proteins, ligands, ribosomes, total_count",
-            "WITH apoc.map.mergeList([{proteins:proteins},{nonpolymeric_ligands:ligands},{rnas:rnas},{other_polymers:[]}]) AS rest, ribosomes, total_count",
-            "WITH collect(apoc.map.merge(ribosomes, rest)) AS structures, min(ribosomes.rcsb_id) AS next_cursor, total_count",
-            "RETURN structures, next_cursor, total_count"
+            "WITH collect(PROPERTIES(rna)) AS rnas, proteins, ligands, ribosomes, total_count, global_next_cursor",
+            "WITH apoc.map.mergeList([{proteins:proteins},{nonpolymeric_ligands:ligands},{rnas:rnas},{other_polymers:[]}]) AS rest, ribosomes, total_count, global_next_cursor",
+            "WITH collect(apoc.map.merge(ribosomes, rest)) AS structures, total_count, global_next_cursor",
+            "RETURN structures, global_next_cursor AS next_cursor, total_count"
         ])
 
         query = "\n".join(query_parts)
