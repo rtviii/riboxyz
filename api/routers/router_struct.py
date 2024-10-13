@@ -118,94 +118,21 @@ def list_ligands(request):
 
 
 
-
-# class FilterParams(BaseModel):
-
-#     cursor          : Optional[str]                   = None
-#     limit           : int                             = Field(default=20, ge=1, le=100)
-#     search          : Optional[str]                   = None
-#     year            : Optional[List[Optional[int]]]   = None
-#     resolution      : Optional[List[Optional[float]]] = None
-#     polymer_classes : Optional[List[PolymerClass]]    = None
-#     source_taxa     : Optional[List[int]]             = None
-#     host_taxa       : Optional[List[int]]             = None
-#     subunit_presence: Optional[str]                   = None
-
-# @structure_router.get('/list', response=dict, tags=[TAG])
-# def filter_list(request, params: FilterParams):
-    # structures, next_cursor, total_count = dbqueries.list_structs_filtered(**params.dict())
-#     structures_validated = [RibosomeStructure.model_validate(s) for s in structures]
-#     return {
-#         "structures": structures_validated,
-#         "next_cursor": next_cursor,
-#         "total_count": total_count
-#     }
-
 @structure_router.post('/list', response=dict, tags=[TAG])
-def filter_list(request, filters: FilterParams):
-    try:
-        print("Received data:", json.dumps(json.loads(request.body), indent=2))
-        parsed_filters = FilterParams(**json.loads(request.body))
-        print("Parsed FilterParams:", parsed_filters.dict())
-    except ValidationError as e:
-        print("Validation error:", e.json())
-        return {"detail": e.errors()}, 422
-    except Exception as e:
-        print("Unexpected error:", str(e))
-        return {"detail": str(e)}, 500
+def filter_list(request):
+    hi = json.loads(request.body)
+    print("HI:", hi)
+    parsed_filters = FilterParams(**json.loads(request.body))
+    pprint(parsed_filters.model_dump())
 
     structures, next_cursor, total_count = dbqueries.list_structs_filtered(parsed_filters)
-    pprint(structures)
     structures_validated = [RibosomeStructure.model_validate(s) for s in structures]
+    print("Returned {} strucutres".format(len(structures_validated)))
     return {
         "structures" : structures_validated,
         "next_cursor": next_cursor,
         "total_count": total_count
     }
-
-    #!--------------------------------------]]]]]]]
-    #*--------------------------------------]]]]]]]
-    # ! Old implementation
-    #!--------------------------------------]]]]]]]
-# @structure_router.get('/list', response=dict,  tags=[TAG])
-# def filter_list(request,
-#       page             = 1,
-#       search           = None,
-#       year             = None,
-#       resolution       = None,
-#       polymer_classes  = None,
-#       source_taxa      = None,
-#       host_taxa        = None,
-#       subunit_presence =None
-#       ):
-
-#     def parse_empty_or_int(_:str):
-#         if _ != '':
-#             return int(_)
-#         else:
-#             return None
-
-#     def parse_empty_or_float(_:str):
-#         if _ != '':
-#             return float(_)
-#         else:
-#             return None
-
-#     year            = None if year            == "" else list(map(parse_empty_or_int,year.split(",")))
-#     resolution      = None if resolution      == "" else list(map(parse_empty_or_float,resolution.split(",")))
-#     host_taxa       = None if host_taxa       == "" else list(map(parse_empty_or_int,host_taxa.split(","))) if host_taxa else None
-#     source_taxa     = None if source_taxa     == "" else list(map(parse_empty_or_int,source_taxa.split(","))) if source_taxa else None
-#     polymer_classes = None if polymer_classes == "" else list(map(lambda _: PolymerClass(_), polymer_classes.split(",")))
-
-#     structures, count    = dbqueries.list_structs_filtered(int(page), search, year, resolution, polymer_classes, source_taxa, host_taxa, subunit_presence)[0]
-#     structures_validated = []
-#     for i in structures:
-#         try:
-#             structures_validated.append(RibosomeStructure.model_validate(i))
-#         except Exception as e:
-#             print("Failed to validate structure", i['rcsb_id'], e)
-#             continue
-#     return { "structures":structures_validated, "count": count }
 
 @structure_router.get('/structures_overview', response=list[dict], tags=[TAG])
 def overview(request):

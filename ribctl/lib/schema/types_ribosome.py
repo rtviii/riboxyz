@@ -454,26 +454,6 @@ class NonpolymericLigand(BaseModel):
 
 
 
-    # nonpoly["nonpolymer_comp"]["chem_comp"]["id"]
-    # nonpoly["nonpolymer_comp"]["chem_comp"]["name"]
-    # nonpoly["nonpolymer_comp"]["chem_comp"]["three_letter_code"]
-
-    # nonpoly["nonpolymer_comp"]["drugbank"]["drugbank_container_identifiers"][
-    #     "drugbank_id"
-    # ]
-    # nonpoly["nonpolymer_comp"]["drugbank"]["drugbank_info"]["cas_number"]
-    # nonpoly["nonpolymer_comp"]["drugbank"]["drugbank_info"]["description"]
-
-    # nonpoly["nonpolymer_comp"]["rcsb_chem_comp_target"]
-
-    # {
-    #     "interaction_type": "target",
-    #     "name": "Spermine synthase",
-    #     "provenance_source": "DrugBank",
-    #     "reference_database_accession_code": "P52788",
-    #     "reference_database_name": "UniProt",
-    # },
-
 class AssemblyInstancesMap(BaseModel):
     """
     This basically specifies which assembly an instnace of a polymer or a nonpolymer belongs to.
@@ -537,7 +517,6 @@ class PTCInfo(BaseModel):
     midpoint_coordinates : tuple[float, float, float]
     nomenclature_table   : NomenclatureTable
 
-# ? ----------------------------------------------{ Structure Model }------------------------------------------------
 class RibosomeStructure(BaseModel):
 
     def get_polymers_by_assembly(self)->dict[str,list[str]]:
