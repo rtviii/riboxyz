@@ -16,7 +16,7 @@ from ribctl.lib.schema.types_ribosome import (
     LifecycleFactorClass,
     MitochondrialRNAClass,
     Polymer,
-    RibosomeStructure,
+    RibosomeStructureMetadata,
     tRNA,
 )
 from ribctl.lib.libmsa import Taxid, ncbi

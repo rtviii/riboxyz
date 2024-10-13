@@ -28,7 +28,7 @@ from ribctl.lib.schema.types_ribosome import (
     PolynucleotideClass,
     PolypeptideClass,
     Protein,
-    RibosomeStructure,
+    RibosomeStructureMetadata,
 )
 from ribctl.lib.libhmm import HMM, HMMClassifier
 
@@ -822,7 +822,7 @@ class ETLCollector:
     def asm_parse(self, dictionaries: list[dict]) -> list[AssemblyInstancesMap]:
         return list(map(AssemblyInstancesMap.model_validate, dictionaries))
 
-    async def process_structure(self, overwrite: bool = False, reclassify:bool=False) -> RibosomeStructure:
+    async def process_structure(self, overwrite: bool = False, reclassify:bool=False) -> RibosomeStructureMetadata:
         RA = RibosomeOps(self.rcsb_id)
         if os.path.isfile(RA.paths.profile):
             logger.debug("Profile already exists for {}.".format(self.rcsb_id))
@@ -874,7 +874,7 @@ class ETLCollector:
                     break
         organisms            = self.infer_organisms_from_polymers([*proteins, *rna, *other] )
         subunit_presence     = lsu_ssu_presence(rna, is_mitochondrial)
-        reshaped             = RibosomeStructure(
+        reshaped             = RibosomeStructureMetadata(
             rcsb_id                = structure_data["rcsb_id"],
             expMethod              = structure_data["exptl"][0]["method"],
             resolution             = structure_data["rcsb_entry_info"]["resolution_combined"][0],

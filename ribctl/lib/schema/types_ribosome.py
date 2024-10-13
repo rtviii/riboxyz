@@ -3,8 +3,10 @@ from enum import Enum
 import typing
 from Bio.SeqRecord import SeqRecord
 from Bio.Seq import Seq
-from pydantic import BaseModel, field_serializer
+from pydantic import BaseModel, field_serializer, Field
 from ribctl.lib.enumunion import enum_union
+from pydantic import BaseModel, Field
+from typing import Optional, Literal, Union, ClassVar
 
 # |********************************************************************************************************|
 # | https://docs.google.com/spreadsheets/d/1mapshbn1ArofPN-Omu8GG5QdcwlJ0ym0BlN252kkUBU/edit#gid=815712128 |
@@ -517,7 +519,7 @@ class PTCInfo(BaseModel):
     midpoint_coordinates : tuple[float, float, float]
     nomenclature_table   : NomenclatureTable
 
-class RibosomeStructure(BaseModel):
+class RibosomeStructureMetadata(BaseModel):
 
     def get_polymers_by_assembly(self)->dict[str,list[str]]:
         if self.assembly_map:
@@ -542,6 +544,15 @@ class RibosomeStructure(BaseModel):
 
     def __hash__(self):
         return hash(self.rcsb_id)
+
+    @staticmethod
+    def model_validate_partial(data: dict, polymer_fields: bool = False):
+        if polymer_fields:
+            return RibosomeStructure.model_validate(data)
+        else:
+            # Create a copy of the data without the detailed fields
+            filtered_data = {k: v for k, v in data.items() if k not in ['proteins', 'rnas', 'other_polymers', 'nonpolymeric_ligands']}
+            return RibosomeStructure.model_validate(filtered_data)
 
     rcsb_id   : str
     expMethod : str
@@ -571,8 +582,10 @@ class RibosomeStructure(BaseModel):
     mitochondrial   : bool
     subunit_presence: Optional[list[typing.Literal['ssu','lsu']]] = None
 
-    proteins: list[Protein]
-    rnas    : list[RNA]
 
+class RibosomeStructure(RibosomeStructureMetadata):
+    rnas                : list[RNA]
     other_polymers      : list[Polymer]
     nonpolymeric_ligands: list[NonpolymericLigand]
+    proteins            : list[Protein]
+

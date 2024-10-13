@@ -16,7 +16,7 @@ from Bio.PDB.Structure import Structure
 from Bio.PDB.MMCIFParser import FastMMCIFParser
 from ribctl.lib.tunnel import ptc_resdiues_get, ptc_residues_calculate_midpoint
 from ribctl.lib.utils import download_unpack_place
-from ribctl.lib.schema.types_ribosome import ( RNA, PTCInfo, Polymer, PolymerClass, PolynucleotideClass, PolynucleotideClass, PolypeptideClass, RibosomeStructure, )
+from ribctl.lib.schema.types_ribosome import ( RNA, PTCInfo, Polymer, PolymerClass, PolynucleotideClass, PolynucleotideClass, PolypeptideClass, RibosomeStructureMetadata, )
 from ribctl import RIBETL_DATA
 from ribctl.logs.loggers import get_etl_logger
 
@@ -141,9 +141,9 @@ class RibosomeOps:
             return PTCInfo.model_validate(_)
 
 
-    def profile(self) -> RibosomeStructure:
+    def profile(self) -> RibosomeStructureMetadata:
         with open(self.paths.profile, "r") as f:
-            return RibosomeStructure.model_validate(json.load(f))
+            return RibosomeStructureMetadata.model_validate(json.load(f))
 
     def biopython_structure(self)-> Structure:
         cifpath = RibosomeOps(self.rcsb_id).paths.cif

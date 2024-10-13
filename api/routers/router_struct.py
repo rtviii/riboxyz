@@ -15,7 +15,7 @@ from neo4j_ribosome.db_lib_reader import FilterParams, dbqueries
 from ribctl import ASSETS, ASSETS_PATH, RIBETL_DATA
 from ribctl.etl.etl_assets_ops import RibosomeOps, Structure
 from ribctl.lib.info import StructureCompositionStats, run_composition_stats
-from ribctl.lib.schema.types_ribosome import  CytosolicProteinClass, CytosolicRNAClass, ElongationFactorClass, InitiationFactorClass, LifecycleFactorClass, MitochondrialProteinClass, MitochondrialRNAClass, PTCInfo, Polymer, PolymerClass, PolynucleotideClass, PolynucleotideClass, PolypeptideClass, Protein, ProteinClass, RibosomeStructure, tRNA
+from ribctl.lib.schema.types_ribosome import  CytosolicProteinClass, CytosolicRNAClass, ElongationFactorClass, InitiationFactorClass, LifecycleFactorClass, MitochondrialProteinClass, MitochondrialRNAClass, PTCInfo, Polymer, PolymerClass, PolynucleotideClass, PolynucleotideClass, PolypeptideClass, Protein, ProteinClass, RibosomeStructureMetadata, RibosomeStructureMetadata, tRNA
 from ribctl.lib.libtax import Taxid 
 
 structure_router = Router()
@@ -59,9 +59,9 @@ def structure_composition_stats(request):
     with open(filename, 'r') as infile:
         return json.load(infile)
 
-@structure_router.get("/random_profile", response=RibosomeStructure, tags=[TAG])
+@structure_router.get("/random_profile", response=RibosomeStructureMetadata, tags=[TAG])
 def random_profile(request):
-    return RibosomeStructure.model_validate(dbqueries.random_structure()[0])
+    return RibosomeStructureMetadata.model_validate(dbqueries.random_structure()[0])
 
 @structure_router.get('/list_polymers_filtered_by_polymer_class', response=dict,  tags=[TAG])
 def polymers_by_polymer_class(request,
@@ -120,14 +120,10 @@ def list_ligands(request):
 
 @structure_router.post('/list', response=dict, tags=[TAG])
 def filter_list(request):
-    hi = json.loads(request.body)
-    print("HI:", hi)
     parsed_filters = FilterParams(**json.loads(request.body))
-    pprint(parsed_filters.model_dump())
-
     structures, next_cursor, total_count = dbqueries.list_structs_filtered(parsed_filters)
-    structures_validated = [RibosomeStructure.model_validate(s) for s in structures]
-    print("Returned {} strucutres".format(len(structures_validated)))
+    # structures_validated = [RibosomeStructure.model_validate_partial(s, polymer_fields=True) for s in structures]
+    structures_validated = [RibosomeStructureMetadata.model_validate(s) for s in structures]
     return {
         "structures" : structures_validated,
         "next_cursor": next_cursor,
@@ -139,7 +135,7 @@ def overview(request):
     return dbqueries.structures_overview()
 
 
-@structure_router.get('/profile', response=RibosomeStructure, tags=[TAG],)
+@structure_router.get('/profile', response=RibosomeStructureMetadata, tags=[TAG],)
 def structure_profile(request,rcsb_id:str):
 
     """Return a `.json` profile of the given RCSB_ID structure."""

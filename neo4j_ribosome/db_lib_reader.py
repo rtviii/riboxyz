@@ -423,14 +423,28 @@ with rib order by rib.rcsb_id desc\n"""
 
         query_parts.extend(
             [
-                "WITH rib",
-                "ORDER BY rib.rcsb_id DESC",
-                "WITH ",
-                "collect(rib) AS all_structures,",
-                "count(rib) AS total_count",
-                f"unwind all_structures[0..$limit] as structure",
-                "with total_count, structure,  min(structure.rcsb_id) as next_cursor",
-                "return collect(properties(structure)), total_count, next_cursor",
+                # "WITH rib",
+                # "ORDER BY rib.rcsb_id DESC",
+                # "WITH ",
+                # "collect(rib) AS all_structures,",
+                # "count(rib) AS total_count",
+                # f"unwind all_structures[0..$limit] as structure",
+                # "with total_count, structure,  min(structure.rcsb_id) as next_cursor",
+                # "return collect(properties(structure)), total_count, next_cursor",
+
+
+
+"WITH rib",
+"ORDER BY rib.rcsb_id DESC",
+"WITH collect(rib) AS all_structures,",
+     "count(rib) AS total_count",
+"WITH all_structures[0..20] AS structures,",
+     "total_count,",
+     "all_structures[20].rcsb_id AS next_cursor",
+"RETURN ",
+     "[struct IN structures | properties(struct)] AS structures,",
+     "total_count,",
+     "next_cursor"
             ]
         )
 
@@ -444,6 +458,7 @@ with rib order by rib.rcsb_id desc\n"""
 
             def _(tx: Transaction | ManagedTransaction):
                 structures, total_count, next_cursor = tx.run(query, params).values()[0]
+                print("RETURNED STRUCTURES:", len(structures))
                 return (
                    structures,
                    next_cursor,
