@@ -32,7 +32,7 @@ def open_tunnel_csv(rcsb_id: str) -> list[list]:
 
 
 def parse_struct_via_centerline(
-    rcsb_id: str, centerline_data: list, expansion_radius: int = 15
+    rcsb_id: str, centerline_data: list, expansion_radius: int =25
 ) -> list[Atom]:
     """centerline data is an array of lists [radius, x, y, z]"""
     from Bio.PDB.MMCIFParser import MMCIFParser

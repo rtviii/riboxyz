@@ -456,6 +456,8 @@ with rib order by rib.rcsb_id desc\n"""
             def _(tx: Transaction | ManagedTransaction):
                 structures, total_count, next_cursor = tx.run(query, params).values()[0]
                 print("RETURNED STRUCTURES:", len(structures))
+                print("RETURNED CURSOR:", next_cursor)
+                print("RETURNED TALLY:", total_count)
                 return (
                    structures,
                    next_cursor,
@@ -465,123 +467,6 @@ with rib order by rib.rcsb_id desc\n"""
             return session.execute_read(_)
 
 
-
-#     def list_structs_filtered(self, filters: FilterParams):
-#         query_parts = ["MATCH (rib:RibosomeStructure)"]
-#         where_clauses = []
-#         params = {"limit": filters.limit}
-
-#         if filters.cursor:
-#             where_clauses.append("rib.rcsb_id < $cursor")
-#             params["cursor"] = filters.cursor
-
-#         if filters.search:
-#             where_clauses.append(
-#                 """
-#                 toLower(rib.citation_title) + toLower(rib.rcsb_id) + 
-#                 toLower(rib.pdbx_keywords_text) + 
-#                 toLower(reduce(acc = '', str IN rib.src_organism_names | acc + str)) + 
-#                 toLower(reduce(acc = '', str IN rib.host_organism_names | acc + str)) +
-#                 toLower(reduce(acc = '', str IN rib.citation_rcsb_authors | acc + str))
-#                 CONTAINS $search
-#             """
-#             )
-#             params["search"] = filters.search.lower()
-
-#         if filters.year:
-#             start, end = filters.year
-#             if start is not None:
-#                 where_clauses.append(
-#                     "(datetime(rib.deposition_date).year >= $year_start AND rib.deposition_date IS NOT NULL)"
-#                 )
-#                 params["year_start"] = start
-#             if end is not None:
-#                 where_clauses.append(
-#                     "(datetime(rib.deposition_date).year <= $year_end AND rib.deposition_date IS NOT NULL)"
-#                 )
-#                 params["year_end"] = end
-
-#         if filters.resolution:
-#             start, end = filters.resolution
-#             if start is not None:
-#                 where_clauses.append("rib.resolution > $resolution_start")
-#                 params["resolution_start"] = float(start)
-#             if end is not None:
-#                 where_clauses.append("rib.resolution < $resolution_end")
-#                 params["resolution_end"] = float(end)
-
-#         if filters.polymer_classes:
-#             where_clauses.append(
-#                 "ALL(x IN $polymer_classes WHERE x IN apoc.coll.flatten(collect{ MATCH (rib)-[]-(p:Polymer) RETURN p.nomenclature }))"
-#             )
-#             params["polymer_classes"] = [pc.value for pc in filters.polymer_classes]
-
-#         if filters.source_taxa:
-#             where_clauses.append(
-#                 "EXISTS{ MATCH (rib)-[:belongs_to_lineage_source]-(p:PhylogenyNode) WHERE p.ncbi_tax_id IN $source_taxa }"
-#             )
-#             params["source_taxa"] = filters.source_taxa
-
-#         if filters.host_taxa:
-#             where_clauses.append(
-#                 "EXISTS{ MATCH (rib)-[:belongs_to_lineage_host]-(p:PhylogenyNode) WHERE p.ncbi_tax_id IN $host_taxa }"
-#             )
-#             params["host_taxa"] = filters.host_taxa
-
-#         if filters.subunit_presence:
-#             if filters.subunit_presence == "SSU+LSU":
-#                 where_clauses.append(
-#                     '"lsu" IN rib.subunit_presence AND "ssu" IN rib.subunit_presence'
-#                 )
-#             elif filters.subunit_presence == "LSU":
-#                 where_clauses.append(
-#                     '"lsu" IN rib.subunit_presence AND NOT "ssu" IN rib.subunit_presence'
-#                 )
-#             elif filters.subunit_presence == "SSU":
-#                 where_clauses.append(
-#                     '"ssu" IN rib.subunit_presence AND NOT "lsu" IN rib.subunit_presence'
-#                 )
-
-#         if where_clauses:
-#             query_parts.append("WHERE " + " AND ".join(where_clauses))
-
-#         query_parts.extend(
-#             [
-
-
-# "WITH rib",
-# "ORDER BY rib.rcsb_id DESC",
-# "WITH collect(rib) AS all_structures,",
-#      "count(rib) AS total_count",
-# "WITH all_structures[0..20] AS structures,",
-#      "total_count,",
-#      "all_structures[20].rcsb_id AS next_cursor",
-# "RETURN ",
-#      "[struct IN structures | properties(struct)] AS structures,",
-#      "total_count,",
-#      "next_cursor"
-
-#             ]
-#         )
-
-#         query = "\n".join(query_parts)
-
-#         print("=======Executing filtered structures query:==========")
-#         print("\033[96m" + query + "\033[0m")
-#         print("=====================================================")
-
-#         with self.adapter.driver.session() as session:
-
-#             def _(tx: Transaction | ManagedTransaction):
-#                 structures, total_count, next_cursor = tx.run(query, params).values()[0]
-#                 print("RETURNED STRUCTURES:", len(structures))
-#                 return (
-#                    structures,
-#                    next_cursor,
-#                    total_count,
-#                 )
-
-#             return session.execute_read(_)
 
     def get_taxa(self, src_host: typing.Literal["source", "host"]) -> list[int]:
         def _(tx: Transaction | ManagedTransaction):

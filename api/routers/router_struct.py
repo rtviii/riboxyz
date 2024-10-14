@@ -122,7 +122,6 @@ def list_ligands(request):
 def filter_list(request):
     parsed_filters = FilterParams(**json.loads(request.body))
     structures, next_cursor, total_count = dbqueries.list_structs_filtered(parsed_filters)
-    # structures_validated = [RibosomeStructure.model_validate_partial(s, polymer_fields=True) for s in structures]
     structures_validated = [RibosomeStructureMetadata.model_validate(s) for s in structures]
     return {
         "structures" : structures_validated,
