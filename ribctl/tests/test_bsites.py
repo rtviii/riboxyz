@@ -2,7 +2,7 @@ import os
 from pprint import pprint
 from ribctl.lib.schema.types_binding_site import BindingSite, LigandTransposition
 from ribctl.lib.mod_transpose_bsites import init_transpose_ligand, open_bsite
-from ribctl.lib.schema.types_ribosome import RibosomeStructureMetadata
+from ribctl.lib.schema.types_ribosome import RibosomeStructure, RibosomeStructureMetadata
 from ribctl.lib import utils
 from ribctl.lib.libbsite import bsite_ligand, bsite_extrarbx_polymer, bsite_extrarbx_polymer, struct_ligand_ids
 from ribctl.lib.mod_superimpose import pymol_super, ranged_align_by_polyclass
@@ -14,7 +14,7 @@ poly_class = "5SrRNA"
 
 def extract_bsites (rcsb_id):
     _structure_cif_handle = utils.open_structure(rcsb_id,'cif')
-    struct_profile_handle = RibosomeStructureMetadata.parse_obj(utils.open_structure(rcsb_id,'json')  )
+    struct_profile_handle = RibosomeStructure.parse_obj(utils.open_structure(rcsb_id,'json')  )
 
     liglike_polys = struct_polymeric_factor_ids(struct_profile_handle)
     ligands       = struct_ligand_ids(rcsb_id, struct_profile_handle)

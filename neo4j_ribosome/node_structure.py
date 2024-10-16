@@ -3,7 +3,7 @@ from typing import Callable, Literal
 from neo4j import Driver, ManagedTransaction, Record, Transaction
 from neo4j.graph import Node, Relationship
 from neo4j import ManagedTransaction, Transaction
-from ribctl.lib.schema.types_ribosome import NonpolymericLigand, RibosomeStructureMetadata
+from ribctl.lib.schema.types_ribosome import NonpolymericLigand, RibosomeStructure, RibosomeStructureMetadata
 
 # Get superkingdom given an rcsb_id
 """
@@ -83,7 +83,7 @@ def link__structure_to_organism(
 
 
 def node__structure(
-    _rib: RibosomeStructureMetadata,
+    _rib: RibosomeStructure,
 ) -> Callable[[Transaction | ManagedTransaction], Record | None]:
     R = _rib.model_dump()
     def _(tx: Transaction | ManagedTransaction):

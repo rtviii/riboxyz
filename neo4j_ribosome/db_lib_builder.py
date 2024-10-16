@@ -7,7 +7,7 @@ from neo4j.graph import Node
 from neo4j import Driver, GraphDatabase
 from neo4j_ribosome.node_polymer import  link__polymer_to_polymer_class, link__polymer_to_structure, node__polymer, upsert_polymer_to_protein, upsert_polymer_to_rna,node__polymer_class
 from neo4j_ribosome.node_structure import   link__ligand_to_struct, link__structure_to_lineage_member, link__structure_to_organism, node__ligand, node__structure, struct_exists
-from ribctl.lib.schema.types_ribosome import MitochondrialProteinClass, PolynucleotideClass, PolynucleotideClass, RibosomeStructureMetadata
+from ribctl.lib.schema.types_ribosome import MitochondrialProteinClass, PolynucleotideClass, PolynucleotideClass, RibosomeStructure, RibosomeStructureMetadata
 from ribctl.etl.etl_assets_ops import RibosomeOps, Structure
 from neo4j import GraphDatabase, Driver, ManagedTransaction, Transaction
 from ribctl.lib.schema.types_ribosome import  NonpolymericLigand,  CytosolicProteinClass, RibosomeStructureMetadata
@@ -85,7 +85,7 @@ class Neo4jAdapter():
                 previous_id = taxid
         return
         
-    def link_structure_to_phylogeny(self,rcsb_id:str, profile:RibosomeStructureMetadata|None=None):
+    def link_structure_to_phylogeny(self,rcsb_id:str, profile:RibosomeStructure|None=None):
         rcsb_id = rcsb_id.upper()
 
         if profile is None:
@@ -131,7 +131,7 @@ class Neo4jAdapter():
                 print("Struct node {} already exists.".format(rcsb_id))
                 return
 
-        R:RibosomeStructureMetadata = RibosomeOps(rcsb_id).profile()
+        R:RibosomeStructure = RibosomeOps(rcsb_id).profile()
 
         with self.driver.session() as s:
 
@@ -168,7 +168,7 @@ class Neo4jAdapter():
 
     def upsert_structure_node(self, rcsb_id:str):
         rcsb_id = rcsb_id.upper()
-        R:RibosomeStructureMetadata = RibosomeOps(rcsb_id).profile()
+        R:RibosomeStructure = RibosomeOps(rcsb_id).profile()
         with self.driver.session() as s:
             structure_node = s.execute_write(node__structure(R))
         print("Successfully merged structure {}.".format(rcsb_id))

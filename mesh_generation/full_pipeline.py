@@ -42,8 +42,13 @@ def DBSCAN_capture(
     CLUSTERS_CONTAINER = dict(sorted(CLUSTERS_CONTAINER.items()))
     return db, CLUSTERS_CONTAINER
 
-def DBSCAN_pick_largest_cluster(clusters_container:dict[int,list])->np.ndarray:
+def DBSCAN_pick_largest_cluster(clusters_container:dict[int,list], pick_manually:bool=False)->np.ndarray:
     DBSCAN_CLUSTER_ID = 0
+    if pick_manually:
+        print("Running Manual Cluster")
+        picked_id =  int(input("Enter Cluster ID to proceed the reconstruction with\n (options:[{}]):".format(list( clusters_container.keys() ))))
+        return np.array(clusters_container[picked_id])
+
     for k, v in clusters_container.items():
         if int(k) == -1:
             continue
@@ -112,13 +117,13 @@ def pipeline(RCSB_ID,args):
     initial_grid, grid_dimensions, translation_vectors = index_grid(bbox_atoms_expanded)
 
 
-    visualize_pointcloud(initial_grid, RCSB_ID, False, "{}.initial.grid.gif".format(RCSB_ID))
+    # visualize_pointcloud(initial_grid, RCSB_ID, False, "{}.initial.grid.gif".format(RCSB_ID))
     # ? Here no trimming has yet occurred.
 
     #! [ Invert the grid ]
     inverted_grid = np.asarray(np.where(initial_grid != 1)).T
     
-    visualize_pointcloud(inverted_grid, RCSB_ID, False, "{}.initial.grid.gif".format(RCSB_ID))
+    # visualize_pointcloud(inverted_grid, RCSB_ID, False, "{}.initial.grid.gif".format(RCSB_ID))
     #! [ Capture DBSCAN clusters within the "negative" space]
     db, clusters_container = DBSCAN_capture(inverted_grid, _u_EPSILON, _u_MIN_SAMPLES, _u_METRIC ) 
     #! [ Extract the largest cluster from the DBSCAN clustering ]
@@ -210,12 +215,14 @@ def pipeline(RCSB_ID,args):
     # ! (it's not uncommon that the truncated shape contains more than one disconnected cluster. Ex. imagine cutting a crescent moon in half in the coronal plane) 
 
     _, dbscan_container= DBSCAN_capture(trimmed_cluster, 3  , 123, _u_METRIC)
+
     print("DBSCAN Clusters: ")
     for (k,v) in dbscan_container.items():
         print(k, len(v))
-    main_cluster = DBSCAN_pick_largest_cluster(dbscan_container)
+
     # visualize_pointcloud(main_cluster, RCSB_ID, GIF_INTERMEDIATES, "{}.ptcloud_trimmed_sharpened.gif".format(RCSB_ID))
     visualize_DBSCAN_CLUSTERS_particular_eps_minnbrs(dbscan_container, 3, 123, GIF_INTERMEDIATES, "{}.ptcloud_trimmed_sharpened.gif".format(RCSB_ID))
+    main_cluster = DBSCAN_pick_largest_cluster(dbscan_container, args.cluster_manual)
     # ! ----------
 
     #! [ Transform the cluster back into Original Coordinate Frame ]

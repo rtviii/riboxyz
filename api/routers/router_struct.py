@@ -15,7 +15,7 @@ from neo4j_ribosome.db_lib_reader import FilterParams, dbqueries
 from ribctl import ASSETS, ASSETS_PATH, RIBETL_DATA
 from ribctl.etl.etl_assets_ops import RibosomeOps, Structure
 from ribctl.lib.info import StructureCompositionStats, run_composition_stats
-from ribctl.lib.schema.types_ribosome import  CytosolicProteinClass, CytosolicRNAClass, ElongationFactorClass, InitiationFactorClass, LifecycleFactorClass, MitochondrialProteinClass, MitochondrialRNAClass, PTCInfo, Polymer, PolymerClass, PolynucleotideClass, PolynucleotideClass, PolypeptideClass, Protein, ProteinClass, RibosomeStructureMetadata, RibosomeStructureMetadata, tRNA
+from ribctl.lib.schema.types_ribosome import  CytosolicProteinClass, CytosolicRNAClass, ElongationFactorClass, InitiationFactorClass, LifecycleFactorClass, MitochondrialProteinClass, MitochondrialRNAClass, PTCInfo, Polymer, PolymerClass, PolynucleotideClass, PolynucleotideClass, PolypeptideClass, Protein, ProteinClass, RibosomeStructure, RibosomeStructureMetadata, RibosomeStructureMetadata, tRNA
 from ribctl.lib.libtax import Taxid 
 
 structure_router = Router()
@@ -59,9 +59,9 @@ def structure_composition_stats(request):
     with open(filename, 'r') as infile:
         return json.load(infile)
 
-@structure_router.get("/random_profile", response=RibosomeStructureMetadata, tags=[TAG])
+@structure_router.get("/random_profile", response=RibosomeStructure, tags=[TAG])
 def random_profile(request):
-    return RibosomeStructureMetadata.model_validate(dbqueries.random_structure()[0])
+    return RibosomeStructure.model_validate(dbqueries.random_structure()[0])
 
 @structure_router.get('/list_polymers_filtered_by_polymer_class', response=dict,  tags=[TAG])
 def polymers_by_polymer_class(request,
@@ -116,8 +116,6 @@ def polymers_by_structure(request,
 def list_ligands(request):
     return dbqueries.list_ligands()
 
-
-
 @structure_router.post('/list', response=dict, tags=[TAG])
 def filter_list(request):
     parsed_filters = FilterParams(**json.loads(request.body))
@@ -133,8 +131,7 @@ def filter_list(request):
 def overview(request):
     return dbqueries.structures_overview()
 
-
-@structure_router.get('/profile', response=RibosomeStructureMetadata, tags=[TAG],)
+@structure_router.get('/profile', response=RibosomeStructure, tags=[TAG],)
 def structure_profile(request,rcsb_id:str):
 
     """Return a `.json` profile of the given RCSB_ID structure."""

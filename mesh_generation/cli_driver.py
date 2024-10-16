@@ -72,6 +72,7 @@ def main():
     #! Interactive / processing
     parser.add_argument( "--trim",  action='store_true',required=False)
     parser.add_argument( "--nascent_chain",  action='store_true',required=False)
+    parser.add_argument( "--cluster_manual",  action='store_true',required=False)
 
     args          = parser.parse_args()
     RCSB_ID       = args.rcsb_id.upper()

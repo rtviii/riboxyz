@@ -24,6 +24,7 @@ from ribctl.lib.schema.types_ribosome import (
     Protein,
     CytosolicProteinClass,
     CytosolicProteinClass,
+    RibosomeStructure,
     RibosomeStructureMetadata,
 )
 
@@ -625,7 +626,7 @@ class ReannotationPipeline:
             for auth_asym_id in other_polymer_obj[ "rcsb_polymer_entity_container_identifiers" ]["auth_asym_ids"]
         ]
 
-    async def process_structure(self, overwrite: bool = False)->RibosomeStructureMetadata:
+    async def process_structure(self, overwrite: bool = False)->RibosomeStructure:
         rcsb_id = self.rcsb_data_dict["rcsb_id"]
         RA      = RibosomeOps(rcsb_id)
 
@@ -726,7 +727,7 @@ class ReannotationPipeline:
         organisms                                = self.infer_organisms_from_polymers([*_prot_polypeptides, *_rna_polynucleotides])
         subunit_presence                         = lsu_ssu_presence(_rna_polynucleotides, is_mitochondrial)
 
-        reshaped                                 = RibosomeStructureMetadata(
+        reshaped                                 = RibosomeStructure(
             rcsb_id                = self.rcsb_data_dict["rcsb_id"],
             expMethod              = self.rcsb_data_dict["exptl"][0]["method"],
             resolution             = self.rcsb_data_dict["rcsb_entry_info"]["resolution_combined"][0],
