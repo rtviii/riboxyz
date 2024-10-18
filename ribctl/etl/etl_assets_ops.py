@@ -80,6 +80,9 @@ class AssetPath:
 
     @property
     def tunnel_dir(self):
+
+        if not os.path.exists(os.path.join(self.dir, "TUNNELS")):
+            os.mkdir(os.path.join(self.dir, "TUNNELS"))
         return os.path.join(self.dir, "TUNNELS")
 
 class RibosomeOps:

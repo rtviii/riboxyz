@@ -3,18 +3,31 @@ import json
 import os
 import numpy as np
 from sklearn.cluster import DBSCAN
-from mesh_generation.bbox_extraction import ( encode_atoms, extract_bbox_atoms, open_tunnel_csv, parse_struct_via_bbox, parse_struct_via_centerline)
-from mesh_generation.libsurf import apply_poisson_reconstruction, estimate_normals, estimate_normals_and_create_gif, ptcloud_convex_hull_points, ptcloud_convex_hull_points_and_gif
-from mesh_generation.visualization import DBSCAN_CLUSTERS_visualize_largest, custom_cluster_recon_path, plot_multiple_by_kingdom, plot_multiple_surfaces, plot_with_landmarks, visualize_DBSCAN_CLUSTERS_particular_eps_minnbrs, visualize_mesh, visualize_pointcloud, visualize_pointclouds 
-from mesh_generation.paths import *
-from mesh_generation.voxelize import (expand_atomcenters_to_spheres_threadpool, index_grid)
+from mesh_generation.mesh_bbox_extraction import ( encode_atoms, extract_bbox_atoms, open_tunnel_csv, parse_struct_via_bbox, parse_struct_via_centerline)
+from mesh_generation.mesh_libsurf import apply_poisson_reconstruction, estimate_normals, estimate_normals_and_create_gif, ptcloud_convex_hull_points, ptcloud_convex_hull_points_and_gif
+from mesh_generation.mes_visualization import DBSCAN_CLUSTERS_visualize_largest,  plot_multiple_by_kingdom, plot_multiple_surfaces, plot_with_landmarks, visualize_DBSCAN_CLUSTERS_particular_eps_minnbrs, visualize_mesh, visualize_pointcloud, visualize_pointclouds 
+from mesh_generation.mesh_paths import *
+from mesh_generation.mesh_voxelize import (expand_atomcenters_to_spheres_threadpool, index_grid)
 import numpy as np
+
+# https://pmc.ncbi.nlm.nih.gov/articles/PMC8492066/ 
+# PTC maturation also includes the universally conserved and essential modifications to incorporate pseudouridine Ψ3067 by RNA pseudouridine synthase.
+
+# ? Try this first before complicating things:
+# The bounding box should be defined by the LSU RNA. 
+                                #    by the PTC from below.
+
+# ? Apply skeletonization and cross-section surface area threshold to make the cut at vestibules
+# The bounding box should be defined by the LSU RNA. 
+                                #    by the PTC from below.
+
+
+
 
 def expand_bbox_atoms_to_spheres(atom_coordinates:np.ndarray, sphere_vdw_radii:np.ndarray, rcsb_id: str):
     sphere_sources = zip(atom_coordinates, sphere_vdw_radii)
     SINK           = []
     expanded       = expand_atomcenters_to_spheres_threadpool(SINK, sphere_sources)
-
     return np.array(expanded)
 
 def DBSCAN_capture(
@@ -76,38 +89,32 @@ def load_trimming_parameters( RCSB_ID:str, file_path=TRIMMING_PARAMS_DICT_PATH):
 def pipeline(RCSB_ID,args):
     GIF_INTERMEDIATES = args.gif_intermediates
 
-
     #! [ Pipeline Parameters ]
-    _u_EPSILON     = 5.5 if args.dbscan_tuple is None else float(args.dbscan_tuple.split(",")[0])
-    _u_MIN_SAMPLES = 600 if args.dbscan_tuple is None else int(args.dbscan_tuple.split(",")[1])
-    _u_METRIC      = "euclidean"
+    _u_EPSILON_initial_pass     = 5.5 if args.dbscan_tuple is None else float(args.dbscan_tuple.split(",")[0])
+    _u_MIN_SAMPLES_initial_pass = 600 if args.dbscan_tuple is None else int(args.dbscan_tuple.split(",")[1])
+    _u_METRIC                   = "euclidean"
+    _u_EPSILON_refinement     = 3
+    _u_MIN_SAMPLES_refinement = 123
 
     d3d_alpha         = args.D3D_alpha   if args.D3D_alpha   is not None else 2
     d3d_tol           = args.D3D_tol     if args.D3D_tol     is not None else 1
     PR_depth          = args.PR_depth    if args.PR_depth    is not None else 6
     PR_ptweight       = args.PR_ptweight if args.PR_ptweight is not None else 3
+    #! [ Pipeline Parameters ]
 
-    struct_tunnel_dir = Assets(RCSB_ID).paths.tunnel_dir
-    if not os.path.exists(struct_tunnel_dir):
-        os.mkdir(struct_tunnel_dir)
-
-    if args.bbox or  ( not os.path.exists(tunnel_atom_encoding_path(RCSB_ID)) ):
+    if args.bbox or (not os.path.exists(tunnel_atom_encoding_path(RCSB_ID)) ):
         extract_bbox_atoms(RCSB_ID)
 
     #! [ Bounding Box Atoms ]
     if args.bbox or ( not os.path.exists(spheres_expanded_pointset_path(RCSB_ID)) ) :
-        "the data arrives here as *bound_box around the centerline expansion* atom coordinates extracted from the biopython model "
-
         with open( tunnel_atom_encoding_path(RCSB_ID), "r", ) as infile: 
             bbox_atoms = json.load(infile)
         _atom_centers       = np.array(list(map(lambda x: x["coord"], bbox_atoms)))
         _vdw_radii          = np.array(list(map(lambda x: x["vdw_radius"], bbox_atoms)))
         bbox_atoms_expanded = expand_bbox_atoms_to_spheres(_atom_centers, _vdw_radii, RCSB_ID)
-
         np.save(spheres_expanded_pointset_path(RCSB_ID), bbox_atoms_expanded)
         print("Saved spheres_expanded_pointset data to disk : {}".format(spheres_expanded_pointset_path(RCSB_ID)))
     else:
-        print("Opened atoms in the bounding box")
         bbox_atoms_expanded = np.load(spheres_expanded_pointset_path(RCSB_ID))
 
     
@@ -125,9 +132,9 @@ def pipeline(RCSB_ID,args):
     
     # visualize_pointcloud(inverted_grid, RCSB_ID, False, "{}.initial.grid.gif".format(RCSB_ID))
     #! [ Capture DBSCAN clusters within the "negative" space]
-    db, clusters_container = DBSCAN_capture(inverted_grid, _u_EPSILON, _u_MIN_SAMPLES, _u_METRIC ) 
+    db, clusters_container = DBSCAN_capture(inverted_grid, _u_EPSILON_initial_pass, _u_MIN_SAMPLES_initial_pass, _u_METRIC ) 
     #! [ Extract the largest cluster from the DBSCAN clustering ]
-    visualize_DBSCAN_CLUSTERS_particular_eps_minnbrs(clusters_container, _u_EPSILON, _u_MIN_SAMPLES, GIF_INTERMEDIATES, "{}.dbscan.clusters.gif".format(RCSB_ID))
+    visualize_DBSCAN_CLUSTERS_particular_eps_minnbrs(clusters_container, _u_EPSILON_initial_pass, _u_MIN_SAMPLES_initial_pass, GIF_INTERMEDIATES, "{}.dbscan.clusters.gif".format(RCSB_ID))
     largest_cluster = DBSCAN_pick_largest_cluster(clusters_container)
     
 
@@ -214,11 +221,7 @@ def pipeline(RCSB_ID,args):
     # ! Second pass of dbscan is needed to pick up the largest part of the trimmed cluster. 
     # ! (it's not uncommon that the truncated shape contains more than one disconnected cluster. Ex. imagine cutting a crescent moon in half in the coronal plane) 
 
-    _, dbscan_container= DBSCAN_capture(trimmed_cluster, 3  , 123, _u_METRIC)
-
-    print("DBSCAN Clusters: ")
-    for (k,v) in dbscan_container.items():
-        print(k, len(v))
+    _, dbscan_container = DBSCAN_capture(trimmed_cluster, _u_EPSILON_refinement  , _u_MIN_SAMPLES_refinement, _u_METRIC)
 
     # visualize_pointcloud(main_cluster, RCSB_ID, GIF_INTERMEDIATES, "{}.ptcloud_trimmed_sharpened.gif".format(RCSB_ID))
     visualize_DBSCAN_CLUSTERS_particular_eps_minnbrs(dbscan_container, 3, 123, GIF_INTERMEDIATES, "{}.ptcloud_trimmed_sharpened.gif".format(RCSB_ID))
