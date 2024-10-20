@@ -1,4 +1,12 @@
-from typing import TypeVar
+from pprint import pprint
+from typing import List, TypeVar
+from Bio.PDB.Residue import Residue
+from Bio.PDB.Chain import Chain
+import numpy as np
+from ribctl.etl.etl_assets_ops import RibosomeOps
+from Bio.PDB.MMCIFParser import MMCIFParser
+from Bio.PDB.NeighborSearch import NeighborSearch
+from Bio.PDB import Selection
 
 
 rcsb_ids = [
@@ -99,17 +107,25 @@ rcsb_ids = [
     ]
 
 
-# get trna cterm
-def biopythin_chain_get_cterm_residues(bpchain):
-    ...
+rcsb_id      = '7A5F'
+mttRNA_auth_asym_id = '24'
 
-# get mtrna PTC residues 
-def res_nbhd(cterm_residues)->List[Residue]:
-    ...
+
+mtrRNA_auth_asym_id = 'A3'
+def trna_get_cterm_residues()->np.ndarray:
+    c:Chain = RibosomeOps(rcsb_id).biopython_structure()[0][mttRNA_auth_asym_id]
+    c_terminus:Residue = [*c][-1]
+    return c_terminus.center_of_mass()
 
 # get mtrna PTC residues, a good 10-15 of them -- whichver radius that works out to.
-def res_nbhd(cterm_residues)->List[Residue]:
-    ...
+def mitorrna_ptc_residues(trna_cterm_pos:np.ndarray, mtrrna: Chain)->List[Residue]:
+    atoms       = Selection.unfold_entities(mtrrna, "A")
+    ns          = NeighborSearch(atoms)
+    nbhd        = set()
+    nearby_residues = ns.search(trna_cterm_pos, 10, "R")
+
+    return nearby_residues
+
 
 # get mtrna PTC residues, a good 10-15 of them -- whichver radius that works out to.
 def project_residues(cterm_residues)->List[Residue]:
@@ -120,9 +136,12 @@ def project_residues(cterm_residues)->List[Residue]:
 # basically assgin to every node of the taxonomy tree the the landmark with the data where there is one
 # "project" from extant nodes to the rest preferring proximal nodes as sources
 class GlobalTaxonomy[T]():
-   
     ...
-
 
 def get_rcsb_ids():
     return rcsb_ids
+
+
+trna_Cterm =trna_get_cterm_residues()
+mtRRNA:Chain = RibosomeOps(rcsb_id).biopython_structure()[0][mtrRNA_auth_asym_id]
+ress = mitorrna_ptc_residues(trna_Cterm,mtRRNA)
