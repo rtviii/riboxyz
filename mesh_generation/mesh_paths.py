@@ -4,8 +4,6 @@ from ribctl import EXIT_TUNNEL_WORK, RIBETL_DATA
 from ribctl.etl.etl_assets_ops import Assets, RibosomeOps
 
 
-
-
 # most of this stuff is unnecessary
 tunnel_atom_encoding_path      = lambda rcsb_id: os.path.join( Assets(rcsb_id).paths.tunnel_dir, "{}_tunnel_atoms_bbox.json".format(rcsb_id.upper()) )
 spheres_expanded_pointset_path = lambda rcsb_id: os.path.join( Assets(rcsb_id).paths.tunnel_dir, "{}_spheres_expanded_pointset.npy".format(rcsb_id.upper()), )
@@ -22,13 +20,3 @@ TUNNEL_PATH               = lambda rcsb_id :  os.path.join( EXIT_TUNNEL_WORK, "m
 
 def custom_cluster_recon_path(rcsb_id, eps, min_nbrs):
     return os.path.join( Assets(rcsb_id).paths.ptc, rcsb_id.upper(), "{}_poisson_recon-eps{}_minnbrs{}.ply".format(rcsb_id.upper(), eps, min_nbrs) )
-
-# def mmcif_ensemble_LSU(rcsb_id):
-#     return os.path.join(EXIT_TUNNEL_WORK, rcsb_id, '{}_lsu_alphashape.mmcif'.format(rcsb_id))
-
-# def convex_hull_ensemble_LSU(rcsb_id):
-#     return os.path.join(EXIT_TUNNEL_WORK, rcsb_id, '{}_lsu_convex_hull.ply'.format(rcsb_id))
-
-# def alphashape_ensemble_LSU(rcsb_id):
-#     return os.path.join(EXIT_TUNNEL_WORK, rcsb_id, '{}_lsu_alphashape.ply'.format(rcsb_id))
-

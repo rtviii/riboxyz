@@ -13,14 +13,16 @@ import numpy as np
 # https://pmc.ncbi.nlm.nih.gov/articles/PMC8492066/ 
 # PTC maturation also includes the universally conserved and essential modifications to incorporate pseudouridine Ψ3067 by RNA pseudouridine synthase.
 
+# First step would be to obtain the PTC for as many structures as we can
+# Find mitochondrial 
+# Project extant to all.---> general pipeline
+
 # ? Try this first before complicating things:
-# The bounding box should be defined by the LSU RNA. 
-                                #    by the PTC from below.
+# The bounding box should be defined by the LSU RNA.
 
 # ? Apply skeletonization and cross-section surface area threshold to make the cut at vestibules
 # The bounding box should be defined by the LSU RNA. 
                                 #    by the PTC from below.
-
 
 
 

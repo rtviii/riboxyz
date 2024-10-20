@@ -81,8 +81,6 @@ def polymers_by_structure(request,
       polymer_classes = None,
       source_taxa     = None,
       host_taxa       = None):
-
-                
     def parse_empty_or_int(_:str):
         if _ != '':
             return int(_)
