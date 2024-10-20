@@ -1,3 +1,6 @@
+from typing import TypeVar
+
+
 rcsb_ids = [
       "2FTC",
       "3J6B",
@@ -94,6 +97,32 @@ rcsb_ids = [
       "8PK0",
       "8QSJ"
     ]
+
+
+# get trna cterm
+def biopythin_chain_get_cterm_residues(bpchain):
+    ...
+
+# get mtrna PTC residues 
+def res_nbhd(cterm_residues)->List[Residue]:
+    ...
+
+# get mtrna PTC residues, a good 10-15 of them -- whichver radius that works out to.
+def res_nbhd(cterm_residues)->List[Residue]:
+    ...
+
+# get mtrna PTC residues, a good 10-15 of them -- whichver radius that works out to.
+def project_residues(cterm_residues)->List[Residue]:
+    ...
+
+
+# T is a landmark with method project_into, project_from, data D and flag `present`
+# basically assgin to every node of the taxonomy tree the the landmark with the data where there is one
+# "project" from extant nodes to the rest preferring proximal nodes as sources
+class GlobalTaxonomy[T]():
+   
+    ...
+
 
 def get_rcsb_ids():
     return rcsb_ids
