@@ -8,6 +8,10 @@ from Bio.PDB.MMCIFParser import MMCIFParser
 from Bio.PDB.NeighborSearch import NeighborSearch
 from Bio.PDB import Selection
 
+from ribctl.lib.libbsite import map_motifs
+from ribctl.lib.libseq import BiopythonChain
+from ribctl.lib.schema.types_binding_site import ResidueSummary
+
 
 rcsb_ids = [
       "2FTC",
@@ -107,13 +111,15 @@ rcsb_ids = [
     ]
 
 
-rcsb_id      = '7A5F'
+src_rcsb_id             = '7A5F'
+# target_rcsb_id             = '8OIN'
+target_rcsb_id             = '7QI4'
 mttRNA_auth_asym_id = '24'
-
-
-mtrRNA_auth_asym_id = 'A3'
+mtRRNA_src_aaid     = 'A3'
+# mtRRNA_target_aaid  = 'B8'
+mtRRNA_target_aaid  = 'A'
 def trna_get_cterm_residues()->np.ndarray:
-    c:Chain = RibosomeOps(rcsb_id).biopython_structure()[0][mttRNA_auth_asym_id]
+    c:Chain = RibosomeOps(src_rcsb_id).biopython_structure()[0][mttRNA_auth_asym_id]
     c_terminus:Residue = [*c][-1]
     return c_terminus.center_of_mass()
 
@@ -123,13 +129,9 @@ def mitorrna_ptc_residues(trna_cterm_pos:np.ndarray, mtrrna: Chain)->List[Residu
     ns          = NeighborSearch(atoms)
     nbhd        = set()
     nearby_residues = ns.search(trna_cterm_pos, 10, "R")
-
     return nearby_residues
 
 
-# get mtrna PTC residues, a good 10-15 of them -- whichver radius that works out to.
-def project_residues(cterm_residues)->List[Residue]:
-    ...
 
 
 # T is a landmark with method project_into, project_from, data D and flag `present`
@@ -142,6 +144,10 @@ def get_rcsb_ids():
     return rcsb_ids
 
 
-trna_Cterm =trna_get_cterm_residues()
-mtRRNA:Chain = RibosomeOps(rcsb_id).biopython_structure()[0][mtrRNA_auth_asym_id]
-ress = mitorrna_ptc_residues(trna_Cterm,mtRRNA)
+trna_Cterm          = trna_get_cterm_residues()
+mtRRNA_src:Chain    = RibosomeOps(src_rcsb_id).biopython_structure()[0][mtRRNA_src_aaid]
+ress                = mitorrna_ptc_residues(trna_Cterm,mtRRNA_src)
+mtRRNA_target:Chain = RibosomeOps(target_rcsb_id).biopython_structure()[0][mtRRNA_target_aaid]
+_,_,motifs = map_motifs(BiopythonChain( mtRRNA_src ), BiopythonChain(mtRRNA_target), [ResidueSummary.from_biopython_residue(r) for r in ress], 'mt16SrRNA', True)
+x:Residue
+pprint(sorted(motifs, key=lambda x: x.get_id()))

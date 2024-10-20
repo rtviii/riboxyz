@@ -51,8 +51,6 @@ def lig_get_chemical_categories():
 
 
 
-
-
 def get_lig_bsite(
     lig_chemid: str,
     struct: Structure,
