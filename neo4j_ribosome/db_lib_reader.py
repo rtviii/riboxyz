@@ -434,7 +434,7 @@ return apoc.map.merge(rib, rest)
             params["current_polymer_class"] = filters.current_polymer_class.value
 
         if filters.uniprot_id:
-            polymer_where_clauses.append("poly.uniprot_id = $uniprot_id")
+            polymer_where_clauses.append(" $uniprot_id in poly.uniprot_accession")
             params["uniprot_id"] = filters.uniprot_id
 
         if filters.has_motif:
@@ -498,14 +498,22 @@ return apoc.map.merge(rib, rest)
         with self.adapter.driver.session() as session:
             def _(tx: Transaction | ManagedTransaction):
                 result = tx.run(query, params)
-                result = result.single()
-                if result:
-                    ( polymers, total_structures_count, total_polymers_count, next_cursor ) = result
+                record = result.single()
+                if record:
+                    polymers, total_structures_count, total_polymers_count, next_cursor = record
                     return (
-                        polymers,
-                          ( (next_cursor["rcsb_id"], next_cursor["auth_asym_id"]) if next_cursor else None ),
-                        total_polymers_count,
-                        total_structures_count, )
+                        polymers or [],  # Ensure we always return a list, even if empty
+                        (
+                            (next_cursor["rcsb_id"], next_cursor["auth_asym_id"])
+                            if next_cursor
+                            else (None, None)
+                        ),
+                        total_polymers_count or 0,
+                        total_structures_count or 0,
+                    )
+                else:
+                    # If no record is returned, provide default values
+                    return ([], (None, None), 0, 0)
 
             return session.execute_read(_)
 
