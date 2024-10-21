@@ -116,9 +116,9 @@ def list_ligands(request):
 
 @structure_router.post('/list', response=dict, tags=[TAG])
 def filter_list(request, filters:StructureFilterParams):
-    parsed_filters = StructureFilterParams(**json.loads(request.body))
+    parsed_filters                       = StructureFilterParams(**json.loads(request.body))
     structures, next_cursor, total_count = dbqueries.list_structs_filtered(parsed_filters)
-    structures_validated = [RibosomeStructureMetadata.model_validate(s) for s in structures]
+    structures_validated                 = [RibosomeStructureMetadata.model_validate(s) for s in structures]
     return {
         "structures" : structures_validated,
         "next_cursor": next_cursor,
@@ -128,15 +128,13 @@ def filter_list(request, filters:StructureFilterParams):
 @structure_router.post('/list_polymers', response=dict, tags=[TAG])
 def list_polymers(request, filters:PolymersFilterParams): 
     parsed_filters =                    PolymersFilterParams(**json.loads(request.body))
-    polymers, next_cursor, total_count = dbqueries.list_polymers_filtered(parsed_filters)
-    print(total_count)
-    print(next_cursor)
-    print(polymers)
+    pprint(parsed_filters)
+    polymers, next_cursor, total_structures, total_polymers_count = dbqueries.list_polymers_filtered(parsed_filters)
     polymers_validated = [Polymer.model_validate(p) for p in polymers]
     return {
         "polymers"   : polymers_validated,
         "next_cursor": next_cursor,
-        "total_count": total_count
+        "total_count": total_polymers_count
     }
 
 @structure_router.get('/structures_overview', response=list[dict], tags=[TAG])

@@ -34,18 +34,17 @@ class StructureFilterParams(BaseModel):
 
 class PolymersFilterParams(BaseModel):
 
-    cursor: Optional[Tuple[str, str]] = None
-    limit           : int                                                    = Field(default=20, ge=1, le=100)
-    year            : Optional[tuple[Optional[int], Optional[int]]]          = None
-    search          : Optional[str]                                          = None
-    resolution      : Optional[tuple[Optional[float], Optional[float]]]      = None
-    polymer_classes : Optional[List[PolynucleotideClass | PolypeptideClass]] = None
-    source_taxa     : Optional[List[int]]                                    = None
-    host_taxa       : Optional[List[int]]                                    = None
-    subunit_presence: Optional[Literal["SSU+LSU", "LSU", "SSU"]]             = None
+    cursor           : Optional[Tuple[str, str]]                              = None
+    limit            : int                                                    = Field(default=20, ge=1, le=100)
+    year             : Optional[tuple[Optional[int], Optional[int]]]          = None
+    search           : Optional[str]                                          = None
+    resolution       : Optional[tuple[Optional[float], Optional[float]]]      = None
+    polymer_classes  : Optional[List[PolynucleotideClass | PolypeptideClass]] = None
+    source_taxa      : Optional[List[int]]                                    = None
+    host_taxa        : Optional[List[int]]                                    = None
+    subunit_presence : Optional[Literal["SSU+LSU", "LSU", "SSU"]]              = None
 
-
-    current_polymer_class: Optional[PolynucleotideClass| PolypeptideClass] = None
+    current_polymer_class : Optional[PolynucleotideClass| PolypeptideClass] = None
     uniprot_id            : Optional[str]                                  = None
 
 
@@ -447,12 +446,13 @@ with rib order by rib.rcsb_id desc\n"""
 
 
     def list_polymers_filtered(self, filters: PolymersFilterParams):
-        query_parts = ["MATCH (rib:RibosomeStructure)-[]-(poly:Polymer)"]
-        where_clauses = []
+        # First stage: Filter structures
+        structure_query_parts = ["MATCH (rib:RibosomeStructure)"]
+        structure_where_clauses = []
         params = {"limit": filters.limit}
 
         if filters.search:
-            where_clauses.append(
+            structure_where_clauses.append(
                 """
                 toLower(rib.citation_title) + toLower(rib.rcsb_id) + 
                 toLower(rib.pdbx_keywords_text) + 
@@ -467,12 +467,12 @@ with rib order by rib.rcsb_id desc\n"""
         if filters.year:
             start, end = filters.year
             if start is not None:
-                where_clauses.append(
+                structure_where_clauses.append(
                     "(datetime(rib.deposition_date).year >= $year_start AND rib.deposition_date IS NOT NULL)"
                 )
                 params["year_start"] = start
             if end is not None:
-                where_clauses.append(
+                structure_where_clauses.append(
                     "(datetime(rib.deposition_date).year <= $year_end AND rib.deposition_date IS NOT NULL)"
                 )
                 params["year_end"] = end
@@ -480,84 +480,104 @@ with rib order by rib.rcsb_id desc\n"""
         if filters.resolution:
             start, end = filters.resolution
             if start is not None:
-                where_clauses.append("rib.resolution > $resolution_start")
+                structure_where_clauses.append("rib.resolution > $resolution_start")
                 params["resolution_start"] = float(start)
             if end is not None:
-                where_clauses.append("rib.resolution < $resolution_end")
+                structure_where_clauses.append("rib.resolution < $resolution_end")
                 params["resolution_end"] = float(end)
 
         if filters.polymer_classes:
-            where_clauses.append(
-                "ANY(x IN $polymer_classes WHERE x IN poly.nomenclature)"
+            structure_where_clauses.append(
+                "ALL(x IN $polymer_classes WHERE x IN apoc.coll.flatten(collect{ MATCH (rib)-[]-(p:Polymer) RETURN p.nomenclature }))"
             )
             params["polymer_classes"] = [pc.value for pc in filters.polymer_classes]
 
         if filters.source_taxa:
-            where_clauses.append(
+            structure_where_clauses.append(
                 "EXISTS{ MATCH (rib)-[:belongs_to_lineage_source]-(p:PhylogenyNode) WHERE p.ncbi_tax_id IN $source_taxa }"
             )
             params["source_taxa"] = filters.source_taxa
 
         if filters.host_taxa:
-            where_clauses.append(
+            structure_where_clauses.append(
                 "EXISTS{ MATCH (rib)-[:belongs_to_lineage_host]-(p:PhylogenyNode) WHERE p.ncbi_tax_id IN $host_taxa }"
             )
             params["host_taxa"] = filters.host_taxa
 
         if filters.subunit_presence:
             if filters.subunit_presence == "SSU+LSU":
-                where_clauses.append(
+                structure_where_clauses.append(
                     '"lsu" IN rib.subunit_presence AND "ssu" IN rib.subunit_presence'
                 )
             elif filters.subunit_presence == "LSU":
-                where_clauses.append(
+                structure_where_clauses.append(
                     '"lsu" IN rib.subunit_presence AND NOT "ssu" IN rib.subunit_presence'
                 )
             elif filters.subunit_presence == "SSU":
-                where_clauses.append(
+                structure_where_clauses.append(
                     '"ssu" IN rib.subunit_presence AND NOT "lsu" IN rib.subunit_presence'
                 )
 
+        if structure_where_clauses:
+            structure_query_parts.append("WHERE " + " AND ".join(structure_where_clauses))
+
+        structure_query_parts.extend([
+            "WITH rib",
+            "ORDER BY rib.rcsb_id DESC",
+            "WITH collect(rib) AS filtered_structures"
+        ])
+
+        # Second stage: Match and filter polymers
+        query_parts = [
+            "UNWIND filtered_structures AS rib",
+            "MATCH (rib)-[]-(poly:Polymer)"
+        ]
+        
+        polymer_where_clauses = []
+
         if filters.current_polymer_class:
-            where_clauses.append("poly.current_polymer_class = $current_polymer_class")
+            polymer_where_clauses.append("poly.current_polymer_class = $current_polymer_class")
             params["current_polymer_class"] = filters.current_polymer_class.value
 
         if filters.uniprot_id:
-            where_clauses.append("poly.uniprot_id = $uniprot_id")
+            polymer_where_clauses.append("poly.uniprot_id = $uniprot_id")
             params["uniprot_id"] = filters.uniprot_id
 
-        if where_clauses:
-            query_parts.append("WHERE " + " AND ".join(where_clauses))
+        if polymer_where_clauses:
+            query_parts.append("WHERE " + " AND ".join(polymer_where_clauses))
 
         query_parts.extend([
             "WITH poly, rib",
             "ORDER BY rib.rcsb_id DESC, poly.auth_asym_id DESC",
             "WITH collect(poly) AS all_polymers,",
-            "     count(poly) AS total_count"
+            "     count(DISTINCT rib) AS total_structures,",
+            "     count(poly) AS total_polymers"
         ])
 
         # Apply cursor filter after collecting all polymers
         if filters.cursor:
-            query_parts.append("WITH all_polymers, total_count,")
+            query_parts.append("WITH all_polymers, total_structures, total_polymers,")
             query_parts.append("     [p IN all_polymers WHERE p.rcsb_id < $cursor_rcsb_id OR (p.rcsb_id = $cursor_rcsb_id AND p.auth_asym_id < $cursor_auth_asym_id)] AS filtered_polymers")
             params["cursor_rcsb_id"], params["cursor_auth_asym_id"] = filters.cursor
         else:
-            query_parts.append("WITH all_polymers AS filtered_polymers, total_count")
+            query_parts.append("WITH all_polymers AS filtered_polymers, total_structures, total_polymers")
 
         query_parts.extend([
             "WITH filtered_polymers[0..$limit] AS polymers,",
-            "     total_count,",
+            "     total_structures,",
+            "     total_polymers,",
             "     CASE WHEN size(filtered_polymers) > $limit",
             "          THEN {rcsb_id: filtered_polymers[$limit].rcsb_id, auth_asym_id: filtered_polymers[$limit].auth_asym_id}",
             "          ELSE null",
             "     END AS next_cursor",
             "RETURN",
             "     [poly IN polymers | properties(poly)] AS polymers,",
-            "     total_count,",
+            "     total_structures,",
+            "     total_polymers,",
             "     next_cursor"
         ])
 
-        query = "\n".join(query_parts)
+        query = "\n".join(structure_query_parts + query_parts)
 
         print("=======Executing filtered polymers query:==========")
         print("\033[96m" + query + "\033[0m")
@@ -567,16 +587,16 @@ with rib order by rib.rcsb_id desc\n"""
             def _(tx: Transaction | ManagedTransaction):
                 result = tx.run(query, params).single()
                 if result:
-                    polymers, total_count, next_cursor = result
+                    polymers, total_structures, total_polymers, next_cursor = result
                     return (
                         polymers,
                         (next_cursor['rcsb_id'], next_cursor['auth_asym_id']) if next_cursor else None,
-                        total_count
+                        total_structures,
+                        total_polymers
                     )
-                return [], None, 0
+                return [], None, 0, 0
 
             return session.execute_read(_)
-
 
 
 
