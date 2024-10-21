@@ -131,7 +131,6 @@ def list_structures(request, filters:StructureFilterParams):
 
 @structure_router.post('/list_polymers', response=dict, tags=[TAG])
 def list_polymers(request, filters:PolymersFilterParams): 
-    print("hit polymers")
     parsed_filters =                    PolymersFilterParams(**json.loads(request.body))
     print(parsed_filters)
     polymers, next_cursor,  total_polymers_count, total_structures_count  = dbqueries.list_polymers_filtered(parsed_filters)

@@ -52,21 +52,19 @@ class StructureFilterParams(BaseModel):
 
 class PolymersFilterParams(BaseModel):
 
-    cursor: Optional[
-        Union[Tuple[Optional[str], Optional[str]], List[Optional[str]], str]
-    ] = None
-    limit: int = Field(default=20, ge=1, le=100)
-    year: Optional[Tuple[Optional[int], Optional[int]]] = None
-    search: Optional[str] = None
-    resolution: Optional[Tuple[Optional[float], Optional[float]]] = None
-    polymer_classes: Optional[List[Union[PolynucleotideClass, PolypeptideClass]]] = None
-    source_taxa: Optional[List[int]] = None
-    host_taxa: Optional[List[int]] = None
-    subunit_presence: Optional[Literal["SSU+LSU", "LSU", "SSU"]] = None
+    cursor          : Optional[ Union[Tuple[Optional[str], Optional[str]], List[Optional[str]], str] ] = None
+    limit           : int                                                                              = Field(default=20, ge=1, le=100)
+    year            : Optional[Tuple[Optional[int], Optional[int]]]                                    = None
+    search          : Optional[str]                                                                    = None
+    resolution      : Optional[Tuple[Optional[float], Optional[float]]]                                = None
+    polymer_classes : Optional[List[Union[PolynucleotideClass, PolypeptideClass]]]                     = None
+    source_taxa     : Optional[List[int]]                                                              = None
+    host_taxa       : Optional[List[int]]                                                              = None
+    subunit_presence: Optional[Literal["SSU+LSU", "LSU", "SSU"]]                                       = None
 
     current_polymer_class: Optional[Union[PolynucleotideClass, PolypeptideClass]] = None
-    uniprot_id: Optional[str] = None
-    has_motif: Optional[str] = None
+    uniprot_id           : Optional[str]                                          = None
+    has_motif            : Optional[str]                                          = None
 
     def get_cursor(self) -> Optional[Tuple[Optional[str], Optional[str]]]:
         if self.cursor is None:
@@ -500,12 +498,9 @@ return apoc.map.merge(rib, rest)
         with self.adapter.driver.session() as session:
             def _(tx: Transaction | ManagedTransaction):
                 result = tx.run(query, params)
-                pprint("GOT RESULT")
-                print(result)
                 result = result.single()
                 if result:
-                    print(result)
-                    ( polymers, total_structures_count, total_polymers_count, next_cursor, ) = result
+                    ( polymers, total_structures_count, total_polymers_count, next_cursor ) = result
                     return (
                         polymers,
                           ( (next_cursor["rcsb_id"], next_cursor["auth_asym_id"]) if next_cursor else None ),
