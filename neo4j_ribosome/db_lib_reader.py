@@ -45,7 +45,8 @@ class PolymersFilterParams(BaseModel):
     subunit_presence : Optional[Literal["SSU+LSU", "LSU", "SSU"]]              = None
 
     current_polymer_class : Optional[PolynucleotideClass| PolypeptideClass] = None
-    uniprot_id            : Optional[str]                                  = None
+    uniprot_id            : Optional[str]                                   = None
+    has_motif             : Optional[str]                                   = None
 
 
 class Neo4jReader:
@@ -536,12 +537,17 @@ with rib order by rib.rcsb_id desc\n"""
         polymer_where_clauses = []
 
         if filters.current_polymer_class:
-            polymer_where_clauses.append("poly.current_polymer_class = $current_polymer_class")
+            polymer_where_clauses.append(" $current_polymer_class in poly.nomenclature")
             params["current_polymer_class"] = filters.current_polymer_class.value
 
         if filters.uniprot_id:
             polymer_where_clauses.append("poly.uniprot_id = $uniprot_id")
             params["uniprot_id"] = filters.uniprot_id
+
+        if filters.has_motif:
+            polymer_where_clauses.append("poly.entity_poly_seq_one_letter_code_can CONTAINS $has_motif")
+            params["has_motif"] = filters.has_motif
+
 
         if polymer_where_clauses:
             query_parts.append("WHERE " + " AND ".join(polymer_where_clauses))
@@ -591,8 +597,8 @@ with rib order by rib.rcsb_id desc\n"""
                     return (
                         polymers,
                         (next_cursor['rcsb_id'], next_cursor['auth_asym_id']) if next_cursor else None,
-                        total_structures,
-                        total_polymers
+                        total_polymers,
+                        total_structures
                     )
                 return [], None, 0, 0
 

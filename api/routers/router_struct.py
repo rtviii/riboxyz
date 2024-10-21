@@ -128,13 +128,17 @@ def filter_list(request, filters:StructureFilterParams):
 @structure_router.post('/list_polymers', response=dict, tags=[TAG])
 def list_polymers(request, filters:PolymersFilterParams): 
     parsed_filters =                    PolymersFilterParams(**json.loads(request.body))
-    pprint(parsed_filters)
-    polymers, next_cursor, total_structures, total_polymers_count = dbqueries.list_polymers_filtered(parsed_filters)
+    polymers, next_cursor,  total_polymers_count, total_structures_count  = dbqueries.list_polymers_filtered(parsed_filters)
     polymers_validated = [Polymer.model_validate(p) for p in polymers]
+    print("POLYMERS VALIDATED", len(polymers_validated))
+    print("NEXT CURSOR", next_cursor)
+    print("TOTAL POLY COUNT", total_polymers_count)
+    print("TOTAL STRUCT COUNT", total_structures_count)
     return {
-        "polymers"   : polymers_validated,
-        "next_cursor": next_cursor,
-        "total_count": total_polymers_count
+        "polymers"              : polymers_validated,
+        "next_cursor"           : next_cursor,
+        "total_polymers_count"  : total_polymers_count,
+        "total_structures_count": total_structures_count
     }
 
 @structure_router.get('/structures_overview', response=list[dict], tags=[TAG])
