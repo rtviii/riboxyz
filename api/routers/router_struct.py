@@ -11,7 +11,7 @@ import pandas
 from pydantic import BaseModel, Field, ValidationError
 from typing import Optional, List
 from pydantic import BaseModel
-from neo4j_ribosome.db_lib_reader import FilterParams, dbqueries
+from neo4j_ribosome.db_lib_reader import PolymersFilterParams, StructureFilterParams, dbqueries
 from ribctl import ASSETS, ASSETS_PATH, RIBETL_DATA
 from ribctl.etl.etl_assets_ops import RibosomeOps, Structure
 from ribctl.lib.info import StructureCompositionStats, run_composition_stats
@@ -115,12 +115,26 @@ def list_ligands(request):
     return dbqueries.list_ligands()
 
 @structure_router.post('/list', response=dict, tags=[TAG])
-def filter_list(request):
-    parsed_filters = FilterParams(**json.loads(request.body))
+def filter_list(request, filters:StructureFilterParams):
+    parsed_filters = StructureFilterParams(**json.loads(request.body))
     structures, next_cursor, total_count = dbqueries.list_structs_filtered(parsed_filters)
     structures_validated = [RibosomeStructureMetadata.model_validate(s) for s in structures]
     return {
         "structures" : structures_validated,
+        "next_cursor": next_cursor,
+        "total_count": total_count
+    }
+
+@structure_router.post('/list_polymers', response=dict, tags=[TAG])
+def list_polymers(request, filters:PolymersFilterParams): 
+    parsed_filters =                    PolymersFilterParams(**json.loads(request.body))
+    polymers, next_cursor, total_count = dbqueries.list_polymers_filtered(parsed_filters)
+    print(total_count)
+    print(next_cursor)
+    print(polymers)
+    polymers_validated = [Polymer.model_validate(p) for p in polymers]
+    return {
+        "polymers"   : polymers_validated,
         "next_cursor": next_cursor,
         "total_count": total_count
     }
