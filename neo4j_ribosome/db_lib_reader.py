@@ -17,36 +17,65 @@ DO NOT put validation logic/schema here. This is a pure interface to the databas
 """
 
 from pydantic import BaseModel, Field
-from typing import Optional, List, Literal, Tuple
+from typing import Optional, List, Literal, Tuple, Union
 
 
 class StructureFilterParams(BaseModel):
 
-    cursor          : Optional[str]                                          = None
-    limit           : int                                                    = Field(default=20, ge=1, le=100)
-    year            : Optional[tuple[Optional[int], Optional[int]]]          = None
-    search          : Optional[str]                                          = None
-    resolution      : Optional[tuple[Optional[float], Optional[float]]]      = None
-    polymer_classes : Optional[List[PolynucleotideClass | PolypeptideClass]] = None
-    source_taxa     : Optional[List[int]]                                    = None
-    host_taxa       : Optional[List[int]]                                    = None
-    subunit_presence: Optional[Literal["SSU+LSU", "LSU", "SSU"]]             = None
+    cursor: Optional[str] = None
+    limit: int = Field(default=20, ge=1, le=100)
+    year: Optional[tuple[Optional[int], Optional[int]]] = None
+    search: Optional[str] = None
+    resolution: Optional[tuple[Optional[float], Optional[float]]] = None
+    polymer_classes: Optional[List[PolynucleotideClass | PolypeptideClass]] = None
+    source_taxa: Optional[List[int]] = None
+    host_taxa: Optional[List[int]] = None
+    subunit_presence: Optional[Literal["SSU+LSU", "LSU", "SSU"]] = None
+
+
+# class PolymersFilterParams(BaseModel):
+
+#     cursor           : Optional[Tuple[str, str]]                              = None
+#     limit            : int                                                    = Field(default=20, ge=1, le=100)
+#     year             : Optional[tuple[Optional[int], Optional[int]]]          = None
+#     search           : Optional[str]                                          = None
+#     resolution       : Optional[tuple[Optional[float], Optional[float]]]      = None
+#     polymer_classes  : Optional[List[PolynucleotideClass | PolypeptideClass]] = None
+#     source_taxa      : Optional[List[int]]                                    = None
+#     host_taxa        : Optional[List[int]]                                    = None
+#     subunit_presence : Optional[Literal["SSU+LSU", "LSU", "SSU"]]              = None
+
+#     current_polymer_class : Optional[PolynucleotideClass| PolypeptideClass] = None
+#     uniprot_id            : Optional[str]                                  = None
+#     has_motif            : Optional[str]                                  = None
+
 
 class PolymersFilterParams(BaseModel):
 
-    cursor           : Optional[Tuple[str, str]]                              = None
-    limit            : int                                                    = Field(default=20, ge=1, le=100)
-    year             : Optional[tuple[Optional[int], Optional[int]]]          = None
-    search           : Optional[str]                                          = None
-    resolution       : Optional[tuple[Optional[float], Optional[float]]]      = None
-    polymer_classes  : Optional[List[PolynucleotideClass | PolypeptideClass]] = None
-    source_taxa      : Optional[List[int]]                                    = None
-    host_taxa        : Optional[List[int]]                                    = None
-    subunit_presence : Optional[Literal["SSU+LSU", "LSU", "SSU"]]              = None
+    cursor: Optional[
+        Union[Tuple[Optional[str], Optional[str]], List[Optional[str]], str]
+    ] = None
+    limit: int = Field(default=20, ge=1, le=100)
+    year: Optional[Tuple[Optional[int], Optional[int]]] = None
+    search: Optional[str] = None
+    resolution: Optional[Tuple[Optional[float], Optional[float]]] = None
+    polymer_classes: Optional[List[Union[PolynucleotideClass, PolypeptideClass]]] = None
+    source_taxa: Optional[List[int]] = None
+    host_taxa: Optional[List[int]] = None
+    subunit_presence: Optional[Literal["SSU+LSU", "LSU", "SSU"]] = None
 
-    current_polymer_class : Optional[PolynucleotideClass| PolypeptideClass] = None
-    uniprot_id            : Optional[str]                                   = None
-    has_motif             : Optional[str]                                   = None
+    current_polymer_class: Optional[Union[PolynucleotideClass, PolypeptideClass]] = None
+    uniprot_id: Optional[str] = None
+    has_motif: Optional[str] = None
+
+    def get_cursor(self) -> Optional[Tuple[Optional[str], Optional[str]]]:
+        if self.cursor is None:
+            return None
+        if isinstance(self.cursor, str):
+            return (self.cursor, self.cursor)
+        if isinstance(self.cursor, (list, tuple)) and len(self.cursor) == 2:
+            return (self.cursor[0], self.cursor[1])
+        raise ValueError("Invalid cursor format")
 
 
 class Neo4jReader:
@@ -179,152 +208,6 @@ return apoc.map.merge(rib, rest)
 
             return session.execute_read(_)
 
-    def list_polymers_filtered_by_polymer_class(
-        self, page: int, polymer_class: PolynucleotideClass
-    ):
-
-        query_by_polymer_class = """
-         match (poly:Polymer)-[]-(pc:PolymerClass {{class_id:"{}" }})
-         with poly order by poly.nomenclature desc
-         with collect(poly)[{}..{}] as poly, count(poly) as pcount
-         unwind poly as polys
-         return collect(properties(polys)), pcount
-        """.format(
-            polymer_class.value, (page - 1) * 50, page * 50
-        )
-
-        print("=======Executing polymer query by polymer class:==========")
-        print("\033[96m" + query_by_polymer_class + "\033[0m")
-        print("===============================")
-
-        with self.adapter.driver.session() as session:
-
-            def _(tx: Transaction | ManagedTransaction):
-                return tx.run(query_by_polymer_class).values()
-
-            return session.execute_read(_)
-
-    def list_polymers_filtered_by_structure(
-        self,
-        page: int,
-        search: None | str = None,
-        year: None | typing.Tuple[int | None, int | None] = None,
-        resolution: None | typing.Tuple[float | None, float | None] = None,
-        polymer_classes: None | list[PolynucleotideClass | PolypeptideClass] = None,
-        source_taxa: None | list[int] = None,
-        host_taxa: None | list[int] = None,
-    ):
-
-        query_by_structure = (
-            """match (rib:RibosomeStructure)
-with rib order by rib.rcsb_id desc\n"""
-            + (
-                "\nwhere\n"
-                if list(
-                    map(
-                        lambda x: x is not None,
-                        [
-                            search,
-                            year,
-                            resolution,
-                            polymer_classes,
-                            source_taxa,
-                            host_taxa,
-                        ],
-                    )
-                ).count(True)
-                > 0
-                else ""
-            )
-            + (
-                "toLower(rib.citation_title) + toLower(rib.rcsb_id) + toLower(rib.pdbx_keywords_text) + apoc.text.join(rib.citation_rcsb_authors, \"\")  contains '{}' \n".format(
-                    search
-                )
-                if search != ""
-                else ""
-            )
-            + (
-                "{} ({} <= rib.citation_year and rib.citation_year <= {} or rib.citation_year is null)\n".format(
-                    "and" if search != "" else "",
-                    year[0] if year[0] is not None else 0,
-                    year[1] if year[1] is not None else 9999,
-                )
-                if year is not None
-                else ""
-            )
-            + (
-                "{} {} < rib.resolution and rib.resolution < {}\n".format(
-                    "and" if search != "" or year != None else "",
-                    resolution[0] if resolution[0] is not None else 0,
-                    resolution[1] if resolution[1] is not None else 9999,
-                )
-                if resolution is not None
-                else ""
-            )
-            + (
-                "{} ALL(x in [ {} ] where x in apoc.coll.flatten(collect{{ match (rib)-[]-(p:Polymer) return p.nomenclature }}))\n".format(
-                    "and" if search != "" or year != None or resolution != None else "",
-                    ", ".join(['"%s"' % w.value for w in polymer_classes]),
-                )
-                if polymer_classes is not None
-                else ""
-            )
-            + (
-                "{} exists{{ MATCH (rib)-[:belongs_to_lineage_source]-(p:PhylogenyNode ) where p.ncbi_tax_id in {} }}\n".format(
-                    (
-                        "and"
-                        if search != ""
-                        or year != None
-                        or resolution != None
-                        or polymer_classes != None
-                        else ""
-                    ),
-                    source_taxa,
-                )
-                if source_taxa is not None
-                else ""
-            )
-            + (
-                "{} exists{{ MATCH (rib)-[:belongs_to_lineage_host]-(p:PhylogenyNode ) where p.ncbi_tax_id in {} }}\n".format(
-                    (
-                        "and"
-                        if search != ""
-                        or year != None
-                        or resolution != None
-                        or polymer_classes != None
-                        else ""
-                    ),
-                    host_taxa,
-                )
-                if host_taxa is not None
-                else ""
-            )
-            # !------------- TAXONOMY NEW
-            + """
- with collect(rib) as rib
- unwind rib as ribosomes
-
- match (poly:Polymer)-[]-(ribosomes)
- with poly order by poly.nomenclature desc
- with collect(poly)[{}..{}] as poly, count(poly) as pcount
- unwind poly as polys
- return collect(properties(polys)), pcount
-""".format(
-                (page - 1) * 50, page * 50
-            )
-        )
-
-        print("=======Executing polumer query by structure:==========")
-        print("\033[96m" + query_by_structure + "\033[0m")
-        print("===============================")
-
-        with self.adapter.driver.session() as session:
-
-            def _(tx: Transaction | ManagedTransaction):
-                return tx.run(query_by_structure).values()
-
-            return session.execute_read(_)
-
     def list_structs_filtered(self, filters: StructureFilterParams):
         query_parts = ["MATCH (rib:RibosomeStructure)"]
         where_clauses = []
@@ -400,33 +283,41 @@ with rib order by rib.rcsb_id desc\n"""
         if where_clauses:
             query_parts.append("WHERE " + " AND ".join(where_clauses))
 
-        query_parts.extend([
-            "WITH rib",
-            "ORDER BY rib.rcsb_id DESC",
-            "WITH collect(rib) AS all_structures,",
-            "     count(rib) AS total_count"
-        ])
+        query_parts.extend(
+            [
+                "WITH rib",
+                "ORDER BY rib.rcsb_id DESC",
+                "WITH collect(rib) AS all_structures,",
+                "     count(rib) AS total_count",
+            ]
+        )
 
         # Apply cursor filter after collecting all structures
         if filters.cursor:
             query_parts.append("WITH all_structures, total_count,")
-            query_parts.append("     [s IN all_structures WHERE s.rcsb_id < $cursor] AS filtered_structures")
+            query_parts.append(
+                "     [s IN all_structures WHERE s.rcsb_id < $cursor] AS filtered_structures"
+            )
             params["cursor"] = filters.cursor
         else:
-            query_parts.append("WITH all_structures AS filtered_structures, total_count")
+            query_parts.append(
+                "WITH all_structures AS filtered_structures, total_count"
+            )
 
-        query_parts.extend([
-            "WITH filtered_structures[0..20] AS structures,",
-            "     total_count,",
-            "     CASE WHEN size(filtered_structures) > 20",
-            "          THEN filtered_structures[20].rcsb_id",
-            "          ELSE null",
-            "     END AS next_cursor",
-            "RETURN",
-            "     [struct IN structures | properties(struct)] AS structures,",
-            "     total_count,",
-            "     next_cursor"
-        ])
+        query_parts.extend(
+            [
+                "WITH filtered_structures[0..20] AS structures,",
+                "     total_count,",
+                "     CASE WHEN size(filtered_structures) > 20",
+                "          THEN filtered_structures[20].rcsb_id",
+                "          ELSE null",
+                "     END AS next_cursor",
+                "RETURN",
+                "     [struct IN structures | properties(struct)] AS structures,",
+                "     total_count,",
+                "     next_cursor",
+            ]
+        )
 
         query = "\n".join(query_parts)
 
@@ -435,16 +326,16 @@ with rib order by rib.rcsb_id desc\n"""
         print("=====================================================")
 
         with self.adapter.driver.session() as session:
+
             def _(tx: Transaction | ManagedTransaction):
                 structures, total_count, next_cursor = tx.run(query, params).values()[0]
                 return (
-                   structures,
-                   next_cursor,
-                   total_count,
+                    structures,
+                    next_cursor,
+                    total_count,
                 )
 
             return session.execute_read(_)
-
 
     def list_polymers_filtered(self, filters: PolymersFilterParams):
         # First stage: Filter structures
@@ -520,24 +411,28 @@ with rib order by rib.rcsb_id desc\n"""
                 )
 
         if structure_where_clauses:
-            structure_query_parts.append("WHERE " + " AND ".join(structure_where_clauses))
+            structure_query_parts.append(
+                "WHERE " + " AND ".join(structure_where_clauses)
+            )
 
-        structure_query_parts.extend([
-            "WITH rib",
-            "ORDER BY rib.rcsb_id DESC",
-            "WITH collect(rib) AS filtered_structures"
-        ])
+        structure_query_parts.extend(
+            [
+                "WITH collect(rib) AS filtered_structures",
+                "WITH filtered_structures, size(filtered_structures) AS total_structures_count",
+            ]
+        )
 
         # Second stage: Match and filter polymers
         query_parts = [
             "UNWIND filtered_structures AS rib",
-            "MATCH (rib)-[]-(poly:Polymer)"
+            "MATCH (rib)-[]-(poly:Polymer)",
+            "WHERE poly.assembly_id = 0",
         ]
-        
+
         polymer_where_clauses = []
 
         if filters.current_polymer_class:
-            polymer_where_clauses.append(" $current_polymer_class in poly.nomenclature")
+            polymer_where_clauses.append("$current_polymer_class in poly.nomenclature")
             params["current_polymer_class"] = filters.current_polymer_class.value
 
         if filters.uniprot_id:
@@ -545,66 +440,79 @@ with rib order by rib.rcsb_id desc\n"""
             params["uniprot_id"] = filters.uniprot_id
 
         if filters.has_motif:
-            polymer_where_clauses.append("poly.entity_poly_seq_one_letter_code_can CONTAINS $has_motif")
+            polymer_where_clauses.append(
+                "poly.entity_poly_seq_one_letter_code_can CONTAINS $has_motif"
+            )
             params["has_motif"] = filters.has_motif
 
-
         if polymer_where_clauses:
-            query_parts.append("WHERE " + " AND ".join(polymer_where_clauses))
+            query_parts.append("AND " + " AND ".join(polymer_where_clauses))
 
-        query_parts.extend([
-            "WITH poly, rib",
-            "ORDER BY rib.rcsb_id DESC, poly.auth_asym_id DESC",
-            "WITH collect(poly) AS all_polymers,",
-            "     count(DISTINCT rib) AS total_structures,",
-            "     count(poly) AS total_polymers"
-        ])
+        query_parts.extend(
+            [
+                "WITH total_structures_count, rib, collect(poly) as rib_polymers",
+                "WITH total_structures_count, collect({rib: rib, polymers: rib_polymers}) AS all_data",
+                "WITH total_structures_count, all_data, reduce(acc = 0, data IN all_data | acc + size(data.polymers)) AS total_polymers_count",
+                "UNWIND all_data AS data",
+                "WITH total_structures_count, total_polymers_count, data.rib AS rib, data.polymers AS rib_polymers",
+                "UNWIND rib_polymers AS poly",
+                "WITH total_structures_count, total_polymers_count, rib, poly",
+                "ORDER BY rib.rcsb_id DESC, poly.auth_asym_id ASC",
+            ]
+        )
 
-        # Apply cursor filter after collecting all polymers
-        if filters.cursor:
-            query_parts.append("WITH all_polymers, total_structures, total_polymers,")
-            query_parts.append("     [p IN all_polymers WHERE p.rcsb_id < $cursor_rcsb_id OR (p.rcsb_id = $cursor_rcsb_id AND p.auth_asym_id < $cursor_auth_asym_id)] AS filtered_polymers")
-            params["cursor_rcsb_id"], params["cursor_auth_asym_id"] = filters.cursor
-        else:
-            query_parts.append("WITH all_polymers AS filtered_polymers, total_structures, total_polymers")
+        # Apply cursor filter
+        cursor = filters.get_cursor()
+        if cursor and cursor[0] is not None:
+            query_parts.extend(
+                [
+                    "WITH total_structures_count, total_polymers_count, rib, poly",
+                    "WHERE rib.rcsb_id < $cursor_rcsb_id OR (rib.rcsb_id = $cursor_rcsb_id AND poly.auth_asym_id > $cursor_auth_asym_id)",
+                ]
+            )
+            params["cursor_rcsb_id"] = cursor[0]
+            params["cursor_auth_asym_id"] = cursor[1] if cursor[1] is not None else ""
 
-        query_parts.extend([
-            "WITH filtered_polymers[0..$limit] AS polymers,",
-            "     total_structures,",
-            "     total_polymers,",
-            "     CASE WHEN size(filtered_polymers) > $limit",
-            "          THEN {rcsb_id: filtered_polymers[$limit].rcsb_id, auth_asym_id: filtered_polymers[$limit].auth_asym_id}",
-            "          ELSE null",
-            "     END AS next_cursor",
-            "RETURN",
-            "     [poly IN polymers | properties(poly)] AS polymers,",
-            "     total_structures,",
-            "     total_polymers,",
-            "     next_cursor"
-        ])
+        query_parts.extend(
+            [
+                f"WITH total_structures_count, total_polymers_count, rib, poly",
+                f"WITH total_structures_count, total_polymers_count, collect({{rib: rib, poly: poly}}) AS all_polymers",
+                f"WITH total_structures_count, total_polymers_count, all_polymers[0..{filters.limit}] AS limited_polymers, size(all_polymers) > {filters.limit} AS has_more",
+                "UNWIND limited_polymers AS polymer_data",
+                "WITH total_structures_count, total_polymers_count, polymer_data.rib AS rib, polymer_data.poly AS poly, has_more",
+                "ORDER BY rib.rcsb_id DESC, poly.auth_asym_id ASC",
+                "WITH total_structures_count, total_polymers_count, collect(poly) AS polymers, has_more,",
+                "     collect(rib.rcsb_id) AS rcsb_ids, collect(poly.auth_asym_id) AS auth_asym_ids",
+                "WITH polymers, total_structures_count, total_polymers_count, has_more,",
+                "     rcsb_ids[size(rcsb_ids)-1] AS last_rcsb_id, auth_asym_ids[size(auth_asym_ids)-1] AS last_auth_asym_id",
+                "RETURN",
+                "    polymers,",
+                "    total_structures_count,",
+                "    total_polymers_count,",
+                "    CASE WHEN has_more THEN {rcsb_id: last_rcsb_id, auth_asym_id: last_auth_asym_id} ELSE null END AS next_cursor",
+            ]
+        )
 
         query = "\n".join(structure_query_parts + query_parts)
 
-        print("=======Executing filtered polymers query:==========")
-        print("\033[96m" + query + "\033[0m")
-        print("=====================================================")
+        print("\n\033[96m" + query + "\033[0m\n")
 
         with self.adapter.driver.session() as session:
             def _(tx: Transaction | ManagedTransaction):
-                result = tx.run(query, params).single()
+                result = tx.run(query, params)
+                pprint("GOT RESULT")
+                print(result)
+                result = result.single()
                 if result:
-                    polymers, total_structures, total_polymers, next_cursor = result
+                    print(result)
+                    ( polymers, total_structures_count, total_polymers_count, next_cursor, ) = result
                     return (
                         polymers,
-                        (next_cursor['rcsb_id'], next_cursor['auth_asym_id']) if next_cursor else None,
-                        total_polymers,
-                        total_structures
-                    )
-                return [], None, 0, 0
+                          ( (next_cursor["rcsb_id"], next_cursor["auth_asym_id"]) if next_cursor else None ),
+                        total_polymers_count,
+                        total_structures_count, )
 
             return session.execute_read(_)
-
-
 
     def get_taxa(self, src_host: typing.Literal["source", "host"]) -> list[int]:
         def _(tx: Transaction | ManagedTransaction):

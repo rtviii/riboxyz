@@ -63,60 +63,64 @@ def structure_composition_stats(request):
 def random_profile(request):
     return RibosomeStructure.model_validate(dbqueries.random_structure()[0])
 
-@structure_router.get('/list_polymers_filtered_by_polymer_class', response=dict,  tags=[TAG])
-def polymers_by_polymer_class(request,
-      polymer_class: PolymerClass,
-      page  = 1,
-      ):
+# @structure_router.get('/list_polymers_filtered_by_polymer_class', response=dict,  tags=[TAG])
+# def polymers_by_polymer_class(request,
+#       polymer_class: PolymerClass,
+#       page  = 1,
+#       ):
 
-    polymers, count = dbqueries.list_polymers_filtered_by_polymer_class(page, polymer_class)[0]
-    return { "polymers":polymers, "count": count }
+#     polymers, count = dbqueries.list_polymers_filtered_by_polymer_class(page, polymer_class)[0]
+#     return { "polymers":polymers, "count": count }
 
-@structure_router.get('/list_polymers_by_structure', response=dict,  tags=[TAG])
-def polymers_by_structure(request,
-      page  = 1,
-      search          = None,
-      year            = None,
-      resolution      = None,
-      polymer_classes = None,
-      source_taxa     = None,
-      host_taxa       = None):
-    def parse_empty_or_int(_:str):
-        if _ != '':
-            return int(_)
-        else:
-            return None
+# @structure_router.get('/list_polymers_by_structure', response=dict,  tags=[TAG])
+# def polymers_by_structure(request,
+#       page  = 1,
+#       search          = None,
+#       year            = None,
+#       resolution      = None,
+#       polymer_classes = None,
+#       source_taxa     = None,
+#       host_taxa       = None):
+#     def parse_empty_or_int(_:str):
+#         if _ != '':
+#             return int(_)
+#         else:
+#             return None
 
-    def parse_empty_or_float(_:str):
-        if _ != '':
-            return float(_)
-        else:
-            return None
+#     def parse_empty_or_float(_:str):
+#         if _ != '':
+#             return float(_)
+#         else:
+#             return None
 
 
-    year            = None if year            == "" else list(map(parse_empty_or_int,year.split(",")))
-    resolution      = None if resolution      == "" else list(map(parse_empty_or_float,resolution.split(",")))
-    host_taxa       = None if host_taxa       == "" else list(map(parse_empty_or_int,host_taxa.split(","))) if host_taxa else None
-    source_taxa     = None if source_taxa     == "" else list(map(parse_empty_or_int,source_taxa.split(","))) if source_taxa else None
-    polymer_classes = None if polymer_classes == "" else list(map(lambda _: PolymerClass(_), polymer_classes.split(",")))
+#     year            = None if year            == "" else list(map(parse_empty_or_int,year.split(",")))
+#     resolution      = None if resolution      == "" else list(map(parse_empty_or_float,resolution.split(",")))
+#     host_taxa       = None if host_taxa       == "" else list(map(parse_empty_or_int,host_taxa.split(","))) if host_taxa else None
+#     source_taxa     = None if source_taxa     == "" else list(map(parse_empty_or_int,source_taxa.split(","))) if source_taxa else None
+#     polymer_classes = None if polymer_classes == "" else list(map(lambda _: PolymerClass(_), polymer_classes.split(",")))
 
-    qreturn =  dbqueries.list_polymers_filtered_by_structure(page, search, year, resolution, polymer_classes, source_taxa, host_taxa)
+#     qreturn =  dbqueries.list_polymers_filtered_by_structure(page, search, year, resolution, polymer_classes, source_taxa, host_taxa)
 
-    if len(qreturn) < 1:
-        print("Found none. returning empty", { "polymers":[], "count": 0 })
-        return { "polymers":[], "count": 0 }
-    else:
-        polymers, count = qreturn[0]
-        print("RETURNING POLYMERS actual len", len( polymers ), count)
-        return { "polymers":polymers, "count": count }
+#     if len(qreturn) < 1:
+#         print("Found none. returning empty", { "polymers":[], "count": 0 })
+#         return { "polymers":[], "count": 0 }
+#     else:
+#         polymers, count = qreturn[0]
+#         print("RETURNING POLYMERS actual len", len( polymers ), count)
+#         return { "polymers":polymers, "count": count }
+
+
+
 
 @structure_router.get('/list_ligands',response=list[tuple[dict,list[dict]]] , tags=[TAG])
 def list_ligands(request):
     return dbqueries.list_ligands()
 
-@structure_router.post('/list', response=dict, tags=[TAG])
-def filter_list(request, filters:StructureFilterParams):
+@structure_router.post('/list_structures', response=dict, tags=[TAG])
+def list_structures(request, filters:StructureFilterParams):
     parsed_filters                       = StructureFilterParams(**json.loads(request.body))
+    print(parsed_filters)
     structures, next_cursor, total_count = dbqueries.list_structs_filtered(parsed_filters)
     structures_validated                 = [RibosomeStructureMetadata.model_validate(s) for s in structures]
     return {
@@ -127,13 +131,11 @@ def filter_list(request, filters:StructureFilterParams):
 
 @structure_router.post('/list_polymers', response=dict, tags=[TAG])
 def list_polymers(request, filters:PolymersFilterParams): 
+    print("hit polymers")
     parsed_filters =                    PolymersFilterParams(**json.loads(request.body))
+    print(parsed_filters)
     polymers, next_cursor,  total_polymers_count, total_structures_count  = dbqueries.list_polymers_filtered(parsed_filters)
     polymers_validated = [Polymer.model_validate(p) for p in polymers]
-    print("POLYMERS VALIDATED", len(polymers_validated))
-    print("NEXT CURSOR", next_cursor)
-    print("TOTAL POLY COUNT", total_polymers_count)
-    print("TOTAL STRUCT COUNT", total_structures_count)
     return {
         "polymers"              : polymers_validated,
         "next_cursor"           : next_cursor,
