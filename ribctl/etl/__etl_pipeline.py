@@ -25,6 +25,7 @@ from ribctl.lib.schema.types_ribosome import (
     CytosolicProteinClass,
     CytosolicProteinClass,
     RibosomeStructure,
+    RibosomeStructureMetadata,
 )
 
 

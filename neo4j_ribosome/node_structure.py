@@ -3,7 +3,7 @@ from typing import Callable, Literal
 from neo4j import Driver, ManagedTransaction, Record, Transaction
 from neo4j.graph import Node, Relationship
 from neo4j import ManagedTransaction, Transaction
-from ribctl.lib.schema.types_ribosome import NonpolymericLigand, RibosomeStructure
+from ribctl.lib.schema.types_ribosome import NonpolymericLigand, RibosomeStructure, RibosomeStructureMetadata
 
 # Get superkingdom given an rcsb_id
 """

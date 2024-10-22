@@ -28,9 +28,10 @@ ce = click.echo
 @click.option('-t', '--taxid', type=int, help='List structures for descendants of this taxid')
 @click.pass_context
 def ls(ctx, taxid):
-    rcsb_id = ctx.obj['rcsb_id'].upper()
-    
-    
+    rcsb_id = None
+
+    if 'rcsb_id' in ctx.obj:
+        rcsb_id = ctx.obj['rcsb_id'].upper()
     
     if rcsb_id is not None:
         if "." in rcsb_id:

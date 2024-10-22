@@ -2,7 +2,7 @@ import argparse
 import itertools
 import os
 from typing import Tuple
-from ribctl.lib.schema.types_ribosome import RibosomeStructure
+from ribctl.lib.schema.types_ribosome import RibosomeStructureMetadata
 from pymol import cmd
 from ribctl.lib.mod_transpose_bsites import SeqMatch
 from ribctl.lib.utils import open_structure
@@ -33,9 +33,9 @@ def ranged_align_by_polyclass(
 
     rstart, rend = rng
 
-    json_src = RibosomeStructure.parse_obj(
+    json_src = RibosomeStructureMetadata.parse_obj(
         open_structure(src_struct.upper(), 'json'))
-    json_tgt = RibosomeStructure.parse_obj(
+    json_tgt = RibosomeStructureMetadata.parse_obj(
         open_structure(tgt_struct.upper(), 'json'))
 
     seq_ids = {
@@ -103,9 +103,9 @@ def ranged_align_by_auth_asym_id(
 
     rstart, rend = rng
 
-    json_src = RibosomeStructure.parse_obj(
+    json_src = RibosomeStructureMetadata.parse_obj(
         open_structure(src_struct.upper(), 'json'))
-    json_tgt = RibosomeStructure.parse_obj(
+    json_tgt = RibosomeStructureMetadata.parse_obj(
         open_structure(tgt_struct.upper(), 'json'))
 
     seq_ids = {

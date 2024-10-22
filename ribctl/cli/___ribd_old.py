@@ -8,7 +8,7 @@ with warnings.catch_warnings():
 with warnings.catch_warnings():
     warnings.simplefilter('ignore', BiopythonDeprecationWarning)
 
-from ribctl.lib.schema.types_ribosome import RibosomeStructure
+from ribctl.lib.schema.types_ribosome import RibosomeStructureMetadata
 sys.dont_write_bytecode = True
 import argparse
 import json

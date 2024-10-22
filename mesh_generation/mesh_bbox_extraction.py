@@ -7,7 +7,7 @@ import open3d as o3d
 from mendeleev import element
 import pandas as pd
 from ribctl.etl.etl_assets_ops import RibosomeOps, Structure
-from mesh_generation.paths import *
+from mesh_generation.mesh_paths import *
 from Bio.PDB.Atom import Atom
 
 # Tunnel refinement:
@@ -32,19 +32,19 @@ def open_tunnel_csv(rcsb_id: str) -> list[list]:
 
 
 def parse_struct_via_centerline(
-    rcsb_id: str, centerline_data: list, expansion_radius: int = 15
+    rcsb_id: str, centerline_data: list, expansion_radius: int = 30
 ) -> list[Atom]:
     """centerline data is an array of lists [radius, x, y, z]"""
     from Bio.PDB.MMCIFParser import MMCIFParser
     from Bio.PDB.NeighborSearch import NeighborSearch
     from Bio.PDB import Selection
 
-    parser = MMCIFParser()
+    parser      = MMCIFParser()
     struct_path = RibosomeOps(rcsb_id).paths.cif
-    structure = parser.get_structure(rcsb_id, struct_path)
-    atoms = Selection.unfold_entities(structure, "A")
-    ns = NeighborSearch(atoms)
-    nbhd = set()
+    structure   = parser.get_structure(rcsb_id, struct_path)
+    atoms       = Selection.unfold_entities(structure, "A")
+    ns          = NeighborSearch(atoms)
+    nbhd        = set()
 
     for [probe_radius, x, y, z] in centerline_data:
         nearby_atoms = ns.search([x, y, z], probe_radius + expansion_radius, "A")
@@ -110,7 +110,6 @@ def remove_nascent_chain(atoms: list[Atom], rcsb_id:str) -> list[Atom]:
     print("REMOVING THE NASCENT CHAIN: {} in {}".format(nascent_chains[rcsb_id], rcsb_id))
     return list(filter(lambda x: x.get_full_id()[2] != nascent_chains[rcsb_id] ,atoms))
 
-
 def parse_struct_via_bbox(rcsb_id: str, bbox: list[Atom]) -> list[Atom]:
     """bbox is a tuple of minx,miny,minz and maxx,maxy,maxz points"""
     from Bio.PDB.MMCIFParser import MMCIFParser
@@ -150,7 +149,6 @@ def parse_struct_via_bbox(rcsb_id: str, bbox: list[Atom]) -> list[Atom]:
             nbhd.append(atom)
 
     return remove_nascent_chain(nbhd, rcsb_id)
-
 
 def encode_atoms(
     rcsb_id: str, atoms_list: list[Atom], write=False, writepath=None
@@ -206,14 +204,12 @@ def encode_atoms(
 
     return aggregate
 
-
 def create_pcd_from_atoms(
     positions: np.ndarray, atom_types: np.ndarray, save_path: str
 ):
     pcd = o3d.geometry.PointCloud(o3d.utility.Vector3dVector(positions))
     pcd.colors = o3d.utility.Vector3dVector(atom_types)
     o3d.io.write_point_cloud(save_path, pcd)
-
 
 def bounding_box(points: np.ndarray):
     """Computes the axis-aligned minimum bounding box of a list of points.
@@ -247,7 +243,6 @@ def bounding_box(points: np.ndarray):
         [max_x, max_y, max_z],
         [min_x, max_y, max_z],
     ]
-
 
 def extract_bbox_atoms(rcsb_id: str) -> list:
     print("Extracting tunnel bounding box atoms for {}".format(rcsb_id))

@@ -2,7 +2,7 @@ import os
 from pprint import pprint
 from ribctl.lib.schema.types_binding_site import BindingSite, LigandTransposition
 from ribctl.lib.mod_transpose_bsites import init_transpose_ligand, open_bsite
-from ribctl.lib.schema.types_ribosome import RibosomeStructure
+from ribctl.lib.schema.types_ribosome import RibosomeStructure, RibosomeStructureMetadata
 from ribctl.lib import utils
 from ribctl.lib.libbsite import bsite_ligand, bsite_extrarbx_polymer, bsite_extrarbx_polymer, struct_ligand_ids
 from ribctl.lib.mod_superimpose import pymol_super, ranged_align_by_polyclass
@@ -40,7 +40,7 @@ def extract_bsites (rcsb_id):
 def predict_bsite(PDBID_target, ligand_id, ligand_type)->LigandTransposition:
 
     bsite          = open_bsite(utils.ligand_path(PDBID_target, ligand_id, ligand_type))
-    target_profile = RibosomeStructure.parse_obj(utils.open_structure(PDBID_target,'json')  )
+    target_profile = RibosomeStructureMetadata.parse_obj(utils.open_structure(PDBID_target,'json')  )
     prediction     = init_transpose_ligand(target_profile, bsite)
 
     return prediction

@@ -16,14 +16,6 @@ from Bio.PDB.Residue import Residue
 from Bio.PDB.Chain import Chain
 from ribctl.lib.schema.types_binding_site import ( ResidueSummary, )
 
-# Don't want to lose my own rant, but this should be moved out to a blog post or somethign.
-"""
-Ex. here are guys from model-angelo ( GNN for model building that chenwei looked at) fixing this on their onw : https://github.com/3dem/model-angelo/issues/51
-Here is Deep Mind implementing their own parser https://huggingface.co/spaces/simonduerr/ProteinMPNN/blob/f969e9cfb6f11ba299c7108aadff124e9cf38b1f/alphafold/alphafold/data/mmcif_parsing.py
-Here the  gemmi guy trying to connect his work to chimerax and stumbling over this : https://mail.cgl.ucsf.edu/mailman/archives/list/chimerax-users@cgl.ucsf.edu/thread/XOO3G5MUOHLQBHSVF2NENWYNG3SOUF2O/
-https://bioinformatics.stackexchange.com/questions/14210/pdb-residue-numbering
-https://proteopedia.org/wiki/index.php/Unusual_sequence_numbering
-"""
 
 class BiopythonChain(Chain):
     """ 

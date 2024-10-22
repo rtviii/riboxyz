@@ -29,6 +29,7 @@ from ribctl.lib.schema.types_ribosome import (
     PolypeptideClass,
     Protein,
     RibosomeStructure,
+    RibosomeStructureMetadata,
 )
 from ribctl.lib.libhmm import HMM, HMMClassifier
 

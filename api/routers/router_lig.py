@@ -9,7 +9,6 @@ from ribctl import RIBETL_DATA
 from ribctl.etl.etl_assets_ops import RibosomeOps, Structure
 from ribctl.lib.libbsite import bsite_ligand, bsite_transpose, lig_get_chemical_categories
 from ribctl.lib.schema.types_binding_site import BindingSite, LigandTransposition
-from ribctl.lib.schema.types_ribosome import RNA, LifecycleFactorClass, MitochondrialProteinClass, Polymer, PolynucleotideClass, CytosolicProteinClass, PolynucleotideClass, PolypeptideClass, Protein, ProteinClass, RibosomeStructure
 
 router_lig = Router()
 TAG                   = "Ligands, Antibitics & Small Molecules"

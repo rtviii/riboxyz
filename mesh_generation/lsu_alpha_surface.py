@@ -13,8 +13,8 @@ import numpy as np
 import numpy as np
 from sklearn.cluster import DBSCAN
 from __archive.scripts.pymol_visualtion import extract_chains
-from mesh_generation.bbox_extraction import ( encode_atoms, open_tunnel_csv, parse_struct_via_bbox, parse_struct_via_centerline)
-from mesh_generation.paths import *
+from mesh_generation.mesh_bbox_extraction import ( encode_atoms, open_tunnel_csv, parse_struct_via_bbox, parse_struct_via_centerline)
+from mesh_generation.mesh_paths import *
 from ribctl import RIBETL_DATA
 from ribctl.lib.libpdb import extract_lsu_ensemble_tunnel_vicinity
 import pyvista as pv
