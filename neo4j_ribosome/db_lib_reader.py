@@ -19,7 +19,6 @@ DO NOT put validation logic/schema here. This is a pure interface to the databas
 from pydantic import BaseModel, Field
 from typing import Optional, List, Literal, Tuple, Union
 
-
 class StructureFilterParams(BaseModel):
 
     cursor: Optional[str] = None
@@ -31,23 +30,6 @@ class StructureFilterParams(BaseModel):
     source_taxa: Optional[List[int]] = None
     host_taxa: Optional[List[int]] = None
     subunit_presence: Optional[Literal["SSU+LSU", "LSU", "SSU"]] = None
-
-
-# class PolymersFilterParams(BaseModel):
-
-#     cursor           : Optional[Tuple[str, str]]                              = None
-#     limit            : int                                                    = Field(default=20, ge=1, le=100)
-#     year             : Optional[tuple[Optional[int], Optional[int]]]          = None
-#     search           : Optional[str]                                          = None
-#     resolution       : Optional[tuple[Optional[float], Optional[float]]]      = None
-#     polymer_classes  : Optional[List[PolynucleotideClass | PolypeptideClass]] = None
-#     source_taxa      : Optional[List[int]]                                    = None
-#     host_taxa        : Optional[List[int]]                                    = None
-#     subunit_presence : Optional[Literal["SSU+LSU", "LSU", "SSU"]]              = None
-
-#     current_polymer_class : Optional[PolynucleotideClass| PolypeptideClass] = None
-#     uniprot_id            : Optional[str]                                  = None
-#     has_motif            : Optional[str]                                  = None
 
 
 class PolymersFilterParams(BaseModel):
@@ -535,62 +517,5 @@ return apoc.map.merge(rib, rest)
         with self.adapter.driver.session() as session:
             return session.execute_read(_)
 
-
 dbqueries = Neo4jReader()
 
-
-#! ---- Sample structures query
-
-# match (rib:RibosomeStructure)
-# with rib order by rib.rcsb_id desc
-
-# where
-# toLower(rib.citation_title) + toLower(rib.rcsb_id) + toLower(rib.pdbx_keywords_text) + apoc.text.join(rib.citation_rcsb_authors, "")  contains 'complex'
-# and (2004 <= rib.citation_year and rib.citation_year <= 2020 or rib.citation_year is null)
-# and 0.5 < rib.resolution and rib.resolution < 4.0
-# and ALL(x in [ "16SrRNA" ] where x in apoc.coll.flatten(collect{ match (rib)-[]-(p:Polymer) return p.nomenclature }))
-# and ANY(tax in [2] where tax in apoc.coll.flatten(collect{ match (rib)-[:source]-(p:PhylogenyNode)-[:descendant_of*]-(s:PhylogenyNode) return [p.ncbi_tax_id, s.ncbi_tax_id]}))
-
-# with collect(rib)[0..20] as rib, count(rib) as total_count
-# unwind rib as ribosomes
-
-# optional match (l:Ligand)-[]-(ribosomes)
-# with collect(PROPERTIES(l)) as ligands, ribosomes, total_count
-# match (rps:Protein)-[]-(ribosomes)
-# with collect(PROPERTIES(rps)) as proteins, ligands, ribosomes, total_count
-# optional match (rna:RNA)-[]-(ribosomes)
-# with collect(PROPERTIES(rna)) as rnas, proteins, ligands, ribosomes, total_count
-
-# with apoc.map.mergeList([{proteins:proteins},{nonpolymeric_ligands:ligands},{rnas:rnas},{other_polymers:[]}]) as rest, ribosomes, total_count
-# return collect(apoc.map.merge(ribosomes, rest)),  collect(distinct total_count)[0]
-
-
-#! ---- Sample polymers query [by_structure]
-
-# match (rib:RibosomeStructure)
-# with rib order by rib.rcsb_id desc
-
-# where
-# toLower(rib.citation_title) + toLower(rib.rcsb_id) + toLower(rib.pdbx_keywords_text) + apoc.text.join(rib.citation_rcsb_authors, "")  contains 'complex'
-# and (2004 <= rib.citation_year and rib.citation_year <= 2020 or rib.citation_year is null)
-# and 0.5 < rib.resolution and rib.resolution < 4.0
-# and ALL(x in [ "16SrRNA" ] where x in apoc.coll.flatten(collect{ match (rib)-[]-(p:Polymer) return p.nomenclature }))
-# and ANY(tax in [2] where tax in apoc.coll.flatten(collect{ match (rib)-[:source]-(p:PhylogenyNode)-[:descendant_of*]-(s:PhylogenyNode) return [p.ncbi_tax_id, s.ncbi_tax_id]}))
-
-# with collect(rib) as rib
-# unwind rib as ribosomes
-
-# match (poly:Polymer)-[]-(ribosomes)
-# with poly order by poly.nomenclature desc
-# with collect(poly)[0..50] as poly, count(poly) as pcount
-# unwind poly as polys
-# return properties(polys), pcount
-
-
-#! ---- Sample polymers query [by_polymer_class]
-
-# match (poly:Polymer)-[]-(pc:PolymerClass {class_id:"uL4"})
-# with poly order by poly.nomenclature desc
-# with collect(poly)[0..50] as poly, count(poly) as pcount
-# unwind poly as polys
-# return properties(polys), pcount

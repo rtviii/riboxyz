@@ -63,56 +63,6 @@ def structure_composition_stats(request):
 def random_profile(request):
     return RibosomeStructure.model_validate(dbqueries.random_structure()[0])
 
-# @structure_router.get('/list_polymers_filtered_by_polymer_class', response=dict,  tags=[TAG])
-# def polymers_by_polymer_class(request,
-#       polymer_class: PolymerClass,
-#       page  = 1,
-#       ):
-
-#     polymers, count = dbqueries.list_polymers_filtered_by_polymer_class(page, polymer_class)[0]
-#     return { "polymers":polymers, "count": count }
-
-# @structure_router.get('/list_polymers_by_structure', response=dict,  tags=[TAG])
-# def polymers_by_structure(request,
-#       page  = 1,
-#       search          = None,
-#       year            = None,
-#       resolution      = None,
-#       polymer_classes = None,
-#       source_taxa     = None,
-#       host_taxa       = None):
-#     def parse_empty_or_int(_:str):
-#         if _ != '':
-#             return int(_)
-#         else:
-#             return None
-
-#     def parse_empty_or_float(_:str):
-#         if _ != '':
-#             return float(_)
-#         else:
-#             return None
-
-
-#     year            = None if year            == "" else list(map(parse_empty_or_int,year.split(",")))
-#     resolution      = None if resolution      == "" else list(map(parse_empty_or_float,resolution.split(",")))
-#     host_taxa       = None if host_taxa       == "" else list(map(parse_empty_or_int,host_taxa.split(","))) if host_taxa else None
-#     source_taxa     = None if source_taxa     == "" else list(map(parse_empty_or_int,source_taxa.split(","))) if source_taxa else None
-#     polymer_classes = None if polymer_classes == "" else list(map(lambda _: PolymerClass(_), polymer_classes.split(",")))
-
-#     qreturn =  dbqueries.list_polymers_filtered_by_structure(page, search, year, resolution, polymer_classes, source_taxa, host_taxa)
-
-#     if len(qreturn) < 1:
-#         print("Found none. returning empty", { "polymers":[], "count": 0 })
-#         return { "polymers":[], "count": 0 }
-#     else:
-#         polymers, count = qreturn[0]
-#         print("RETURNING POLYMERS actual len", len( polymers ), count)
-#         return { "polymers":polymers, "count": count }
-
-
-
-
 @structure_router.get('/list_ligands',response=list[tuple[dict,list[dict]]] , tags=[TAG])
 def list_ligands(request):
     return dbqueries.list_ligands()
