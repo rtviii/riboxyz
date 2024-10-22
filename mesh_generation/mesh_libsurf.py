@@ -9,14 +9,14 @@ import json
 import os
 import numpy as np
 import numpy as np
-from mesh_generation.bbox_extraction import (
+from mesh_generation.mesh_bbox_extraction import (
     encode_atoms,
     open_tunnel_csv,
     parse_struct_via_bbox,
     parse_struct_via_centerline,
 )
 from compas.geometry import bounding_box
-from mesh_generation.paths import *
+from mesh_generation.mesh_paths import *
 from ribctl import EXIT_TUNNEL_WORK, POISSON_RECON_BIN, RIBETL_DATA
 import warnings
 warnings.filterwarnings("ignore")

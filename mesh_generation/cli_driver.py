@@ -5,10 +5,10 @@ sys.path.append('/home/rtviii/dev/riboxyz')
 from matplotlib import pyplot as plt
 import numpy as np
 from sklearn.cluster import DBSCAN
-from bbox_extraction import ( encode_atoms, open_tunnel_csv, parse_struct_via_bbox, parse_struct_via_centerline)
-from paths import *
-from full_pipeline import pipeline
-from visualization import plot_with_landmarks
+from mesh_generation.mesh_bbox_extraction import ( encode_atoms, open_tunnel_csv, parse_struct_via_bbox, parse_struct_via_centerline)
+from mesh_paths import *
+from mesh_generation.mesh_full_pipeline import pipeline
+from mesh_generation.mes_visualization import plot_with_landmarks
 
 
 DBSCAN_METRICS        = [

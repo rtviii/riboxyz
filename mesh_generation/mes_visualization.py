@@ -6,7 +6,7 @@ import pyvista as pv
 import json
 import numpy as np
 import numpy as np
-from mesh_generation.paths import *
+from mesh_generation.mesh_paths import *
 from ribctl import EXIT_TUNNEL_WORK, POISSON_RECON_BIN, RIBETL_DATA
 from ribctl.etl.etl_assets_ops import RibosomeOps, Structure
 
