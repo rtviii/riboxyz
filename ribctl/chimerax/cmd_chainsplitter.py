@@ -31,4 +31,4 @@ def register_ribrepr_command(logger):
         synopsis           = "representation")
     register("chainsplitter", desc, chainsplitter, logger=logger)
 
-register_ribrepr_command(session.logger)
+# register_ribrepr_command(session.logger)

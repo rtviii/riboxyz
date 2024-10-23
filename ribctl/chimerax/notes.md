@@ -2,7 +2,7 @@
 
 #### Python:
 
-Before i forget: ChimeraX runs with pythone3.11 and the on this arch machine this python is activated per-shell via `pyenv shell 3.11.9`
+Before i forget: ChimeraX runs with python3.11 and the on this arch machine this python is activated per-shell via `pyenv shell 3.11.9`
 
 
 #### CMD:

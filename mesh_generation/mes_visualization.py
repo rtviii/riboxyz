@@ -9,9 +9,7 @@ import numpy as np
 from mesh_generation.mesh_paths import *
 from ribctl import EXIT_TUNNEL_WORK, POISSON_RECON_BIN, RIBETL_DATA
 from ribctl.etl.etl_assets_ops import RibosomeOps, Structure
-
 from ribctl.lib.libmsa import Taxid
-
 
 hexcolors = {
     'aliceblue'           : '#F0F8FF',
@@ -166,7 +164,6 @@ hexcolors = {
     'tab:olive'           : '#bcbd22',
     'tab:cyan'            : '#17becf',
 }
-
 
 diagram_tunnels = {
     "bacteria": [
@@ -1028,10 +1025,6 @@ def retrieve_ptc_and_chain_atoms(rcsb_id):
 
         return ptc_midpoint, atom_coordinates_by_chain
 
-
-
-
-#! For figure only
 def visualize_DBSCAN_CLUSTERS_particular_eps_minnbrs( dbscan_cluster_dict: dict[int, list], eps, min_nbrs, gif:bool=False, gif_name:str|None=None):
     plotter               = pv.Plotter(off_screen=gif)
     y_offset= 0.95

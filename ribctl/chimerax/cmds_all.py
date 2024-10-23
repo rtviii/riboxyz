@@ -2,12 +2,13 @@ import enum
 import json
 import os
 import sys
+sys.path.append('/home/rtviii/dev/riboxyz')
+
 from chimerax.core.commands import register, CmdDesc
 from chimerax.atomic import Structure, AtomicStructure, Chain
 from chimerax.core.commands import run, runscript
 from chimerax.core.commands import CmdDesc, register, StringArg
-
-# https://mail.cgl.ucsf.edu/mailman/archives/list/chimera-users@cgl.ucsf.edu/thread/EOUA5K3CZU6DJYVPISR3GFWHCISR6WGV/
+from chimerax.core import session
 
 RIBETL_DATA = os.environ.get("RIBETL_DATA", "/home/rtviii/dev/RIBETL_DATA")
 
@@ -416,18 +417,6 @@ def ribosome_representation(session, structure: AtomicStructure):
     run(session, "graphics silhouettes true width 1")
     run(session, "light soft")
 
-# # ! Didn't work out for now. Chimerax segfaults when looped on this.
-def produce_and_save_movie(session, structure:str):
-    RCSB_ID = structure
-    run(session, "open /home/rtviii/dev/RIBETL_DATA/{}/{}.cif".format(RCSB_ID, RCSB_ID))
-    run(session, "sym #1 assembly 1") # take only one assembly if multiple are available
-    run(session, "ribrep #2")
-    run(session, "movie record")
-    run(session, "turn y 2 180")
-    run(session, "wait 180")
-    run(session, "movie encode /home/rtviii/dev/riboxyz/chimerax/movies/{}.mp4".format(RCSB_ID))
-    run(session, "close all")
-
 def register_ribrepr_command(logger):
     from chimerax.core.commands import CmdDesc, register
     from chimerax.atomic import AtomicStructureArg, Chain, Residue, Atom
@@ -438,6 +427,17 @@ def register_ribrepr_command(logger):
         synopsis           = "representation ",
     )
     register("ribrep", desc, ribosome_representation, logger=logger)
+
+def produce_and_save_movie(session, structure:str):
+    RCSB_ID = structure
+    run(session, "open /home/rtviii/dev/RIBETL_DATA/{}/{}.cif".format(RCSB_ID, RCSB_ID))
+    run(session, "sym #1 assembly 1") # take only one assembly if multiple are available
+    run(session, "ribrep #2")
+    run(session, "movie record")
+    run(session, "turn y 2 180")
+    run(session, "wait 180")
+    run(session, "movie encode /home/rtviii/dev/riboxyz/chimerax/movies/{}.mp4".format(RCSB_ID))
+    run(session, "close all")
 
 def register_ribmovie_command(logger):
     from chimerax.core.commands import CmdDesc, register
@@ -450,8 +450,43 @@ def register_ribmovie_command(logger):
     )
     register("ribmovie", desc, produce_and_save_movie, logger=logger)
 
-register_ribrepr_command(session.logger)
-register_ribmovie_command(session.logger)
+def register_ligvis_command(logger):
+    def ligvis(session, rcsb_id_chemid:str):
+        chemid, rcsb_id  = rcsb_id_chemid.split("_")
+        OUTPATH = "/home/rtviii/dev/riboxyz/antibiotic_bsites/images/{}_{}.png".format(chemid, rcsb_id)
+        if os.path.exists(OUTPATH):
+            return
 
+        run(session, "set bgColor white")
+        profile         = os.path.join("/home/rtviii/dev/riboxyz/antibiotic_bsites", "{}_{}.json".format(chemid, rcsb_id)) 
+        run(session, "ribetl {}".format(rcsb_id))
+        run(session, "sym #1 assembly 1" )
+        run(session, "hide #2" )
+        run(session, "show surf")
+        run(session, "transparency 85")
+
+        with open(profile, 'r') as f:
+            data:dict = json.load(f)
+
+        for auth_asym_id, poly in data.items():
+            for resi in poly['residues']:
+                run(session, "cartoon #2/{}:{}".format(auth_asym_id,resi['seqid']))
+                run(session, "color #2/{}:{} red".format(auth_asym_id,resi['seqid']))
+        
+        run(session, "save /home/rtviii/dev/riboxyz/antibiotic_bsites/images/{}_{}.png width 800 height 800".format(chemid, rcsb_id))
+        run(session, "close all")
+        print("Produced image for ", chemid, rcsb_id)
+
+    desc = CmdDesc( required= [("rcsb_id_chemid", StringArg)], required_arguments = ["rcsb_id_chemid"] )
+    register("ligvis", desc, ligvis, logger=logger)
+
+def register_ribetl_command(logger):
+    def ribetl(session, rcsb_id:str):
+        rcsb_id = rcsb_id.upper()
+        cifpath = os.path.join(RIBETL_DATA, rcsb_id, "{}.cif".format(rcsb_id))
+        run(session, "open {}".format(rcsb_id,cifpath))
+
+    desc = CmdDesc( required=[("rcsb_id", StringArg)], required_arguments = ["rcsb_id"] )
+    register("ribetl", desc, ribetl, logger=logger)
 
 

@@ -34,6 +34,5 @@ def register_ligvis_command(logger):
     desc = CmdDesc( required= [("rcsb_id_chemid", StringArg)], required_arguments = ["rcsb_id_chemid"] )
     register("ligvis", desc, ligvis, logger=logger)
 
+
 register_ligvis_command(session.logger)
-
-
