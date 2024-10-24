@@ -111,15 +111,16 @@ rcsb_ids = [
     ]
 
 
-src_rcsb_id             = '7A5F'
+# this structure has a mitochondrial tRNA in the A-site, which we use to grab the PTC
+REFERENCE_MITO_STRUCTURE_TRNA             = ( '7A5F' , '24')
 # target_rcsb_id             = '8OIN'
 target_rcsb_id             = '7QI4'
-mttRNA_auth_asym_id = '24'
 mtRRNA_src_aaid     = 'A3'
 # mtRRNA_target_aaid  = 'B8'
 mtRRNA_target_aaid  = 'A'
 def trna_get_cterm_residues()->np.ndarray:
-    c:Chain = RibosomeOps(src_rcsb_id).biopython_structure()[0][mttRNA_auth_asym_id]
+    rcsb_id, trna_id = REFERENCE_MITO_STRUCTURE_TRNA
+    c:Chain = RibosomeOps(rcsb_id).biopython_structure()[0][trna_id]
     c_terminus:Residue = [*c][-1]
     return c_terminus.center_of_mass()
 

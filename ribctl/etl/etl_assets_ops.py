@@ -166,41 +166,6 @@ class RibosomeOps:
         p = self.profile()
         return (p.src_organism_ids, p.host_organism_ids)
 
-    def get_chain_by_polymer_class(
-        self, poly_class: PolynucleotideClass, assembly: int = 0
-    ) -> Polymer | None:
-
-        profile = self.profile()
-
-        if poly_class in [v.value for v in PolynucleotideClass]:
-            if profile.rnas is not None:
-                for rna in profile.rnas:
-                    if (
-                        poly_class in [r.value for r in rna.nomenclature]
-                        and rna.assembly_id == assembly
-                    ):
-                        return rna
-            else:
-                return None
-
-        elif poly_class in [v.value for v in PolypeptideClass]:
-            for prot in profile.proteins:
-                if (
-                    poly_class in [v.value for v in prot.nomenclature]
-                    and prot.assembly_id == assembly
-                ):
-                    return prot
-            else:
-                return None
-
-        else:
-            for polyf in profile.other_polymers:
-                if (
-                    poly_class in [p.value for p in polyf.nomenclature]
-                    and polyf.assembly_id == assembly
-                ):
-                    return polyf
-        return None
 
     def get_poly_by_auth_asym_id( self, auth_asym_id: str ) -> Polymer :
 
@@ -210,21 +175,11 @@ class RibosomeOps:
                 return chain
         raise KeyError("No chain found with auth_asym_id: {}".format(auth_asym_id))
 
-    def get_poly_by_polyclass(
-        self, class_: PolymerClass, assembly: int = 0
-    ) ->Polymer | None:
+    def get_poly_by_polyclass( self, class_: PolymerClass, assembly: int = 0 ) ->Polymer | None:
         """@assembly here stands to specify which of the two or more models the rna comes from
         in the case that a structure contains multiple models (ex. 4V4Q XRAY)"""
 
         profile = self.profile()
-
-        # if profile.rnas == None:
-        #     return None
-
-        # for rna in profile.rnas:
-        #     if class_ in rna.nomenclature and rna.assembly_id == assembly:
-        #         return rna
-
         for polymer in [*profile.rnas, *profile.other_polymers, *profile.proteins]: 
             if class_ in  polymer.nomenclature and polymer.assembly_id == assembly:
                 return polymer
