@@ -111,13 +111,11 @@ rcsb_ids = [
     ]
 
 
-# this structure has a mitochondrial tRNA in the A-site, which we use to grab the PTC
 REFERENCE_MITO_STRUCTURE_TRNA             = ( '7A5F' , '24')
-# # target_rcsb_id             = '8OIN'
-# target_rcsb_id             = '7QI4'
-# mtRRNA_src_aaid     = 'A3'
-# # mtRRNA_target_aaid  = 'B8'
-# mtRRNA_target_aaid  = 'A'
+# TODO:
+# 1.combine the cterm/residue acquision into one ptc_reference fucntion for mitochondria
+# 2.use ptc_reference in consort with another structures's rrna to establish that structure's mapped residues
+# 3.get the farthest pair of residues -- midpoint is the ptc in that structure
 
 def trna_get_cterm_residues()->np.ndarray:
     rcsb_id, trna_id = REFERENCE_MITO_STRUCTURE_TRNA
