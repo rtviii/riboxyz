@@ -113,18 +113,18 @@ rcsb_ids = [
 
 # this structure has a mitochondrial tRNA in the A-site, which we use to grab the PTC
 REFERENCE_MITO_STRUCTURE_TRNA             = ( '7A5F' , '24')
-# target_rcsb_id             = '8OIN'
-target_rcsb_id             = '7QI4'
-mtRRNA_src_aaid     = 'A3'
-# mtRRNA_target_aaid  = 'B8'
-mtRRNA_target_aaid  = 'A'
+# # target_rcsb_id             = '8OIN'
+# target_rcsb_id             = '7QI4'
+# mtRRNA_src_aaid     = 'A3'
+# # mtRRNA_target_aaid  = 'B8'
+# mtRRNA_target_aaid  = 'A'
+
 def trna_get_cterm_residues()->np.ndarray:
     rcsb_id, trna_id = REFERENCE_MITO_STRUCTURE_TRNA
     c:Chain = RibosomeOps(rcsb_id).biopython_structure()[0][trna_id]
     c_terminus:Residue = [*c][-1]
     return c_terminus.center_of_mass()
 
-# get mtrna PTC residues, a good 10-15 of them -- whichver radius that works out to.
 def mitorrna_ptc_residues(trna_cterm_pos:np.ndarray, mtrrna: Chain)->List[Residue]:
     atoms       = Selection.unfold_entities(mtrrna, "A")
     ns          = NeighborSearch(atoms)
@@ -133,6 +133,16 @@ def mitorrna_ptc_residues(trna_cterm_pos:np.ndarray, mtrrna: Chain)->List[Residu
     return nearby_residues
 
 
+def get_ptc_mito(rcsb_id:str):
+    trna_Cterm          = trna_get_cterm_residues()
+    mtRRNA_src_aaid     = RibosomeOps(rcsb_id).get_LSU_rRNA().auth_asym_id
+    mtRRNA_src_chain:Chain    = RibosomeOps(rcsb_id).biopython_structure()[0][mtRRNA_src_aaid]
+    ress                = mitorrna_ptc_residues(trna_Cterm,mtRRNA_src)
+
+    mtRRNA_target:Chain = RibosomeOps(target_rcsb_id).biopython_structure()[0][mtRRNA_target_aaid]
+    _,_,motifs = map_motifs(BiopythonChain( mtRRNA_src ), BiopythonChain(mtRRNA_target), [ResidueSummary.from_biopython_residue(r) for r in ress], 'mt16SrRNA', True)
+    x:Residue
+    pprint(sorted(motifs, key=lambda x: x.get_id()))
 
 
 # T is a landmark with method project_into, project_from, data D and flag `present`
