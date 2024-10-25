@@ -10,7 +10,9 @@ from ribctl.lib.libtax import Taxid
 def midpoint(p1, p2):
     return (p1 + p2) / 2
 
-def find_closest_points(points1, points2):
+
+
+def find_closest_pair_two_sets(points1, points2):
     """
     Find the pair of points (one from each set) that are closest to each other.
     
@@ -73,7 +75,7 @@ def get_constriction(rcsb_id: str):
     uL4_coords  = [(r.center_of_mass() ) for r in uL4_c.child_list]
     uL22_coords = [(r_.center_of_mass() ) for r_ in uL22_c.child_list]
 
-    return midpoint(*find_closest_points(uL4_coords, uL22_coords))
+    return midpoint(*find_closest_pair_two_sets(uL4_coords, uL22_coords))
 
 
 get_ptc_mito('3J9M')
