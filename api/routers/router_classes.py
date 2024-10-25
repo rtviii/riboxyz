@@ -2,10 +2,10 @@ from io import BytesIO
 import json
 import os
 from pprint import pprint
-from django.http import HttpResponse, JsonResponse, HttpResponseServerError
+from django.http import  JsonResponse
 from ninja import Router
 from ribctl import RIBETL_DATA
-from ribctl.etl.etl_assets_ops import RibosomeOps, Structure
+from ribctl.etl.etl_assets_ops import RibosomeOps
 from ribctl.lib.schema.types_ribosome import RNA, LifecycleFactorClass, MitochondrialProteinClass, Polymer, PolynucleotideClass, CytosolicProteinClass, PolynucleotideClass, PolypeptideClass, Protein
 
 classification_router = Router()
@@ -20,7 +20,7 @@ def polynucleotide_class(request,rna_class:PolynucleotideClass):
 
     for rcsb_id in os.listdir(RIBETL_DATA):
         try:
-            x = RibosomeOps(rcsb_id).get_chain_by_polymer_class(rna_class)
+            x = RibosomeOps(rcsb_id).get_poly_by_polyclass(rna_class)
         except Exception as e:
             print(e)
 
@@ -38,7 +38,7 @@ def polypeptide_class(request,protein_class:PolypeptideClass):
     protein_class = protein_class.value
     for rcsb_id in os.listdir(RIBETL_DATA):
         try:
-            x = RibosomeOps(rcsb_id).get_chain_by_polymer_class(protein_class)
+            x = RibosomeOps(rcsb_id).get_poly_by_polyclass(protein_class)
         except Exception as e:
             print(e)
 
@@ -47,7 +47,6 @@ def polypeptide_class(request,protein_class:PolypeptideClass):
             agg.append(x.model_dump())
 
     return JsonResponse(agg, safe=False)
-
 
 @classification_router.get('/lifecyle_factor',  tags=[TAG], response=list[Protein])
 def lifecycle_factor_class(request,factor_class:LifecycleFactorClass):

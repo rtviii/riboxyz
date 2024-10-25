@@ -15,7 +15,6 @@ from Bio.PDB.Atom import Atom
 from ribctl import EXIT_TUNNEL_WORK, RIBETL_DATA
 
 
-
 def open_tunnel_csv(rcsb_id: str) -> list[list]:
     TUNNEL_PATH = os.path.join(
         EXIT_TUNNEL_WORK, "mole_tunnels", "tunnel_{}.csv".format(rcsb_id)
@@ -31,7 +30,7 @@ def open_tunnel_csv(rcsb_id: str) -> list[list]:
     return data
 
 def parse_struct_via_centerline(
-    rcsb_id: str, centerline_data: list, expansion_radius: int = 30
+    rcsb_id: str, centerline_data: list, expansion_radius: int = 15
 ) -> list[Atom]:
     """centerline data is an array of lists [radius, x, y, z]"""
     from Bio.PDB.MMCIFParser import MMCIFParser
@@ -262,8 +261,6 @@ def extract_bbox_atoms(rcsb_id: str) -> list:
         write=True,
         writepath=tunnel_atom_encoding_path(rcsb_id),
     )
-
-
 
 # Define constriction site as the midpoint between the closest residues of ul22/ul4 or ul22m/ul4m
 

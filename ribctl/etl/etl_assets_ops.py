@@ -66,9 +66,9 @@ class AssetPath:
     def profile(self):
         return os.path.join(self.dir, f"{self.rcsb_id}.json")
 
-    # @property
-    # def chains_dir(self):
-    #     return f"{self.dir}/CHAINS"
+    @property
+    def chains_dir(self):
+        return f"{self.dir}/CHAINS"
 
     @property
     def classification_report(self):

@@ -116,6 +116,7 @@ REFERENCE_MITO_STRUCTURE_TRNA             = ( '7A5F' , '24')
 # 1.combine the cterm/residue acquision into one ptc_reference fucntion for mitochondria
 # 2.use ptc_reference in consort with another structures's rrna to establish that structure's mapped residues
 # 3.get the farthest pair of residues -- midpoint is the ptc in that structure
+# 4.feed to mesh acq
 
 def trna_get_cterm_residues()->np.ndarray:
     rcsb_id, trna_id = REFERENCE_MITO_STRUCTURE_TRNA

@@ -213,7 +213,7 @@ def bsite_transpose(
         if len(source_polymer.nomenclature) < 1:
             continue
 
-        target_polymer = target_ops.get_chain_by_polymer_class( source_polymer.nomenclature[0], 0 )
+        target_polymer = target_ops.get_poly_by_polyclass( source_polymer.nomenclature[0], 0 )
         if target_polymer == None:
             continue
 

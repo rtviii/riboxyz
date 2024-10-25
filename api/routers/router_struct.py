@@ -159,7 +159,6 @@ def polymer_classes_nomenclature(request):
     }
     return  classes
 
-
 @structure_router.get('/list_source_taxa', response=list[dict], tags=[TAG])
 def list_source_taxa(request, source_or_host:typing.Literal["source", "host"]):
     """This endpoint informs the frontend about which tax ids are present in the database.

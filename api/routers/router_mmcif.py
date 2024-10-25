@@ -18,13 +18,10 @@ def polymer(request, rcsb_id:str, auth_asym_id:str):
     if not os.path.exists(chain_fullpath):
         return HttpResponse(status=404)
     
-    # Open and read the file
     with open(chain_fullpath, 'rb') as file:
         file_content = file.read()
-    print("GOT FILE AT APTH" , chain_fullpath)
     
-    # Create the response with the correct MIME type
-    response = HttpResponse(file_content, content_type='chemical/x-mmcif')
+    response                        = HttpResponse(file_content, content_type='chemical/x-mmcif')
     response['Content-Disposition'] = f'attachment; filename="{os.path.basename(chain_fullpath)}"'
     
     return response
