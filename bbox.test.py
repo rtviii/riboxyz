@@ -1,3 +1,4 @@
+from mitoptc import get_ptc_mito
 from ribctl.etl.etl_assets_ops import RibosomeOps
 import numpy as np
 from Bio.PDB.Chain import Chain
@@ -75,7 +76,7 @@ def get_constriction(rcsb_id: str):
     return midpoint(*find_closest_points(uL4_coords, uL22_coords))
 
 
-get_ptc('3J9M')
+get_ptc_mito('3J9M')
 get_constriction('3J9M')
 rrna_ptcloud('3J9M')
 

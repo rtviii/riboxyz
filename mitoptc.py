@@ -111,38 +111,52 @@ mitochondrial_rcsb_ids = [
     ]
 
 
-REFERENCE_MITO_STRUCTURE_TRNA             = ( '7A5F' , '24')
 # TODO:
 # 1.combine the cterm/residue acquision into one ptc_reference fucntion for mitochondria
 # 2.use ptc_reference in consort with another structures's rrna to establish that structure's mapped residues
 # 3.get the farthest pair of residues -- midpoint is the ptc in that structure
 # 4.feed to mesh acq
 
-def trna_get_cterm_residues()->np.ndarray:
-    rcsb_id, trna_id = REFERENCE_MITO_STRUCTURE_TRNA
-    c:Chain = RibosomeOps(rcsb_id).biopython_structure()[0][trna_id]
-    c_terminus:Residue = [*c][-1]
-    return c_terminus.center_of_mass()
+REFERENCE_MITO_STRUCTURE_TRNA_RRNA             = ( '7A5F' , '24', "A3")
+ref_rcsb_id, ref_trna_aaid, ref_rrna_aaid = REFERENCE_MITO_STRUCTURE_TRNA_RRNA
+def PTC_reference_mito()->List[Residue]:
+    mmcif_struct = RibosomeOps(ref_rcsb_id).biopython_structure()[0   ]   
 
-def mitorrna_ptc_residues(trna_cterm_pos:np.ndarray, mtrrna: Chain)->List[Residue]:
-    atoms       = Selection.unfold_entities(mtrrna, "A")
-    ns          = NeighborSearch(atoms)
-    nbhd        = set()
-    nearby_residues = ns.search(trna_cterm_pos, 10, "R")
+    def trna_cterm_pos()->np.ndarray:
+        c:Chain = mmcif_struct[ref_trna_aaid]
+        c_terminus:Residue = [*c][-1]
+        return c_terminus.center_of_mass()
+
+    mtrrna          = mmcif_struct[ref_rrna_aaid]
+    atoms           = Selection.unfold_entities(mtrrna, "A")
+    ns              = NeighborSearch(atoms)
+    nearby_residues = ns.search(trna_cterm_pos(), 10, "R")
+
     return nearby_residues
 
 
-def get_ptc_mito(rcsb_id:str):
-    trna_Cterm          = trna_get_cterm_residues()
-    mtRRNA_src_aaid     = RibosomeOps(rcsb_id).get_LSU_rRNA().auth_asym_id
-    mtRRNA_src_chain:Chain    = RibosomeOps(rcsb_id).biopython_structure()[0][mtRRNA_src_aaid]
-    ress                = mitorrna_ptc_residues(trna_Cterm,mtRRNA_src)
 
-    mtRRNA_target:Chain = RibosomeOps(target_rcsb_id).biopython_structure()[0][mtRRNA_target_aaid]
-    _,_,motifs = map_motifs(BiopythonChain( mtRRNA_src ), BiopythonChain(mtRRNA_target), [ResidueSummary.from_biopython_residue(r) for r in ress], 'mt16SrRNA', True)
-    x:Residue
+def get_ptc_mito(target_rcsb_id:str):
+    """
+    Get PTC in @target_rcsb_id by way of mapping a reference PTC in a given mitochondrial structure
+    """
+    mmcif_struct_src = RibosomeOps(ref_rcsb_id).biopython_structure()[0]   
+    mmcif_struct_tgt = RibosomeOps(target_rcsb_id).biopython_structure()[0]   
+
+    mtRRNA_tgt_aaid  = RibosomeOps(target_rcsb_id).get_LSU_rRNA().auth_asym_id
+
+    rrna_src = mmcif_struct_src[ref_rrna_aaid]
+    rrna_tgt = mmcif_struct_tgt[mtRRNA_tgt_aaid]
+
+    ref_residues     = PTC_reference_mito()
+
+
+    _,_,motifs = map_motifs(BiopythonChain(rrna_src), BiopythonChain(rrna_tgt), [ResidueSummary.from_biopython_residue(r) for r in ref_residues], 'mt16SrRNA', True)
     pprint(sorted(motifs, key=lambda x: x.get_id()))
+    return motifs
 
+
+get_ptc_mito('3J9M')
 
 # T is a landmark with method project_into, project_from, data D and flag `present`
 # basically assgin to every node of the taxonomy tree the the landmark with the data where there is one
@@ -150,14 +164,4 @@ def get_ptc_mito(rcsb_id:str):
 class GlobalTaxonomy[T]():
     ...
 
-def get_rcsb_ids():
-    return rcsb_ids
 
-
-trna_Cterm          = trna_get_cterm_residues()
-mtRRNA_src:Chain    = RibosomeOps(src_rcsb_id).biopython_structure()[0][mtRRNA_src_aaid]
-ress                = mitorrna_ptc_residues(trna_Cterm,mtRRNA_src)
-mtRRNA_target:Chain = RibosomeOps(target_rcsb_id).biopython_structure()[0][mtRRNA_target_aaid]
-_,_,motifs = map_motifs(BiopythonChain( mtRRNA_src ), BiopythonChain(mtRRNA_target), [ResidueSummary.from_biopython_residue(r) for r in ress], 'mt16SrRNA', True)
-x:Residue
-pprint(sorted(motifs, key=lambda x: x.get_id()))
