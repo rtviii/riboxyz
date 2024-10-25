@@ -173,8 +173,8 @@ def get_ptc_mito(target_rcsb_id: str)->Tuple[np.ndarray ,list[Residue]]:
         BiopythonChain(rrna_tgt),
         [ResidueSummary.from_biopython_residue(r) for r in ref_residues],
         "mt16SrRNA",
-        True,
-    )
+        True )
+
     (p1,p2,dist) = find_closest_pair([r.center_of_mass()  for r in motifs])
     return (p1+p2)/2, motifs
 
@@ -182,4 +182,4 @@ def get_ptc_mito(target_rcsb_id: str)->Tuple[np.ndarray ,list[Residue]]:
 # T is a landmark with method project_into, project_from, data D and flag `present`
 # basically assgin to every node of the taxonomy tree the the landmark with the data where there is one
 # "project" from extant nodes to the rest preferring proximal nodes as sources
-class GlobalTaxonomy[T](): ...
+# class GlobalTaxonomy[T](): ...

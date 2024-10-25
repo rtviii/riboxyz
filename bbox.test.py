@@ -4,13 +4,10 @@ import numpy as np
 from Bio.PDB.Chain import Chain
 from Bio.PDB.Residue import Residue
 from scipy.spatial.distance import cdist
-
 from ribctl.lib.libtax import Taxid
 
 def midpoint(p1, p2):
     return (p1 + p2) / 2
-
-
 
 def find_closest_pair_two_sets(points1, points2):
     """
@@ -78,143 +75,146 @@ def get_constriction(rcsb_id: str):
     return midpoint(*find_closest_pair_two_sets(uL4_coords, uL22_coords))
 
 
-get_ptc_mito('3J9M')
-get_constriction('3J9M')
-rrna_ptcloud('3J9M')
+ptc_point, _          = get_ptc_mito('3J9M')
+constriction_point = get_constriction('3J9M')
+# ptcloud            = rrna_ptcloud('3J9M')
 
-# import numpy as np
-# import pyvista as pv
+# !---------------------------------------------------------------------------------
+import numpy as np
+import pyvista as pv
 
 
-# def create_cylinder_from_points(base_point, axis_point, radius, height):
-#     """
-#     Create a cylinder using two points: a base point and a point defining the axis direction.
+def create_cylinder_from_points(base_point, axis_point, radius, height):
+    """
+    Create a cylinder using two points: a base point and a point defining the axis direction.
     
-#     Parameters:
-#     base_point: array-like, [x, y, z] starting point of cylinder
-#     axis_point: array-like, [x, y, z] point defining cylinder axis direction
-#     radius: float, radius of cylinder
-#     height: float, total height of cylinder (can extend past axis_point)
+    Parameters:
+    base_point: array-like, [x, y, z] starting point of cylinder
+    axis_point: array-like, [x, y, z] point defining cylinder axis direction
+    radius: float, radius of cylinder
+    height: float, total height of cylinder (can extend past axis_point)
     
-#     Returns:
-#     cylinder: PyVista cylinder mesh (triangulated)
-#     direction: numpy array of normalized direction vector
-#     """
-#     base_point = np.array(base_point)
-#     axis_point = np.array(axis_point)
+    Returns:
+    cylinder: PyVista cylinder mesh (triangulated)
+    direction: numpy array of normalized direction vector
+    """
+    base_point = np.array(base_point)
+    axis_point = np.array(axis_point)
     
-#     direction = axis_point - base_point
-#     direction = direction / np.linalg.norm(direction)
+    direction = axis_point - base_point
+    direction = direction / np.linalg.norm(direction)
     
-#     cylinder = pv.Cylinder(
-#         center=base_point + (height/2) * direction,
-#         direction=direction,
-#         radius=radius,
-#         height=height,
-#         resolution=30
-#     ).triangulate()
+    cylinder = pv.Cylinder(
+        center=base_point + (height/2) * direction,
+        direction=direction,
+        radius=radius,
+        height=height,
+        resolution=30
+    ).triangulate()
     
-#     return cylinder, direction
+    return cylinder, direction
 
-# def intersect_hull_with_cylinder(points, base_point, axis_point, radius, height):
-#     """
-#     Create convex hull from point cloud and intersect it with a cylinder 
-#     defined by two points.
-    
-#     Parameters:
-#     points: numpy array of shape (N, 3) containing the point cloud
-#     base_point: array-like, [x, y, z] base point of cylinder
-#     axis_point: array-like, [x, y, z] point defining cylinder axis
-#     radius: float, radius of cylinder
-#     height: float, height of cylinder
-    
-#     Returns:
-#     dict containing:
-#         - intersection: PyVista mesh of the intersection
-#         - hull: PyVista mesh of the convex hull
-#         - cylinder: PyVista mesh of the cylinder
-#         - direction: numpy array of cylinder axis direction
-#     """
-#     # Create convex hull
-#     cloud = pv.PolyData(points)
-#     hull = cloud.delaunay_3d().extract_surface()
-#     hull = hull.triangulate()
-    
-#     # Create cylinder
-#     cylinder, direction = create_cylinder_from_points(
-#         base_point, axis_point, radius, height
-#     )
-    
-#     # Compute intersection
-#     intersection = hull.boolean_intersection(cylinder)
-    
-#     return {
-#         'intersection': intersection,
-#         'hull': hull,
-#         'cylinder': cylinder,
-#         'direction': direction
-#     }
 
-# def visualize_intersection(result, points, base_point, axis_point):
-#     """
-#     Visualize the intersection, hull, cylinder, and points.
-#     """
-#     plotter = pv.Plotter()
+def intersect_hull_with_cylinder(points, base_point, axis_point, radius, height):
+    """
+    Create convex hull from point cloud and intersect it with a cylinder 
+    defined by two points.
     
-#     # Add hull with transparency
-#     plotter.add_mesh(result['hull'], color='blue', opacity=0.3, label='Convex Hull')
+    Parameters:
+    points: numpy array of shape (N, 3) containing the point cloud
+    base_point: array-like, [x, y, z] base point of cylinder
+    axis_point: array-like, [x, y, z] point defining cylinder axis
+    radius: float, radius of cylinder
+    height: float, height of cylinder
     
-#     # Add cylinder with transparency
-#     plotter.add_mesh(result['cylinder'], color='red', opacity=0.3, label='Cylinder')
+    Returns:
+    dict containing:
+        - intersection: PyVista mesh of the intersection
+        - hull: PyVista mesh of the convex hull
+        - cylinder: PyVista mesh of the cylinder
+        - direction: numpy array of cylinder axis direction
+    """
+    # Create convex hull
+    cloud = pv.PolyData(points)
+    hull = cloud.delaunay_3d().extract_surface()
+    hull = hull.triangulate()
     
-#     # Add intersection
-#     plotter.add_mesh(result['intersection'], color='green', label='Intersection')
+    # Create cylinder
+    cylinder, direction = create_cylinder_from_points(
+        base_point, axis_point, radius, height
+    )
     
-#     # Add original points
-#     plotter.add_points(points, color='black', point_size=10, label='Points')
+    # Compute intersection
+    intersection = hull.boolean_intersection(cylinder)
     
-#     # Add cylinder base and axis points
-#     plotter.add_points(np.array([base_point]), color='red', point_size=15, label='Cylinder Base')
-#     plotter.add_points(np.array([axis_point]), color='blue', point_size=15, label='Cylinder Axis Point')
-    
-#     plotter.add_legend()
-#     return plotter
+    return {
+        'intersection': intersection,
+        'hull': hull,
+        'cylinder': cylinder,
+        'direction': direction
+    }
 
-# # Example usage
-# # if __name__ == "__main__":
-# #     # Parameters you'll need to provide:
-# #     # 1. Point cloud
-# #     points = rrna_ptcloud('3J9M')
+def visualize_intersection(result, points, base_point, axis_point):
+    """
+    Visualize the intersection, hull, cylinder, and points.
+    """
+    plotter = pv.Plotter()
     
-# #     # 2. Cylinder parameters
-# #     base_point = np.array([0., 0., 0.])  # Replace with your base point
-# #     axis_point = np.array([1., 1., 1.])  # Replace with your axis point
-# #     radius = 1.0                         # Replace with your radius
-# #     height = 3.0                         # Replace with your height
+    # Add hull with transparency
+    plotter.add_mesh(result['hull'], color='blue', opacity=0.3, label='Convex Hull')
     
-# #     try:
-# #         # Compute intersection
-# #         result = intersect_hull_with_cylinder(
-# #             points=points,
-# #             base_point=base_point,
-# #             axis_point=axis_point,
-# #             radius=radius,
-# #             height=height
-# #         )
+    # Add cylinder with transparency
+    plotter.add_mesh(result['cylinder'], color='red', opacity=0.3, label='Cylinder')
+    
+    # Add intersection
+    plotter.add_mesh(result['intersection'], color='green', label='Intersection')
+    
+    # Add original points
+    plotter.add_points(points, color='black', point_size=10, label='Points')
+    
+    # Add cylinder base and axis points
+    plotter.add_points(np.array([base_point]), color='red', point_size=15, label='Cylinder Base')
+    plotter.add_points(np.array([axis_point]), color='blue', point_size=15, label='Cylinder Axis Point')
+    
+    plotter.add_legend()
+    return plotter
+
+pv.global_theme.allow_empty_mesh = True
+# Example usage
+if __name__ == "__main__":
+    # Parameters you'll need to provide:
+    # 1. Point cloud
+    points = rrna_ptcloud('3J9M')
+    
+    # 2. Cylinder parameters
+    base_point = np.array(ptc_point)  # Replace with your base point
+    axis_point = np.array(constriction_point)  # Replace with your axis point
+    radius = 40.0                         # Replace with your radius
+    height = 100.0                         # Replace with your height
+    
+    try:
+        # Compute intersection
+        result = intersect_hull_with_cylinder(
+            points=points,
+            base_point=base_point,
+            axis_point=axis_point,
+            radius=radius,
+            height=height
+        )
         
-# #         # Print some information about the results
-# #         print("Intersection Properties:")
-# #         print(f"Volume: {result['intersection'].volume}")
-# #         print(f"Surface Area: {result['intersection'].area}")
-# #         print(f"Number of points: {len(result['intersection'].points)}")
+        # Print some information about the results
+        print("Intersection Properties:")
+        print(f"Volume: {result['intersection'].volume}")
+        print(f"Surface Area: {result['intersection'].area}")
+        print(f"Number of points: {len(result['intersection'].points)}")
         
-# #         # Visualize
-# #         plotter = visualize_intersection(result, points, base_point, axis_point)
-# #         plotter.show()
+        # Visualize
+        plotter = visualize_intersection(result, points, base_point, axis_point)
+        plotter.show()
         
-# #     except Exception as e:
-# #         print(f"Error occurred: {str(e)}")
-# #         print("\nDebug information:")
-# #         print(f"Number of points: {len(points)}")
-# #         print(f"Distance between base and axis points: "
-# #               f"{np.linalg.norm(axis_point - base_point)}")
+    except Exception as e:
+        print(f"Error occurred: {str(e)}")
+        print("\nDebug information:")
+        print(f"Number of points: {len(points)}")
+        print(f"Distance between base and axis points: "
+              f"{np.linalg.norm(axis_point - base_point)}")
