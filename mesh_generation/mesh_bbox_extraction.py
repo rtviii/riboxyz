@@ -267,6 +267,5 @@ def extract_bbox_atoms(rcsb_id: str) -> list:
 def get_ptc():
     ...
 
-
 def via_ptc_and_constriction(rcsb_id: str):
     ...

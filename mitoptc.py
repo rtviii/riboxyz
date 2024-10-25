@@ -13,7 +13,7 @@ from ribctl.lib.libseq import BiopythonChain
 from ribctl.lib.schema.types_binding_site import ResidueSummary
 
 
-rcsb_ids = [
+mitochondrial_rcsb_ids = [
       "2FTC",
       "3J6B",
       "3J7Y",

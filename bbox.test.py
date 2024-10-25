@@ -55,10 +55,10 @@ def get_constriction(rcsb_id: str):
     ro = RibosomeOps(rcsb_id)
     is_mitochondrial = ro.profile().mitochondrial
     if is_mitochondrial:
-        uL4   = ro.get_poly_by_polyclass('uL4m')
+        uL4  = ro.get_poly_by_polyclass('uL4m')
         uL22 = ro.get_poly_by_polyclass('uL22m')
     else:
-        uL4   = ro.get_poly_by_polyclass('uL4')
+        uL4  = ro.get_poly_by_polyclass('uL4')
         uL22 = ro.get_poly_by_polyclass('uL22')
 
     if uL4 is None or uL22 is None:
@@ -74,16 +74,10 @@ def get_constriction(rcsb_id: str):
 
     return midpoint(*find_closest_points(uL4_coords, uL22_coords))
 
-   
 
-
-    
-    
-
-
-
-# get_constriction('3J9M')
-print(rrna_ptcloud('3J9M'))
+get_ptc('3J9M')
+get_constriction('3J9M')
+rrna_ptcloud('3J9M')
 
 # import numpy as np
 # import pyvista as pv
