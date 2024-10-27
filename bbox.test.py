@@ -83,7 +83,6 @@ constriction_point = get_constriction('3J9M')
 import numpy as np
 import pyvista as pv
 
-
 def create_cylinder_from_points(base_point, axis_point, radius, height):
     """
     Create a cylinder using two points: a base point and a point defining the axis direction.
@@ -113,7 +112,6 @@ def create_cylinder_from_points(base_point, axis_point, radius, height):
     ).triangulate()
     
     return cylinder, direction
-
 
 def intersect_hull_with_cylinder(points, base_point, axis_point, radius, height):
     """

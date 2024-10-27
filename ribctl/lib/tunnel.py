@@ -38,7 +38,6 @@ def pick_match(matches, rna_length: int):
     else:
         return matches[0]
 
-
 def residue_labels(res: Residue | ResidueSummary) -> bool:
     return res.label_comp_id in [*AMINO_ACIDS.keys(), *NUCLEOTIDES]
 

@@ -1,14 +1,15 @@
 import sys
 sys.dont_write_bytecode = True
 
+from neo4j_ribosome.node_ligand import link__ligand_to_struct, node__ligand
 from ribctl.lib.libtax import PhylogenyNode, Taxid
 from neo4j_ribosome.node_phylogeny import link__phylogeny, node__phylogeny
 from neo4j.graph import Node
 from neo4j import Driver, GraphDatabase
 from neo4j_ribosome.node_polymer import  link__polymer_to_polymer_class, link__polymer_to_structure, node__polymer, upsert_polymer_to_protein, upsert_polymer_to_rna,node__polymer_class
-from neo4j_ribosome.node_structure import   link__ligand_to_struct, link__structure_to_lineage_member, link__structure_to_organism, node__ligand, node__structure, struct_exists
+from neo4j_ribosome.node_structure import    link__structure_to_lineage_member, link__structure_to_organism, node__structure, struct_exists
 from ribctl.lib.schema.types_ribosome import MitochondrialProteinClass, PolynucleotideClass, PolynucleotideClass, RibosomeStructure, RibosomeStructureMetadata
-from ribctl.etl.etl_assets_ops import RibosomeOps, Structure
+from ribctl.etl.etl_assets_ops import Assets, RibosomeOps, Structure
 from neo4j import GraphDatabase, Driver, ManagedTransaction, Transaction
 from ribctl.lib.schema.types_ribosome import  NonpolymericLigand,  CytosolicProteinClass, RibosomeStructureMetadata
 
@@ -65,7 +66,7 @@ class Neo4jAdapter():
             return node
 
     def init_phylogenies(self):
-        taxa = RibosomeOps.collect_all_taxa()
+        taxa = Assets.collect_all_taxa()
         for taxon in taxa:
             self._create_lineage(taxon.ncbi_tax_id)
 
