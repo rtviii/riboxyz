@@ -94,17 +94,17 @@ class SequenceProjection_ManyToOne:
         return {}
 
 tetracycline_structs = [
-    [
+    ( 
         {
-            "InChI": "InChI=1S/C21H25ClN2O7/c1-24(2)15-6-5-7-11(17(27)10(6)19(29)14(20(15)30)21(23)31)18(28)13-9(25)4-3-8(22)12(13)16(7)26/h3-4,6-7,10-11,14-18,25-28H,5H2,1-2H3,(H2,23,31)/t6-,7+,10-,11+,14+,15+,16+,17+,18-/m1/s1",
-            "InChIKey": "DMSXRSJJYGANOR-VAVXRSHRSA-N",
-            "SMILES": "CN(C)C1C2CC3C(c4c(ccc(c4C(C3C(C2C(=O)C(C1=O)C(=O)N)O)O)O)Cl)O",
-            "SMILES_stereo": "CN(C)[C@H]1[C@@H]2C[C@@H]3[C@@H](c4c(ccc(c4C(C3C([C@@H]2C(=O)C(C1=O)C(=O)N)O)O)O)Cl)O",
-            "chemicalId": "D2C",
-            "chemicalName": "(2S,4S,4AR,5AS,6S,11R,11AS,12R,12AR)-7-CHLORO-4-(DIMETHYLAMINO)-6,10,11,12-TETRAHYDROXY-1,3-DIOXO-1,2,3,4,4A,5,5A,6,11,11A,12,12A-DODECAHYDROTETRACENE-2-CARBOXAMIDE",
-            "formula_weight": 0.453,
+            "InChI"              : "InChI=1S/C21H25ClN2O7/c1-24(2)15-6-5-7-11(17(27)10(6)19(29)14(20(15)30)21(23)31)18(28)13-9(25)4-3-8(22)12(13)16(7)26/h3-4,6-7,10-11,14-18,25-28H,5H2,1-2H3,(H2,23,31)/t6-,7+,10-,11+,14+,15+,16+,17+,18-/m1/s1",
+            "InChIKey"           : "DMSXRSJJYGANOR-VAVXRSHRSA-N",
+            "SMILES"             : "CN(C)C1C2CC3C(c4c(ccc(c4C(C3C(C2C(=O)C(C1=O)C(=O)N)O)O)O)Cl)O",
+            "SMILES_stereo"      : "CN(C)[C@H]1[C@@H]2C[C@@H]3[C@@H](c4c(ccc(c4C(C3C([C@@H]2C(=O)C(C1=O)C(=O)N)O)O)O)Cl)O",
+            "chemicalId"         : "D2C",
+            "chemicalName"       : "(2S,4S,4AR,5AS,6S,11R,11AS,12R,12AR)-7-CHLORO-4-(DIMETHYLAMINO)-6,10,11,12-TETRAHYDROXY-1,3-DIOXO-1,2,3,4,4A,5,5A,6,11,11A,12,12A-DODECAHYDROTETRACENE-2-CARBOXAMIDE",
+            "formula_weight"     : 0.453,
             "number_of_instances": 1,
-            "pdbx_description": "(2S,4S,4AR,5AS,6S,11R,11AS,12R,12AR)-7-CHLORO-4-(DIMETHYLAMINO)-6,10,11,12-TETRAHYDROXY-1,3-DIOXO-1,2,3,4,4A,5,5A,6,11,11A,12,12A-DODECAHYDROTETRACENE-2-CARBOXAMIDE",
+            "pdbx_description"   : "(2S,4S,4AR,5AS,6S,11R,11AS,12R,12AR)-7-CHLORO-4-(DIMETHYLAMINO)-6,10,11,12-TETRAHYDROXY-1,3-DIOXO-1,2,3,4,4A,5,5A,6,11,11A,12,12A-DODECAHYDROTETRACENE-2-CARBOXAMIDE",
         },
         [
             {
@@ -116,15 +116,15 @@ tetracycline_structs = [
                 },
             }
         ],
-    ],
-    [
+     ),
+    ( 
         {
-            "InChI": "InChI=1S/C22H24N2O8/c1-21(31)8-5-4-6-11(25)12(8)16(26)13-9(21)7-10-15(24(2)3)17(27)14(20(23)30)19(29)22(10,32)18(13)28/h4-6,9-10,15,25,27-28,31-32H,7H2,1-3H3,(H2,23,30)/t9-,10-,15-,21+,22-/m0/s1",
-            "InChIKey": "OFVLGDICTFRJMM-WESIUVDSSA-N",
-            "SMILES": "CC1(c2cccc(c2C(=O)C3=C(C4(C(CC31)C(C(=C(C4=O)C(=O)N)O)N(C)C)O)O)O)O",
-            "SMILES_stereo": "C[C@]1(c2cccc(c2C(=O)C3=C([C@]4([C@@H](C[C@@H]31)C(C(=C(C4=O)C(=O)N)O)N(C)C)O)O)O)O",
-            "chemicalId": "TAC",
-            "chemicalName": "TETRACYCLINE",
+            "InChI"               : "InChI=1S/C22H24N2O8/c1-21(31)8-5-4-6-11(25)12(8)16(26)13-9(21)7-10-15(24(2)3)17(27)14(20(23)30)19(29)22(10,32)18(13)28/h4-6,9-10,15,25,27-28,31-32H,7H2,1-3H3,(H2,23,30)/t9-,10-,15-,21+,22-/m0/s1",
+            "InChIKey"            : "OFVLGDICTFRJMM-WESIUVDSSA-N",
+            "SMILES"              : "CC1(c2cccc(c2C(=O)C3=C(C4(C(CC31)C(C(=C(C4=O)C(=O)N)O)N(C)C)O)O)O)O",
+            "SMILES_stereo"       : "C[C@]1(c2cccc(c2C(=O)C3=C([C@]4([C@@H](C[C@@H]31)C(C(=C(C4=O)C(=O)N)O)N(C)C)O)O)O)O",
+            "chemicalId"          : "TAC",
+            "chemicalName"        : "TETRACYCLINE",
             "drugbank_description": "Tetracycline is a broad spectrum polyketide "
             "antibiotic produced by the Streptomyces genus of "
             "Actinobacteria. It exerts a bacteriostatic effect "
@@ -195,18 +195,18 @@ tetracycline_structs = [
                 },
             },
         ],
-    ],
-    [
+     ),
+    ( 
         {
-            "InChI": "InChI=1S/C27H31FN4O8/c1-31(2)20-13-8-11-7-12-14(28)9-15(30-16(33)10-32-5-3-4-6-32)21(34)18(12)22(35)17(11)24(37)27(13,40)25(38)19(23(20)36)26(29)39/h9,11,13,20,34-35,38,40H,3-8,10H2,1-2H3,(H2,29,39)(H,30,33)/t11-,13-,20-,27-/m0/s1",
-            "InChIKey": "AKLMFDDQCHURPW-ISIOAQNYSA-N",
-            "SMILES": "CN(C)C1C2CC3Cc4c(cc(c(c4C(=C3C(=O)C2(C(=C(C1=O)C(=O)N)O)O)O)O)NC(=O)CN5CCCC5)F",
-            "SMILES_stereo": "CN(C)[C@H]1[C@@H]2C[C@@H]3Cc4c(cc(c(c4C(=C3C(=O)[C@@]2(C(=C(C1=O)C(=O)N)O)O)O)O)NC(=O)CN5CCCC5)F",
-            "chemicalId": "YQM",
-            "chemicalName": "Eravacycline",
-            "formula_weight": 0.559,
+            "InChI"              : "InChI=1S/C27H31FN4O8/c1-31(2)20-13-8-11-7-12-14(28)9-15(30-16(33)10-32-5-3-4-6-32)21(34)18(12)22(35)17(11)24(37)27(13,40)25(38)19(23(20)36)26(29)39/h9,11,13,20,34-35,38,40H,3-8,10H2,1-2H3,(H2,29,39)(H,30,33)/t11-,13-,20-,27-/m0/s1",
+            "InChIKey"           : "AKLMFDDQCHURPW-ISIOAQNYSA-N",
+            "SMILES"             : "CN(C)C1C2CC3Cc4c(cc(c(c4C(=C3C(=O)C2(C(=C(C1=O)C(=O)N)O)O)O)O)NC(=O)CN5CCCC5)F",
+            "SMILES_stereo"      : "CN(C)[C@H]1[C@@H]2C[C@@H]3Cc4c(cc(c(c4C(=C3C(=O)[C@@]2(C(=C(C1=O)C(=O)N)O)O)O)O)NC(=O)CN5CCCC5)F",
+            "chemicalId"         : "YQM",
+            "chemicalName"       : "Eravacycline",
+            "formula_weight"     : 0.559,
             "number_of_instances": 1,
-            "pdbx_description": "Eravacycline",
+            "pdbx_description"   : "Eravacycline",
         },
         [
             {
@@ -258,18 +258,18 @@ tetracycline_structs = [
                 },
             },
         ],
-    ],
-    [
+     ),
+    ( 
         {
-            "InChI": "InChI=1S/C28H32F3N3O7/c1-3-34(4-2)21-14-9-11-8-13-18(16(35)10-12(15-6-5-7-33-15)20(13)28(29,30)31)22(36)17(11)24(38)27(14,41)25(39)19(23(21)37)26(32)40/h10-11,14-15,21,33,35,37-38,41H,3-9H2,1-2H3,(H2,32,40)/t11-,14-,15-,21-,27-/m0/s1",
-            "InChIKey": "IDWTZCZXXFOLNV-DOYYSQEVSA-N",
-            "SMILES": "CCN(CC)C1C2CC3Cc4c(c(cc(c4C(F)(F)F)C5CCCN5)O)C(=O)C3=C(C2(C(=O)C(=C1O)C(=O)N)O)O",
-            "SMILES_stereo": "CCN(CC)[C@H]1[C@@H]2C[C@@H]3Cc4c(c(cc(c4C(F)(F)F)[C@@H]5CCCN5)O)C(=O)C3=C([C@@]2(C(=O)C(=C1O)C(=O)N)O)O",
-            "chemicalId": "80P",
-            "chemicalName": "(4S,4aS,5aR,12aS)-4-(diethylamino)-3,10,12,12a-tetrahydroxy-1,11-dioxo-8-[(2S)-pyrrolidin-2-yl]-7-(trifluoromethyl)-1,4,4a,5,5a,6,11,12a-octahydrotetracene-2-carboxamide",
-            "formula_weight": 0.58,
+            "InChI"              : "InChI=1S/C28H32F3N3O7/c1-3-34(4-2)21-14-9-11-8-13-18(16(35)10-12(15-6-5-7-33-15)20(13)28(29,30)31)22(36)17(11)24(38)27(14,41)25(39)19(23(21)37)26(32)40/h10-11,14-15,21,33,35,37-38,41H,3-9H2,1-2H3,(H2,32,40)/t11-,14-,15-,21-,27-/m0/s1",
+            "InChIKey"           : "IDWTZCZXXFOLNV-DOYYSQEVSA-N",
+            "SMILES"             : "CCN(CC)C1C2CC3Cc4c(c(cc(c4C(F)(F)F)C5CCCN5)O)C(=O)C3=C(C2(C(=O)C(=C1O)C(=O)N)O)O",
+            "SMILES_stereo"      : "CCN(CC)[C@H]1[C@@H]2C[C@@H]3Cc4c(c(cc(c4C(F)(F)F)[C@@H]5CCCN5)O)C(=O)C3=C([C@@]2(C(=O)C(=C1O)C(=O)N)O)O",
+            "chemicalId"         : "80P",
+            "chemicalName"       : "(4S,4aS,5aR,12aS)-4-(diethylamino)-3,10,12,12a-tetrahydroxy-1,11-dioxo-8-[(2S)-pyrrolidin-2-yl]-7-(trifluoromethyl)-1,4,4a,5,5a,6,11,12a-octahydrotetracene-2-carboxamide",
+            "formula_weight"     : 0.58,
             "number_of_instances": 3,
-            "pdbx_description": "(4S,4aS,5aR,12aS)-4-(diethylamino)-3,10,12,12a-tetrahydroxy-1,11-dioxo-8-[(2S)-pyrrolidin-2-yl]-7-(trifluoromethyl)-1,4,4a,5,5a,6,11,12a-octahydrotetracene-2-carboxamide",
+            "pdbx_description"   : "(4S,4aS,5aR,12aS)-4-(diethylamino)-3,10,12,12a-tetrahydroxy-1,11-dioxo-8-[(2S)-pyrrolidin-2-yl]-7-(trifluoromethyl)-1,4,4a,5,5a,6,11,12a-octahydrotetracene-2-carboxamide",
         },
         [
             {
@@ -297,18 +297,18 @@ tetracycline_structs = [
                 },
             },
         ],
-    ],
-    [
+     ),
+    ( 
         {
-            "InChI": "InChI=1S/C29H39N5O8/c1-28(2,3)31-11-17(35)32-15-10-16(33(4)5)13-8-12-9-14-21(34(6)7)24(38)20(27(30)41)26(40)29(14,42)25(39)18(12)23(37)19(13)22(15)36/h10,12,14,21,31,36,38-39,42H,8-9,11H2,1-7H3,(H2,30,41)(H,32,35)/p+2/t12-,14-,21-,29-/m0/s1",
-            "InChIKey": "FPZLLRFZJZRHSY-HJYUBDRYSA-P",
-            "SMILES": "CC(C)(C)NCC(=O)Nc1cc(c2c(c1O)C(=O)C3=C(C4(C(CC3C2)C(C(=C(C4=O)C(=O)N)O)[NH+](C)C)O)O)[NH+](C)C",
-            "SMILES_stereo": "CC(C)(C)NCC(=O)Nc1cc(c2c(c1O)C(=O)C3=C([C@]4([C@@H](C[C@@H]3C2)[C@@H](C(=C(C4=O)C(=O)N)O)[NH+](C)C)O)O)[NH+](C)C",
-            "chemicalId": "T1C",
-            "chemicalName": "TIGECYCLINE",
-            "formula_weight": 0.588,
+            "InChI"              : "InChI=1S/C29H39N5O8/c1-28(2,3)31-11-17(35)32-15-10-16(33(4)5)13-8-12-9-14-21(34(6)7)24(38)20(27(30)41)26(40)29(14,42)25(39)18(12)23(37)19(13)22(15)36/h10,12,14,21,31,36,38-39,42H,8-9,11H2,1-7H3,(H2,30,41)(H,32,35)/p+2/t12-,14-,21-,29-/m0/s1",
+            "InChIKey"           : "FPZLLRFZJZRHSY-HJYUBDRYSA-P",
+            "SMILES"             : "CC(C)(C)NCC(=O)Nc1cc(c2c(c1O)C(=O)C3=C(C4(C(CC3C2)C(C(=C(C4=O)C(=O)N)O)[NH+](C)C)O)O)[NH+](C)C",
+            "SMILES_stereo"      : "CC(C)(C)NCC(=O)Nc1cc(c2c(c1O)C(=O)C3=C([C@]4([C@@H](C[C@@H]3C2)[C@@H](C(=C(C4=O)C(=O)N)O)[NH+](C)C)O)O)[NH+](C)C",
+            "chemicalId"         : "T1C",
+            "chemicalName"       : "TIGECYCLINE",
+            "formula_weight"     : 0.588,
             "number_of_instances": 2,
-            "pdbx_description": "TIGECYCLINE",
+            "pdbx_description"   : "TIGECYCLINE",
         },
         [
             {
@@ -353,18 +353,18 @@ tetracycline_structs = [
                 },
             },
         ],
-    ],
-    [
+     ),
+    ( 
         {
-            "InChI": "InChI=1S/C29H30FN3O7/c1-32(2)22-18-8-15-7-14-6-13-4-3-12(9-33-10-16(30)11-33)5-17(13)23(34)19(14)24(35)20(15)26(37)29(18,40)27(38)21(25(22)36)28(31)39/h3-6,15-16,18,22,34,36-37,40H,7-11H2,1-2H3,(H2,31,39)/t15-,18-,22-,29-/m0/s1",
-            "InChIKey": "DAUIQSOIFWOKJQ-MGVDVOGZSA-N",
-            "SMILES": "CN(C)C1C2CC3Cc4cc5ccc(cc5c(c4C(=O)C3=C(C2(C(=O)C(=C1O)C(=O)N)O)O)O)CN6CC(C6)F",
-            "SMILES_stereo": "CN(C)[C@H]1[C@@H]2C[C@@H]3Cc4cc5ccc(cc5c(c4C(=O)C3=C([C@@]2(C(=O)C(=C1O)C(=O)N)O)O)O)CN6CC(C6)F",
-            "chemicalId": "P8F",
-            "chemicalName": "Pentacycline",
-            "formula_weight": 0.552,
+            "InChI"              : "InChI=1S/C29H30FN3O7/c1-32(2)22-18-8-15-7-14-6-13-4-3-12(9-33-10-16(30)11-33)5-17(13)23(34)19(14)24(35)20(15)26(37)29(18,40)27(38)21(25(22)36)28(31)39/h3-6,15-16,18,22,34,36-37,40H,7-11H2,1-2H3,(H2,31,39)/t15-,18-,22-,29-/m0/s1",
+            "InChIKey"           : "DAUIQSOIFWOKJQ-MGVDVOGZSA-N",
+            "SMILES"             : "CN(C)C1C2CC3Cc4cc5ccc(cc5c(c4C(=O)C3=C(C2(C(=O)C(=C1O)C(=O)N)O)O)O)CN6CC(C6)F",
+            "SMILES_stereo"      : "CN(C)[C@H]1[C@@H]2C[C@@H]3Cc4cc5ccc(cc5c(c4C(=O)C3=C([C@@]2(C(=O)C(=C1O)C(=O)N)O)O)O)CN6CC(C6)F",
+            "chemicalId"         : "P8F",
+            "chemicalName"       : "Pentacycline",
+            "formula_weight"     : 0.552,
             "number_of_instances": 2,
-            "pdbx_description": "Pentacycline",
+            "pdbx_description"   : "Pentacycline",
         },
         [
             {
@@ -376,15 +376,15 @@ tetracycline_structs = [
                 },
             }
         ],
-    ],
-    [
+     ),
+    ( 
         {
-            "InChI": "InChI=1S/C24H29N3O8/c1-26(2)18-13-8-11-7-12-10(9-27(3)35-4)5-6-14(28)16(12)19(29)15(11)21(31)24(13,34)22(32)17(20(18)30)23(25)33/h5-6,11,13,18,28,30-31,34H,7-9H2,1-4H3,(H2,25,33)/t11-,13-,18-,24-/m0/s1",
-            "InChIKey": "PQJQFLNBMSCUSH-SBAJWEJLSA-N",
-            "SMILES": "CN(C)C1C2CC3Cc4c(ccc(c4C(=O)C3=C(C2(C(=O)C(=C1O)C(=O)N)O)O)O)CN(C)OC",
-            "SMILES_stereo": "CN(C)[C@H]1[C@@H]2C[C@@H]3Cc4c(ccc(c4C(=O)C3=C([C@@]2(C(=O)C(=C1O)C(=O)N)O)O)O)CN(C)OC",
-            "chemicalId": "V7A",
-            "chemicalName": "Sarecycline",
+            "InChI"               : "InChI=1S/C24H29N3O8/c1-26(2)18-13-8-11-7-12-10(9-27(3)35-4)5-6-14(28)16(12)19(29)15(11)21(31)24(13,34)22(32)17(20(18)30)23(25)33/h5-6,11,13,18,28,30-31,34H,7-9H2,1-4H3,(H2,25,33)/t11-,13-,18-,24-/m0/s1",
+            "InChIKey"            : "PQJQFLNBMSCUSH-SBAJWEJLSA-N",
+            "SMILES"              : "CN(C)C1C2CC3Cc4c(ccc(c4C(=O)C3=C(C2(C(=O)C(=C1O)C(=O)N)O)O)O)CN(C)OC",
+            "SMILES_stereo"       : "CN(C)[C@H]1[C@@H]2C[C@@H]3Cc4c(ccc(c4C(=O)C3=C([C@@]2(C(=O)C(=C1O)C(=O)N)O)O)O)CN(C)OC",
+            "chemicalId"          : "V7A",
+            "chemicalName"        : "Sarecycline",
             "drugbank_description": "Sarecycline is a semi-synthetic derivative of "
             "tetracycline that was initially discovered by "
             "Paratek Pharmaceuticals from Boston, MA but then "
@@ -432,10 +432,10 @@ tetracycline_structs = [
             "flora and consequently fewer resultant adverse "
             "effects associated with diarrhea, fungal "
             "overgrowth, etc.",
-            "drugbank_id": "DB12035",
-            "formula_weight": 0.488,
+            "drugbank_id"        : "DB12035",
+            "formula_weight"     : 0.488,
             "number_of_instances": 2,
-            "pdbx_description": "Sarecycline",
+            "pdbx_description"   : "Sarecycline",
         },
         [
             {
@@ -455,7 +455,7 @@ tetracycline_structs = [
                 },
             },
         ],
-    ],
+     ),
 ]
 
 composite_bsite = {
@@ -474,23 +474,16 @@ composite_bsite = {
 
 
 
-# Given a number of records(ligand-structure pairs)
-# - retrieve binding site
-# - transpose each binding site to the target structure
-# ---> split the bsite transpotion into chains
-# - collect per-chain mappings into weights
-# - collect weights into a composite bsite prediction
-
-
-CHEM_ID = NewType("CHEM_ID", str)
-RCSB_ID = NewType("RCSB_ID", str)
+CHEM_ID        = NewType("CHEM_ID", str)
+RCSB_ID        = NewType("RCSB_ID", str)
 target_rcsb_id = "7K00"
-RADIUS        = 10
+RADIUS         = 10
+
 def prepare_mapping_sources(source_structures:list[tuple[RCSB_ID, CHEM_ID]])->dict[PolymerClass, list[PredictionTarget]]:
     per_class_registry:dict[PolymerClass, list[PredictionTarget]] = {}
                                           
-    for source_rcsb_id, chem_id in source_structures:
-        print("Mapping {}/{}(source) into {} (target)".format(source_rcsb_id,chemid,target_rcsb_id))
+    for ( source_rcsb_id, chem_id ) in source_structures:
+        print("Mapping {}/{}(source) into {} (target)".format(source_rcsb_id,chem_id,target_rcsb_id))
         bsite_source = bsite_ligand(chem_id, source_rcsb_id, RADIUS)
         bsite_target = bsite_transpose(source_rcsb_id, target_rcsb_id, bsite_source)
         chains: list[ResiduesMapping] = bsite_target.constituent_chains
@@ -508,16 +501,19 @@ def prepare_mapping_sources(source_structures:list[tuple[RCSB_ID, CHEM_ID]])->di
 
 sources = []
 for record in tetracycline_structs:
-    chem, structs = record
+
+    print(record)
+
+    chem = record[0]
+    structs = record[1]
 
     chemid  = chem["chemicalId"]
     rcsb_id = structs[0]['rcsb_id']
+
     sources.append((rcsb_id, chemid))
     
+# pprint(sources)
 registry = prepare_mapping_sources(sources)
 
-pprint(registry)
-
-
-
+# pprint(registry)
 # SequenceProjection_ManyToOne()
