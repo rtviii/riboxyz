@@ -38,7 +38,6 @@ def pick_match(matches, rna_length: int):
     else:
         return matches[0]
 
-
 def residue_labels(res: Residue | ResidueSummary) -> bool:
     return res.label_comp_id in [*AMINO_ACIDS.keys(), *NUCLEOTIDES]
 
@@ -70,7 +69,6 @@ def ptc_fuzzyfind_subseq_in_chain(
     PTC_residues_6 = ( [ress_sanitized[i] for i in list(range(match6.start, match6.end))] if match6 else [] )
 
     return PTC_residues_6, PTC_residues_8, PTC_residues_9, auth_asym_id
-
 
 def ptc_resdiues_get(
     biopython_structure: Structure, rnas: list[RNA], assembly_id: int = 0
@@ -121,7 +119,6 @@ def ptc_resdiues_get(
     PTC_residues = [ress_sanitized[i] for i in list(range(m0.start, m0.end))]
 
     return PTC_residues, auth_asym_id
-
 
 def ptc_residues_to_atom_coordinates(
     reslist: list[Residue], auth_asym_id: str

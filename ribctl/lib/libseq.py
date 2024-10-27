@@ -199,3 +199,38 @@ class SeqPairwise:
             else:
                 _ += v
         return _
+
+
+def map_motifs(source_chain:BiopythonChain, target_chain:BiopythonChain, bound_residues:list[ResidueSummary], polymer_class:str, verbose:bool=False)->tuple[str,str,list[Residue]]:
+
+    bpchain_source = source_chain
+    bpchain_target = target_chain
+
+    #! SOURCE & TARGET MAPS
+    [ src_flat_structural_seq, src_flat_idx_to_residue_map, src_auth_seq_id_to_flat_index_map, ] = bpchain_source.flat_sequence
+    [ tgt_flat_structural_seq, tgt_flat_idx_to_residue_map, tgt_auth_seq_id_to_flat_index_map, ] = bpchain_target.flat_sequence
+
+    # ! Bound residues  [in STRUCTURE SPACE]
+    src_bound_auth_seq_idx = [ (residue.auth_seq_id, residue.label_comp_id) for residue in bound_residues ]
+
+    primary_seq_source, auth_seq_to_primary_ix_source = ( bpchain_source.primary_sequence )
+    primary_seq_target, auth_seq_to_primary_ix_target = ( bpchain_target.primary_sequence )
+
+
+    src_bound_flat_indices = [ src_auth_seq_id_to_flat_index_map[index] for index, label in filter( lambda x: x[1] in [*NUCLEOTIDES, *AMINO_ACIDS.keys()], src_bound_auth_seq_idx, ) ]
+
+    M = SeqPairwise( src_flat_structural_seq, tgt_flat_structural_seq, src_bound_flat_indices )
+
+    tgt_bound_flat_indices = M.tgt_ids
+    tgt_bound_residues = [ tgt_flat_idx_to_residue_map[idx] for idx in tgt_bound_flat_indices ]
+
+    if verbose:
+        print("\n\n\t\t [{}] ".format(polymer_class))
+        print( "[\033[95mSource\033[0m Primary]\t", SeqPairwise.highlight_indices( primary_seq_source, [ auth_seq_to_primary_ix_source[index] for index, label in src_bound_auth_seq_idx ]))
+        print( "[\033[95mSource\033[0m Flat   ]\t", SeqPairwise.highlight_indices(src_flat_structural_seq, src_bound_flat_indices), )
+        print( "[\033[95mSource\033[0m Aligned]\t", M.highlight_indices(M.src_aln, ixs=M.aligned_ids) )
+        print( "[\033[96mTarget\033[0m Aligned]\t", M.highlight_indices(M.tgt_aln, ixs=M.aligned_ids) )
+        print( "[\033[96mTarget\033[0m Flat   ]\t", SeqPairwise.highlight_indices(tgt_flat_structural_seq, tgt_bound_flat_indices), )
+        print( "[\033[96mTarget\033[0m Primary]\t", SeqPairwise.highlight_indices( primary_seq_target, [ auth_seq_to_primary_ix_target[residue.get_id()[1]] for residue in tgt_bound_residues ], ), )
+
+    return primary_seq_source, primary_seq_target, tgt_bound_residues

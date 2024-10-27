@@ -31,7 +31,6 @@ class StructureFilterParams(BaseModel):
     host_taxa: Optional[List[int]] = None
     subunit_presence: Optional[Literal["SSU+LSU", "LSU", "SSU"]] = None
 
-
 class PolymersFilterParams(BaseModel):
 
     cursor          : Optional[ Union[Tuple[Optional[str], Optional[str]], List[Optional[str]], str] ] = None
@@ -56,7 +55,6 @@ class PolymersFilterParams(BaseModel):
         if isinstance(self.cursor, (list, tuple)) and len(self.cursor) == 2:
             return (self.cursor[0], self.cursor[1])
         raise ValueError("Invalid cursor format")
-
 
 class Neo4jReader:
 
