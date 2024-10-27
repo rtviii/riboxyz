@@ -100,16 +100,15 @@ class BindingSite(BaseModel):
 
 #TODO: The following four classes can be collapsed into one
 class PredictionSource(BaseModel):
-
     source_seq    : str
     source_bound_residues: list[ResidueSummary]
     auth_asym_id  : str
 
 #TODO: these two should just b ea single class tagged extending Polymer with "TARGET"| "SOURCE" and "bound residues"
 class PredictionTarget(BaseModel):
-    target_seq: str
+    target_seq           : str
     target_bound_residues: list[ResidueSummary]
-    auth_asym_id: str
+    auth_asym_id         : str
 
 class PredictionAlignments(BaseModel):
 
@@ -117,12 +116,11 @@ class PredictionAlignments(BaseModel):
     source_seq_aligned: str
     target_seq_aligned: str
 
-class PredictedResiduesPolymer(BaseModel):
+class ResiduesMapping(BaseModel):
 
     polymer_class: PolymerClass
     source       : PredictionSource
     target       : PredictionTarget
-    # alignment    : PredictionAlignments
 
     @field_serializer('polymer_class')
     def serialize_nomenclature(self, polymer_class:PolymerClass ):
@@ -132,7 +130,7 @@ class LigandTransposition(BaseModel):
 
     source                : str
     target                : str
-    constituent_chains    : list[PredictedResiduesPolymer]
+    constituent_chains    : list[ResiduesMapping]
     purported_binding_site: BindingSite
 
     def save(self, filename: str):

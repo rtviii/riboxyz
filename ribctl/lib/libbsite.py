@@ -16,7 +16,7 @@ from ribctl.lib.schema.types_binding_site import (
     NUCLEOTIDES,
     BindingSiteChain,
     LigandTransposition,
-    PredictedResiduesPolymer,
+    ResiduesMapping,
     PredictionSource,
     PredictionTarget,
 )
@@ -153,10 +153,13 @@ def bsite_ligand(
 
 
 def bsite_transpose(
+
     source_rcsb_id: str,
     target_rcsb_id: str,
     binding_site  : BindingSite,
     save          : bool = False,
+    verbose       : bool=False
+
 ) -> LigandTransposition:
 
     source_rcsb_id, target_rcsb_id = source_rcsb_id.upper(), target_rcsb_id.upper()
@@ -187,9 +190,9 @@ def bsite_transpose(
         bpchain_source = BiopythonChain(source_struct[0][source_polymer.auth_asym_id])
         bpchain_target = BiopythonChain(target_struct[0][target_polymer.auth_asym_id])
 
-        primary_seq_source, primary_seq_target, tgt_bound_residues =  map_motifs(bpchain_source, bpchain_target, source_polymer.bound_residues, source_polymer.nomenclature[0], verbose=True)
+        primary_seq_source, primary_seq_target, tgt_bound_residues =  map_motifs(bpchain_source, bpchain_target, source_polymer.bound_residues, source_polymer.nomenclature[0], verbose)
 
-        polymer_pair = PredictedResiduesPolymer(
+        polymer_pair = ResiduesMapping(
             polymer_class = source_polymer.nomenclature[0],
             source        = PredictionSource(
                 source_seq            = primary_seq_source,

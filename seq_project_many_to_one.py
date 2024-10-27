@@ -1,10 +1,12 @@
 from pprint import pprint
 import sys
+from typing import NewType, TypeVar
 from Bio.PDB.Residue import Residue
 from ribctl.lib.libbsite import map_motifs, bsite_ligand, bsite_transpose
 from ribctl.lib.libseq import BiopythonChain
 from ribctl.lib.schema.types_binding_site import (
-    PredictedResiduesPolymer,
+    PredictionTarget,
+    ResiduesMapping,
     ResidueSummary,
 )
 from ribctl.lib.schema.types_ribosome import PolymerClass
@@ -15,12 +17,15 @@ from ribctl.lib.libmsa import Fasta
 from concurrent.futures import ProcessPoolExecutor
 
 
+# ? Ligand Projections
 # Ok let's not complicate things. The prototype is thus:
 # take a motif in 7K00 protein, say uL10
+
 # 1. To Record:
 # - locus name and its anchor structure/chain/residue
 # - project anchor into the MSA of homologs of other structure
 # - project anchor into each other structure PAIRWISE
+
 # 2. Backtrack to structural files indices for each structure, record as a row in a table.
 
 s = Fasta.poly_class_all_seq(PolymerClass("uL4"))
@@ -29,31 +34,31 @@ type ResidiueIndices = list[int]
 type RCSB_ID         = str
 
 class SequenceProjection_ManyToOne:
-    """Given multiple sequences and residue ranges within them, project the ranges onto a single sequence"""
+    """Given multiple source sequences and residue ranges within them, project the ranges onto a single target sequence"""
 
     target_chain: BiopythonChain
     target_struct: RCSB_ID
     polymer_class: PolymerClass
 
-    source_chains: dict[RCSB_ID, tuple[BiopythonChain, list[ResidueSummary]]]
+    source_motifs  : dict[RCSB_ID, tuple[BiopythonChain, list[ResidueSummary]]]
     target_mappings: dict[RCSB_ID, list[Residue]]
 
     weights: dict[int, list[RCSB_ID]]
 
     def __init__(
         self,
-        target_seq: BiopythonChain,
-        target_rcsb_id: str,
-        source_seq_pairs: list[tuple[RCSB_ID, BiopythonChain, list[ResidueSummary]]],
-        polymer_class: str,
-    ) -> None:
+      target_seq      : BiopythonChain,
+      target_rcsb_id  : str,
+      source_seq_pairs: list[tuple[RCSB_ID, BiopythonChain, list[ResidueSummary]]],
+      polymer_class   : str,
+    ) -> None         : 
 
         self.target_chain = target_seq
         self.target_struct = target_rcsb_id
         self.polymer_class = PolymerClass(polymer_class)
 
         for rcsb_id, chain, indices in source_seq_pairs:
-            self.source_chains[rcsb_id] = (chain, indices)
+            self.source_motifs[rcsb_id] = (chain, indices)
 
     def project(self):
         def map_motifs_wrapper(args):
@@ -64,7 +69,7 @@ class SequenceProjection_ManyToOne:
 
         futures = []
         with ProcessPoolExecutor(max_workers=10) as executor:
-            for rcsb_id, (source_chain, source_residues) in self.source_chains.items():
+            for rcsb_id, (source_chain, source_residues) in self.source_motifs.items():
                 partial_map_motifs = partial(
                     map_motifs_wrapper,
                     (
@@ -466,8 +471,7 @@ composite_bsite = {
     ]
 }
 
-target_struct = "7K00"
-RADIUS        = 10
+
 
 
 # Given a number of records(ligand-structure pairs)
@@ -477,25 +481,43 @@ RADIUS        = 10
 # - collect per-chain mappings into weights
 # - collect weights into a composite bsite prediction
 
+
+CHEM_ID = NewType("CHEM_ID", str)
+RCSB_ID = NewType("RCSB_ID", str)
+target_rcsb_id = "7K00"
+RADIUS        = 10
+def prepare_mapping_sources(source_structures:list[tuple[RCSB_ID, CHEM_ID]])->dict[PolymerClass, list[PredictionTarget]]:
+    per_class_registry:dict[PolymerClass, list[PredictionTarget]] = {}
+                                          
+    for source_rcsb_id, chem_id in source_structures:
+        print("Mapping {}/{}(source) into {} (target)".format(source_rcsb_id,chemid,target_rcsb_id))
+        bsite_source = bsite_ligand(chem_id, source_rcsb_id, RADIUS)
+        bsite_target = bsite_transpose(source_rcsb_id, target_rcsb_id, bsite_source)
+        chains: list[ResiduesMapping] = bsite_target.constituent_chains
+        for chain in chains:
+            if chain.polymer_class not in per_class_registry:
+                per_class_registry.update({ chain.polymer_class: [chain.target] })
+            else:
+                per_class_registry[chain.polymer_class].append(chain.target)
+  
+    return per_class_registry
+
+
+
+
+
+sources = []
 for record in tetracycline_structs:
+    chem, structs = record
 
-    ligand, structures = record
+    chemid  = chem["chemicalId"]
+    rcsb_id = structs[0]['rcsb_id']
+    sources.append((rcsb_id, chemid))
+    
+registry = prepare_mapping_sources(sources)
 
-    chemical_id = ligand["chemicalId"]
-    rcsb_id = structures[0]["rcsb_id"]
-    bsite_source = bsite_ligand(chemical_id, rcsb_id, RADIUS)
-    bsite_target = bsite_transpose(rcsb_id, target_struct, bsite_source)
-    chains: list[PredictedResiduesPolymer] = bsite_target.constituent_chains
+pprint(registry)
 
-    for chain in chains:
-        chain.polymer_class
-        chain.source
-        chain.target
-
-    composite_bsite[rcsb_id] = lig_transpose.purported_binding_site
-
-
-pprint(composite_bsite)
 
 
 # SequenceProjection_ManyToOne()
