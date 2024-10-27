@@ -477,23 +477,46 @@ composite_bsite = {
 CHEM_ID        = NewType("CHEM_ID", str)
 RCSB_ID        = NewType("RCSB_ID", str)
 target_rcsb_id = "7K00"
-RADIUS         = 10
+RADIUS = 10
 
-def prepare_mapping_sources(source_structures:list[tuple[RCSB_ID, CHEM_ID]])->dict[PolymerClass, list[PredictionTarget]]:
-    per_class_registry:dict[PolymerClass, list[PredictionTarget]] = {}
-                                          
-    for ( source_rcsb_id, chem_id ) in source_structures:
-        print("Mapping {}/{}(source) into {} (target)".format(source_rcsb_id,chem_id,target_rcsb_id))
-        bsite_source = bsite_ligand(chem_id, source_rcsb_id, RADIUS)
-        bsite_target = bsite_transpose(source_rcsb_id, target_rcsb_id, bsite_source)
-        chains: list[ResiduesMapping] = bsite_target.constituent_chains
-        for chain in chains:
-            if chain.polymer_class not in per_class_registry:
-                per_class_registry.update({ chain.polymer_class: [chain.target] })
+from multiprocessing import Pool
+from functools import partial
+def process_single_structure(
+    structure_pair: tuple[RCSB_ID, CHEM_ID],
+    target_rcsb_id: str = target_rcsb_id,
+    radius: float = RADIUS
+) -> list[tuple[PolymerClass, PredictionTarget]]:
+    """Process a single structure and return list of (polymer_class, target) pairs"""
+    source_rcsb_id, chem_id = structure_pair
+    print(f"Mapping {source_rcsb_id}/{chem_id}(source) into {target_rcsb_id} (target)")
+    
+    bsite_source = bsite_ligand(chem_id, source_rcsb_id, radius)
+    bsite_target = bsite_transpose(source_rcsb_id, target_rcsb_id, bsite_source)
+    
+    results = []
+    for chain in bsite_target.constituent_chains:
+        results.append((chain.polymer_class, chain.target))
+    return results
+
+def prepare_mapping_sources(
+    source_structures: list[tuple[RCSB_ID, CHEM_ID]],
+    n_processes: int = None  
+) -> dict[PolymerClass, list[PredictionTarget]]:
+    
+    per_class_registry: dict[PolymerClass, list[PredictionTarget]] = {}
+    
+    with Pool(processes=n_processes) as pool:
+        all_results = pool.map(process_single_structure, source_structures)
+
+    for structure_results in all_results:
+        for polymer_class, target in structure_results:
+            if polymer_class not in per_class_registry:
+                per_class_registry[polymer_class] = [target]
             else:
-                per_class_registry[chain.polymer_class].append(chain.target)
-  
+                per_class_registry[polymer_class].append(target)
+                
     return per_class_registry
+  
 
 
 
@@ -501,19 +524,13 @@ def prepare_mapping_sources(source_structures:list[tuple[RCSB_ID, CHEM_ID]])->di
 
 sources = []
 for record in tetracycline_structs:
-
     print(record)
-
-    chem = record[0]
+    chem    = record[0]
     structs = record[1]
 
     chemid  = chem["chemicalId"]
     rcsb_id = structs[0]['rcsb_id']
-
     sources.append((rcsb_id, chemid))
     
-# pprint(sources)
-registry = prepare_mapping_sources(sources)
-
-# pprint(registry)
-# SequenceProjection_ManyToOne()
+registry = prepare_mapping_sources(sources, 10)
+registry
