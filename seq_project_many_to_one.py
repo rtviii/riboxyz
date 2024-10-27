@@ -88,7 +88,6 @@ class SequenceProjection_ManyToOne:
 
         return {}
 
-
 tetracycline_structs = [
     [
         {
@@ -453,10 +452,6 @@ tetracycline_structs = [
         ],
     ],
 ]
-
-
-
-
 
 composite_bsite = {
     "uL4": [

@@ -70,7 +70,6 @@ def ptc_fuzzyfind_subseq_in_chain(
 
     return PTC_residues_6, PTC_residues_8, PTC_residues_9, auth_asym_id
 
-
 def ptc_resdiues_get(
     biopython_structure: Structure, rnas: list[RNA], assembly_id: int = 0
 ) -> tuple[list[Residue], str]:
@@ -120,7 +119,6 @@ def ptc_resdiues_get(
     PTC_residues = [ress_sanitized[i] for i in list(range(m0.start, m0.end))]
 
     return PTC_residues, auth_asym_id
-
 
 def ptc_residues_to_atom_coordinates(
     reslist: list[Residue], auth_asym_id: str

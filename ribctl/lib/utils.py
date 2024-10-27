@@ -22,6 +22,3 @@ async def download_unpack_place(struct_id: str) -> None:
     with open(structfile, "wb") as f:
         f.write(decompressed)
 
-
-def open_structure(pdbid: str) -> Structure :
-    ...

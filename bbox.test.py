@@ -1,4 +1,4 @@
-from mitoptc import get_ptc_mito
+from ribctl.lib.mitoptc import get_ptc_mito
 from ribctl.etl.etl_assets_ops import RibosomeOps
 import numpy as np
 from Bio.PDB.Chain import Chain
