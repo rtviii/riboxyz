@@ -402,20 +402,6 @@ tetracycline_structs = [
     ),
 ]
 
-composite_bsite = {
-    "uL4": [
-        {
-            "source": 4,
-            "mapping": "",
-        },
-        {
-            "source": 5120,
-            "mapping": "",
-        },
-    ]
-}
-
-
 CHEM_ID = NewType("CHEM_ID", str)
 RCSB_ID = NewType("RCSB_ID", str)
 target_rcsb_id = "7K00"
@@ -460,27 +446,17 @@ def prepare_mapping_sources(
 
 sources = []
 for record in tetracycline_structs:
-    chem = record[0]
+    chem    = record[0]
     structs = record[1]
+    for struct in structs:
+        chemid  = chem["chemicalId"]
+        rcsb_id = struct["rcsb_id"]
+        sources.append((rcsb_id, chemid))
 
-    chemid = chem["chemicalId"]
-    rcsb_id = structs[0]["rcsb_id"]
-    sources.append((rcsb_id, chemid))
-
-# Now there are definitely a fuckton of parameters and knobs one can tweak here
-# - based on phylogeny(distance)
-# - based on compounds and their function
-# - based on the conservation of the binding site itself
-# we are just going to roll with normalizing on the number of structures for now
-# (i.e. a single residue hit in target is weighted via m/n where m is the number of source binding sites this residue figures in and n is the total number of binding sites)
-
-registry = prepare_mapping_sources(sources[:3])
-
+N_SOURCES = len(sources)
+registry = prepare_mapping_sources(sources)
 
 def compact_class(
-    # target_chain: BiopythonChain,
-    # target_rcsb_id: str,
-    # polymer_class: PolymerClass,
     projections: list[PredictionTarget],
     number_of_sources: int,
 ) -> dict[int, float]:
@@ -498,18 +474,14 @@ def compact_class(
     [ weights.update({x:y})  for x,y in list(map(lambda item: (item[0], item[1] / number_of_sources), weights.items())) ] 
     return weights
 
+compacted_registry = {}
+for poly_class in registry.keys():
+    compacted_registry.update({poly_class: compact_class( registry[poly_class], N_SOURCES)})
 
-pprint(registry['16SrRNA'])
-# target_chain_aaid = RibosomeOps(target_rcsb_id).get_poly_by_polyclass(PolymerClass("16SrRNA")).auth_asym_id
-# target_chain = RibosomeOps(target_rcsb_id).biopython_structure()[0][target_chain_aaid]
 
-compacted = compact_class(
-    # BiopythonChain(target_chain),
-    # target_rcsb_id,
-    # PolymerClass("16SrRNA"),
-   registry['16SrRNA'],
-   3)
-pprint(compacted)
+pprint(compacted_registry)
+
+
 # class MotifsMapManyToOne:
 #     """Given multiple source sequences and residue ranges within them, project the ranges onto a single target sequence"""
 
@@ -545,3 +517,6 @@ pprint(compacted)
 # target chain
 
 # ...
+
+# target_chain_aaid = RibosomeOps(target_rcsb_id).get_poly_by_polyclass(PolymerClass("16SrRNA")).auth_asym_id
+# target_chain = RibosomeOps(target_rcsb_id).biopython_structure()[0][target_chain_aaid]
