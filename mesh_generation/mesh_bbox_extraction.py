@@ -61,7 +61,7 @@ def remove_nascent_chain(atoms: list[Atom], rcsb_id:str) -> list[Atom]:
         "6IP6": "zx",
         "5LZW": "1",
         "6Q95": "6",
-        "6T59": "NA",
+        "6T59": "1",
         "5AJ0": "By",
         "6Q97": "6",
         "6OLI": "y",
