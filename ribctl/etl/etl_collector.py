@@ -831,6 +831,7 @@ class ETLCollector:
                 return RA.profile()
 
         #! Assemblies metadata
+        
         assmebly_maps = self.query_rcsb_api(AssemblyIdentificationString.replace("$RCSB_ID", self.rcsb_id) )["entry"]["assemblies"]
         self.asm_maps = list(map(AssemblyInstancesMap.model_validate, assmebly_maps))
         # pprint(self.asm_maps)

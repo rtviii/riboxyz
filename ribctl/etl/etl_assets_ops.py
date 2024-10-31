@@ -166,7 +166,6 @@ class RibosomeOps:
         p = self.profile()
         return (p.src_organism_ids, p.host_organism_ids)
 
-
     def get_poly_by_auth_asym_id( self, auth_asym_id: str ) -> Polymer :
 
         profile = self.profile()

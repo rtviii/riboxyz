@@ -52,7 +52,7 @@ def rrna_ptcloud(rcsb_id:str)->np.ndarray:
     return np.array([r.center_of_mass()  for r in rna_chain.child_list])
 
 def get_constriction(rcsb_id: str):
-    ro = RibosomeOps(rcsb_id)
+    ro               = RibosomeOps(rcsb_id)
     is_mitochondrial = ro.profile().mitochondrial
     if is_mitochondrial:
         uL4  = ro.get_poly_by_polyclass('uL4m')

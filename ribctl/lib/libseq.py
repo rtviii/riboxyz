@@ -16,8 +16,13 @@ from Bio.PDB.Residue import Residue
 from Bio.PDB.Chain import Chain
 from ribctl.lib.schema.types_binding_site import ( ResidueSummary, )
 
+# lets say you align 4ug0.A to 4u3m.F
+# 1. take biopython struct of 4ugo, get chain A
+# 2. take biopython struct of 4u3m, get chain F
+# 3. wrap both in SequenceMappingContainer
+# 4. use flat sequence for alignment
 
-class BiopythonChain(Chain):
+class SequenceMappingContainer(Chain):
     """ 
     A container for keeping track of the correspondence between the structural and sequence indices within a give polymer chain.
     \nStructural data(`mmcif`) frequently has unresolved and modified residues adheres to the author's numbering (which is arbitrary for all intents and purposes, ex. starts at, say, 7).
@@ -35,6 +40,7 @@ class BiopythonChain(Chain):
     but ideally this is taken care of at the parser level or at the deposition level.
 
     Again, see more: 
+
     - https://proteopedia.org/wiki/index.php/Unusual_sequence_numbering
     - https://bioinformatics.stackexchange.com/questions/14210/pdb-residue-numbering
     - https://bioinformatics.stackexchange.com/questions/20458/how-is-the-canonical-version-entity-poly-pdbx-seq-one-letter-code-obtaine
@@ -45,7 +51,10 @@ class BiopythonChain(Chain):
 
     chain                        : Chain
 
+    # from flat to residue that contributes the index to primary
     flat_index_to_residue_map    : dict[int, Residue]
+
+    # from primary to flat
     auth_seq_id_to_flat_index_map: dict[int, int]
 
     @property
@@ -201,7 +210,7 @@ class SeqPairwise:
         return _
 
 
-def map_motifs(source_chain:BiopythonChain, target_chain:BiopythonChain, bound_residues:list[ResidueSummary], polymer_class:str, verbose:bool=False)->tuple[str,str,list[Residue]]:
+def map_motifs(source_chain:SequenceMappingContainer, target_chain:SequenceMappingContainer, bound_residues:list[ResidueSummary], polymer_class:str, verbose:bool=False)->tuple[str,str,list[Residue]]:
 
     bpchain_source = source_chain
     bpchain_target = target_chain

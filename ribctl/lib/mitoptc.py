@@ -8,7 +8,7 @@ from Bio.PDB.NeighborSearch import NeighborSearch
 from Bio.PDB import Selection
 
 from ribctl.lib.libbsite import map_motifs
-from ribctl.lib.libseq import BiopythonChain
+from ribctl.lib.libseq import SequenceMappingContainer
 from ribctl.lib.schema.types_binding_site import ResidueSummary
 from scipy.spatial.distance import pdist, squareform
 
@@ -169,8 +169,8 @@ def get_ptc_mito(target_rcsb_id: str)->Tuple[np.ndarray ,list[Residue]]:
     ref_residues = PTC_reference_mito()
 
     _, _, motifs = map_motifs(
-        BiopythonChain(rrna_src),
-        BiopythonChain(rrna_tgt),
+        SequenceMappingContainer(rrna_src),
+        SequenceMappingContainer(rrna_tgt),
         [ResidueSummary.from_biopython_residue(r) for r in ref_residues],
         "mt16SrRNA",
         True )

@@ -1,7 +1,7 @@
 from pprint import pprint
 import sys
 
-from ribctl.lib.libseq import BiopythonChain, SeqPairwise, map_motifs
+from ribctl.lib.libseq import SequenceMappingContainer, SeqPairwise, map_motifs
 sys.path.append("/home/rtviii/dev/riboxyz")
 from neo4j_ribosome.db_lib_reader import Neo4jReader
 import operator
@@ -158,7 +158,7 @@ def bsite_transpose(
     target_rcsb_id: str,
     binding_site  : BindingSite,
     save          : bool = False,
-    verbose       : bool=False
+    verbose       : bool=True
 
 ) -> LigandTransposition:
 
@@ -187,8 +187,8 @@ def bsite_transpose(
         if target_polymer == None:
             continue
 
-        bpchain_source = BiopythonChain(source_struct[0][source_polymer.auth_asym_id])
-        bpchain_target = BiopythonChain(target_struct[0][target_polymer.auth_asym_id])
+        bpchain_source = SequenceMappingContainer(source_struct[0][source_polymer.auth_asym_id])
+        bpchain_target = SequenceMappingContainer(target_struct[0][target_polymer.auth_asym_id])
 
         primary_seq_source, primary_seq_target, tgt_bound_residues =  map_motifs(bpchain_source, bpchain_target, source_polymer.bound_residues, source_polymer.nomenclature[0], verbose)
 
