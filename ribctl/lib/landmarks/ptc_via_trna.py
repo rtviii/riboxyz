@@ -2,7 +2,6 @@ from pprint import pprint
 from typing import List, NewType, Tuple, TypeVar
 import typing
 from ribctl.etl.ribosome_ops import AssetPath, RibosomeOps
-from ribctl.lib.landmarks.ptc_via_trna import PTC_reference_residues
 import pickle
 from Bio.PDB.Residue import Residue
 import copy
@@ -15,6 +14,7 @@ from Bio.PDB.NeighborSearch import NeighborSearch
 from Bio.PDB import Selection
 from ribctl.lib.libbsite import map_motifs
 from ribctl.lib.libseq import SequenceMappingContainer
+from ribctl.lib.libtax import Taxid
 from ribctl.lib.schema.types_binding_site import ResidueSummary
 from scipy.spatial.distance import pdist, squareform
 
@@ -69,30 +69,6 @@ def PTC_reference_residues(ribosome_type:typing.Literal['euk','bact','arch','mit
 
     return list(filter(lambda x: ResidueSummary.filter_noncanonical(x.resname ),nearby_residues)), rrrna, (ref_rcsb_id, ref_trna_aaid, ref_rrna_aaid)
 
-def PTC_location(target_rcsb_id: str, ribosome_type:typing.Literal['euk','bact','arch','mito'])->Tuple[np.ndarray ,list[Residue]]:
-    """
-    Get PTC in @target_rcsb_id by way of mapping a reference PTC in a given mitochondrial structure
-    """
-    mmcif_struct_src = RibosomeOps(ref_rcsb_id).biopython_structure()[0]
-    mmcif_struct_tgt = RibosomeOps(target_rcsb_id).biopython_structure()[0]
-
-    mtRRNA_tgt_aaid = RibosomeOps(target_rcsb_id).get_LSU_rRNA().auth_asym_id
-
-    rrna_src = mmcif_struct_src[ref_rrna_aaid]
-    rrna_tgt = mmcif_struct_tgt[mtRRNA_tgt_aaid]
-
-    ref_residues = PTC_reference_residues()
-
-    _, _, motifs = map_motifs(
-        SequenceMappingContainer(rrna_src),
-        SequenceMappingContainer(rrna_tgt),
-        [ResidueSummary.from_biopython_residue(r) for r in ref_residues],
-        "mt16SrRNA",
-        True )
-
-    (p1,p2,dist) = find_closest_pair([r.center_of_mass()  for r in motifs])
-    return (p1+p2)/2, motifs
-
 def pickle_ref_ptc_data(ref_data:dict, output_file:str):
     try:
         with open(output_file, 'wb') as f:
@@ -104,21 +80,19 @@ def pickle_ref_ptc_data(ref_data:dict, output_file:str):
         print(f"Error pickling residues: {str(e)}")
         return False
 
-def unpickle_residue_array(input_file:str):
+def unpickle_residue_array(input_file:str)->dict|None:
     try:
         with open(input_file, 'rb') as f:
-            residues = pickle.load(f)
-        return residues
+            data_dict = pickle.load(f)
+        return data_dict
     except Exception as e:
         print(f"Error unpickling residues: {str(e)}")
         return None
 
 def produce_ptc_references():
     for ribosome_type in ['mito', 'euk','arch', 'bact'] :
-
-        residues, chain, meta             = PTC_reference_residues(ribosome_type)
+        residues, chain, meta = PTC_reference_residues(ribosome_type)
         ref_rcsb_id, ref_trna_aaid, ref_rrna_aaid = meta 
-
         _ = {
             'nearest_residues': residues,
             'chain'           : chain,
@@ -130,7 +104,49 @@ def produce_ptc_references():
         pickle_ref_ptc_data(_,outpath )
 
 def get_ptc_reference(ribosome_type:typing.Literal['mito', 'euk','arch', 'bact']):
-    cached_name   = 'ptc_reference_residues_{}.pickle'.format(ribosome_type.upper())
+    cached_name   = AssetPath.ptc_references(ribosome_type)
     return unpickle_residue_array(cached_name)
 
-produce_ptc_references()
+def PTC_location(target_rcsb_id: str)->Tuple[np.ndarray ,list[Residue]]:
+    """
+    Get PTC in @target_rcsb_id by way of mapping a reference PTC in a given mitochondrial structure
+    """
+    RO     = RibosomeOps(target_rcsb_id)
+    tax_id = RO.taxid
+    match Taxid.superkingdom(tax_id):
+        case 'archaea':
+            ribosome_type = 'arch'
+        case 'bacteria':
+            ribosome_type = 'bact'
+        case 'eukaryota':
+            ribosome_type = 'euk'
+        case _:
+            raise ValueError("Invalid taxid")
+
+    if RO.profile().mitochondrial:
+        ribosome_type = 'mito'
+
+    data_dict = get_ptc_reference(ribosome_type)
+    if data_dict is None:
+        raise IndexError("Reference file doesn't exist. It should")
+
+    ref_residues:list[Residue] = data_dict['nearest_residues']
+    ref_chain   :Chain         = data_dict['chain'           ]
+    # data_dict['ref_rcsb_id'     ]
+    # data_dict['ref_trna_aaid'   ]
+    # data_dict['ref_rrna_aaid'   ]
+
+    mmcif_struct_tgt = RO.biopython_structure()[0]
+    LSU_RNA_tgt_aaid = RO.get_LSU_rRNA().auth_asym_id
+    LSU_RNA_tgt:Chain      = mmcif_struct_tgt[LSU_RNA_tgt_aaid]
+
+
+    _, _, motifs = map_motifs(
+        SequenceMappingContainer(ref_chain),
+        SequenceMappingContainer(LSU_RNA_tgt),
+        [ResidueSummary.from_biopython_residue(r) for r in ref_residues],
+        "-",
+        True )
+
+    (p1,p2,dist) = find_closest_pair([r.center_of_mass()  for r in motifs])
+    return (p1+p2)/2, motifs

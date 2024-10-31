@@ -101,6 +101,9 @@ class RibosomeOps:
         self.rcsb_id = rcsb_id.upper()
         self.paths   = AssetPath(self.rcsb_id)
 
+    @property
+    def taxid(self)->int:
+        return self.profile().src_organism_ids[0]
 
     def nomenclature_table(self, verbose: bool = False) -> dict[str, dict]:
         prof = self.profile()
