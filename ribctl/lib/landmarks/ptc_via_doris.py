@@ -41,7 +41,6 @@ def pick_match(matches, rna_length: int):
 def residue_labels(res: Residue | ResidueSummary) -> bool:
     return res.label_comp_id in [*AMINO_ACIDS.keys(), *NUCLEOTIDES]
 
-
 def ptc_fuzzyfind_subseq_in_chain(
     biopython_struct, auth_asym_id: str, assembly_id: int = 0
 ) -> tuple[list[Residue], list[Residue], list[Residue], str]:
@@ -147,7 +146,6 @@ def ptc_residues_to_atom_coordinates(
     ptc_coordinates = {auth_asym_id: ptc_coordinates}
 
     return ptc_coordinates
-
 
 def ptc_residues_calculate_midpoint(
     reslist: list[Residue], auth_asym_id: str

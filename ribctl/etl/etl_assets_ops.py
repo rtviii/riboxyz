@@ -14,7 +14,7 @@ from ribctl import AMINO_ACIDS_3_TO_1_CODE, CHAINSPLITTER_PATH, CLASSIFICATION_R
 from ribctl.lib.libtax import PhylogenyNode, PhylogenyRank, Taxid
 from Bio.PDB.Structure import Structure
 from Bio.PDB.MMCIFParser import FastMMCIFParser
-from ribctl.lib.tunnel import ptc_resdiues_get, ptc_residues_calculate_midpoint
+from ribctl.lib.landmarks.ptc_via_doris import ptc_resdiues_get, ptc_residues_calculate_midpoint
 from ribctl.lib.utils import download_unpack_place
 from ribctl.lib.schema.types_ribosome import ( RNA, PTCInfo, Polymer, PolymerClass, PolynucleotideClass, PolynucleotideClass, PolypeptideClass, RibosomeStructure, RibosomeStructureMetadata, )
 from ribctl import RIBETL_DATA

@@ -1,8 +1,5 @@
-from pprint import pprint
 import gemmi
 import sys
-
-
 
 def get_ligand_neighbors(structure_path, ligand_id, radius=10.0):
     # 1. Open the mmCIF structure

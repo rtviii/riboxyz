@@ -11,14 +11,11 @@ from ribctl.lib.schema.types_binding_site import (
     ResidueSummary,
 )
 from ribctl.lib.schema.types_ribosome import PolymerClass
-from functools import partial
-
 sys.path.append("/home/rtviii/dev/riboxyz")
 from ribctl.lib.libmsa import Fasta
 from concurrent.futures import ProcessPoolExecutor
 from multiprocessing import Pool
 from functools import partial
-
 
 # ? Ligand Projections
 # Ok let's not complicate things. The prototype is thus:
@@ -31,18 +28,13 @@ from functools import partial
 
 # 2. Backtrack to structural files indices for each structure, record as a row in a table.
 
-s = Fasta.poly_class_all_seq(PolymerClass("uL4"))
-
-
-
-
-
 def process_single_structure(
     structure_pair: tuple[str,str],
     target_rcsb_id: str  = "7K00",
     radius: float = 15
 ) -> list[tuple[PolymerClass, PredictionTarget]]:
     """Process a single structure and return list of (polymer_class, target) pairs"""
+
     source_rcsb_id, chem_id = structure_pair
     print(f"Mapping {source_rcsb_id}/{chem_id}(source) into {target_rcsb_id} (target)")
 
@@ -54,11 +46,9 @@ def process_single_structure(
         results.append((chain.polymer_class, chain.target))
     return results
 
-
 def prepare_mapping_sources(
     source_structures: list[tuple[str, str]], n_processes: int = 8
 ) -> dict[PolymerClass, list[PredictionTarget]]:
-
     per_class_registry: dict[PolymerClass, list[PredictionTarget]] = {}
     with Pool(processes = n_processes) as pool:
         all_results = pool.map(process_single_structure, source_structures)
@@ -69,9 +59,7 @@ def prepare_mapping_sources(
                 per_class_registry[polymer_class] = [target]
             else:
                 per_class_registry[polymer_class].append(target)
-
     return per_class_registry
-
 
 def compact_class(
     projections: list[PredictionTarget],

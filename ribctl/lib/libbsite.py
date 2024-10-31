@@ -1,6 +1,5 @@
 from pprint import pprint
 import sys
-
 from ribctl.lib.libseq import SequenceMappingContainer, SeqPairwise, map_motifs
 sys.path.append("/home/rtviii/dev/riboxyz")
 from neo4j_ribosome.db_lib_reader import Neo4jReader
@@ -35,7 +34,6 @@ import os
 from collections import defaultdict
 from ribctl import ASSETS_PATH
 
-
 def lig_get_chemical_categories():
     ligands_classification_path = os.path.join(
         ASSETS_PATH, "ligands", "ligand_chemical_categories.csv"
@@ -48,8 +46,6 @@ def lig_get_chemical_categories():
         reverse_dict[category].append(ligand)
 
     return dict(reverse_dict)
-
-
 
 def get_lig_bsite(
     lig_chemid: str,
@@ -134,7 +130,6 @@ def get_lig_bsite(
         source=struct.get_id().upper(),
     )
 
-
 def bsite_ligand(
     chemicalId: str, rcsb_id: str, radius: float, save: bool = False
 ) -> BindingSite:
@@ -148,9 +143,6 @@ def bsite_ligand(
             json.dump(binding_site_ligand.model_dump(), f)
 
     return binding_site_ligand
-
-
-
 
 def bsite_transpose(
 
@@ -255,10 +247,8 @@ def bsite_transpose(
     )
     return _
 
-
 def retrieve_ligands():
     chemcat = lig_get_chemical_categories()["Tetracyclines"]
-    pprint(chemcat)
     ligands = Neo4jReader().list_ligands()
 
     def filter_by_category(lig_structs: tuple[dict, list[dict]]):

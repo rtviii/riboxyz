@@ -51,37 +51,6 @@ def rrna_ptcloud(rcsb_id:str)->np.ndarray:
     rna_chain:Chain = structure[0][lsurna.auth_asym_id]
     return np.array([r.center_of_mass()  for r in rna_chain.child_list])
 
-def get_constriction(rcsb_id: str):
-    ro               = RibosomeOps(rcsb_id)
-    is_mitochondrial = ro.profile().mitochondrial
-    if is_mitochondrial:
-        uL4  = ro.get_poly_by_polyclass('uL4m')
-        uL22 = ro.get_poly_by_polyclass('uL22m')
-    else:
-        uL4  = ro.get_poly_by_polyclass('uL4')
-        uL22 = ro.get_poly_by_polyclass('uL22')
-
-    if uL4 is None or uL22 is None:
-        raise ValueError("Could not find uL4 or uL22 in {}".format(rcsb_id))
-
-    structure = ro.biopython_structure()
-
-    uL4_c       :Chain = structure[0][uL4.auth_asym_id]
-    uL22_c      :Chain = structure[0][uL22.auth_asym_id]
-
-    uL4_coords  = [(r.center_of_mass() ) for r in uL4_c.child_list]
-    uL22_coords = [(r_.center_of_mass() ) for r_ in uL22_c.child_list]
-
-    return midpoint(*find_closest_pair_two_sets(uL4_coords, uL22_coords))
-
-
-ptc_point, _          = get_ptc_mito('3J9M')
-constriction_point = get_constriction('3J9M')
-# ptcloud            = rrna_ptcloud('3J9M')
-
-# !---------------------------------------------------------------------------------
-import numpy as np
-import pyvista as pv
 
 def create_cylinder_from_points(base_point, axis_point, radius, height):
     """
@@ -176,6 +145,15 @@ def visualize_intersection(result, points, base_point, axis_point):
     
     plotter.add_legend()
     return plotter
+
+
+
+
+ptc_point, _          = get_ptc_mito('3J9M')
+constriction_point = get_constriction('3J9M')
+
+import numpy as np
+import pyvista as pv
 
 pv.global_theme.allow_empty_mesh = True
 # Example usage

@@ -12,103 +12,12 @@ from ribctl.lib.libseq import SequenceMappingContainer
 from ribctl.lib.schema.types_binding_site import ResidueSummary
 from scipy.spatial.distance import pdist, squareform
 
-mitochondrial_rcsb_ids = [
-    "2FTC",
-    "3J6B",
-    "3J7Y",
-    "3J9M",
-    "3JD5",
-    "4CE4",
-    "4V19",
-    "5AJ3",
-    "5AJ4",
-    "5MRC",
-    "5MRE",
-    "5MRF",
-    "5OOL",
-    "5OOM",
-    "6GAW",
-    "6GAZ",
-    "6GB2",
-    "6I9R",
-    "6NU2",
-    "6NU3",
-    "6RW4",
-    "6RW5",
-    "6VLZ",
-    "6VMI",
-    "6XYW",
-    "6ZM5",
-    "6ZM6",
-    "7A5F",
-    "7A5G",
-    "7A5H",
-    "7A5I",
-    "7A5J",
-    "7A5K",
-    "7L08",
-    "7L20",
-    "7O9K",
-    "7O9M",
-    "7ODR",
-    "7ODS",
-    "7ODT",
-    "7OF0",
-    "7OF2",
-    "7OF3",
-    "7OF4",
-    "7OF5",
-    "7OF6",
-    "7OF7",
-    "7OI6",
-    "7OI7",
-    "7OI8",
-    "7OI9",
-    "7OIA",
-    "7OIB",
-    "7OIC",
-    "7OID",
-    "7OIE",
-    "7P2E",
-    "7PD3",
-    "7PKT",
-    "7PNT",
-    "7PNU",
-    "7PNV",
-    "7PNW",
-    "7PNX",
-    "7PNY",
-    "7PNZ",
-    "7PO0",
-    "7PO1",
-    "7PO2",
-    "7PO3",
-    "7PO4",
-    "7QH6",
-    "7QH7",
-    "7QI4",
-    "7QI5",
-    "7QI6",
-    "8A22",
-    "8ANY",
-    "8APN",
-    "8APO",
-    "8CSP",
-    "8CSQ",
-    "8CSR",
-    "8CSS",
-    "8CST",
-    "8CSU",
-    "8OIN",
-    "8OIP",
-    "8OIQ",
-    "8OIR",
-    "8OIS",
-    "8OIT",
-    "8PK0",
-    "8QSJ",
-]
-
+REFERENCE_MITO_STRUCTURE_TRNA_RRNA = ("7A5F", "24", "A3")
+#TODO:
+REFERENCE_ARCHAEA_STRUCTURE_TRNA_RRNA = ("8HKY", "APTN", "A23S")
+REFERENCE_BACTERIA_STRUCTURE_TRNA_RRNA = ("8UD8", "1x", "1A")
+REFERENCE_EUKARYA_STRUCTURE_TRNA_RRNA = ("8G5Z", "Pt", "L5")
+ref_rcsb_id, ref_trna_aaid, ref_rrna_aaid = REFERENCE_MITO_STRUCTURE_TRNA_RRNA
 
 
 def find_closest_pair(points:np.ndarray):
@@ -128,15 +37,6 @@ def find_closest_pair(points:np.ndarray):
     min_distance   = distances[min_idx]
     
     return closest_point1, closest_point2, min_distance
-# TODO:
-# 1.combine the cterm/residue acquision into one ptc_reference fucntion for mitochondria
-# 2.use ptc_reference in consort with another structures's rrna to establish that structure's mapped residues
-# 3.get the farthest pair of residues -- midpoint is the ptc in that structure
-# 4.feed to mesh acq
-
-REFERENCE_MITO_STRUCTURE_TRNA_RRNA = ("7A5F", "24", "A3")
-ref_rcsb_id, ref_trna_aaid, ref_rrna_aaid = REFERENCE_MITO_STRUCTURE_TRNA_RRNA
-
 
 def PTC_reference_mito() -> List[Residue]:
     mmcif_struct = RibosomeOps(ref_rcsb_id).biopython_structure()[0]
@@ -152,6 +52,8 @@ def PTC_reference_mito() -> List[Residue]:
     nearby_residues = ns.search(trna_cterm_pos(), 10, "R")
 
     return nearby_residues
+
+
 
 
 def get_ptc_mito(target_rcsb_id: str)->Tuple[np.ndarray ,list[Residue]]:
@@ -183,3 +85,100 @@ def get_ptc_mito(target_rcsb_id: str)->Tuple[np.ndarray ,list[Residue]]:
 # basically assgin to every node of the taxonomy tree the the landmark with the data where there is one
 # "project" from extant nodes to the rest preferring proximal nodes as sources
 # class GlobalTaxonomy[T](): ...
+
+# mitochondrial_rcsb_ids = [
+#     "2FTC",
+#     "3J6B",
+#     "3J7Y",
+#     "3J9M",
+#     "3JD5",
+#     "4CE4",
+#     "4V19",
+#     "5AJ3",
+#     "5AJ4",
+#     "5MRC",
+#     "5MRE",
+#     "5MRF",
+#     "5OOL",
+#     "5OOM",
+#     "6GAW",
+#     "6GAZ",
+#     "6GB2",
+#     "6I9R",
+#     "6NU2",
+#     "6NU3",
+#     "6RW4",
+#     "6RW5",
+#     "6VLZ",
+#     "6VMI",
+#     "6XYW",
+#     "6ZM5",
+#     "6ZM6",
+#     "7A5F",
+#     "7A5G",
+#     "7A5H",
+#     "7A5I",
+#     "7A5J",
+#     "7A5K",
+#     "7L08",
+#     "7L20",
+#     "7O9K",
+#     "7O9M",
+#     "7ODR",
+#     "7ODS",
+#     "7ODT",
+#     "7OF0",
+#     "7OF2",
+#     "7OF3",
+#     "7OF4",
+#     "7OF5",
+#     "7OF6",
+#     "7OF7",
+#     "7OI6",
+#     "7OI7",
+#     "7OI8",
+#     "7OI9",
+#     "7OIA",
+#     "7OIB",
+#     "7OIC",
+#     "7OID",
+#     "7OIE",
+#     "7P2E",
+#     "7PD3",
+#     "7PKT",
+#     "7PNT",
+#     "7PNU",
+#     "7PNV",
+#     "7PNW",
+#     "7PNX",
+#     "7PNY",
+#     "7PNZ",
+#     "7PO0",
+#     "7PO1",
+#     "7PO2",
+#     "7PO3",
+#     "7PO4",
+#     "7QH6",
+#     "7QH7",
+#     "7QI4",
+#     "7QI5",
+#     "7QI6",
+#     "8A22",
+#     "8ANY",
+#     "8APN",
+#     "8APO",
+#     "8CSP",
+#     "8CSQ",
+#     "8CSR",
+#     "8CSS",
+#     "8CST",
+#     "8CSU",
+#     "8OIN",
+#     "8OIP",
+#     "8OIQ",
+#     "8OIR",
+#     "8OIS",
+#     "8OIT",
+#     "8PK0",
+#     "8QSJ",
+# ]

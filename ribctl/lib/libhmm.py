@@ -13,7 +13,6 @@ from ribctl.lib.schema.types_ribosome import RNA, ElongationFactorClass, Initiat
 from pyhmmer.easel import Alphabet, DigitalSequenceBlock, TextSequence, SequenceFile, SequenceBlock, TextSequenceBlock, DigitalSequence
 from pyhmmer.plan7 import Pipeline, HMM , TopHits
 from ribctl.logs.loggers import get_classification_logger
-
 import concurrent.futures
 
 # logger= get_classification_logger()
@@ -23,7 +22,6 @@ def digitize_seq_record(seq_record:SeqRecord, alphabet:Alphabet)->DigitalSequenc
     """Convert a SeqRecord to a DigitalSequence"""
     seq_  = pyhmmer.easel.TextSequence(name=bytes(seq_record.id,'utf-8'), sequence=seq_record.seq)
     return seq_.digitize(alphabet)
-
 
 def pick_best_hmm_hit(matches_dict:dict[Polymer, list[float]], chain_info:Polymer)->PolymerClass | None:
     """Given a dictionary of sequence-HMMe e-values, pick the best candidate class"""
@@ -50,7 +48,6 @@ def pick_best_hmm_hit(matches_dict:dict[Polymer, list[float]], chain_info:Polyme
             logger.warning("{}.{} : Multiple sensible matches detected, picked {} (smallest e-value) : \n {}".format(chain_info.parent_rcsb_id, chain_info.auth_asym_id,results[0][0], results))
 
     return results[0]['candidate_class']
-
 
 def hmm_create(name:str, seqs:Iterator[SeqRecord], alphabet:Alphabet)->HMM:
     """Create an HMM from a list of sequences"""
