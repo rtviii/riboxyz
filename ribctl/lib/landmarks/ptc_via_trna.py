@@ -1,23 +1,16 @@
 from pprint import pprint
 from typing import List, Tuple, TypeVar
+import typing
 from Bio.PDB.Residue import Residue
 from Bio.PDB.Chain import Chain
 import numpy as np
 from ribctl.etl.etl_assets_ops import RibosomeOps
 from Bio.PDB.NeighborSearch import NeighborSearch
 from Bio.PDB import Selection
-
 from ribctl.lib.libbsite import map_motifs
 from ribctl.lib.libseq import SequenceMappingContainer
 from ribctl.lib.schema.types_binding_site import ResidueSummary
 from scipy.spatial.distance import pdist, squareform
-
-REFERENCE_MITO_STRUCTURE_TRNA_RRNA = ("7A5F", "24", "A3")
-#TODO:
-REFERENCE_ARCHAEA_STRUCTURE_TRNA_RRNA = ("8HKY", "APTN", "A23S")
-REFERENCE_BACTERIA_STRUCTURE_TRNA_RRNA = ("8UD8", "1x", "1A")
-REFERENCE_EUKARYA_STRUCTURE_TRNA_RRNA = ("8G5Z", "Pt", "L5")
-ref_rcsb_id, ref_trna_aaid, ref_rrna_aaid = REFERENCE_MITO_STRUCTURE_TRNA_RRNA
 
 
 def find_closest_pair(points:np.ndarray):
@@ -38,12 +31,32 @@ def find_closest_pair(points:np.ndarray):
     
     return closest_point1, closest_point2, min_distance
 
-def PTC_reference_mito() -> List[Residue]:
-    mmcif_struct = RibosomeOps(ref_rcsb_id).biopython_structure()[0]
+def PTC_reference_residues(ribosome_type:typing.Literal['euk','bact','arch','mito']) -> list[Residue]:
 
+    REFERENCE_MITO_STRUCTURE_TRNA_RRNA     = ("7A5F", "24", "A3")
+    REFERENCE_ARCHAEA_STRUCTURE_TRNA_RRNA  = ("8HKY", "APTN", "A23S")
+    REFERENCE_BACTERIA_STRUCTURE_TRNA_RRNA = ("8UD8", "1x", "1A")
+
+    REFERENCE_EUKARYA_STRUCTURE_TRNA_RRNA  = ("8CCS", "Bb", "AA")
+    match ribosome_type:
+        case 'euk':
+            ref_rcsb_id, ref_trna_aaid, ref_rrna_aaid = REFERENCE_EUKARYA_STRUCTURE_TRNA_RRNA
+        case 'bact':
+            ref_rcsb_id, ref_trna_aaid, ref_rrna_aaid = REFERENCE_BACTERIA_STRUCTURE_TRNA_RRNA
+        case 'arch':
+            ref_rcsb_id, ref_trna_aaid, ref_rrna_aaid = REFERENCE_ARCHAEA_STRUCTURE_TRNA_RRNA
+        case 'mito':
+            ref_rcsb_id, ref_trna_aaid, ref_rrna_aaid = REFERENCE_MITO_STRUCTURE_TRNA_RRNA
+        case _:
+            raise ValueError("Invalid ribosome type")
+
+
+    mmcif_struct = RibosomeOps(ref_rcsb_id).biopython_structure()[0]
     def trna_cterm_pos() -> np.ndarray: 
         trnaChain                     : Chain = mmcif_struct[ref_trna_aaid]
-        c_terminus                    : Residue = [*trnaChain][-1]
+        print("got trnachain", trnaChain)
+        c_terminus                    : Residue = list(filter(lambda x: ResidueSummary.filter_noncanonical(x.resname), [*trnaChain]))[-1]
+        print("got cterminus", c_terminus)
         return c_terminus.center_of_mass()
 
     mtrrna          = mmcif_struct[ref_rrna_aaid]
@@ -52,7 +65,6 @@ def PTC_reference_mito() -> List[Residue]:
     nearby_residues = ns.search(trna_cterm_pos(), 10, "R")
 
     return nearby_residues
-
 
 
 
@@ -68,7 +80,7 @@ def get_ptc_mito(target_rcsb_id: str)->Tuple[np.ndarray ,list[Residue]]:
     rrna_src = mmcif_struct_src[ref_rrna_aaid]
     rrna_tgt = mmcif_struct_tgt[mtRRNA_tgt_aaid]
 
-    ref_residues = PTC_reference_mito()
+    ref_residues = PTC_reference_residues()
 
     _, _, motifs = map_motifs(
         SequenceMappingContainer(rrna_src),

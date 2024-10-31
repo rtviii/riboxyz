@@ -39,6 +39,11 @@ class ResidueSummary(BaseModel):
     rcsb_id:str
     full_id      : typing.Optional[tuple[str, int, str, tuple[str, int, str]]]
 
+
+    @staticmethod
+    def filter_noncanonical(resname:str):
+        return resname in [*AMINO_ACIDS.keys(), *NUCLEOTIDES]
+
     @staticmethod
     def three_letter_code_to_one(resname: str):
         if resname in AMINO_ACIDS:
