@@ -6,7 +6,7 @@ import sys
 from neo4j_ribosome import NEO4J_CURRENTDB, NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER
 from neo4j_ribosome.db_lib_reader import Neo4jReader
 from neo4j_ribosome.db_lib_builder import Neo4jAdapter
-from ribctl.etl.etl_assets_ops import Assets, RibosomeOps, Structure
+from ribctl.etl.ribosome_ops import Assets, RibosomeOps, Structure
 
 sys.dont_write_bytecode = True
 

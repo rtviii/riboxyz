@@ -3,7 +3,7 @@ import click
 from click import Context
 from loguru import logger
 from ribctl.etl import etl_obtain
-from ribctl.etl.etl_assets_ops import AssetClass, Assets
+from ribctl.etl.ribosome_ops import AssetClass, Assets
 from ribctl.logs.loggers import get_etl_logger
 
 

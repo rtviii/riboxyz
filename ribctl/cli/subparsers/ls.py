@@ -1,7 +1,7 @@
 import os
 import click
 from ribctl import RIBETL_DATA
-from ribctl.etl.etl_assets_ops import Assets, RibosomeOps, Structure
+from ribctl.etl.ribosome_ops import Assets, RibosomeOps, Structure
 from ribctl.lib.libtax import Taxid
 ce = click.echo
 

@@ -10,7 +10,7 @@ from Bio.PDB.Structure import Structure
 from Bio.PDB.Chain import Chain
 from loguru import logger
 import requests
-from ribctl import AMINO_ACIDS_3_TO_1_CODE, CHAINSPLITTER_PATH, CLASSIFICATION_REPORTS
+from ribctl import AMINO_ACIDS_3_TO_1_CODE, ASSETS_PATH, CHAINSPLITTER_PATH, CLASSIFICATION_REPORTS
 from ribctl.lib.libtax import PhylogenyNode, PhylogenyRank, Taxid
 from Bio.PDB.Structure import Structure
 from Bio.PDB.MMCIFParser import FastMMCIFParser
@@ -50,6 +50,11 @@ class AssetPath:
     def binding_site_prediction(self, chemId:str, source_struct:str):
         return f"{self.dir}/{self.rcsb_id.upper()}_LIG_{chemId.upper()}_PREDICTION_VIA_{source_struct.upper()}.json"
     
+    @staticmethod
+    def ptc_references( ribosome_type:typing.Literal['arch','bact','euk','mito']):
+        filename = "ptc_reference_residues_{}.pickle".format(ribosome_type.upper())
+        return os.path.join(ASSETS_PATH, "landmarks_cache", filename )
+
     @property
     def dir(self):
         return os.path.join(RIBETL_DATA, self.rcsb_id)
@@ -61,6 +66,7 @@ class AssetPath:
     @property
     def ptc(self):
         return os.path.join( self.dir, "{}_PTC_COORDINATES.json".format(self.rcsb_id) )
+
 
     @property
     def profile(self):

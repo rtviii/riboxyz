@@ -3,7 +3,7 @@ import os
 from pprint import pprint
 from django.http import JsonResponse, HttpResponseServerError
 from ninja import Router
-from ribctl.etl.etl_assets_ops import RibosomeOps
+from ribctl.etl.ribosome_ops import RibosomeOps
 from ribctl.lib.libbsite import bsite_ligand, bsite_transpose, lig_get_chemical_categories
 from ribctl.lib.schema.types_binding_site import BindingSite, LigandTransposition
 from ribctl.lib.seq_project_many_to_one import compact_class, prepare_mapping_sources

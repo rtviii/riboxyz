@@ -4,7 +4,7 @@ import typing
 from venv import logger
 from ninja import Router
 from ribctl.etl.etl_pipeline import current_rcsb_structs
-from ribctl.etl.etl_assets_ops import Structure
+from ribctl.etl.ribosome_ops import Structure
 # from db.ribosomexyz import ribosomexyzDB
 # from rbxz_bend.application import db_connection, ribosomexyzApp
 # from rbxz_bend.settings import NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER

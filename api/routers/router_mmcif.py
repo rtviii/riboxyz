@@ -1,7 +1,7 @@
 import os
 from django.http import HttpResponse
 from ninja import Router
-from ribctl.etl.etl_assets_ops import RibosomeOps, Structure
+from ribctl.etl.ribosome_ops import RibosomeOps, Structure
 from ribctl.lib.schema.types_ribosome import RNA, LifecycleFactorClass, MitochondrialProteinClass, Polymer, PolynucleotideClass
 
 mmcif_router = Router();

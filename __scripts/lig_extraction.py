@@ -43,7 +43,7 @@ import json
 from pprint import pprint
 from neo4j_ribosome.db_lib_builder import Neo4jAdapter
 from neo4j_ribosome.db_lib_reader import dbqueries
-from ribctl.etl.etl_assets_ops import Assets
+from ribctl.etl.ribosome_ops import Assets
 from ribctl.lib.libbsite import bsite_ligand
 
 

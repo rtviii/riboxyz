@@ -7,7 +7,7 @@ from typing import Any
 from loguru import logger
 import pyhmmer
 import requests
-from ribctl.etl.etl_assets_ops import RibosomeOps
+from ribctl.etl.ribosome_ops import RibosomeOps
 from ribctl.etl.gql_querystrings import (
     AssemblyIdentificationString,
     EntryInfoString,

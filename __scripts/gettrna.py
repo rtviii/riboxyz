@@ -1,7 +1,7 @@
 import json
 import os
 from ribctl import RIBETL_DATA
-from ribctl.etl.etl_assets_ops import RibosomeOps, Structure
+from ribctl.etl.ribosome_ops import RibosomeOps, Structure
 from ribctl.lib.libmsa import Fasta
 import os
 from Bio import SeqRecord

@@ -1,7 +1,7 @@
 # ? ---------- Paths ------------
 import os
 from ribctl import EXIT_TUNNEL_WORK, RIBETL_DATA
-from ribctl.etl.etl_assets_ops import Assets, RibosomeOps
+from ribctl.etl.ribosome_ops import Assets, RibosomeOps
 
 
 # most of this stuff is unnecessary

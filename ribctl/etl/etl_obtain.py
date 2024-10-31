@@ -1,6 +1,6 @@
 import asyncio
 from typing import Coroutine
-from ribctl.etl.etl_assets_ops import AssetClass, Assets, RibosomeOps, Structure
+from ribctl.etl.ribosome_ops import AssetClass, Assets, RibosomeOps, Structure
 from ribctl.etl.etl_collector import ( ETLCollector )
 import asyncio
 

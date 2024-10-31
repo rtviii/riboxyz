@@ -7,12 +7,12 @@ RIBETL_DATA     = os.environ.get("RIBETL_DATA")
 if not os.path.exists(RIBETL_DATA):
     raise NotADirectoryError("RIBETL_DATA directory does not exist. Most things won't work.")
 
-# This amounts to "_assets folder is expected to exist in the root of `ribctl`(next to top-level __init__.py)"
 #! ------------- logs ----------------
 LOGS_PATH              = os.path.join(pathlib.Path(__file__).parent, "logs")
 CLASSIFICATION_REPORTS = os.path.join(pathlib.Path(__file__).parent, "logs","hmm_classification_reports")
 
 #! ------------- assets ----------------
+# This amounts to "assets folder is expected to exist in the root of `ribctl`(next to top-level __init__.py)"
 ASSETS_PATH        = os.path.join(pathlib.Path(__file__).parent, "assets")
 MUSCLE_BIN         = os.path.join(ASSETS_PATH, "muscle3.8.1")
 NCBI_TAXDUMP_GZ    = os.path.join(ASSETS_PATH, "taxdump.tar.gz")
