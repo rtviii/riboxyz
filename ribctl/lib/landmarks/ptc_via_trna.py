@@ -18,6 +18,10 @@ from ribctl.lib.libtax import Taxid
 from ribctl.lib.schema.types_binding_site import ResidueSummary
 from scipy.spatial.distance import pdist, squareform
 
+REFERENCE_MITO_STRUCTURE_TRNA_RRNA     = ("7A5F", "24", "A3")
+REFERENCE_ARCHAEA_STRUCTURE_TRNA_RRNA  = ("8HKY", "APTN", "A23S")
+REFERENCE_BACTERIA_STRUCTURE_TRNA_RRNA = ("8UD8", "1x", "1A")
+REFERENCE_EUKARYA_STRUCTURE_TRNA_RRNA  = ("8CCS", "Bb", "AA")
 
 def find_closest_pair(points:np.ndarray):
     points = np.asarray(points)
@@ -38,10 +42,6 @@ def find_closest_pair(points:np.ndarray):
     return closest_point1, closest_point2, min_distance
 
 def PTC_reference_residues(ribosome_type:typing.Literal['euk','bact','arch','mito']) ->tuple[  list[Residue], Chain, tuple[str,str,str] ]:
-    REFERENCE_MITO_STRUCTURE_TRNA_RRNA     = ("7A5F", "24", "A3")
-    REFERENCE_ARCHAEA_STRUCTURE_TRNA_RRNA  = ("8HKY", "APTN", "A23S")
-    REFERENCE_BACTERIA_STRUCTURE_TRNA_RRNA = ("8UD8", "1x", "1A")
-    REFERENCE_EUKARYA_STRUCTURE_TRNA_RRNA  = ("8CCS", "Bb", "AA")
     match ribosome_type:
         case 'euk':
             ref_rcsb_id, ref_trna_aaid, ref_rrna_aaid = REFERENCE_EUKARYA_STRUCTURE_TRNA_RRNA
