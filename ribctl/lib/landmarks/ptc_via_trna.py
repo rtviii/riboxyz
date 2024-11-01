@@ -109,8 +109,8 @@ def get_ptc_reference(ribosome_type:typing.Literal['mito', 'euk','arch', 'bact']
 
 def PTC_location(target_rcsb_id: str)->Tuple[np.ndarray ,list[Residue]]:
     """
-    Get PTC in @target_rcsb_id by way of mapping a reference PTC in a given mitochondrial structure
-    """
+    # Get PTC in @target_rcsb_id by way of mapping a reference PTC in a given mitochondrial structure
+    # """
     RO     = RibosomeOps(target_rcsb_id)
     tax_id = RO.taxid
     match Taxid.superkingdom(tax_id):
@@ -139,6 +139,8 @@ def PTC_location(target_rcsb_id: str)->Tuple[np.ndarray ,list[Residue]]:
     mmcif_struct_tgt = RO.biopython_structure()[0]
     LSU_RNA_tgt_aaid = RO.get_LSU_rRNA().auth_asym_id
     LSU_RNA_tgt:Chain      = mmcif_struct_tgt[LSU_RNA_tgt_aaid]
+    print("got target", [LSU_RNA_tgt.child_dict])
+    print("got target", LSU_RNA_tgt)
 
 
     _, _, motifs = map_motifs(
@@ -147,6 +149,17 @@ def PTC_location(target_rcsb_id: str)->Tuple[np.ndarray ,list[Residue]]:
         [ResidueSummary.from_biopython_residue(r) for r in ref_residues],
         "-",
         True )
+
+
+    # RO     = RibosomeOps(target_rcsb_id)
+    # mmcif_struct_tgt = RO.biopython_structure()[0]
+    # LSU_RNA_tgt_aaid = RO.get_LSU_rRNA().auth_asym_id
+    # LSU_RNA_tgt:Chain      = mmcif_struct_tgt["72"]
+    # nums  = [2602,2451 ]
+    # residues =LSU_RNA_tgt.child_list
+    # x :Residue= residues[1]
+    # motifs = list(filter( lambda x: int(x.full_id[3][1]) in nums, LSU_RNA_tgt.child_list ))
+    # pprint(motifs)
 
     (p1,p2,dist) = find_closest_pair([r.center_of_mass()  for r in motifs])
     return (p1+p2)/2, motifs

@@ -188,8 +188,10 @@ class RibosomeOps:
         in the case that a structure contains multiple models (ex. 4V4Q XRAY)"""
 
         profile = self.profile()
+        polymer:Polymer
         for polymer in [*profile.rnas, *profile.other_polymers, *profile.proteins]: 
-            if class_ in  polymer.nomenclature and polymer.assembly_id == assembly:
+            if class_ in  polymer.nomenclature and polymer.assembly_id == assembly and polymer.entity_poly_seq_length > 30:
+                print("RETURNING ", polymer)
                 return polymer
         
 

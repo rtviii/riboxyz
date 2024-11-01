@@ -22,11 +22,13 @@ def open_tunnel_csv(rcsb_id: str) -> list[list]:
     df = pd.read_csv(TUNNEL_PATH)
     data = []
     for index, row in df.iterrows():
-        radius = row["Radius"]
         x_coordinate = row["X"]
         y_coordinate = row["Y"]
         z_coordinate = row["Z"]
+        radius       = row["Radius"]
         data.append([radius, x_coordinate, y_coordinate, z_coordinate])
+        # if index > 10:
+        #     exit
     return data
 
 def parse_struct_via_centerline(
@@ -51,8 +53,9 @@ def parse_struct_via_centerline(
     return list(nbhd)
 
 def remove_nascent_chain(atoms: list[Atom], rcsb_id:str) -> list[Atom]:
-    print("params", rcsb_id)
     nascent_chains = {
+        "8RCS": "p",
+        "7A5F": 'Y2',
         "7AQC": "W",
         "7N30": "Pp",
         "6HCQ": "1",
