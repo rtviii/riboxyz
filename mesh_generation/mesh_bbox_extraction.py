@@ -27,8 +27,6 @@ def open_tunnel_csv(rcsb_id: str) -> list[list]:
         z_coordinate = row["Z"]
         radius       = row["Radius"]
         data.append([radius, x_coordinate, y_coordinate, z_coordinate])
-        # if index > 10:
-        #     exit
     return data
 
 def parse_struct_via_centerline(
@@ -264,8 +262,6 @@ def extract_bbox_atoms(rcsb_id: str) -> list:
         write=True,
         writepath=tunnel_atom_encoding_path(rcsb_id),
     )
-
-# Define constriction site as the midpoint between the closest residues of ul22/ul4 or ul22m/ul4m
 
 def get_ptc():
     ...
