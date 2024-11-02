@@ -3,6 +3,7 @@ import click
 from click import Context
 from loguru import logger
 from ribctl.etl import etl_obtain
+from ribctl.etl.assets_global import GlobalAssets
 from ribctl.etl.assets_structure import AssetClass, StructureAssets
 from ribctl.logs.loggers import get_etl_logger
 
@@ -16,7 +17,7 @@ def etl(ctx: Context):
 @etl.command()
 @click.pass_context
 def all(ctx:Context):
-        global_status = StructureAssets.global_status()
+        global_status = GlobalAssets.global_status()
         list(map(lambda a: a.name, list(AssetClass)))
         header = ( "[RCSB_ID \t" + "".join(["| {}".format(a.name) for a in list(AssetClass)]) + "]" )
         click.echo(header)
@@ -45,14 +46,14 @@ def assets(ctx: Context, assets,reclassify, overwrite, rcsb_sync, all_structs, d
 
     
     if rcsb_sync:
-        for rcsb_id in StructureAssets.status_vs_rcsb():
+        for rcsb_id in GlobalAssets.status_vs_rcsb():
             print("RCSB Sync: Fetching assets for {}".format(rcsb_id))
             routines = etl_obtain.asset_routines(rcsb_id, [AssetClass.profile, AssetClass.mmcif] , overwrite)
             asyncio.run(etl_obtain.execute_asset_task_pool(routines))
         return
 
     if all_structs:
-        for rcsb_id in StructureAssets.list_all_structs():
+        for rcsb_id in GlobalAssets.list_all_structs():
             print("[{}]".format(rcsb_id))
             try:
                 routines = etl_obtain.asset_routines(rcsb_id, assets , overwrite)

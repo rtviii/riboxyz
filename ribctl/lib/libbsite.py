@@ -11,8 +11,6 @@ import pandas as pd
 with warnings.catch_warnings():
     warnings.simplefilter("ignore", BiopythonDeprecationWarning)
 from ribctl.lib.schema.types_binding_site import (
-    AMINO_ACIDS,
-    NUCLEOTIDES,
     BindingSiteChain,
     LigandTransposition,
     ResiduesMapping,

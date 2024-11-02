@@ -2,18 +2,14 @@ import math
 import os
 from fuzzysearch import find_near_matches
 import numpy as np
-from ribctl.lib.schema.types_binding_site import (
-    AMINO_ACIDS,
-    NUCLEOTIDES,
-    ResidueSummary,
-)
 from Bio.PDB.Atom import Atom
 from Bio.PDB.Residue import Residue
 from Bio.PDB.Chain import Chain
 from Bio.PDB.Atom import Atom
 from functools import reduce
 from Bio.PDB.Structure import Structure
-from ribctl.lib.schema.types_ribosome import RNA
+from ribctl.lib.schema.primitivs import AMINO_ACIDS, NUCLEOTIDES
+from ribctl.lib.schema.types_ribosome import RNA, ResidueSummary
 from fuzzysearch import find_near_matches
 
 # https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4574749/pdf/1719.pdf

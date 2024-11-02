@@ -1,4 +1,7 @@
 import sys
+
+from ribctl.lib.schema.primitivs import AMINO_ACIDS, NUCLEOTIDES
+from ribctl.lib.schema.types_ribosome import ResidueSummary
 sys.path.append("/home/rtviii/dev/riboxyz")
 from typing import Optional
 import re
@@ -8,13 +11,8 @@ from Bio import ( BiopythonDeprecationWarning, )
 with warnings.catch_warnings():
     warnings.simplefilter("ignore", BiopythonDeprecationWarning)
     from Bio import pairwise2
-from ribctl.lib.schema.types_binding_site import (
-    AMINO_ACIDS,
-    NUCLEOTIDES,
-)
 from Bio.PDB.Residue import Residue
 from Bio.PDB.Chain import Chain
-from ribctl.lib.schema.types_binding_site import ( ResidueSummary, )
 
 # lets say you align 4ug0.A to 4u3m.F
 # 1. take biopython struct of 4ugo, get chain A
