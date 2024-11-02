@@ -22,6 +22,9 @@ from ribctl import RIBETL_DATA
 from ribctl.logs.loggers import get_etl_logger
 from ribctl.ribosome_ops import RibosomeOps
 
+
+
+
 class GlobalAssets:
 
     @staticmethod

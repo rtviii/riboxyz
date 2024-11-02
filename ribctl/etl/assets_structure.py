@@ -19,7 +19,6 @@ from ribctl.lib.utils import download_unpack_place
 from ribctl.lib.schema.types_ribosome import ( RNA, PTCInfo, Polymer, PolymerClass, PolynucleotideClass, PolynucleotideClass, PolypeptideClass, RibosomeStructure, RibosomeStructureMetadata, )
 from ribctl import RIBETL_DATA
 from ribctl.logs.loggers import get_etl_logger
-from ribctl.ribosome_ops import RibosomeOps
 
 
 """
@@ -46,7 +45,7 @@ class AssetClass(enum.StrEnum):
             return getattr(AssetClass, _)
         return None
 
-class AssetPathsStructure:
+class StructureAssetPaths:
     rcsb_id:str
     def __init__(self, rcsb_id) -> None:
         self.rcsb_id = rcsb_id
@@ -95,14 +94,12 @@ class AssetPathsStructure:
 class StructureAssets:
 
     rcsb_id: str
-    ro     : RibosomeOps
-    paths  : AssetPathsStructure
+    paths  : StructureAssetPaths
     
 
     def __init__(self, rcsb_id: str) -> None:
         self.rcsb_id = rcsb_id
-        self.ro      = RibosomeOps(rcsb_id)
-        self.paths   = AssetPathsStructure(rcsb_id)
+        self.paths   = StructureAssetPaths(rcsb_id)
     
     def assets_status(self)->dict[AssetClass, bool]:
         _ = {}
@@ -181,19 +178,21 @@ class StructureAssets:
         if os.path.exists(asset_ptc_coords_path) and not overwrite:
             logger.debug(f"PTC coordinates already exist for {self.rcsb_id} and overwrite is set to False" )
 
-        ress, auth_asym_id = ptc_resdiues_get( self.ro.biopython_structure(), self.ro.profile().rnas )
-        midpoint_coords    = ptc_residues_calculate_midpoint(ress, auth_asym_id)
+        # ress, auth_asym_id = ptc_resdiues_get( self.ro.biopython_structure(), self.ro.profile().rnas )
+        # midpoint_coords    = ptc_residues_calculate_midpoint(ress, auth_asym_id)
 
-        writeout = {
-            "site_9_residues"      : [(res.get_resname(), res.id[1]) for res in ress],
-            "LSU_rRNA_auth_asym_id": auth_asym_id,
-            "midpoint_coordinates" : midpoint_coords,
-            "nomenclature_table"   : self.ro.nomenclature_table(),
-        }
+        # writeout = {
+        #     "site_9_residues"      : [(res.get_resname(), res.id[1]) for res in ress],
+        #     "LSU_rRNA_auth_asym_id": auth_asym_id,
+        #     "midpoint_coordinates" : midpoint_coords,
+        #     "nomenclature_table"   : self.ro.nomenclature_table(),
+        # }
 
-        with open(asset_ptc_coords_path, "w") as f:
-            json.dump(writeout, f)
-            etllogger.info( f"Saved PTC coordinates for {self.rcsb_id} to {asset_ptc_coords_path}" )
+        # with open(asset_ptc_coords_path, "w") as f:
+        #     json.dump(writeout, f)
+        #     etllogger.info( f"Saved PTC coordinates for {self.rcsb_id} to {asset_ptc_coords_path}" )
+        raise NotImplemented("IMplement and move out of the assests")
+        ...
 
     def write_own_json_profile(self, new_profile: dict, overwrite: bool = False):
         """Update self, basically."""
@@ -206,7 +205,7 @@ class StructureAssets:
                 logger.debug(f"Updated profile for {self.rcsb_id}")
 
     def biopython_structure(self)-> Structure:
-        cifpath = RibosomeOps(self.rcsb_id).paths.cif
+        cifpath = StructureAssetPaths(self.rcsb_id).cif
         return FastMMCIFParser(QUIET=True).get_structure(self.rcsb_id, cifpath)
 
     def profile(self) -> RibosomeStructure:
