@@ -1,4 +1,3 @@
-
 Biogenesis and assembly being the endgame, i think it makes sense to start at the elongation stage and work our way "outwards" in both directions given the following:
 
 1. How much more ample the data and research there is

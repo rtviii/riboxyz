@@ -263,6 +263,7 @@ def extract_bbox_atoms(rcsb_id: str) -> list:
         writepath=tunnel_atom_encoding_path(rcsb_id),
     )
 
+
 def get_ptc():
     ...
 

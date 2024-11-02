@@ -706,13 +706,13 @@ class ETLCollector:
     - ligand annotation
     """
 
-    rcsb_id: str
+    rcsb_id       : str
     node_structure: dict
-    node_polymers: dict
-    node_ligands: dict
+    node_polymers : dict
+    node_ligands  : dict
 
     # ? Housekeeping
-    asm_maps: list[AssemblyInstancesMap]
+    asm_maps             : list[AssemblyInstancesMap]
     polymers_target_count: int
 
     def query_rcsb_api(self, gql_string: str) -> dict:
@@ -874,6 +874,7 @@ class ETLCollector:
                 if rna_d.nomenclature[0] in [ k.value for k in list(MitochondrialRNAClass) ]:
                     is_mitochondrial = True
                     break
+                
         organisms            = self.infer_organisms_from_polymers([*proteins, *rna, *other] )
         subunit_presence     = lsu_ssu_presence(rna, is_mitochondrial)
         reshaped             = RibosomeStructure(

@@ -6,9 +6,7 @@
 
 - Sarcin-ricin Loop (SRL)
 - Anticodon Stem Loop (ASL)
-
 - L1 Stalk
-
 
 ## Conserved Functional Locations
 
