@@ -21,9 +21,6 @@ from ribctl import RIBETL_DATA
 from ribctl.logs.loggers import get_etl_logger
 
 
-RCSB_ID = typing.NewType("RCSB_ID", str)
-
-
 class AssetClass(enum.StrEnum):
     profile   = auto()
     cif       = auto()
@@ -260,7 +257,7 @@ class Assets:
     
     
     @staticmethod
-    def global_status()->dict[RCSB_ID, dict[AssetClass, bool]]:
+    def global_status()->dict[str, dict[AssetClass, bool]]:
         _ = {}
         for struct in Assets.list_all_structs():
             _[struct] = Assets(struct).assets_status()

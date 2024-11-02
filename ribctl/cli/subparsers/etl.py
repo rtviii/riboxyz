@@ -63,4 +63,3 @@ def assets(ctx: Context, assets,reclassify, overwrite, rcsb_sync, all_structs, d
                 print("Error processing {}: {}".format(rcsb_id, e))
         return
 
-    # asyncio.run(etl_obtain.execute_asset_task_pool())

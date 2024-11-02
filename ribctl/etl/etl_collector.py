@@ -80,15 +80,14 @@ class StructureNode:
 
         return [externalRefIds, externalRefTypes, externalRefLinks]
 
-
 class PolymersNode:
     # ? Initialized classification resources:
 
-    rcsb_polymers: int
+    rcsb_polymers         : int
     hmm_ribosomal_proteins: dict[CytosolicProteinClass, HMM]
-    rcsb_data_polymers: dict
-    rcsb_data_assemblies: dict
-    rcsb_id: str
+    rcsb_data_polymers    : dict
+    rcsb_data_assemblies  : dict
+    rcsb_id               : str
 
     def __init__(self, data: dict) -> None:
         self.rcsb_data_polymers = data["polymer_entities"]
@@ -667,7 +666,6 @@ class PolymersNode:
     #         for auth_asym_id in other_polymer_obj[ "rcsb_polymer_entity_container_identifiers" ]["auth_asym_ids"]
     #     ]
 
-
 class NonpolymersNode:
     rcsb_nonpolymers: dict
 
@@ -692,7 +690,6 @@ class NonpolymersNode:
             formula_weight      = nonpoly["rcsb_nonpolymer_entity"]["formula_weight"],
             number_of_instances = nonpoly["rcsb_nonpolymer_entity"][ "pdbx_number_of_molecules"],
         )
-
 
 class ETLCollector:
     """
