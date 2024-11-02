@@ -1,4 +1,6 @@
 import sys
+
+from ribctl.etl.assets_global import GlobalAssets
 sys.dont_write_bytecode = True
 
 from neo4j_ribosome.node_ligand import link__ligand_to_struct, node__ligand
@@ -66,7 +68,7 @@ class Neo4jAdapter():
             return node
 
     def init_phylogenies(self):
-        taxa = StructureAssets.collect_all_taxa()
+        taxa = GlobalAssets.collect_all_taxa()
         for taxon in taxa:
             self._create_lineage(taxon.ncbi_tax_id)
 
@@ -90,7 +92,7 @@ class Neo4jAdapter():
         rcsb_id = rcsb_id.upper()
 
         if profile is None:
-            profile = RibosomeOps(rcsb_id).profile()
+            profile = RibosomeOps(rcsb_id).profile
 
         _= []
         with self.driver.session() as s:
@@ -132,7 +134,7 @@ class Neo4jAdapter():
                 print("Struct node {} already exists.".format(rcsb_id))
                 return
 
-        R:RibosomeStructure = RibosomeOps(rcsb_id).profile()
+        R:RibosomeStructure = RibosomeOps(rcsb_id).profile
 
         with self.driver.session() as s:
 
@@ -169,7 +171,7 @@ class Neo4jAdapter():
 
     def upsert_structure_node(self, rcsb_id:str):
         rcsb_id = rcsb_id.upper()
-        R:RibosomeStructure = RibosomeOps(rcsb_id).profile()
+        R:RibosomeStructure = RibosomeOps(rcsb_id).profile
         with self.driver.session() as s:
             structure_node = s.execute_write(node__structure(R))
         print("Successfully merged structure {}.".format(rcsb_id))

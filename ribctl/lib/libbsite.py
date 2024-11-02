@@ -24,7 +24,7 @@ from Bio.PDB.NeighborSearch import NeighborSearch
 from Bio.PDB.Residue import Residue
 from Bio.PDB.Model import Model
 from Bio.PDB.Structure import Structure
-from ribctl.etl.assets_structure import RibosomeOps
+from ribctl.ribosome_ops import RibosomeOps
 from ribctl.lib.schema.types_binding_site import (
     BindingSite,
     BindingSiteChain,
@@ -58,7 +58,7 @@ def get_lig_bsite(
     # Make sure only the first assembly is used if multiple are in the file.
     md: Model = [*struct.get_models()][0]
     assemblies = (
-        RibosomeOps(struct.get_id().upper()).profile().get_polymers_by_assembly()
+        RibosomeOps(struct.get_id().upper()).profile.get_polymers_by_assembly()
     )
     # If there are two or more assemblies, delete chains belonging to all but the first one.
     if len(assemblies.items()) > 1:
@@ -135,11 +135,11 @@ def bsite_ligand(
 ) -> BindingSite:
 
     chemicalId = chemicalId.upper()
-    _structure_cif_handle = RibosomeOps(rcsb_id).biopython_structure()
+    _structure_cif_handle = RibosomeOps(rcsb_id).assets.biopython_structure()
     binding_site_ligand = get_lig_bsite(chemicalId, _structure_cif_handle, radius)
 
     if save:
-        with open(RibosomeOps(rcsb_id).paths.binding_site(chemicalId), "w") as f:
+        with open(RibosomeOps(rcsb_id).assets.paths.binding_site(chemicalId), "w") as f:
             json.dump(binding_site_ligand.model_dump(), f)
 
     return binding_site_ligand
@@ -155,8 +155,8 @@ def bsite_transpose(
 ) -> LigandTransposition:
 
     source_rcsb_id, target_rcsb_id = source_rcsb_id.upper(), target_rcsb_id.upper()
-    target_struct = RibosomeOps(target_rcsb_id).biopython_structure()
-    source_struct = RibosomeOps(source_rcsb_id).biopython_structure()
+    target_struct = RibosomeOps(target_rcsb_id).assets.biopython_structure()
+    source_struct = RibosomeOps(source_rcsb_id).assets.biopython_structure()
 
     source_ops = RibosomeOps(source_rcsb_id)
     # source_profile = source_ops.profile()

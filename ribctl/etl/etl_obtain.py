@@ -1,6 +1,7 @@
 import asyncio
 from typing import Coroutine
-from ribctl.etl.assets_structure import AssetClass, StructureAssets, RibosomeOps, Structure
+from ribctl.etl.assets_structure import AssetClass
+from ribctl.ribosome_ops import  StructureAssets, RibosomeOps, Structure
 from ribctl.etl.etl_collector import ( ETLCollector )
 import asyncio
 
@@ -14,7 +15,7 @@ def asset_routines(
 
     rcsb_id = rcsb_id.upper()
     RO      = RibosomeOps(rcsb_id)
-    RO._verify_dir_exists()
+    RO.assets._verify_dir_exists()
     RA = StructureAssets(rcsb_id)
 
     coroutines = []
