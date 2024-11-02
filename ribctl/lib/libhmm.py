@@ -16,7 +16,7 @@ from ribctl.logs.loggers import get_classification_logger
 import concurrent.futures
 
 # logger= get_classification_logger()
-hmm_cachedir = ASSETS['__hmm_cache']
+hmm_cachedir = ASSETS['cache_hmm']
 
 def digitize_seq_record(seq_record:SeqRecord, alphabet:Alphabet)->DigitalSequence:
     """Convert a SeqRecord to a DigitalSequence"""
@@ -189,8 +189,9 @@ class PolymerClassesOrganismScanner():
         print("Initializing PolymerClassesOrganismScanner for taxid: {}".format(organism_taxid))
 
         self.organism_tax_id:int = organism_taxid
-        self.filename_hmms_registry       = os.path.join(ASSETS['__hmm_cache'], "taxid_{}_hmm_scanner".format(organism_taxid))
-        self.filename_seed_seqs = os.path.join(ASSETS['__hmm_cache'], "taxid_{}_seed_seqs".format(organism_taxid))
+
+        self.filename_hmms_registry = os.path.join(ASSETS['cache_hmm'], "taxid_{}_hmm_scanner".format(organism_taxid))
+        self.filename_seed_seqs     = os.path.join(ASSETS['cache_hmm'], "taxid_{}_seed_seqs".format(organism_taxid))
 
         self.seed_sequences: dict[PolymerClass, list[SeqRecord]] = {}
         self.hmms_registry : dict[PolymerClass, HMM]             = {}

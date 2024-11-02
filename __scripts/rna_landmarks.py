@@ -5,7 +5,7 @@
 import json
 from pprint import pprint
 import numpy as np
-from ribctl.etl.ribosome_ops import Structure
+from ribctl.etl.assets_structure import Structure
 from ribctl.lib.libhmm import fasta_phylogenetic_correction
 from ribctl.lib.libmsa import Fasta, muscle_align_N_seq
 from ribctl.lib.schema.types_ribosome import PolynucleotideClass

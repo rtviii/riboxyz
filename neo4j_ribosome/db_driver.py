@@ -6,7 +6,7 @@ import sys
 from neo4j_ribosome import NEO4J_CURRENTDB, NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER
 from neo4j_ribosome.db_lib_reader import Neo4jReader
 from neo4j_ribosome.db_lib_builder import Neo4jAdapter
-from ribctl.etl.ribosome_ops import Assets, RibosomeOps, Structure
+from ribctl.etl.assets_structure import StructureAssets, RibosomeOps, Structure
 
 sys.dont_write_bytecode = True
 
@@ -18,7 +18,7 @@ def full_upload():
     futures: list[Future] = []
 
     with ThreadPoolExecutor(max_workers=10) as executor:
-        for rcsb_id in sorted(Assets.list_all_structs()):
+        for rcsb_id in sorted(StructureAssets.list_all_structs()):
             fut = executor.submit(partial(adapter.add_total_structure, rcsb_id, True))
             futures.append(fut)
     wait(futures, return_when=ALL_COMPLETED)
@@ -28,7 +28,7 @@ def rcsb_sync():
     adapter = Neo4jAdapter(NEO4J_URI, NEO4J_USER, NEO4J_CURRENTDB)
     futures: list[Future] = []
     with ThreadPoolExecutor(max_workers=10) as executor:
-        for rcsb_id in sorted(Assets.status_vs_rcsb()):
+        for rcsb_id in sorted(StructureAssets.status_vs_rcsb()):
             fut = executor.submit(partial(adapter.add_total_structure, rcsb_id, True))
             futures.append(fut)
     wait(futures, return_when=ALL_COMPLETED)
@@ -38,14 +38,14 @@ def upsert_all_structures():
     adapter = Neo4jAdapter(NEO4J_URI, NEO4J_USER, NEO4J_CURRENTDB)
     futures: list[Future] = []
     with ThreadPoolExecutor(max_workers=10) as executor:
-        for rcsb_id in sorted(Assets.list_all_structs()):
+        for rcsb_id in sorted(StructureAssets.list_all_structs()):
             fut = executor.submit(partial(adapter.upsert_structure_node, rcsb_id))
             futures.append(fut)
     wait(futures, return_when=ALL_COMPLETED)
 
 def upsert_all_ligands():
     unique = {}
-    for rcsb_id in sorted(Assets.list_all_structs()):
+    for rcsb_id in sorted(StructureAssets.list_all_structs()):
         profile = RibosomeOps(rcsb_id).profile()
         for ligand in profile.nonpolymeric_ligands:
             if ( not "ion" in ligand.chemicalName.lower() ) and ( ligand.chemicalId not in unique ):

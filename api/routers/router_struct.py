@@ -13,7 +13,7 @@ from typing import Optional, List
 from pydantic import BaseModel
 from neo4j_ribosome.db_lib_reader import PolymersFilterParams, StructureFilterParams, dbqueries
 from ribctl import ASSETS, ASSETS_PATH, RIBETL_DATA
-from ribctl.etl.ribosome_ops import RibosomeOps, Structure
+from ribctl.etl.assets_structure import RibosomeOps, Structure
 from ribctl.lib.info import StructureCompositionStats, run_composition_stats
 from ribctl.lib.schema.types_ribosome import  CytosolicProteinClass, CytosolicRNAClass, ElongationFactorClass, InitiationFactorClass, LifecycleFactorClass, MitochondrialProteinClass, MitochondrialRNAClass, PTCInfo, Polymer, PolymerClass, PolynucleotideClass, PolynucleotideClass, PolypeptideClass, Protein, ProteinClass, RibosomeStructure, RibosomeStructureMetadata, RibosomeStructureMetadata, tRNA
 from ribctl.lib.libtax import Taxid 

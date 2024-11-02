@@ -24,7 +24,7 @@ from Bio.PDB.NeighborSearch import NeighborSearch
 from Bio.PDB.Residue import Residue
 from Bio.PDB.Model import Model
 from Bio.PDB.Structure import Structure
-from ribctl.etl.ribosome_ops import RibosomeOps
+from ribctl.etl.assets_structure import RibosomeOps
 from ribctl.lib.schema.types_binding_site import (
     BindingSite,
     BindingSiteChain,

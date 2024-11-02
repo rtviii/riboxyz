@@ -2,7 +2,7 @@ from pprint import pprint
 import sys
 from typing import NewType, TypeVar
 from Bio.PDB.Residue import Residue
-from ribctl.etl.ribosome_ops import RibosomeOps
+from ribctl.etl.assets_structure import RibosomeOps
 from ribctl.lib.libbsite import map_motifs, bsite_ligand, bsite_transpose
 from ribctl.lib.libseq import SequenceMappingContainer
 from ribctl.lib.schema.types_binding_site import (

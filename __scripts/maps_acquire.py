@@ -1,5 +1,5 @@
 from ribctl import RIBETL_DATA
-from ribctl.etl.ribosome_ops import RibosomeOps, Structure
+from ribctl.etl.assets_structure import RibosomeOps, Structure
 import os
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor

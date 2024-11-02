@@ -5,7 +5,7 @@ from pprint import pprint
 from django.http import  JsonResponse
 from ninja import Router
 from ribctl import RIBETL_DATA
-from ribctl.etl.ribosome_ops import RibosomeOps
+from ribctl.etl.assets_structure import RibosomeOps
 from ribctl.lib.schema.types_ribosome import RNA, LifecycleFactorClass, MitochondrialProteinClass, Polymer, PolynucleotideClass, CytosolicProteinClass, PolynucleotideClass, PolypeptideClass, Protein
 
 classification_router = Router()

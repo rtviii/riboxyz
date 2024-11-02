@@ -1,5 +1,5 @@
 from ribctl.lib.mitoptc import get_ptc_mito
-from ribctl.etl.ribosome_ops import RibosomeOps
+from ribctl.etl.assets_structure import RibosomeOps
 import numpy as np
 from Bio.PDB.Chain import Chain
 from Bio.PDB.Residue import Residue

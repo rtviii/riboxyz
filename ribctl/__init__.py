@@ -13,7 +13,7 @@ CLASSIFICATION_REPORTS = os.path.join(pathlib.Path(__file__).parent, "logs","hmm
 
 #! ------------- assets ----------------
 # This amounts to "assets folder is expected to exist in the root of `ribctl`(next to top-level __init__.py)"
-ASSETS_PATH        = os.path.join(pathlib.Path(__file__).parent, "assets")
+ASSETS_PATH        = os.path.join(pathlib.Path(__file__).parent, "assets_project")
 MUSCLE_BIN         = os.path.join(ASSETS_PATH, "muscle3.8.1")
 NCBI_TAXDUMP_GZ    = os.path.join(ASSETS_PATH, "taxdump.tar.gz")
 NCBI_TAXA_SQLITE   = os.path.join(ASSETS_PATH, "taxa.sqlite")
@@ -43,7 +43,7 @@ asset_type  = Literal[
     "fasta_factors_initiation_bacteria",
     "fasta_factors_initiation_eukaryota",
 
-    "__hmm_cache",
+    "cache_hmm",
 ]
 
 if os.environ.get("RIBETL_DATA") == "" or not os.path.exists(ASSETS_PATH):
@@ -83,7 +83,7 @@ ASSETS: dict[asset_type, pathlib.Path] = {
     "fasta_factors_elongation_eukaryota": pathlib.Path(os.path.join(ASSETS_PATH, "fasta_factors_elongation","eukaryota")),
     "fasta_factors_elongation_archaea"  : pathlib.Path(os.path.join(ASSETS_PATH, "fasta_factors_elongation","archaea")),
 
-    "__hmm_cache"             : pathlib.Path(os.path.join(ASSETS_PATH, "__hmm_cache")),
+    "cache_hmm"             : pathlib.Path(os.path.join(ASSETS_PATH, "cache_hmm")),
 }
 
 TAXID_BACTERIA  = 2

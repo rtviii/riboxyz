@@ -6,7 +6,7 @@ import typing
 
 from pydantic import BaseModel
 from ribctl import ASSETS, ASSETS_PATH
-from ribctl.etl.ribosome_ops import Assets, RibosomeOps, Structure
+from ribctl.etl.assets_structure import StructureAssets, RibosomeOps, Structure
 from ribctl.lib.libtax import PhylogenyNode
 from ribctl.lib.schema.types_ribosome import (
     RNA,
@@ -129,7 +129,7 @@ def get_stats():
         "bacteria": {},
     }
 
-    for struct in Assets.list_all_structs():
+    for struct in StructureAssets.list_all_structs():
         try:
             [struct_stat, lig_compounds, n_dbank_compounds, superkingdom] = (struct_stats(RibosomeOps(struct)))
 

@@ -1,7 +1,7 @@
 from pprint import pprint
 from typing import List, NewType, Tuple, TypeVar
 import typing
-from ribctl.etl.ribosome_ops import AssetPath, RibosomeOps
+from ribctl.etl.assets_structure import AssetPathsStructure, RibosomeOps
 import pickle
 from Bio.PDB.Residue import Residue
 import copy
@@ -9,7 +9,7 @@ import typing
 from Bio.PDB.Residue import Residue
 from Bio.PDB.Chain import Chain
 import numpy as np
-from ribctl.etl.ribosome_ops import RibosomeOps
+from ribctl.etl.assets_structure import RibosomeOps
 from Bio.PDB.NeighborSearch import NeighborSearch
 from Bio.PDB import Selection
 from ribctl.lib.libbsite import map_motifs
@@ -100,11 +100,11 @@ def produce_ptc_references():
             'ref_trna_aaid'   : ref_trna_aaid,
             'ref_rrna_aaid'   : ref_rrna_aaid
         }
-        outpath = AssetPath.ptc_references(ribosome_type)
+        outpath = AssetPathsStructure.ptc_references(ribosome_type)
         pickle_ref_ptc_data(_,outpath )
 
 def get_ptc_reference(ribosome_type:typing.Literal['mito', 'euk','arch', 'bact']):
-    cached_name   = AssetPath.ptc_references(ribosome_type)
+    cached_name   = AssetPathsStructure.ptc_references(ribosome_type)
     return unpickle_residue_array(cached_name)
 
 def PTC_location(target_rcsb_id: str)->Tuple[np.ndarray ,list[Residue]]:

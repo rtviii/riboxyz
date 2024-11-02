@@ -5,7 +5,7 @@ import numpy as np
 import open3d as o3d
 from mendeleev import element
 import pandas as pd
-from ribctl.etl.ribosome_ops import RibosomeOps, Structure
+from ribctl.etl.assets_structure import RibosomeOps, Structure
 from mesh_generation.mesh_paths import *
 from Bio.PDB.Atom import Atom
 

@@ -9,7 +9,7 @@ from neo4j import Driver, GraphDatabase
 from neo4j_ribosome.node_polymer import  link__polymer_to_polymer_class, link__polymer_to_structure, node__polymer, upsert_polymer_to_protein, upsert_polymer_to_rna,node__polymer_class
 from neo4j_ribosome.node_structure import    link__structure_to_lineage_member, link__structure_to_organism, node__structure, struct_exists
 from ribctl.lib.schema.types_ribosome import MitochondrialProteinClass, PolynucleotideClass, PolynucleotideClass, RibosomeStructure, RibosomeStructureMetadata
-from ribctl.etl.ribosome_ops import Assets, RibosomeOps, Structure
+from ribctl.etl.assets_structure import StructureAssets, RibosomeOps, Structure
 from neo4j import GraphDatabase, Driver, ManagedTransaction, Transaction
 from ribctl.lib.schema.types_ribosome import  NonpolymericLigand,  CytosolicProteinClass, RibosomeStructureMetadata
 
@@ -66,7 +66,7 @@ class Neo4jAdapter():
             return node
 
     def init_phylogenies(self):
-        taxa = Assets.collect_all_taxa()
+        taxa = StructureAssets.collect_all_taxa()
         for taxon in taxa:
             self._create_lineage(taxon.ncbi_tax_id)
 

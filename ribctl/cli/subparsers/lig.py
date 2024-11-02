@@ -3,7 +3,7 @@ import json
 import os
 from pprint import pprint
 import click
-from ribctl.etl.ribosome_ops import RibosomeOps, Structure
+from ribctl.etl.assets_structure import RibosomeOps, Structure
 from ribctl.lib.libbsite import bsite_ligand, BindingSite, BindingSiteChain, bsite_transpose
 from neo4j_ribosome.db_lib_reader import Neo4jReader
 ce = click.echo

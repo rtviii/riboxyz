@@ -7,7 +7,7 @@ from typing import List
 import chempy
 import pandas as pd
 from pymol import cmd
-from ribctl.etl.ribosome_ops import RibosomeOps, Structure
+from ribctl.etl.assets_structure import RibosomeOps, Structure
 from mesh_generation.paths import TUNNEL_PATH, poisson_recon_ascii_path
 sys.path.append('/home/rtviii/dev/riboxyz')       #! hack until ribctl is a separate pypi project (after that just pip install ribctl)
 from ribctl.lib.tunnel import ptc_residues_calculate_midpoint, ptc_resdiues_get

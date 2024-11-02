@@ -3,7 +3,7 @@ import os
 from pprint import pprint
 from django.http import JsonResponse, HttpResponseServerError
 from ninja import Router
-from ribctl.etl.ribosome_ops import RibosomeOps
+from ribctl.etl.assets_structure import RibosomeOps
 from ribctl.lib.libbsite import bsite_ligand, bsite_transpose, lig_get_chemical_categories
 from ribctl.lib.schema.types_binding_site import BindingSite, LigandTransposition
 from ribctl.lib.seq_project_many_to_one import compact_class, prepare_mapping_sources
@@ -18,8 +18,6 @@ def lig_nbhd(request, source_structure:str, chemical_id:str, radius:int=5):
     if not os.path.exists(path):
         try:
             bsite = bsite_ligand(chemical_id, source_structure, radius)
-            pprint("produced")
-            pprint(bsite)
             return JsonResponse(bsite.model_dump(), safe=False)
         except Exception as e:
             return HttpResponseServerError(e)
@@ -33,8 +31,22 @@ def lig_transpose(request, source_structure:str, target_structure:str, chemical_
     bsite_path      = RibosomeOps(source_structure).paths.binding_site(chemical_id)
     prediction_path = RibosomeOps(target_structure).paths.binding_site_prediction(chemical_id, source_structure)
 
+
+    if os.path.exists(prediction_path):
+        with open(prediction_path, 'r') as f:
+            return JsonResponse(json.load(f), safe=False)
+
     bsite           = bsite_ligand(chemical_id, source_structure, radius)
     prediction      = bsite_transpose(source_structure,target_structure,bsite)
+
+
+    with open(prediction_path, 'w') as f:
+        json.dump(prediction.model_dump(), f, indent=4)
+        pprint("Saved to file {}".format(prediction_path))
+
+    with open(bsite_path, 'w') as f:
+        json.dump(bsite.model_dump(), f, indent=4)
+        pprint("Saved to file {}".format(bsite_path))
 
     return JsonResponse(prediction.model_dump(), safe=False)
 

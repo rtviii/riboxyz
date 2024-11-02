@@ -7,7 +7,7 @@ from typing import Any, Optional
 import pyhmmer
 from pyhmmer.plan7 import HMM
 import requests
-from ribctl.etl.ribosome_ops import RibosomeOps, Structure
+from ribctl.etl.assets_structure import RibosomeOps, Structure
 from ribctl.lib.info import lsu_ssu_presence
 from ribctl.lib.libhmm import ( HMMClassifier, )
 from ribctl.lib.schema.types_ribosome import (
