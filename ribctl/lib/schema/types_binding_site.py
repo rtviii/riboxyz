@@ -32,11 +32,12 @@ NUCLEOTIDES = ["A", "T", "C", "G", "U"]
 
 
 class ResidueSummary(BaseModel): 
+
     label_seq_id : typing.Optional[int] = None
     label_comp_id: typing.Optional[str] = None
     auth_asym_id : str
     auth_seq_id  : int
-    rcsb_id:str
+    rcsb_id      : str
     full_id      : typing.Optional[tuple[str, int, str, tuple[str, int, str]]]
 
 

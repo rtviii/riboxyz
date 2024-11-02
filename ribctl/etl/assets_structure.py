@@ -22,7 +22,21 @@ from ribctl.logs.loggers import get_etl_logger
 
 
 """
-Interface to the structural assets corresponding to a single entry in the database and a single subdir of `RIBETL_DATA`
+Interface to the structural assets corresponding to a single entry in the database and a single subdir of `RIBETL_DATA`.
+Example layout for a given structure:
+    RIBETL_DATA/
+        ├── 4UG0.cif
+        ├── 4UG0.json
+        ├── 4UG0_PTC.json
+        ├── TUNNELS
+        │   ├── 4UG0_convex_hull.npy
+        │   ├── 4UG0_normal_estimated_surf.ply
+        │   ├── 4UG0_poisson_recon.ply
+        │   ├── 4UG0_poisson_recon_ascii.ply
+        │   ├── 4UG0_spheres_expanded_pointset.npy
+        │   ├── 4UG0_tunnel_atoms_bbox.json
+        │   └── tunnel_4UG0.csv
+        └── classification_report_4UG0.json
 """
 
 
@@ -67,7 +81,7 @@ class StructureAssetPaths:
 
     @property
     def ptc(self):
-        return os.path.join( self.dir, "{}_PTC_COORDINATES.json".format(self.rcsb_id) )
+        return os.path.join(self.dir, "{}_PTC.json".format(self.rcsb_id) )
 
     @property
     def profile(self):
@@ -95,7 +109,6 @@ class StructureAssets:
 
     rcsb_id: str
     paths  : StructureAssetPaths
-    
 
     def __init__(self, rcsb_id: str) -> None:
         self.rcsb_id = rcsb_id

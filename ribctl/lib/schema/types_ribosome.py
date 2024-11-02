@@ -3,10 +3,13 @@ from enum import Enum
 import typing
 from Bio.SeqRecord import SeqRecord
 from Bio.Seq import Seq
+import numpy as np
 from pydantic import BaseModel, field_serializer, Field
 from ribctl.lib.enumunion import enum_union
 from pydantic import BaseModel, Field
 from typing import Optional, Literal, Union, ClassVar
+
+from ribctl.lib.schema.types_binding_site import ResidueSummary
 
 # |********************************************************************************************************|
 # | https://docs.google.com/spreadsheets/d/1mapshbn1ArofPN-Omu8GG5QdcwlJ0ym0BlN252kkUBU/edit#gid=815712128 |
@@ -512,12 +515,24 @@ class NomenclatureItem(BaseModel):
 class NomenclatureTable(BaseModel):
     __pydantic_root_model__: Dict[str, NomenclatureItem]
 
-class PTCInfo(BaseModel):
 
-    # site_9_residues      : list[tuple[str, int]]
-    LSU_rRNA_auth_asym_id: str
-    midpoint_coordinates : tuple[float, float, float]
-    nomenclature_table   : NomenclatureTable
+class PTCInfo(BaseModel):
+    location: list[float]
+    residues: list[ResidueSummary]
+
+#     # site_9_residues      : list[tuple[str, int]]
+#     LSU_rRNA_auth_asym_id: str
+#     midpoint_coordinates : tuple[float, float, float]
+#     nomenclature_table   : NomenclatureTable
+
+
+
+# ! Deprecated
+# class PTCInfo(BaseModel):
+#     # site_9_residues      : list[tuple[str, int]]
+#     LSU_rRNA_auth_asym_id: str
+#     midpoint_coordinates : tuple[float, float, float]
+#     nomenclature_table   : NomenclatureTable
 
 class RibosomeStructureMetadata(BaseModel):
 

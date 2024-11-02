@@ -33,6 +33,10 @@ from ribctl.lib.schema.types_ribosome import (
 )
 from ribctl.lib.libhmm import HMM, HMMClassifier
 
+"""
+
+These "Node" classes double up as templates for neo4j nodes that will be created AND housekeeping containers for data processing.
+"""
 
 class StructureNode:
     rcsb_data_entry: dict
