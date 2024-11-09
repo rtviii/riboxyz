@@ -13,7 +13,7 @@ from typing import Optional, List
 from pydantic import BaseModel
 from neo4j_ribosome.db_lib_reader import PolymersFilterParams, StructureFilterParams, dbqueries
 from ribctl import ASSETS, ASSETS_PATH, RIBETL_DATA
-from ribctl.etl.assets_structure import RibosomeOps, Structure
+from ribctl.ribosome_ops import RibosomeOps
 from ribctl.lib.info import StructureCompositionStats, run_composition_stats
 from ribctl.lib.schema.types_ribosome import  CytosolicProteinClass, CytosolicRNAClass, ElongationFactorClass, InitiationFactorClass, LifecycleFactorClass, MitochondrialProteinClass, MitochondrialRNAClass, PTCInfo, Polymer, PolymerClass, PolynucleotideClass, PolynucleotideClass, PolypeptideClass, Protein, ProteinClass, RibosomeStructure, RibosomeStructureMetadata, RibosomeStructureMetadata, tRNA
 from ribctl.lib.libtax import Taxid 
@@ -40,8 +40,8 @@ def tax_dict(request):
 
 @structure_router.get("/polymer_classification_report",  tags=[TAG])
 def polymer_classification_report(request, rcsb_id:str):
-    if os.path.exists(RibosomeOps(rcsb_id).paths.classification_report):
-        with open(RibosomeOps(rcsb_id).paths.classification_report, 'r') as f:
+    if os.path.exists(RibosomeOps(rcsb_id).assets.paths.classification_report):
+        with open(RibosomeOps(rcsb_id).assets.paths.classification_report, 'r') as f:
             return json.load(f)
     else :
         return []
@@ -105,7 +105,7 @@ def structure_profile(request,rcsb_id:str):
     rcsb_id     = str.upper(params['rcsb_id'][0])
 
     try:
-        with open(RibosomeOps(rcsb_id).paths.profile, 'r') as f:
+        with open(RibosomeOps(rcsb_id).assets.paths.profile, 'r') as f:
             return JsonResponse(json.load(f))
     except Exception as e:
         return HttpResponseServerError("Failed to find structure profile {}:\n\n{}".format(rcsb_id, e))
@@ -115,7 +115,7 @@ def structure_ptc(request,rcsb_id:str):
     params      = dict(request.GET)
     rcsb_id     = str.upper(params['rcsb_id'][0])
     try:
-        ptc = RibosomeOps(rcsb_id).ptc()
+        ptc = RibosomeOps(rcsb_id).assets.ptc()
         _ =  ptc.model_dump()
         print("SENDING:", _)
         return JsonResponse(_)
@@ -124,7 +124,7 @@ def structure_ptc(request,rcsb_id:str):
      
 class ChainsByStruct(Schema):
     class PolymerByStruct(Schema):
-        nomenclature: list[PolynucleotideClass]
+        nomenclature: list[PolymerClass]
         auth_asym_id: str
         entity_poly_polymer_type: str
         entity_poly_seq_length: int

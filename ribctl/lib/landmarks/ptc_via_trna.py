@@ -1,7 +1,9 @@
 from pprint import pprint
 from typing import List, NewType, Tuple, TypeVar
 import typing
-from ribctl.etl.assets_structure import StructureAssetPaths, RibosomeOps
+from ribctl.etl.assets_global import GlobalAssets
+from ribctl.etl.assets_structure import StructureAssetPaths
+from ribctl.ribosome_ops  import RibosomeOps
 import pickle
 from Bio.PDB.Residue import Residue
 import copy
@@ -9,7 +11,7 @@ import typing
 from Bio.PDB.Residue import Residue
 from Bio.PDB.Chain import Chain
 import numpy as np
-from ribctl.etl.assets_structure import RibosomeOps
+from ribctl.ribosome_ops import RibosomeOps
 from Bio.PDB.NeighborSearch import NeighborSearch
 from Bio.PDB import Selection
 from ribctl.lib.libbsite import map_motifs
@@ -56,7 +58,7 @@ def PTC_reference_residues(ribosome_type:typing.Literal['euk','bact','arch','mit
 
     print("\t Seeking the LSU rRNA[{}] residues in the  vicinity of tRNA[{}] chain's C-terminus in [{}]".format(ref_rrna_aaid, ref_trna_aaid, ref_rcsb_id))
 
-    mmcif_struct = RibosomeOps(ref_rcsb_id).biopython_structure()[0]
+    mmcif_struct = RibosomeOps(ref_rcsb_id).assets.biopython_structure()[0]
     def trna_cterm_pos() -> np.ndarray: 
         trnaChain                     : Chain = mmcif_struct[ref_trna_aaid]
         c_terminus                    : Residue = list(filter(lambda x: ResidueSummary.filter_noncanonical(x.resname), [*trnaChain]))[-1]
@@ -100,11 +102,11 @@ def produce_ptc_references():
             'ref_trna_aaid'   : ref_trna_aaid,
             'ref_rrna_aaid'   : ref_rrna_aaid
         }
-        outpath = StructureAssetPaths.ptc_references(ribosome_type)
+        outpath = GlobalAssets.ptc_references(ribosome_type)
         pickle_ref_ptc_data(_,outpath )
 
 def get_ptc_reference(ribosome_type:typing.Literal['mito', 'euk','arch', 'bact']):
-    cached_name   = StructureAssetPaths.ptc_references(ribosome_type)
+    cached_name   = GlobalAssets.ptc_references(ribosome_type)
     return unpickle_residue_array(cached_name)
 
 def PTC_location(target_rcsb_id: str)->Tuple[np.ndarray ,list[Residue]]:
@@ -123,7 +125,7 @@ def PTC_location(target_rcsb_id: str)->Tuple[np.ndarray ,list[Residue]]:
         case _:
             raise ValueError("Invalid taxid")
 
-    if RO.profile().mitochondrial:
+    if RO.profile.mitochondrial:
         ribosome_type = 'mito'
 
     data_dict = get_ptc_reference(ribosome_type)
@@ -136,7 +138,7 @@ def PTC_location(target_rcsb_id: str)->Tuple[np.ndarray ,list[Residue]]:
     # data_dict['ref_trna_aaid'   ]
     # data_dict['ref_rrna_aaid'   ]
 
-    mmcif_struct_tgt = RO.biopython_structure()[0]
+    mmcif_struct_tgt = RO.assets.biopython_structure()[0]
     LSU_RNA_tgt_aaid = RO.get_LSU_rRNA().auth_asym_id
     LSU_RNA_tgt:Chain      = mmcif_struct_tgt[LSU_RNA_tgt_aaid]
     print("got target", [LSU_RNA_tgt.child_dict])

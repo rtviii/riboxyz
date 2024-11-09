@@ -1,7 +1,7 @@
 import os
 from django.http import HttpResponse
 from ninja import Router
-from ribctl.etl.assets_structure import RibosomeOps, Structure
+from ribctl.ribosome_ops import RibosomeOps 
 from ribctl.lib.schema.types_ribosome import RNA, LifecycleFactorClass, MitochondrialProteinClass, Polymer, PolynucleotideClass
 
 mmcif_router = Router();
@@ -11,10 +11,8 @@ tag = "mmcif"
 def polymer(request, rcsb_id:str, auth_asym_id:str):
     rcsb_id        = rcsb_id.upper()
     RO             = RibosomeOps(rcsb_id)
-    chain_fullpath = os.path.join(RO.paths.chains_dir, f'{rcsb_id}_{auth_asym_id}.cif')
-    
-    print( chain_fullpath)
-    # Ensure the file exists
+    chain_fullpath = os.path.join(RO.assets.paths.chains_dir, f'{rcsb_id}_{auth_asym_id}.cif')
+
     if not os.path.exists(chain_fullpath):
         return HttpResponse(status=404)
     
