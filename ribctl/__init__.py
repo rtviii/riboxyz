@@ -2,7 +2,7 @@ import os
 import pathlib
 from typing import Literal
 
-RIBETL_DATA     = os.environ.get("RIBETL_DATA")
+RIBETL_DATA     = pathlib.Path(os.environ.get("RIBETL_DATA"))
 if not os.path.exists(RIBETL_DATA):
     raise NotADirectoryError("RIBETL_DATA directory does not exist. Most things won't work.")
 

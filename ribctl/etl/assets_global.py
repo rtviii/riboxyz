@@ -11,6 +11,7 @@ from Bio.PDB.Chain import Chain
 from loguru import logger
 import requests
 from ribctl import AMINO_ACIDS_3_TO_1_CODE, ASSETS_PATH, CHAINSPLITTER_PATH, CLASSIFICATION_REPORTS
+from ribctl.etl.asset_manager import RibosomeAssetManager
 from ribctl.etl.assets_structure import AssetClass, StructureAssets
 from ribctl.lib.libtax import PhylogenyNode, PhylogenyRank, Taxid
 from Bio.PDB.Structure import Structure
@@ -25,8 +26,7 @@ from ribctl.ribosome_ops import RibosomeOps
 
 
 
-class GlobalAssets:
-
+class GlobalAssets(RibosomeAssetManager):
     @staticmethod
     def status_vs_rcsb() -> list[str]:
         """Return a list of structures that are in the RCSB but not in the local database."""
@@ -70,6 +70,7 @@ class GlobalAssets:
         }
         query = rcsb_search_api + "?json=" + json.dumps(q)
         return sorted(requests.get(query).json()["result_set"])
+
     @staticmethod
     def list_all_structs()->list[str]:
         
