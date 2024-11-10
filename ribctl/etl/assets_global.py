@@ -37,8 +37,7 @@ class GlobalAssets:
         """Return all structures in the rcsb that contain the phrase RIBOSOME and have more than 25 protein entities"""
 
         rcsb_search_api = "https://search.rcsb.org/rcsbsearch/v2/query"
-        
-        q2 = {
+        q = {
             "query": {
                 "type"            : "group",
                 "logical_operator": "and",
@@ -69,7 +68,7 @@ class GlobalAssets:
             "return_type": "entry",
             "request_options": {"return_all_hits": True, "results_verbosity": "compact"},
         }
-        query = rcsb_search_api + "?json=" + json.dumps(q2)
+        query = rcsb_search_api + "?json=" + json.dumps(q)
         return sorted(requests.get(query).json()["result_set"])
     @staticmethod
     def list_all_structs()->list[str]:

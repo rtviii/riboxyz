@@ -20,7 +20,7 @@ def asset_routines(
 
     coroutines = []
     if AssetClass.profile in assetlist:
-        coroutines.append( ETLCollector(rcsb_id).process_structure(overwrite, reclassify) )
+        coroutines.append(ETLCollector(rcsb_id).process_structure(overwrite, reclassify) )
 
     if AssetClass.mmcif in assetlist:
         coroutines.append(RA.upsert_cif(overwrite))
