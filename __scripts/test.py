@@ -34,7 +34,7 @@ from ribctl.lib.libhmm import (
     hmm_create,
     hmm_produce,
 )
-from ribctl.etl.ribosome_ops import Assetlist, RibosomeOps, Structure
+from ribctl.etl.assets_structure import Assetlist, RibosomeOps, Structure
 from ribctl.lib.schema.types_ribosome import (
     LifecycleFactorClass,
     Polymer,
@@ -49,7 +49,7 @@ from ribctl.lib.taxlib import (
 )
 from ete3 import NCBITaxa
 
-hmm_cachedir = ASSETS["__hmm_cache"]
+hmm_cachedir = ASSETS["cache_hmm"]
 
 import sys
 

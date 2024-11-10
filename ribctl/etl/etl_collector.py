@@ -7,7 +7,7 @@ from typing import Any
 from loguru import logger
 import pyhmmer
 import requests
-from ribctl.etl.ribosome_ops import RibosomeOps
+from ribctl.ribosome_ops import RibosomeOps
 from ribctl.etl.gql_querystrings import (
     AssemblyIdentificationString,
     EntryInfoString,
@@ -33,6 +33,10 @@ from ribctl.lib.schema.types_ribosome import (
 )
 from ribctl.lib.libhmm import HMM, HMMClassifier
 
+"""
+
+These "Node" classes double up as templates for neo4j nodes that will be created AND housekeeping containers for data processing.
+"""
 
 class StructureNode:
     rcsb_data_entry: dict
@@ -80,15 +84,14 @@ class StructureNode:
 
         return [externalRefIds, externalRefTypes, externalRefLinks]
 
-
 class PolymersNode:
     # ? Initialized classification resources:
 
-    rcsb_polymers: int
+    rcsb_polymers         : int
     hmm_ribosomal_proteins: dict[CytosolicProteinClass, HMM]
-    rcsb_data_polymers: dict
-    rcsb_data_assemblies: dict
-    rcsb_id: str
+    rcsb_data_polymers    : dict
+    rcsb_data_assemblies  : dict
+    rcsb_id               : str
 
     def __init__(self, data: dict) -> None:
         self.rcsb_data_polymers = data["polymer_entities"]
@@ -139,7 +142,7 @@ class PolymersNode:
         )
 
         RA = RibosomeOps(self.rcsb_id)
-        if ( not os.path.exists(RA.paths.classification_report) ) or override_classification :
+        if ( not os.path.exists(RA.assets.paths.classification_report) ) or override_classification :
             print("Creating new classifciation report.")
             protein_alphabet = pyhmmer.easel.Alphabet.amino()
             protein_classifier = HMMClassifier(_prot_polypeptides, protein_alphabet,
@@ -173,7 +176,7 @@ class PolymersNode:
                     *rna_classification.items(),
                 ]
             }
-            report_path = RA.paths.classification_report
+            report_path = RA.assets.paths.classification_report
 
             with open(report_path, "w") as outfile:
                 json.dump(full_report, outfile, indent=4)
@@ -183,10 +186,10 @@ class PolymersNode:
             # * Make sure you pick the "best_hit". The reports are saved with multiple possible class assignments for each chain (for the record/debugging).
             print(
                 "Using existing classification report: {}".format(
-                    RA.paths.classification_report
+                    RA.assets.paths.classification_report
                 )
             )
-            with open(RA.paths.classification_report, "r") as infile:
+            with open(RA.assets.paths.classification_report, "r") as infile:
                 full_report = json.load(infile)
                 reported_classes = {
                     auth_asym_id: HMMClassifier.pick_best_hit(polymer_class_hits, 35)
@@ -667,7 +670,6 @@ class PolymersNode:
     #         for auth_asym_id in other_polymer_obj[ "rcsb_polymer_entity_container_identifiers" ]["auth_asym_ids"]
     #     ]
 
-
 class NonpolymersNode:
     rcsb_nonpolymers: dict
 
@@ -693,7 +695,6 @@ class NonpolymersNode:
             number_of_instances = nonpoly["rcsb_nonpolymer_entity"][ "pdbx_number_of_molecules"],
         )
 
-
 class ETLCollector:
     """
     ETL Pipeline as it currently stands takes care of injesting a graphql profile from RCSB and reshaping it into a RibosomeStructure.
@@ -706,13 +707,13 @@ class ETLCollector:
     - ligand annotation
     """
 
-    rcsb_id: str
+    rcsb_id       : str
     node_structure: dict
-    node_polymers: dict
-    node_ligands: dict
+    node_polymers : dict
+    node_ligands  : dict
 
     # ? Housekeeping
-    asm_maps: list[AssemblyInstancesMap]
+    asm_maps             : list[AssemblyInstancesMap]
     polymers_target_count: int
 
     def query_rcsb_api(self, gql_string: str) -> dict:
@@ -825,10 +826,10 @@ class ETLCollector:
 
     async def process_structure(self, overwrite: bool = False, reclassify:bool=False) -> RibosomeStructure:
         RA = RibosomeOps(self.rcsb_id)
-        if os.path.isfile(RA.paths.profile):
+        if os.path.isfile(RA.assets.paths.profile):
             logger.debug("Profile already exists for {}.".format(self.rcsb_id))
             if not overwrite:
-                return RA.profile()
+                return RA.profile
 
         #! Assemblies metadata
         
@@ -874,6 +875,7 @@ class ETLCollector:
                 if rna_d.nomenclature[0] in [ k.value for k in list(MitochondrialRNAClass) ]:
                     is_mitochondrial = True
                     break
+                
         organisms            = self.infer_organisms_from_polymers([*proteins, *rna, *other] )
         subunit_presence     = lsu_ssu_presence(rna, is_mitochondrial)
         reshaped             = RibosomeStructure(
@@ -902,5 +904,5 @@ class ETLCollector:
             mitochondrial          = is_mitochondrial,
             subunit_presence       = subunit_presence,
         )
-        RA.write_own_json_profile(reshaped.model_dump(), overwrite=overwrite)
+        RA.assets.write_own_json_profile(reshaped.model_dump(), overwrite=overwrite)
         return reshaped

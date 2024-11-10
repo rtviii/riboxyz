@@ -43,7 +43,7 @@ import json
 from pprint import pprint
 from neo4j_ribosome.db_lib_builder import Neo4jAdapter
 from neo4j_ribosome.db_lib_reader import dbqueries
-from ribctl.etl.ribosome_ops import Assets
+from ribctl.etl.assets_structure import StructureAssets
 from ribctl.lib.libbsite import bsite_ligand
 
 
@@ -64,7 +64,7 @@ def all_structs_for_lig(chemid: str):
 for CHEMID in CHEMIDS:
     for i in all_structs_for_lig(CHEMID):
         rcsb_id = i[0]
-        path    = Assets(rcsb_id).paths.binding_site(CHEMID)
+        path    = StructureAssets(rcsb_id).paths.binding_site(CHEMID)
         bsite   = bsite_ligand(CHEMID, rcsb_id)
 
         with open(path, "w+") as f:

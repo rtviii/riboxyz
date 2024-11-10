@@ -3,10 +3,15 @@ from enum import Enum
 import typing
 from Bio.SeqRecord import SeqRecord
 from Bio.Seq import Seq
+from Bio.PDB.Residue import Residue
+import numpy as np
 from pydantic import BaseModel, field_serializer, Field
 from ribctl.lib.enumunion import enum_union
 from pydantic import BaseModel, Field
 from typing import Optional, Literal, Union, ClassVar
+
+from ribctl.lib.schema.primitivs import AMINO_ACIDS, NUCLEOTIDES
+
 
 # |********************************************************************************************************|
 # | https://docs.google.com/spreadsheets/d/1mapshbn1ArofPN-Omu8GG5QdcwlJ0ym0BlN252kkUBU/edit#gid=815712128 |
@@ -455,6 +460,69 @@ class NonpolymericLigand(BaseModel):
     InChIKey     : Optional[str] =None
 
 
+class ResidueSummary(BaseModel): 
+
+    label_seq_id : typing.Optional[int] = None
+    label_comp_id: typing.Optional[str] = None
+    auth_asym_id : str
+    auth_seq_id  : int
+    rcsb_id      : str
+    full_id      : typing.Optional[tuple[str, int, str, tuple[str, int, str]]]
+
+
+    @staticmethod
+    def filter_noncanonical(resname:str):
+        return resname in [*AMINO_ACIDS.keys(), *NUCLEOTIDES]
+
+    @staticmethod
+    def three_letter_code_to_one(resname: str):
+        if resname in AMINO_ACIDS:
+            return AMINO_ACIDS[resname]["one_letter_code"]
+        elif resname in NUCLEOTIDES:
+                return resname
+        else:
+            return '-'
+
+    @staticmethod
+    def one_letter_code_to_three(resname: str):
+        if resname in [*map(lambda x: x[1]['one_letter_code'], AMINO_ACIDS.items())]:
+            for tlk, d in AMINO_ACIDS.items():
+                if d["one_letter_code"] == resname:
+                    return tlk
+        elif resname in NUCLEOTIDES:
+                return resname
+        else:
+            return '-'
+
+    def __hash__(self):
+        return hash( self.get_resname() if self.get_resname() is not None else "" + str(self.get_seqid()) + self.get_parent_auth_asym_id() )
+
+    def get_resname(self):
+        return self.label_comp_id
+
+    def get_seqid(self):
+        (structure_id, model_id, chain_id, _) = self.full_id
+        (hetero, seqid, insertion_code)       = _
+        return seqid
+
+    def get_parent_auth_asym_id(self):
+        (structure_id, assembly_id, chain_id, _) = self.full_id
+        return chain_id
+
+    @staticmethod
+    def from_biopython_residue(r: Residue):
+
+        (structure_id, model_id, chain_id, _) = r.get_full_id()
+        (hetero, seqid, insertion_code) = _
+
+        return ResidueSummary(
+            auth_seq_id   = seqid,
+            label_seq_id  = None,
+            label_comp_id = r.get_resname(),
+            auth_asym_id  = chain_id,
+            full_id       = r.get_full_id(),
+            rcsb_id       = r.get_full_id()[0]
+        )
 
 class AssemblyInstancesMap(BaseModel):
     """
@@ -512,12 +580,24 @@ class NomenclatureItem(BaseModel):
 class NomenclatureTable(BaseModel):
     __pydantic_root_model__: Dict[str, NomenclatureItem]
 
-class PTCInfo(BaseModel):
 
-    # site_9_residues      : list[tuple[str, int]]
-    LSU_rRNA_auth_asym_id: str
-    midpoint_coordinates : tuple[float, float, float]
-    nomenclature_table   : NomenclatureTable
+class PTCInfo(BaseModel):
+    location: list[float]
+    residues: list[ResidueSummary]
+
+#     # site_9_residues      : list[tuple[str, int]]
+#     LSU_rRNA_auth_asym_id: str
+#     midpoint_coordinates : tuple[float, float, float]
+#     nomenclature_table   : NomenclatureTable
+
+
+
+# ! Deprecated
+# class PTCInfo(BaseModel):
+#     # site_9_residues      : list[tuple[str, int]]
+#     LSU_rRNA_auth_asym_id: str
+#     midpoint_coordinates : tuple[float, float, float]
+#     nomenclature_table   : NomenclatureTable
 
 class RibosomeStructureMetadata(BaseModel):
 

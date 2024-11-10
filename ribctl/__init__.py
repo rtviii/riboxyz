@@ -2,18 +2,16 @@ import os
 import pathlib
 from typing import Literal
 
-  
 RIBETL_DATA     = os.environ.get("RIBETL_DATA")
 if not os.path.exists(RIBETL_DATA):
     raise NotADirectoryError("RIBETL_DATA directory does not exist. Most things won't work.")
 
 #! ------------- logs ----------------
-LOGS_PATH              = os.path.join(pathlib.Path(__file__).parent, "logs")
 CLASSIFICATION_REPORTS = os.path.join(pathlib.Path(__file__).parent, "logs","hmm_classification_reports")
 
 #! ------------- assets ----------------
 # This amounts to "assets folder is expected to exist in the root of `ribctl`(next to top-level __init__.py)"
-ASSETS_PATH        = os.path.join(pathlib.Path(__file__).parent, "assets")
+ASSETS_PATH        = os.path.join(pathlib.Path(__file__).parent, "assets_project")
 MUSCLE_BIN         = os.path.join(ASSETS_PATH, "muscle3.8.1")
 NCBI_TAXDUMP_GZ    = os.path.join(ASSETS_PATH, "taxdump.tar.gz")
 NCBI_TAXA_SQLITE   = os.path.join(ASSETS_PATH, "taxa.sqlite")
@@ -43,7 +41,7 @@ asset_type  = Literal[
     "fasta_factors_initiation_bacteria",
     "fasta_factors_initiation_eukaryota",
 
-    "__hmm_cache",
+    "cache_hmm",
 ]
 
 if os.environ.get("RIBETL_DATA") == "" or not os.path.exists(ASSETS_PATH):
@@ -56,7 +54,7 @@ if os.environ.get(NCBI_TAXA_SQLITE) == "" or not os.path.exists(NCBI_TAXA_SQLITE
                    """)
 
 
-# if os.environ.get(NCBI_TAXDUMP_GZ) == "" or not os.path.exists(NCBI_TAXDUMP_GZ):
+# if os.envion.get(NCBI_TAXDUMP_GZ) == "" or not os.path.exists(NCBI_TAXDUMP_GZ):
 #     raise FileNotFoundError(
 #         """NCBI taxonomy dump file should be available at $NCBI_TAXDUMP_GZ environment variable. 
 #         Download it here: https://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz """
@@ -83,7 +81,7 @@ ASSETS: dict[asset_type, pathlib.Path] = {
     "fasta_factors_elongation_eukaryota": pathlib.Path(os.path.join(ASSETS_PATH, "fasta_factors_elongation","eukaryota")),
     "fasta_factors_elongation_archaea"  : pathlib.Path(os.path.join(ASSETS_PATH, "fasta_factors_elongation","archaea")),
 
-    "__hmm_cache"             : pathlib.Path(os.path.join(ASSETS_PATH, "__hmm_cache")),
+    "cache_hmm"             : pathlib.Path(os.path.join(ASSETS_PATH, "cache_hmm")),
 }
 
 TAXID_BACTERIA  = 2
@@ -115,30 +113,5 @@ AMINO_ACIDS_3_TO_1_CODE = {
     "VAL": "V",
 }
 AMINO_ACIDS_1_TO_3_CODE = {v: k for k, v in AMINO_ACIDS_3_TO_1_CODE.items()}
-
-model_species = {
-    "Lactococcus"               : 1357,
-    "Mycobacterium smegmatis"   : 1772,
-    "Mycobacterium tuberculosis": 1773,
-    "Bacillus subtilis"         : 1423,
-    "Leishmania donovani"       : 5661,
-    "Trypanosoma cruzi"         : 5693,
-    "Trichomonas vaginalis"     : 5722,
-    "Giardia duodenalis"        : 5741,
-    "Spraguea lophii"           : 51541,
-}
-
-model_subgenuses = {
-    "Lactococcus"               : 1357,
-    "Mycobacterium smegmatis"   : 1772,
-    "Mycobacterium tuberculosis": 1773,
-    "Bacillus subtilis"         : 1423,
-    "Leishmania donovani"       : 38568,
-    "Trypanosoma cruzi"         : 47570,
-    "Trichomonas vaginalis"     : 181550,
-    "Giardia duodenalis"        : 5741,
-    "Spraguea lophii"           : 51540,
-}
-
 
 __version__ = "0.1.0"

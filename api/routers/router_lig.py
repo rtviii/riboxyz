@@ -3,7 +3,7 @@ import os
 from pprint import pprint
 from django.http import JsonResponse, HttpResponseServerError
 from ninja import Router
-from ribctl.etl.ribosome_ops import RibosomeOps
+from ribctl.ribosome_ops import RibosomeOps
 from ribctl.lib.libbsite import bsite_ligand, bsite_transpose, lig_get_chemical_categories
 from ribctl.lib.schema.types_binding_site import BindingSite, LigandTransposition
 from ribctl.lib.seq_project_many_to_one import compact_class, prepare_mapping_sources
@@ -14,12 +14,10 @@ TAG                   = "Ligands, Antibitics & Small Molecules"
 @router_lig.get('/binding_pocket',  tags=[TAG], response=BindingSite)
 def lig_nbhd(request, source_structure:str, chemical_id:str, radius:int=5):
     """All members of the given RNA class: small and large subunit, cytosolic and mitochondrial RNA; tRNA.  """
-    path = RibosomeOps(source_structure).paths.binding_site(chemical_id)
+    path = RibosomeOps(source_structure).assets.paths.binding_site(chemical_id)
     if not os.path.exists(path):
         try:
             bsite = bsite_ligand(chemical_id, source_structure, radius)
-            pprint("produced")
-            pprint(bsite)
             return JsonResponse(bsite.model_dump(), safe=False)
         except Exception as e:
             return HttpResponseServerError(e)
@@ -30,11 +28,25 @@ def lig_nbhd(request, source_structure:str, chemical_id:str, radius:int=5):
 @router_lig.get('/transpose',  tags=[TAG], response=LigandTransposition)
 def lig_transpose(request, source_structure:str, target_structure:str, chemical_id:str, radius:float):
     """All members of the given RNA class: small and large subunit, cytosolic and mitochondrial RNA; tRNA.  """
-    bsite_path      = RibosomeOps(source_structure).paths.binding_site(chemical_id)
-    prediction_path = RibosomeOps(target_structure).paths.binding_site_prediction(chemical_id, source_structure)
+    bsite_path      = RibosomeOps(source_structure).assets.paths.binding_site(chemical_id)
+    prediction_path = RibosomeOps(target_structure).assets.paths.binding_site_prediction(chemical_id, source_structure)
+
+
+    if os.path.exists(prediction_path):
+        with open(prediction_path, 'r') as f:
+            return JsonResponse(json.load(f), safe=False)
 
     bsite           = bsite_ligand(chemical_id, source_structure, radius)
     prediction      = bsite_transpose(source_structure,target_structure,bsite)
+
+
+    with open(prediction_path, 'w') as f:
+        json.dump(prediction.model_dump(), f, indent=4)
+        pprint("Saved to file {}".format(prediction_path))
+
+    with open(bsite_path, 'w') as f:
+        json.dump(bsite.model_dump(), f, indent=4)
+        pprint("Saved to file {}".format(bsite_path))
 
     return JsonResponse(prediction.model_dump(), safe=False)
 
@@ -45,10 +57,10 @@ def lig_chemical_categories(request,):
 
 @router_lig.get('/bsite_composite',  tags=[TAG], response=dict)
 def bsite_composite(request,):
-    with open('bsite_composite.json', 'r') as f:
-        compacted_registry = json.load(f)
-        pprint("Saved to file bsite_composite.json")
-    return JsonResponse(compacted_registry, safe=False)
+    # with open('bsite_composite.json', 'r') as f:
+    #     compacted_registry = json.load(f)
+    #     pprint("Saved to file bsite_composite.json")
+    # return JsonResponse(compacted_registry, safe=False)
 
     tetracycline_structs = [
         (
@@ -415,33 +427,33 @@ def bsite_composite(request,):
         ),
     ]
 
-    # target_rcsb_id = "7K00"
-    # RADIUS = 15
+    target_rcsb_id = "7K00"
+    RADIUS = 15
 
-    # sources = []
-    # sources:list[tuple[str,str]] = []
-    # for record in tetracycline_structs:
-    #     chem    = record[0]
-    #     structs = record[1]
-    #     for struct in structs:
-    #         chemid  = chem["chemicalId"]
-    #         rcsb_id = struct["rcsb_id"]
-    #         sources.append((rcsb_id, chemid))
+    sources = []
+    sources:list[tuple[str,str]] = []
+    for record in tetracycline_structs:
+        chem    = record[0]
+        structs = record[1]
+        for struct in structs:
+            chemid  = chem["chemicalId"]
+            rcsb_id = struct["rcsb_id"]
+            sources.append((rcsb_id, chemid))
 
-    # N_SOURCES = len(sources)
-    # registry = prepare_mapping_sources(sources)
-    # RO = RibosomeOps(target_rcsb_id)
-    # compacted_registry: dict[PolymerClass, dict[int, float]] = {}
-    # for poly_class in registry.keys():
-    #     chain = RO.get_poly_by_polyclass(poly_class)
-    #     if chain is not None:
-    #         aaid = chain.auth_asym_id
-    #     compacted_registry.update({aaid: compact_class( registry[poly_class], N_SOURCES)})
+    N_SOURCES = len(sources)
+    registry = prepare_mapping_sources(sources)
+    RO = RibosomeOps(target_rcsb_id)
+    compacted_registry: dict[PolymerClass, dict[int, float]] = {}
+    for poly_class in registry.keys():
+        chain = RO.get_poly_by_polyclass(poly_class)
+        if chain is not None:
+            aaid = chain.auth_asym_id
+        compacted_registry.update({aaid: compact_class( registry[poly_class], N_SOURCES)})
 
-    # pprint(compacted_registry)
+    pprint(compacted_registry)
     
-    # with open('bsite_composite.json', 'w') as f:
-    #     json.dump(compacted_registry, f)
-    #     pprint("Saved to file bsite_composite.json")
+    with open('bsite_composite.json', 'w') as f:
+        json.dump(compacted_registry, f)
+        pprint("Saved to file bsite_composite.json")
 
-    # return JsonResponse(compacted_registry, safe=False)
+    return JsonResponse(compacted_registry, safe=False)

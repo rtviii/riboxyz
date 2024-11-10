@@ -6,7 +6,7 @@ from Bio.PDB.Chain import Chain
 from loguru import logger
 import numpy as np
 from ribctl import AMINO_ACIDS_3_TO_1_CODE, ASSETS_PATH, CHAINSPLITTER_PATH, CLASSIFICATION_REPORTS
-from ribctl.etl.ribosome_ops import RibosomeOps
+from ribctl.etl.assets_structure import RibosomeOps
 from ribctl.lib.libtax import PhylogenyNode, PhylogenyRank, Taxid
 from Bio.PDB.Structure import Structure
 from Bio.PDB.MMCIFParser import FastMMCIFParser

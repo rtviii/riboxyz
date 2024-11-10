@@ -3,7 +3,7 @@ import json
 import os
 from pprint import pprint
 import click
-from ribctl.etl.ribosome_ops import RibosomeOps, Structure
+from ribctl.ribosome_ops import RibosomeOps, Structure
 from ribctl.lib.libbsite import bsite_ligand, BindingSite, BindingSiteChain, bsite_transpose
 from neo4j_ribosome.db_lib_reader import Neo4jReader
 ce = click.echo
@@ -28,9 +28,9 @@ def list_ligands(limit):
 def nbhd(chem_id, rcsb_id,  radius, save):
     bsite = bsite_ligand(chem_id, rcsb_id, radius)
     if save:
-        with open(RibosomeOps(rcsb_id).paths.binding_site(chem_id), 'w') as outfile:
+        with open(RibosomeOps(rcsb_id).assets.paths.binding_site(chem_id), 'w') as outfile:
             json.dump(bsite.model_dump(), outfile, indent=4)
-            ce("Saved: {}".format(RibosomeOps(rcsb_id).paths.binding_site(chem_id)))
+            ce("Saved: {}".format(RibosomeOps(rcsb_id).assets.paths.binding_site(chem_id)))
 
     pprint(bsite.model_dump())
 
@@ -48,7 +48,7 @@ def transpose(ctx, chem_id, source_struct, target_struct, radius, save):
     transposed = bsite_transpose(source_struct,target_struct, bsite).model_dump()
 
     if save:
-        transposed_path = RibosomeOps(target_struct).paths.binding_site_prediction(chem_id, source_struct)
+        transposed_path = RibosomeOps(target_struct).assets.paths.binding_site_prediction(chem_id, source_struct)
         with open(transposed_path, 'w') as outfile:
             json.dump(transposed, outfile, indent=4)
             ce("Saved: {}".format(transposed_path))

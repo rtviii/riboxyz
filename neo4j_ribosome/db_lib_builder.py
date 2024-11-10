@@ -1,4 +1,6 @@
 import sys
+
+from ribctl.etl.assets_global import GlobalAssets
 sys.dont_write_bytecode = True
 
 from neo4j_ribosome.node_ligand import link__ligand_to_struct, node__ligand
@@ -9,7 +11,7 @@ from neo4j import Driver, GraphDatabase
 from neo4j_ribosome.node_polymer import  link__polymer_to_polymer_class, link__polymer_to_structure, node__polymer, upsert_polymer_to_protein, upsert_polymer_to_rna,node__polymer_class
 from neo4j_ribosome.node_structure import    link__structure_to_lineage_member, link__structure_to_organism, node__structure, struct_exists
 from ribctl.lib.schema.types_ribosome import MitochondrialProteinClass, PolynucleotideClass, PolynucleotideClass, RibosomeStructure, RibosomeStructureMetadata
-from ribctl.etl.ribosome_ops import Assets, RibosomeOps, Structure
+from ribctl.ribosome_ops import StructureAssets, RibosomeOps, Structure
 from neo4j import GraphDatabase, Driver, ManagedTransaction, Transaction
 from ribctl.lib.schema.types_ribosome import  NonpolymericLigand,  CytosolicProteinClass, RibosomeStructureMetadata
 
@@ -66,7 +68,7 @@ class Neo4jAdapter():
             return node
 
     def init_phylogenies(self):
-        taxa = Assets.collect_all_taxa()
+        taxa = GlobalAssets.collect_all_taxa()
         for taxon in taxa:
             self._create_lineage(taxon.ncbi_tax_id)
 
@@ -90,7 +92,7 @@ class Neo4jAdapter():
         rcsb_id = rcsb_id.upper()
 
         if profile is None:
-            profile = RibosomeOps(rcsb_id).profile()
+            profile = RibosomeOps(rcsb_id).profile
 
         _= []
         with self.driver.session() as s:
@@ -132,7 +134,7 @@ class Neo4jAdapter():
                 print("Struct node {} already exists.".format(rcsb_id))
                 return
 
-        R:RibosomeStructure = RibosomeOps(rcsb_id).profile()
+        R:RibosomeStructure = RibosomeOps(rcsb_id).profile
 
         with self.driver.session() as s:
 
@@ -169,7 +171,7 @@ class Neo4jAdapter():
 
     def upsert_structure_node(self, rcsb_id:str):
         rcsb_id = rcsb_id.upper()
-        R:RibosomeStructure = RibosomeOps(rcsb_id).profile()
+        R:RibosomeStructure = RibosomeOps(rcsb_id).profile
         with self.driver.session() as s:
             structure_node = s.execute_write(node__structure(R))
         print("Successfully merged structure {}.".format(rcsb_id))
