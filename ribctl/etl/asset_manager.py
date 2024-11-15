@@ -11,15 +11,15 @@ from ribctl import RIBETL_DATA
 
 class AssetType(Enum):
     # Core Data Assets
-    MMCIF = auto()
-    STRUCTURE_PROFILE = auto()  # Structure profile
+    MMCIF                 = auto()
+    STRUCTURE_PROFILE     = auto()  # Structure profile
     CLASSIFICATION_REPORT = auto()
 
     # Structural Analysis Assets
-    PTC = auto()  # PTC site analysis
-    NPET_MESH = auto()  # Tunnel analysis
+    PTC         = auto()  # PTC site analysis
+    NPET_MESH   = auto()  # Tunnel analysis
     RNA_HELICES = auto()  # RNA helix annotations
-    TRNA_SITES = auto()  # tRNA binding sites
+    TRNA_SITES  = auto()  # tRNA binding sites
 
     # Visualization Assets
     THUMBNAIL = auto()  # Structure thumbnail
@@ -28,11 +28,10 @@ class AssetType(Enum):
 @dataclass
 class AssetDefinition:
     """Defines an asset and its properties"""
-
-    asset_type: AssetType
-    dependencies: Set[AssetType]
-    path_template: str
-    required: bool
+    asset_type    : AssetType
+    dependencies  : Set[AssetType]
+    path_template : str
+    required      : bool
     schema_version: str = "0.1"
 
 

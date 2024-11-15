@@ -100,7 +100,7 @@ def generate(
     async def main():
         if 'rcsb_id' in ctx.obj:
             # Single structure processing
-            # await process_structure(ctx.obj['rcsb_id'].upper(), asset_types)
+            await process_structure(ctx.obj['rcsb_id'].upper(), asset_types)
             return
 
         if rcsb_sync:
