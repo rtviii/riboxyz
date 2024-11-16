@@ -7,7 +7,7 @@ from loguru import logger
 
 class AssetGenerator(Protocol):
     """Protocol that all asset generators must implement"""
-    async def __call__(self, pdb_id: str, output_path: Path, force: bool = False) -> None:
+    async def __call__(self, rcsb_id: str, output_path: Path, overwrite: bool = False) -> None:
         ...
 
 class AssetType(Enum):

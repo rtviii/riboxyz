@@ -825,12 +825,6 @@ class ETLCollector:
         return list(map(AssemblyInstancesMap.model_validate, dictionaries))
 
     async def process_structure(self, overwrite: bool = False, reclassify:bool=False) -> RibosomeStructure:
-        RA = RibosomeOps(self.rcsb_id)
-        if os.path.isfile(RA.assets.paths.profile):
-            logger.debug("Profile already exists for {}.".format(self.rcsb_id))
-            if not overwrite:
-                return RA.profile
-
         #! Assemblies metadata
         
         assmebly_maps = self.query_rcsb_api(AssemblyIdentificationString.replace("$RCSB_ID", self.rcsb_id) )["entry"]["assemblies"]
@@ -904,5 +898,4 @@ class ETLCollector:
             mitochondrial          = is_mitochondrial,
             subunit_presence       = subunit_presence,
         )
-        RA.assets.write_own_json_profile(reshaped.model_dump(), overwrite=overwrite)
         return reshaped
