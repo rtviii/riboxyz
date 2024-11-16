@@ -4,17 +4,12 @@ import enum
 import json
 import os
 from pprint import pprint
-import subprocess
 import typing
 from Bio.PDB.Structure import Structure
 from Bio.PDB.Chain import Chain
-from loguru import logger
 import requests
 from ribctl import (
-    AMINO_ACIDS_3_TO_1_CODE,
     ASSETS_PATH,
-    CHAINSPLITTER_PATH,
-    CLASSIFICATION_REPORTS,
 )
 from ribctl.etl.asset_manager import RibosomeAssetManager
 from ribctl.etl.assets_structure import AssetClass, StructureAssets
@@ -26,28 +21,17 @@ from ribctl.lib.landmarks.ptc_via_doris import (
     ptc_residues_calculate_midpoint,
 )
 from ribctl.lib.utils import download_unpack_place
-from ribctl.lib.schema.types_ribosome import (
-    RNA,
-    PTCInfo,
-    Polymer,
-    PolymerClass,
-    PolynucleotideClass,
-    PolynucleotideClass,
-    PolypeptideClass,
-    RibosomeStructure,
-    RibosomeStructureMetadata,
-)
 from ribctl import RIBETL_DATA
 from ribctl.logs.loggers import get_etl_logger
 from ribctl.ribosome_ops import RibosomeOps
 
 
-class GlobalView(RibosomeAssetManager):
+class GlobalOps():
     @staticmethod
     def status_vs_rcsb() -> list[str]:
         """Return a list of structures that are in the RCSB but not in the local database."""
         return list(
-            set(GlobalView.current_rcsb_structs()) - set(GlobalView.list_all_structs())
+            set(GlobalOps.current_rcsb_structs()) - set(GlobalOps.list_all_structs())
         )
 
     @staticmethod
@@ -113,7 +97,7 @@ class GlobalView(RibosomeAssetManager):
     @staticmethod
     def collect_all_taxa() -> set[PhylogenyNode]:
         _ = set()
-        for struct in GlobalView.list_all_structs():
+        for struct in GlobalOps.list_all_structs():
             rp = RibosomeOps(struct).profile
             for org in [*rp.src_organism_ids, *rp.host_organism_ids]:
                 # if Taxid.rank(org) not in list(typing.get_args(PhylogenyRank)):
@@ -142,6 +126,6 @@ class GlobalView(RibosomeAssetManager):
     @staticmethod
     def global_status() -> dict[str, dict[AssetClass, bool]]:
         _ = {}
-        for struct in GlobalView.list_all_structs():
+        for struct in GlobalOps.list_all_structs():
             _[struct] = StructureAssets(struct).assets_status()
         return _

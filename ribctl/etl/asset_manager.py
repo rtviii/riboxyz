@@ -75,16 +75,16 @@ class RibosomeAssetManager:
         """Initialize asset definitions with their dependencies"""
         self.assets: Dict[AssetType, AssetDefinition] = {
             AssetType.MMCIF: AssetDefinition(
-                asset_type=AssetType.MMCIF,
-                dependencies=set(),  # No dependencies
-                path_template="{pdb_id}.cif",
-                required=True,
+                asset_type    = AssetType.MMCIF,
+                dependencies  = set(),           # No dependencies
+                path_template = "{pdb_id}.cif",
+                required      = True,
             ),
             AssetType.STRUCTURE_PROFILE: AssetDefinition(
-                asset_type=AssetType.STRUCTURE_PROFILE,
-                dependencies=set(),
-                path_template="{pdb_id}.json",
-                required=True,
+                asset_type    = AssetType.STRUCTURE_PROFILE,
+                dependencies  = set(),
+                path_template = "{pdb_id}.json",
+                required      = True,
             ),
             AssetType.PTC: AssetDefinition(
                 asset_type=AssetType.PTC,

@@ -58,6 +58,8 @@ class AssetRegistry:
         for asset_type in asset_types:
             await self.generate_asset(pdb_id, asset_type, force)
 
+
+
 # Example Usage:
 """
 # Set up manager and registry
