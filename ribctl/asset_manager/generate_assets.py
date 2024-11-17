@@ -12,7 +12,6 @@ from ribctl.lib.utils import download_unpack_place
 
 manager  = RibosomeAssetManager(RIBETL_DATA)
 registry = AssetRegistry(manager)
-RCSB_ID  = '3J7Z'
 
 @registry.register(AssetType.STRUCTURE_PROFILE)
 async def generate_profile(rcsb_id: str) -> RibosomeStructure:
@@ -23,7 +22,6 @@ async def generate_profile(rcsb_id: str) -> RibosomeStructure:
 async def generate_ptc(rcsb_id: str) -> PTCInfo:
     return PTC_location(rcsb_id)
 
-# raw_handler = RawAssetHandler(RIBETL_DATA)
-# asyncio.run(  raw_handler.fetch_mmcif(RCSB_ID, force=True) )
-# asyncio.run(registry.generate_asset(RCSB_ID, AssetType.STRUCTURE_PROFILE , True))
-asyncio.run(registry.generate_asset(RCSB_ID, AssetType.PTC ))
+
+rcsb_id = '4UG0'
+asyncio.run(registry.generate_asset(rcsb_id,AssetType.STRUCTURE_PROFILE))

@@ -12,7 +12,6 @@ from ribctl import (
     ASSETS_PATH,
 )
 from ribctl.asset_manager.asset_manager import RibosomeAssetManager
-from ribctl.asset_manager.assets_structure import AssetClass, StructureAssets
 from ribctl.lib.libtax import PhylogenyNode, PhylogenyRank, Taxid
 from Bio.PDB.Structure import Structure
 from Bio.PDB.MMCIFParser import FastMMCIFParser
@@ -122,11 +121,4 @@ class GlobalOps():
                     print("Error with", org, struct)
                     print(e)
                 _.add(pn)
-        return _
-
-    @staticmethod
-    def global_status() -> dict[str, dict[AssetClass, bool]]:
-        _ = {}
-        for struct in GlobalOps.list_all_structs():
-            _[struct] = StructureAssets(struct).assets_status()
         return _

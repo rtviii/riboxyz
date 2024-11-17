@@ -111,6 +111,10 @@ class StructureAssets:
     def biopython_get_chain(self, auth_asym_id: str) -> Chain:
         return self.biopython_structure().child_dict[0].child_dict[auth_asym_id]
 
+    def acquire_all_assets(self):
+        ...
+
+
     def _verify_dir_exists(self):
         if not os.path.exists(self.paths.dir):
             os.umask(0)

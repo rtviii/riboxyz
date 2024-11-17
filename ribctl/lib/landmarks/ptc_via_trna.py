@@ -1,7 +1,6 @@
 from pprint import pprint
 from typing import List, NewType, Tuple, TypeVar
 import typing
-
 from ribctl.asset_manager.assets_structure import StructureAssetPaths
 from ribctl.global_ops import GlobalOps
 from ribctl.lib.schema.types_ribosome import PTCInfo
@@ -165,8 +164,6 @@ def PTC_location(target_rcsb_id: str) -> PTCInfo:
     mmcif_struct_tgt = RO.assets.biopython_structure()[0]
     LSU_RNA_tgt_aaid = RO.get_LSU_rRNA().auth_asym_id
     LSU_RNA_tgt: Chain = mmcif_struct_tgt[LSU_RNA_tgt_aaid]
-    print("got target", [LSU_RNA_tgt.child_dict])
-    print("got target", LSU_RNA_tgt)
 
     _, _, motifs = map_motifs(
         SequenceMappingContainer(ref_chain),

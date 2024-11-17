@@ -27,8 +27,8 @@ class AssetInfo:
 class AssetType(Enum):
     # Raw assets explicitly marked
     MMCIF     = AssetInfo("mmcif", model=None, is_raw=True)
-    THUMBNAIL = AssetInfo("thumbnail", model=None, is_raw=True, dependencies={"STRUCTURE_PROFILE","MMCIF"})
-    NPET_MESH = AssetInfo("npet_mesh", model=None, is_raw=True, dependencies={"STRUCTURE_PROFILE","MMCIF"})
+    # THUMBNAIL = AssetInfo("thumbnail", model=None, is_raw=True, dependencies={"STRUCTURE_PROFILE","MMCIF"})
+    # NPET_MESH = AssetInfo("npet_mesh", model=None, is_raw=True, dependencies={"STRUCTURE_PROFILE","MMCIF"})
     
     # Model-based assets
     STRUCTURE_PROFILE = AssetInfo("profile", model=RibosomeStructure)

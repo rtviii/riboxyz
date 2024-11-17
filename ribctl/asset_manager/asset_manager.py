@@ -24,9 +24,9 @@ class AssetPathManager:
               AssetType.MMCIF                : "{asset_dir}/{pdb_id}.cif",
               AssetType.STRUCTURE_PROFILE    : "{asset_dir}/{pdb_id}.json",
               AssetType.PTC                  : "{asset_dir}/{pdb_id}_PTC.json",
-              AssetType.THUMBNAIL            : "{asset_dir}/{pdb_id}.png",
-              AssetType.CLASSIFICATION_REPORT: "{asset_dir}/classification_report_{pdb_id}.json",
-              AssetType.NPET_MESH            : "{asset_dir}/TUNNELS/{pdb_id}_NPET_MESH.ply",
+            #   AssetType.THUMBNAIL            : "{asset_dir}/{pdb_id}.png",
+            #   AssetType.CLASSIFICATION_REPORT: "{asset_dir}/classification_report_{pdb_id}.json",
+            #   AssetType.NPET_MESH            : "{asset_dir}/TUNNELS/{pdb_id}_NPET_MESH.ply",
             # AssetType.RNA_HELICES          : "{asset_dir}/RNA_HELICES.json",
             # AssetType.TRNA_SITES           : "{asset_dir}/TRNA_SITES.json",
         }
