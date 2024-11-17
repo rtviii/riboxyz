@@ -1,43 +1,28 @@
-"""
-# Set up manager and registry
+import asyncio
+from ribctl import RIBETL_DATA
+from ribctl.etl.asset_external import RawAssetHandler
+from ribctl.etl.asset_manager import RibosomeAssetManager
+from ribctl.etl.asset_registry import AssetRegistry
+from ribctl.etl.asset_types import AssetType
+from ribctl.etl.etl_collector import ETLCollector
+from ribctl.lib.schema.types_ribosome import PTCInfo, RibosomeStructure
+from ribctl.lib.utils import download_unpack_place
+
+
 manager = RibosomeAssetManager(RIBETL_DATA)
 registry = AssetRegistry(manager)
 
-# Register generators with decorator
-@registry.register(AssetType.MMCIF)
-async def generate_mmcif(pdb_id: str, output_path: Path, force: bool = False) -> None:
-    # Your mmCIF generation logic
-    ...
-
-# Generate assets
-await registry.generate_multiple("1J5E", [AssetType.MMCIF], force=False)
-"""
-
-import asyncio
-import os
-from loguru import logger
-from ribctl import RIBETL_DATA
-from ribctl.etl.asset_manager import (
-    AssetPathManager,
-    AssetType,
-    RibosomeAssetManager,
-    AssetGenRegistry,
-)
-from ribctl.etl.etl_collector import ETLCollector
-from ribctl.ribosome_ops import RibosomeOps
-
-registry = AssetGenRegistry(RibosomeAssetManager(RIBETL_DATA))
-
 @registry.register(AssetType.STRUCTURE_PROFILE)
-async def generate_profile(rcsb_id: str, overwrite: bool = False) -> None:
-    RA = RibosomeOps(rcsb_id)
-    if os.path.isfile(RA.assets.paths.profile):
-        logger.debug("Profile already exists for {}.".format(rcsb_id))
-        if not overwrite:
-            return
-    profile = await ETLCollector(rcsb_id).process_structure(overwrite=overwrite)
-    RA.assets.write_own_json_profile(profile.model_dump(), overwrite=overwrite)
+async def generate_profile(rcsb_id: str) -> RibosomeStructure:
+    profile = await ETLCollector(rcsb_id).process_structure()
+    return profile
 
+@registry.register(AssetType.PTC)
+async def generate_ptc(rcsb_id: str) -> PTCInfo:
+    ...
+    # Your PTC generation logic
+    # return ptc_info
 
-
-asyncio.run(registry.generate_asset("3J7Z", AssetType.STRUCTURE_PROFILE, force=True))
+# For raw assets
+# raw_handler = RawAssetHandler(RIBETL_DATA)
+# await raw_handler.fetch_mmcif("1J5E", force=True)
