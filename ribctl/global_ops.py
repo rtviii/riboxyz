@@ -11,8 +11,8 @@ import requests
 from ribctl import (
     ASSETS_PATH,
 )
-from ribctl.etl.asset_manager import RibosomeAssetManager
-from ribctl.etl.assets_structure import AssetClass, StructureAssets
+from ribctl.asset_manager.asset_manager import RibosomeAssetManager
+from ribctl.asset_manager.assets_structure import AssetClass, StructureAssets
 from ribctl.lib.libtax import PhylogenyNode, PhylogenyRank, Taxid
 from Bio.PDB.Structure import Structure
 from Bio.PDB.MMCIFParser import FastMMCIFParser
@@ -91,8 +91,9 @@ class GlobalOps():
 
     @staticmethod
     def ptc_references(ribosome_type: typing.Literal["arch", "bact", "euk", "mito"]):
-        filename = "ptc_reference_residues_{}.pickle".format(ribosome_type.upper())
-        return os.path.join(ASSETS_PATH, "landmarks_cache", filename)
+        filename   = "ptc_reference_residues_{}.pickle".format(ribosome_type.upper())
+        ptcrefpath = os.path.join(ASSETS_PATH, "cache_landmarks", filename)
+        return ptcrefpath
 
     @staticmethod
     def collect_all_taxa() -> set[PhylogenyNode]:

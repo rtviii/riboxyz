@@ -11,36 +11,36 @@ from ribctl.lib.schema.types_ribosome import PTCInfo, RibosomeStructure
 # Type for any pydantic model
 ModelT = TypeVar('ModelT', bound=BaseModel)
 
-class AssetInfo(Generic[ModelT]):
-    """Associates an asset with its model type and other metadata"""
+class AssetInfo:
     def __init__(
         self, 
         name: str, 
-        model: Optional[Type[ModelT]] = None,
-        dependencies: set[str] = set()
+        model: Optional[Type[BaseModel]] = None,
+        dependencies: set[str] = set(),
+        is_raw: bool = False  # New flag to explicitly mark raw assets
     ):
         self.name = name
         self.model = model
         self.dependencies = dependencies
+        self.is_raw = is_raw
 
 class AssetType(Enum):
-    # Core Data Assets - note how each specifies its model type
-    MMCIF                 = AssetInfo("mmcif", None)  # Raw file, no model
-    STRUCTURE_PROFILE     = AssetInfo("profile", RibosomeStructure)
-    # CLASSIFICATION_REPORT = AssetInfo("classification", ClassificationReport)
-
-    # # Structural Analysis Assets
-    PTC         = AssetInfo("ptc", PTCInfo, dependencies={"MMCIF", "STRUCTURE_PROFILE"})
-    # NPET_MESH   = AssetInfo("npet", NPETMesh, dependencies={"MMCIF"})
-    # RNA_HELICES = AssetInfo("rna_helices", RNAHelices)
-    # TRNA_SITES  = AssetInfo("trna", TRNASites)
-
-    # Visualization Assets
-    THUMBNAIL = AssetInfo("thumbnail", None)  # Another raw file
-
+    # Raw assets explicitly marked
+    MMCIF     = AssetInfo("mmcif", model=None, is_raw=True)
+    THUMBNAIL = AssetInfo("thumbnail", model=None, is_raw=True, dependencies={"STRUCTURE_PROFILE","MMCIF"})
+    NPET_MESH = AssetInfo("npet_mesh", model=None, is_raw=True, dependencies={"STRUCTURE_PROFILE","MMCIF"})
+    
+    # Model-based assets
+    STRUCTURE_PROFILE = AssetInfo("profile", model=RibosomeStructure)
+    PTC               = AssetInfo("ptc", model=PTCInfo, dependencies={"STRUCTURE_PROFILE", "MMCIF"});
+    
     @property
     def model_type(self) -> Optional[Type[BaseModel]]:
         return self.value.model
+
+    @property
+    def is_raw_asset(self) -> bool:
+        return self.value.is_raw
 
     @property
     def dependencies(self) -> set['AssetType']:

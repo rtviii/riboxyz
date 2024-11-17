@@ -1,6 +1,5 @@
 import sys
 
-from ribctl.etl.assets_global import GlobalView
 
 sys.dont_write_bytecode = True
 

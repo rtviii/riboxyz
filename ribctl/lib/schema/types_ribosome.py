@@ -585,20 +585,6 @@ class PTCInfo(BaseModel):
     location: list[float]
     residues: list[ResidueSummary]
 
-#     # site_9_residues      : list[tuple[str, int]]
-#     LSU_rRNA_auth_asym_id: str
-#     midpoint_coordinates : tuple[float, float, float]
-#     nomenclature_table   : NomenclatureTable
-
-
-
-# ! Deprecated
-# class PTCInfo(BaseModel):
-#     # site_9_residues      : list[tuple[str, int]]
-#     LSU_rRNA_auth_asym_id: str
-#     midpoint_coordinates : tuple[float, float, float]
-#     nomenclature_table   : NomenclatureTable
-
 class RibosomeStructureMetadata(BaseModel):
 
     def get_polymers_by_assembly(self)->dict[str,list[str]]:

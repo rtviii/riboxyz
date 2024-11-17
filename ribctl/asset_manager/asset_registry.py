@@ -15,46 +15,46 @@ class AssetRegistry:
         self.manager = manager
         self.path_manager = manager.path_manager
 
-    def register(self, asset_type: AssetType) -> Callable[
-        [Callable[[str], Awaitable[ModelT]]], 
-        Callable[[str, bool], Awaitable[None]]
-    ]:
-        """Decorator for registering model-based asset generators"""
-        def decorator(func: Callable[[str], Awaitable[ModelT]]) -> Callable[[str, bool], Awaitable[None]]:
-            @functools.wraps(func)
-            async def wrapped(rcsb_id: str, overwrite: bool = False) -> None:
-                output_path = self.path_manager.get_asset_path(rcsb_id, asset_type)
-                logger.info(f"Starting {func.__name__} for {rcsb_id}")
+    def register(self, asset_type: AssetType):
+            def decorator(func: Callable[[str], Awaitable[ModelT]]) -> Callable[[str, bool], Awaitable[None]]:
+                @functools.wraps(func)
+                async def wrapped(rcsb_id: str, overwrite: bool = False) -> None:
+                    output_path = self.path_manager.get_asset_path(rcsb_id, asset_type)
+                    logger.info(f"Starting {func.__name__} for {rcsb_id}")
 
-                try:
-                    if output_path.exists() and not overwrite:
-                        logger.info(f"Asset exists at {output_path}, skipping")
-                        return
+                    try:
+                        if output_path.exists() and not overwrite:
+                            logger.info(f"Asset exists at {output_path}, skipping")
+                            return
 
-                    output_path.parent.mkdir(parents=True, exist_ok=True)
+                        output_path.parent.mkdir(parents=True, exist_ok=True)
 
-                    # Load dependencies if needed
-                    dependencies = {}
-                    if asset_type.dependencies:
-                        for dep in asset_type.dependencies:
-                            dep_path = self.path_manager.get_asset_path(rcsb_id, dep)
-                            if not dep_path.exists():
-                                await self.generate_asset(rcsb_id, dep, overwrite)
-                            model_cls = dep.model_type
-                            dependencies[dep.value.name] = model_cls.model_validate_json(dep_path.read_text())
+                        # Load only model-based dependencies
+                        dependencies = {}
+                        if asset_type.dependencies:
+                            for dep in asset_type.dependencies:
+                                if dep.is_raw_asset:
+                                    # Skip trying to load raw assets as models
+                                    continue
+                                    
+                                dep_path = self.path_manager.get_asset_path(rcsb_id, dep)
+                                if not dep_path.exists():
+                                    await self.generate_asset(rcsb_id, dep, overwrite)
+                                model_cls = dep.model_type
+                                dependencies[dep.value.name] = model_cls.model_validate_json(dep_path.read_text())
 
-                    # Generate and save the model
-                    result = await func(rcsb_id)
-                    output_path.write_text(result.model_dump_json())
-                    logger.success(f"Generated {asset_type.name} for {rcsb_id}")
+                        # Generate and save
+                        result = await func(rcsb_id)
+                        output_path.write_text(result.model_dump_json())
+                        logger.success(f"Generated {asset_type.name} for {rcsb_id}")
 
-                except Exception as e:
-                    logger.exception(f"Failed {func.__name__} for {rcsb_id}: {str(e)}")
-                    raise
+                    except Exception as e:
+                        logger.exception(f"Failed {func.__name__} for {rcsb_id}: {str(e)}")
+                        raise
 
-            self.manager.register_generator(asset_type, wrapped)
-            return wrapped
-        return decorator
+                self.manager.register_generator(asset_type, wrapped)
+                return wrapped
+            return decorator
 
     async def generate_asset(self, rcsb_id: str, asset_type: AssetType, force: bool = False) -> None:
         """Generate a single asset and its dependencies"""

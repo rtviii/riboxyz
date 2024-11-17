@@ -1,8 +1,10 @@
 from pprint import pprint
 from typing import List, NewType, Tuple, TypeVar
 import typing
-from ribctl.etl.assets_global import GlobalView
-from ribctl.etl.assets_structure import StructureAssetPaths
+
+from ribctl.asset_manager.assets_structure import StructureAssetPaths
+from ribctl.global_ops import GlobalOps
+from ribctl.lib.schema.types_ribosome import PTCInfo
 from ribctl.ribosome_ops import RibosomeOps
 import pickle
 from Bio.PDB.Residue import Residue
@@ -20,10 +22,10 @@ from ribctl.lib.libtax import Taxid
 from ribctl.lib.schema.types_binding_site import ResidueSummary
 from scipy.spatial.distance import pdist, squareform
 
-REFERENCE_MITO_STRUCTURE_TRNA_RRNA = ("7A5F", "24", "A3")
-REFERENCE_ARCHAEA_STRUCTURE_TRNA_RRNA = ("8HKY", "APTN", "A23S")
+REFERENCE_MITO_STRUCTURE_TRNA_RRNA     = ("7A5F", "24", "A3")
+REFERENCE_ARCHAEA_STRUCTURE_TRNA_RRNA  = ("8HKY", "APTN", "A23S")
 REFERENCE_BACTERIA_STRUCTURE_TRNA_RRNA = ("8UD8", "1x", "1A")
-REFERENCE_EUKARYA_STRUCTURE_TRNA_RRNA = ("8CCS", "Bb", "AA")
+REFERENCE_EUKARYA_STRUCTURE_TRNA_RRNA  = ("8CCS", "Bb", "AA")
 
 
 def find_closest_pair(points: np.ndarray):
@@ -134,16 +136,16 @@ def produce_ptc_references():
             "ref_trna_aaid": ref_trna_aaid,
             "ref_rrna_aaid": ref_rrna_aaid,
         }
-        outpath = GlobalView.ptc_references(ribosome_type)
+        outpath = GlobalOps.ptc_references(ribosome_type)
         pickle_ref_ptc_data(_, outpath)
 
 
 def get_ptc_reference(ribosome_type: typing.Literal["mito", "euk", "arch", "bact"]):
-    cached_name = GlobalView.ptc_references(ribosome_type)
+    cached_name = GlobalOps.ptc_references(ribosome_type)
     return unpickle_residue_array(cached_name)
 
 
-def PTC_location(target_rcsb_id: str) -> Tuple[np.ndarray, list[Residue]]:
+def PTC_location(target_rcsb_id: str) -> PTCInfo:
     """
     # Get PTC in @target_rcsb_id by way of mapping a reference PTC in a given mitochondrial structure
     #"""
@@ -186,15 +188,21 @@ def PTC_location(target_rcsb_id: str) -> Tuple[np.ndarray, list[Residue]]:
         True,
     )
 
-    # RO     = RibosomeOps(target_rcsb_id)
-    # mmcif_struct_tgt = RO.biopython_structure()[0]
-    # LSU_RNA_tgt_aaid = RO.get_LSU_rRNA().auth_asym_id
-    # LSU_RNA_tgt:Chain      = mmcif_struct_tgt["72"]
-    # nums  = [2602,2451 ]
-    # residues =LSU_RNA_tgt.child_list
-    # x :Residue= residues[1]
-    # motifs = list(filter( lambda x: int(x.full_id[3][1]) in nums, LSU_RNA_tgt.child_list ))
+    # RO                = RibosomeOps(target_rcsb_id)
+    # mmcif_struct_tgt  = RO.biopython_structure()[0]
+    # LSU_RNA_tgt_aaid  = RO.get_LSU_rRNA().auth_asym_id
+    # LSU_RNA_tgt:Chain = mmcif_struct_tgt["72"]
+    # nums              = [2602,2451 ]
+    # residues          = LSU_RNA_tgt.child_list
+    # x :Residue        = residues[1]
+    # motifs            = list(filter( lambda x: int(x.full_id[3][1]) in nums, LSU_RNA_tgt.child_list ))
     # pprint(motifs)
 
     (p1, p2, dist) = find_closest_pair([r.center_of_mass() for r in motifs])
-    return (p1 + p2) / 2, motifs
+
+    center = (p1 + p2) / 2 
+
+    return PTCInfo(
+        location=center.tolist(),
+         residues=list(map(ResidueSummary.from_biopython_residue, motifs))
+    )
