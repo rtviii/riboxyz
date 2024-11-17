@@ -303,7 +303,6 @@ class HMMClassifier():
                 sequence_proper = ''.join(list(filter(lambda x: x.lower() in ['u','c','g','a'], list(seq_record.seq) ))) if chain.entity_poly_polymer_type == "RNA"  else seq_record.seq
                 query_seq                       = pyhmmer.easel.TextSequence(name=bytes(seq_record.id,'utf-8'), sequence=str( sequence_proper )).digitize(self.alphabet)
                 cls_hits_tuples                 = hmmscanner.classify_seq(self.alphabet, query_seq)
-
                 for ( candidate_class, tophits ) in cls_hits_tuples:
                     for hit in tophits:
                            d_hit = {

@@ -1,12 +1,16 @@
+from functools import partial
 import sys
 sys.path.append("/home/rtviii/dev/riboxyz")
+from ribctl.ribosome_ops import RibosomeOps
+from neo4j_ribosome import NEO4J_CURRENTDB, NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER
+from neo4j_ribosome.db_lib_builder import Neo4jAdapter
 from ribctl import RIBETL_DATA
 from ribctl.asset_manager.parallel_acquisition import process_chunk
 import click
 from typing import List, Tuple
 from pathlib import Path
 import multiprocessing
-from concurrent.futures import ProcessPoolExecutor
+from concurrent.futures import ALL_COMPLETED, Future, ProcessPoolExecutor, ThreadPoolExecutor, wait
 from tqdm import tqdm
 
 from ribctl.asset_manager.asset_types import AssetType
@@ -20,7 +24,6 @@ def get_input_pdb_ids() -> List[str]:
 class PDBIDsParam(click.ParamType):
     """Custom parameter type for PDB IDs validation"""
     name = "pdb_ids"
-    
     def convert(self, value, param, ctx):
         if isinstance(value, list):
             return value
@@ -165,23 +168,6 @@ def get(ctx, asset_types, force, workers, chunk_size,
                     click.echo(f"Error processing chunk: {str(e)}", err=True)
 
 @db.command()
-@click.argument('pdb_ids', type=PDBIDsParam(), nargs=-1)
-@click.option('--asset-type', '-t', 
-              type=click.Choice(['all', 'structure', 'sequence', 'alignment']),
-              default='all', 
-              help='Type of assets to upload')
-@click.pass_context
-def upload(ctx, pdb_ids, asset_type):
-    """Upload assets to database for given PDB IDs"""
-    all_pdb_ids = list(set(ctx.obj['piped_pdb_ids'] + sum(pdb_ids, [])))
-    if not all_pdb_ids:
-        click.echo("No PDB IDs provided", err=True)
-        return
-        
-    click.echo(f"Uploading {asset_type} assets for: {', '.join(all_pdb_ids)}")
-    # TODO: Implement upload logic
-
-@db.command()
 @click.argument('query_file', type=click.Path(exists=True))
 @click.option('--params', '-p', multiple=True, help='Parameters for the Cypher query in key=value format')
 @click.option('--output', '-o', type=click.Path(), help='Output file for query results')
@@ -213,6 +199,110 @@ def cypher(ctx, query_file, params, output):
     # else:
     #     # Print results to stdout
     #     click.echo(results)
+
+@db.command()
+@click.argument('pdb_ids', type=PDBIDsParam(), nargs=-1)
+@click.option('--workers', '-w',
+              default=10,
+              help='Number of worker threads')
+@click.option('--force', '-f', is_flag=True, help='Force upload even if structure exists')
+@click.option('--mode', '-m', type=click.Choice(['full', 'structure', 'ligands'], case_sensitive=False),
+               default='full',
+              help='Upload mode: full (all data), structure (only structure nodes), or ligands')
+@click.pass_context
+def upload(ctx, pdb_ids, workers, force, mode):
+    """Upload structure data to Neo4j database.
+    
+    Examples:\n
+    \b
+    # Upload complete data for specific structures
+    ribd.py db upload 3J7Z 4V6X
+    
+    \b
+    # Upload only structure nodes
+    ribd.py db upload --mode structure 3J7Z
+    
+    \b
+    # Upload from file with force option
+    cat pdb_list.txt | ribd.py db upload --force
+    """
+    all_pdb_ids = list(set(ctx.obj['piped_pdb_ids'] + sum(pdb_ids, [])))
+    
+    if not all_pdb_ids:
+        click.echo("No PDB IDs provided", err=True)
+        return
+    
+    try:
+        adapter = Neo4jAdapter(NEO4J_URI, NEO4J_USER, NEO4J_CURRENTDB, NEO4J_PASSWORD)
+    except Exception as e:
+        click.echo(f"Failed to connect to database: {str(e)}", err=True)
+        return
+
+    click.echo("Starting upload...")
+    with click.progressbar(length=len(all_pdb_ids),
+                         label='Uploading structures',
+                         show_pos=True,
+                         file=sys.stderr) as bar:
+        
+        futures: list[Future] = []
+        
+        with ThreadPoolExecutor(max_workers=workers) as executor:
+            for rcsb_id in sorted(all_pdb_ids):
+                if mode == 'full':
+                    fut = executor.submit(
+                        partial(adapter.add_total_structure, rcsb_id, force)
+                    )
+                elif mode == 'structure':
+                    fut = executor.submit(
+                        partial(adapter.upsert_structure_node, rcsb_id)
+                    )
+                elif mode == 'ligands':
+                    profile = RibosomeOps(rcsb_id).profile
+                    for ligand in profile.nonpolymeric_ligands:
+                        if not "ion" in ligand.chemicalName.lower():
+                            fut = executor.submit(
+                                partial(adapter.upsert_ligand_node, ligand, rcsb_id)
+                            )
+                
+                fut.add_done_callback(lambda p: bar.update(1))
+                futures.append(fut)
+                
+            # Wait for all uploads to complete
+            errors = []
+            done, _ = wait(futures, return_when=ALL_COMPLETED)
+            for future in done:
+                try:
+                    future.result()  # Check for exceptions
+                except Exception as e:
+                    errors.append(str(e))
+
+    if errors:
+        click.echo("\nErrors occurred during upload:", err=True)
+        for error in errors:
+            click.echo(f"  - {error}", err=True)
+    else:
+        click.echo("\nUpload completed successfully")
+
+@db.command()
+@click.option('--force', '-f', is_flag=True,
+              help='Force reinitialization of database')
+@click.pass_context
+def init(ctx, force):
+    """Initialize a new Neo4j database instance.
+    
+    Creates necessary constraints and initial data structures.
+    """
+    if not force:
+        click.confirm('This will initialize a new database instance. Continue?',
+                     abort=True)
+    
+    try:
+        adapter = Neo4jAdapter(NEO4J_URI, NEO4J_USER, NEO4J_CURRENTDB, NEO4J_PASSWORD)
+        adapter.initialize_new_instance()
+        click.echo("Database initialized successfully")
+    except Exception as e:
+        click.echo(f"Failed to initialize database: {str(e)}", err=True)
+
 
 if __name__ == '__main__':
     cli(obj={})

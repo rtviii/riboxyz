@@ -184,7 +184,7 @@ class Neo4jAdapter:
 
         if not disable_exists_check:
             if self.check_structure_exists(rcsb_id):
-                print("Struct node {} already exists.".format(rcsb_id))
+                print("\nStruct node {} already exists.".format(rcsb_id))
                 return
 
         R: RibosomeStructure = RibosomeOps(rcsb_id).profile
