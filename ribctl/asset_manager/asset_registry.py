@@ -5,7 +5,7 @@ from loguru import logger
 
 from pydantic import BaseModel
 
-from ribctl.etl.asset_manager import RibosomeAssetManager
+from ribctl.asset_manager.asset_manager import RibosomeAssetManager
 from .asset_types import AssetType
 
 ModelT = TypeVar('ModelT', bound=BaseModel)

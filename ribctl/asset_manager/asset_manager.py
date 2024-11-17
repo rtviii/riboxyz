@@ -61,11 +61,11 @@ class RibosomeAssetManager:
         
         for asset_type in AssetType:
             self.assets[asset_type] = AssetDefinition(
-                asset_type=asset_type,
-                dependencies=asset_type.dependencies,
-                path_template="{pdb_id}",  # Basic template, actual paths handled by PathManager
-                required=True,  # Could be made configurable per asset if needed
-                generator=None  # Will be set by registry
+                asset_type    = asset_type,
+                dependencies  = asset_type.dependencies,
+                path_template = "{pdb_id}",              # Basic template, actual paths handled by PathManager
+                required      = True,                    # Could be made configurable per asset if needed
+                generator     = None  # Will be set by registry
             )
 
     def register_generator(
@@ -76,7 +76,6 @@ class RibosomeAssetManager:
         """Register a generator function for an asset type"""
         if asset_type not in self.assets:
             raise ValueError(f"Unknown asset type: {asset_type}")
-        logger.info(f"Registering generator for {asset_type.name}")
         self.assets[asset_type].generator = generator
 
     async def verify_asset(self, pdb_id: str, asset_type: AssetType) -> bool:

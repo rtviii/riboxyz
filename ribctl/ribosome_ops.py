@@ -9,7 +9,7 @@ from Bio.PDB.Structure import Structure
 from Bio.PDB.Chain import Chain
 from loguru import logger
 from ribctl import AMINO_ACIDS_3_TO_1_CODE, ASSETS_PATH, CHAINSPLITTER_PATH, CLASSIFICATION_REPORTS
-from ribctl.etl.assets_structure import  StructureAssets
+from ribctl.asset_manager.assets_structure import StructureAssets
 from ribctl.lib.libtax import PhylogenyNode, PhylogenyRank, Taxid
 from Bio.PDB.Structure import Structure
 from ribctl.lib.landmarks.ptc_via_doris import ptc_resdiues_get, ptc_residues_calculate_midpoint

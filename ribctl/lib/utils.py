@@ -1,5 +1,3 @@
-from Bio.PDB.Structure import Structure
-from Bio.PDB.MMCIFParser import FastMMCIFParser
 import gzip
 import os
 import requests
