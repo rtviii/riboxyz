@@ -30,7 +30,7 @@ class AssetType(Enum):
     # THUMBNAIL = AssetInfo("thumbnail", model=None, is_raw=True, dependencies={"STRUCTURE_PROFILE","MMCIF"})
     # NPET_MESH = AssetInfo("npet_mesh", model=None, is_raw=True, dependencies={"STRUCTURE_PROFILE","MMCIF"})
     
-    # Model-based assets
+    # Model Based assets
     STRUCTURE_PROFILE = AssetInfo("profile", model=RibosomeStructure)
     PTC               = AssetInfo("ptc", model=PTCInfo, dependencies={"STRUCTURE_PROFILE", "MMCIF"});
     

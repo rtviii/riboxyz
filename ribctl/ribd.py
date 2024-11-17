@@ -1,16 +1,15 @@
 import sys
 sys.path.append("/home/rtviii/dev/riboxyz")
-from concurrent.futures import ProcessPoolExecutor
-import multiprocessing
+from ribctl import RIBETL_DATA
+from ribctl.asset_manager.parallel_acquisition import process_chunk
 import click
-import sys
-from typing import List, Optional
+from typing import List, Tuple
 from pathlib import Path
+import multiprocessing
+from concurrent.futures import ProcessPoolExecutor
 from tqdm import tqdm
 
-from ribctl import RIBETL_DATA
 from ribctl.asset_manager.asset_types import AssetType
-from ribctl.asset_manager.parallel_acquisition import process_chunk  # for progress bars
 
 def get_input_pdb_ids() -> List[str]:
     """Get PDB IDs from either stdin (if piped) or return None to handle as argument"""
@@ -76,11 +75,10 @@ def verify_all(ctx):
     # 3. Report any issues found
 
 @etl.command()
-@click.argument('pdb_ids', type=PDBIDsParam(), nargs=-1)
-@click.option('--asset-types', '-t', multiple=True,
-              type=click.Choice([t.name for t in AssetType]),
-              default=[t.name for t in AssetType],
-              help='Asset types to acquire')
+@click.option('--asset-types', '-t', 
+              multiple=True,
+              type=click.Choice([t.name for t in AssetType], case_sensitive=True),
+              help='Asset types to acquire (if not specified, all assets will be acquired)')
 @click.option('--force', '-f', is_flag=True,
               help='Force regeneration of existing assets')
 @click.option('--workers', '-w',
@@ -92,15 +90,41 @@ def verify_all(ctx):
               help='Maximum concurrent structures per worker')
 @click.option('--concurrent-assets', '-a', default=3,
               help='Maximum concurrent assets per structure')
+@click.argument('pdb_ids', type=PDBIDsParam(), nargs=-1)
 @click.pass_context
-def get(ctx, pdb_ids, asset_types, force, workers, chunk_size,
-        concurrent_structures, concurrent_assets):
-    """Download or generate assets for given PDB IDs"""
+def get(ctx, asset_types, force, workers, chunk_size,
+        concurrent_structures, concurrent_assets, pdb_ids):
+    """Download or generate assets for given PDB IDs. 
+    
+    Examples:\n
+    \b
+    # Get specific assets for a single structure
+    ribd.py etl get --asset-types MMCIF STRUCTURE_PROFILE 3J7Z
+    
+    \b
+    # Get all assets for multiple structures
+    ribd.py etl get 3J7Z 4V6X
+    
+    \b
+    # Process structures from a file with specific assets
+    cat pdb_list.txt | ribd.py etl get --asset-types MMCIF PTC
+    """
     all_pdb_ids = list(set(ctx.obj['piped_pdb_ids'] + sum(pdb_ids, [])))
     
     if not all_pdb_ids:
         click.echo("No PDB IDs provided", err=True)
         return
+
+    # If no asset types specified, use all available types
+    selected_asset_types = (
+        [AssetType[name] for name in asset_types]
+        if asset_types
+        else list(AssetType)
+    )
+
+    # Inform user about the operation
+    assets_str = ", ".join(ast.name for ast in selected_asset_types)
+    click.echo(f"Getting assets [{assets_str}] for {len(all_pdb_ids)} structures...")
 
     # Split PDB IDs into chunks
     chunks = [all_pdb_ids[i:i + chunk_size] 
@@ -111,9 +135,9 @@ def get(ctx, pdb_ids, asset_types, force, workers, chunk_size,
             futures = [
                 executor.submit(
                     process_chunk,
-                    str(RIBETL_DATA),  # Convert Path to string
+                    str(RIBETL_DATA),
                     chunk,
-                    list(asset_types),  # Pass enum names
+                    [ast.name for ast in selected_asset_types],  # Pass enum names
                     force,
                     concurrent_structures,
                     concurrent_assets

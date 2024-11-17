@@ -20,7 +20,6 @@ class AssetRegistry:
                 @functools.wraps(func)
                 async def wrapped(rcsb_id: str, overwrite: bool = False) -> None:
                     output_path = self.path_manager.get_asset_path(rcsb_id, asset_type)
-                    logger.info(f"Starting {func.__name__} for {rcsb_id}")
 
                     try:
                         if output_path.exists() and not overwrite:

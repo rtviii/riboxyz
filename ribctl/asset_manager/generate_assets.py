@@ -1,6 +1,6 @@
 import asyncio
 from ribctl import RIBETL_DATA
-from ribctl.asset_manager.asset_external import RawAssetHandler
+from ribctl.asset_manager.asset_raw import RawAssetHandler
 from ribctl.asset_manager.asset_manager import RibosomeAssetManager
 from ribctl.asset_manager.asset_registry import AssetRegistry
 from ribctl.asset_manager.asset_types import AssetType
