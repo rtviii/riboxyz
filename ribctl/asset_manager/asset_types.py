@@ -49,7 +49,6 @@ class AssetType(Enum):
     def requires_model(self) -> bool:
         return self.model_type is not None
 
-
 ModelT = TypeVar('ModelT', bound=BaseModel)
 
 class ModelGenerator(Protocol[ModelT]):
