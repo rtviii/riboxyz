@@ -8,7 +8,6 @@ from ribctl.lib.schema.types_ribosome import PTCInfo
 from ribctl.ribosome_ops import RibosomeOps
 import pickle
 from Bio.PDB.Residue import Residue
-import copy
 import typing
 from Bio.PDB.Residue import Residue
 from Bio.PDB.Chain import Chain
@@ -92,15 +91,7 @@ def PTC_reference_residues(
     ns = NeighborSearch(atoms)
     nearby_residues = ns.search(trna_cterm_pos(), 10, "R")
 
-    return (
-        list(
-            filter(
-                lambda x: ResidueSummary.filter_noncanonical(x.resname), nearby_residues
-            )
-        ),
-        rrrna,
-        (ref_rcsb_id, ref_trna_aaid, ref_rrna_aaid),
-    )
+    return ( list( filter( lambda x: ResidueSummary.filter_noncanonical(x.resname), nearby_residues ) ), rrrna, (ref_rcsb_id, ref_trna_aaid, ref_rrna_aaid), )
 
 
 def pickle_ref_ptc_data(ref_data: dict, output_file: str):
@@ -170,9 +161,6 @@ def PTC_location(target_rcsb_id: str) -> PTCInfo:
 
     ref_residues: list[Residue] = data_dict["nearest_residues"]
     ref_chain: Chain = data_dict["chain"]
-    # data_dict['ref_rcsb_id'     ]
-    # data_dict['ref_trna_aaid'   ]
-    # data_dict['ref_rrna_aaid'   ]
 
     mmcif_struct_tgt = RO.assets.biopython_structure()[0]
     LSU_RNA_tgt_aaid = RO.get_LSU_rRNA().auth_asym_id
@@ -188,20 +176,8 @@ def PTC_location(target_rcsb_id: str) -> PTCInfo:
         False,
     )
 
-    # RO                = RibosomeOps(target_rcsb_id)
-    # mmcif_struct_tgt  = RO.biopython_structure()[0]
-    # LSU_RNA_tgt_aaid  = RO.get_LSU_rRNA().auth_asym_id
-    # LSU_RNA_tgt:Chain = mmcif_struct_tgt["72"]
-    # nums              = [2602,2451 ]
-    # residues          = LSU_RNA_tgt.child_list
-    # x :Residue        = residues[1]
-    # motifs            = list(filter( lambda x: int(x.full_id[3][1]) in nums, LSU_RNA_tgt.child_list ))
-    # pprint(motifs)
-
     (p1, p2, dist) = find_closest_pair([r.center_of_mass() for r in motifs])
-
     center = (p1 + p2) / 2 
-
     return PTCInfo(
         location=center.tolist(),
          residues=list(map(ResidueSummary.from_biopython_residue, motifs))
