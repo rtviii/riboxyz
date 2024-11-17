@@ -185,7 +185,7 @@ def PTC_location(target_rcsb_id: str) -> PTCInfo:
         SequenceMappingContainer(LSU_RNA_tgt),
         [ResidueSummary.from_biopython_residue(r) for r in ref_residues],
         "-",
-        True,
+        False,
     )
 
     # RO                = RibosomeOps(target_rcsb_id)

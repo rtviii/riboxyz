@@ -148,7 +148,7 @@ def bsite_transpose(
     target_rcsb_id: str,
     binding_site  : BindingSite,
     save          : bool = False,
-    verbose       : bool=True
+    verbose       : bool=False
 
 ) -> LigandTransposition:
 

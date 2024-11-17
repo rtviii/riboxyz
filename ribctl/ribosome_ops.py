@@ -98,7 +98,6 @@ class RibosomeOps:
         for polymer in [*profile.rnas, *profile.other_polymers, *profile.proteins]: 
             if class_ in  polymer.nomenclature and polymer.assembly_id == assembly and polymer.entity_poly_seq_length > 30:
                 return polymer
-        
     def get_LSU_rRNA(self, assembly: int = 0) -> RNA:
         """retrieve the largest rRNA sequence in the structure
         @returns (seq, auth_asym_id, rna_type)
