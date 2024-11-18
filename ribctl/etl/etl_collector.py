@@ -38,6 +38,7 @@ from ribctl.lib.libhmm import HMM, HMMClassifier
 These "Node" classes double up as templates for neo4j nodes that will be created AND housekeeping containers for data processing.
 """
 
+
 class StructureNode:
     rcsb_data_entry: dict
     asm_maps: list[AssemblyInstancesMap]
@@ -47,21 +48,34 @@ class StructureNode:
 
     def process(self) -> list:
 
-        externalRefs = self.extract_external_refs( self.rcsb_data_entry["rcsb_external_references"] )
+        externalRefs = self.extract_external_refs(
+            self.rcsb_data_entry["rcsb_external_references"]
+        )
 
-        if ( self.rcsb_data_entry["citation"] != None and len(self.rcsb_data_entry["citation"]) > 0 ):
+        if (
+            self.rcsb_data_entry["citation"] != None
+            and len(self.rcsb_data_entry["citation"]) > 0
+        ):
             pub = self.rcsb_data_entry["citation"][0]
         else:
             pub = {
-                "year"                   : None,
-                "rcsb_authors"           : None,
-                "title"                  : None,
-                "pdbx_database_id_DOI"   : None,
+                "year": None,
+                "rcsb_authors": None,
+                "title": None,
+                "pdbx_database_id_DOI": None,
                 "pdbx_database_id_PubMed": None,
             }
 
-        kwords_text = ( self.rcsb_data_entry["struct_keywords"]["text"] if self.rcsb_data_entry["struct_keywords"] != None else None )
-        kwords      = ( self.rcsb_data_entry["struct_keywords"]["pdbx_keywords"] if self.rcsb_data_entry["struct_keywords"] != None else None )
+        kwords_text = (
+            self.rcsb_data_entry["struct_keywords"]["text"]
+            if self.rcsb_data_entry["struct_keywords"] != None
+            else None
+        )
+        kwords = (
+            self.rcsb_data_entry["struct_keywords"]["pdbx_keywords"]
+            if self.rcsb_data_entry["struct_keywords"] != None
+            else None
+        )
         year = self.rcsb_data_entry["rcsb_accession_info"]["deposit_date"].split("-")[0]
         return [externalRefs, pub, kwords_text, kwords, year]
 
@@ -84,21 +98,22 @@ class StructureNode:
 
         return [externalRefIds, externalRefTypes, externalRefLinks]
 
+
 class PolymersNode:
     # ? Initialized classification resources:
 
-    rcsb_polymers         : int
+    rcsb_polymers: int
     hmm_ribosomal_proteins: dict[CytosolicProteinClass, HMM]
-    rcsb_data_polymers    : dict
-    rcsb_data_assemblies  : dict
-    rcsb_id               : str
+    rcsb_data_polymers: dict
+    rcsb_data_assemblies: dict
+    rcsb_id: str
 
     def __init__(self, data: dict) -> None:
         self.rcsb_data_polymers = data["polymer_entities"]
         self.rcsb_data_assemblies = data["assemblies"]
         self.rcsb_id = data["rcsb_id"]
 
-    def process(self, override_classification:bool=False) -> list[list[Polymer]]:
+    def process(self, override_classification: bool = False) -> list[list[Polymer]]:
         # This says "accumlate over all LENGTHS of "asym_ids" field (generally 1 or 2) of each polymer in `polymer_entities`
         # TODO: So we need to return this from POLYMER DATA
         # self.polymers_target_count = functools.reduce( lambda count, poly: count + len(poly["rcsb_polymer_entity_container_identifiers"]["asym_ids"]), self.rcsb_data_dict["polymer_entities"], 0)
@@ -134,7 +149,9 @@ class PolymersNode:
                     case _:
                         _other_polymers.append(poly)
 
-        logger.debug( "Classifying {}: {} polypeptides, {} polynucleotides, {} other.".format( self.rcsb_id,
+        logger.debug(
+            "Classifying {}: {} polypeptides, {} polynucleotides, {} other.".format(
+                self.rcsb_id,
                 len(_prot_polypeptides),
                 len(_rna_polynucleotides),
                 len(_other_polymers),
@@ -142,10 +159,14 @@ class PolymersNode:
         )
 
         RA = RibosomeOps(self.rcsb_id)
-        if ( not os.path.exists(RA.assets.paths.classification_report) ) or override_classification :
+        if (
+            not os.path.exists(RA.assets.paths.classification_report)
+        ) or override_classification:
             print("Creating new classifciation report.")
             protein_alphabet = pyhmmer.easel.Alphabet.amino()
-            protein_classifier = HMMClassifier(_prot_polypeptides, protein_alphabet,
+            protein_classifier = HMMClassifier(
+                _prot_polypeptides,
+                protein_alphabet,
                 [
                     p
                     for p in [
@@ -157,7 +178,7 @@ class PolymersNode:
             )
             protein_classifier.classify_chains()
 
-            rna_alphabet   = pyhmmer.easel.Alphabet.rna()
+            rna_alphabet = pyhmmer.easel.Alphabet.rna()
             rna_classifier = HMMClassifier(
                 _rna_polynucleotides,
                 rna_alphabet,
@@ -217,7 +238,6 @@ class PolymersNode:
         ) == self.polymers_target_count
 
         return [_prot_polypeptides, _rna_polynucleotides, _other_polymers]
-
 
     # def process_polypeptides(self) -> tuple[list[Protein], list[Polymer]]:
     #     poly_entities = self.rcsb_data_dict["polymer_entities"]
@@ -670,6 +690,7 @@ class PolymersNode:
     #         for auth_asym_id in other_polymer_obj[ "rcsb_polymer_entity_container_identifiers" ]["auth_asym_ids"]
     #     ]
 
+
 class NonpolymersNode:
     rcsb_nonpolymers: dict
 
@@ -687,13 +708,16 @@ class NonpolymersNode:
 
     def nonpoly_reshape_to_ligand(self, nonpoly: dict) -> NonpolymericLigand:
         return NonpolymericLigand(
-            nonpolymer_comp     = nonpoly["nonpolymer_comp"],
-            chemicalId          = nonpoly["pdbx_entity_nonpoly"]["comp_id"],
-            chemicalName        = nonpoly["pdbx_entity_nonpoly"]["name"],
-            pdbx_description    = nonpoly["rcsb_nonpolymer_entity"]["pdbx_description"],
-            formula_weight      = nonpoly["rcsb_nonpolymer_entity"]["formula_weight"],
-            number_of_instances = nonpoly["rcsb_nonpolymer_entity"][ "pdbx_number_of_molecules"],
+            nonpolymer_comp=nonpoly["nonpolymer_comp"],
+            chemicalId=nonpoly["pdbx_entity_nonpoly"]["comp_id"],
+            chemicalName=nonpoly["pdbx_entity_nonpoly"]["name"],
+            pdbx_description=nonpoly["rcsb_nonpolymer_entity"]["pdbx_description"],
+            formula_weight=nonpoly["rcsb_nonpolymer_entity"]["formula_weight"],
+            number_of_instances=nonpoly["rcsb_nonpolymer_entity"][
+                "pdbx_number_of_molecules"
+            ],
         )
+
 
 class ETLCollector:
     """
@@ -707,13 +731,13 @@ class ETLCollector:
     - ligand annotation
     """
 
-    rcsb_id       : str
+    rcsb_id: str
     node_structure: dict
-    node_polymers : dict
-    node_ligands  : dict
+    node_polymers: dict
+    node_ligands: dict
 
     # ? Housekeeping
-    asm_maps             : list[AssemblyInstancesMap]
+    asm_maps: list[AssemblyInstancesMap]
     polymers_target_count: int
 
     def query_rcsb_api(self, gql_string: str) -> dict:
@@ -742,10 +766,10 @@ class ETLCollector:
         Only needed because rcsb does not provide unequivocal taxid for structures (sometimes it's host+source)
         """
 
-        src_organism_names : list[str] = []
-        src_organism_ids   : list[int] = []
+        src_organism_names: list[str] = []
+        src_organism_ids: list[int] = []
         host_organism_names: list[str] = []
-        host_organism_ids  : list[int] = []
+        host_organism_ids: list[int] = []
 
         for polymer in polymers:
             host_organism_names = (
@@ -798,9 +822,9 @@ class ETLCollector:
             host_id = [max(host_id_tally, key=lambda k: host_id_tally[k])]
 
         return {
-            "src_organism_ids"   : src_id,
-            "src_organism_names" : list(map(str, set(src_organism_names))),
-            "host_organism_ids"  : host_id,
+            "src_organism_ids": src_id,
+            "src_organism_names": list(map(str, set(src_organism_names))),
+            "host_organism_ids": host_id,
             "host_organism_names": list(map(str, set(host_organism_names))),
         }
 
@@ -814,7 +838,10 @@ class ETLCollector:
         else:
             for assembly_map in self.asm_maps:
                 for polymer_instance in assembly_map.polymer_entity_instances:
-                    if ( polymer_instance.rcsb_polymer_entity_instance_container_identifiers.auth_asym_id == auth_asym_id ):
+                    if (
+                        polymer_instance.rcsb_polymer_entity_instance_container_identifiers.auth_asym_id
+                        == auth_asym_id
+                    ):
                         return int(assembly_map.rcsb_id.split("-")[1]) - 1
             else:
                 raise LookupError(
@@ -824,22 +851,27 @@ class ETLCollector:
     def asm_parse(self, dictionaries: list[dict]) -> list[AssemblyInstancesMap]:
         return list(map(AssemblyInstancesMap.model_validate, dictionaries))
 
-    async def process_structure(self, overwrite: bool = False, reclassify:bool=False) -> RibosomeStructure:
-        RA = RibosomeOps(self.rcsb_id)
-        if os.path.isfile(RA.assets.paths.profile):
-            logger.debug("Profile already exists for {}.".format(self.rcsb_id))
-            if not overwrite:
-                return RA.profile
-
+    async def generate_profile(
+        self, overwrite: bool = False, reclassify: bool = False
+    ) -> RibosomeStructure:
         #! Assemblies metadata
-        
-        assmebly_maps = self.query_rcsb_api(AssemblyIdentificationString.replace("$RCSB_ID", self.rcsb_id) )["entry"]["assemblies"]
+
+        assmebly_maps = self.query_rcsb_api(
+            AssemblyIdentificationString.replace("$RCSB_ID", self.rcsb_id)
+        )["entry"]["assemblies"]
         self.asm_maps = list(map(AssemblyInstancesMap.model_validate, assmebly_maps))
         # pprint(self.asm_maps)
 
         #! Polymers
-        polymers_data        = self.query_rcsb_api( PolymerEntitiesString.replace("$RCSB_ID", self.rcsb_id) )["entry"]
-        proteins, rna, other = PolymersNode(polymers_data).process(override_classification=reclassify)
+        polymers_data = self.query_rcsb_api(
+            PolymerEntitiesString.replace("$RCSB_ID", self.rcsb_id)
+        )["entry"]
+
+        # pprint(polymers_data)
+        # exit()
+        proteins, rna, other = PolymersNode(polymers_data).process(
+            override_classification=reclassify
+        )
 
         #! Assign polymers to assemblies
         for p in proteins:
@@ -850,59 +882,71 @@ class ETLCollector:
             o.assembly_id = self.poly_assign_to_asm(o.auth_asym_id)
 
         #! Structure Metadata
-        structure_data = self.query_rcsb_api( EntryInfoString.replace("$RCSB_ID", self.rcsb_id) )["entry"]
-        [externalRefs, pub, kwords_text, kwords, year] = StructureNode( structure_data ).process()
+        structure_data = self.query_rcsb_api(
+            EntryInfoString.replace("$RCSB_ID", self.rcsb_id)
+        )["entry"]
+        [externalRefs, pub, kwords_text, kwords, year] = StructureNode(
+            structure_data
+        ).process()
 
         #! Ligands
-        nonpolymers_data          = self.query_rcsb_api( NonpolymerEntitiesString.replace("$RCSB_ID", self.rcsb_id) )["entry"]
-        ligands                   = NonpolymersNode(nonpolymers_data).process()
-        ligands                   = list(filter(lambda x: "ion" not in x.chemicalName.lower(), ligands))
-        ligands_chem_info_qstring = LigandsChemInfo.replace( "$COMP_IDS", str(list(map(lambda x: x.chemicalId, ligands))).replace("'", '"'), )
-        chemical_info             = self.query_rcsb_api(ligands_chem_info_qstring)["chem_comps"]
+        nonpolymers_data = self.query_rcsb_api(
+            NonpolymerEntitiesString.replace("$RCSB_ID", self.rcsb_id)
+        )["entry"]
+        ligands = NonpolymersNode(nonpolymers_data).process()
+        ligands = list(filter(lambda x: "ion" not in x.chemicalName.lower(), ligands))
+        ligands_chem_info_qstring = LigandsChemInfo.replace(
+            "$COMP_IDS",
+            str(list(map(lambda x: x.chemicalId, ligands))).replace("'", '"'),
+        )
+        chemical_info = self.query_rcsb_api(ligands_chem_info_qstring)["chem_comps"]
 
         for lig in ligands:
             for chem_comp in chemical_info:
                 if chem_comp["chem_comp"]["id"] == lig.chemicalId:
-                   lig.InChIKey                  = chem_comp["rcsb_chem_comp_descriptor"]["InChIKey"]
-                   lig.InChI                     = chem_comp["rcsb_chem_comp_descriptor"]["InChI"]
-                   lig.SMILES                    = chem_comp["rcsb_chem_comp_descriptor"]["SMILES"]
-                   lig.SMILES_stereo             = chem_comp["rcsb_chem_comp_descriptor"]["SMILES_stereo"]
+                    lig.InChIKey = chem_comp["rcsb_chem_comp_descriptor"]["InChIKey"]
+                    lig.InChI = chem_comp["rcsb_chem_comp_descriptor"]["InChI"]
+                    lig.SMILES = chem_comp["rcsb_chem_comp_descriptor"]["SMILES"]
+                    lig.SMILES_stereo = chem_comp["rcsb_chem_comp_descriptor"][
+                        "SMILES_stereo"
+                    ]
 
         # --------------------------
         is_mitochondrial = False
         for rna_d in rna:
             if len(rna_d.nomenclature) > 0:
-                if rna_d.nomenclature[0] in [ k.value for k in list(MitochondrialRNAClass) ]:
+                if rna_d.nomenclature[0] in [
+                    k.value for k in list(MitochondrialRNAClass)
+                ]:
                     is_mitochondrial = True
                     break
-                
-        organisms            = self.infer_organisms_from_polymers([*proteins, *rna, *other] )
-        subunit_presence     = lsu_ssu_presence(rna, is_mitochondrial)
-        reshaped             = RibosomeStructure(
-            rcsb_id                = structure_data["rcsb_id"],
-            expMethod              = structure_data["exptl"][0]["method"],
-            resolution             = structure_data["rcsb_entry_info"]["resolution_combined"][0],
-            deposition_date        = structure_data["rcsb_accession_info"]["deposit_date"],
-            rcsb_external_ref_id   = externalRefs[0],
-            rcsb_external_ref_type = externalRefs[1],
-            rcsb_external_ref_link = externalRefs[2],
-            citation_year          = year,
-            citation_rcsb_authors  = pub["rcsb_authors"],
-            citation_title         = pub["title"],
-            citation_pdbx_doi      = pub["pdbx_database_id_DOI"],
-            pdbx_keywords_text     = kwords_text,
-            pdbx_keywords          = kwords,
-            src_organism_ids       = organisms["src_organism_ids"],
-            src_organism_names     = organisms["src_organism_names"],
-            host_organism_ids      = organisms["host_organism_ids"],
-            host_organism_names    = organisms["host_organism_names"],
-            proteins               = proteins,
-            rnas                   = rna,
-            nonpolymeric_ligands   = ligands,
-            other_polymers         = other,
-            assembly_map           = self.asm_maps,
-            mitochondrial          = is_mitochondrial,
-            subunit_presence       = subunit_presence,
+
+        organisms = self.infer_organisms_from_polymers([*proteins, *rna, *other])
+        subunit_presence = lsu_ssu_presence(rna, is_mitochondrial)
+        reshaped = RibosomeStructure(
+            rcsb_id=structure_data["rcsb_id"],
+            expMethod=structure_data["exptl"][0]["method"],
+            resolution=structure_data["rcsb_entry_info"]["resolution_combined"][0],
+            deposition_date=structure_data["rcsb_accession_info"]["deposit_date"],
+            rcsb_external_ref_id=externalRefs[0],
+            rcsb_external_ref_type=externalRefs[1],
+            rcsb_external_ref_link=externalRefs[2],
+            citation_year=year,
+            citation_rcsb_authors=pub["rcsb_authors"],
+            citation_title=pub["title"],
+            citation_pdbx_doi=pub["pdbx_database_id_DOI"],
+            pdbx_keywords_text=kwords_text,
+            pdbx_keywords=kwords,
+            src_organism_ids=organisms["src_organism_ids"],
+            src_organism_names=organisms["src_organism_names"],
+            host_organism_ids=organisms["host_organism_ids"],
+            host_organism_names=organisms["host_organism_names"],
+            proteins=proteins,
+            rnas=rna,
+            nonpolymeric_ligands=ligands,
+            other_polymers=other,
+            assembly_map=self.asm_maps,
+            mitochondrial=is_mitochondrial,
+            subunit_presence=subunit_presence,
         )
-        RA.assets.write_own_json_profile(reshaped.model_dump(), overwrite=overwrite)
         return reshaped

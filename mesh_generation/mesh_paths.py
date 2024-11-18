@@ -1,7 +1,7 @@
 # ? ---------- Paths ------------
 import os
 from ribctl import EXIT_TUNNEL_WORK, RIBETL_DATA
-from ribctl.etl.assets_structure import StructureAssets
+from ribctl.asset_manager.assets_structure import StructureAssets
 
 # most of this stuff is unnecessary
 tunnel_atom_encoding_path      = lambda rcsb_id: os.path.join( StructureAssets(rcsb_id).paths.tunnel_dir, "{}_tunnel_atoms_bbox.json".format(rcsb_id.upper()) )

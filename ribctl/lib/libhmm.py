@@ -285,8 +285,6 @@ class HMMClassifier():
 
     def classify_chains(self)->None:
         for chain in self.chains:
-                if chain.auth_asym_id == 'S27A':
-                    print("Classifying chain" , chain.auth_asym_id)
                 # --- If the the scanner for this taxid is present, use it. Otherwise create it.
                 if len(chain.src_organism_ids)< 1:
                     continue
@@ -300,13 +298,11 @@ class HMMClassifier():
 
                 self.report[chain.auth_asym_id] = []
                 seq_record                      = chain.to_SeqRecord()
-                query_seq                       = pyhmmer.easel.TextSequence(name=bytes(seq_record.id,'utf-8'), sequence=str( seq_record.seq )).digitize(self.alphabet)
-                if chain.auth_asym_id == 'S27A':
-                    print("Query seq" , query_seq)
+                
+                # This garbage is needed because tRNAs carry an amino acid and some idiots just tag that on the end of rna sequence, which probably breaks more than one RNA.alphabet check worldwide.
+                sequence_proper = ''.join(list(filter(lambda x: x.lower() in ['u','c','g','a'], list(seq_record.seq) ))) if chain.entity_poly_polymer_type == "RNA"  else seq_record.seq
+                query_seq                       = pyhmmer.easel.TextSequence(name=bytes(seq_record.id,'utf-8'), sequence=str( sequence_proper )).digitize(self.alphabet)
                 cls_hits_tuples                 = hmmscanner.classify_seq(self.alphabet, query_seq)
-                if chain.auth_asym_id == 'S27A':
-                    print("Hits:" , cls_hits_tuples)
-
                 for ( candidate_class, tophits ) in cls_hits_tuples:
                     for hit in tophits:
                            d_hit = {

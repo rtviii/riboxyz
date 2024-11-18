@@ -9,7 +9,7 @@ from Bio.PDB.Structure import Structure
 from Bio.PDB.Chain import Chain
 from loguru import logger
 from ribctl import AMINO_ACIDS_3_TO_1_CODE, ASSETS_PATH, CHAINSPLITTER_PATH, CLASSIFICATION_REPORTS
-from ribctl.etl.assets_structure import  StructureAssets
+from ribctl.asset_manager.assets_structure import StructureAssets
 from ribctl.lib.libtax import PhylogenyNode, PhylogenyRank, Taxid
 from Bio.PDB.Structure import Structure
 from ribctl.lib.landmarks.ptc_via_doris import ptc_resdiues_get, ptc_residues_calculate_midpoint
@@ -97,10 +97,7 @@ class RibosomeOps:
         polymer:Polymer
         for polymer in [*profile.rnas, *profile.other_polymers, *profile.proteins]: 
             if class_ in  polymer.nomenclature and polymer.assembly_id == assembly and polymer.entity_poly_seq_length > 30:
-                print("RETURNING ", polymer)
                 return polymer
-        
-
     def get_LSU_rRNA(self, assembly: int = 0) -> RNA:
         """retrieve the largest rRNA sequence in the structure
         @returns (seq, auth_asym_id, rna_type)
