@@ -320,54 +320,143 @@ def instance(ctx):
     """Manage Neo4j database instances"""
     pass
 
-@instance.command(name='create')
-@click.argument('name', required=True)
+
+@instance.command()
+@click.option('--name', prompt='Database name', 
+              help='Name for the new database instance')
+@click.option('--initialize/--no-initialize', default=True,
+              help='Initialize with constraints and basic data')
 @click.option('--force', '-f', is_flag=True,
-              help='Force creation if instance exists')
-@click.pass_context
-def create_instance(ctx, name, force):
+              help='Force creation even if database exists')
+def create(name: str, initialize: bool, force: bool):
     """Create a new Neo4j database instance.
     
     Examples:\n
     \b
-    # Create a new instance
-    ribd.py db instance create ribosome2
+    # Create a new database with prompts
+    ribd.py db instance create
     
     \b
-    # Force create an instance
-    ribd.py db instance create --force ribosome2
+    # Create a specific database non-interactively
+    ribd.py db instance create --name ribosome_test
+    
+    \b
+    # Create without initialization
+    ribd.py db instance create --name ribosome_test --no-initialize
     """
     try:
-        # Create database instance using system database
-        adapter = Neo4jAdapter(NEO4J_URI, NEO4J_USER, "system", NEO4J_PASSWORD)
+        # Connect to system database to manage instances
+        adapter = Neo4jAdapter(
+            NEO4J_URI, 
+            NEO4J_USER, 
+            "system",  # Use system database for management
+            NEO4J_PASSWORD
+        )
+        
+        # Check if database exists
+        if not force:
+            with adapter.driver.session() as session:
+                result = session.run(
+                    "SHOW DATABASES WHERE name = $name",
+                    name=name
+                )
+                if result.single():
+                    if not click.confirm(f'Database "{name}" already exists. Override?'):
+                        click.echo("Cancelled.")
+                        return
+        
+        # Create database
         with adapter.driver.session() as session:
-            # Check if instance exists
-            result = session.run("SHOW DATABASES")
-            databases = [record["name"] for record in result]
+            session.run(f"CREATE DATABASE {name} IF NOT EXISTS")
+            click.echo(f"Created database: {name}")
+        
+        if initialize:
+            # Switch adapter to new database
+            adapter = Neo4jAdapter(
+                NEO4J_URI,
+                NEO4J_USER,
+                name,  # Use new database
+                NEO4J_PASSWORD
+            )
             
-            if name in databases and not force:
-                click.echo(f"Database instance '{name}' already exists. Use --force to recreate.", err=True)
-                return
+            with click.progressbar(
+                length=3,
+                label='Initializing database',
+                show_pos=True
+            ) as bar:
+                # Initialize constraints
+                adapter.init_constraints()
+                bar.update(1)
+                
+                # Initialize polymer classes
+                adapter.init_polymer_classes()
+                bar.update(1)
+                
+                # Initialize phylogenies
+                adapter.init_phylogenies()
+                bar.update(1)
             
-            if force:
-                session.run(f"DROP DATABASE {name} IF EXISTS")
-            
-            # Create new database
-            session.run(f"CREATE DATABASE {name}")
-            click.echo(f"Created database instance '{name}'")
-            
-            # Initialize the new instance
-            adapter = Neo4jAdapter(NEO4J_URI, NEO4J_USER, name, NEO4J_PASSWORD)
-            adapter.initialize_new_instance()
-            click.echo(f"Initialized database instance '{name}'")
-            
+            click.echo("\nDatabase initialized successfully!")
+        
     except Exception as e:
-        click.echo(f"Failed to create database instance: {str(e)}", err=True)
+        click.echo(f"Error creating database: {str(e)}", err=True)
+        raise
 
+@instance.command()
+def list():
+    """List all Neo4j database instances"""
+    try:
+        adapter = Neo4jAdapter(NEO4J_URI, NEO4J_USER, "system", NEO4J_PASSWORD)
+        
+        with adapter.driver.session() as session:
+            result = session.run("SHOW DATABASES")
+            databases = result.data()
+            
+            if not databases:
+                click.echo("No databases found")
+                return
+                
+            click.echo("\nAvailable databases:")
+            for db in databases:
+                status = "🟢" if db['currentStatus'] == "online" else "🔴"
+                click.echo(f"{status} {db['name']:<20} ({db['currentStatus']})")
+                
+    except Exception as e:
+        click.echo(f"Error listing databases: {str(e)}", err=True)
 
+@instance.command()
+@click.argument('name')
+@click.option('--output', '-o', type=click.Path(), 
+              help='Output directory for backup files')
+def backup(name: str, output: str | None):
+    """Backup a Neo4j database instance
+    
+    Examples:\n
+    \b
+    # Backup to default location
+    ribd.py db instance backup ribosome_test
+    
+    \b
+    # Backup to specific directory
+    ribd.py db instance backup ribosome_test -o /path/to/backup
+    """
+    if not output:
+        output = str(Path.home() / '.ribd' / 'backups')
+    
+    output_path = Path(output)
+    output_path.mkdir(parents=True, exist_ok=True)
+    
+    try:
+        # TODO: Implement actual backup logic using neo4j-admin dump
+        # This would require shell access to the container
+        click.echo(f"Backing up database {name} to {output_path}")
+        click.echo("Backup functionality not yet implemented")
+        
+    except Exception as e:
+        click.echo(f"Error backing up database: {str(e)}", err=True)
 @db.command(name='upload_all')
 @click.option('--workers', '-w',
-              default=10,
+              default=5,  # Reduced default workers
               help='Number of worker threads')
 @click.option('--force', '-f', is_flag=True, 
               help='Force upload even if structures exist')
@@ -379,32 +468,47 @@ def create_instance(ctx, name, force):
               help='Neo4j database instance name', 
               default=NEO4J_CURRENTDB)
 @click.option('--chunk-size', '-c', 
-              default=10,
+              default=5,  # Reduced default chunk size
               help='Number of structures to process per chunk')
+@click.option('--delay', '-d',
+              default=2.0,
+              help='Delay in seconds between chunk processing')
+@click.option('--max-retries', '-r',
+              default=3,
+              help='Maximum number of retries per structure')
 @click.pass_context
-def upload_all(ctx, workers, force, mode, instance, chunk_size):
-    """Upload all available structures to Neo4j database in parallel.
+def upload_all(ctx, workers, force, mode, instance, chunk_size, delay, max_retries):
+    """Upload all available structures to Neo4j database in parallel with safeguards.
     
     Examples:\n
     \b
-    # Upload all structures with default settings
-    ribd.py db upload_all
+    # Upload with conservative settings
+    ribd.py db upload_all --workers 5 --chunk-size 5 --delay 2
     
     \b
-    # Upload all structures to specific instance with more workers
-    ribd.py db upload_all --instance neo4j --workers 20
-    
-    \b
-    # Upload only structure nodes for all structures
-    ribd.py db upload_all --mode structure
+    # Upload with more aggressive settings
+    ribd.py db upload_all --workers 10 --chunk-size 8 --delay 1
     """
+    from time import sleep
+    import random
+
+    def process_with_retry(adapter, rcsb_id, operation, max_retries):
+        for attempt in range(max_retries):
+            try:
+                return operation()
+            except Exception as e:
+                if attempt == max_retries - 1:
+                    raise e
+                sleep_time = (attempt + 1) * 2 + random.random()  # Exponential backoff
+                sleep(sleep_time)
+                continue
+
     try:
         adapter = Neo4jAdapter(NEO4J_URI, NEO4J_USER, instance, NEO4J_PASSWORD)
     except Exception as e:
         click.echo(f"Failed to connect to database: {str(e)}", err=True)
         return
 
-    # Get all available structure IDs
     try:
         all_structures = GlobalOps.list_all_structs()
         if not all_structures:
@@ -416,83 +520,77 @@ def upload_all(ctx, workers, force, mode, instance, chunk_size):
         click.echo(f"Failed to get structure list: {str(e)}", err=True)
         return
 
-    # Split structures into chunks for parallel processing
+    # Split structures into chunks
     chunks = [all_structures[i:i + chunk_size] 
              for i in range(0, len(all_structures), chunk_size)]
 
     click.echo(f"Starting parallel upload to instance '{instance}'...")
     click.echo(f"Processing in chunks of {chunk_size} with {workers} workers")
+    click.echo(f"Using {delay}s delay between chunks")
 
     with tqdm(total=len(all_structures), 
              desc="Uploading structures",
              unit="structure") as pbar:
         
-        futures: list[Future] = []
-        errors: list[tuple[str, str]] = []  # (structure_id, error_message)
-        
-        with ThreadPoolExecutor(max_workers=workers) as executor:
-            for chunk in chunks:
+        for chunk_idx, chunk in enumerate(chunks):
+            futures: list[Future] = []
+            chunk_errors: list[tuple[str, str]] = []
+            
+            # Process one chunk at a time
+            with ThreadPoolExecutor(max_workers=workers) as executor:
                 for rcsb_id in chunk:
                     if mode == 'full':
-                        fut = executor.submit(
-                            partial(adapter.add_total_structure, rcsb_id, force)
-                        )
+                        operation = partial(adapter.add_total_structure, rcsb_id, force)
                     elif mode == 'structure':
-                        fut = executor.submit(
-                            partial(adapter.upsert_structure_node, rcsb_id)
-                        )
+                        operation = partial(adapter.upsert_structure_node, rcsb_id)
                     elif mode == 'ligands':
                         try:
                             profile = RibosomeOps(rcsb_id).profile
+                            operations = []
                             for ligand in profile.nonpolymeric_ligands:
                                 if not "ion" in ligand.chemicalName.lower():
-                                    fut = executor.submit(
+                                    operations.append(
                                         partial(adapter.upsert_ligand_node, ligand, rcsb_id)
                                     )
                         except Exception as e:
-                            errors.append((rcsb_id, f"Failed to process ligands: {str(e)}"))
+                            chunk_errors.append((rcsb_id, f"Failed to process ligands: {str(e)}"))
                             continue
-
-                    def update_progress(future, rcsb_id=rcsb_id):
+                    
+                    def process_structure(operation, rcsb_id=rcsb_id):
                         try:
-                            future.result()  # Check for exceptions
+                            process_with_retry(adapter, rcsb_id, operation, max_retries)
+                            return None
                         except Exception as e:
-                            errors.append((rcsb_id, str(e)))
-                        pbar.update(1)
-                        pbar.set_description(f"Processed {rcsb_id}")
+                            return (rcsb_id, str(e))
 
-                    fut.add_done_callback(update_progress)
-                    futures.append(fut)
+                    if mode == 'ligands' and operations:
+                        for op in operations:
+                            fut = executor.submit(process_structure, op)
+                            futures.append(fut)
+                    else:
+                        fut = executor.submit(process_structure, operation)
+                        futures.append(fut)
 
-            # Wait for all uploads to complete
-            done, _ = wait(futures, return_when=ALL_COMPLETED)
+                # Wait for current chunk to complete
+                for future in futures:
+                    result = future.result()
+                    if result:
+                        chunk_errors.append(result)
+                    pbar.update(1)
 
-    # Report results
-    total_processed = len(all_structures)
-    failed = len(errors)
-    succeeded = total_processed - failed
+            # Report any errors from this chunk
+            if chunk_errors:
+                click.echo(f"\nErrors in chunk {chunk_idx + 1}:")
+                for rcsb_id, error in chunk_errors:
+                    click.echo(f"  - {rcsb_id}: {error}")
 
-    click.echo("\nUpload Summary:")
-    click.echo(f"Total structures processed: {total_processed}")
-    click.echo(f"Successfully uploaded: {succeeded}")
-    click.echo(f"Failed: {failed}")
+            # Delay between chunks
+            if chunk_idx < len(chunks) - 1:  # Don't delay after last chunk
+                sleep(delay)
 
-    if errors:
-        click.echo("\nErrors occurred during upload:")
-        for rcsb_id, error in errors:
-            click.echo(f"  - {rcsb_id}: {error}")
-    else:
-        click.echo("\nAll structures uploaded successfully")
-
-
-
-
-
-
-
-
-
-
+    # Final report
+    click.echo("\nUpload completed!")
+    click.echo(f"Total structures processed: {len(all_structures)}")
 
 
 
