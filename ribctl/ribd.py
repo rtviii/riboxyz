@@ -594,7 +594,71 @@ def upload_all(ctx, workers, force, mode, instance, chunk_size, delay, max_retri
 
 
 
-
+@instance.command(name='delete')
+@click.argument('name', required=True)
+@click.option('--force', '-f', is_flag=True,
+              help='Force deletion without confirmation')
+@click.pass_context
+def delete_instance(ctx, name, force):
+    """Delete a Neo4j database instance and all its data.
+    
+    Examples:\n
+    \b
+    # Delete an instance with confirmation
+    ribd.py db instance delete ribosome2
+    
+    \b
+    # Force delete without confirmation
+    ribd.py db instance delete --force ribosome2
+    """
+    try:
+        # Connect to system database for instance management
+        adapter = Neo4jAdapter(NEO4J_URI, NEO4J_USER, "system", NEO4J_PASSWORD)
+        
+        with adapter.driver.session() as session:
+            # Check if instance exists
+            result = session.run("SHOW DATABASES")
+            databases = [record["name"] for record in result]
+            
+            if name not in databases:
+                click.echo(f"Database instance '{name}' does not exist.", err=True)
+                return
+            
+            # Check if it's the default database
+            if name == "neo4j":
+                click.echo("Cannot delete the default 'neo4j' database.", err=True)
+                return
+                
+            # Get instance status
+            result = session.run("SHOW DATABASE $name", name=name)
+            status = result.single()["currentStatus"]
+            
+            if not force:
+                click.echo(f"\nDatabase: {name}")
+                click.echo(f"Status: {status}")
+                click.confirm("Are you sure you want to delete this database and ALL its data?",
+                            abort=True)
+            
+            # Stop the database if it's running
+            if status != "offline":
+                click.echo("Stopping database...")
+                session.run("STOP DATABASE $name", name=name)
+            
+            # Drop the database
+            click.echo("Deleting database...")
+            session.run("DROP DATABASE $name IF EXISTS", name=name)
+            
+            # Verify deletion
+            result = session.run("SHOW DATABASES")
+            databases = [record["name"] for record in result]
+            
+            if name not in databases:
+                click.echo(f"Successfully deleted database instance '{name}'")
+            else:
+                click.echo(f"Failed to delete database instance '{name}'", err=True)
+                
+    except Exception as e:
+        click.echo(f"Failed to delete database instance: {str(e)}", err=True)
 
 
 
