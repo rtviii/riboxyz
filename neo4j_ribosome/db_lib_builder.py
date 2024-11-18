@@ -1,5 +1,6 @@
 import sys
 
+from ribctl.global_ops import GlobalOps
 
 sys.dont_write_bytecode = True
 
@@ -33,8 +34,6 @@ from ribctl.ribosome_ops import StructureAssets, RibosomeOps, Structure
 from neo4j import GraphDatabase, Driver, ManagedTransaction, Transaction
 from ribctl.lib.schema.types_ribosome import (
     NonpolymericLigand,
-    CytosolicProteinClass,
-    RibosomeStructureMetadata,
 )
 
 NODE_CONSTRAINTS = [
@@ -47,7 +46,6 @@ NODE_CONSTRAINTS = [
 # If you are connecting via a shell or programmatically via a driver,
 # just issue a `ALTER CURRENT USER SET PASSWORD FROM 'current password' TO 'new password'` statement against
 # the system database in the current session, and then restart your driver with the new password configured.
-
 
 class Neo4jAdapter:
 
@@ -72,7 +70,6 @@ class Neo4jAdapter:
             self.driver = GraphDatabase.driver(
                 uri, auth=(user, password), database=current_db
             )
-            # print("[{}] established connection to DB[{}] via {} ".format(user, current_db, uri))
         except Exception as ae:
             print(ae)
 
@@ -101,7 +98,7 @@ class Neo4jAdapter:
             return node
 
     def init_phylogenies(self):
-        taxa = GlobalView.collect_all_taxa()
+        taxa = GlobalOps.collect_all_taxa()
         for taxon in taxa:
             self._create_lineage(taxon.ncbi_tax_id)
 
@@ -164,7 +161,7 @@ class Neo4jAdapter:
                         )
                     )
                 _.extend(lineage_memebers_source)
-        print("Linked structure {} to phylogeny: {}".format(rcsb_id, _))
+        print("\nLinked structure {} to phylogeny: {}".format(rcsb_id, _))
 
     def check_structure_exists(self, rcsb_id: str) -> bool:
         rcsb_id = rcsb_id.upper()
@@ -237,3 +234,100 @@ class Neo4jAdapter:
             structure_node = s.execute_write(node__structure(R))
         print("Successfully merged structure {}.".format(rcsb_id))
         return structure_node
+
+    def delete_structure(self, rcsb_id: str, dry_run: bool = False) -> dict[str, int]:
+        """
+        Delete a structure and its polymers, preserving ligand nodes while removing their relationships.
+        
+        Args:
+            rcsb_id: The RCSB ID of the structure to delete
+            dry_run: If True, only count nodes/relationships that would be deleted without actually deleting
+            
+        Returns:
+            Dictionary with counts of deleted/affected nodes and relationships
+        """
+        rcsb_id = rcsb_id.upper()
+        
+        # Query to count and optionally delete the structure and polymers
+        query = """
+        MATCH (s:RibosomeStructure {rcsb_id: $rcsb_id})
+        
+        // Count all connected nodes and relationships
+        OPTIONAL MATCH (s)-[r1]-(p:Polymer)
+        OPTIONAL MATCH (s)-[r2]-(l:Ligand)
+        OPTIONAL MATCH (s)-[r3]-(t:PhylogenyNode)
+        
+        WITH s,
+             collect(DISTINCT p) as polymers,
+             collect(DISTINCT r1) as polymerRels,
+             collect(DISTINCT r2) as ligandRels,
+             collect(DISTINCT r3) as taxaRels,
+             count(DISTINCT p) as polymerCount,
+             count(DISTINCT r1) + count(DISTINCT r2) + count(DISTINCT r3) as relCount
+        
+        // Delete relationships to ligands (preserve nodes)
+        FOREACH (r IN ligandRels | DELETE r)
+        
+        // Delete relationships to taxa (preserve nodes)
+        FOREACH (r IN taxaRels | DELETE r)
+        
+        // Delete polymers and their relationships
+        FOREACH (p IN polymers | DETACH DELETE p)
+        
+        // Finally delete the structure
+        DETACH DELETE s
+        
+        RETURN {
+            structure: 1,
+            polymers: polymerCount,
+            relationships: relCount
+        } as counts
+        """
+        
+        # Only count query for dry run
+        dry_run_query = """
+        MATCH (s:RibosomeStructure {rcsb_id: $rcsb_id})
+        
+        OPTIONAL MATCH (s)-[r1]-(p:Polymer)
+        OPTIONAL MATCH (s)-[r2]-(l:Ligand)
+        OPTIONAL MATCH (s)-[r3]-(t:PhylogenyNode)
+        
+        RETURN {
+            structure: 1,
+            polymers: count(DISTINCT p),
+            relationships: count(DISTINCT r1) + count(DISTINCT r2) + count(DISTINCT r3)
+        } as counts
+        """
+        
+        with self.driver.session() as session:
+            # First check if structure exists
+            if not self.check_structure_exists(rcsb_id):
+                raise ValueError(f"Structure {rcsb_id} does not exist in database")
+                
+            try:
+                # Execute appropriate query based on dry_run flag
+                result = session.execute_write(
+                    lambda tx: tx.run(
+                        dry_run_query if dry_run else query,
+                        rcsb_id=rcsb_id
+                    ).single()
+                )
+                
+                counts = result['counts'] if result else {
+                    'structure': 0,
+                    'polymers': 0,
+                    'relationships': 0
+                }
+                
+                action = "Would delete" if dry_run else "Deleted"
+                print(f"\n{action} for {rcsb_id}:")
+                print(f"- Structure node: {counts['structure']}")
+                print(f"- Polymer nodes: {counts['polymers']}")
+                print(f"- Relationships: {counts['relationships']}")
+                print("(Ligand nodes preserved)")
+                
+                return counts
+                
+            except Exception as e:
+                print(f"Error deleting structure {rcsb_id}: {str(e)}")
+                raise

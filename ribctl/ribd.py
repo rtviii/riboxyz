@@ -209,8 +209,9 @@ def cypher(ctx, query_file, params, output):
 @click.option('--mode', '-m', type=click.Choice(['full', 'structure', 'ligands'], case_sensitive=False),
                default='full',
               help='Upload mode: full (all data), structure (only structure nodes), or ligands')
+@click.option('--instance', '-i', help='Neo4j database instance name', default=NEO4J_CURRENTDB)
 @click.pass_context
-def upload(ctx, pdb_ids, workers, force, mode):
+def upload(ctx, pdb_ids, workers, force, mode, instance):
     """Upload structure data to Neo4j database.
     
     Examples:\n
@@ -219,8 +220,8 @@ def upload(ctx, pdb_ids, workers, force, mode):
     ribd.py db upload 3J7Z 4V6X
     
     \b
-    # Upload only structure nodes
-    ribd.py db upload --mode structure 3J7Z
+    # Upload only structure nodes to specific instance
+    ribd.py db upload --mode structure --instance neo4j 3J7Z
     
     \b
     # Upload from file with force option
@@ -233,12 +234,12 @@ def upload(ctx, pdb_ids, workers, force, mode):
         return
     
     try:
-        adapter = Neo4jAdapter(NEO4J_URI, NEO4J_USER, NEO4J_CURRENTDB, NEO4J_PASSWORD)
+        adapter = Neo4jAdapter(NEO4J_URI, NEO4J_USER, instance, NEO4J_PASSWORD)
     except Exception as e:
         click.echo(f"Failed to connect to database: {str(e)}", err=True)
         return
 
-    click.echo("Starting upload...")
+    click.echo(f"Starting upload to instance '{instance}'...")
     with click.progressbar(length=len(all_pdb_ids),
                          label='Uploading structures',
                          show_pos=True,
@@ -286,22 +287,82 @@ def upload(ctx, pdb_ids, workers, force, mode):
 @db.command()
 @click.option('--force', '-f', is_flag=True,
               help='Force reinitialization of database')
+@click.argument('instance_name', required=True)
 @click.pass_context
-def init(ctx, force):
+def init(ctx, force, instance_name):
     """Initialize a new Neo4j database instance.
     
-    Creates necessary constraints and initial data structures.
+    Creates necessary constraints and initial data structures in the specified instance.
+    
+    Examples:\n
+    \b
+    # Initialize a new instance named 'ribosome'
+    ribd.py db init ribosome
+    
+    \b
+    # Force reinitialize an existing instance
+    ribd.py db init --force ribosome
     """
     if not force:
-        click.confirm('This will initialize a new database instance. Continue?',
+        click.confirm(f'This will initialize database instance "{instance_name}". Continue?',
                      abort=True)
     
     try:
-        adapter = Neo4jAdapter(NEO4J_URI, NEO4J_USER, NEO4J_CURRENTDB, NEO4J_PASSWORD)
+        adapter = Neo4jAdapter(NEO4J_URI, NEO4J_USER, instance_name, NEO4J_PASSWORD)
         adapter.initialize_new_instance()
-        click.echo("Database initialized successfully")
+        click.echo(f"Database instance '{instance_name}' initialized successfully")
     except Exception as e:
-        click.echo(f"Failed to initialize database: {str(e)}", err=True)
+        click.echo(f"Failed to initialize database instance: {str(e)}", err=True)
+
+@db.group()
+@click.pass_context
+def instance(ctx):
+    """Manage Neo4j database instances"""
+    pass
+
+@instance.command(name='create')
+@click.argument('name', required=True)
+@click.option('--force', '-f', is_flag=True,
+              help='Force creation if instance exists')
+@click.pass_context
+def create_instance(ctx, name, force):
+    """Create a new Neo4j database instance.
+    
+    Examples:\n
+    \b
+    # Create a new instance
+    ribd.py db instance create ribosome2
+    
+    \b
+    # Force create an instance
+    ribd.py db instance create --force ribosome2
+    """
+    try:
+        # Create database instance using system database
+        adapter = Neo4jAdapter(NEO4J_URI, NEO4J_USER, "system", NEO4J_PASSWORD)
+        with adapter.driver.session() as session:
+            # Check if instance exists
+            result = session.run("SHOW DATABASES")
+            databases = [record["name"] for record in result]
+            
+            if name in databases and not force:
+                click.echo(f"Database instance '{name}' already exists. Use --force to recreate.", err=True)
+                return
+            
+            if force:
+                session.run(f"DROP DATABASE {name} IF EXISTS")
+            
+            # Create new database
+            session.run(f"CREATE DATABASE {name}")
+            click.echo(f"Created database instance '{name}'")
+            
+            # Initialize the new instance
+            adapter = Neo4jAdapter(NEO4J_URI, NEO4J_USER, name, NEO4J_PASSWORD)
+            adapter.initialize_new_instance()
+            click.echo(f"Initialized database instance '{name}'")
+            
+    except Exception as e:
+        click.echo(f"Failed to create database instance: {str(e)}", err=True)
 
 
 if __name__ == '__main__':
