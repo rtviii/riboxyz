@@ -1,6 +1,7 @@
 from functools import partial
 import sys
 sys.path.append("/home/rtviii/dev/riboxyz")
+from ribctl.global_ops import GlobalOps
 from ribctl.ribosome_ops import RibosomeOps
 from neo4j_ribosome import NEO4J_CURRENTDB, NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER
 from neo4j_ribosome.db_lib_builder import Neo4jAdapter
@@ -8,7 +9,6 @@ from ribctl import RIBETL_DATA
 from ribctl.asset_manager.parallel_acquisition import process_chunk
 import click
 from typing import List, Tuple
-from pathlib import Path
 import multiprocessing
 from concurrent.futures import ALL_COMPLETED, Future, ProcessPoolExecutor, ThreadPoolExecutor, wait
 from tqdm import tqdm
@@ -363,6 +363,142 @@ def create_instance(ctx, name, force):
             
     except Exception as e:
         click.echo(f"Failed to create database instance: {str(e)}", err=True)
+
+
+@db.command(name='upload_all')
+@click.option('--workers', '-w',
+              default=10,
+              help='Number of worker threads')
+@click.option('--force', '-f', is_flag=True, 
+              help='Force upload even if structures exist')
+@click.option('--mode', '-m', 
+              type=click.Choice(['full', 'structure', 'ligands'], case_sensitive=False),
+              default='full',
+              help='Upload mode: full (all data), structure (only structure nodes), or ligands')
+@click.option('--instance', '-i', 
+              help='Neo4j database instance name', 
+              default=NEO4J_CURRENTDB)
+@click.option('--chunk-size', '-c', 
+              default=10,
+              help='Number of structures to process per chunk')
+@click.pass_context
+def upload_all(ctx, workers, force, mode, instance, chunk_size):
+    """Upload all available structures to Neo4j database in parallel.
+    
+    Examples:\n
+    \b
+    # Upload all structures with default settings
+    ribd.py db upload_all
+    
+    \b
+    # Upload all structures to specific instance with more workers
+    ribd.py db upload_all --instance neo4j --workers 20
+    
+    \b
+    # Upload only structure nodes for all structures
+    ribd.py db upload_all --mode structure
+    """
+    try:
+        adapter = Neo4jAdapter(NEO4J_URI, NEO4J_USER, instance, NEO4J_PASSWORD)
+    except Exception as e:
+        click.echo(f"Failed to connect to database: {str(e)}", err=True)
+        return
+
+    # Get all available structure IDs
+    try:
+        all_structures = GlobalOps.list_all_structs()
+        if not all_structures:
+            click.echo("No structures found to upload", err=True)
+            return
+        
+        click.echo(f"Found {len(all_structures)} structures to process")
+    except Exception as e:
+        click.echo(f"Failed to get structure list: {str(e)}", err=True)
+        return
+
+    # Split structures into chunks for parallel processing
+    chunks = [all_structures[i:i + chunk_size] 
+             for i in range(0, len(all_structures), chunk_size)]
+
+    click.echo(f"Starting parallel upload to instance '{instance}'...")
+    click.echo(f"Processing in chunks of {chunk_size} with {workers} workers")
+
+    with tqdm(total=len(all_structures), 
+             desc="Uploading structures",
+             unit="structure") as pbar:
+        
+        futures: list[Future] = []
+        errors: list[tuple[str, str]] = []  # (structure_id, error_message)
+        
+        with ThreadPoolExecutor(max_workers=workers) as executor:
+            for chunk in chunks:
+                for rcsb_id in chunk:
+                    if mode == 'full':
+                        fut = executor.submit(
+                            partial(adapter.add_total_structure, rcsb_id, force)
+                        )
+                    elif mode == 'structure':
+                        fut = executor.submit(
+                            partial(adapter.upsert_structure_node, rcsb_id)
+                        )
+                    elif mode == 'ligands':
+                        try:
+                            profile = RibosomeOps(rcsb_id).profile
+                            for ligand in profile.nonpolymeric_ligands:
+                                if not "ion" in ligand.chemicalName.lower():
+                                    fut = executor.submit(
+                                        partial(adapter.upsert_ligand_node, ligand, rcsb_id)
+                                    )
+                        except Exception as e:
+                            errors.append((rcsb_id, f"Failed to process ligands: {str(e)}"))
+                            continue
+
+                    def update_progress(future, rcsb_id=rcsb_id):
+                        try:
+                            future.result()  # Check for exceptions
+                        except Exception as e:
+                            errors.append((rcsb_id, str(e)))
+                        pbar.update(1)
+                        pbar.set_description(f"Processed {rcsb_id}")
+
+                    fut.add_done_callback(update_progress)
+                    futures.append(fut)
+
+            # Wait for all uploads to complete
+            done, _ = wait(futures, return_when=ALL_COMPLETED)
+
+    # Report results
+    total_processed = len(all_structures)
+    failed = len(errors)
+    succeeded = total_processed - failed
+
+    click.echo("\nUpload Summary:")
+    click.echo(f"Total structures processed: {total_processed}")
+    click.echo(f"Successfully uploaded: {succeeded}")
+    click.echo(f"Failed: {failed}")
+
+    if errors:
+        click.echo("\nErrors occurred during upload:")
+        for rcsb_id, error in errors:
+            click.echo(f"  - {rcsb_id}: {error}")
+    else:
+        click.echo("\nAll structures uploaded successfully")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 if __name__ == '__main__':

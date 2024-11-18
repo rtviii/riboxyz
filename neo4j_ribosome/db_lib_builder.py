@@ -123,7 +123,7 @@ class Neo4jAdapter:
         return
 
     def link_structure_to_phylogeny(
-        self, rcsb_id: str, profile: RibosomeStructure | None = None
+        self, rcsb_id: str, profile: RibosomeStructure | None = None, verbose: bool = False
     ):
         rcsb_id = rcsb_id.upper()
 
@@ -132,7 +132,6 @@ class Neo4jAdapter:
 
         _ = []
         with self.driver.session() as s:
-
             for organism_host in profile.host_organism_ids:
 
                 self._create_lineage(organism_host)
@@ -161,7 +160,6 @@ class Neo4jAdapter:
                         )
                     )
                 _.extend(lineage_memebers_source)
-        print("\nLinked structure {} to phylogeny: {}".format(rcsb_id, _))
 
     def check_structure_exists(self, rcsb_id: str) -> bool:
         rcsb_id = rcsb_id.upper()
