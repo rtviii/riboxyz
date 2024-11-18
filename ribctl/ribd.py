@@ -1,6 +1,17 @@
-from functools import partial
 import sys
 sys.path.append("/home/rtviii/dev/riboxyz")
+from functools import partial
+import click
+from typing import List
+import sys
+from pathlib import Path
+from ribctl.asset_manager.asset_types import AssetType
+from ribctl.asset_manager.asset_manager import RibosomeAssetManager
+from ribctl.asset_manager.asset_registry import AssetRegistry
+from concurrent.futures import ProcessPoolExecutor
+import asyncio
+from loguru import logger
+from ribctl.lib.schema.types_ribosome import PTCInfo, RibosomeStructure
 from ribctl.asset_manager.assets_structure import StructureAssets
 from ribctl.global_ops import GlobalOps
 from ribctl.ribosome_ops import RibosomeOps
@@ -13,7 +24,6 @@ from typing import List, Tuple
 import multiprocessing
 from concurrent.futures import ALL_COMPLETED, Future, ProcessPoolExecutor, ThreadPoolExecutor, wait
 from tqdm import tqdm
-
 from ribctl.asset_manager.asset_types import AssetType
 
 def get_input_pdb_ids() -> List[str]:
@@ -26,6 +36,7 @@ class PDBIDsParam(click.ParamType):
     """Custom parameter type for PDB IDs validation"""
     name = "pdb_ids"
     def convert(self, value, param, ctx):
+
         if type(value) == list:  # Changed from isinstance(value, list)
             return value
         if not value:
@@ -34,6 +45,18 @@ class PDBIDsParam(click.ParamType):
         if not (len(pdb_id) == 4 and pdb_id.isalnum()):
             self.fail(f"Invalid PDB ID format: {value}", param, ctx)
         return [pdb_id]
+
+
+
+
+def get_input_structures() -> List[str]:
+    """Read PDB IDs from stdin if available, otherwise return empty list"""
+    if not sys.stdin.isatty():
+        return [line.strip().upper() for line in sys.stdin.readlines() if line.strip()]
+    return []
+
+
+
 @click.group()
 @click.pass_context
 def cli(ctx):
@@ -41,17 +64,80 @@ def cli(ctx):
     ctx.ensure_object(dict)
     ctx.obj['piped_pdb_ids'] = get_input_pdb_ids()
 
+
+
+
+
 @cli.group()
 @click.pass_context
 def etl(ctx):
     """ETL operations for ribosome data"""
     pass
 
-@cli.group()
-@click.pass_context
-def db(ctx):
-    """Database operations for ribosome data"""
-    pass
+
+@etl.command()
+@click.option('-t', '--asset-type', 
+              type=click.Choice([t.name for t in AssetType], case_sensitive=True),
+              multiple=True,
+              required=True,
+              help='Asset type(s) to acquire. Can be specified multiple times.')
+@click.argument('pdb_id', required=False)
+@click.option('--force', is_flag=True, help='Force regeneration of existing assets')
+@click.option('--max-structures', default=4, help='Maximum number of concurrent structures to process')
+@click.option('--max-assets', default=3, help='Maximum number of concurrent assets per structure')
+def get(asset_type: List[str], pdb_id: str, force: bool, max_structures: int, max_assets: int):
+    """
+    Acquire assets for specified structure(s). Accepts either a single PDB ID as argument
+    or a list of IDs via stdin pipe.
+    """
+    # Get structures from either argument or pipe
+    structures = get_input_structures()
+    if pdb_id:
+        structures.append(pdb_id.upper())
+    
+    if not structures:
+        raise click.UsageError("No PDB IDs provided. Either pass an ID as argument or pipe IDs to stdin.")
+
+    # Convert asset type names to enum
+    asset_types = [AssetType[t] for t in asset_type]
+    base_path = Path(RIBETL_DATA)  
+    manager   = RibosomeAssetManager(base_path)
+    registry  = AssetRegistry(manager)
+    
+    # Set up asset generators
+    from ribctl.etl.etl_collector import ETLCollector
+    from ribctl.lib.landmarks.ptc_via_trna import PTC_location
+    
+    @registry.register(AssetType.STRUCTURE_PROFILE)
+    async def generate_profile(rcsb_id: str) -> RibosomeStructure:
+        profile = await ETLCollector(rcsb_id).generate_profile()
+        return profile
+
+    @registry.register(AssetType.PTC)
+    async def generate_ptc(rcsb_id: str) -> PTCInfo:
+        return PTC_location(rcsb_id)
+    
+    async def process_structure(rcsb_id: str):
+        try:
+            await registry.generate_multiple(rcsb_id, asset_types, force)
+            click.echo(f"Successfully processed assets for {rcsb_id}")
+        except Exception as e:
+            logger.exception(f"Failed to process {rcsb_id}")
+            click.echo(f"Failed to process {rcsb_id}: {str(e)}", err=True)
+
+    async def process_all():
+        sem = asyncio.Semaphore(max_structures)
+        
+        async def wrapped_process(rcsb_id: str):
+            async with sem:
+                await process_structure(rcsb_id)
+        
+        tasks = [wrapped_process(rcsb_id) for rcsb_id in structures]
+        await asyncio.gather(*tasks)
+    
+    # Run the async processing
+    asyncio.run(process_all())
+
 
 @etl.command()
 @click.argument('pdb_ids', type=PDBIDsParam(), nargs=-1)
@@ -77,91 +163,104 @@ def verify_all(ctx):
     # 2. Check their existence and integrity
     # 3. Report any issues found
 
-@etl.command()
-@click.option('--asset-types', '-t', 
-              multiple=True,
-              type=click.Choice([t.name for t in AssetType], case_sensitive=True),
-              help='Asset types to acquire (if not specified, all assets will be acquired)')
-@click.option('--force', '-f', is_flag=True,
-              help='Force regeneration of existing assets')
-@click.option('--workers', '-w',
-              default=max(1, multiprocessing.cpu_count() - 1),
-              help='Number of worker processes')
-@click.option('--chunk-size', '-c', default=4,
-              help='Number of structures to process per worker')
-@click.option('--concurrent-structures', '-s', default=4,
-              help='Maximum concurrent structures per worker')
-@click.option('--concurrent-assets', '-a', default=3,
-              help='Maximum concurrent assets per structure')
-@click.argument('pdb_ids', nargs=-1, type=str)  # Changed to argument
+@etl.command(name='sync_all')
+@click.option('--asset-types', '-t', multiple=True, type=click.Choice([t.name for t in AssetType], case_sensitive=True), help='Asset types to acquire (required)', required=True)
+@click.option('--force', '-f', is_flag=True, help='Force regeneration of existing assets')
+@click.option('--workers', '-w', default=max(1, multiprocessing.cpu_count() - 1), help='Number of worker processes')
+@click.option('--chunk-size', '-c', default=4, help='Number of structures to process per worker')
+@click.option('--concurrent-structures', '-s', default=4, help='Maximum concurrent structures per worker')
+@click.option('--concurrent-assets', '-a', default=3, help='Maximum concurrent assets per structure')
+@click.option('--delay', '-d', default=2.0, help='Delay in seconds between chunks')
+@click.option('--max-retries', '-r', default=3, help='Maximum number of retries per failed operation')
 @click.pass_context
-def get(ctx, asset_types, force, workers, chunk_size,
-        concurrent_structures, concurrent_assets, pdb_ids):
-    """Download or generate assets for given PDB IDs. 
+def sync_all(ctx, asset_types, force, workers, chunk_size,
+             concurrent_structures, concurrent_assets, delay, max_retries):
+    """Synchronize all structure assets with RCSB, downloading or updating as needed.
+    
+    Compares local assets with RCSB database and only processes structures that:
+    - Don't exist locally
+    - Have different modification dates
+    - Are missing requested assets
     
     Examples:\n
     \b
-    # Get specific assets for a single structure
-    ribd.py etl get -t MMCIF -t STRUCTURE_PROFILE 3J7Z
+    # Sync specific assets for all outdated structures
+    ribd.py etl sync_all --asset-types MMCIF STRUCTURE_PROFILE
     
     \b
-    # Get all assets for multiple structures
-    ribd.py etl get 3J7Z 4V6X
-    
-    \b
-    # Process structures from a file with specific assets
-    cat pdb_list.txt | ribd.py etl get -t MMCIF -t PTC
+    # Force sync with custom settings
+    ribd.py etl sync_all --asset-types MMCIF PTC --workers 4 --force
     """
-    # Convert and validate PDB IDs
-    all_pdb_ids = []
-    for pdb_id in pdb_ids:
-        if not (len(pdb_id) == 4 and pdb_id.isalnum()):
-            click.echo(f"Invalid PDB ID format: {pdb_id}", err=True)
+    from time import sleep
+    import random
+
+    def process_with_retry(operation, max_retries):
+        """Execute operation with retries and exponential backoff"""
+        for attempt in range(max_retries):
+            try:
+                return operation()
+            except Exception as e:
+                if attempt == max_retries - 1:
+                    raise e
+                sleep_time = (attempt + 1) * 2 + random.random()
+                sleep(sleep_time)
+
+    try:
+        # Get structures that need updating
+        click.echo("Comparing local assets with RCSB database...")
+        
+        # Here we'd use your vs_rcsb method to get structures needing updates
+        structures_to_update = GlobalOps.status_vs_rcsb()
+        
+        if not structures_to_update:
+            click.echo("All structures are up to date!")
             return
-        all_pdb_ids.append(pdb_id.upper())
-    
-    # Add any piped IDs
-    all_pdb_ids.extend(ctx.obj['piped_pdb_ids'])
-    all_pdb_ids = list(set(all_pdb_ids))  # Remove duplicates
-    
-    if not all_pdb_ids:
-        click.echo("No PDB IDs provided", err=True)
+        
+        click.echo(f"Found {len(structures_to_update)} structures needing updates")
+    except Exception as e:
+        click.echo(f"Failed to compare with RCSB: {str(e)}", err=True)
         return
 
-    # If no asset types specified, use all available types
-    selected_asset_types = (
-        [AssetType[name] for name in asset_types]
-        if asset_types
-        else list(AssetType)
-    )
-
-    # Inform user about the operation
+    # Convert asset type names to enums
+    selected_asset_types = [AssetType[name] for name in asset_types]
     assets_str = ", ".join(ast.name for ast in selected_asset_types)
-    click.echo(f"Getting assets [{assets_str}] for {len(all_pdb_ids)} structures...")
+    
+    # Inform user about the operation
+    click.echo(f"Getting assets [{assets_str}] for {len(structures_to_update)} structures...")
+    click.echo(f"Using {workers} workers, {chunk_size} structures per chunk")
+    click.echo(f"Delay between chunks: {delay}s")
 
-    # Split PDB IDs into chunks
-    chunks = [all_pdb_ids[i:i + chunk_size] 
-             for i in range(0, len(all_pdb_ids), chunk_size)]
+    # Split structures into chunks
+    chunks = [structures_to_update[i:i + chunk_size] 
+             for i in range(0, len(structures_to_update), chunk_size)]
 
-    with tqdm(total=len(all_pdb_ids)) as pbar:
+    errors = []
+    with tqdm(total=len(structures_to_update)) as pbar:
         with ProcessPoolExecutor(max_workers=workers) as executor:
-            futures = [
-                executor.submit(
+            futures = []
+            
+            # Submit all chunks to the process pool
+            for chunk in chunks:
+                future = executor.submit(
                     process_chunk,
                     str(RIBETL_DATA),
                     chunk,
-                    [ast.name for ast in selected_asset_types],  # Pass enum names
+                    [ast.name for ast in selected_asset_types],
                     force,
                     concurrent_structures,
                     concurrent_assets
                 )
-                for chunk in chunks
-            ]
+                futures.append(future)
 
             # Process results as they complete
-            for future in futures:
+            for idx, future in enumerate(futures):
                 try:
-                    results = future.result()
+                    results = process_with_retry(
+                        lambda: future.result(),
+                        max_retries
+                    )
+                    
+                    # Process results for this chunk
                     for rcsb_id, asset_results in results.items():
                         pbar.update(1)
                         pbar.set_description(f"Processed {rcsb_id}")
@@ -169,13 +268,47 @@ def get(ctx, asset_types, force, workers, chunk_size,
                         # Report failures
                         for result in asset_results:
                             if not result.success:
-                                click.echo(
+                                error_msg = (
                                     f"Error with {result.asset_type_name} "
-                                    f"for {rcsb_id}: {result.error}",
-                                    err=True
+                                    f"for {rcsb_id}: {result.error}"
                                 )
+                                errors.append((rcsb_id, error_msg))
+                                click.echo(f"\n{error_msg}", err=True)
+                    
+                    # Apply delay after each chunk except the last
+                    if idx < len(futures) - 1:
+                        sleep(delay)
+                        
                 except Exception as e:
-                    click.echo(f"Error processing chunk: {str(e)}", err=True)
+                    error_msg = f"Failed to process chunk after {max_retries} retries: {str(e)}"
+                    click.echo(f"\n{error_msg}", err=True)
+                    chunk = chunks[idx]  # Get corresponding chunk for this future
+                    errors.extend((str(pdb_id), error_msg) for pdb_id in chunk)
+
+    # Final report
+    total_processed = len(structures_to_update)
+    failed = len(errors)
+    succeeded = total_processed - failed
+
+    click.echo("\nSync Summary:")
+    click.echo(f"Total structures processed: {total_processed}")
+    click.echo(f"Successfully processed: {succeeded}")
+    click.echo(f"Failed: {failed}")
+
+    if errors:
+        click.echo("\nErrors occurred during processing:")
+        for rcsb_id, error in errors:
+            click.echo(f"  - {rcsb_id}: {error}")
+    else:
+        click.echo("\nAll structures processed successfully")
+
+
+
+@cli.group()
+@click.pass_context
+def db(ctx):
+    """Database operations for ribosome data"""
+    pass
 
 @db.command()
 @click.argument('query_file', type=click.Path(exists=True))
@@ -324,6 +457,173 @@ def init(ctx, force, instance_name):
     except Exception as e:
         click.echo(f"Failed to initialize database instance: {str(e)}", err=True)
 
+
+
+@db.command()
+@click.option('--batch-size', '-b', default=100,
+              help='Number of nodes to process before committing')
+@click.option('--sleep-time', '-s', default=2.0,
+              help='Sleep time in seconds between batches')
+@click.option('--max-retries', '-r', default=3,
+              help='Maximum number of retries per operation')
+@click.option('--force', '-f', is_flag=True, help='Force upload even if structure exists')
+@click.option('--mode', '-m', type=click.Choice(['full', 'structure', 'ligands'], case_sensitive=False),
+              default = 'full',
+              help    = 'Upload mode: full (all data), structure (only structure nodes), or ligands')
+@click.argument('pdb_ids', type=PDBIDsParam(), nargs=-1)
+@click.pass_context
+def upload(ctx, batch_size, sleep_time, max_retries, force, mode, pdb_ids):
+    """Upload structures to Neo4j with memory-safe batching."""
+    from time import sleep
+    import random
+
+    def process_with_retry(operation, retries):
+        for attempt in range(retries):
+            try:
+                return operation()
+            except Exception as e:
+                if attempt == retries - 1:
+                    raise e
+                sleep_time = (attempt + 1) * 2 + random.random()
+                sleep(sleep_time)
+
+    all_pdb_ids = list(set(ctx.obj['piped_pdb_ids'] + sum(pdb_ids, [])))
+    
+    if not all_pdb_ids:
+        click.echo("No PDB IDs provided", err=True)
+        return
+    
+    try:
+        adapter = Neo4jAdapter(NEO4J_URI, NEO4J_USER, NEO4J_CURRENTDB, NEO4J_PASSWORD)
+    except Exception as e:
+        click.echo(f"Failed to connect to database: {str(e)}", err=True)
+        return
+
+    # Split into batches
+    batches = [all_pdb_ids[i:i + batch_size] 
+               for i in range(0, len(all_pdb_ids), batch_size)]
+
+    click.echo(f"Processing {len(all_pdb_ids)} structures in {len(batches)} batches")
+
+    errors = []
+    with tqdm(total=len(all_pdb_ids)) as pbar:
+        for batch_idx, batch in enumerate(batches):
+            try:
+                # Process each structure in the batch
+                for rcsb_id in batch:
+                    try:
+                        def upload_operation():
+                            if mode == 'full':
+                                adapter.add_total_structure(rcsb_id, force)
+                            elif mode == 'structure':
+                                adapter.upsert_structure_node(rcsb_id)
+                            elif mode == 'ligands':
+                                profile = RibosomeOps(rcsb_id).profile
+                                for ligand in profile.nonpolymeric_ligands:
+                                    if not "ion" in ligand.chemicalName.lower():
+                                        adapter.upsert_ligand_node(ligand, rcsb_id)
+
+                        process_with_retry(upload_operation, max_retries)
+                        pbar.update(1)
+                        pbar.set_description(f"Processed {rcsb_id}")
+
+                    except Exception as e:
+                        error_msg = f"Error processing {rcsb_id}: {str(e)}"
+                        errors.append((rcsb_id, error_msg))
+                        click.echo(f"\n{error_msg}", err=True)
+                        pbar.update(1)
+
+                # Sleep between batches to allow garbage collection
+                if batch_idx < len(batches) - 1:
+                    sleep(sleep_time)
+
+            except Exception as e:
+                error_msg = f"Failed to process batch: {str(e)}"
+                click.echo(f"\n{error_msg}", err=True)
+                errors.extend((str(pdb_id), error_msg) for pdb_id in batch)
+
+    # Final report
+    total_processed = len(all_pdb_ids)
+    failed          = len(errors)
+    succeeded       = total_processed - failed
+
+    click.echo("\nUpload Summary:")
+    click.echo(f"Total structures processed: {total_processed}")
+    click.echo(f"Successfully uploaded: {succeeded}")
+    click.echo(f"Failed: {failed}")
+
+    if errors:
+        click.echo("\nErrors occurred during upload:")
+        for rcsb_id, error in errors:
+            click.echo(f"  - {rcsb_id}: {error}")
+    else:
+        click.echo("\nAll structures uploaded successfully")
+
+
+@db.command(name='upload_all')
+@click.option('--force', '-f', is_flag=True, help='Force upload even if structures exist')
+@click.option('--mode', '-m', type=click.Choice(['full', 'structure', 'ligands'], case_sensitive=False), 
+              default='full', help='Upload mode: full (all data), structure (only structure nodes), or ligands')
+@click.pass_context
+def upload_all(ctx, force, mode):
+    """Upload all available structures one at a time."""
+    try:
+        all_structures = sorted(GlobalOps.list_all_structs())
+        if not all_structures:
+            click.echo("No structures found to upload", err=True)
+            return
+        
+        click.echo(f"Found {len(all_structures)} structures to process")
+        
+        adapter = Neo4jAdapter(NEO4J_URI, NEO4J_USER, NEO4J_CURRENTDB, NEO4J_PASSWORD)
+        
+        # Process one at a time
+        errors = []
+        with tqdm(total=len(all_structures), desc="Uploading structures") as pbar:
+            for rcsb_id in all_structures:
+                try:
+                    if mode == 'full':
+                        adapter.add_total_structure(rcsb_id, force)
+                    elif mode == 'structure':
+                        adapter.upsert_structure_node(rcsb_id)
+                    elif mode == 'ligands':
+                        profile = RibosomeOps(rcsb_id).profile
+                        for ligand in profile.nonpolymeric_ligands:
+                            if not "ion" in ligand.chemicalName.lower():
+                                adapter.upsert_ligand_node(ligand, rcsb_id)
+                                
+                    pbar.update(1)
+                    pbar.set_description(f"Processed {rcsb_id}")
+                    
+                except Exception as e:
+                    error_msg = f"Error processing {rcsb_id}: {str(e)}"
+                    errors.append((rcsb_id, error_msg))
+                    click.echo(f"\nError with {rcsb_id}: {str(e)}", err=True)
+                    pbar.update(1)
+                    continue  # Move to next structure
+
+        # Final report
+        total     = len(all_structures)
+        failed    = len(errors)
+        succeeded = total - failed
+
+        click.echo("\nUpload Summary:")
+        click.echo(f"Total structures processed: {total}")
+        click.echo(f"Successfully uploaded: {succeeded}")
+        click.echo(f"Failed: {failed}")
+
+        if errors:
+            click.echo("\nErrors occurred during upload:")
+            for rcsb_id, error in errors:
+                click.echo(f"  - {rcsb_id}: {error}")
+        else:
+            click.echo("\nAll structures uploaded successfully")
+
+    except Exception as e:
+        click.echo(f"An error occurred: {str(e)}", err=True)
+        raise
+
+
 @db.group()
 @click.pass_context
 def instance(ctx):
@@ -434,106 +734,6 @@ def list():
     except Exception as e:
         click.echo(f"Error listing databases: {str(e)}", err=True)
 
-@db.command()
-@click.option('--batch-size', '-b', default=100,
-              help='Number of nodes to process before committing')
-@click.option('--sleep-time', '-s', default=2.0,
-              help='Sleep time in seconds between batches')
-@click.option('--max-retries', '-r', default=3,
-              help='Maximum number of retries per operation')
-@click.option('--force', '-f', is_flag=True, help='Force upload even if structure exists')
-@click.option('--mode', '-m', type=click.Choice(['full', 'structure', 'ligands'], case_sensitive=False),
-              default = 'full',
-              help    = 'Upload mode: full (all data), structure (only structure nodes), or ligands')
-@click.argument('pdb_ids', type=PDBIDsParam(), nargs=-1)
-@click.pass_context
-def upload(ctx, batch_size, sleep_time, max_retries, force, mode, pdb_ids):
-    """Upload structures to Neo4j with memory-safe batching."""
-    from time import sleep
-    import random
-
-    def process_with_retry(operation, retries):
-        for attempt in range(retries):
-            try:
-                return operation()
-            except Exception as e:
-                if attempt == retries - 1:
-                    raise e
-                sleep_time = (attempt + 1) * 2 + random.random()
-                sleep(sleep_time)
-
-    all_pdb_ids = list(set(ctx.obj['piped_pdb_ids'] + sum(pdb_ids, [])))
-    
-    if not all_pdb_ids:
-        click.echo("No PDB IDs provided", err=True)
-        return
-    
-    try:
-        adapter = Neo4jAdapter(NEO4J_URI, NEO4J_USER, NEO4J_CURRENTDB, NEO4J_PASSWORD)
-    except Exception as e:
-        click.echo(f"Failed to connect to database: {str(e)}", err=True)
-        return
-
-    # Split into batches
-    batches = [all_pdb_ids[i:i + batch_size] 
-               for i in range(0, len(all_pdb_ids), batch_size)]
-
-    click.echo(f"Processing {len(all_pdb_ids)} structures in {len(batches)} batches")
-
-    errors = []
-    with tqdm(total=len(all_pdb_ids)) as pbar:
-        for batch_idx, batch in enumerate(batches):
-            try:
-                # Process each structure in the batch
-                for rcsb_id in batch:
-                    try:
-                        def upload_operation():
-                            if mode == 'full':
-                                adapter.add_total_structure(rcsb_id, force)
-                            elif mode == 'structure':
-                                adapter.upsert_structure_node(rcsb_id)
-                            elif mode == 'ligands':
-                                profile = RibosomeOps(rcsb_id).profile
-                                for ligand in profile.nonpolymeric_ligands:
-                                    if not "ion" in ligand.chemicalName.lower():
-                                        adapter.upsert_ligand_node(ligand, rcsb_id)
-
-                        process_with_retry(upload_operation, max_retries)
-                        pbar.update(1)
-                        pbar.set_description(f"Processed {rcsb_id}")
-
-                    except Exception as e:
-                        error_msg = f"Error processing {rcsb_id}: {str(e)}"
-                        errors.append((rcsb_id, error_msg))
-                        click.echo(f"\n{error_msg}", err=True)
-                        pbar.update(1)
-
-                # Sleep between batches to allow garbage collection
-                if batch_idx < len(batches) - 1:
-                    sleep(sleep_time)
-
-            except Exception as e:
-                error_msg = f"Failed to process batch: {str(e)}"
-                click.echo(f"\n{error_msg}", err=True)
-                errors.extend((str(pdb_id), error_msg) for pdb_id in batch)
-
-    # Final report
-    total_processed = len(all_pdb_ids)
-    failed          = len(errors)
-    succeeded       = total_processed - failed
-
-    click.echo("\nUpload Summary:")
-    click.echo(f"Total structures processed: {total_processed}")
-    click.echo(f"Successfully uploaded: {succeeded}")
-    click.echo(f"Failed: {failed}")
-
-    if errors:
-        click.echo("\nErrors occurred during upload:")
-        for rcsb_id, error in errors:
-            click.echo(f"  - {rcsb_id}: {error}")
-    else:
-        click.echo("\nAll structures uploaded successfully")
-
 @instance.command(name='delete')
 @click.argument('name', required=True)
 @click.option('--force', '-f', is_flag=True,
@@ -600,372 +800,6 @@ def delete_instance(ctx, name, force):
     except Exception as e:
         click.echo(f"Failed to delete database instance: {str(e)}", err=True)
 
-@etl.command(name='get_all')
-@click.option('--asset-types', '-t', 
-              multiple=True,
-              type=click.Choice([t.name for t in AssetType], case_sensitive=True),
-              help='Asset types to acquire (required)',
-              required=True)
-@click.option('--force', '-f', is_flag=True,
-              help='Force regeneration of existing assets')
-@click.option('--workers', '-w',
-              default=max(1, multiprocessing.cpu_count() - 1),
-              help='Number of worker processes')
-@click.option('--chunk-size', '-c', default=4,
-              help='Number of structures to process per worker')
-@click.option('--concurrent-structures', '-s', default=4,
-              help='Maximum concurrent structures per worker')
-@click.option('--concurrent-assets', '-a', default=3,
-              help='Maximum concurrent assets per structure')
-@click.option('--delay', '-d',
-              default=2.0,
-              help='Delay in seconds between chunks')
-@click.option('--max-retries', '-r',
-              default=3,
-              help='Maximum number of retries per failed operation')
-@click.pass_context
-def get_all(ctx, asset_types, force, workers, chunk_size,
-            concurrent_structures, concurrent_assets, delay, max_retries):
-    """Download or generate assets for all available structures.
-    
-    Requires explicit specification of which asset types to acquire using --asset-types/-t option.
-    
-    Examples:\n
-    \b
-    # Get specific assets for all structures
-    ribd.py etl get_all --asset-types MMCIF STRUCTURE_PROFILE
-    
-    \b
-    # Get assets with custom settings
-    ribd.py etl get_all --asset-types MMCIF PTC --workers 4 --chunk-size 10
-    
-    \b
-    # Process with retries and delays
-    ribd.py etl get_all --asset-types STRUCTURE_PROFILE --delay 5 --max-retries 5
-    """
-    from time import sleep
-    import random
-
-    def process_with_retry(operation, max_retries):
-        """Execute operation with retries and exponential backoff"""
-        for attempt in range(max_retries):
-            try:
-                return operation()
-            except Exception as e:
-                if attempt == max_retries - 1:
-                    raise e
-                sleep_time = (attempt + 1) * 2 + random.random()
-                sleep(sleep_time)
-
-    try:
-        all_structures = GlobalOps.list_all_structs()
-        if not all_structures:
-            click.echo("No structures found to process", err=True)
-            return
-        
-        click.echo(f"Found {len(all_structures)} structures to process")
-    except Exception as e:
-        click.echo(f"Failed to get structure list: {str(e)}", err=True)
-        return
-
-    # Convert asset type names to enums
-    selected_asset_types = [AssetType[name] for name in asset_types]
-    assets_str = ", ".join(ast.name for ast in selected_asset_types)
-    
-    # Inform user about the operation
-    click.echo(f"Getting assets [{assets_str}] for {len(all_structures)} structures...")
-    click.echo(f"Using {workers} workers, {chunk_size} structures per chunk")
-    click.echo(f"Delay between chunks: {delay}s")
-
-    # Split all structures into chunks
-    chunks = [all_structures[i:i + chunk_size] 
-             for i in range(0, len(all_structures), chunk_size)]
-
-    errors = []
-    with tqdm(total=len(all_structures)) as pbar:
-        with ProcessPoolExecutor(max_workers=workers) as executor:
-            futures = []
-            
-            # Submit all chunks to the process pool
-            for chunk in chunks:
-                future = executor.submit(
-                    process_chunk,
-                    str(RIBETL_DATA),
-                    chunk,
-                    [ast.name for ast in selected_asset_types],
-                    force,
-                    concurrent_structures,
-                    concurrent_assets
-                )
-                futures.append(future)
-
-            # Process results as they complete
-            for idx, future in enumerate(futures):
-                try:
-                    results = process_with_retry(
-                        lambda: future.result(),
-                        max_retries
-                    )
-                    
-                    # Process results for this chunk
-                    for rcsb_id, asset_results in results.items():
-                        pbar.update(1)
-                        pbar.set_description(f"Processed {rcsb_id}")
-                        
-                        # Report failures
-                        for result in asset_results:
-                            if not result.success:
-                                error_msg = (
-                                    f"Error with {result.asset_type_name} "
-                                    f"for {rcsb_id}: {result.error}"
-                                )
-                                errors.append((rcsb_id, error_msg))
-                                click.echo(f"\n{error_msg}", err=True)
-                    
-                    # Apply delay after each chunk except the last
-                    if idx < len(futures) - 1:
-                        sleep(delay)
-                        
-                except Exception as e:
-                    error_msg = f"Failed to process chunk after {max_retries} retries: {str(e)}"
-                    click.echo(f"\n{error_msg}", err=True)
-                    chunk = chunks[idx]  # Get corresponding chunk for this future
-                    errors.extend((str(pdb_id), error_msg) for pdb_id in chunk)
-
-    # Final report
-    total_processed = len(all_structures)
-    failed = len(errors)
-    succeeded = total_processed - failed
-
-    click.echo("\nProcessing Summary:")
-    click.echo(f"Total structures processed: {total_processed}")
-    click.echo(f"Successfully processed: {succeeded}")
-    click.echo(f"Failed: {failed}")
-
-    if errors:
-        click.echo("\nErrors occurred during processing:")
-        for rcsb_id, error in errors:
-            click.echo(f"  - {rcsb_id}: {error}")
-    else:
-        click.echo("\nAll structures processed successfully")
-    # Final report
-    total_processed = len(all_structures)
-    failed = len(errors)
-    succeeded = total_processed - failed
-
-    click.echo("\nProcessing Summary:")
-    click.echo(f"Total structures processed: {total_processed}")
-    click.echo(f"Successfully processed: {succeeded}")
-    click.echo(f"Failed: {failed}")
-
-    if errors:
-        click.echo("\nErrors occurred during processing:")
-        for rcsb_id, error in errors:
-            click.echo(f"  - {rcsb_id}: {error}")
-    else:
-        click.echo("\nAll structures processed successfully")
-
-@etl.command(name='sync_all')
-@click.option('--asset-types', '-t', multiple=True, type=click.Choice([t.name for t in AssetType], case_sensitive=True), help='Asset types to acquire (required)', required=True)
-@click.option('--force', '-f', is_flag=True, help='Force regeneration of existing assets')
-@click.option('--workers', '-w', default=max(1, multiprocessing.cpu_count() - 1), help='Number of worker processes')
-@click.option('--chunk-size', '-c', default=4, help='Number of structures to process per worker')
-@click.option('--concurrent-structures', '-s', default=4, help='Maximum concurrent structures per worker')
-@click.option('--concurrent-assets', '-a', default=3, help='Maximum concurrent assets per structure')
-@click.option('--delay', '-d', default=2.0, help='Delay in seconds between chunks')
-@click.option('--max-retries', '-r', default=3, help='Maximum number of retries per failed operation')
-@click.pass_context
-def sync_all(ctx, asset_types, force, workers, chunk_size,
-             concurrent_structures, concurrent_assets, delay, max_retries):
-    """Synchronize all structure assets with RCSB, downloading or updating as needed.
-    
-    Compares local assets with RCSB database and only processes structures that:
-    - Don't exist locally
-    - Have different modification dates
-    - Are missing requested assets
-    
-    Examples:\n
-    \b
-    # Sync specific assets for all outdated structures
-    ribd.py etl sync_all --asset-types MMCIF STRUCTURE_PROFILE
-    
-    \b
-    # Force sync with custom settings
-    ribd.py etl sync_all --asset-types MMCIF PTC --workers 4 --force
-    """
-    from time import sleep
-    import random
-
-    def process_with_retry(operation, max_retries):
-        """Execute operation with retries and exponential backoff"""
-        for attempt in range(max_retries):
-            try:
-                return operation()
-            except Exception as e:
-                if attempt == max_retries - 1:
-                    raise e
-                sleep_time = (attempt + 1) * 2 + random.random()
-                sleep(sleep_time)
-
-    try:
-        # Get structures that need updating
-        click.echo("Comparing local assets with RCSB database...")
-        
-        # Here we'd use your vs_rcsb method to get structures needing updates
-        structures_to_update = GlobalOps.status_vs_rcsb()
-        
-        if not structures_to_update:
-            click.echo("All structures are up to date!")
-            return
-        
-        click.echo(f"Found {len(structures_to_update)} structures needing updates")
-    except Exception as e:
-        click.echo(f"Failed to compare with RCSB: {str(e)}", err=True)
-        return
-
-    # Convert asset type names to enums
-    selected_asset_types = [AssetType[name] for name in asset_types]
-    assets_str = ", ".join(ast.name for ast in selected_asset_types)
-    
-    # Inform user about the operation
-    click.echo(f"Getting assets [{assets_str}] for {len(structures_to_update)} structures...")
-    click.echo(f"Using {workers} workers, {chunk_size} structures per chunk")
-    click.echo(f"Delay between chunks: {delay}s")
-
-    # Split structures into chunks
-    chunks = [structures_to_update[i:i + chunk_size] 
-             for i in range(0, len(structures_to_update), chunk_size)]
-
-    errors = []
-    with tqdm(total=len(structures_to_update)) as pbar:
-        with ProcessPoolExecutor(max_workers=workers) as executor:
-            futures = []
-            
-            # Submit all chunks to the process pool
-            for chunk in chunks:
-                future = executor.submit(
-                    process_chunk,
-                    str(RIBETL_DATA),
-                    chunk,
-                    [ast.name for ast in selected_asset_types],
-                    force,
-                    concurrent_structures,
-                    concurrent_assets
-                )
-                futures.append(future)
-
-            # Process results as they complete
-            for idx, future in enumerate(futures):
-                try:
-                    results = process_with_retry(
-                        lambda: future.result(),
-                        max_retries
-                    )
-                    
-                    # Process results for this chunk
-                    for rcsb_id, asset_results in results.items():
-                        pbar.update(1)
-                        pbar.set_description(f"Processed {rcsb_id}")
-                        
-                        # Report failures
-                        for result in asset_results:
-                            if not result.success:
-                                error_msg = (
-                                    f"Error with {result.asset_type_name} "
-                                    f"for {rcsb_id}: {result.error}"
-                                )
-                                errors.append((rcsb_id, error_msg))
-                                click.echo(f"\n{error_msg}", err=True)
-                    
-                    # Apply delay after each chunk except the last
-                    if idx < len(futures) - 1:
-                        sleep(delay)
-                        
-                except Exception as e:
-                    error_msg = f"Failed to process chunk after {max_retries} retries: {str(e)}"
-                    click.echo(f"\n{error_msg}", err=True)
-                    chunk = chunks[idx]  # Get corresponding chunk for this future
-                    errors.extend((str(pdb_id), error_msg) for pdb_id in chunk)
-
-    # Final report
-    total_processed = len(structures_to_update)
-    failed = len(errors)
-    succeeded = total_processed - failed
-
-    click.echo("\nSync Summary:")
-    click.echo(f"Total structures processed: {total_processed}")
-    click.echo(f"Successfully processed: {succeeded}")
-    click.echo(f"Failed: {failed}")
-
-    if errors:
-        click.echo("\nErrors occurred during processing:")
-        for rcsb_id, error in errors:
-            click.echo(f"  - {rcsb_id}: {error}")
-    else:
-        click.echo("\nAll structures processed successfully")
-
-@db.command(name='upload_all')
-@click.option('--force', '-f', is_flag=True, help='Force upload even if structures exist')
-@click.option('--mode', '-m', type=click.Choice(['full', 'structure', 'ligands'], case_sensitive=False), 
-              default='full', help='Upload mode: full (all data), structure (only structure nodes), or ligands')
-@click.pass_context
-def upload_all(ctx, force, mode):
-    """Upload all available structures one at a time."""
-    try:
-        all_structures = sorted(GlobalOps.list_all_structs())
-        if not all_structures:
-            click.echo("No structures found to upload", err=True)
-            return
-        
-        click.echo(f"Found {len(all_structures)} structures to process")
-        
-        adapter = Neo4jAdapter(NEO4J_URI, NEO4J_USER, NEO4J_CURRENTDB, NEO4J_PASSWORD)
-        
-        # Process one at a time
-        errors = []
-        with tqdm(total=len(all_structures), desc="Uploading structures") as pbar:
-            for rcsb_id in all_structures:
-                try:
-                    if mode == 'full':
-                        adapter.add_total_structure(rcsb_id, force)
-                    elif mode == 'structure':
-                        adapter.upsert_structure_node(rcsb_id)
-                    elif mode == 'ligands':
-                        profile = RibosomeOps(rcsb_id).profile
-                        for ligand in profile.nonpolymeric_ligands:
-                            if not "ion" in ligand.chemicalName.lower():
-                                adapter.upsert_ligand_node(ligand, rcsb_id)
-                                
-                    pbar.update(1)
-                    pbar.set_description(f"Processed {rcsb_id}")
-                    
-                except Exception as e:
-                    error_msg = f"Error processing {rcsb_id}: {str(e)}"
-                    errors.append((rcsb_id, error_msg))
-                    click.echo(f"\nError with {rcsb_id}: {str(e)}", err=True)
-                    pbar.update(1)
-                    continue  # Move to next structure
-
-        # Final report
-        total     = len(all_structures)
-        failed    = len(errors)
-        succeeded = total - failed
-
-        click.echo("\nUpload Summary:")
-        click.echo(f"Total structures processed: {total}")
-        click.echo(f"Successfully uploaded: {succeeded}")
-        click.echo(f"Failed: {failed}")
-
-        if errors:
-            click.echo("\nErrors occurred during upload:")
-            for rcsb_id, error in errors:
-                click.echo(f"  - {rcsb_id}: {error}")
-        else:
-            click.echo("\nAll structures uploaded successfully")
-
-    except Exception as e:
-        click.echo(f"An error occurred: {str(e)}", err=True)
-        raise
 
 if __name__ == '__main__':
     cli(obj={})
