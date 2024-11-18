@@ -1,16 +1,8 @@
 import sys
 sys.path.append("/home/rtviii/dev/riboxyz")
 from functools import partial
-import click
-from typing import List
-import sys
-from pathlib import Path
-from ribctl.asset_manager.asset_types import AssetType
 from ribctl.asset_manager.asset_manager import RibosomeAssetManager
 from ribctl.asset_manager.asset_registry import AssetRegistry
-from concurrent.futures import ProcessPoolExecutor
-import asyncio
-from loguru import logger
 from ribctl.lib.schema.types_ribosome import PTCInfo, RibosomeStructure
 from ribctl.asset_manager.assets_structure import StructureAssets
 from ribctl.global_ops import GlobalOps
@@ -18,9 +10,14 @@ from ribctl.ribosome_ops import RibosomeOps
 from neo4j_ribosome import NEO4J_CURRENTDB, NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER
 from neo4j_ribosome.db_lib_builder import Neo4jAdapter
 from ribctl import RIBETL_DATA
-from ribctl.asset_manager.parallel_acquisition import process_chunk
+from typing import List, Tuple, Dict
 import click
-from typing import List, Tuple
+from pathlib import Path
+import asyncio
+from concurrent.futures import ProcessPoolExecutor
+import math
+from loguru import logger
+from ribctl.asset_manager.parallel_acquisition import process_chunk, AcquisitionResult
 import multiprocessing
 from concurrent.futures import ALL_COMPLETED, Future, ProcessPoolExecutor, ThreadPoolExecutor, wait
 from tqdm import tqdm
@@ -137,6 +134,114 @@ def get(asset_type: List[str], pdb_id: str, force: bool, max_structures: int, ma
     
     # Run the async processing
     asyncio.run(process_all())
+
+
+def process_chunk_with_tracking(
+    chunk: List[str],
+    base_dir: str,
+    asset_type_names: List[str],
+    force: bool,
+    max_structures: int,
+    max_assets: int,
+) -> Dict[str, List[AcquisitionResult]]:
+    """Process a chunk of structures and track progress. This function needs to be at module level to be pickleable."""
+    result = process_chunk(
+        base_dir=base_dir,
+        rcsb_ids=chunk,
+        asset_type_names=asset_type_names,
+        force=force,
+        max_concurrent_structures=max_structures,
+        max_concurrent_assets=max_assets
+    )
+    
+    for rcsb_id, acquisitions in result.items():
+        success = all(acq.success for acq in acquisitions)
+        if success:
+            print(f"Successfully processed assets for {rcsb_id}")
+        else:
+            failures = [f"{acq.asset_type_name}: {acq.error}" for acq in acquisitions if not acq.success]
+            print(f"Failed to process {rcsb_id}:", file=sys.stderr)
+            for failure in failures:
+                print(f"  - {failure}", file=sys.stderr)
+    
+    return result
+
+@etl.command()
+@click.option('-t', '--asset-type', 
+              type=click.Choice([t.name for t in AssetType], case_sensitive=True),
+              multiple=True,
+              required=True,
+              help='Asset type(s) to acquire. Can be specified multiple times.')
+@click.option('--force', is_flag=True, help='Force regeneration of existing assets')
+@click.option('--max-structures', default=4, help='Maximum number of concurrent structures per process')
+@click.option('--max-assets', default=3, help='Maximum number of concurrent assets per structure')
+@click.option('--processes', default=4, help='Number of parallel processes to use')
+@click.option('--chunk-size', default=10, help='Number of structures to process per chunk')
+def get_all(
+    asset_type: List[str], 
+    force: bool, 
+    max_structures: int, 
+    max_assets: int,
+    processes: int,
+    chunk_size: int
+):
+    """
+    Acquire assets for ALL structures in the database using parallel processing.
+    Structures are processed in parallel chunks using multiple CPU cores.
+    """
+    # Convert asset type names to enum
+    asset_types = [AssetType[t] for t in asset_type]
+    
+    # Get all available structures
+    structures = GlobalOps.list_all_structs()
+    
+    if not structures:
+        click.echo("No structures found in the database!", err=True)
+        return
+    
+    total_structures = len(structures)
+    click.echo(f"Found {total_structures} structures to process")
+    
+    # Split structures into chunks
+    chunks = [
+        structures[i:i + chunk_size] 
+        for i in range(0, len(structures), chunk_size)
+    ]
+    
+    # Create a partial function with all the fixed arguments
+    process_func = partial(
+        process_chunk_with_tracking,
+        base_dir=str(Path(RIBETL_DATA)),
+        asset_type_names=[t.name for t in asset_types],
+        force=force,
+        max_structures=max_structures,
+        max_assets=max_assets
+    )
+    
+    # Process chunks in parallel
+    click.echo(f"Processing {len(chunks)} chunks using {processes} processes")
+    processed = 0
+    failed = 0
+    
+    with ProcessPoolExecutor(max_workers=processes) as executor:
+        for result in executor.map(process_func, chunks):
+            # Count successes and failures from results
+            for rcsb_id, acquisitions in result.items():
+                if all(acq.success for acq in acquisitions):
+                    processed += 1
+                else:
+                    failed += 1
+    
+    # Print final summary
+    click.echo(f"\nProcessing complete:")
+    click.echo(f"Total structures: {total_structures}")
+    click.echo(f"Successfully processed: {processed}")
+    click.echo(f"Failed: {failed}")
+    
+    # Return non-zero exit code if any failures
+    if failed > 0:
+        raise click.ClickException(f"Failed to process {failed} structures")
+
 
 
 @etl.command()
