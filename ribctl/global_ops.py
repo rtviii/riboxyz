@@ -25,12 +25,21 @@ from ribctl.logs.loggers import get_etl_logger
 from ribctl.ribosome_ops import RibosomeOps
 
 
-class GlobalOps():
+class GlobalOps:
     @staticmethod
-    def status_vs_rcsb() -> list[str]:
+    def missing_profiles() -> list[str]:
         """Return a list of structures that are in the RCSB but not in the local database."""
         return list(
-            set(GlobalOps.current_rcsb_structs()) - set(GlobalOps.list_all_structs())
+            set(GlobalOps.current_rcsb_structs()) - set(GlobalOps.list_profiles())
+        )
+
+    @staticmethod
+    def missing_db_entries(db_entries:list[str]) -> list[str]:
+        """Return a list of structures that are in the RCSB but not in the local database."""
+
+        return list(
+            set(GlobalOps.current_rcsb_structs())
+            - set(db_entries )
         )
 
     @staticmethod
@@ -76,7 +85,7 @@ class GlobalOps():
         return sorted(requests.get(query).json()["result_set"])
 
     @staticmethod
-    def list_all_structs() -> list[str]:
+    def list_profiles() -> list[str]:
 
         profiles_exist = [
             (
@@ -90,14 +99,14 @@ class GlobalOps():
 
     @staticmethod
     def ptc_references(ribosome_type: typing.Literal["arch", "bact", "euk", "mito"]):
-        filename   = "ptc_reference_residues_{}.pickle".format(ribosome_type.upper())
+        filename = "ptc_reference_residues_{}.pickle".format(ribosome_type.upper())
         ptcrefpath = os.path.join(ASSETS_PATH, "cache_landmarks", filename)
         return ptcrefpath
 
     @staticmethod
     def collect_all_taxa() -> set[PhylogenyNode]:
         _ = set()
-        for struct in GlobalOps.list_all_structs():
+        for struct in GlobalOps.list_profiles():
             rp = RibosomeOps(struct).profile
             for org in [*rp.src_organism_ids, *rp.host_organism_ids]:
                 # if Taxid.rank(org) not in list(typing.get_args(PhylogenyRank)):

@@ -7,7 +7,6 @@ from ribctl.lib.schema.types_ribosome import (
     PolynucleotideClass,
     PolypeptideClass,
 )
-
 sys.dont_write_bytecode = True
 from neo4j import ManagedTransaction, Transaction
 from neo4j_ribosome.db_lib_builder import Neo4jAdapter
