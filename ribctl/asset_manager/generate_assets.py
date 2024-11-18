@@ -10,18 +10,20 @@ from ribctl.lib.schema.types_ribosome import PTCInfo, RibosomeStructure
 from ribctl.lib.utils import download_unpack_place
 
 
-manager  = RibosomeAssetManager(RIBETL_DATA)
+manager = RibosomeAssetManager(RIBETL_DATA)
 registry = AssetRegistry(manager)
+
 
 @registry.register(AssetType.STRUCTURE_PROFILE)
 async def generate_profile(rcsb_id: str) -> RibosomeStructure:
-    profile = await ETLCollector(rcsb_id).process_structure()
+    profile = await ETLCollector(rcsb_id).generate_profile()
     return profile
+
 
 @registry.register(AssetType.PTC)
 async def generate_ptc(rcsb_id: str) -> PTCInfo:
     return PTC_location(rcsb_id)
 
 
-rcsb_id = '4UG0'
-asyncio.run(registry.generate_asset(rcsb_id,AssetType.STRUCTURE_PROFILE))
+rcsb_id = "4UG0"
+asyncio.run(registry.generate_asset(rcsb_id, AssetType.STRUCTURE_PROFILE))
