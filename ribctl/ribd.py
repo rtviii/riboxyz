@@ -424,40 +424,7 @@ def list():
     except Exception as e:
         click.echo(f"Error listing databases: {str(e)}", err=True)
 
-@instance.command()
-@click.argument('name')
-@click.option('--output', '-o', type=click.Path(), 
-              help='Output directory for backup files')
-def backup(name: str, output: str | None):
-    """Backup a Neo4j database instance
-    
-    Examples:\n
-    \b
-    # Backup to default location
-    ribd.py db instance backup ribosome_test
-    
-    \b
-    # Backup to specific directory
-    ribd.py db instance backup ribosome_test -o /path/to/backup
-    """
-    if not output:
-        output = str(Path.home() / '.ribd' / 'backups')
-    
-    output_path = Path(output)
-    output_path.mkdir(parents=True, exist_ok=True)
-    
-    try:
-        # TODO: Implement actual backup logic using neo4j-admin dump
-        # This would require shell access to the container
-        click.echo(f"Backing up database {name} to {output_path}")
-        click.echo("Backup functionality not yet implemented")
-        
-    except Exception as e:
-        click.echo(f"Error backing up database: {str(e)}", err=True)
 @db.command(name='upload_all')
-@click.option('--workers', '-w',
-              default=5,  # Reduced default workers
-              help='Number of worker threads')
 @click.option('--force', '-f', is_flag=True, 
               help='Force upload even if structures exist')
 @click.option('--mode', '-m', 
@@ -468,37 +435,38 @@ def backup(name: str, output: str | None):
               help='Neo4j database instance name', 
               default=NEO4J_CURRENTDB)
 @click.option('--chunk-size', '-c', 
-              default=5,  # Reduced default chunk size
-              help='Number of structures to process per chunk')
+              default=5,
+              help='Number of structures to process before sleeping')
 @click.option('--delay', '-d',
               default=2.0,
-              help='Delay in seconds between chunk processing')
+              help='Delay in seconds between chunks')
 @click.option('--max-retries', '-r',
               default=3,
               help='Maximum number of retries per structure')
 @click.pass_context
-def upload_all(ctx, workers, force, mode, instance, chunk_size, delay, max_retries):
-    """Upload all available structures to Neo4j database in parallel with safeguards.
+def upload_all(ctx, force, mode, instance, chunk_size, delay, max_retries):
+    """Upload all available structures to Neo4j database sequentially with safeguards.
     
     Examples:\n
     \b
-    # Upload with conservative settings
-    ribd.py db upload_all --workers 5 --chunk-size 5 --delay 2
+    # Upload with default settings
+    ribd.py db upload_all
     
     \b
-    # Upload with more aggressive settings
-    ribd.py db upload_all --workers 10 --chunk-size 8 --delay 1
+    # Upload with custom chunk size and delay
+    ribd.py db upload_all --chunk-size 10 --delay 1
     """
     from time import sleep
     import random
 
-    def process_with_retry(adapter, rcsb_id, operation, max_retries):
+    def process_with_retry(operation, max_retries):
         for attempt in range(max_retries):
             try:
-                return operation()
+                operation()
+                return None
             except Exception as e:
                 if attempt == max_retries - 1:
-                    raise e
+                    return str(e)
                 sleep_time = (attempt + 1) * 2 + random.random()  # Exponential backoff
                 sleep(sleep_time)
                 continue
@@ -520,78 +488,73 @@ def upload_all(ctx, workers, force, mode, instance, chunk_size, delay, max_retri
         click.echo(f"Failed to get structure list: {str(e)}", err=True)
         return
 
-    # Split structures into chunks
-    chunks = [all_structures[i:i + chunk_size] 
-             for i in range(0, len(all_structures), chunk_size)]
-
-    click.echo(f"Starting parallel upload to instance '{instance}'...")
-    click.echo(f"Processing in chunks of {chunk_size} with {workers} workers")
+    click.echo(f"Starting sequential upload to instance '{instance}'...")
+    click.echo(f"Processing with {chunk_size} structures per chunk")
     click.echo(f"Using {delay}s delay between chunks")
 
+    errors = []
     with tqdm(total=len(all_structures), 
              desc="Uploading structures",
              unit="structure") as pbar:
         
-        for chunk_idx, chunk in enumerate(chunks):
-            futures: list[Future] = []
-            chunk_errors: list[tuple[str, str]] = []
-            
-            # Process one chunk at a time
-            with ThreadPoolExecutor(max_workers=workers) as executor:
-                for rcsb_id in chunk:
-                    if mode == 'full':
-                        operation = partial(adapter.add_total_structure, rcsb_id, force)
-                    elif mode == 'structure':
-                        operation = partial(adapter.upsert_structure_node, rcsb_id)
-                    elif mode == 'ligands':
-                        try:
-                            profile = RibosomeOps(rcsb_id).profile
-                            operations = []
-                            for ligand in profile.nonpolymeric_ligands:
-                                if not "ion" in ligand.chemicalName.lower():
-                                    operations.append(
-                                        partial(adapter.upsert_ligand_node, ligand, rcsb_id)
-                                    )
-                        except Exception as e:
-                            chunk_errors.append((rcsb_id, f"Failed to process ligands: {str(e)}"))
-                            continue
-                    
-                    def process_structure(operation, rcsb_id=rcsb_id):
-                        try:
-                            process_with_retry(adapter, rcsb_id, operation, max_retries)
-                            return None
-                        except Exception as e:
-                            return (rcsb_id, str(e))
+        for idx, rcsb_id in enumerate(sorted(all_structures)):
+            try:
+                if mode == 'full':
+                    error = process_with_retry(
+                        lambda: adapter.add_total_structure(rcsb_id, force),
+                        max_retries
+                    )
+                elif mode == 'structure':
+                    error = process_with_retry(
+                        lambda: adapter.upsert_structure_node(rcsb_id),
+                        max_retries
+                    )
+                elif mode == 'ligands':
+                    try:
+                        profile = RibosomeOps(rcsb_id).profile
+                        for ligand in profile.nonpolymeric_ligands:
+                            if not "ion" in ligand.chemicalName.lower():
+                                error = process_with_retry(
+                                    lambda: adapter.upsert_ligand_node(ligand, rcsb_id),
+                                    max_retries
+                                )
+                                if error:
+                                    raise Exception(error)
+                    except Exception as e:
+                        error = str(e)
+                
+                if error:
+                    errors.append((rcsb_id, error))
+                    click.echo(f"\nError processing {rcsb_id}: {error}", err=True)
+                
+                pbar.update(1)
+                pbar.set_description(f"Processed {rcsb_id}")
 
-                    if mode == 'ligands' and operations:
-                        for op in operations:
-                            fut = executor.submit(process_structure, op)
-                            futures.append(fut)
-                    else:
-                        fut = executor.submit(process_structure, operation)
-                        futures.append(fut)
+                # Sleep after each chunk
+                if (idx + 1) % chunk_size == 0:
+                    sleep(delay)
 
-                # Wait for current chunk to complete
-                for future in futures:
-                    result = future.result()
-                    if result:
-                        chunk_errors.append(result)
-                    pbar.update(1)
-
-            # Report any errors from this chunk
-            if chunk_errors:
-                click.echo(f"\nErrors in chunk {chunk_idx + 1}:")
-                for rcsb_id, error in chunk_errors:
-                    click.echo(f"  - {rcsb_id}: {error}")
-
-            # Delay between chunks
-            if chunk_idx < len(chunks) - 1:  # Don't delay after last chunk
-                sleep(delay)
+            except Exception as e:
+                errors.append((rcsb_id, str(e)))
+                click.echo(f"\nUnexpected error processing {rcsb_id}: {str(e)}", err=True)
+                pbar.update(1)
 
     # Final report
-    click.echo("\nUpload completed!")
-    click.echo(f"Total structures processed: {len(all_structures)}")
+    total_processed = len(all_structures)
+    failed = len(errors)
+    succeeded = total_processed - failed
 
+    click.echo("\nUpload Summary:")
+    click.echo(f"Total structures processed: {total_processed}")
+    click.echo(f"Successfully uploaded: {succeeded}")
+    click.echo(f"Failed: {failed}")
+
+    if errors:
+        click.echo("\nErrors occurred during upload:")
+        for rcsb_id, error in errors:
+            click.echo(f"  - {rcsb_id}: {error}")
+    else:
+        click.echo("\nAll structures uploaded successfully")
 
 
 @instance.command(name='delete')
