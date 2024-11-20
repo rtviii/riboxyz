@@ -1,20 +1,56 @@
-name: Debug SSH Connection
+name: Check VM Status
 
 on:
-  workflow_dispatch: # Manual trigger only for testing
+  workflow_dispatch:
+  schedule:
+    - cron: '*/30 * * * *'
 
 jobs:
-  test-ssh:
+  check-vm:
     runs-on: ubuntu-latest
     steps:
-      - name: Debug SSH Connection
+      - name: Check Status File
+        id: check
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
-          debug: true # Enable debug output
           script: |
-            whoami
-            pwd
-            echo "Connection successful! $(whoami)"
+            cat ~/test-actions/status.json
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          ref: master  # Specify the branch
+          fetch-depth: 0  # Fetch all history
+
+      - name: Update README
+        run: |
+          # Configure git
+          git config --global user.name 'GitHub Action'
+          git config --global user.email 'action@github.com'
+          
+          # Pull latest changes
+          git pull origin master
+          
+          # Update README content
+          if grep -q "## Status" README.md; then
+            # If status section exists, update it
+            sed -i '/## Status/,/^$/c\## Status\n![Status](https://img.shields.io/badge/status-ready-green)\n' README.md
+          else
+            # If no status section, add it at the top
+            echo -e "## Status\n![Status](https://img.shields.io/badge/status-ready-green)\n\n$(cat README.md)" > README.md.tmp
+            mv README.md.tmp README.md
+          fi
+          
+          # Commit and push if there are changes
+          git add README.md
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Update status badge [skip ci]"
+            git push origin master
+          fi
+
+
