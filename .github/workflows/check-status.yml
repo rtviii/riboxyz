@@ -1,0 +1,39 @@
+# .github/workflows/check-status.yml
+name: Check VM Status
+
+on:
+  # Manual trigger
+  workflow_dispatch:
+  # Every 30 minutes
+  schedule:
+    - cron: '*/30 * * * *'
+
+jobs:
+  check-vm:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Status File
+        id: check
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          script: |
+            cat ~/test-actions/status.json
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Update README
+        run: |
+          # Replace or add status section in README
+          echo "## Status" > README.md
+          echo "![Status](https://img.shields.io/badge/status-ready-green)" >> README.md
+          
+          # Commit and push changes
+          git config --global user.name 'GitHub Action'
+          git config --global user.email 'action@github.com'
+          git add README.md
+          git commit -m "Update status badge [skip ci]"
+          git push
