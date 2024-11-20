@@ -1,3 +1,6 @@
+## Status
+![Status](https://img.shields.io/badge/status-ready-green)
+
 <div style="display: flex; align-items: center; max-width: 800px; margin: 0 auto;">
   <div style="width: 30%;">
   <img src="./ribxz_logo_black.png" alt="Riboxyz Logo" style="width:450px; height:400px; padding: 10px;">
@@ -16,7 +19,3 @@
   </div> -->
 Paper: <a href="https://academic.oup.com/nar/article/51/D1/D509/6777803">A comprehensive database for visualizing and analyzing ribosome structures</a>
 </div>
-
-
-
-
