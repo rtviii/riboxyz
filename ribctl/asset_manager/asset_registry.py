@@ -5,7 +5,11 @@ from loguru import logger
 
 from pydantic import BaseModel
 
+from ribctl import RIBETL_DATA
 from ribctl.asset_manager.asset_manager import RibosomeAssetManager
+from ribctl.etl.etl_collector import ETLCollector
+from ribctl.lib.landmarks.ptc_via_trna import PTC_location
+from ribctl.lib.schema.types_ribosome import PTCInfo, RibosomeStructure
 from .asset_types import AssetType
 
 ModelT = TypeVar('ModelT', bound=BaseModel)
@@ -68,3 +72,19 @@ class AssetRegistry:
         """Generate multiple assets for a structure"""
         for asset_type in asset_types:
             await self.generate_asset(rcsb_id, asset_type, force)
+
+
+
+registry = AssetRegistry(RibosomeAssetManager(RIBETL_DATA))
+
+
+@registry.register(AssetType.STRUCTURE_PROFILE)
+async def generate_profile(rcsb_id: str) -> RibosomeStructure:
+    profile = await ETLCollector(rcsb_id).generate_profile()
+    return profile
+
+
+@registry.register(AssetType.PTC)
+async def generate_ptc(rcsb_id: str) -> PTCInfo:
+    return PTC_location(rcsb_id)
+

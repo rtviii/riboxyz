@@ -13,44 +13,33 @@ from ribctl.asset_manager.asset_types import AssetType
 from ribctl.etl.etl_collector import ETLCollector
 from ribctl.lib.landmarks.ptc_via_trna import PTC_location
 from ribctl.lib.schema.types_ribosome import PTCInfo, RibosomeStructure
+from ribctl.asset_manager.asset_registry import registry
 
 
 @dataclass
 class AcquisitionResult:
-    rcsb_id: str
-    asset_type_name: str  # Store enum name instead of enum object
-    success: bool
-    error: Optional[str] = None
+
+    rcsb_id        : str
+    asset_type_name: str
+    success        : bool
+    error          : Optional[str] = None
 
 
 def process_chunk(
-    base_dir: str,  # Pass as string instead of Path
-    rcsb_ids: List[str],
-    asset_type_names: List[str],  # Pass enum names instead of enum objects
-    force: bool = False,
-    max_concurrent_structures: int = 4,
-    max_concurrent_assets: int = 3,
-) -> Dict[str, List[AcquisitionResult]]:
+
+  base_dir                             : str,
+  rcsb_ids                             : List[str],
+  asset_type_names                     : List[str],
+  force                                : bool = False,
+  max_concurrent_structures            : int = 4,
+  max_concurrent_assets                : int = 3,
+) -> Dict[str, List[AcquisitionResult]]: 
     """Process a chunk of structures in a separate process"""
 
     async def _process_chunk_async() -> Dict[str, List[AcquisitionResult]]:
-        # Reconstruct objects inside the process
         base_path = Path(base_dir)
         asset_types = [AssetType[name] for name in asset_type_names]
-
         raw_handler = RawAssetHandler(base_path)
-        manager = RibosomeAssetManager(base_path)
-        registry = AssetRegistry(manager)
-
-        # Register your asset generators here
-        @registry.register(AssetType.STRUCTURE_PROFILE)
-        async def generate_profile(rcsb_id: str) -> "RibosomeStructure":
-            profile = await ETLCollector(rcsb_id).generate_profile()
-            return profile
-
-        @registry.register(AssetType.PTC)
-        async def generate_ptc(rcsb_id: str) -> "PTCInfo":
-            return PTC_location(rcsb_id)
 
         async def acquire_asset(
             rcsb_id: str, asset_type: AssetType

@@ -1,4 +1,3 @@
-## Status
 ![Status](https://img.shields.io/badge/status-ready-green)
 
 <div style="display: flex; align-items: center; max-width: 800px; margin: 0 auto;">
