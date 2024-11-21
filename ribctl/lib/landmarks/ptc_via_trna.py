@@ -137,8 +137,8 @@ def get_ptc_reference(ribosome_type: typing.Literal["mito", "euk", "arch", "bact
 
 def PTC_location(target_rcsb_id: str) -> PTCInfo:
     """
-    # Get PTC in @target_rcsb_id by way of mapping a reference PTC in a given mitochondrial structure
-    #"""
+    #### Get PTC in @target_rcsb_id by way of mapping a reference PTC in a given mitochondrial structure
+    """
     RO = RibosomeOps(target_rcsb_id)
     tax_id = RO.taxid
     match Taxid.superkingdom(tax_id):
@@ -176,6 +176,6 @@ def PTC_location(target_rcsb_id: str) -> PTCInfo:
     (p1, p2, dist) = find_closest_pair([r.center_of_mass() for r in motifs])
     center = (p1 + p2) / 2 
     return PTCInfo(
-        location=center.tolist(),
-         residues=list(map(ResidueSummary.from_biopython_residue, motifs))
+        location = center.tolist(),
+        residues = list(map(ResidueSummary.from_biopython_residue, motifs))
     )

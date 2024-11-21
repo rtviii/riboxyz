@@ -1,11 +1,7 @@
 from Bio.PDB.Chain import Chain
 import numpy as np
+from ribctl.lib.utils import find_closest_pair_two_sets, midpoint
 from ribctl.ribosome_ops import RibosomeOps
-from ribctl.lib.landmarks.ptc_via_doris import ptc_resdiues_get, ptc_residues_calculate_midpoint
-from ribctl.lib.npet.tunnel_bbox_ptc_constriction import find_closest_pair_two_sets, midpoint
-from ribctl.lib.utils import download_unpack_place
-from ribctl.lib.schema.types_ribosome import ( RNA, PTCInfo, Polymer, PolymerClass, PolynucleotideClass, PolynucleotideClass, PolypeptideClass, RibosomeStructure, RibosomeStructureMetadata, )
-from ribctl.logs.loggers import get_etl_logger
 
 def get_constriction(rcsb_id: str)->np.ndarray:
     ro               = RibosomeOps(rcsb_id)
