@@ -1,5 +1,6 @@
-from ribctl.lib.mitoptc import get_ptc_mito
-from ribctl.etl.assets_structure import RibosomeOps
+from ribctl.lib.landmarks.constriction import get_constriction
+from ribctl.lib.landmarks.ptc_via_trna import PTC_location
+from ribctl.ribosome_ops import RibosomeOps
 import numpy as np
 from Bio.PDB.Chain import Chain
 from Bio.PDB.Residue import Residue
@@ -120,7 +121,7 @@ def intersect_hull_with_cylinder(points, base_point, axis_point, radius, height)
         'cylinder': cylinder,
         'direction': direction
     }
-
+    
 def visualize_intersection(result, points, base_point, axis_point):
     """
     Visualize the intersection, hull, cylinder, and points.
@@ -149,7 +150,7 @@ def visualize_intersection(result, points, base_point, axis_point):
 
 
 
-ptc_point, _          = get_ptc_mito('3J9M')
+ptc_point, _          = PTC_location('3J9M')
 constriction_point = get_constriction('3J9M')
 
 import numpy as np

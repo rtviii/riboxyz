@@ -121,9 +121,6 @@ def get(
 
     # Convert asset type names to enum
     asset_types = [AssetType[t] for t in asset_type]
-    base_path = Path(RIBETL_DATA)
-    manager = RibosomeAssetManager(base_path)
-
     async def process_structure(rcsb_id: str):
         try:
             await main_registry.generate_multiple(rcsb_id, asset_types, force)
