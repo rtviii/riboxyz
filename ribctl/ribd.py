@@ -1,4 +1,5 @@
 import sys
+
 sys.path.append("/home/rtviii/dev/riboxyz")
 from neo4j_ribosome.db_lib_reader import Neo4jReader
 from functools import partial
@@ -20,6 +21,7 @@ import math
 from loguru import logger
 from ribctl.asset_manager.parallel_acquisition import process_chunk, AcquisitionResult
 import multiprocessing
+from ribctl.asset_manager.asset_registry import main_registry
 from concurrent.futures import (
     ALL_COMPLETED,
     Future,
@@ -121,24 +123,10 @@ def get(
     asset_types = [AssetType[t] for t in asset_type]
     base_path = Path(RIBETL_DATA)
     manager = RibosomeAssetManager(base_path)
-    registry = AssetRegistry(manager)
-
-    # Set up asset generators
-    from ribctl.etl.etl_collector import ETLCollector
-    from ribctl.lib.landmarks.ptc_via_trna import PTC_location
-
-    @registry.register(AssetType.STRUCTURE_PROFILE)
-    async def generate_profile(rcsb_id: str) -> RibosomeStructure:
-        profile = await ETLCollector(rcsb_id).generate_profile()
-        return profile
-
-    @registry.register(AssetType.PTC)
-    async def generate_ptc(rcsb_id: str) -> PTCInfo:
-        return PTC_location(rcsb_id)
 
     async def process_structure(rcsb_id: str):
         try:
-            await registry.generate_multiple(rcsb_id, asset_types, force)
+            await main_registry.generate_multiple(rcsb_id, asset_types, force)
             click.echo(f"Successfully processed assets for {rcsb_id}")
         except Exception as e:
             logger.exception(f"Failed to process {rcsb_id}")
@@ -783,14 +771,14 @@ def upload_missing(
 
     async def main():
         # Get list of missing structures
-        db_entries =Neo4jReader(
-                    Neo4jAdapter(
-                        uri=NEO4J_URI,
-                        user=NEO4J_USER,
-                        password=NEO4J_PASSWORD,
-                        current_db=NEO4J_CURRENTDB,
-                    )
-                ).all_ids()
+        db_entries = Neo4jReader(
+            Neo4jAdapter(
+                uri=NEO4J_URI,
+                user=NEO4J_USER,
+                password=NEO4J_PASSWORD,
+                current_db=NEO4J_CURRENTDB,
+            )
+        ).all_ids()
         missing_structures = GlobalOps.missing_db_entries(db_entries)
         total = len(missing_structures)
 
@@ -800,7 +788,9 @@ def upload_missing(
 
         for struct in missing_structures:
             click.echo(f"- {struct}")
-        click.echo( f"Found {total} structures in RCSB that are not in the local database:" )
+        click.echo(
+            f"Found {total} structures in RCSB that are not in the local database:"
+        )
 
         if dry_run:
             click.echo("\nDry run - no structures were uploaded")
