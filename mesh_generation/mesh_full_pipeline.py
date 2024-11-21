@@ -7,8 +7,11 @@ from mesh_generation.mesh_bbox_extraction import ( encode_atoms, extract_bbox_at
 from mesh_generation.mesh_libsurf import apply_poisson_reconstruction, estimate_normals, estimate_normals_and_create_gif, ptcloud_convex_hull_points, ptcloud_convex_hull_points_and_gif
 from mesh_generation.mes_visualization import DBSCAN_CLUSTERS_visualize_largest,  plot_multiple_by_kingdom, plot_multiple_surfaces, plot_with_landmarks, visualize_DBSCAN_CLUSTERS_particular_eps_minnbrs, visualize_mesh, visualize_pointcloud, visualize_pointclouds 
 from mesh_generation.mesh_paths import *
-from mesh_generation.mesh_voxelize import (expand_atomcenters_to_spheres_threadpool, index_grid)
+from mesh_generation.mesh_voxelize import (expand_atomcenters_to_spheres_threadpool, get_empty_space_points, index_grid)
+from Bio.PDB.Atom import Atom
 import numpy as np
+
+from ribctl.lib.npet.tunnel_bbox_ptc_constriction import get_npet_cylinder_residues
 
 # https://pmc.ncbi.nlm.nih.gov/articles/PMC8492066/ 
 # PTC maturation also includes the universally conserved and essential modifications to incorporate pseudouridine Ψ3067 by RNA pseudouridine synthase.
@@ -24,10 +27,9 @@ import numpy as np
 # The bounding box should be defined by the LSU RNA. 
                                 #    by the PTC from below.
 
-def expand_bbox_atoms_to_spheres(atom_coordinates:np.ndarray, sphere_vdw_radii:np.ndarray, rcsb_id: str):
-    sphere_sources = zip(atom_coordinates, sphere_vdw_radii)
+def expand_bbox_atoms_to_spheres(atom_coordinates:np.ndarray, ):
     SINK           = []
-    expanded       = expand_atomcenters_to_spheres_threadpool(SINK, sphere_sources)
+    expanded       = expand_atomcenters_to_spheres_threadpool(SINK, atoms=atom_coordinates)
     return np.array(expanded)
 
 def DBSCAN_capture(
@@ -113,37 +115,37 @@ def pipeline(RCSB_ID,args):
     PR_ptweight       = args.PR_ptweight if args.PR_ptweight is not None else 3
     #! [ Pipeline Parameters ]
 
-    if args.bbox or (not os.path.exists(tunnel_atom_encoding_path(RCSB_ID)) ):
-        extract_bbox_atoms(RCSB_ID)
 
-    #! [ Bounding Box Atoms ]
-    if args.bbox or ( not os.path.exists(spheres_expanded_pointset_path(RCSB_ID)) ) :
-        with open( tunnel_atom_encoding_path(RCSB_ID), "r", ) as infile: 
-            bbox_atoms = json.load(infile)
-        _atom_centers       = np.array(list(map(lambda x: x["coord"], bbox_atoms)))
-        _vdw_radii          = np.array(list(map(lambda x: x["vdw_radius"], bbox_atoms)))
-        bbox_atoms_expanded = expand_bbox_atoms_to_spheres(_atom_centers, _vdw_radii, RCSB_ID)
-        np.save(spheres_expanded_pointset_path(RCSB_ID), bbox_atoms_expanded)
-        print("Saved spheres_expanded_pointset data to disk : {}".format(spheres_expanded_pointset_path(RCSB_ID)))
-    else:
-        bbox_atoms_expanded = np.load(spheres_expanded_pointset_path(RCSB_ID))
+    npet_residues, bp,ap,radius, height       = get_npet_cylinder_residues(RCSB_ID)
+    atoms_poss          = np.array([atom.get_coord() for residue in npet_residues for atom in residue.child_list])
 
+    # bbox_atoms_expanded = expand_bbox_atoms_to_spheres(atoms_poss)
+    empty_points = get_empty_space_points(
+        base_point      = bp,
+        axis_point      = ap,
+        radius          = radius,
+        height          = height,
+        resolution      = 1,
+        existing_points = atoms_poss
+    )
+    # print("EmptyPoints", empty_points)
+    # exit()
+
+    # np.save(spheres_expanded_pointset_path(RCSB_ID), bbox_atoms_expanded)
+
+    visualize_pointcloud(empty_points, RCSB_ID)
+    # # exit()
+    # # ! [ Bounding Box Atoms are transformed into an Index Grid ]
+    # initial_grid, grid_dimensions, translation_vectors = index_grid(bbox_atoms_expanded)
+    # visualize_pointcloud(initial_grid, RCSB_ID, False)
+    # # ? Here no trimming has yet occurred.
+
+    # #! [ Invert the grid ]
+    # inverted_grid = np.asarray(np.where(initial_grid != 1)).T
     
-    visualize_pointcloud(bbox_atoms_expanded, RCSB_ID, GIF_INTERMEDIATES, "{}.bbox_atoms_expanded.gif".format(RCSB_ID))
-    # ! [ Bounding Box Atoms are transformed into an Index Grid ]
-    # _, xyz_negative, _ , translation_vectors = index_grid(bbox_atoms_expanded)
-    initial_grid, grid_dimensions, translation_vectors = index_grid(bbox_atoms_expanded)
-
-
-    # visualize_pointcloud(initial_grid, RCSB_ID, False, "{}.initial.grid.gif".format(RCSB_ID))
-    # ? Here no trimming has yet occurred.
-
-    #! [ Invert the grid ]
-    inverted_grid = np.asarray(np.where(initial_grid != 1)).T
-    
-    # visualize_pointcloud(inverted_grid, RCSB_ID, False, "{}.initial.grid.gif".format(RCSB_ID))
-    #! [ Capture DBSCAN clusters within the "negative" space]
-    db, clusters_container = DBSCAN_capture(inverted_grid, _u_EPSILON_initial_pass, _u_MIN_SAMPLES_initial_pass, _u_METRIC ) 
+    visualize_pointcloud(empty_points, RCSB_ID, False)
+    # #! [ Capture DBSCAN clusters within the "negative" space]
+    db, clusters_container = DBSCAN_capture(empty_points, _u_EPSILON_initial_pass, _u_MIN_SAMPLES_initial_pass, _u_METRIC ) 
     #! [ Extract the largest cluster from the DBSCAN clustering ]
     visualize_DBSCAN_CLUSTERS_particular_eps_minnbrs(clusters_container, _u_EPSILON_initial_pass, _u_MIN_SAMPLES_initial_pass, GIF_INTERMEDIATES, "{}.dbscan.clusters.gif".format(RCSB_ID))
     largest_cluster = DBSCAN_pick_largest_cluster(clusters_container)

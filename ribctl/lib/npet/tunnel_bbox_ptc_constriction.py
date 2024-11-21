@@ -312,10 +312,6 @@ def filter_residues_parallel(
     filtered_indices = [idx for chunk_result in results for idx in chunk_result]
     return [residues[i] for i in filtered_indices]
 
-
-
-
-
 def visualize_filtered_residues(
     filtered_residues: List[T],
     all_residues: Optional[List[T]],  # If None, won't show unfiltered residues
@@ -475,8 +471,7 @@ def visualize_filtered_residues(
     return plotter
 
 
-
-def get_npet_cylinder_residues(rcsb_id:str)->list[Entity]:
+def get_npet_cylinder_residues(rcsb_id:str):
     residues           = ribosome_entities(rcsb_id, 'R')
     ptc_point          = PTC_location(rcsb_id)
     constriction_point = get_constriction(rcsb_id)
@@ -490,7 +485,7 @@ def get_npet_cylinder_residues(rcsb_id:str)->list[Entity]:
         axis_point,
         radius,
         height,
-    )
+    ),  base_point, axis_point, radius, height
 
 
 if __name__ == "__main__":
