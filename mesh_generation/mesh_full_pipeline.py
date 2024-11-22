@@ -119,7 +119,7 @@ def pipeline(RCSB_ID,args):
     npet_residues, bp,ap,radius, height       = get_npet_cylinder_residues(RCSB_ID)
     atoms_poss          = np.array([atom.get_coord() for residue in npet_residues for atom in residue.child_list])
 
-    # bbox_atoms_expanded = expand_bbox_atoms_to_spheres(atoms_poss)
+    bbox_atoms_expanded = expand_bbox_atoms_to_spheres(atoms_poss)
     empty_points = get_empty_space_points(
         base_point      = bp,
         axis_point      = ap,

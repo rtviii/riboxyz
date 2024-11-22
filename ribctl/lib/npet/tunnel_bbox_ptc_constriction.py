@@ -471,14 +471,12 @@ def visualize_filtered_residues(
     return plotter
 
 
-def get_npet_cylinder_residues(rcsb_id:str):
+def get_npet_cylinder_residues(rcsb_id:str,radius, height):
     residues           = ribosome_entities(rcsb_id, 'R')
     ptc_point          = PTC_location(rcsb_id)
     constriction_point = get_constriction(rcsb_id)
     base_point         = np.array(ptc_point.location)
     axis_point         = np.array(constriction_point)
-    radius             = 40.0
-    height             = 100.0
     return filter_residues_parallel(
         residues,
         base_point,
