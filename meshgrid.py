@@ -1,3 +1,4 @@
+from pprint import pprint
 import numpy as np
 import pyvista as pv
 force_float=False
@@ -5,8 +6,8 @@ force_float=False
 def explore_3d_grid():
     # Create non-symmetrical coordinate arrays
     x = np.linspace(0,11,10)        # 3 points, unevenly spaced
-    y = np.linspace(0,11,10)     # 4 points
-    z = np.linspace(0,11,10)        # 3 points, big spacing
+    y = np.linspace(0,6,5)     # 4 points
+    z = np.linspace(0,21,20)        # 3 points, big spacing
     
     print("Coordinate arrays:")
     print("x:", x, "  (size:", len(x), ")")
@@ -16,6 +17,9 @@ def explore_3d_grid():
     # Create 3D grid
     X, Y, Z = np.meshgrid(x, y, z, indexing='ij')
     
+    print(X.shape)
+    print(Y.shape)
+    print(Z.shape)
     print("\nGrid shapes:")
     print("X shape:", X.shape)  # Should be (3, 4, 3)
     
@@ -50,11 +54,11 @@ def explore_3d_grid():
         y[occupied[1]], 
         z[occupied[2]]
     ))
+    print("occupied points")
+    pprint(points)
     
     # Also create a point cloud of ALL grid points to show the structure
-    all_points = np.column_stack((
-        X.ravel(), Y.ravel(), Z.ravel()
-    ))
+    all_points = np.column_stack(( X.ravel(), Y.ravel(), Z.ravel() ))
     
     plotter = pv.Plotter()
     
@@ -79,4 +83,21 @@ def explore_3d_grid():
     plotter.show_axes()
     plotter.show()
 
-explore_3d_grid()
+# explore_3d_grid()
+x = np.array([0, 1])
+y = np.array([0, 1])
+z = np.array([0, 1])
+
+X, Y, Z = np.meshgrid(x, y, z, indexing='ij')
+
+print("X array (x-coordinates at each point):")
+print(X)
+print("\nY array (y-coordinates at each point):")
+print(Y)
+print("\nZ array (z-coordinates at each point):")
+print(Z)
+
+# Let's look at one point
+i, j, k = 0, 0, 1
+print(f"\nAt position [{i},{j},{k}], the point coordinates are:")
+print(f"({X[i,j,k]}, {Y[i,j,k]}, {Z[i,j,k]})")

@@ -10,48 +10,12 @@ import numpy as np
 import pyvista as pv
 from typing import Tuple
 
-def create_cylinder_voxel_grid(
-    radius: float,
-    height: float,
-    voxel_size: float
-) -> Tuple[np.ndarray, Tuple[np.ndarray, np.ndarray, np.ndarray]]:
-    """
-    Creates a voxel grid representation of a cylinder centered at origin, aligned with z-axis.
-    
-    Args:
-        radius: Radius of cylinder
-        height: Height of cylinder
-        voxel_size: Size of each voxel
-    
-    Returns:
-        Tuple containing:
-        - 3D boolean array representing the voxel grid
-        - Tuple of coordinate arrays (x, y, z) for the voxel centers
-    """
-    # Calculate grid dimensions
-    nx = ny = int(2 * radius / voxel_size) + 1
-    nz = int(height / voxel_size) + 1
-    
-    # Create grid coordinates centered at origin for x,y
-    # and starting at 0 for z
-    x = np.linspace(-radius, radius, nx)
-    y = np.linspace(-radius, radius, ny)
-    z = np.linspace(0, height, nz)
-    
-    # Create 3D coordinate grid
-    X, Y, Z = np.meshgrid(x, y, z, indexing='ij')
-    
-    # Calculate radial distance for each point
-    R = np.sqrt(X**2 + Y**2)
-    
-    # Create voxel grid
-    voxel_grid = (R <= radius)
-    
-    return voxel_grid, (x, y, z)
 
 def visualize_voxel_grid(
     voxel_grid: np.ndarray,
     coordinates: Tuple[np.ndarray, np.ndarray, np.ndarray],
+    transformed_base,
+    transformed_axis,
     filled_points: np.ndarray = np.ndarray([])
 ):
     plotter = pv.Plotter()
@@ -69,6 +33,8 @@ def visualize_voxel_grid(
     plotter.add_mesh(point_cloud, color='black', point_size=2, opacity=0.1,show_edges=True,edge_color='gray')
     plotter.add_mesh(filled_points, color='red', point_size=6, opacity=0.5, show_edges=True,edge_color='gray')
     
+    plotter.add_mesh(pv.Sphere(radius=4, center=transformed_axis), color='blue', label='Axis Point')
+    plotter.add_mesh(pv.Sphere(radius=4, center=transformed_base), color='red', label='Base Point')
     plotter.show_axes()
     plotter.show_grid()
     plotter.show()
@@ -123,25 +89,49 @@ RCSB_ID = '3J7Z'
 radius     = 40
 height     = 80
 residues, base, axis = get_npet_cylinder_residues(RCSB_ID, radius=radius, height=height)
-
-points = np.array([a.get_coord() for residue in residues for a in residue])
-atom_points =  points
-np.save('points.npy', atom_points)
-
-# base_point = np.array([179.15499878, 179.46508789, 160.99293518])
-# axis_point = np.array([199.4345495, 264.11536385, 51.34317183])
+points = np.array([atom.get_coord() for residue in residues for atom in residue.child_list])
 voxel_size = 1
 
-# # points = np.load("bbox_atoms_expanded.npy")
-# if os.path.exists('points.npy'):
-#     points = np.load('points.npy')
-# else:
-#     npet_residues, bp,ap,radius, height       = get_npet_cylinder_residues(RCSB_ID, radius, height)
-#     points = np.array([r.center_of_mass() for r in npet_residues])
+translation, rotation = get_transformation_to_C0(base, axis)
+t_base = ( base + translation ) @ rotation.T
+t_axis = ( axis + translation ) @ rotation.T
 
-grid,(x,y,z) = create_cylinder_voxel_grid(radius, height,1)
-visualize_voxel_grid(grid,(x,y,z,), points)
-transformed= transform_points_to_C0(points, base, axis)
-visualize_voxel_grid(grid,(x,y,z,), transformed)
+if os.path.exists('points.npy'):
+    points = np.load('points.npy')
+else:
+    points = np.array([ residue.center_of_mass() for residue  in residues])
+    np.save('points.npy', points)
+    print("SAVED")
 
 
+nx = ny = int(2 * radius / voxel_size) + 1
+nz = int(height / voxel_size) + 1
+x = np.linspace(-radius, radius, nx)
+y = np.linspace(-radius, radius, ny)
+z = np.linspace(0, height, nz)
+X, Y, Z = np.meshgrid(x, y, z, indexing='ij')
+
+
+transformed = transform_points_to_C0(points, base, axis)
+X_I = np.round(transformed[:,0])
+Y_I = np.round(transformed[:,1])
+Z_I = np.round(transformed[:,2])
+
+cylinder_mask = (np.sqrt(X**2 + Y**2) <= radius)
+hollow_cylinder = ~cylinder_mask
+
+# 3. Create point cloud mask
+point_cloud_mask = np.zeros_like(X, dtype=bool)
+for point in zip(X_I, Y_I, Z_I):
+    point_cloud_mask |= (np.abs(X - point[0])<=2) & (np.abs(Y == point[1])<2) & (np.abs(Z == point[2])<2)
+
+final_mask = hollow_cylinder | point_cloud_mask
+
+occupied = np.where(final_mask)
+points = np.column_stack((
+    x[occupied[0]], 
+    y[occupied[1]], 
+    z[occupied[2]]
+))
+occupied_points = pv.PolyData(points)
+visualize_pointcloud(occupied_points)
