@@ -3,7 +3,10 @@ from typing import Tuple
 import numpy as np
 
 from mesh_generation.mes_visualization import visualize_pointcloud
-from ribctl.lib.npet.tunnel_bbox_ptc_constriction import get_npet_cylinder_residues
+from mesh_generation.mesh_full_pipeline import expand_atoms_to_spheres
+from ribctl.lib.landmarks.constriction import get_constriction
+from ribctl.lib.landmarks.ptc_via_trna import PTC_location
+from ribctl.lib.npet.tunnel_bbox_ptc_constriction import filter_residues_parallel, get_npet_cylinder_residues, ribosome_entities
 
 
 import numpy as np
@@ -88,20 +91,25 @@ def transform_points_to_C0(points: np.ndarray, base_point: np.ndarray, axis_poin
 RCSB_ID = '3J7Z'
 radius     = 40
 height     = 80
-residues, base, axis = get_npet_cylinder_residues(RCSB_ID, radius=radius, height=height)
-points = np.array([atom.get_coord() for residue in residues for atom in residue.child_list])
 voxel_size = 1
 
-translation, rotation = get_transformation_to_C0(base, axis)
-t_base = ( base + translation ) @ rotation.T
-t_axis = ( axis + translation ) @ rotation.T
+# residues, base, axis = get_npet_cylinder_residues(RCSB_ID, radius=radius, height=height)
+
+base_point = np.array(PTC_location(RCSB_ID).location)
+axis_point = np.array( get_constriction(RCSB_ID) )
+# translation, rotation = get_transformation_to_C0(base, axis)
+# t_base = ( base + translation ) @ rotation.T
+# t_axis = ( axis + translation ) @ rotation.T
 
 if os.path.exists('points.npy'):
     points = np.load('points.npy')
+    print("Loaded")
 else:
-    points = np.array([ residue.center_of_mass() for residue  in residues])
+    residues= filter_residues_parallel( ribosome_entities(RCSB_ID, 'R'), base_point, axis_point, radius, height, )
+    points = np.array([atom.get_coord() for residue in residues for atom in residue.child_list])
     np.save('points.npy', points)
-    print("SAVED")
+    print("Saved")
+    ...
 
 
 nx = ny = int(2 * radius / voxel_size) + 1
@@ -120,14 +128,45 @@ Z_I = np.round(transformed[:,2])
 cylinder_mask = (np.sqrt(X**2 + Y**2) <= radius)
 hollow_cylinder = ~cylinder_mask
 
+# !-------------
 # 3. Create point cloud mask
+# point_cloud_mask = np.zeros_like(X, dtype=bool)
+# for point in zip(X_I, Y_I, Z_I):
+#     point_cloud_mask |= (X == point[0]) & (Y == point[1]) & (Z == point[2])
+
+
+# !-------------
+radius_around_point = 2.0  # radius of sphere around each point
+# point_cloud_mask = np.zeros_like(X, dtype=bool)
+# for point in zip(X_I, Y_I, Z_I):
+#     distance_to_point = np.sqrt(
+#         (X - point[0])**2 + 
+#         (Y - point[1])**2 + 
+#         (Z - point[2])**2
+#     )
+#     point_cloud_mask |= (distance_to_point <= radius_around_point)
+
+
+# !-------------
+points = np.column_stack((X_I, Y_I, Z_I))  # Shape: (N, 3)
 point_cloud_mask = np.zeros_like(X, dtype=bool)
-for point in zip(X_I, Y_I, Z_I):
-    point_cloud_mask |= (np.abs(X - point[0])<=2) & (np.abs(Y == point[1])<2) & (np.abs(Z == point[2])<2)
+
+# Reshape grid coordinates for broadcasting
+grid_coords = np.stack([X, Y, Z])  # Shape: (3, nx, ny, nz)
+grid_coords = grid_coords.reshape(3, -1)  # Shape: (3, nx*ny*nz)
+
+for point in points:
+    # Calculate distances using broadcasting
+    distances = np.sqrt(np.sum((grid_coords.T - point)**2, axis=1))
+    # Reshape back to grid shape and add to mask
+    point_cloud_mask |= (distances.reshape(X.shape) <= radius_around_point)
+
+
+# !-------------
 
 final_mask = hollow_cylinder | point_cloud_mask
-
 occupied = np.where(final_mask)
+
 points = np.column_stack((
     x[occupied[0]], 
     y[occupied[1]], 

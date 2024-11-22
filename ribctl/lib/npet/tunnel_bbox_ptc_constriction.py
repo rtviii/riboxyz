@@ -435,12 +435,10 @@ def is_point_in_cylinder(
     # Check if point is inside cylinder
     return (radial_distance <= radius) and (0 <= projection <= height)
 
-def get_npet_cylinder_residues(rcsb_id:str,radius, height):
-    residues           = ribosome_entities(rcsb_id, 'R')
-    ptc_point          = PTC_location(rcsb_id)
-    constriction_point = get_constriction(rcsb_id)
-    base_point         = np.array(ptc_point.location)
-    axis_point         = np.array(constriction_point)
+def get_npet_cylinder_residues(rcsb_id:str, radius, height):
+    residues   = ribosome_entities(rcsb_id, 'R')
+    base_point = np.array(PTC_location(rcsb_id).location)
+    axis_point = np.array( get_constriction(rcsb_id) )
 
     return filter_residues_parallel(
         residues,
