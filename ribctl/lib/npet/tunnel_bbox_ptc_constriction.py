@@ -148,30 +148,6 @@ def make_cylinder_predicate(
     height: float,
     position_getter: Callable[[T], np.ndarray] 
 ) -> Callable[[T], bool]:
-    """
-    Creates a predicate function that checks if objects lie within a cylinder
-    based on their position.
-    
-    Parameters:
-    -----------
-    base_point : np.ndarray
-        Center point of cylinder base
-    axis_point : np.ndarray
-        Point defining cylinder axis direction
-    radius : float
-        Radius of cylinder
-    height : float
-        Height of cylinder
-    position_getter : Callable[[T], np.ndarray]
-        Function to extract position from object. Defaults to lambda x: x[1]
-        which assumes object is a tuple with position as second element.
-        
-    Returns:
-    --------
-    Callable[[T], bool]
-        Predicate function that takes an object and returns True if its
-        position lies within the cylinder
-    """
     def predicate(obj: T) -> bool:
         position = position_getter(obj)
         return is_point_in_cylinder(position, base_point, axis_point, radius, height)
@@ -187,48 +163,7 @@ pv.global_theme.allow_empty_mesh = True
 
 T = TypeVar('T')
 
-def is_point_in_cylinder(
-    point: np.ndarray,
-    base_point: np.ndarray,
-    axis_point: np.ndarray,
-    radius: float,
-    height: float
-) -> bool:
-    """
-    Checks if a single point lies within a cylinder defined by base point, 
-    axis point, radius and height.
-    """
-    # Convert inputs to numpy arrays
-    point = np.asarray(point)
-    base_point = np.asarray(base_point)
-    axis_point = np.asarray(axis_point)
-    
-    # Calculate cylinder axis direction vector
-    axis = axis_point - base_point
-    axis_length = np.linalg.norm(axis)
-    axis_unit = axis / axis_length
-    
-    # Calculate vector from base to point
-    point_vector = point - base_point
-    
-    # Project vector onto cylinder axis
-    projection = np.dot(point_vector, axis_unit)
-    
-    # Calculate perpendicular vector from axis to point
-    projection_point = base_point + projection * axis_unit
-    radial_vector = point - projection_point
-    
-    # Calculate radial distance
-    radial_distance = np.linalg.norm(radial_vector)
-    
-    # Check if point is inside cylinder
-    return (radial_distance <= radius) and (0 <= projection <= height)
-
 def get_residue_position(residue):
-    """
-    Default function to get position from residue.
-    Assumes residue has center_of_mass() method.
-    """
     return residue.center_of_mass()
 
 def _worker_process_chunk(chunk_data):
@@ -291,7 +226,6 @@ def filter_residues_parallel(
     # Pre-compute all positions and create index mapping
     positions = np.array([get_residue_position(r) for r in residues])
     
-    # Create chunks of indices
     indices = list(range(len(residues)))
     index_chunks = [
         indices[i:i + chunk_size] 
@@ -299,10 +233,7 @@ def filter_residues_parallel(
     ]
     
     # Create data chunks for processing
-    chunks_data = [
-        (positions[idx], base_point, axis_point, radius, height, idx)
-        for idx in index_chunks
-    ]
+    chunks_data = [ (positions[idx], base_point, axis_point, radius, height, idx) for idx in index_chunks ]
     
     # Process chunks in parallel
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
@@ -470,6 +401,39 @@ def visualize_filtered_residues(
         
     return plotter
 
+def is_point_in_cylinder(
+    point: np.ndarray,
+    base_point: np.ndarray,
+    axis_point: np.ndarray,
+    radius: float,
+    height: float
+
+) -> bool:
+
+    point      = np.asarray(point)
+    base_point = np.asarray(base_point)
+    axis_point = np.asarray(axis_point)
+    
+    # Calculate cylinder axis direction vector
+    axis        = axis_point - base_point
+    axis_length = np.linalg.norm(axis)
+    axis_unit   = axis / axis_length
+    
+    # Calculate vector from base to point
+    point_vector = point - base_point
+    
+    # Project vector onto cylinder axis
+    projection = np.dot(point_vector, axis_unit)
+    
+    # Calculate perpendicular vector from axis to point
+    projection_point = base_point + projection * axis_unit
+    radial_vector    = point - projection_point
+    
+    # Calculate radial distance
+    radial_distance = np.linalg.norm(radial_vector)
+    
+    # Check if point is inside cylinder
+    return (radial_distance <= radius) and (0 <= projection <= height)
 
 def get_npet_cylinder_residues(rcsb_id:str,radius, height):
     residues           = ribosome_entities(rcsb_id, 'R')
@@ -477,13 +441,14 @@ def get_npet_cylinder_residues(rcsb_id:str,radius, height):
     constriction_point = get_constriction(rcsb_id)
     base_point         = np.array(ptc_point.location)
     axis_point         = np.array(constriction_point)
+
     return filter_residues_parallel(
         residues,
         base_point,
         axis_point,
         radius,
         height,
-    ),  base_point, axis_point, radius, height
+    ),  base_point, axis_point
 
 
 if __name__ == "__main__":

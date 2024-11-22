@@ -167,15 +167,7 @@ def points_in_cylinder(points: np.ndarray,
     mask = radial_mask & height_mask
     return mask, transformed_points[mask]
 
-def create_cylinder_voxel_grid(transformed_points: np.ndarray,
-                             radius: float,
-                             height: float,
-                             voxel_size: float) -> Tuple[np.ndarray, Tuple[np.ndarray, np.ndarray, np.ndarray]]:
-    """
-    Create voxel grid for points in cylinder coordinates.
-    The grid must be centered at (0,0) in the xy-plane and start at 0 in z
-    as this is where the transformed points are located.
-    """
+def create_cylinder_voxel_grid(transformed_points: np.ndarray, radius: float, height: float, voxel_size: float) -> Tuple[np.ndarray, Tuple[np.ndarray, np.ndarray, np.ndarray]]:
     # Calculate grid dimensions
     nx = ny = int(2 * radius / voxel_size)  # Remove +1 as we'll center the grid
     nz = int(height / voxel_size)
@@ -224,9 +216,13 @@ def main():
     RCSB_ID = '3J7Z'
     base_point = np.array([179.15499878, 179.46508789, 160.99293518])
     axis_point = np.array([199.4345495, 264.11536385, 51.34317183])
-    radius = 50
-    height = 200
+    radius = 40
+    height = 150
     voxel_size = 1
+
+
+
+
 
     # points = np.load("bbox_atoms_expanded.npy")
     if os.path.exists('points.npy'):
