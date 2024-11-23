@@ -14,10 +14,8 @@ TAG                   = "Polymer Classes"
 @classification_router.get('/polynucleotide',  tags=[TAG], response=list[RNA])
 def polynucleotide_class(request,rna_class:PolynucleotideClass):
     """All members of the given RNA class: small and large subunit, cytosolic and mitochondrial RNA; tRNA.  """
-
-    agg = []
+    agg       = []
     rna_class = rna_class.value
-
     for rcsb_id in os.listdir(RIBETL_DATA):
         try:
             x = RibosomeOps(rcsb_id).get_poly_by_polyclass(rna_class)

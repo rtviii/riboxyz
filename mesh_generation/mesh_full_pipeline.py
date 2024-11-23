@@ -72,13 +72,8 @@ def DBSCAN_capture(
     u_MIN_SAMPLES = min_samples
     u_METRIC = metric
 
-    print(
-        "Running DBSCAN on {} points. eps={}, min_samples={}, distance_metric={}".format(
-            len(ptcloud), u_EPSILON, u_MIN_SAMPLES, u_METRIC
-        )
-    )
-
-    db = DBSCAN(eps=eps, min_samples=min_samples, metric=metric).fit(ptcloud)
+    print( "Running DBSCAN on {} points. eps={}, min_samples={}, distance_metric={}".format( len(ptcloud), u_EPSILON, u_MIN_SAMPLES, u_METRIC ) )
+    db     = DBSCAN(eps=eps, min_samples=min_samples, metric=metric).fit(ptcloud)
     labels = db.labels_
 
     CLUSTERS_CONTAINER = {}
@@ -94,35 +89,30 @@ def DBSCAN_capture(
 def DBSCAN_pick_largest_cluster(
     clusters_container: dict[int, list], pick_manually: bool = False
 ) -> np.ndarray:
-    DBSCAN_CLUSTER_ID = 0
-    if pick_manually:
-        print("-------------------------------")
-        print("Running Manual Cluster Selection")
-        picked_id = int(
-            input(
-                "Enter Cluster ID to proceed the reconstruction with\n (options:[{}]):".format(
-                    list(clusters_container.keys())
-                )
-            )
-        )
-        print("Choise cluster # {}".format(picked_id))
-        if picked_id == -2:
-            # if picked -2 ==> return largest
-            for k, v in clusters_container.items():
-                if int(k) == -1:
-                    continue
-                elif len(v) > len(clusters_container[DBSCAN_CLUSTER_ID]):
-                    DBSCAN_CLUSTER_ID = int(k)
-            return np.array(clusters_container[DBSCAN_CLUSTER_ID])
+    print("Picking largest container from")
+    for k, v in clusters_container.items():
+        print(k, ":",len(v))
+    # if pick_manually:
+    #     picked_id = int( input( "Enter Cluster ID to proceed the reconstruction with\n (options:[{}]):".format( list(clusters_container.keys()) ) ) )
+    #     if picked_id == -2:
+    #         # if picked -2 ==> return largest
+    #         for k, v in clusters_container.items():
+    #             if int(k) == -1:
+    #                 continue
+    #             elif len(v) > len(clusters_container[PICKED_ID]):
+    #                 PICKED_ID = int(k)
+    #         return np.array(clusters_container[PICKED_ID])
 
-        return np.array(clusters_container[picked_id])
+    #     return np.array(clusters_container[picked_id])
 
+    PICKED_ID = None
     for k, v in clusters_container.items():
         if int(k) == -1:
             continue
-        elif len(v) > len(clusters_container[DBSCAN_CLUSTER_ID]):
-            DBSCAN_CLUSTER_ID = int(k)
-    return np.array(clusters_container[DBSCAN_CLUSTER_ID])
+        if PICKED_ID == None or len(v) > len(clusters_container[PICKED_ID]):
+            PICKED_ID = int(k)
+            print("picked ", k, " because v has ", len (v))
+    return np.array(clusters_container[PICKED_ID])
 
 
 def cache_trimming_parameters(
@@ -212,9 +202,7 @@ def pipeline(RCSB_ID, args):
 
     # #! [ Visualize the largest DBSCAN cluster to establish whether trimming is required ]
     # DBSCAN_CLUSTERS_visualize_largest(np.asarray(np.where(initial_grid == 1)).T, clusters_container, largest_cluster)
-    visualize_pointcloud(
-        largest_cluster, RCSB_ID, GIF_INTERMEDIATES, "{}.ptcloud.gif".format(RCSB_ID)
-    )
+    visualize_pointcloud( largest_cluster, RCSB_ID, GIF_INTERMEDIATES, "{}.ptcloud.gif".format(RCSB_ID) )
 
     # TODO : refactor this trimming logic out
     TRUNCATION_TUPLES = load_trimming_parameters(RCSB_ID)
@@ -329,8 +317,8 @@ def pipeline(RCSB_ID, args):
     # visualize_pointcloud(main_cluster, RCSB_ID, GIF_INTERMEDIATES, "{}.ptcloud_trimmed_sharpened.gif".format(RCSB_ID))
     visualize_DBSCAN_CLUSTERS_particular_eps_minnbrs(
         dbscan_container,
-        3,
-        123,
+        4.2,
+        280,
         GIF_INTERMEDIATES,
         "{}.ptcloud_trimmed_sharpened.gif".format(RCSB_ID),
     )
@@ -338,26 +326,20 @@ def pipeline(RCSB_ID, args):
     # ! ----------
 
     #! [ Transform the cluster back into Original Coordinate Frame ]
-    coordinates_in_the_original_frame = (
-        main_cluster - translation_vectors[1] + translation_vectors[0]
-    )
+    coordinates_in_the_original_frame = ( main_cluster - translation_vectors[1] + translation_vectors[0] )
 
     #! [ Transform the cluster back into original coordinate frame ]
-    surface_pts = ptcloud_convex_hull_points(
-        coordinates_in_the_original_frame, d3d_alpha, d3d_tol
-    )
-    visualize_pointcloud(
-        surface_pts, RCSB_ID, False, "{}.surface_pts.gif".format(RCSB_ID)
-    )
+    surface_pts = ptcloud_convex_hull_points( coordinates_in_the_original_frame, d3d_alpha, d3d_tol )
+    visualize_pointcloud( surface_pts, RCSB_ID, False, "{}.surface_pts.gif".format(RCSB_ID) )
 
     #! [ Transform the cluster back into Original Coordinate Frame ]
     np.save(convex_hull_cluster_path(RCSB_ID), surface_pts)
     estimate_normals(
         surface_pts,
         surface_with_normals_path(RCSB_ID),
-        kdtree_radius=10,
-        kdtree_max_nn=15,
-        correction_tangent_planes_n=10,
+        kdtree_radius               = 10,
+        kdtree_max_nn               = 15,
+        correction_tangent_planes_n = 10,
     )
     apply_poisson_reconstruction(
         surface_with_normals_path(RCSB_ID),

@@ -3,22 +3,24 @@ from scipy.spatial import cKDTree
 import pyvista as pv
 
 from cylinder import get_transformation_to_C0, transform_points_to_C0
-from mesh_generation.mes_visualization import visualize_pointcloud
+from mesh_generation.mes_visualization import visualize_DBSCAN_CLUSTERS_particular_eps_minnbrs, visualize_mesh, visualize_pointcloud
+from mesh_generation.mesh_full_pipeline import DBSCAN_capture, DBSCAN_pick_largest_cluster
+from mesh_generation.mesh_libsurf import apply_poisson_reconstruction, estimate_normals, ptcloud_convex_hull_points
 from ribctl.lib.landmarks.constriction import get_constriction
 from ribctl.lib.landmarks.ptc_via_trna import PTC_location
 from ribctl.lib.npet.tunnel_bbox_ptc_constriction import filter_residues_parallel, ribosome_entities
 
+from mesh_generation.mesh_paths import convex_hull_cluster_path, surface_with_normals_path, poisson_recon_path
+
 def generate_voxel_centers(radius: float, height: float, voxel_size: float) -> tuple:
-    """Generate centers of all voxels in the grid"""
     nx = ny = int(2 * radius / voxel_size) + 1
     nz = int(height / voxel_size) + 1
+    x  = np.linspace(-radius, radius, nx)
+    y  = np.linspace(-radius, radius, ny)
+    z  = np.linspace(0, height, nz)
     
-    x = np.linspace(-radius, radius, nx)
-    y = np.linspace(-radius, radius, ny)
-    z = np.linspace(0, height, nz)
-    
-    # Generate all voxel center coordinates
     X, Y, Z = np.meshgrid(x, y, z, indexing='ij')
+
     voxel_centers = np.column_stack((X.ravel(), Y.ravel(), Z.ravel()))
     
     return voxel_centers, (X.shape, x, y, z)
@@ -28,34 +30,21 @@ def create_point_cloud_mask(points: np.ndarray,
                           height: float,
                           voxel_size: float = 1.0,
                           radius_around_point: float = 2.0):
-    """
-    Create point cloud mask using KDTree for efficient spatial queries
-    """
-    # Generate voxel centers
     voxel_centers, (grid_shape, x, y, z) = generate_voxel_centers(radius, height, voxel_size)
-    
-    # Create KDTree from the transformed points
     tree = cKDTree(points)
-    
-    # Find all voxels that have points within radius_around_point
-    # This is much more efficient than checking each point against each voxel
     indices = tree.query_ball_point(voxel_centers, radius_around_point)
     
-    # Create mask from the indices
+
     point_cloud_mask = np.zeros(len(voxel_centers), dtype=bool)
     point_cloud_mask[[i for i, idx in enumerate(indices) if idx]] = True
     
-    # Reshape mask back to grid shape
     point_cloud_mask = point_cloud_mask.reshape(grid_shape)
     
-    # Create cylinder mask
     X, Y, Z = np.meshgrid(x, y, z, indexing='ij')
     cylinder_mask = (np.sqrt(X**2 + Y**2) <= radius)
     hollow_cylinder = ~cylinder_mask
     
-    # Combine masks
     final_mask = hollow_cylinder | point_cloud_mask
-    
     return final_mask, (x, y, z)
 
 def transform_points_to_C0(points: np.ndarray, base_point: np.ndarray, axis_point: np.ndarray) -> np.ndarray:
@@ -75,7 +64,7 @@ def transform_points_from_C0(points: np.ndarray, base_point: np.ndarray, axis_po
 def main():
     # Load your points and transform them as before
     RCSB_ID    = '4UG0'
-    R          = 15
+    R          = 40
     H          = 120
     Vsize      = 1
     ATOM_SIZE  = 2
@@ -102,9 +91,56 @@ def main():
     ))
     world_coords    = transform_points_from_C0(empty_coordinates ,base_point,axis_point)
     occupied_points = pv.PolyData(empty_coordinates)
-    world_coords    = pv.PolyData(world_coords)
+    world_coords_pv    = pv.PolyData(world_coords)
+    # visualize_pointcloud(occupied_points, world_coords_pv)
 
-    visualize_pointcloud(occupied_points, world_coords)
+
+
+    _u_EPSILON_initial_pass = 5.5 
+    _u_MIN_SAMPLES_initial_pass =  600
+    _u_EPSILON_refinement = 3.5
+    _u_MIN_SAMPLES_refinement = 175
+
+    d3d_alpha = 2
+    d3d_tol = 1
+    PR_depth = 6
+    PR_ptweight = 3
+    db, clusters_container = DBSCAN_capture(world_coords , _u_EPSILON_initial_pass, _u_MIN_SAMPLES_initial_pass)
+    #! [ Extract the largest cluster from the DBSCAN clustering ]
+    visualize_DBSCAN_CLUSTERS_particular_eps_minnbrs( clusters_container, _u_EPSILON_initial_pass, _u_MIN_SAMPLES_initial_pass)
+    largest_cluster = DBSCAN_pick_largest_cluster(clusters_container)
+    db, clusters_refinement = DBSCAN_capture(largest_cluster , _u_EPSILON_refinement, _u_MIN_SAMPLES_refinement)
+    refined = DBSCAN_pick_largest_cluster(clusters_refinement)
+
+
+    #! [ Transform the cluster back into original coordinate frame ]
+    surface_pts = ptcloud_convex_hull_points( refined, d3d_alpha, d3d_tol )
+    visualize_pointcloud( surface_pts, RCSB_ID, False, "{}.surface_pts.gif".format(RCSB_ID) )
+
+    #! [ Transform the cluster back into Original Coordinate Frame ]
+    np.save(convex_hull_cluster_path(RCSB_ID), surface_pts)
+    estimate_normals(
+        surface_pts,
+        surface_with_normals_path(RCSB_ID),
+        kdtree_radius               = 10,
+        kdtree_max_nn               = 15,
+        correction_tangent_planes_n = 10,
+    )
+    apply_poisson_reconstruction(
+        surface_with_normals_path(RCSB_ID),
+        poisson_recon_path(RCSB_ID),
+        recon_depth=PR_depth,
+        recon_pt_weight=PR_ptweight,
+    )
+
+    visualize_mesh(
+        pv.read(poisson_recon_path(RCSB_ID)),
+        RCSB_ID
+    )
+
+    
+
+
 
 if __name__ == '__main__':
     main()
