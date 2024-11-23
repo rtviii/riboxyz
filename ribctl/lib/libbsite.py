@@ -1,6 +1,6 @@
 from pprint import pprint
 import sys
-from ribctl.lib.libseq import SequenceMappingContainer, SeqPairwise, map_motifs
+from ribctl.lib._libseq import SequenceMappingContainer, SeqPairwise, map_motifs
 sys.path.append("/home/rtviii/dev/riboxyz")
 # from neo4j_ribosome.db_lib_reader import Neo4jReader
 import operator

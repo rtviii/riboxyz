@@ -59,8 +59,8 @@ def create_point_cloud_mask(points: np.ndarray,
 
 def main():
     # Load your points and transform them as before
-    points = np.load('points.npy')
-    RCSB_ID = '3J7Z'
+    points     = np.load('points.npy')
+    RCSB_ID    = '3J7Z'
     base_point = np.array(PTC_location(RCSB_ID).location)
     axis_point = np.array(get_constriction(RCSB_ID) )
     print("loaded and got axis")
@@ -84,6 +84,7 @@ def main():
     
     # Visualize results
     occupied_points = pv.PolyData(visualization_points)
+
     visualize_pointcloud(occupied_points)
 
 if __name__ == '__main__':
