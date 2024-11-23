@@ -1,178 +1,243 @@
-from Bio.PDB.Chain import Chain
-from Bio.PDB.Residue import  Residue
-from Bio import pairwise2
-from typing import List, Dict, Tuple, Optional
-from functools import lru_cache
-import re
+import sys
 
 from ribctl.lib.schema.primitivs import AMINO_ACIDS, NUCLEOTIDES
 from ribctl.lib.schema.types_ribosome import ResidueSummary
+sys.path.append("/home/rtviii/dev/riboxyz")
+from typing import Optional
+import re
+from typing import List
+import warnings
+from Bio import ( BiopythonDeprecationWarning, )
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore", BiopythonDeprecationWarning)
+    from Bio import pairwise2
+from Bio.PDB.Residue import Residue
+from Bio.PDB.Chain import Chain
 
-class SequenceMappingContainer:
-    def __init__(self, chain: Chain):
-        self.chain = chain
-        # Cache the sequence mappings on initialization
-        self._init_sequences()
+# lets say you align 4ug0.A to 4u3m.F
+# 1. take biopython struct of 4ugo, get chain A
+# 2. take biopython struct of 4u3m, get chain F
+# 3. wrap both in SequenceMappingContainer
+# 4. use flat sequence for alignment
+
+class SequenceMappingContainer(Chain):
+    """ 
+    A container for keeping track of the correspondence between the structural and sequence indices within a give polymer chain.
+    \nStructural data(`mmcif`) frequently has unresolved and modified residues adheres to the author's numbering (which is arbitrary for all intents and purposes, ex. starts at, say, 7).
+    More here:https://proteopedia.org/wiki/index.php/Unusual_sequence_numbering
     
-    def _init_sequences(self):
-        """Initialize all sequence mappings once during construction"""
-        self._flat_seq_data = self._compute_flat_sequence()
-        self._primary_seq_data = self._compute_primary_sequence()
+    This container keeps pointers between the naive (convenient) indices and the structural residues. 
+    I refer to the following in the code:
+
+    - **auth_seq_id** is the author-assigned residue number and is frequently used to refer to structural components. (ex. in Molstar)
+    - **flat_index** is the the straightforward arithmetic (0-start) numbering. I produce it by removing all the modified residues from the "primary sequence"
+    - **primary_sequence** is the sequence of structural residues (as packed into the BioPython `Chain` object) represented as a string.
+    - **flat_sequence** is the **primary_sequence** with the modified residues removed, represented as a string.
     
-    @lru_cache(maxsize=1)
-    def _compute_primary_sequence(self, represent_noncanonical: str = ".") -> Tuple[str, Dict[int, int]]:
-        """Compute primary sequence and mapping (cached)"""
-        seq = []
+    There is lots to optimize in this code (it builds index->Residue<object> maps by enumeration),
+    but ideally this is taken care of at the parser level or at the deposition level.
+
+    Again, see more: 
+
+    - https://proteopedia.org/wiki/index.php/Unusual_sequence_numbering
+    - https://bioinformatics.stackexchange.com/questions/14210/pdb-residue-numbering
+    - https://bioinformatics.stackexchange.com/questions/20458/how-is-the-canonical-version-entity-poly-pdbx-seq-one-letter-code-obtaine
+    - https://www.biostars.org/p/9588718/
+    - https://stackoverflow.com/questions/45466408/biopython-resseq-doesnt-match-pdb-file
+    
+    """
+
+    chain                        : Chain
+
+    # from flat to residue that contributes the index to primary
+    flat_index_to_residue_map    : dict[int, Residue]
+
+    # from primary to flat
+    auth_seq_id_to_flat_index_map: dict[int, int]
+
+    @property
+    def primary_sequence(self, represent_noncanonical_as:str=".") -> tuple[str, dict[int,int]]:
+        seq = ""
         auth_seq_id_to_primary_ix = {}
-        
         for ix, residue in enumerate(self.chain.get_residues()):
-            resname = residue.resname
-            if resname in AMINO_ACIDS:
-                seq.append(ResidueSummary.three_letter_code_to_one(resname))
-            elif resname in NUCLEOTIDES:
-                seq.append(resname)
+            if residue.resname in [*AMINO_ACIDS.keys()]:
+                seq = seq + ResidueSummary.three_letter_code_to_one(residue.resname)
+            elif residue.resname in [*NUCLEOTIDES]:
+                seq = seq + residue.resname
             else:
-                seq.append(represent_noncanonical)
+                seq = seq + represent_noncanonical_as
             auth_seq_id_to_primary_ix[residue.get_id()[1]] = ix
-            
-        return ''.join(seq), auth_seq_id_to_primary_ix
 
-    @lru_cache(maxsize=1)
-    def _compute_flat_sequence(self) -> Tuple[str, Dict[int, Residue], Dict[int, int]]:
-        """Compute flat sequence and mappings (cached)"""
-        seq = []
-        flat_index_to_residue_map = {}
+        return seq, auth_seq_id_to_primary_ix
+
+    @property
+    def flat_sequence(self) -> tuple[str, dict[int,Residue], dict[int,int]]:
+        res: list[Residue] = [*self.chain.get_residues()]
+
+        flat_index_to_residue_map     = {}
         auth_seq_id_to_flat_index_map = {}
-        flat_index = 0
-        
-        for residue in self.chain.get_residues():
-            resname = residue.resname
-            if resname in AMINO_ACIDS or resname in NUCLEOTIDES:
-                seq.append(ResidueSummary.three_letter_code_to_one(resname))
+        seq                           = ""
+        flat_index                    = 0
+
+        for residue in res:
+            if residue.resname in [*AMINO_ACIDS.keys(), *NUCLEOTIDES]:
+                seq = seq + ResidueSummary.three_letter_code_to_one(residue.resname)
                 flat_index_to_residue_map[flat_index] = residue
                 auth_seq_id_to_flat_index_map[residue.get_id()[1]] = flat_index
                 flat_index += 1
-                
-        return ''.join(seq), flat_index_to_residue_map, auth_seq_id_to_flat_index_map
-    
-    @property
-    def primary_sequence(self) -> Tuple[str, Dict[int, int]]:
-        return self._primary_seq_data
-    
-    @property
-    def flat_sequence(self) -> Tuple[str, Dict[int, Residue], Dict[int, int]]:
-        return self._flat_seq_data
+            else:
+                continue
+        return seq, flat_index_to_residue_map, auth_seq_id_to_flat_index_map
+
+    def __init__(self, chain: Chain):
+        self.chain = chain
 
 class SeqPairwise:
-    def __init__(self, sourceseq: str, targetseq: str, source_residues: List[int]):
-        self.src = sourceseq
-        self.src_ids = source_residues
-        self.tgt = targetseq
-        
-        # Compute alignment once
-        alignment = pairwise2.align.globalxx(self.src, self.tgt, one_alignment_only=True)[0]
-        self.src_aln = alignment.seqA
-        self.tgt_aln = alignment.seqB
-        
-        # Create position maps first
-        self._src_aln_pos_map = self._create_position_map(self.src_aln)
-        self._tgt_aln_pos_map = self._create_position_map(self.tgt_aln)
-        
-        # Then compute indices using the position maps
-        self.aligned_ids = self._compute_aligned_indices()
-        self.tgt_ids = self._compute_target_indices()
-    
-    def _create_position_map(self, seq: str) -> Dict[int, int]:
-        """Create a mapping of position to original index (excluding gaps)"""
-        pos_map = {}
-        orig_pos = 0
-        for i, char in enumerate(seq):
-            if char != '-':
-                pos_map[i] = orig_pos
-                orig_pos += 1
-        return pos_map
-    
-    def _compute_aligned_indices(self) -> List[int]:
-        """Compute all aligned indices in one pass"""
-        indices = []
+    def __init__(self, sourceseq: str, targetseq: str, source_residues: list[int]):
+        """A container for origin and target sequences when matching residue indices in the source sequence to the target sequence.
+         - return the map {int:int} between the two sequences
+                 CASE 1. The first one is longer:
+                     Initial
+
+        Common ix    0 1 2 3 4 5 6 7 8 9             Aligned ix   0 1 2 3 4 5 6 7 8 9
+        Canonical    X Y G G H A S D S D    ----->   Canonical    X Y G G H A S D S D
+        Structure    Y G G H A S D                   Structure    - Y G G H A S D - -
+
+         IMPORTANT: BOTH SEQUENCES ARE ASSUMED TO HAVE NO GAPS ( at least not represeneted as "-"). That will screw up the arithmetic.
+        """
+
+        # *  indices of the given residues in the source sequence.
+        self.src    : str       = sourceseq
+        self.src_ids: list[int] = source_residues
+
+        # * Indices of the corresponding residues in target sequence. To be filled.
+        self.tgt: str = targetseq
+        self.tgt_ids: list[int] = []
+
+        _ = pairwise2.align.globalxx(self.src, self.tgt, one_alignment_only=True)
+
+        self.src_aln = _[0].seqA
+        self.tgt_aln = _[0].seqB
+
+        self.aligned_ids = []
+
         for src_resid in self.src_ids:
-            orig_count = 0
-            for i, char in enumerate(self.src_aln):
-                if char != '-':
-                    if orig_count == src_resid:
-                        indices.append(i)
-                        break
-                    orig_count += 1
-        return indices
-    
-    def _compute_target_indices(self) -> List[int]:
-        """Compute all target indices in one pass"""
-        indices = []
+            self.aligned_ids.append(self.forwards_match(self.src_aln, src_resid))
+
         for aln_resid in self.aligned_ids:
-            if self.tgt_aln[aln_resid] != '-':
-                orig_pos = self._tgt_aln_pos_map.get(aln_resid)
-                if orig_pos is not None:
-                    indices.append(orig_pos)
-        return indices
+            tgt_aln_index = self.backwards_match(self.tgt_aln, aln_resid)
+            if tgt_aln_index == None:
+                continue
+            else:
+                self.tgt_ids.append(tgt_aln_index)
+
+    def forwards_match(
+        self, aligned_source_sequence: str, original_residue_index: int
+    ) -> int:
+        """Returns the index of a source-sequence residue in the aligned source sequence. Basically, "count forward including gaps" """
+        if original_residue_index > len(aligned_source_sequence):
+            raise IndexError( f"Passed residue with invalid index ({original_residue_index}) to back-match to target.Seqlen aligned:{len(aligned_source_sequence)}" )
+
+        original_residues_count = 0
+        for aligned_ix, char in enumerate(aligned_source_sequence):
+            if original_residues_count == original_residue_index:
+                if char == "-":
+                    continue
+                else:
+                    return aligned_ix
+            if char == "-":
+                continue
+            else:
+                original_residues_count += 1
+
+        raise ValueError(
+            f"Residue with index {original_residue_index} not found in the aligned source sequence after full search. Logical errory, likely."
+        )
+
+    def backwards_match(
+        self, aligned_target_sequence: str, aligned_residue_index: int
+    ) -> int | None:
+        """Returns the target-sequence index of a residue in the [aligned] target sequence. Basically, "count back ignoring gaps" """
+        if aligned_residue_index > len(aligned_target_sequence):
+            raise IndexError( f"Passed residue with invalid index ({aligned_residue_index}) to back-match to target.Seqlen:{len(aligned_target_sequence)}" )
+
+        if aligned_target_sequence[aligned_residue_index] == "-":
+            return None
+
+        original_residues_index = 0
+        for aligned_ix, char in enumerate(aligned_target_sequence):
+            if aligned_ix == aligned_residue_index:
+                return original_residues_index
+            if char == "-":
+                continue
+            else:
+                original_residues_index += 1
 
     @staticmethod
-    def highlight_indices(sequence: str, ixs: List[int], color: int = 91) -> str:
-        """Optimized highlighting using a single join operation"""
-        highlighted = []
+    def highlight_subseq(sequence: str, subsequence: str, index: int = None):
+        """Highlight subsequence"""
+        CRED = "\033[91m"
+        CEND = "\033[0m"
+        _ = []
+        if index != None:
+            return (
+                sequence[: index - 1]
+                + CRED
+                + sequence[index]
+                + CEND
+                + sequence[index + 1 :]
+            )
+        for item in re.split(re.compile(f"({subsequence})"), sequence):
+            if item == subsequence:
+                _.append(CRED + item + CEND)
+            else:
+                _.append(item)
+        return "".join(_)
+
+    @staticmethod
+    def highlight_indices(sequence: str, ixs: List[int], color: int = 91):
+        """Highlight indices"""
+        CRED = "\033[{}m".format(color)
+        CEND = "\033[0m"
+        _ = ""
         for i, v in enumerate(sequence):
             if i in ixs:
-                highlighted.append(f"\033[{color}m{v}\033[0m")
+                _ += CRED + v + CEND
             else:
-                highlighted.append(v)
-        return ''.join(highlighted)
+                _ += v
+        return _
 
 
-def map_motifs(
-    source_chain: SequenceMappingContainer,
-    target_chain: SequenceMappingContainer,
-    bound_residues: List[ResidueSummary],
-    polymer_class: str,
-    verbose: bool = False
-) -> Tuple[str, str, List[Residue]]:
-    
-    # Get cached sequences and mappings
-    src_flat_seq, src_flat_to_res, src_auth_to_flat = source_chain.flat_sequence
-    tgt_flat_seq, tgt_flat_to_res, _ = target_chain.flat_sequence
-    
-    # Filter bound residues once
-    valid_residues = {*NUCLEOTIDES, *AMINO_ACIDS.keys()}
-    src_bound_flat_indices = [
-        src_auth_to_flat[res.auth_seq_id]
-        for res in bound_residues
-        if res.label_comp_id in valid_residues
-    ]
-    
-    # Perform sequence alignment and mapping
-    mapper = SeqPairwise(src_flat_seq, tgt_flat_seq, src_bound_flat_indices)
-    tgt_bound_residues = [tgt_flat_to_res[idx] for idx in mapper.tgt_ids]
-    
+def map_motifs(source_chain:SequenceMappingContainer, target_chain:SequenceMappingContainer, bound_residues:list[ResidueSummary], polymer_class:str, verbose:bool=False)->tuple[str,str,list[Residue]]:
+
+    bpchain_source = source_chain
+    bpchain_target = target_chain
+
+    #! SOURCE & TARGET MAPS
+    [ src_flat_structural_seq, src_flat_idx_to_residue_map, src_auth_seq_id_to_flat_index_map, ] = bpchain_source.flat_sequence
+    [ tgt_flat_structural_seq, tgt_flat_idx_to_residue_map, tgt_auth_seq_id_to_flat_index_map, ] = bpchain_target.flat_sequence
+
+    # ! Bound residues  [in STRUCTURE SPACE]
+    src_bound_auth_seq_idx = [ (residue.auth_seq_id, residue.label_comp_id) for residue in bound_residues ]
+
+    primary_seq_source, auth_seq_to_primary_ix_source = ( bpchain_source.primary_sequence )
+    primary_seq_target, auth_seq_to_primary_ix_target = ( bpchain_target.primary_sequence )
+
+
+    src_bound_flat_indices = [ src_auth_seq_id_to_flat_index_map[index] for index, label in filter( lambda x: x[1] in [*NUCLEOTIDES, *AMINO_ACIDS.keys()], src_bound_auth_seq_idx, ) ]
+
+    M = SeqPairwise( src_flat_structural_seq, tgt_flat_structural_seq, src_bound_flat_indices )
+
+    tgt_bound_flat_indices = M.tgt_ids
+    tgt_bound_residues = [ tgt_flat_idx_to_residue_map[idx] for idx in tgt_bound_flat_indices ]
+
     if verbose:
-        primary_seq_source, auth_to_primary_source = source_chain.primary_sequence
-        primary_seq_target, auth_to_primary_target = target_chain.primary_sequence
-        
-        print(f"\n\n\t\t [{polymer_class}] ")
-        print("[\033[95mSource\033[0m Primary]\t", 
-              SeqPairwise.highlight_indices(
-                  primary_seq_source,
-                  [auth_to_primary_source[res.auth_seq_id] for res in bound_residues]
-              ))
-        print("[\033[95mSource\033[0m Flat   ]\t",
-              SeqPairwise.highlight_indices(src_flat_seq, src_bound_flat_indices))
-        print("[\033[95mSource\033[0m Aligned]\t",
-              mapper.highlight_indices(mapper.src_aln, mapper.aligned_ids))
-        print("[\033[96mTarget\033[0m Aligned]\t",
-              mapper.highlight_indices(mapper.tgt_aln, mapper.aligned_ids))
-        print("[\033[96mTarget\033[0m Flat   ]\t",
-              SeqPairwise.highlight_indices(tgt_flat_seq, mapper.tgt_ids))
-        print("[\033[96mTarget\033[0m Primary]\t",
-              SeqPairwise.highlight_indices(
-                  primary_seq_target,
-                  [auth_to_primary_target[res.get_id()[1]] for res in tgt_bound_residues]
-              ))
-    
-    return source_chain.primary_sequence[0], target_chain.primary_sequence[0], tgt_bound_residues
+        print("\n\n\t\t [{}] ".format(polymer_class))
+        print( "[\033[95mSource\033[0m Primary]\t", SeqPairwise.highlight_indices( primary_seq_source, [ auth_seq_to_primary_ix_source[index] for index, label in src_bound_auth_seq_idx ]))
+        print( "[\033[95mSource\033[0m Flat   ]\t", SeqPairwise.highlight_indices(src_flat_structural_seq, src_bound_flat_indices), )
+        print( "[\033[95mSource\033[0m Aligned]\t", M.highlight_indices(M.src_aln, ixs=M.aligned_ids) )
+        print( "[\033[96mTarget\033[0m Aligned]\t", M.highlight_indices(M.tgt_aln, ixs=M.aligned_ids) )
+        print( "[\033[96mTarget\033[0m Flat   ]\t", SeqPairwise.highlight_indices(tgt_flat_structural_seq, tgt_bound_flat_indices), )
+        print( "[\033[96mTarget\033[0m Primary]\t", SeqPairwise.highlight_indices( primary_seq_target, [ auth_seq_to_primary_ix_target[residue.get_id()[1]] for residue in tgt_bound_residues ], ), )
+
+    return primary_seq_source, primary_seq_target, tgt_bound_residues

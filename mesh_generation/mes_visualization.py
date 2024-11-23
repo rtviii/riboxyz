@@ -1251,13 +1251,14 @@ def visualize_mesh(mesh, rcsb_id:str|None=None, gif:bool=False, gif_name:str|Non
     else:
         plotter.show()
 
-def visualize_pointcloud(ptcloud,  rcsb_id:str|None=None, gif:bool=False, gif_name:str|None=None):
+def visualize_pointcloud(ptcloud,ptcloud2,  rcsb_id:str|None=None, gif:bool=False, gif_name:str|None=None):
     plotter              = pv.Plotter(off_screen=gif)
     n_labels = 7
     plotter.show_grid( n_xlabels=n_labels, n_ylabels=n_labels, n_zlabels=n_labels, font_size = 8)
     plotter.add_axes(line_width=2,cone_radius=0.3, shaft_length=2, tip_length=1, ambient=1, label_size=(0.2, 0.6))
     plotter.add_text('RCSB_ID:{}'.format(rcsb_id if rcsb_id is not None else "" ), position='upper_right', font_size=14, shadow=True, font='courier', color='black')
     plotter.add_points(ptcloud, color='black', point_size=3,  opacity=0.3)
+    plotter.add_points(ptcloud2, color='red', point_size=1,  opacity=1)
     plotter.show()
 
 def visualize_pointclouds(ptcloud1:np.ndarray, ptcloud2:np.ndarray, background_positive:np.ndarray, gif:bool=False, gif_name:str|None=None):

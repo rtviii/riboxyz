@@ -15,7 +15,7 @@ from ribctl.ribosome_ops import RibosomeOps
 from Bio.PDB.NeighborSearch import NeighborSearch
 from Bio.PDB import Selection
 from ribctl.lib.libbsite import map_motifs
-from ribctl.lib._libseq import SequenceMappingContainer
+from ribctl.lib.libseq import SequenceMappingContainer
 from ribctl.lib.libtax import Taxid
 from ribctl.lib.schema.types_binding_site import ResidueSummary
 from scipy.spatial.distance import pdist, squareform

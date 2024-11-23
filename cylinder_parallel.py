@@ -54,13 +54,8 @@ def main():
     voxel_size = 1
     ATOM_RADIUS = 2
 
-    # residues, base, axis = get_npet_cylinder_residues(RCSB_ID, radius=radius, height=height)
-
     base_point = np.array(PTC_location(RCSB_ID).location)
     axis_point = np.array( get_constriction(RCSB_ID) )
-    # translation, rotation = get_transformation_to_C0(base, axis)
-    # t_base = ( base + translation ) @ rotation.T
-    # t_axis = ( axis + translation ) @ rotation.T
 
     if os.path.exists('points.npy'):
         points = np.load('points.npy')

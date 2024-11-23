@@ -102,8 +102,8 @@ if __name__ == '__main__':
         points = np.load('points.npy')
         print("Loaded")
     else:
-        residues= filter_residues_parallel( ribosome_entities(RCSB_ID, 'R'), base_point, axis_point, radius, height, )
-        points = np.array([atom.get_coord() for residue in residues for atom in residue.child_list])
+        residues = filter_residues_parallel( ribosome_entities(RCSB_ID, 'R'), base_point, axis_point, radius, height, )
+        points   = np.array([atom.get_coord() for residue in residues for atom in residue.child_list])
         np.save('points.npy', points)
         print("Saved")
         ...

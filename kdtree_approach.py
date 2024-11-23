@@ -2,10 +2,11 @@ import numpy as np
 from scipy.spatial import cKDTree
 import pyvista as pv
 
-from cylinder import transform_points_to_C0
+from cylinder import get_transformation_to_C0, transform_points_to_C0
 from mesh_generation.mes_visualization import visualize_pointcloud
 from ribctl.lib.landmarks.constriction import get_constriction
 from ribctl.lib.landmarks.ptc_via_trna import PTC_location
+from ribctl.lib.npet.tunnel_bbox_ptc_constriction import filter_residues_parallel, ribosome_entities
 
 def generate_voxel_centers(radius: float, height: float, voxel_size: float) -> tuple:
     """Generate centers of all voxels in the grid"""
@@ -57,35 +58,53 @@ def create_point_cloud_mask(points: np.ndarray,
     
     return final_mask, (x, y, z)
 
+def transform_points_to_C0(points: np.ndarray, base_point: np.ndarray, axis_point: np.ndarray) -> np.ndarray:
+    translation, rotation = get_transformation_to_C0(base_point, axis_point)
+    points_translated  = points + translation
+    points_transformed = points_translated @ rotation.T
+    
+    return points_transformed
+
+
+def transform_points_from_C0(points: np.ndarray, base_point: np.ndarray, axis_point: np.ndarray) -> np.ndarray:
+    translation, rotation = get_transformation_to_C0(base_point, axis_point)
+    points_unrotated = points @ rotation
+    points_untranslated = points_unrotated - translation
+    
+    return points_untranslated
 def main():
     # Load your points and transform them as before
-    points     = np.load('points.npy')
-    RCSB_ID    = '3J7Z'
+    RCSB_ID    = '4UG0'
+    R          = 15
+    H          = 120
+    Vsize      = 1
+    ATOM_SIZE  = 2
     base_point = np.array(PTC_location(RCSB_ID).location)
     axis_point = np.array(get_constriction(RCSB_ID) )
-    print("loaded and got axis")
+
+    residues           = filter_residues_parallel( ribosome_entities(RCSB_ID, 'R'), base_point, axis_point, R, H)
+    points             = np.array([atom.get_coord() for residue in residues for atom in residue.child_list])
     transformed_points = transform_points_to_C0(points, base_point, axis_point)
 
-    final_mask, (x, y, z) = create_point_cloud_mask(
+    mask, (x, y, z) = create_point_cloud_mask(
         transformed_points,
-        radius              = 40,
-        height              = 80,
-        voxel_size          = 1.0,
-        radius_around_point = 2.0
+        radius              = R,
+        height              = H,
+        voxel_size          = Vsize,
+        radius_around_point = ATOM_SIZE
     )
     
-    # Extract points for visualization
-    occupied = np.where(~final_mask)
-    visualization_points = np.column_stack((
-        x[occupied[0]], 
-        y[occupied[1]], 
-        z[occupied[2]]
+    points = np.where(~mask)
+    empty_coordinates = np.column_stack((
+        x[points[0]], 
+        y[points[1]], 
+        z[points[2]]
     ))
-    
-    # Visualize results
-    occupied_points = pv.PolyData(visualization_points)
+    world_coords    = transform_points_from_C0(empty_coordinates ,base_point,axis_point)
+    occupied_points = pv.PolyData(empty_coordinates)
+    world_coords    = pv.PolyData(world_coords)
 
-    visualize_pointcloud(occupied_points)
+    visualize_pointcloud(occupied_points, world_coords)
 
 if __name__ == '__main__':
     main()
