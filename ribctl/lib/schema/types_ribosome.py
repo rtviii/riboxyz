@@ -585,6 +585,9 @@ class PTCInfo(BaseModel):
     location: list[float]
     residues: list[ResidueSummary]
 
+class ConstrictionSite(BaseModel):
+    location: list[float]
+
 class RibosomeStructureMetadata(BaseModel):
 
     def get_polymers_by_assembly(self)->dict[str,list[str]]:

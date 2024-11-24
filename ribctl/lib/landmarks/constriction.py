@@ -15,7 +15,8 @@ def get_constriction(rcsb_id: str)->np.ndarray:
     if uL4 is None or uL22 is None:
         raise ValueError("Could not find uL4 or uL22 in {}".format(rcsb_id))
     structure = ro.assets.biopython_structure()
-    uL4_c :Chain  = structure[0][uL4.auth_asym_id]
+    
+    uL4_c  :Chain = structure[0][uL4.auth_asym_id]
     uL22_c :Chain = structure[0][uL22.auth_asym_id]
 
     uL4_coords  = [(r.center_of_mass() ) for r in uL4_c.child_list]

@@ -54,7 +54,6 @@ def transform_points_to_C0(points: np.ndarray, base_point: np.ndarray, axis_poin
     
     return points_transformed
 
-
 def transform_points_from_C0(points: np.ndarray, base_point: np.ndarray, axis_point: np.ndarray) -> np.ndarray:
     translation, rotation = get_transformation_to_C0(base_point, axis_point)
     points_unrotated = points @ rotation
@@ -63,9 +62,9 @@ def transform_points_from_C0(points: np.ndarray, base_point: np.ndarray, axis_po
     return points_untranslated
 def main():
     # Load your points and transform them as before
-    RCSB_ID    = '4UG0'
+    RCSB_ID    = '8QSJ'
     R          = 40
-    H          = 120
+    H          = 100
     Vsize      = 1
     ATOM_SIZE  = 2
     base_point = np.array(PTC_location(RCSB_ID).location)

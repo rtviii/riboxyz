@@ -24,6 +24,7 @@ class AssetPathManager:
               AssetType.MMCIF                : "{asset_dir}/{pdb_id}.cif",
               AssetType.STRUCTURE_PROFILE    : "{asset_dir}/{pdb_id}.json",
               AssetType.PTC                  : "{asset_dir}/{pdb_id}_PTC.json",
+              AssetType.CONSTRICTION_SITE                  : "{asset_dir}/{pdb_id}_CONSTRICTION_SITE.json",
             #   AssetType.THUMBNAIL            : "{asset_dir}/{pdb_id}.png",
             #   AssetType.CLASSIFICATION_REPORT: "{asset_dir}/classification_report_{pdb_id}.json",
             #   AssetType.NPET_MESH            : "{asset_dir}/TUNNELS/{pdb_id}_NPET_MESH.ply",
