@@ -182,10 +182,8 @@ def by_chain(pdbid: str):
 
     if profile['rnas'] != None:
         for rna in list(sorted(profile['rnas'], key=lambda d: d['nomenclature'][0])):
-
             if len( rna['nomenclature'])>0:
                 nomclass = rna['nomenclature'][0]
-
             else:
                 nomclass = random.choice(list(colormap__RNA.keys()))
             prot_tmp = f"{nomclass}.{rna['auth_asym_id']}"

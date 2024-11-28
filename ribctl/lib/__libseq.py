@@ -3,15 +3,12 @@ from Bio.PDB.Residue import  Residue
 from Bio import pairwise2
 from typing import List, Dict, Tuple, Optional
 from functools import lru_cache
-import re
-
 from ribctl.lib.schema.primitivs import AMINO_ACIDS, NUCLEOTIDES
 from ribctl.lib.schema.types_ribosome import ResidueSummary
 
 class SequenceMappingContainer:
     def __init__(self, chain: Chain):
         self.chain = chain
-        # Cache the sequence mappings on initialization
         self._init_sequences()
     
     def _init_sequences(self):

@@ -13,6 +13,7 @@ with warnings.catch_warnings():
     from Bio import pairwise2
 from Bio.PDB.Residue import Residue
 from Bio.PDB.Chain import Chain
+from ribctl.lib.schema.types_ribosome import PolymerClass
 
 # lets say you align 4ug0.A to 4u3m.F
 # 1. take biopython struct of 4ugo, get chain A
@@ -207,7 +208,6 @@ class SeqPairwise:
                 _ += v
         return _
 
-
 def map_motifs(source_chain:SequenceMappingContainer, target_chain:SequenceMappingContainer, bound_residues:list[ResidueSummary], polymer_class:str, verbose:bool=False)->tuple[str,str,list[Residue]]:
 
     bpchain_source = source_chain
@@ -241,3 +241,11 @@ def map_motifs(source_chain:SequenceMappingContainer, target_chain:SequenceMappi
         print( "[\033[96mTarget\033[0m Primary]\t", SeqPairwise.highlight_indices( primary_seq_target, [ auth_seq_to_primary_ix_target[residue.get_id()[1]] for residue in tgt_bound_residues ], ), )
 
     return primary_seq_source, primary_seq_target, tgt_bound_residues
+
+def chain_conservation(
+    source_chain_class: PolymerClass,
+) -> tuple[str, str, List[Residue]]:
+    ...
+
+
+

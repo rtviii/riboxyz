@@ -15,7 +15,6 @@ from .asset_types import AssetType
 
 ModelT = TypeVar("ModelT", bound=BaseModel)
 
-
 class AssetRegistry:
     def __init__(self, manager: RibosomeAssetManager):
         self.manager = manager

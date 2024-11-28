@@ -4,10 +4,18 @@ from pathlib import Path
 from loguru import logger
 from pydantic import BaseModel
 
-from .asset_types import AssetType, ModelT,ModelGenerator, RawGenerator, AssetDefinition
+from .asset_types import (
+    AssetType,
+    ModelT,
+    ModelGenerator,
+    RawGenerator,
+    AssetDefinition,
+)
+
 
 class AssetPathManager:
     """Manages asset paths and directory structure"""
+
     def __init__(self, base_dir: Path):
         self.base_dir = Path(base_dir)
 
@@ -24,10 +32,10 @@ class AssetPathManager:
               AssetType.MMCIF                : "{asset_dir}/{pdb_id}.cif",
               AssetType.STRUCTURE_PROFILE    : "{asset_dir}/{pdb_id}.json",
               AssetType.PTC                  : "{asset_dir}/{pdb_id}_PTC.json",
-              AssetType.CONSTRICTION_SITE                  : "{asset_dir}/{pdb_id}_CONSTRICTION_SITE.json",
-            #   AssetType.THUMBNAIL            : "{asset_dir}/{pdb_id}.png",
-            #   AssetType.CLASSIFICATION_REPORT: "{asset_dir}/classification_report_{pdb_id}.json",
-            #   AssetType.NPET_MESH            : "{asset_dir}/TUNNELS/{pdb_id}_NPET_MESH.ply",
+              AssetType.CONSTRICTION_SITE    : "{asset_dir}/{pdb_id}_CONSTRICTION_SITE.json",
+            # AssetType.THUMBNAIL            : "{asset_dir}/{pdb_id}.png",
+            # AssetType.CLASSIFICATION_REPORT: "{asset_dir}/classification_report_{pdb_id}.json",
+            # AssetType.NPET_MESH            : "{asset_dir}/TUNNELS/{pdb_id}_NPET_MESH.ply",
             # AssetType.RNA_HELICES          : "{asset_dir}/RNA_HELICES.json",
             # AssetType.TRNA_SITES           : "{asset_dir}/TRNA_SITES.json",
         }
@@ -42,16 +50,18 @@ class AssetPathManager:
         """Load and validate a model from disk"""
         if not asset_type.requires_model():
             return None
-            
+
         path = self.get_asset_path(pdb_id, asset_type)
         if not path.exists():
             raise FileNotFoundError(f"No {asset_type.name} asset found for {pdb_id}")
-            
+
         model_cls = asset_type.model_type
         return model_cls.model_validate_json(path.read_text())
 
+
 class RibosomeAssetManager:
     """Manages assets for ribosome structures"""
+
     def __init__(self, base_dir: Path):
         self.path_manager = AssetPathManager(base_dir)
         self._init_asset_definitions()
@@ -59,20 +69,20 @@ class RibosomeAssetManager:
     def _init_asset_definitions(self):
         """Initialize asset definitions - now uses model information from AssetType"""
         self.assets: Dict[AssetType, AssetDefinition] = {}
-        
+
         for asset_type in AssetType:
             self.assets[asset_type] = AssetDefinition(
-                asset_type    = asset_type,
-                dependencies  = asset_type.dependencies,
-                path_template = "{pdb_id}",              # Basic template, actual paths handled by PathManager
-                required      = True,                    # Could be made configurable per asset if needed
-                generator     = None  # Will be set by registry
+                asset_type=asset_type,
+                dependencies=asset_type.dependencies,
+                path_template="{pdb_id}",  # Basic template, actual paths handled by PathManager
+                required=True,  # Could be made configurable per asset if needed
+                generator=None,  # Will be set by registry
             )
 
     def register_generator(
-        self, 
-        asset_type: AssetType, 
-        generator: Union[ModelGenerator[ModelT], RawGenerator]
+        self,
+        asset_type: AssetType,
+        generator: Union[ModelGenerator[ModelT], RawGenerator],
     ) -> None:
         """Register a generator function for an asset type"""
         if asset_type not in self.assets:
@@ -102,6 +112,8 @@ class RibosomeAssetManager:
             for asset_type in AssetType
         }
 
-    def load_dependency(self, pdb_id: str, asset_type: AssetType) -> Optional[BaseModel]:
+    def load_dependency(
+        self, pdb_id: str, asset_type: AssetType
+    ) -> Optional[BaseModel]:
         """Load a dependency model, returns None for raw assets"""
         return self.path_manager.load_model(pdb_id, asset_type)
