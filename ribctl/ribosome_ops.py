@@ -1,9 +1,3 @@
-import asyncio
-from enum import   auto
-import enum
-import json
-import os
-from pprint import pprint
 import typing
 from Bio.PDB.Structure import Structure
 from Bio.PDB.Chain import Chain
@@ -37,17 +31,15 @@ class RibosomeOps:
         return self.assets.profile()
 
     def get_biopython_chain_by_polymer_class(self, polymer_class: PolymerClass) -> Chain:
-        struct = self.assets.biopython_structure()[0]
+        model = self.assets.biopython_structure()[0]
         poly = self.get_poly_by_polyclass(polymer_class)
         if poly == None:
             raise KeyError("No polymer found with class: {}".format(polymer_class))
-        return struct.child_dict[0].child_dict[poly.auth_asym_id]
-
-
+        return model.child_dict[poly.auth_asym_id]
 
     def get_biopython_chain_by_auth_asym_id(self, auth_asym_id: str) -> Chain:
-        struct = self.assets.biopython_structure()[0]
-        return struct.child_dict[0].child_dict[auth_asym_id]
+        model = self.assets.biopython_structure()[0]
+        return model.child_dict[auth_asym_id]
 
     def nomenclature_table(self, verbose: bool = False) -> dict[str, dict]:
         prof = self.assets.profile()
