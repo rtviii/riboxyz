@@ -304,18 +304,19 @@ def calculate_position_entropy(aligned_sequences: List[str], position: int) -> f
     return entropy
 
 def get_conservation_scores(fasta_obj: Fasta) -> Dict[int, float]:
+
     """
     Calculate conservation scores for each position in aligned sequences.
     Returns a dictionary mapping structural indices to conservation scores.
     """
     # Get alignment using existing MUSCLE implementation
     aligned_records = muscle_align_N_seq(fasta_obj.records)
-    
+
     # Convert to list of strings for easier processing
     aligned_sequences = [str(record.seq) for record in aligned_records]
     
     # Detect sequence type
-    seq_type = detect_sequence_type(aligned_sequences)
+    seq_type    = detect_sequence_type(aligned_sequences)
     max_entropy = get_max_entropy(seq_type)
     
     # Calculate entropy for each position
