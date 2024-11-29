@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import TypeVar, Generic, Optional, Type, Tuple
 from pydantic import BaseModel
 
-from ribctl.lib.schema.types_ribosome import PTCInfo, RibosomeStructure
+from ribctl.lib.schema.types_ribosome import ConstrictionSite, PTCInfo, RibosomeStructure
 
 # Type for any pydantic model
 ModelT = TypeVar('ModelT', bound=BaseModel)
@@ -33,6 +33,7 @@ class AssetType(Enum):
     # Model Based assets
     STRUCTURE_PROFILE = AssetInfo("profile", model=RibosomeStructure)
     PTC               = AssetInfo("ptc", model=PTCInfo, dependencies={"STRUCTURE_PROFILE", "MMCIF"});
+    CONSTRICTION_SITE = AssetInfo("constriction_site", model=ConstrictionSite, dependencies={"STRUCTURE_PROFILE", "MMCIF"});
     
     @property
     def model_type(self) -> Optional[Type[BaseModel]]:

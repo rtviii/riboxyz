@@ -1,7 +1,10 @@
 from functools import partial
+from typing import Optional, Tuple
 from matplotlib import pyplot as plt
 import numpy as np
 import concurrent.futures
+
+from sklearn.neighbors import KDTree
 
 
 def sphere_task(container_sink:list, atom_center_coordinate:np.ndarray, vdw_R=2):
@@ -10,11 +13,11 @@ def sphere_task(container_sink:list, atom_center_coordinate:np.ndarray, vdw_R=2)
     container_sink.extend(result)
     return result
 
-def expand_atomcenters_to_spheres_threadpool(sink_container:list, sphere_sources):
+def expand_atomcenters_to_spheres_threadpool(sink_container:list, atoms):
   with concurrent.futures.ThreadPoolExecutor(max_workers=12) as executor:
         futures = []
-        for (center_coordinate, vdw_R) in sphere_sources:
-            partial_task = partial(sphere_task, sink_container, center_coordinate, vdw_R)
+        for atom_pos in atoms:
+            partial_task = partial(sphere_task, sink_container, atom_pos)
             future = executor.submit(partial_task)
             futures.append(future)
         concurrent.futures.wait(futures)
@@ -121,3 +124,155 @@ def index_grid(expanded_sphere_voxels: np.ndarray) :
 
     return ( vox_grid, grid_dimensions, mean_abs_vectors )
 
+
+import numpy as np
+from sklearn.neighbors import KDTree
+
+def make_cylinder_grid(
+    base_point: np.ndarray,
+    axis_point: np.ndarray,
+    radius: float,
+    height: float,
+    resolution: float,
+    existing_points: np.ndarray ,
+) -> tuple[np.ndarray, np.ndarray]:
+    """
+    Creates a cylindrical grid and tracks which points are "active" (occupied by existing points)
+    """
+    # Calculate number of samples for each dimension
+    n_radial  = max(int(radius / resolution), 2)
+    n_angular = max(int(2 * np.pi * radius / resolution), 8)
+    n_height  = max(int(height / resolution), 2)
+    
+    # Create 1D coordinate arrays
+    r = np.linspace(0, radius, n_radial)
+    theta = np.linspace(0, 2*np.pi, n_angular)
+    h = np.linspace(0, height, n_height)
+    
+    # Create 3D coordinate arrays
+    R, Theta, H = np.meshgrid(r, theta, h, indexing='ij')
+    
+    # Convert to Cartesian coordinates
+    X = R * np.cos(Theta)
+    Y = R * np.sin(Theta)
+    Z = H
+    
+    # Get the original shapes before flattening
+    original_shape = X.shape
+    
+    # Stack and reshape coordinates into points array
+    points = np.column_stack([
+        X.ravel(), 
+        Y.ravel(), 
+        Z.ravel()
+    ])
+    
+    # Transform points to align with cylinder axis
+    axis = axis_point - base_point
+    axis_length = np.linalg.norm(axis)
+    if axis_length == 0:
+        raise ValueError("base_point and axis_point cannot be the same")
+    
+    axis = axis / axis_length
+    
+    # Create rotation matrix to align cylinder with given axis
+    z_axis = np.array([0, 0, 1])
+    if not np.allclose(axis, z_axis):
+        rotation_axis = np.cross(z_axis, axis)
+        rotation_axis = rotation_axis / np.linalg.norm(rotation_axis)
+        cos_theta = np.dot(z_axis, axis)
+        sin_theta = np.sqrt(1 - cos_theta**2)
+        
+        K = np.array([[0, -rotation_axis[2], rotation_axis[1]],
+                     [rotation_axis[2], 0, -rotation_axis[0]],
+                     [-rotation_axis[1], rotation_axis[0], 0]])
+        
+        R = np.eye(3) + sin_theta * K + (1 - cos_theta) * (K @ K)
+        points = points @ R.T
+    
+    # Translate points to base_point
+    points = points + base_point
+    
+    # Initialize activity mask to match points shape
+    activity_mask = np.zeros(len(points), dtype=bool)
+    
+    if existing_points is not None and len(existing_points) > 0:
+        # Build KD-tree from existing points
+        tree = KDTree(existing_points)
+        # Query the tree for nearest neighbors
+        distances, _ = tree.query(points, k=2)
+        # Mark points as active if they're within resolution distance of existing points
+        activity_mask = distances.ravel() <= resolution
+    
+    return points, activity_mask
+
+def get_empty_space_points(
+    base_point: np.ndarray,
+    axis_point: np.ndarray,
+    radius: float,
+    height: float,
+    resolution: float,
+    existing_points: np.ndarray
+) -> np.ndarray:
+    """Get points representing empty space in the cylinder"""
+    all_points, activity_mask = make_cylinder_grid(
+        base_point, 
+        axis_point, 
+        radius, 
+        height, 
+        resolution, 
+        existing_points
+    )
+    
+    # Make sure mask shape matches points
+    assert len(activity_mask) == len(all_points), \
+        f"Mask shape {activity_mask.shape} doesn't match points shape {all_points.shape}"
+    
+    # Return points where there are no existing points nearby
+    return all_points[~activity_mask]
+
+
+
+# Example usage:
+if __name__ == "__main__":
+    # Example parameters
+    base_point = np.array([0, 0, 0])
+    axis_point = np.array([0, 0, 10])
+    radius = 5
+    height = 10
+    resolution = 0.5
+    
+    # Generate some example existing points (random points in cylinder)
+    n_points = 1000
+    existing_points = np.random.rand(n_points, 3)
+    existing_points[:, 2] *= height  # Scale z coordinates to height
+    existing_points[:, :2] *= radius  # Scale x,y coordinates to radius
+    
+    # Get empty space points
+    empty_points = get_empty_space_points(
+        base_point, axis_point, radius, height,
+        resolution, existing_points
+    )
+    
+    print(f"Generated {len(empty_points)} empty space points")
+    
+    # Optional: Visualize results with matplotlib
+    import matplotlib.pyplot as plt
+    from mpl_toolkits.mplot3d import Axes3D
+    
+    fig = plt.figure(figsize=(10, 10))
+    ax = fig.add_subplot(111, projection='3d')
+    
+    # Plot existing points in blue
+    ax.scatter(existing_points[:, 0], existing_points[:, 1], existing_points[:, 2], 
+              c='blue', alpha=0.6, label='Existing Points')
+    
+    # Plot empty space points in red
+    ax.scatter(empty_points[:, 0], empty_points[:, 1], empty_points[:, 2],
+              c='red', alpha=0.2, label='Empty Space')
+    
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_zlabel('Z')
+    ax.legend()
+    plt.show()

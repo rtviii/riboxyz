@@ -2,7 +2,7 @@ from pprint import pprint
 import sys
 from ribctl.lib.libseq import SequenceMappingContainer, SeqPairwise, map_motifs
 sys.path.append("/home/rtviii/dev/riboxyz")
-from neo4j_ribosome.db_lib_reader import Neo4jReader
+# from neo4j_ribosome.db_lib_reader import Neo4jReader
 import operator
 import json
 import warnings
@@ -244,14 +244,5 @@ def bsite_transpose(
         ),
     )
     return _
-
-def retrieve_ligands():
-    chemcat = lig_get_chemical_categories()["Tetracyclines"]
-    ligands = Neo4jReader().list_ligands()
-
-    def filter_by_category(lig_structs: tuple[dict, list[dict]]):
-        return lig_structs[0]["chemicalId"] in chemcat
-
-    return list(filter(filter_by_category, ligands))
 
 

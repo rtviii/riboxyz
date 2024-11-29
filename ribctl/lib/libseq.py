@@ -1,5 +1,6 @@
 import sys
 
+from ribctl.lib.libmsa import Fasta, muscle_align_N_seq
 from ribctl.lib.schema.primitivs import AMINO_ACIDS, NUCLEOTIDES
 from ribctl.lib.schema.types_ribosome import ResidueSummary
 sys.path.append("/home/rtviii/dev/riboxyz")
@@ -13,7 +14,7 @@ with warnings.catch_warnings():
     from Bio import pairwise2
 from Bio.PDB.Residue import Residue
 from Bio.PDB.Chain import Chain
-
+from ribctl.lib.schema.types_ribosome import PolymerClass
 # lets say you align 4ug0.A to 4u3m.F
 # 1. take biopython struct of 4ugo, get chain A
 # 2. take biopython struct of 4u3m, get chain F
@@ -207,7 +208,6 @@ class SeqPairwise:
                 _ += v
         return _
 
-
 def map_motifs(source_chain:SequenceMappingContainer, target_chain:SequenceMappingContainer, bound_residues:list[ResidueSummary], polymer_class:str, verbose:bool=False)->tuple[str,str,list[Residue]]:
 
     bpchain_source = source_chain
@@ -241,3 +241,115 @@ def map_motifs(source_chain:SequenceMappingContainer, target_chain:SequenceMappi
         print( "[\033[96mTarget\033[0m Primary]\t", SeqPairwise.highlight_indices( primary_seq_target, [ auth_seq_to_primary_ix_target[residue.get_id()[1]] for residue in tgt_bound_residues ], ), )
 
     return primary_seq_source, primary_seq_target, tgt_bound_residues
+
+
+
+
+from typing import Dict, List, Literal
+import numpy as np
+from Bio.Align import AlignInfo, MultipleSeqAlignment
+from Bio.SeqRecord import SeqRecord
+import math
+from ribctl.lib.schema.primitivs import AMINO_ACIDS, NUCLEOTIDES
+
+SequenceType = Literal["protein", "rna"]
+
+def detect_sequence_type(sequences: List[str]) -> SequenceType:
+    """Detect if sequences are protein or RNA based on composition"""
+    # Sample first non-gap character from each sequence
+    sample_chars = set()
+    for seq in sequences:
+        for char in seq:
+            if char != '-':
+                sample_chars.add(char)
+                break
+                
+    # Check if characters are primarily nucleotides or amino acids
+    nucleotide_chars = set(NUCLEOTIDES)
+    if all(c in nucleotide_chars for c in sample_chars):
+        return "rna"
+    return "protein"
+
+def get_max_entropy(seq_type: SequenceType) -> float:
+    """Get maximum possible entropy for sequence type"""
+    if seq_type == "protein":
+        return math.log2(len(AMINO_ACIDS))  # log2(20) ≈ 4.32
+    else:  # RNA
+        return math.log2(len(NUCLEOTIDES))  # log2(4) = 2
+
+def calculate_position_entropy(aligned_sequences: List[str], position: int) -> float:
+    """Calculate Shannon entropy for a specific position in aligned sequences"""
+    
+    # Get all residues at this position
+    residues = [seq[position] for seq in aligned_sequences]
+    
+    # Count frequency of each residue
+    residue_counts = {}
+    total_residues = 0
+    for residue in residues:
+        if residue != '-':  # Skip gaps
+            residue_counts[residue] = residue_counts.get(residue, 0) + 1
+            total_residues += 1
+    
+    # If position is all gaps, return 0
+    if total_residues == 0:
+        return 0.0
+    
+    # Calculate entropy
+    entropy = 0
+    for count in residue_counts.values():
+        frequency = count / total_residues
+        entropy -= frequency * math.log2(frequency)
+    
+    return entropy
+
+def get_conservation_scores(fasta_obj: Fasta) -> Dict[int, float]:
+
+    """
+    Calculate conservation scores for each position in aligned sequences.
+    Returns a dictionary mapping structural indices to conservation scores.
+    """
+    # Get alignment using existing MUSCLE implementation
+    aligned_records = muscle_align_N_seq(fasta_obj.records)
+
+    # Convert to list of strings for easier processing
+    aligned_sequences = [str(record.seq) for record in aligned_records]
+    
+    # Detect sequence type
+    seq_type    = detect_sequence_type(aligned_sequences)
+    max_entropy = get_max_entropy(seq_type)
+    
+    # Calculate entropy for each position
+    alignment_length = len(aligned_sequences[0])
+    position_scores = {}
+    
+    for pos in range(alignment_length):
+        entropy = calculate_position_entropy(aligned_sequences, pos)
+        # Convert entropy to conservation score (higher score = more conserved)
+        conservation = 1 - (entropy / max_entropy)  
+        position_scores[pos] = conservation
+        
+    return position_scores
+
+def map_alignment_to_structure(
+    alignment_scores: Dict[int, float],
+    seq_mapping: SequenceMappingContainer
+) -> Dict[int, float]:
+    """
+    Map alignment position scores to structural residue indices.
+    Returns dictionary of {auth_seq_id: conservation_score}
+    """
+    # Get flat sequence and mapping information
+    flat_seq, flat_idx_to_residue_map, auth_seq_id_to_flat_index_map = seq_mapping.flat_sequence
+    
+    # Create reverse mapping from flat index to auth_seq_id
+    flat_to_auth = {v: k for k, v in auth_seq_id_to_flat_index_map.items()}
+    
+    # Map alignment scores to structural positions
+    structural_scores = {}
+    for flat_idx, score in alignment_scores.items():
+        if flat_idx in flat_to_auth:
+            auth_seq_id = flat_to_auth[flat_idx]
+            structural_scores[auth_seq_id] = score
+            
+    return structural_scores

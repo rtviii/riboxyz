@@ -139,7 +139,7 @@ def PTC_location(target_rcsb_id: str) -> PTCInfo:
     """
     #### Get PTC in @target_rcsb_id by way of mapping a reference PTC in a given mitochondrial structure
     """
-    RO = RibosomeOps(target_rcsb_id)
+    RO     = RibosomeOps(target_rcsb_id)
     tax_id = RO.taxid
     match Taxid.superkingdom(tax_id):
         case "archaea":
@@ -159,7 +159,7 @@ def PTC_location(target_rcsb_id: str) -> PTCInfo:
         raise IndexError("Reference file doesn't exist. It should")
 
     ref_residues: list[Residue] = data_dict["nearest_residues"]
-    ref_chain: Chain = data_dict["chain"]
+    ref_chain   : Chain         = data_dict["chain"]
 
     mmcif_struct_tgt = RO.assets.biopython_structure()[0]
     LSU_RNA_tgt_aaid = RO.get_LSU_rRNA().auth_asym_id

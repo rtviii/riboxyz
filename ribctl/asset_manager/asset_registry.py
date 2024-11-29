@@ -8,12 +8,12 @@ from pydantic import BaseModel
 from ribctl import RIBETL_DATA
 from ribctl.asset_manager.asset_manager import RibosomeAssetManager
 from ribctl.etl.etl_collector import ETLCollector
+from ribctl.lib.landmarks.constriction import get_constriction
 from ribctl.lib.landmarks.ptc_via_trna import PTC_location
-from ribctl.lib.schema.types_ribosome import PTCInfo, RibosomeStructure
+from ribctl.lib.schema.types_ribosome import ConstrictionSite, PTCInfo, RibosomeStructure
 from .asset_types import AssetType
 
 ModelT = TypeVar("ModelT", bound=BaseModel)
-
 
 class AssetRegistry:
     def __init__(self, manager: RibosomeAssetManager):
@@ -83,7 +83,6 @@ class AssetRegistry:
         for asset_type in asset_types:
             await self.generate_asset(rcsb_id, asset_type, force)
 
-
 main_registry = AssetRegistry(RibosomeAssetManager(RIBETL_DATA))
 
 
@@ -92,7 +91,10 @@ async def generate_profile(rcsb_id: str) -> RibosomeStructure:
     profile = await ETLCollector(rcsb_id).generate_profile()
     return profile
 
-
 @main_registry.register(AssetType.PTC)
 async def generate_ptc(rcsb_id: str) -> PTCInfo:
     return PTC_location(rcsb_id)
+
+@main_registry.register(AssetType.CONSTRICTION_SITE)
+async def generate_constriction(rcsb_id: str) -> ConstrictionSite:
+    return ConstrictionSite(location=get_constriction(rcsb_id).tolist())

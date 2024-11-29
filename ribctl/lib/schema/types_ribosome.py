@@ -16,7 +16,6 @@ from ribctl.lib.schema.primitivs import AMINO_ACIDS, NUCLEOTIDES
 # |********************************************************************************************************|
 # | https://docs.google.com/spreadsheets/d/1mapshbn1ArofPN-Omu8GG5QdcwlJ0ym0BlN252kkUBU/edit#gid=815712128 |
 # |********************************************************************************************************|
-
 # ? ----------------------------------------------{ Polymer Types }------------------------------------------------
 
 class tRNA(str,Enum):
@@ -584,6 +583,9 @@ class NomenclatureTable(BaseModel):
 class PTCInfo(BaseModel):
     location: list[float]
     residues: list[ResidueSummary]
+
+class ConstrictionSite(BaseModel):
+    location: list[float]
 
 class RibosomeStructureMetadata(BaseModel):
 
