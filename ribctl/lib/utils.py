@@ -36,8 +36,8 @@ def find_closest_pair_two_sets(points1, points2):
     min_distance = distances[i, j]
     
     return closest_point1, closest_point2
-async def download_unpack_place(struct_id: str) -> None:
 
+async def download_unpack_place(struct_id: str) -> None:
     BASE_URL = "http://files.rcsb.org/download/"
     FORMAT   = ".cif.gz"
 

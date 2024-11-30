@@ -10,18 +10,23 @@ from ribctl.ribosome_ops import StructureAssets, RibosomeOps, Structure
 from ribctl.lib.libtax import PhylogenyNode
 from ribctl.lib.schema.types_ribosome import (
     RNA,
+    Polymer,
+    RibosomeStructureMetadata,
+)
+from ribctl.lib.types.polymer import (
     CytosolicRNAClass,
     ElongationFactorClass,
     InitiationFactorClass,
     LifecycleFactorClass,
     MitochondrialRNAClass,
-    Polymer,
-    RibosomeStructureMetadata,
     tRNA,
 )
 from ribctl.lib.libmsa import Taxid, ncbi
 
-def lsu_ssu_presence(rnas:list[RNA], is_mitochondrial :bool) -> list[Literal[ "ssu", "lsu"]]:
+
+def lsu_ssu_presence(
+    rnas: list[RNA], is_mitochondrial: bool
+) -> list[Literal["ssu", "lsu"]]:
     has_lsu = 0
     has_ssu = 0
     for rna in rnas:
@@ -32,25 +37,30 @@ def lsu_ssu_presence(rnas:list[RNA], is_mitochondrial :bool) -> list[Literal[ "s
             elif MitochondrialRNAClass.mtrRNA16S in rna.nomenclature:
                 has_lsu = 2
         else:
-            if ( (CytosolicRNAClass.rRNA_5_8S in rna.nomenclature)
+            if (
+                (CytosolicRNAClass.rRNA_5_8S in rna.nomenclature)
                 or (CytosolicRNAClass.rRNA_5S in rna.nomenclature)
                 or (CytosolicRNAClass.rRNA_28S in rna.nomenclature)
                 or (CytosolicRNAClass.rRNA_25S in rna.nomenclature)
-                or (CytosolicRNAClass.rRNA_23S in rna.nomenclature) ):
+                or (CytosolicRNAClass.rRNA_23S in rna.nomenclature)
+            ):
                 has_lsu = 2
-            elif (CytosolicRNAClass.rRNA_16S in rna.nomenclature) or ( CytosolicRNAClass.rRNA_18S in rna.nomenclature ):
+            elif (CytosolicRNAClass.rRNA_16S in rna.nomenclature) or (
+                CytosolicRNAClass.rRNA_18S in rna.nomenclature
+            ):
                 has_ssu = 1
     match has_ssu + has_lsu:
         case 1:
-            return [ "ssu" ]
+            return ["ssu"]
         case 2:
-            return [ "lsu" ]
+            return ["lsu"]
         case 3:
-            return ['ssu','lsu']
+            return ["ssu", "lsu"]
         case 0:
             return []
         case _:
             raise ValueError("Invalid case")
+
 
 def struct_stats(ra: RibosomeOps):
     profile = ra.profile()
@@ -74,10 +84,10 @@ def struct_stats(ra: RibosomeOps):
             ...
             print("No drugbank")
 
-
-    struct_stat["mitochondrial"]       = profile.mitochondrial
-    struct_stat["subunit_composition"] = lsu_ssu_presence(profile.rnas, profile.mitochondrial)
-
+    struct_stat["mitochondrial"] = profile.mitochondrial
+    struct_stat["subunit_composition"] = lsu_ssu_presence(
+        profile.rnas, profile.mitochondrial
+    )
 
     return [
         struct_stat,
@@ -86,18 +96,21 @@ def struct_stats(ra: RibosomeOps):
         Taxid.superkingdom(profile.src_organism_ids[0]),
     ]
 
+
 class CompositionStats(BaseModel):
-    lsu_only          :int
-    ssu_only          :int
-    ssu_lsu           :int
-    drugbank_compounds:int
-    mitochondrial     :int
+    lsu_only: int
+    ssu_only: int
+    ssu_lsu: int
+    drugbank_compounds: int
+    mitochondrial: int
+
 
 class StructureCompositionStats(BaseModel):
 
-    archaea  : CompositionStats
-    bacteria : CompositionStats
+    archaea: CompositionStats
+    bacteria: CompositionStats
     eukaryota: CompositionStats
+
 
 def get_stats():
     global_stats = {
@@ -131,7 +144,9 @@ def get_stats():
 
     for struct in StructureAssets.list_all_structs():
         try:
-            [struct_stat, lig_compounds, n_dbank_compounds, superkingdom] = (struct_stats(RibosomeOps(struct)))
+            [struct_stat, lig_compounds, n_dbank_compounds, superkingdom] = (
+                struct_stats(RibosomeOps(struct))
+            )
 
             if superkingdom not in list(global_stats.keys()):
                 continue
@@ -159,17 +174,24 @@ def get_stats():
         except Exception as e:
             print("Error --->", e)
 
-    return StructureCompositionStats.model_validate({
-        **global_stats,
-        "ligands": lig_global,
-        # "chain_classes": {key: chain_classes[key] for key in sorted(chain_classes)},
-    }).model_dump()
+    return StructureCompositionStats.model_validate(
+        {
+            **global_stats,
+            "ligands": lig_global,
+            # "chain_classes": {key: chain_classes[key] for key in sorted(chain_classes)},
+        }
+    ).model_dump()
+
 
 def run_composition_stats():
-    with open(os.path.join(ASSETS_PATH,"structure_composition_stats.json"), "w") as of:
+    with open(os.path.join(ASSETS_PATH, "structure_composition_stats.json"), "w") as of:
         d = get_stats()
         json.dump(d, of, indent=4)
-        print("Saved structure composition_stats: ", os.path.join(ASSETS_PATH,"structure_composition_stats.json"))
+        print(
+            "Saved structure composition_stats: ",
+            os.path.join(ASSETS_PATH, "structure_composition_stats.json"),
+        )
+
 
 if __name__ == "__main__":
     run_composition_stats()

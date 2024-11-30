@@ -1,6 +1,5 @@
 from pprint import pprint
 from ninja import NinjaAPI, Schema
-from ribctl.lib.schema.types_ribosome import CytosolicProteinClass
 from routers.router_struct import structure_router
 from routers.router_classes import classification_router
 from routers.router_mmcif import mmcif_router

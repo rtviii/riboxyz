@@ -1,9 +1,7 @@
 import functools
 import json
 import os
-from pprint import pprint
 from typing import Any
-
 from loguru import logger
 import pyhmmer
 import requests
@@ -19,17 +17,23 @@ from ribctl.lib.info import lsu_ssu_presence
 from ribctl.lib.schema.types_ribosome import (
     RNA,
     AssemblyInstancesMap,
+    NonpolymericLigand,
+    Polymer,
+    Protein,
+    RibosomeStructure,
+)
+from ribctl.lib.types.polymer import (
+    PolynucleotideClass,
     CytosolicProteinClass,
     LifecycleFactorClass,
     MitochondrialProteinClass,
     MitochondrialRNAClass,
-    NonpolymericLigand,
-    Polymer,
-    PolynucleotideClass,
     PolypeptideClass,
-    Protein,
-    RibosomeStructure,
-    RibosomeStructureMetadata,
+    Proteins,
+    LifecycleFactors,
+    Polynucleotides,
+    Polypeptides,
+    Polymers,
 )
 from ribctl.lib.libhmm import HMM, HMMClassifier
 
@@ -167,14 +171,7 @@ class PolymersNode:
             protein_classifier = HMMClassifier(
                 _prot_polypeptides,
                 protein_alphabet,
-                [
-                    p
-                    for p in [
-                        *list(CytosolicProteinClass),
-                        *list(LifecycleFactorClass),
-                        *list(MitochondrialProteinClass),
-                    ]
-                ],
+                [p for p in Polypeptides],
             )
             protein_classifier.classify_chains()
 
@@ -182,7 +179,7 @@ class PolymersNode:
             rna_classifier = HMMClassifier(
                 _rna_polynucleotides,
                 rna_alphabet,
-                [p for p in list(PolynucleotideClass)],
+                [p for p in Polynucleotides],
             )
             rna_classifier.classify_chains()
 
@@ -221,18 +218,18 @@ class PolymersNode:
         for polymer_dict in _rna_polynucleotides:
             if polymer_dict.auth_asym_id in reported_classes.keys():
                 # momentarily converting to the PolymerClass enums to serialize correctly (see Polymer class def)
-                polymer_dict.nomenclature = list(
-                    map(
-                        PolynucleotideClass, reported_classes[polymer_dict.auth_asym_id]
-                    )
-                )
+                print(reported_classes[polymer_dict.auth_asym_id])
+                # polymer_dict.nomenclature = list(
+                #     map( PolynucleotideClass, reported_classes[polymer_dict.auth_asym_id] ) )
+                polymer_dict.nomenclature = reported_classes[polymer_dict.auth_asym_id]
 
         for polymer_dict in _prot_polypeptides:
             if polymer_dict.auth_asym_id in reported_classes.keys():
                 # momentarily converting to the PolymerClass enums to serialize correctly (see Polymer class def)
-                polymer_dict.nomenclature = list(
-                    map(PolypeptideClass, reported_classes[polymer_dict.auth_asym_id])
-                )
+                polymer_dict.nomenclature = reported_classes[polymer_dict.auth_asym_id]
+                # polymer_dict.nomenclature = list(
+                #     map(PolypeptideClass, reported_classes[polymer_dict.auth_asym_id])
+                # )
         assert (
             len(_rna_polynucleotides) + len(_prot_polypeptides) + len(_other_polymers)
         ) == self.polymers_target_count

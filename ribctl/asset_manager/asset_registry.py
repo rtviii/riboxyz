@@ -88,7 +88,7 @@ main_registry = AssetRegistry(RibosomeAssetManager(RIBETL_DATA))
 
 @main_registry.register(AssetType.STRUCTURE_PROFILE)
 async def generate_profile(rcsb_id: str) -> RibosomeStructure:
-    profile = await ETLCollector(rcsb_id).generate_profile()
+    profile = await ETLCollector(rcsb_id).generate_profile(overwrite=False, reclassify=True)
     return profile
 
 @main_registry.register(AssetType.PTC)

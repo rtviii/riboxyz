@@ -1,16 +1,12 @@
 import typing
 from Bio.PDB.Structure import Structure
 from Bio.PDB.Chain import Chain
-from loguru import logger
-from ribctl import AMINO_ACIDS_3_TO_1_CODE, ASSETS_PATH, CHAINSPLITTER_PATH, CLASSIFICATION_REPORTS
+from ribctl import AMINO_ACIDS_3_TO_1_CODE
 from ribctl.asset_manager.assets_structure import StructureAssets
-from ribctl.lib.libtax import PhylogenyNode, PhylogenyRank, Taxid
 from Bio.PDB.Structure import Structure
-from ribctl.lib.landmarks.ptc_via_doris import ptc_resdiues_get, ptc_residues_calculate_midpoint
-from ribctl.lib.utils import download_unpack_place
-from ribctl.lib.schema.types_ribosome import ( RNA, PTCInfo, Polymer, PolymerClass, PolynucleotideClass, PolynucleotideClass, PolypeptideClass, RibosomeStructure, RibosomeStructureMetadata, )
+from ribctl.lib.types.polymer.base import CytosolicRNAClass, MitochondrialRNAClass
+from ribctl.lib.schema.types_ribosome import ( RNA, PTCInfo, Polymer, PolymerClass,  RibosomeStructure, RibosomeStructureMetadata, )
 from ribctl import RIBETL_DATA
-from ribctl.logs.loggers import get_etl_logger
 
 class RibosomeOps:
     rcsb_id: str
@@ -108,18 +104,17 @@ class RibosomeOps:
         @returns (seq, auth_asym_id, rna_type)
         """
 
-        rna = self.get_poly_by_polyclass(PolynucleotideClass("23SrRNA"), assembly)
+        rna = self.get_poly_by_polyclass(CytosolicRNAClass.rRNA_23S, assembly)
         if rna == None:
-            rna = self.get_poly_by_polyclass(PolynucleotideClass("25SrRNA"), assembly)
+            rna = self.get_poly_by_polyclass(CytosolicRNAClass.rRNA_25S, assembly)
         if rna == None:
-            rna = self.get_poly_by_polyclass(PolynucleotideClass("28SrRNA"), assembly)
+            rna = self.get_poly_by_polyclass(CytosolicRNAClass.rRNA_28S, assembly)
         if rna == None:
-            rna = self.get_poly_by_polyclass(PolynucleotideClass("mt16SrRNA"), assembly)
+            rna = self.get_poly_by_polyclass(MitochondrialRNAClass.mtrRNA16S, assembly)
         if rna == None:
             raise Exception("No LSU rRNA found in structure")
         else:
             return rna
-
 
     @staticmethod
     def biopython_chain_get_seq(

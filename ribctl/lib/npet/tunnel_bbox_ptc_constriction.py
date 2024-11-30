@@ -15,9 +15,6 @@ import numpy as np
 from typing import Callable, Literal, Tuple, List, TypeVar, Union, Optional
 
 
-def bbox_axis(ptc:np.ndarray, constriction:np.ndarray):
-    ...
-
 
 def ribosome_entities(rcsb_id:str, level=Literal['R']|Literal[ 'A' ])->list[Entity]:
     struct = RibosomeOps(rcsb_id).assets.biopython_structure()
