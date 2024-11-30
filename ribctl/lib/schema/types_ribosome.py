@@ -9,6 +9,7 @@ from pydantic import BaseModel, field_serializer, Field
 from ribctl.lib.enumunion import enum_union
 from pydantic import BaseModel, Field
 from typing import Optional, Literal, Union, ClassVar
+from ribctl.lib.types.polymer import PolymerClass
 
 from ribctl.lib.schema.primitivs import AMINO_ACIDS, NUCLEOTIDES
 
@@ -18,323 +19,328 @@ from ribctl.lib.schema.primitivs import AMINO_ACIDS, NUCLEOTIDES
 # |********************************************************************************************************|
 # ? ----------------------------------------------{ Polymer Types }------------------------------------------------
 
-class tRNA(str,Enum):
-    tRNA = "tRNA"
+# class tRNA(str,Enum):
+#     tRNA = "tRNA"
 
-class MitochondrialProteinClass(str,Enum):
-    # mSSU
-    bS1m  = "bS1m"
-    uS2m  = "uS2m"
-    uS3m  = "uS3m"
-    uS4m  = "uS4m"
-    uS5m  = "uS5m"
-    bS6m  = "bS6m"
-    uS7m  = "uS7m"
-    uS8m  = "uS8m"
-    uS9m  = "uS9m"
-    uS10m = "uS10m"
-    uS11m = "uS11m"
-    uS12m = "uS12m"
-    uS13m = "uS13m"
-    uS14m = "uS14m"
-    uS15m = "uS15m"
-    bS16m = "bS16m"
-    uS17m = "uS17m"
-    bS18m = "bS18m"
-    uS19m = "uS19m"
-    bS21m = "bS21m"
-    mS22  = "mS22"
-    mS23  = "mS23"
-    mS25  = "mS25"
-    mS26  = "mS26"
-    mS27  = "mS27"
-    mS29  = "mS29"
-    mS31  = "mS31"
-    mS33  = "mS33"
-    mS34  = "mS34"
-    mS35  = "mS35"
-    mS37  = "mS37"
-    mS38  = "mS38"
-    mS39  = "mS39"
-    mS40  = "mS40"
-    mS41  = "mS41"
-    mS42  = "mS42"
-    mS43  = "mS43"
-    mS44  = "mS44"
-    mS45  = "mS45"
-    mS46  = "mS46"
-    mS47  = "mS47"
+# class MitochondrialProteinClass(str,Enum):
+#     # mSSU
+#     bS1m  = "bS1m"
+#     uS2m  = "uS2m"
+#     uS3m  = "uS3m"
+#     uS4m  = "uS4m"
+#     uS5m  = "uS5m"
+#     bS6m  = "bS6m"
+#     uS7m  = "uS7m"
+#     uS8m  = "uS8m"
+#     uS9m  = "uS9m"
+#     uS10m = "uS10m"
+#     uS11m = "uS11m"
+#     uS12m = "uS12m"
+#     uS13m = "uS13m"
+#     uS14m = "uS14m"
+#     uS15m = "uS15m"
+#     bS16m = "bS16m"
+#     uS17m = "uS17m"
+#     bS18m = "bS18m"
+#     uS19m = "uS19m"
+#     bS21m = "bS21m"
+#     mS22  = "mS22"
+#     mS23  = "mS23"
+#     mS25  = "mS25"
+#     mS26  = "mS26"
+#     mS27  = "mS27"
+#     mS29  = "mS29"
+#     mS31  = "mS31"
+#     mS33  = "mS33"
+#     mS34  = "mS34"
+#     mS35  = "mS35"
+#     mS37  = "mS37"
+#     mS38  = "mS38"
+#     mS39  = "mS39"
+#     mS40  = "mS40"
+#     mS41  = "mS41"
+#     mS42  = "mS42"
+#     mS43  = "mS43"
+#     mS44  = "mS44"
+#     mS45  = "mS45"
+#     mS46  = "mS46"
+#     mS47  = "mS47"
 
-    # mLSU
-    uL1m  = "uL1m"
-    uL2m  = "uL2m"
-    uL3m  = "uL3m"
-    uL4m  = "uL4m"
-    uL5m  = "uL5m"
-    uL6m  = "uL6m"
-    bL9m  = "bL9m"
-    uL10m = "uL10m"
-    uL11m = "uL11m"
-    bL12m = "bL12m"
-    uL13m = "uL13m"
-    uL14m = "uL14m"
-    uL15m = "uL15m"
-    uL16m = "uL16m"
-    bL17m = "bL17m"
-    uL18m = "uL18m"
-    bL19m = "bL19m"
-    bL20m = "bL20m"
-    bL21m = "bL21m"
-    uL22m = "uL22m"
-    uL23m = "uL23m"
-    uL24m = "uL24m"
-    bL27m = "bL27m"
-    bL28m = "bL28m"
-    uL29m = "uL29m"
-    uL30m = "uL30m"
-    bL31m = "bL31m"
-    bL32m = "bL32m"
-    bL33m = "bL33m"
-    bL34m = "bL34m"
-    bL35m = "bL35m"
-    bL36m = "bL36m"
-    mL37  = "mL37"
-    mL38  = "mL38"
-    mL39  = "mL39"
-    mL40  = "mL40"
-    mL41  = "mL41"
-    mL42  = "mL42"
-    mL43  = "mL43"
-    mL44  = "mL44"
-    mL45  = "mL45"
-    mL46  = "mL46"
-    mL48  = "mL48"
-    mL49  = "mL49"
-    mL50  = "mL50"
-    mL51  = "mL51"
-    mL52  = "mL52"
-    mL53  = "mL53"
-    mL54  = "mL54"
-    mL57  = "mL57"
-    mL58  = "mL58"
-    mL59  = "mL59"
-    mL60  = "mL60"
-    mL61  = "mL61"
-    mL62  = "mL62"
-    mL63  = "mL63"
-    mL64  = "mL64"
-    mL65  = "mL65"
-    mL66  = "mL66"
-    mL67  = "mL67"
+#     # mLSU
+#     uL1m  = "uL1m"
+#     uL2m  = "uL2m"
+#     uL3m  = "uL3m"
+#     uL4m  = "uL4m"
+#     uL5m  = "uL5m"
+#     uL6m  = "uL6m"
+#     bL9m  = "bL9m"
+#     uL10m = "uL10m"
+#     uL11m = "uL11m"
+#     bL12m = "bL12m"
+#     uL13m = "uL13m"
+#     uL14m = "uL14m"
+#     uL15m = "uL15m"
+#     uL16m = "uL16m"
+#     bL17m = "bL17m"
+#     uL18m = "uL18m"
+#     bL19m = "bL19m"
+#     bL20m = "bL20m"
+#     bL21m = "bL21m"
+#     uL22m = "uL22m"
+#     uL23m = "uL23m"
+#     uL24m = "uL24m"
+#     bL27m = "bL27m"
+#     bL28m = "bL28m"
+#     uL29m = "uL29m"
+#     uL30m = "uL30m"
+#     bL31m = "bL31m"
+#     bL32m = "bL32m"
+#     bL33m = "bL33m"
+#     bL34m = "bL34m"
+#     bL35m = "bL35m"
+#     bL36m = "bL36m"
+#     mL37  = "mL37"
+#     mL38  = "mL38"
+#     mL39  = "mL39"
+#     mL40  = "mL40"
+#     mL41  = "mL41"
+#     mL42  = "mL42"
+#     mL43  = "mL43"
+#     mL44  = "mL44"
+#     mL45  = "mL45"
+#     mL46  = "mL46"
+#     mL48  = "mL48"
+#     mL49  = "mL49"
+#     mL50  = "mL50"
+#     mL51  = "mL51"
+#     mL52  = "mL52"
+#     mL53  = "mL53"
+#     mL54  = "mL54"
+#     mL57  = "mL57"
+#     mL58  = "mL58"
+#     mL59  = "mL59"
+#     mL60  = "mL60"
+#     mL61  = "mL61"
+#     mL62  = "mL62"
+#     mL63  = "mL63"
+#     mL64  = "mL64"
+#     mL65  = "mL65"
+#     mL66  = "mL66"
+#     mL67  = "mL67"
 
-class CytosolicProteinClass(str,Enum):
-    # SSU
+# class CytosolicProteinClass(str,Enum):
+#     # SSU
 
     
-    bS1   = "bS1"
-    eS1   = "eS1"
-    uS2   = "uS2"
-    uS3   = "uS3"
-    uS4   = "uS4"
-    eS4   = "eS4"
-    uS5   = "uS5"
-    bS6   = "bS6"
-    eS6   = "eS6"
-    uS7   = "uS7"
-    eS7   = "eS7"
-    uS8   = "uS8"
-    eS8   = "eS8"
-    uS9   = "uS9"
-    uS10  = "uS10"
-    eS10  = "eS10"
-    uS11  = "uS11"
-    uS12  = "uS12"
-    eS12  = "eS12"
-    uS13  = "uS13"
-    uS14  = "uS14"
-    uS15  = "uS15"
-    bS16  = "bS16"
-    uS17  = "uS17"
-    eS17  = "eS17"
-    bS18  = "bS18"
-    uS19  = "uS19"
-    eS19  = "eS19"
-    bS20  = "bS20"
-    bS21  = "bS21"
-    bTHX  = "bTHX"
-    eS21  = "eS21"
-    eS24  = "eS24"
-    eS25  = "eS25"
-    eS26  = "eS26"
-    eS27  = "eS27"
-    eS28  = "eS28"
-    eS30  = "eS30"
-    eS31  = "eS31"
-    RACK1 = "RACK1"
-    # LSU
-    uL1  = "uL1"
-    uL2  = "uL2"
-    uL3  = "uL3"
-    uL4  = "uL4"
-    uL5  = "uL5"
-    uL6  = "uL6"
-    eL6  = "eL6"
-    eL8  = "eL8"
-    bL9  = "bL9"
-    uL10 = "uL10"
-    uL11 = "uL11"
-    bL12 = "bL12"
-    uL13 = "uL13"
-    eL13 = "eL13"
-    uL14 = "uL14"
-    eL14 = "eL14"
-    uL15 = "uL15"
-    eL15 = "eL15"
-    uL16 = "uL16"
-    bL17 = "bL17"
-    uL18 = "uL18"
-    eL18 = "eL18"
-    bL19 = "bL19"
-    eL19 = "eL19"
-    bL20 = "bL20"
-    eL20 = "eL20"
-    bL21 = "bL21"
-    eL21 = "eL21"
-    uL22 = "uL22"
-    eL22 = "eL22"
-    uL23 = "uL23"
-    uL24 = "uL24"
-    eL24 = "eL24"
-    bL25 = "bL25"
-    bL27 = "bL27"
-    eL27 = "eL27"
-    bL28 = "bL28"
-    eL28 = "eL28"
-    uL29 = "uL29"
-    eL29 = "eL29"
-    uL30 = "uL30"
-    eL30 = "eL30"
-    bL31 = "bL31"
-    eL31 = "eL31"
-    bL32 = "bL32"
-    eL32 = "eL32"
-    bL33 = "bL33"
-    eL33 = "eL33"
-    bL34 = "bL34"
-    eL34 = "eL34"
-    bL35 = "bL35"
-    bL36 = "bL36"
-    eL36 = "eL36"
-    eL37 = "eL37"
-    eL38 = "eL38"
-    eL39 = "eL39"
-    eL40 = "eL40"
-    eL41 = "eL41"
-    eL42 = "eL42"
-    eL43 = "eL43"
-    P1P2 = "P1P2"
+#     bS1   = "bS1"
+#     eS1   = "eS1"
+#     uS2   = "uS2"
+#     uS3   = "uS3"
+#     uS4   = "uS4"
+#     eS4   = "eS4"
+#     uS5   = "uS5"
+#     bS6   = "bS6"
+#     eS6   = "eS6"
+#     uS7   = "uS7"
+#     eS7   = "eS7"
+#     uS8   = "uS8"
+#     eS8   = "eS8"
+#     uS9   = "uS9"
+#     uS10  = "uS10"
+#     eS10  = "eS10"
+#     uS11  = "uS11"
+#     uS12  = "uS12"
+#     eS12  = "eS12"
+#     uS13  = "uS13"
+#     uS14  = "uS14"
+#     uS15  = "uS15"
+#     bS16  = "bS16"
+#     uS17  = "uS17"
+#     eS17  = "eS17"
+#     bS18  = "bS18"
+#     uS19  = "uS19"
+#     eS19  = "eS19"
+#     bS20  = "bS20"
+#     bS21  = "bS21"
+#     bTHX  = "bTHX"
+#     eS21  = "eS21"
+#     eS24  = "eS24"
+#     eS25  = "eS25"
+#     eS26  = "eS26"
+#     eS27  = "eS27"
+#     eS28  = "eS28"
+#     eS30  = "eS30"
+#     eS31  = "eS31"
+#     RACK1 = "RACK1"
+#     # LSU
+#     uL1  = "uL1"
+#     uL2  = "uL2"
+#     uL3  = "uL3"
+#     uL4  = "uL4"
+#     uL5  = "uL5"
+#     uL6  = "uL6"
+#     eL6  = "eL6"
+#     eL8  = "eL8"
+#     bL9  = "bL9"
+#     uL10 = "uL10"
+#     uL11 = "uL11"
+#     bL12 = "bL12"
+#     uL13 = "uL13"
+#     eL13 = "eL13"
+#     uL14 = "uL14"
+#     eL14 = "eL14"
+#     uL15 = "uL15"
+#     eL15 = "eL15"
+#     uL16 = "uL16"
+#     bL17 = "bL17"
+#     uL18 = "uL18"
+#     eL18 = "eL18"
+#     bL19 = "bL19"
+#     eL19 = "eL19"
+#     bL20 = "bL20"
+#     eL20 = "eL20"
+#     bL21 = "bL21"
+#     eL21 = "eL21"
+#     uL22 = "uL22"
+#     eL22 = "eL22"
+#     uL23 = "uL23"
+#     uL24 = "uL24"
+#     eL24 = "eL24"
+#     bL25 = "bL25"
+#     bL27 = "bL27"
+#     eL27 = "eL27"
+#     bL28 = "bL28"
+#     eL28 = "eL28"
+#     uL29 = "uL29"
+#     eL29 = "eL29"
+#     uL30 = "uL30"
+#     eL30 = "eL30"
+#     bL31 = "bL31"
+#     eL31 = "eL31"
+#     bL32 = "bL32"
+#     eL32 = "eL32"
+#     bL33 = "bL33"
+#     eL33 = "eL33"
+#     bL34 = "bL34"
+#     eL34 = "eL34"
+#     bL35 = "bL35"
+#     bL36 = "bL36"
+#     eL36 = "eL36"
+#     eL37 = "eL37"
+#     eL38 = "eL38"
+#     eL39 = "eL39"
+#     eL40 = "eL40"
+#     eL41 = "eL41"
+#     eL42 = "eL42"
+#     eL43 = "eL43"
+#     P1P2 = "P1P2"
 
-class MitochondrialRNAClass(str,Enum):
-    mtrRNA12S = "mt12SrRNA"  # mitochondrial
-    mtrRNA16S = "mt16SrRNA"  # mitochondrial
+# class MitochondrialRNAClass(str,Enum):
+#     mtrRNA12S = "mt12SrRNA"  # mitochondrial
+#     mtrRNA16S = "mt16SrRNA"  # mitochondrial
     
-class CytosolicRNAClass(str,Enum):
-    rRNA_5S   = "5SrRNA"  #  bacterial or eykaryotic
-    rRNA_16S  = "16SrRNA"  #  c-bacterial or mitochondrial
-    rRNA_23S  = "23SrRNA"  # bacterial
-    rRNA_25S  = "25SrRNA"  # plants
-    rRNA_5_8S = "5.8SrRNA"  # eukaryotic
-    rRNA_18S  = "18SrRNA"  # eukaryotic
-    rRNA_28S  = "28SrRNA"  # eukaryotic
+# class CytosolicRNAClass(str,Enum):
+#     rRNA_5S   = "5SrRNA"  #  bacterial or eykaryotic
+#     rRNA_16S  = "16SrRNA"  #  c-bacterial or mitochondrial
+#     rRNA_23S  = "23SrRNA"  # bacterial
+#     rRNA_25S  = "25SrRNA"  # plants
+#     rRNA_5_8S = "5.8SrRNA"  # eukaryotic
+#     rRNA_18S  = "18SrRNA"  # eukaryotic
+#     rRNA_28S  = "28SrRNA"  # eukaryotic
 
-class ElongationFactorClass(str,Enum):
-    # Eukaryotic
-    eEF1A = "eEF1A"
-    eEF1B = "eEF1B"
-    eFSec = "eFSec"
-    eEF2  = "eEF2"
-    mtEF4 = "mtEF4"
-    eIF5A = "eIF5A"
-    eEF3  = "eEF3"
-    # Bacterial
-    EF_Tu = "EF-Tu"
-    EF_Ts = "EF-Ts"
-    SelB  = "SelB"
-    EF_G  = "EF-G"
-    EF4   = "EF4"
-    EF_P  = "EF-P"
-    Tet_O = "Tet_O"
-    Tet_M = "Tet_M"
-    RelA  = "RelA"
-    BipA  = "BipA"
-    # Archaeal
-    aEF1A = "aEF1A"
-    aEF2  = "aEF2"
+# class ElongationFactorClass(str,Enum):
+#     # Eukaryotic
+#     eEF1A = "eEF1A"
+#     eEF1B = "eEF1B"
+#     eFSec = "eFSec"
+#     eEF2  = "eEF2"
+#     mtEF4 = "mtEF4"
+#     eIF5A = "eIF5A"
+#     eEF3  = "eEF3"
+#     # Bacterial
+#     EF_Tu = "EF-Tu"
+#     EF_Ts = "EF-Ts"
+#     SelB  = "SelB"
+#     EF_G  = "EF-G"
+#     EF4   = "EF4"
+#     EF_P  = "EF-P"
+#     Tet_O = "Tet_O"
+#     Tet_M = "Tet_M"
+#     RelA  = "RelA"
+#     BipA  = "BipA"
+#     # Archaeal
+#     aEF1A = "aEF1A"
+#     aEF2  = "aEF2"
 
-class InitiationFactorClass(str,Enum):
-    #!Eukaryotic
-    eIF1  = "eIF1"
-    eIF1A = "eIF1A"
+# class InitiationFactorClass(str,Enum):
+#     #!Eukaryotic
+#     eIF1  = "eIF1"
+#     eIF1A = "eIF1A"
 
-    eIF2_alpha = "eIF2_alpha"
-    eIF2_beta  = "eIF2_beta"
-    eIF2_gamma = "eIF2_gamma"
+#     eIF2_alpha = "eIF2_alpha"
+#     eIF2_beta  = "eIF2_beta"
+#     eIF2_gamma = "eIF2_gamma"
 
-    eIF2B_alpha   = "eIF2B_alpha"
-    eIF2B_beta    = "eIF2B_beta"
-    eIF2B_gamma   = "eIF2B_gamma"
-    eIF2B_delta   = "eIF2B_delta"
-    eIF2B_epsilon = "eIF2B_epsilon"
+#     eIF2B_alpha   = "eIF2B_alpha"
+#     eIF2B_beta    = "eIF2B_beta"
+#     eIF2B_gamma   = "eIF2B_gamma"
+#     eIF2B_delta   = "eIF2B_delta"
+#     eIF2B_epsilon = "eIF2B_epsilon"
 
-    eIF3_subunitA = "eIF3_subunitA"
-    eIF3_subunitB = "eIF3_subunitB"
-    eIF3_subunitC = "eIF3_subunitC"
-    eIF3_subunitD = "eIF3_subunitD"
-    eIF3_subunitE = "eIF3_subunitE"
-    eIF3_subunitF = "eIF3_subunitF"
-    eIF3_subunitG = "eIF3_subunitG"
-    eIF3_subunitH = "eIF3_subunitH"
-    eIF3_subunitI = "eIF3_subunitI"
-    eIF3_subunitJ = "eIF3_subunitJ"
-    eIF3_subunitK = "eIF3_subunitK"
-    eIF3_subunitL = "eIF3_subunitL"
-    eIF3_subunitM = "eIF3_subunitM"
+#     eIF3_subunitA = "eIF3_subunitA"
+#     eIF3_subunitB = "eIF3_subunitB"
+#     eIF3_subunitC = "eIF3_subunitC"
+#     eIF3_subunitD = "eIF3_subunitD"
+#     eIF3_subunitE = "eIF3_subunitE"
+#     eIF3_subunitF = "eIF3_subunitF"
+#     eIF3_subunitG = "eIF3_subunitG"
+#     eIF3_subunitH = "eIF3_subunitH"
+#     eIF3_subunitI = "eIF3_subunitI"
+#     eIF3_subunitJ = "eIF3_subunitJ"
+#     eIF3_subunitK = "eIF3_subunitK"
+#     eIF3_subunitL = "eIF3_subunitL"
+#     eIF3_subunitM = "eIF3_subunitM"
 
-    eIF4F_4A = "eIF4F_4A"
-    eIF4F_4G = "eIF4F_4G"
-    eIF4F_4E = "eIF4F_4E"
+#     eIF4F_4A = "eIF4F_4A"
+#     eIF4F_4G = "eIF4F_4G"
+#     eIF4F_4E = "eIF4F_4E"
 
-    eIF4B = "eIF4B"
-    eIF5B = "eIF5B"
-    eIF5  = "eIF5"
+#     eIF4B = "eIF4B"
+#     eIF5B = "eIF5B"
+#     eIF5  = "eIF5"
 
-    #!Bacterial
-    IF1 = "IF1"
-    IF2 = "IF2"
-    IF3 = "IF3"
+#     #!Bacterial
+#     IF1 = "IF1"
+#     IF2 = "IF2"
+#     IF3 = "IF3"
 
-    #!Archaeal
-    aIF_1A       = "aIF1A"
-    aIF_2_alpha  = "aIF2_alpha"
-    aIF_2_beta   = "aIF2_beta"
-    aIF_2_gamma  = "aIF2_gamma"
-    aIF_2B_alpha = "aIF2B_alpha"
-    aIF_2B_beta  = "aIF2B_beta"
-    aIF_2B_delta = "aIF2B_delta"
-    aIF5A        = "aIF5A"
-    aIF5B        = "aIF5B"
+#     #!Archaeal
+#     aIF_1A       = "aIF1A"
+#     aIF_2_alpha  = "aIF2_alpha"
+#     aIF_2_beta   = "aIF2_beta"
+#     aIF_2_gamma  = "aIF2_gamma"
+#     aIF_2B_alpha = "aIF2B_alpha"
+#     aIF_2B_beta  = "aIF2B_beta"
+#     aIF_2B_delta = "aIF2B_delta"
+#     aIF5A        = "aIF5A"
+#     aIF5B        = "aIF5B"
 
-LifecycleFactorClass = enum_union(ElongationFactorClass, InitiationFactorClass)
-ProteinClass         = enum_union(CytosolicProteinClass,MitochondrialProteinClass)
-
-PolypeptideClass     = enum_union(LifecycleFactorClass, ProteinClass)
-PolynucleotideClass  = enum_union(CytosolicRNAClass, MitochondrialRNAClass, tRNA)
-PolymerClass         = enum_union(PolynucleotideClass, PolypeptideClass)
+# LifecycleFactorClass = enum_union(ElongationFactorClass, InitiationFactorClass)
+# ProteinClass         = enum_union(CytosolicProteinClass,MitochondrialProteinClass)
+# PolypeptideClass     = enum_union(LifecycleFactorClass, ProteinClass)
+# PolynucleotideClass  = enum_union(CytosolicRNAClass, MitochondrialRNAClass, tRNA)
+# PolymerClass         = enum_union(PolynucleotideClass, PolypeptideClass)
 
 
 # ? ----------------------------------------------{ Composite Models }------------------------------------------------
 
 class Polymer(BaseModel):
+    # model_config = {
+    #     "json_encoders": {
+    #         Enum: lambda v: v.value
+    #     }
+    # }
+
     def __hash__(self):
         return hash(self.auth_asym_id + self.parent_rcsb_id)
 
@@ -370,9 +376,6 @@ class Polymer(BaseModel):
 
     nomenclature                       : list[PolymerClass]
 
-    @field_serializer('nomenclature')
-    def serialize_nomenclature(self, nomenclature_classes: list[PolymerClass], ):
-        return [x.value for x in nomenclature_classes]
 
 class Protein(Polymer):
     def __hash__(self):
@@ -418,6 +421,11 @@ class RNA(Polymer):
     # pass
 
 class NonpolymericLigand(BaseModel):
+    model_config = {
+        "json_encoders": {
+            Enum: lambda v: v.value
+        }
+    }
     # def metadatum(self) -> NonpolymericLigandMetadatum:
     #     return NonpolymericLigandMetadatum(**self.model_dump())
 
@@ -460,6 +468,11 @@ class NonpolymericLigand(BaseModel):
 
 
 class ResidueSummary(BaseModel): 
+    model_config = {
+        "json_encoders": {
+            Enum: lambda v: v.value
+        }
+    }
 
     label_seq_id : typing.Optional[int] = None
     label_comp_id: typing.Optional[str] = None
@@ -524,6 +537,11 @@ class ResidueSummary(BaseModel):
         )
 
 class AssemblyInstancesMap(BaseModel):
+    model_config = {
+        "json_encoders": {
+            Enum: lambda v: v.value
+        }
+    }
     """
     This basically specifies which assembly an instnace of a polymer or a nonpolymer belongs to.
     Certain PDB structures come with more than a single physical model/assembly packaged in the file,
@@ -574,20 +592,45 @@ class AssemblyInstancesMap(BaseModel):
     polymer_entity_instances   : list[PolymerEntityInstance]
 
 class NomenclatureItem(BaseModel):
+    model_config = {
+        "json_encoders": {
+            Enum: lambda v: v.value
+        }
+    }
     nomenclature: list[str]
 
 class NomenclatureTable(BaseModel):
+    model_config = {
+        "json_encoders": {
+            Enum: lambda v: v.value
+        }
+    }
     __pydantic_root_model__: Dict[str, NomenclatureItem]
 
 
 class PTCInfo(BaseModel):
+    model_config = {
+        "json_encoders": {
+            Enum: lambda v: v.value
+        }
+    }
     location: list[float]
     residues: list[ResidueSummary]
 
 class ConstrictionSite(BaseModel):
+    model_config = {
+        "json_encoders": {
+            Enum: lambda v: v.value
+        }
+    }
     location: list[float]
 
 class RibosomeStructureMetadata(BaseModel):
+    model_config = {
+        "json_encoders": {
+            Enum: lambda v: v.value
+        }
+    }
 
     def get_polymers_by_assembly(self)->dict[str,list[str]]:
         if self.assembly_map:

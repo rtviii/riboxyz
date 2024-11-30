@@ -2,7 +2,7 @@ from pprint import pprint
 import typing
 import sys
 from neo4j_ribosome import NEO4J_CURRENTDB, NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER
-from ribctl.lib.schema.types_ribosome import (
+from ribctl.lib.types.polymer import (
     PolynucleotideClass,
     PolynucleotideClass,
     PolypeptideClass,

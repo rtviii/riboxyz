@@ -4,10 +4,8 @@ import typing
 import pydantic
 from pydantic import BaseModel, RootModel, field_serializer
 from Bio.PDB.Residue import Residue
-from ribctl.lib.schema.types_ribosome import Polymer, PolymerClass, PolynucleotideClass, ResidueSummary
-
-
-
+from ribctl.lib.schema.types_ribosome import Polymer  ,ResidueSummary
+from ribctl.lib.types.polymer import PolymerClass
 
 class BindingSiteChain(Polymer):
     bound_residues: list[ResidueSummary]
@@ -42,9 +40,6 @@ class ResiduesMapping(BaseModel):
     source       : PredictionSource
     target       : PredictionTarget
 
-    @field_serializer('polymer_class')
-    def serialize_nomenclature(self, polymer_class:PolymerClass ):
-        return polymer_class.value
 
 class LigandTransposition(BaseModel):
 

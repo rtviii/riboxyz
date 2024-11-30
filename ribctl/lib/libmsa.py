@@ -14,7 +14,7 @@ from typing import Callable, Iterator
 from ribctl import ASSETS, MUSCLE_BIN
 import os
 from ribctl.lib.libtax import  Taxid, ncbi
-from ribctl.lib.schema.types_ribosome import CytosolicProteinClass, ElongationFactorClass, InitiationFactorClass, MitochondrialProteinClass, PolymerClass, PolynucleotideClass
+from ribctl.lib.types.polymer import CytosolicProteinClass, ElongationFactorClass, InitiationFactorClass, MitochondrialProteinClass, PolymerClass, PolynucleotideClass
 import os
 from typing import Dict, List, Set, Tuple
 from Bio import SeqIO

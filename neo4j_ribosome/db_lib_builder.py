@@ -24,12 +24,10 @@ from neo4j_ribosome.node_structure import (
     struct_exists,
 )
 from ribctl.lib.schema.types_ribosome import (
-    MitochondrialProteinClass,
-    PolynucleotideClass,
-    PolynucleotideClass,
     RibosomeStructure,
     RibosomeStructureMetadata,
 )
+from ribctl.lib.types.polymer import     MitochondrialProteinClass, PolynucleotideClass, PolynucleotideClass
 from ribctl.ribosome_ops import StructureAssets, RibosomeOps, Structure
 from neo4j import GraphDatabase, Driver, ManagedTransaction, Transaction
 from ribctl.lib.schema.types_ribosome import (
