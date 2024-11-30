@@ -6,7 +6,8 @@ from django.http import  JsonResponse
 from ninja import Router
 from ribctl import RIBETL_DATA
 from ribctl.ribosome_ops import RibosomeOps
-from ribctl.lib.schema.types_ribosome import RNA, LifecycleFactorClass, MitochondrialProteinClass, Polymer, PolynucleotideClass, CytosolicProteinClass, PolynucleotideClass, PolypeptideClass, Protein
+from ribctl.lib.schema.types_ribosome import RNA, Polymer,   Protein
+from ribctl.lib.types.polymer import LifecycleFactorClass, MitochondrialProteinClass,PolynucleotideClass, CytosolicProteinClass, PolynucleotideClass, PolypeptideClass
 
 classification_router = Router()
 TAG                   = "Polymer Classes"
@@ -15,7 +16,6 @@ TAG                   = "Polymer Classes"
 def polynucleotide_class(request,rna_class:PolynucleotideClass):
     """All members of the given RNA class: small and large subunit, cytosolic and mitochondrial RNA; tRNA.  """
     agg       = []
-    rna_class = rna_class.value
     for rcsb_id in os.listdir(RIBETL_DATA):
         try:
             x = RibosomeOps(rcsb_id).get_poly_by_polyclass(rna_class)
@@ -33,7 +33,6 @@ def polypeptide_class(request,protein_class:PolypeptideClass):
     """All members of the given protein class: cytosolic, mitochondrial proteins """
 
     agg = []
-    protein_class = protein_class.value
     for rcsb_id in os.listdir(RIBETL_DATA):
         try:
             x = RibosomeOps(rcsb_id).get_poly_by_polyclass(protein_class)
@@ -50,10 +49,9 @@ def polypeptide_class(request,protein_class:PolypeptideClass):
 def lifecycle_factor_class(request,factor_class:LifecycleFactorClass):
     """All members of the given factor class: initiation, elongation  """
     agg = []
-    factor_class = factor_class.value
     for rcsb_id in os.listdir(RIBETL_DATA):
         try:
-            x = RibosomeOps(rcsb_id).get_chain_by_polymer_class(factor_class)
+            x = RibosomeOps(rcsb_id).get_poly_by_polyclass(factor_class)
         except Exception as e:
             print(e)
         if x is not None:

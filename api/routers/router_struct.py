@@ -15,7 +15,8 @@ from neo4j_ribosome.db_lib_reader import PolymersFilterParams, StructureFilterPa
 from ribctl import ASSETS, ASSETS_PATH, RIBETL_DATA
 from ribctl.ribosome_ops import RibosomeOps
 from ribctl.lib.info import StructureCompositionStats, run_composition_stats
-from ribctl.lib.schema.types_ribosome import  CytosolicProteinClass, CytosolicRNAClass, ElongationFactorClass, InitiationFactorClass, LifecycleFactorClass, MitochondrialProteinClass, MitochondrialRNAClass, PTCInfo, Polymer, PolymerClass, PolynucleotideClass, PolynucleotideClass, PolypeptideClass, Protein, ProteinClass, RibosomeStructure, RibosomeStructureMetadata, RibosomeStructureMetadata, tRNA
+from ribctl.lib.types.polymer import  CytosolicProteinClass, CytosolicRNAClass, ElongationFactorClass, InitiationFactorClass, LifecycleFactorClass, MitochondrialProteinClass, MitochondrialRNAClass, PolymerClass, PolynucleotideClass, PolynucleotideClass, PolypeptideClass,  ProteinClass, tRNA
+from ribctl.lib.schema.types_ribosome import RibosomeStructure, RibosomeStructureMetadata, Polymer,  RibosomeStructure, RibosomeStructureMetadata, RibosomeStructureMetadata
 from ribctl.lib.libtax import Taxid 
 
 structure_router = Router()
