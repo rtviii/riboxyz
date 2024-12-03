@@ -13,10 +13,12 @@ from typing import Optional, List
 from pydantic import BaseModel
 from neo4j_ribosome.db_lib_reader import PolymersFilterParams, StructureFilterParams, dbqueries
 from ribctl import ASSETS, ASSETS_PATH, RIBETL_DATA
+from ribctl.asset_manager.asset_manager import AssetPathManager
+from ribctl.asset_manager.asset_types import AssetType
 from ribctl.ribosome_ops import RibosomeOps
 from ribctl.lib.info import StructureCompositionStats, run_composition_stats
 from ribctl.lib.types.polymer import  CytosolicProteinClass, CytosolicRNAClass, ElongationFactorClass, InitiationFactorClass, LifecycleFactorClass, MitochondrialProteinClass, MitochondrialRNAClass, PolymerClass, PolynucleotideClass, PolynucleotideClass, PolypeptideClass,  ProteinClass, tRNA
-from ribctl.lib.schema.types_ribosome import RibosomeStructure, RibosomeStructureMetadata, Polymer,  RibosomeStructure, RibosomeStructureMetadata, RibosomeStructureMetadata
+from ribctl.lib.schema.types_ribosome import ConstrictionSite, PTCInfo, RibosomeStructure, RibosomeStructureMetadata, Polymer,  RibosomeStructure, RibosomeStructureMetadata, RibosomeStructureMetadata
 from ribctl.lib.libtax import Taxid 
 
 structure_router = Router()
@@ -111,15 +113,27 @@ def structure_profile(request,rcsb_id:str):
     except Exception as e:
         return HttpResponseServerError("Failed to find structure profile {}:\n\n{}".format(rcsb_id, e))
 
-@structure_router.get('/ptc', response=dict, tags=[TAG],)
+@structure_router.get('/ptc', response=PTCInfo, tags=[TAG],)
 def structure_ptc(request,rcsb_id:str):
     params      = dict(request.GET)
     rcsb_id     = str.upper(params['rcsb_id'][0])
     try:
-        ptc = RibosomeOps(rcsb_id).assets.ptc()
-        _ =  ptc.model_dump()
-        print("SENDING:", _)
-        return JsonResponse(_)
+        ptc = AssetPathManager().load_model(rcsb_id,AssetType.PTC)
+        if not ptc:
+            return JsonResponse({"error": "No PTC found for {}".format(rcsb_id)})
+        return JsonResponse(ptc.model_dump())
+    except Exception as e:
+        return HttpResponseServerError(e)
+
+@structure_router.get('/constriction_site', response=ConstrictionSite, tags=[TAG],)
+def constriction_site(request,rcsb_id:str):
+    params      = dict(request.GET)
+    rcsb_id     = str.upper(params['rcsb_id'][0])
+    try:
+        constriction = AssetPathManager().load_model(rcsb_id,AssetType.CONSTRICTION_SITE)
+        if not constriction:
+            return JsonResponse({"error": "No constriction site found for {}".format(rcsb_id)})
+        return JsonResponse(constriction.model_dump())
     except Exception as e:
         return HttpResponseServerError(e)
      

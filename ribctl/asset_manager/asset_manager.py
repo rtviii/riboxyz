@@ -4,6 +4,8 @@ from pathlib import Path
 from loguru import logger
 from pydantic import BaseModel
 
+from ribctl import RIBETL_DATA
+
 from .asset_types import (
     AssetType,
     ModelT,
@@ -16,7 +18,7 @@ from .asset_types import (
 class AssetPathManager:
     """Manages asset paths and directory structure"""
 
-    def __init__(self, base_dir: Path):
+    def __init__(self, base_dir: Path=RIBETL_DATA):
         self.base_dir = Path(base_dir)
 
     def get_asset_dir(self, pdb_id: str) -> Path:
