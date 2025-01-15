@@ -34,13 +34,10 @@ class GlobalOps:
         )
 
     @staticmethod
-    def missing_db_entries(db_entries:list[str]) -> list[str]:
+    def missing_db_entries(db_entries: list[str]) -> list[str]:
         """Return a list of structures that are in the RCSB but not in the local database."""
 
-        return list(
-            set(GlobalOps.current_rcsb_structs())
-            - set(db_entries )
-        )
+        return list(set(GlobalOps.current_rcsb_structs()) - set(db_entries))
 
     @staticmethod
     def current_rcsb_structs() -> list[str]:
@@ -50,30 +47,30 @@ class GlobalOps:
         q = {
             "query": {
                 "type": "group",
-                "logical_operator": "and",
                 "nodes": [
                     {
                         "type": "terminal",
                         "service": "text",
                         "parameters": {
-                            "operator": "contains_phrase",
-                            "negation": False,
-                            "value": "RIBOSOME",
                             "attribute": "struct_keywords.pdbx_keywords",
+                            "negation": False,
+                            "operator": "contains_words",
+                            "value": "TRANSLATION RIBOSOME",
                         },
                     },
                     {
                         "type": "terminal",
                         "service": "text",
                         "parameters": {
+                            "attribute": "rcsb_entry_info.polymer_entity_count_protein",
                             "operator": "greater",
                             "negation": False,
-                            "value": 12,
-                            "attribute": "rcsb_entry_info.polymer_entity_count_protein",
+                            "value": 10,
                         },
                     },
                 ],
-                "label": "query-builder",
+                "logical_operator": "and",
+                "label": "text",
             },
             "return_type": "entry",
             "request_options": {
@@ -81,6 +78,8 @@ class GlobalOps:
                 "results_verbosity": "compact",
             },
         }
+
+
         query = rcsb_search_api + "?json=" + json.dumps(q)
         return sorted(requests.get(query).json()["result_set"])
 

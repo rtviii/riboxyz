@@ -1,5 +1,6 @@
 import datetime
 import json
+import pickle
 from urllib.request import Request
 from ninja import Router, Body
 import os
@@ -216,7 +217,6 @@ def list_source_taxa(request, source_or_host:typing.Literal["source", "host"]):
     
     return normalize_tax_list_to_dict(tax_ids)
 
-
 from django.http import FileResponse
 from ninja.responses import Response
 @structure_router.get("/tunnel_geometry")
@@ -233,6 +233,23 @@ def get_shape(request, rcsb_id: str, is_ascii:bool=False):
     except IOError:
         return Response({"error": "Error reading the shape file"}, status=500)
 
+@structure_router.get("/cylinder_residues")
+def cylinder_residues(request):
+    try:
+        with open("/home/rtviii/dev/npet-cg-sim/cylinder_residues.json", 'rb') as f:
+            map = json.load(f)
+        return Response(map)
+    except IOError:
+        print("Couldn not read file")
+        
+@structure_router.get("/half_cylinder_residues")
+def half_cylinder_residues(request):
+    try:
+        with open("/home/rtviii/dev/npet-cg-sim/half_cylinder_residues.json", 'rb') as f:
+            map = json.load(f)
+        return Response(map)
+    except IOError:
+        print("Couldn not read file")
 
 @structure_router.get("/tunnel_radial")
 def get_radial(request, rcsb_id: str):

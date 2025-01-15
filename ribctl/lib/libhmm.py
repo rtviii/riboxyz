@@ -4,7 +4,6 @@ sys.dont_write_bytecode = True
 import json
 import os
 import pickle
-from pprint import pprint
 from typing import Iterator, Tuple
 from Bio.SeqRecord import SeqRecord
 import pyhmmer

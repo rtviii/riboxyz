@@ -88,7 +88,6 @@ class Fasta:
             taxid           = int(node.name)
             scientific_name = ncbi.get_taxid_translator([taxid]).get(taxid, "Unknown")
             node.name       = scientific_name
-        print(tree.get_ascii(attributes=["name", "sci_name"]))
 
     def pick_taxids(self, _taxids_int: list[int]) -> list[SeqRecord]:
          

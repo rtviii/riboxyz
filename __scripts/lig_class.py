@@ -8,9 +8,9 @@ from neo4j_ribosome.db_lib_reader import Neo4jReader
 from ribctl.lib.schema.types_ribosome import NonpolymericLigand
 
 def collect_all_ligands_with_smiles():
-    reader  = Neo4jReader()
-    ligs = reader.list_ligands(nodes_only=True)[0][0]
-    ligands = list(map(NonpolymericLigand.model_validate, ligs))
+    reader      = Neo4jReader()
+    ligs        = reader.list_ligands(nodes_only=True)[0][0]
+    ligands     = list(map(NonpolymericLigand.model_validate, ligs))
     query_input = ""
     lig:NonpolymericLigand
     for lig in ligands:
