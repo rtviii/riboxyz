@@ -6,7 +6,7 @@ from __scripts.cylinder import get_transformation_to_C0, transform_points_to_C0
 from mesh_generation.mes_visualization import visualize_DBSCAN_CLUSTERS_particular_eps_minnbrs, visualize_mesh, visualize_pointcloud
 from mesh_generation.mesh_full_pipeline import DBSCAN_capture, DBSCAN_pick_largest_cluster
 from mesh_generation.mesh_libsurf import apply_poisson_reconstruction, estimate_normals, ptcloud_convex_hull_points
-from ribctl.lib.landmarks.constriction import get_constriction
+from ribctl.lib.landmarks.constriction_site import get_constriction
 from ribctl.lib.landmarks.ptc_via_trna import PTC_location
 from ribctl.lib.npet.tunnel_bbox_ptc_constriction import filter_residues_parallel, ribosome_entities
 
@@ -160,8 +160,6 @@ def visualize_clipping_result(original_points: np.ndarray,
     
     p.add_legend()
     p.show()
-
-
 
 def main():
     # Load your points and transform them as before

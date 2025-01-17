@@ -10,16 +10,10 @@ from ribctl.ribosome_ops import StructureAssets, RibosomeOps, Structure
 from ribctl.lib.libtax import PhylogenyNode
 from ribctl.lib.schema.types_ribosome import (
     RNA,
-    Polymer,
-    RibosomeStructureMetadata,
 )
 from ribctl.lib.types.polymer import (
     CytosolicRNAClass,
-    ElongationFactorClass,
-    InitiationFactorClass,
-    LifecycleFactorClass,
     MitochondrialRNAClass,
-    tRNA,
 )
 from ribctl.lib.libmsa import Taxid, ncbi
 

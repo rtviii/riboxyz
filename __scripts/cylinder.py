@@ -4,7 +4,7 @@ import numpy as np
 
 from mesh_generation.mes_visualization import visualize_pointcloud
 from mesh_generation.mesh_full_pipeline import expand_atoms_to_spheres
-from ribctl.lib.landmarks.constriction import get_constriction
+from ribctl.lib.landmarks.constriction_site import get_constriction
 from ribctl.lib.landmarks.ptc_via_trna import PTC_location
 from ribctl.lib.npet.tunnel_bbox_ptc_constriction import (
     filter_residues_parallel,

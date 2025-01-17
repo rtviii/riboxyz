@@ -641,7 +641,7 @@ class RibosomeStructureMetadata(BaseModel):
         else:
             raise Exception("No assembly map found")
 
-    def get_nomenclature_map(self) -> dict[str, list[Polymer]]:
+    def get_nomenclature_map(self) -> dict[str, list[PolymerClass]]:
         "Return a map from auth_asym_id to nomenclatures of all polymers in the structure"
         _ = {}
 
@@ -652,6 +652,9 @@ class RibosomeStructureMetadata(BaseModel):
             _[prna.auth_asym_id] =[ y.name for y in  prna.nomenclature]
 
         return _
+
+
+
 
     def __hash__(self):
         return hash(self.rcsb_id)

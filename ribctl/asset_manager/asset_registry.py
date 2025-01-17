@@ -2,16 +2,14 @@ from typing import TypeVar, Callable, Awaitable
 from pathlib import Path
 import functools
 from loguru import logger
-
 from pydantic import BaseModel
-
 from ribctl import RIBETL_DATA
 from ribctl.asset_manager.asset_manager import RibosomeAssetManager
 from ribctl.etl.etl_collector import ETLCollector
-from ribctl.lib.landmarks.constriction import get_constriction
+from ribctl.lib.landmarks.constriction_site import get_constriction
 from ribctl.lib.landmarks.ptc_via_trna import PTC_location
 from ribctl.lib.schema.types_ribosome import ConstrictionSite, PTCInfo, RibosomeStructure
-from .asset_types import AssetType
+from .types import AssetType
 
 ModelT = TypeVar("ModelT", bound=BaseModel)
 
@@ -84,7 +82,6 @@ class AssetRegistry:
             await self.generate_asset(rcsb_id, asset_type, force)
 
 main_registry = AssetRegistry(RibosomeAssetManager(RIBETL_DATA))
-
 
 @main_registry.register(AssetType.STRUCTURE_PROFILE)
 async def generate_profile(rcsb_id: str) -> RibosomeStructure:

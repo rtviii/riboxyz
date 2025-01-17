@@ -30,7 +30,7 @@ from concurrent.futures import (
     wait,
 )
 from tqdm import tqdm
-from ribctl.asset_manager.asset_types import AssetType
+from ribctl.asset_manager.types import AssetType
 
 
 def get_input_pdb_ids() -> List[str]:
@@ -275,7 +275,9 @@ def verify(ctx, pdb_ids):
         click.echo("No PDB IDs provided", err=True)
         return
 
-    click.echo(f"Verifying assets for: {', '.join(all_pdb_ids)}")
+    # click.echo(f"Verifying assets for: {', '.join(all_pdb_ids)}")
+    click.echo(f"This stuff is not implemented")
+
     # TODO: Implement verification logic
 
 
@@ -284,6 +286,7 @@ def verify(ctx, pdb_ids):
 def verify_all(ctx):
     """Verify all assets in the system"""
     click.echo("Verifying all assets in the system...")
+    click.echo("This stuff is not implemented.")
     # TODO: Implement full verification logic
     # This should probably:
     # 1. Get list of all expected assets

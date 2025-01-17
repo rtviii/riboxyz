@@ -25,7 +25,6 @@ REFERENCE_ARCHAEA_STRUCTURE_TRNA_RRNA  = ("8HKY", "APTN", "A23S")
 REFERENCE_BACTERIA_STRUCTURE_TRNA_RRNA = ("8UD8", "1x", "1A")
 REFERENCE_EUKARYA_STRUCTURE_TRNA_RRNA  = ("8CCS", "Bb", "AA")
 
-
 def find_closest_pair(points: np.ndarray):
     points = np.asarray(points)
     if len(points) < 2:
@@ -43,7 +42,6 @@ def find_closest_pair(points: np.ndarray):
     min_distance = distances[min_idx]
 
     return closest_point1, closest_point2, min_distance
-
 
 def PTC_reference_residues(
     ribosome_type: typing.Literal["euk", "bact", "arch", "mito"]
@@ -92,7 +90,6 @@ def PTC_reference_residues(
 
     return ( list( filter( lambda x: ResidueSummary.filter_noncanonical(x.resname), nearby_residues ) ), rrrna, (ref_rcsb_id, ref_trna_aaid, ref_rrna_aaid), )
 
-
 def pickle_ref_ptc_data(ref_data: dict, output_file: str):
     try:
         with open(output_file, "wb") as f:
@@ -104,7 +101,6 @@ def pickle_ref_ptc_data(ref_data: dict, output_file: str):
         print(f"Error pickling residues: {str(e)}")
         return False
 
-
 def unpickle_residue_array(input_file: str) -> dict | None:
     try:
         with open(input_file, "rb") as f:
@@ -113,7 +109,6 @@ def unpickle_residue_array(input_file: str) -> dict | None:
     except Exception as e:
         print(f"Error unpickling residues: {str(e)}")
         return None
-
 
 def produce_ptc_references():
     for ribosome_type in ["mito", "euk", "arch", "bact"]:
@@ -129,11 +124,9 @@ def produce_ptc_references():
         outpath = GlobalOps.ptc_references(ribosome_type)
         pickle_ref_ptc_data(_, outpath)
 
-
 def get_ptc_reference(ribosome_type: typing.Literal["mito", "euk", "arch", "bact"]):
     cached_name = GlobalOps.ptc_references(ribosome_type)
     return unpickle_residue_array(cached_name)
-
 
 def PTC_location(target_rcsb_id: str) -> PTCInfo:
     """
@@ -155,6 +148,7 @@ def PTC_location(target_rcsb_id: str) -> PTCInfo:
         ribosome_type = "mito"
 
     data_dict = get_ptc_reference(ribosome_type)
+    pprint(data_dict)
     if data_dict is None:
         raise IndexError("Reference file doesn't exist. It should")
 
@@ -162,6 +156,8 @@ def PTC_location(target_rcsb_id: str) -> PTCInfo:
     ref_chain   : Chain         = data_dict["chain"]
 
     mmcif_struct_tgt = RO.assets.biopython_structure()[0]
+
+    # auth_asym_id of the LSU rRNA in the target structure
     LSU_RNA_tgt_aaid = RO.get_LSU_rRNA().auth_asym_id
     LSU_RNA_tgt: Chain = mmcif_struct_tgt[LSU_RNA_tgt_aaid]
 
@@ -170,9 +166,13 @@ def PTC_location(target_rcsb_id: str) -> PTCInfo:
         SequenceMappingContainer(LSU_RNA_tgt),
         [ResidueSummary.from_biopython_residue(r) for r in ref_residues],
         "-",
-        False,
+        True,
     )
 
+    # The assumption here is that the residues are on either side of the wall,
+    # hence the midpoint is the center of the PTC
+    # I can imagine cases where only one or just a contiguous set of residues are found
+    # Then the `center` will kinda bump against the wall, but oh well.
     (p1, p2, dist) = find_closest_pair([r.center_of_mass() for r in motifs])
     center = (p1 + p2) / 2 
     return PTCInfo(

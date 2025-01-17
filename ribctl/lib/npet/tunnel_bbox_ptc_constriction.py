@@ -4,7 +4,7 @@ import multiprocessing
 from pprint import pprint
 import sys
 sys.path.append('/home/rtviii/dev/riboxyz')
-from ribctl.lib.landmarks.constriction import get_constriction
+from ribctl.lib.landmarks.constriction_site import get_constriction
 from ribctl.lib.landmarks.ptc_via_trna import PTC_location
 from ribctl.ribosome_ops import RibosomeOps
 from Bio.PDB.Entity import Entity

@@ -5,7 +5,7 @@ from typing import Dict, Callable, Awaitable
 from functools import partial
 
 from ribctl.lib.utils import download_unpack_place
-from ribctl.asset_manager.asset_types import AssetType
+from ribctl.asset_manager.types import AssetType
 
 class RawAssetHandler:
     """Handler for raw file assets with extensible asset type matching"""

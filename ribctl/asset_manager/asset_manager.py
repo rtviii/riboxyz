@@ -6,14 +6,13 @@ from pydantic import BaseModel
 
 from ribctl import RIBETL_DATA
 
-from .asset_types import (
+from .types import (
     AssetType,
     ModelT,
     ModelGenerator,
     RawGenerator,
     AssetDefinition,
 )
-
 
 class AssetPathManager:
     """Manages asset paths and directory structure"""

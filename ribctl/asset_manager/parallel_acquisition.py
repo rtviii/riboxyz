@@ -5,7 +5,7 @@ from typing import List, Dict, Set, Optional
 from pathlib import Path
 from loguru import logger
 from ribctl.asset_manager.asset_raw import RawAssetHandler
-from ribctl.asset_manager.asset_types import AssetType
+from ribctl.asset_manager.types import AssetType
 from ribctl.asset_manager.asset_registry import main_registry
 
 

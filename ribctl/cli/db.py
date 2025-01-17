@@ -1,6 +1,6 @@
 from functools import partial
 import sys
-
+from ribctl.ribd import cli
 sys.path.append("/home/rtviii/dev/riboxyz")
 from ribctl.asset_manager.assets_structure import StructureAssets
 from ribctl.global_ops import GlobalOps
@@ -20,7 +20,7 @@ from concurrent.futures import (
     wait,
 )
 from tqdm import tqdm
-from ribctl.asset_manager.asset_types import AssetType
+from ribctl.asset_manager.types import AssetType
 
 
 @cli.group()

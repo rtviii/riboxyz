@@ -15,10 +15,6 @@ from ribctl.asset_manager.asset_manager import RibosomeAssetManager
 from ribctl.lib.libtax import PhylogenyNode, PhylogenyRank, Taxid
 from Bio.PDB.Structure import Structure
 from Bio.PDB.MMCIFParser import FastMMCIFParser
-from ribctl.lib.landmarks.ptc_via_doris import (
-    ptc_resdiues_get,
-    ptc_residues_calculate_midpoint,
-)
 from ribctl.lib.utils import download_unpack_place
 from ribctl import RIBETL_DATA
 from ribctl.logs.loggers import get_etl_logger
