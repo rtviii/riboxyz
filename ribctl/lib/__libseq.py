@@ -3,7 +3,7 @@ from Bio.PDB.Residue import  Residue
 from Bio import pairwise2
 from typing import List, Dict, Tuple, Optional
 from functools import lru_cache
-from ribctl.lib.schema.primitivs import AMINO_ACIDS, NUCLEOTIDES
+from ribctl.lib.schema.primitives import AMINO_ACIDS, NUCLEOTIDES
 from ribctl.lib.schema.types_ribosome import ResidueSummary
 
 class SequenceMappingContainer:

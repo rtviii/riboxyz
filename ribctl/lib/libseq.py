@@ -1,7 +1,7 @@
 import sys
 
 from ribctl.lib.libmsa import Fasta, muscle_align_N_seq
-from ribctl.lib.schema.primitivs import AMINO_ACIDS, NUCLEOTIDES
+from ribctl.lib.schema.primitives import AMINO_ACIDS, NUCLEOTIDES
 from ribctl.lib.schema.types_ribosome import ResidueSummary
 sys.path.append("/home/rtviii/dev/riboxyz")
 from typing import Optional
@@ -74,7 +74,6 @@ class SequenceMappingContainer(Chain):
     @property
     def flat_sequence(self) -> tuple[str, dict[int,Residue], dict[int,int]]:
         res: list[Residue] = [*self.chain.get_residues()]
-
         flat_index_to_residue_map     = {}
         auth_seq_id_to_flat_index_map = {}
         seq                           = ""
@@ -243,14 +242,12 @@ def map_motifs(source_chain:SequenceMappingContainer, target_chain:SequenceMappi
     return primary_seq_source, primary_seq_target, tgt_bound_residues
 
 
-
-
 from typing import Dict, List, Literal
 import numpy as np
 from Bio.Align import AlignInfo, MultipleSeqAlignment
 from Bio.SeqRecord import SeqRecord
 import math
-from ribctl.lib.schema.primitivs import AMINO_ACIDS, NUCLEOTIDES
+from ribctl.lib.schema.primitives import AMINO_ACIDS, NUCLEOTIDES
 
 SequenceType = Literal["protein", "rna"]
 

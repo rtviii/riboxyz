@@ -1,5 +1,7 @@
 import sys
 
+from loguru import logger
+
 sys.dont_write_bytecode = True
 import json
 import os
@@ -39,10 +41,8 @@ from pyhmmer.easel import (
     DigitalSequence,
 )
 from pyhmmer.plan7 import Pipeline, HMM, TopHits
-from ribctl.logs.loggers import get_classification_logger
 import concurrent.futures
 
-# logger= get_classification_logger()
 hmm_cachedir = ASSETS["cache_hmm"]
 
 

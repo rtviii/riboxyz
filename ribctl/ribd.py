@@ -1,6 +1,10 @@
 import sys
+
+from loguru import logger
 sys.dont_write_bytecode = True
 sys.path.append("/home/rtviii/dev/riboxyz")
+from logger_config import configure_logging
+configure_logging()
 from neo4j_ribosome.db_lib_reader import Neo4jReader
 from functools import partial
 from ribctl.asset_manager.asset_manager import RibosomeAssetManager
@@ -18,7 +22,6 @@ from pathlib import Path
 import asyncio
 from concurrent.futures import ProcessPoolExecutor
 import math
-from loguru import logger
 from ribctl.asset_manager.parallel_acquisition import process_chunk, AcquisitionResult
 import multiprocessing
 from ribctl.asset_manager.asset_registry import main_registry
@@ -31,7 +34,6 @@ from concurrent.futures import (
 )
 from tqdm import tqdm
 from ribctl.asset_manager.types import AssetType
-
 
 def get_input_pdb_ids() -> List[str]:
     """Get PDB IDs from either stdin (if piped) or return None to handle as argument"""

@@ -18,7 +18,6 @@ from ribctl.lib.utils import download_unpack_place
 from ribctl.lib.schema.types_ribosome import ( RNA, PTCInfo, Polymer, PolymerClass,  RibosomeStructure, RibosomeStructureMetadata, )
 from ribctl.lib.types.polymer import PolynucleotideClass, PolynucleotideClass, PolypeptideClass
 from ribctl import RIBETL_DATA
-from ribctl.logs.loggers import get_etl_logger
 
 
 """

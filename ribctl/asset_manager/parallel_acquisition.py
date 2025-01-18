@@ -1,6 +1,7 @@
 # parallel_acquisition.py
 import asyncio
 from dataclasses import dataclass
+import sys
 from typing import List, Dict, Set, Optional
 from pathlib import Path
 from loguru import logger
@@ -27,7 +28,8 @@ def process_chunk(
     max_concurrent_assets: int = 3,
 ) -> Dict[str, List[AcquisitionResult]]:
     """Process a chunk of structures in a separate process"""
-
+    from logger_config import configure_logging
+    configure_logging() 
     async def _process_chunk_async() -> Dict[str, List[AcquisitionResult]]:
         base_path = Path(base_dir)
         asset_types = [AssetType[name] for name in asset_type_names]
@@ -43,8 +45,8 @@ def process_chunk(
                     await main_registry.generate_asset(rcsb_id, asset_type, force)
                 return AcquisitionResult(rcsb_id, asset_type.name, True)
             except Exception as e:
-                logger.exception(f"Failed to acquire {asset_type.name} for {rcsb_id}")
                 return AcquisitionResult(rcsb_id, asset_type.name, False, str(e))
+
 
         structure_sem = asyncio.Semaphore(max_concurrent_structures)
         asset_sem = asyncio.Semaphore(max_concurrent_assets)
@@ -68,7 +70,7 @@ def process_chunk(
 
                     async def acquire_with_semaphore(asset_type: AssetType):
                         async with asset_sem:
-                            return await acquire_asset(rcsb_id, asset_type)
+                                return await acquire_asset(rcsb_id, asset_type)
 
                     tasks = [
                         acquire_with_semaphore(asset_type)

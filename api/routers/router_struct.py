@@ -1,6 +1,5 @@
 import datetime
 import json
-import pickle
 from urllib.request import Request
 from ninja import Router, Body
 import os
@@ -8,10 +7,6 @@ from pprint import pprint
 import typing
 from django.http import JsonResponse, HttpResponseServerError
 from ninja import Path, Router, Schema
-import pandas
-from pydantic import BaseModel, Field, ValidationError
-from typing import Optional, List
-from pydantic import BaseModel
 from neo4j_ribosome.db_lib_reader import (
     PolymersFilterParams,
     StructureFilterParams,
@@ -27,14 +22,9 @@ from ribctl.lib.types.polymer import (
     CytosolicRNAClass,
     ElongationFactorClass,
     InitiationFactorClass,
-    LifecycleFactorClass,
     MitochondrialProteinClass,
     MitochondrialRNAClass,
     PolymerClass,
-    PolynucleotideClass,
-    PolynucleotideClass,
-    PolypeptideClass,
-    ProteinClass,
     tRNA,
 )
 from ribctl.lib.schema.types_ribosome import (

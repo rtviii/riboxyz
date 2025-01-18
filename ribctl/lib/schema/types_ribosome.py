@@ -4,20 +4,16 @@ import typing
 from Bio.SeqRecord import SeqRecord
 from Bio.Seq import Seq
 from Bio.PDB.Residue import Residue
-import numpy as np
-from pydantic import BaseModel, field_serializer, Field
-from ribctl.lib.enumunion import enum_union
-from pydantic import BaseModel, Field
-from typing import Optional, Literal, Union, ClassVar
+from pydantic import BaseModel
+from typing import Optional
 from ribctl.lib.types.polymer import PolymerClass
-
-from ribctl.lib.schema.primitivs import AMINO_ACIDS, NUCLEOTIDES
+from ribctl.lib.schema.primitives import AMINO_ACIDS, NUCLEOTIDES
 
 
 # |********************************************************************************************************|
 # | https://docs.google.com/spreadsheets/d/1mapshbn1ArofPN-Omu8GG5QdcwlJ0ym0BlN252kkUBU/edit#gid=815712128 |
 # |********************************************************************************************************|
-# ? ----------------------------------------------{ Polymer Types }------------------------------------------------
+# ? ----------------------------------------------{ Polymer Types: Deprecated in favour of hierarchies }------------------------------------------------
 
 # class tRNA(str,Enum):
 #     tRNA = "tRNA"
@@ -331,7 +327,6 @@ from ribctl.lib.schema.primitivs import AMINO_ACIDS, NUCLEOTIDES
 # PolynucleotideClass  = enum_union(CytosolicRNAClass, MitochondrialRNAClass, tRNA)
 # PolymerClass         = enum_union(PolynucleotideClass, PolypeptideClass)
 
-
 # ? ----------------------------------------------{ Composite Models }------------------------------------------------
 
 class Polymer(BaseModel):
@@ -375,7 +370,6 @@ class Polymer(BaseModel):
     entity_poly_entity_type            : str
 
     nomenclature                       : list[PolymerClass]
-
 
 class Protein(Polymer):
     def __hash__(self):
@@ -465,7 +459,6 @@ class NonpolymericLigand(BaseModel):
     SMILES_stereo: Optional[str] =None
     InChI        : Optional[str] =None
     InChIKey     : Optional[str] =None
-
 
 class ResidueSummary(BaseModel): 
     model_config = {
@@ -607,7 +600,6 @@ class NomenclatureTable(BaseModel):
     }
     __pydantic_root_model__: Dict[str, NomenclatureItem]
 
-
 class PTCInfo(BaseModel):
     model_config = {
         "json_encoders": {
@@ -695,7 +687,6 @@ class RibosomeStructureMetadata(BaseModel):
     assembly_map    : Optional[list[AssemblyInstancesMap]] = None
     mitochondrial   : bool
     subunit_presence: Optional[list[typing.Literal['ssu','lsu']]] = None
-
 
 class RibosomeStructure(RibosomeStructureMetadata):
     rnas                : list[RNA]
