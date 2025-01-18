@@ -1,4 +1,3 @@
-from pprint import pprint
 from typing import List, NewType, Tuple, TypeVar
 import typing
 from ribctl.global_ops import GlobalOps
@@ -147,7 +146,6 @@ def PTC_location(target_rcsb_id: str) -> PTCInfo:
         ribosome_type = "mito"
 
     data_dict = get_ptc_reference(ribosome_type)
-    pprint(data_dict)
     if data_dict is None:
         raise IndexError("Reference file doesn't exist. It should")
 
@@ -165,7 +163,7 @@ def PTC_location(target_rcsb_id: str) -> PTCInfo:
         SequenceMappingContainer(LSU_RNA_tgt),
         [ResidueSummary.from_biopython_residue(r) for r in ref_residues],
         "-",
-        True,
+        False,
     )
 
     # The assumption here is that the residues are on either side of the wall,

@@ -1,43 +1,15 @@
-import asyncio
 from enum import   auto
-import enum
 import json
 import os
 from pprint import pprint
-import subprocess
-import typing
 from Bio.PDB.Structure import Structure
 from Bio.PDB.Chain import Chain
 from loguru import logger
 import requests
-from ribctl import AMINO_ACIDS_3_TO_1_CODE, ASSETS_PATH, CHAINSPLITTER_PATH, CLASSIFICATION_REPORTS
-from ribctl.lib.libtax import PhylogenyNode, PhylogenyRank, Taxid
 from Bio.PDB.Structure import Structure
 from Bio.PDB.MMCIFParser import FastMMCIFParser
-from ribctl.lib.utils import download_unpack_place
 from ribctl.lib.schema.types_ribosome import ( RNA, PTCInfo, Polymer, PolymerClass,  RibosomeStructure, RibosomeStructureMetadata, )
-from ribctl.lib.types.polymer import PolynucleotideClass, PolynucleotideClass, PolypeptideClass
 from ribctl import RIBETL_DATA
-
-
-"""
-Interface to the structural assets corresponding to a single entry in the database and a single subdir of `RIBETL_DATA`.
-Example layout for a given structure:
-    RIBETL_DATA/
-        ├── 4UG0.cif
-        ├── 4UG0.json
-        ├── 4UG0_PTC.json
-        ├── TUNNELS
-        │   ├── 4UG0_convex_hull.npy
-        │   ├── 4UG0_normal_estimated_surf.ply
-        │   ├── 4UG0_poisson_recon.ply
-        │   ├── 4UG0_poisson_recon_ascii.ply
-        │   ├── 4UG0_spheres_expanded_pointset.npy
-        │   ├── 4UG0_tunnel_atoms_bbox.json
-        │   └── tunnel_4UG0.csv
-        └── classification_report_4UG0.json
-"""
-
 
 class StructureAssetPaths:
     rcsb_id:str
