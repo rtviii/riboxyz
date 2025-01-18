@@ -67,7 +67,6 @@ class AssetRegistry:
     ) -> None:
         """Generate a single asset and its dependencies"""
         logger.info(f"Generating {asset_type.name} for {rcsb_id}")
-
         asset_def = self.manager.assets[asset_type]
         if not asset_def.generator:
             raise ValueError(f"No generator registered for {asset_type}")

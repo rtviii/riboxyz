@@ -1,5 +1,5 @@
 import sys
-
+sys.dont_write_bytecode = True
 sys.path.append("/home/rtviii/dev/riboxyz")
 from neo4j_ribosome.db_lib_reader import Neo4jReader
 from functools import partial

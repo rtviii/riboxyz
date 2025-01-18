@@ -5,7 +5,6 @@ from pydantic import BaseModel
 from pathlib import Path
 from typing import TypeVar, Generic, Optional, Type, Tuple
 from pydantic import BaseModel
-
 from ribctl.lib.schema.types_ribosome import ConstrictionSite, PTCInfo, RibosomeStructure
 
 # Type for any pydantic model
@@ -56,6 +55,7 @@ class AssetType(Enum):
 
     def requires_model(self) -> bool:
         return self.model_type is not None
+
 
 ModelT = TypeVar('ModelT', bound=BaseModel)
 class ModelGenerator(Protocol[ModelT]):

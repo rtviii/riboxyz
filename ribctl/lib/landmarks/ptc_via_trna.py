@@ -1,7 +1,6 @@
 from pprint import pprint
 from typing import List, NewType, Tuple, TypeVar
 import typing
-from ribctl.asset_manager.assets_structure import StructureAssetPaths
 from ribctl.global_ops import GlobalOps
 from ribctl.lib.schema.types_ribosome import PTCInfo
 from ribctl.ribosome_ops import RibosomeOps
