@@ -7,9 +7,9 @@
 # - on completiong: ffmpeg it to a gif
 
 
-RCSB_ID = "4V6X"
+RCSB_ID = "7K00"
 def produce_gif(rcsb_id:str):
-    render_movie ='chimerax --nogui --offscreen --cmd "cd /home/rtviii/dev/riboxyz/ribctl/chimerax; open cmd_ribetl.py; open cmd_ribrepr.py; open cmd_ribmovie.py; ribetl {}; ribmovie {}; close all" -'.format(rcsb_id, rcsb_id)
+    render_movie = 'chimerax --nogui --offscreen --cmd "cd /home/rtviii/dev/riboxyz/ribctl/lib/chimerax; open cmd_ribetl.py; open cmd_ribrepr.py; open cmd_ribmovie.py; ribmovie {}; close all" -'.format(rcsb_id, rcsb_id)
     import subprocess
     subprocess.run(render_movie, shell=True)
 
