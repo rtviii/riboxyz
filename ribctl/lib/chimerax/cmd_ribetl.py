@@ -7,7 +7,7 @@ from chimerax.atomic import Structure, AtomicStructure, Chain
 from chimerax.core.commands import run, runscript
 from chimerax.core.commands import CmdDesc, register, StringArg
 
-RIBETL_DATA = os.environ.get("RIBETL_DATA", '/home/rtviii/dev/RIBETL_DATA')
+RIBETL_DATA = os.environ.get("RIBETL_DATA")
 def register_ribetl_command(logger):
     def ribetl(session, rcsb_id:str):
         rcsb_id = rcsb_id.upper()
