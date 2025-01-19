@@ -15,9 +15,9 @@ from ribctl.ribosome_ops import RibosomeOps
 chain = RibosomeOps('7K00').get_biopython_chain_by_polymer_class('23SrRNA')
 
 seq, mpa= SequenceMappingContainer(chain).primary_sequence
+
 print(seq.rstrip('.'))
 print(len(seq.rstrip('.')))
-
 
 # structure_scores = map_alignment_to_structure(alignment_scores,SequenceMappingContainer(chain))
 # pprint(structure_scores)
