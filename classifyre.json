@@ -4,20 +4,6 @@
   "classification_status": "In progress",
   "number_of_elements": 246,
   "number_of_pages": 25,
-  "invalid_entities": [
-    {
-      "structure": "None",
-      "report": ["Cannot process the input SMILES string, please check again"]
-    },
-    {
-      "structure": "None",
-      "report": ["Cannot process the input SMILES string, please check again"]
-    },
-    {
-      "structure": "None",
-      "report": ["Cannot process the input SMILES string, please check again"]
-    }
-  ],
   "entities": [
     {
       "identifier": "ERY",
