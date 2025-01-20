@@ -4,13 +4,14 @@ from ninja import Router
 from ribctl.ribosome_ops import RibosomeOps 
 
 mmcif_router = Router();
-tag = "mmcif"
+tag          = "mmcif"
 
 @mmcif_router.get('/polymer',  tags=[tag])
 def polymer(request, rcsb_id:str, auth_asym_id:str):
     rcsb_id        = rcsb_id.upper()
     RO             = RibosomeOps(rcsb_id)
     chain_fullpath = os.path.join(RO.assets.paths.chains_dir, f'{rcsb_id}_{auth_asym_id}.cif')
+
 
     if not os.path.exists(chain_fullpath):
         return HttpResponse(status=404)

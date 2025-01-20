@@ -21,6 +21,7 @@ def chainsplitter(session, rcsb_id:str):
     for auth_asym_id, model_n in cid_to_spec.items():
         chain_path = os.path.join(chains_dir, f"{rcsb_id}_{auth_asym_id}.cif")
         run(session, "save {} {}".format(chain_path, model_n))
+        print("Saved ", chain_path)
 
 def register_ribrepr_command(logger):
     from chimerax.core.commands import CmdDesc, register
@@ -31,4 +32,4 @@ def register_ribrepr_command(logger):
         synopsis           = "representation")
     register("chainsplitter", desc, chainsplitter, logger=logger)
 
-# register_ribrepr_command(session.logger)
+register_ribrepr_command(session.logger)
