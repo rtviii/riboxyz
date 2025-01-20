@@ -53,7 +53,6 @@ def digitize_seq_record(seq_record: SeqRecord, alphabet: Alphabet) -> DigitalSeq
     )
     return seq_.digitize(alphabet)
 
-
 def pick_best_hmm_hit(
     matches_dict: dict[Polymer, list[float]], chain_info: Polymer
 ) -> PolymerClass | None:
@@ -90,7 +89,6 @@ def pick_best_hmm_hit(
             )
 
     return results[0]["candidate_class"]
-
 
 def hmm_create(name: str, seqs: Iterator[SeqRecord], alphabet: Alphabet) -> HMM:
     """Create an HMM from a list of sequences"""
@@ -133,7 +131,6 @@ def hmm_produce(candidate_class: PolymerClass, organism_taxid: int, seed_sequenc
 
     return (candidate_class, HMM)
 
-
 def _obtain_phylogenetic_nbhd_task(
     base_taxids: list[int],
     fasta_record: Fasta,
@@ -144,7 +141,6 @@ def _obtain_phylogenetic_nbhd_task(
     phylo_nbhd_ids = phylogenetic_neighborhood(base_taxids, str(taxid), max_n_neighbors)
     seqs = fasta_record.pick_taxids(phylo_nbhd_ids)
     return polymer_class, iter(seqs)
-
 
 class PolymerClassFastaRegistry:
     """This is a wrapper around fasta records for all polymer classes. Only a few sequences should be picked from it at a time."""
@@ -226,7 +222,6 @@ class PolymerClassFastaRegistry:
             polymer_class, seqs = completed_future.result()
             _[polymer_class] = seqs
         return _
-
 
 class PolymerClassesOrganismScanner:
     # https://pyhmmer.readthedocs.io/en/stable/api/plan7.html#pyhmmer.plan7.HMM
