@@ -11,7 +11,6 @@ from chimerax.core.commands import CmdDesc, register, StringArg
 RIBETL_DATA = os.environ.get("RIBETL_DATA")
 def produce_and_save_movie(session, structure:str):
     RCSB_ID = structure.upper()
-    # run(session, "open {}/{}/{}.cif".format(RIBETL_DATA,RCSB_ID, RCSB_ID))
     run(session, "view")
     run(session, "ribetl {}".format(RCSB_ID)) # take only one assembly if multiple are available
     run(session, "sym #1 assembly 1") # take only one assembly if multiple are available

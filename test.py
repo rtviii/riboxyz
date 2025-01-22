@@ -3,6 +3,7 @@ import json
 import os
 from pprint import pprint
 from ribctl import ASSETS, ASSETS_PATH
+from ribctl.lib.libbsite import bsite_transpose, get_lig_bsite
 from ribctl.lib.libmsa import Fasta, FastaBalancer
 from ribctl.lib.libseq import (
     SequenceMappingContainer,
@@ -28,18 +29,36 @@ from ribctl.ribosome_ops import RibosomeOps
 # pprint(structure_scores)
 
 
-file = os.path.join(ASSETS_PATH, "ligands", "ligand_classes.json")
-# file = os.path.join("classifyre.json")
-chemids = []
+# file = os.path.join(ASSETS_PATH, "ligands", "ligand_classes.json")
+# # file = os.path.join("classifyre.json")
+# chemids = []
 
-with open(file, "r") as f:
-    ligands = json.load(f)
-    pprint(len(ligands))
-    # for ent in ligands:
-    #     try:
-    #         print(ent["identifier"])
-    #         chemids.append(ent["identifier"])
-    #     except:
-    #         pprint(ent)
+# with open(file, "r") as f:
+#     ligands = json.load(f)
+#     pprint(len(ligands))
+#     # for ent in ligands:
+#     #     try:
+#     #         print(ent["identifier"])
+#     #         chemids.append(ent["identifier"])
+#     #     except:
+#     #         pprint(ent)
 
-# pprint(chemids)
+# # pprint(chemids)
+
+
+
+bsite = get_lig_bsite('YQM', RibosomeOps('7M4W').assets.biopython_structure(), 10.0)
+for chain in bsite.chains:
+    print(chain.auth_asym_id)
+print('-----------------TRANSPOSISTION-----------------')
+res = bsite_transpose('7M4W','7K00',bsite)
+for chain in res.constituent_chains:
+    print(chain.polymer_class)
+
+    print(chain.source.auth_asym_id)
+    print(chain.target.auth_asym_id)
+    # print(chain.source.source_bound_residues)
+    # print(chain.source.source_seq)
+    # print(chain.target.target_bound_residues)
+    # print(chain.target.target_seq)
+    # exit()

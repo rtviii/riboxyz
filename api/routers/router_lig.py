@@ -50,7 +50,7 @@ def lig_transpose(
         with open(prediction_path, "r") as f:
             return JsonResponse(json.load(f), safe=False)
 
-    bsite = bsite_ligand(chemical_id, source_structure, radius)
+    bsite      = bsite_ligand(chemical_id, source_structure, radius)
     prediction = bsite_transpose(source_structure, target_structure, bsite)
 
     with open(prediction_path, "w") as f:

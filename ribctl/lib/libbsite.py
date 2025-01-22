@@ -55,22 +55,22 @@ def get_lig_bsite(
     """
     # Make sure only the first assembly is used if multiple are in the file.
     md: Model = [*struct.get_models()][0]
-    assemblies = (
-        RibosomeOps(struct.get_id().upper()).profile.get_polymers_by_assembly()
-    )
+    assemblies = ( RibosomeOps(struct.get_id().upper()).profile.get_polymers_by_assembly() )
     # If there are two or more assemblies, delete chains belonging to all but the first one.
     if len(assemblies.items()) > 1:
         for i in range(len(assemblies.items()) - 1):
             for chain_aaid in [*assemblies.items()][i + 1][1]:
                 md.detach_child(chain_aaid)
 
-    ns = NeighborSearch(list(struct.get_atoms()))
-    nbr_residues = []
-    ligand_residues = list(
-        filter(lambda x: x.get_resname() == lig_chemid, list(struct.get_residues()))
-    )
+    ns              = NeighborSearch(list(struct.get_atoms()))
 
-    for lig_res in ligand_residues:
+    nbr_residues    = []
+    ligand_residues = list(filter(lambda x: x.get_resname() == lig_chemid, list(struct.get_residues())) )
+
+    #** So, for the case where there are multiple ligands, we only take the first one.
+    #** Otherwise there is possibility of "disjoint" pockets being detected which is not convenient.
+    #** The identification system could be better at the structural level on my or mmcif side.
+    for lig_res in ligand_residues[:1]:
         for atom in lig_res.child_list:
             found_nbrs = ns.search(atom.get_coord(), radius, level="R")
             nbr_residues.extend(found_nbrs)
@@ -78,21 +78,20 @@ def get_lig_bsite(
     nbr_residues: list[Residue] = list(set(nbr_residues))
     nbr_chains = []
 
-    # TODO: grab the PROXIMATE idx by `enumerate`ing the chain residues
-    # It doesn't fucking matter as long as you are unable to match residue comp ID 1-to-1
-    # TODO: Just try constructing the sequence from the biopython one and aligning (with pairwise2) into the canonical one.
-    # TODO:          (then just subtract the gaps from the canonical one)
-    # auth_seq_id_to_label_seq_id_mapping_by_chain = {}
     nbr_residues_by_chain_aaid = {}
 
     for residue in nbr_residues:
 
         parent_chain = residue.get_parent()
         auth_asym_id = parent_chain.get_id()
+
         if auth_asym_id not in nbr_residues_by_chain_aaid:
             nbr_residues_by_chain_aaid[auth_asym_id] = [residue]
         else:
             nbr_residues_by_chain_aaid[auth_asym_id].append(residue)
+
+    pprint("NBR_RESIDUES_BY_CHAIN_AAID")
+    pprint(nbr_residues_by_chain_aaid.keys())
 
     RO = RibosomeOps(struct.get_id().upper())
 
@@ -143,7 +142,6 @@ def bsite_ligand(
     return binding_site_ligand
 
 def bsite_transpose(
-
     source_rcsb_id: str,
     target_rcsb_id: str,
     binding_site  : BindingSite,
@@ -166,6 +164,7 @@ def bsite_transpose(
     bindign_site_chains = []
 
     for source_polymer in binding_site.chains:
+        print("GOT SRC POLYMER 1", source_polymer.auth_asym_id)
 
         source_polymer = BindingSiteChain.model_validate(source_polymer)
 

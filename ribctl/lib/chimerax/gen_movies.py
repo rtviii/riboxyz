@@ -60,10 +60,16 @@ def process_structure(session, struct_id, base_dir):
     
     print(f"Successfully completed {struct_id} at {time.strftime('%H:%M:%S')}")
 
-def get_structures_without_movies(base_dir):
-    """Returns a list of structure IDs that don't have corresponding .mp4 files"""
+def get_structures_without_movies(base_dir, reverse=False):
+    """Returns a list of structure IDs that don't have corresponding .mp4 files
+    
+    Args:
+        base_dir (str): Base directory path
+        reverse (bool): If True, return structures in reverse order
+    """
     structures = []
-    for item in sorted(os.listdir(base_dir)):
+    items = sorted(os.listdir(base_dir), reverse=reverse)
+    for item in items:
         dir_path = os.path.join(base_dir, item)
         if os.path.isdir(dir_path):
             mp4_path = os.path.join(dir_path, f"{item}.mp4")
@@ -71,8 +77,13 @@ def get_structures_without_movies(base_dir):
                 structures.append(item)
     return structures
 
-def process_missing_movies(session):
-    """Main loop to process structures that don't have movies"""
+def process_missing_movies(session, reverse=False):
+    """Main loop to process structures that don't have movies
+    
+    Args:
+        session: ChimeraX session
+        reverse (bool): If True, process structures in reverse order
+    """
     while True:
         try:
             base_dir = os.environ.get("RIBETL_DATA")
@@ -80,7 +91,7 @@ def process_missing_movies(session):
                 print("ERROR: RIBETL_DATA environment variable not set")
                 return
             
-            structures = get_structures_without_movies(base_dir)
+            structures = get_structures_without_movies(base_dir, reverse=reverse)
             
             if not structures:
                 print("All structures processed! Checking again in 10 seconds...")
@@ -106,4 +117,4 @@ def process_missing_movies(session):
             continue
 
 # Start processing
-process_missing_movies(session)
+process_missing_movies(session, reverse=True)  
