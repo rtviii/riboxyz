@@ -73,6 +73,7 @@ def get_lig_bsite(
     for lig_res in ligand_residues[:1]:
         for atom in lig_res.child_list:
             found_nbrs = ns.search(atom.get_coord(), radius, level="R")
+            found_nbrs = [r for r in found_nbrs if r.get_resname() != lig_chemid]
             nbr_residues.extend(found_nbrs)
 
     nbr_residues: list[Residue] = list(set(nbr_residues))
@@ -90,11 +91,10 @@ def get_lig_bsite(
         else:
             nbr_residues_by_chain_aaid[auth_asym_id].append(residue)
 
-    pprint("NBR_RESIDUES_BY_CHAIN_AAID")
-    pprint(nbr_residues_by_chain_aaid.keys())
 
     RO = RibosomeOps(struct.get_id().upper())
 
+    pprint(list(nbr_residues_by_chain_aaid.keys()))
     # pprint(sorted( nbr_residues_by_chain_aaid['L'], key=lambda x: x.get_id()[1] ))
     for chain_aaid, bound_residues in nbr_residues_by_chain_aaid.items():
         polymer = RO.get_poly_by_auth_asym_id(chain_aaid)
@@ -164,7 +164,6 @@ def bsite_transpose(
     bindign_site_chains = []
 
     for source_polymer in binding_site.chains:
-        print("GOT SRC POLYMER 1", source_polymer.auth_asym_id)
 
         source_polymer = BindingSiteChain.model_validate(source_polymer)
 

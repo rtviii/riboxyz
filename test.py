@@ -50,27 +50,40 @@ from ribctl.ribosome_ops import RibosomeOps
 # # pprint(chemids)
 
 
+# lig_chemid = 'SAH'
+# source_id  = '6SG9'
+# tartget_id = '7K00'
 
-# bsite = get_lig_bsite('YQM', RibosomeOps('7M4W').assets.biopython_structure(), 10.0)
-# res = bsite_transpose('7M4W','7K00',bsite)
+# bsite = get_lig_bsite(lig_chemid, RibosomeOps(source_id).assets.biopython_structure(), 10.0)
+# pprint(bsite)
+# res   = bsite_transpose(source_id,tartget_id,bsite)
+# print(res)
+
 all_ligand_sources = Neo4jReader(Neo4jAdapter(NEO4J_URI, NEO4J_USER, NEO4J_CURRENTDB)).list_ligands()
-# pprint(all_ligand_ids)
-RO = RibosomeOps('7K00')
+RO                 = RibosomeOps('7K00')
 
 for lig_source in all_ligand_sources:
-    distance         = 999999
+    distance_0         = 999999
     closest_to_ecoli = None
+
     for elem in lig_source[1:]:
         for ss in elem:
             distance = get_lineage_distance(RO.taxid,ss['tax_node']['ncbi_tax_id'])
+            if distance <  distance_0:
+                distance_0       = distance
+                closest_to_ecoli = ss
 
-    # exit()
+    # pprint(closest_to_ecoli)
+    chemical_id = lig_source[0]['chemicalId']
+    source_id   = closest_to_ecoli['rcsb_id']
+    outpath     = RO.assets.paths.binding_site_prediction(chemical_id, source_id)
 
-    # pprint(s)
-    # Taxid.relative_distances_to_taxid(RO.
-    
-    # s['ncbi_tax_id']
-    # exit()
-# for CHEMID in all_ligand_ids:
-#     bsite = get_lig_bsite(CHEMID, RibosomeOps('7M4W').assets.biopython_structure(), 10.0)
-#     res   = bsite_transpose('7M4W','7K00',bsite)
+    if outpath is not None and os.path.exists(outpath):
+        print(f"File exists: {outpath}")
+    else:
+        print(f"Closest to Ecoli for ligand {lig_source[0]['chemicalId']}: {closest_to_ecoli['rcsb_id']} {closest_to_ecoli['tax_node']['ncbi_tax_id']} {closest_to_ecoli['tax_node']['scientific_name']} {distance_0}")
+        bsite = get_lig_bsite(chemical_id, RibosomeOps(source_id).assets.biopython_structure(), 10.0)
+        res   = bsite_transpose(source_id,'7K00',bsite)
+        with open(outpath, "w") as f:
+            json.dump(res.model_dump(), f)
+            print("Saved: ", outpath)
