@@ -2,6 +2,8 @@ import sys
 
 from loguru import logger
 
+from ribctl.lib.libtax import find_n_closest_relatives
+
 sys.dont_write_bytecode = True
 import json
 import os
@@ -10,7 +12,7 @@ from typing import Iterator, Tuple
 from Bio.SeqRecord import SeqRecord
 import pyhmmer
 from ribctl import ASSETS
-from ribctl.lib.libmsa import Fasta, muscle_align_N_seq, phylogenetic_neighborhood
+from ribctl.lib.libmsa import Fasta, muscle_align_N_seq
 from ribctl.lib.schema.types_ribosome import RNA, Polymer, PolymerClass, Protein
 from ribctl.lib.types.polymer import (
     CytosolicProteinClass,
@@ -53,6 +55,7 @@ def digitize_seq_record(seq_record: SeqRecord, alphabet: Alphabet) -> DigitalSeq
     )
     return seq_.digitize(alphabet)
 
+
 def pick_best_hmm_hit(
     matches_dict: dict[Polymer, list[float]], chain_info: Polymer
 ) -> PolymerClass | None:
@@ -89,6 +92,7 @@ def pick_best_hmm_hit(
             )
 
     return results[0]["candidate_class"]
+
 
 def hmm_create(name: str, seqs: Iterator[SeqRecord], alphabet: Alphabet) -> HMM:
     """Create an HMM from a list of sequences"""
@@ -131,6 +135,7 @@ def hmm_produce(candidate_class: PolymerClass, organism_taxid: int, seed_sequenc
 
     return (candidate_class, HMM)
 
+
 def _obtain_phylogenetic_nbhd_task(
     base_taxids: list[int],
     fasta_record: Fasta,
@@ -138,9 +143,10 @@ def _obtain_phylogenetic_nbhd_task(
     taxid: int,
     max_n_neighbors: int,
 ):
-    phylo_nbhd_ids = phylogenetic_neighborhood(base_taxids, str(taxid), max_n_neighbors)
+    phylo_nbhd_ids = find_n_closest_relatives(base_taxids, str(taxid), max_n_neighbors)
     seqs = fasta_record.pick_taxids(phylo_nbhd_ids)
     return polymer_class, iter(seqs)
+
 
 class PolymerClassFastaRegistry:
     """This is a wrapper around fasta records for all polymer classes. Only a few sequences should be picked from it at a time."""
@@ -223,6 +229,7 @@ class PolymerClassFastaRegistry:
             _[polymer_class] = seqs
         return _
 
+
 class PolymerClassesOrganismScanner:
     # https://pyhmmer.readthedocs.io/en/stable/api/plan7.html#pyhmmer.plan7.HMM
     """
@@ -237,11 +244,17 @@ class PolymerClassesOrganismScanner:
 
     @property
     def hmms_amino(self) -> list[tuple[PolypeptideClass, HMM]]:
-        return list( filter(lambda x: x[0] in list(Polypeptides), self.hmms_registry.items()) )
+        return list(
+            filter(lambda x: x[0] in list(Polypeptides), self.hmms_registry.items())
+        )
 
     @property
     def hmms_rna(self) -> list[tuple[PolynucleotideClass, HMM]]:
-        return list( filter( lambda x: x[0] in [*list(Polynucleotides)], self.hmms_registry.items() ) )
+        return list(
+            filter(
+                lambda x: x[0] in [*list(Polynucleotides)], self.hmms_registry.items()
+            )
+        )
 
     def cache_hmms(self):
         with open(os.path.join(self.filename_hmms_registry), "wb") as outfile:
@@ -364,6 +377,7 @@ class PolymerClassesOrganismScanner:
         }
         return _
 
+
 class HMMClassifier:
     """
     HMMClassifier takes a set of polymer chains and "candidate" polymer classes and returns a classification report for which polymer class best matches the given polymer chain.
@@ -378,12 +392,12 @@ class HMMClassifier:
 
     """
 
-    organism_scanners : dict[int, PolymerClassesOrganismScanner]
-    chains            : list[Polymer]
-    alphabet          : pyhmmer.easel.Alphabet
-    candidate_classes : list[PolymerClass]
+    organism_scanners: dict[int, PolymerClassesOrganismScanner]
+    chains: list[Polymer]
+    alphabet: pyhmmer.easel.Alphabet
+    candidate_classes: list[PolymerClass]
     bitscore_threshold: int = 35
-    report            : dict
+    report: dict
 
     def __init__(
         self,

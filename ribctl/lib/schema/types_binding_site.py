@@ -29,7 +29,6 @@ class PredictionTarget(BaseModel):
     auth_asym_id         : str
 
 class PredictionAlignments(BaseModel):
-
     aligned_ids       : list[int]
     source_seq_aligned: str
     target_seq_aligned: str

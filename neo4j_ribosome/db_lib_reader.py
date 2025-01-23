@@ -169,7 +169,6 @@ return apoc.map.merge(rib, rest)
 
     def list_ligands(self, nodes_only: bool = False):
         with self.adapter.driver.session() as session:
-
             def _(tx: Transaction | ManagedTransaction):
                 if nodes_only:
                     return tx.run(
@@ -182,7 +181,6 @@ return apoc.map.merge(rib, rest)
                                   match (r)-[:source]-(p:PhylogenyNode) 
                                   return properties(l), collect({rcsb_id: r.rcsb_id , tax_node: properties(p)})"""
                     ).values()
-
             return session.execute_read(_)
 
     def list_structs_filtered(self, filters: StructureFilterParams):

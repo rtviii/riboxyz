@@ -135,7 +135,6 @@ def generate_consensus(records):
     summary_align.dumb_consensus()
     return summary_align
 
-
 def barr2str(bArr):
     return "".join([x.decode("utf-8") for x in bArr])
 
@@ -146,23 +145,6 @@ def seq_to_fasta(rcsb_id: str, _seq: str, outfile: str):
     seq_record.id = seq_record.description = rcsb_id
     SeqIO.write(seq_record, outfile, "fasta")
 
-def phylogenetic_neighborhood( _taxids_base: list[int], taxid_target: str, n_neighbors: int = 10 ) -> list[int]:
-    """Given a set of taxids and a target taxid, return a list of the [n_neighbors] phylogenetically closest to the target."""
-
-    taxids_base        = list(map(lambda x: str(x),_taxids_base)) # Ensure all taxids are strings because that's what ete's ncbi expects
-
-    tree               = ncbi.get_topology(list(set([*taxids_base, str(taxid_target)])))
-    target_node        = tree.search_nodes(name=str(taxid_target))[0]
-    phylo_all_nodes    = [(other_node.name, tree.get_distance(target_node, other_node)) for other_node in tree.traverse()]
-
-    phylo_extant_nodes = filter(lambda taxid: taxid[0] in taxids_base, phylo_all_nodes)
-    phylo_sorted_nodes = sorted(phylo_extant_nodes, key=lambda x: x[1]) # Sort by phylogenetic distance (tuples are (taxid, phylo_dist) ex. ('4932', 3.0))
-    nbr_taxids         = list(map(lambda tax_phydist: tax_phydist[0], phylo_sorted_nodes))
-
-    if len(nbr_taxids) < n_neighbors:
-        return list(map(lambda x : int(x),  nbr_taxids[1:] ))
-    else:
-        return list(map(lambda x : int(x), nbr_taxids[1 : n_neighbors + 1]))
 
 def muscle_align_N_seq( seq_records: list[SeqRecord], vvv: bool = False ) -> Iterator[SeqRecord]:
     """Given a MSA of a protein class, and a fasta string of a chain, return a new MSA with the chain added to the class MSA."""

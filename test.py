@@ -2,6 +2,9 @@
 import json
 import os
 from pprint import pprint
+from neo4j_ribosome import NEO4J_CURRENTDB, NEO4J_URI, NEO4J_USER
+from neo4j_ribosome.db_lib_builder import Neo4jAdapter
+from neo4j_ribosome.db_lib_reader import Neo4jReader
 from ribctl import ASSETS, ASSETS_PATH
 from ribctl.lib.libbsite import bsite_transpose, get_lig_bsite
 from ribctl.lib.libmsa import Fasta, FastaBalancer
@@ -10,6 +13,7 @@ from ribctl.lib.libseq import (
     get_conservation_scores,
     map_alignment_to_structure,
 )
+from ribctl.lib.libtax import Taxid, get_lineage_distance, print_lineage_comparison
 from ribctl.ribosome_ops import RibosomeOps
 
 
@@ -47,18 +51,26 @@ from ribctl.ribosome_ops import RibosomeOps
 
 
 
-bsite = get_lig_bsite('YQM', RibosomeOps('7M4W').assets.biopython_structure(), 10.0)
-for chain in bsite.chains:
-    print(chain.auth_asym_id)
-print('-----------------TRANSPOSISTION-----------------')
-res = bsite_transpose('7M4W','7K00',bsite)
-for chain in res.constituent_chains:
-    print(chain.polymer_class)
+# bsite = get_lig_bsite('YQM', RibosomeOps('7M4W').assets.biopython_structure(), 10.0)
+# res = bsite_transpose('7M4W','7K00',bsite)
+all_ligand_sources = Neo4jReader(Neo4jAdapter(NEO4J_URI, NEO4J_USER, NEO4J_CURRENTDB)).list_ligands()
+# pprint(all_ligand_ids)
+RO = RibosomeOps('7K00')
 
-    print(chain.source.auth_asym_id)
-    print(chain.target.auth_asym_id)
-    # print(chain.source.source_bound_residues)
-    # print(chain.source.source_seq)
-    # print(chain.target.target_bound_residues)
-    # print(chain.target.target_seq)
+for lig_source in all_ligand_sources:
+    distance         = 999999
+    closest_to_ecoli = None
+    for elem in lig_source[1:]:
+        for ss in elem:
+            distance = get_lineage_distance(RO.taxid,ss['tax_node']['ncbi_tax_id'])
+
     # exit()
+
+    # pprint(s)
+    # Taxid.relative_distances_to_taxid(RO.
+    
+    # s['ncbi_tax_id']
+    # exit()
+# for CHEMID in all_ligand_ids:
+#     bsite = get_lig_bsite(CHEMID, RibosomeOps('7M4W').assets.biopython_structure(), 10.0)
+#     res   = bsite_transpose('7M4W','7K00',bsite)
