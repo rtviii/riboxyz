@@ -74,24 +74,34 @@ def bsite_composite(
     return JsonResponse(compacted_registry, safe=False)
 
 
-@router_lig.get("/classifyre_report", tags=[TAG], response=dict)
-def classifyre_report(
-    request,
-):
-    file = os.path.join(ASSETS_PATH, "ligands", "ligand_classes.json")
-    if not os.path.exists(file):
-        return HttpResponseServerError("File not found")
-    with open(file, "r") as f:
-        compacted_registry = json.load(f)
-    return JsonResponse(compacted_registry, safe=False)
+# @router_lig.get("/classifyre_report", tags=[TAG], response=dict)
+# def classifyre_report(
+#     request,
+# ):
+#     file = os.path.join(ASSETS_PATH, "ligands", "ligand_classes.json")
+#     if not os.path.exists(file):
+#         return HttpResponseServerError("File not found")
+#     with open(file, "r") as f:
+#         compacted_registry = json.load(f)
+#     return JsonResponse(compacted_registry, safe=False)
 
 
+
+# @router_lig.get("/demo_7k00", tags=[TAG], response=dict)
+# def demo_7k00(
+#     request,
+# ):
+#     file = os.path.join(ASSETS_PATH, "ligands", "7K00_ligand_predictions.json")
+#     if not os.path.exists(file):
+#         return HttpResponseServerError("File not found")
+#     with open(file, "r") as f:
+#         compacted_registry = json.load(f)
+#     return JsonResponse(compacted_registry, safe=False)
 
 @router_lig.get("/demo_7k00", tags=[TAG], response=dict)
-def demo_7k00(
-    request,
-):
-    file = os.path.join(ASSETS_PATH, "ligands", "7K00_ligand_predictions.json")
+def demo_7k00(request):
+    file = os.path.join(ASSETS_PATH, "ligands", "ligands_data_7k00_demo.json")
+
     if not os.path.exists(file):
         return HttpResponseServerError("File not found")
     with open(file, "r") as f:
