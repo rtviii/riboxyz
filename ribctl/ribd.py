@@ -32,7 +32,7 @@ from concurrent.futures import (
     wait,
 )
 from tqdm import tqdm
-from ribctl.asset_manager.types import AssetType
+from ribctl.asset_manager.asset_types import AssetType
 
 def get_input_pdb_ids() -> List[str]:
     """Get PDB IDs from either stdin (if piped) or return None to handle as argument"""

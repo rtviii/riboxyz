@@ -2,7 +2,7 @@ from typing import Dict, Set, Optional, Union, Type
 from pathlib import Path
 from loguru import logger
 from pydantic import BaseModel
-from .types import (
+from .asset_types import (
     AssetType,
     ModelT,
     ModelGenerator,

@@ -5,10 +5,8 @@ import sys
 from typing import List, Dict, Set, Optional
 from pathlib import Path
 from loguru import logger
-from ribctl.asset_manager.asset_raw import RawAssetHandler
-from ribctl.asset_manager.types import AssetType
-from ribctl.asset_manager.asset_registry import main_registry
-
+from ribctl.asset_manager.asset_types import AssetType
+from ribctl.asset_manager.asset_registry import main_registry, RawAssetHandler
 
 
 @dataclass
@@ -18,7 +16,6 @@ class AcquisitionResult:
     asset_type_name: str
     success: bool
     error: Optional[str] = None
-
 
 
 def process_chunk_with_tracking(
@@ -54,8 +51,6 @@ def process_chunk_with_tracking(
                 print(f"  - {failure}", file=sys.stderr)
 
     return result
-
-
 
 
 def process_chunk(
