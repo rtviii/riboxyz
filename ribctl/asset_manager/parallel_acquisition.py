@@ -70,9 +70,8 @@ def process_chunk(
     from logger_config import configure_logging
     configure_logging() 
     async def _process_chunk_async() -> Dict[str, List[AcquisitionResult]]:
-        base_path = Path(base_dir)
         asset_types = [AssetType[name] for name in asset_type_names]
-        raw_handler = RawAssetHandler(base_path)
+        raw_handler = RawAssetHandler()
 
         async def acquire_asset(
             rcsb_id: str, asset_type: AssetType

@@ -12,13 +12,13 @@ from ribctl.asset_manager.types import AssetType
 class RawAssetHandler:
     """Handler for raw file assets with extensible asset type matching"""
     
-    def __init__(self, base_dir: Path):
-        self.base_dir = base_dir
+    def __init__(self):
         self._handlers: Dict[AssetType, Callable[[str, bool], Awaitable[None]]] = {}
         self._register_default_handlers()
 
     def _register_default_handlers(self) -> None:
         """Register built-in handlers for known raw asset types"""
+        self.register_handler(AssetType.MMCIF, self._fetch_mmcif)
         self.register_handler(AssetType.MMCIF, self._fetch_mmcif)
         # Add other default handlers:
         # self.register_handler(AssetType.NPET_MESH, self._fetch_npet_mesh)
@@ -45,9 +45,10 @@ class RawAssetHandler:
             
         await handler(rcsb_id, force)
 
+
     async def _fetch_mmcif(self, rcsb_id: str, force: bool = False) -> None:
         """Download and save mmCIF file"""
-        output_path = self.base_dir / rcsb_id.upper() / f"{rcsb_id}.cif"
+        output_path = AssetType.MMCIF.get_path(rcsb_id)
         
         if output_path.exists() and not force:
             logger.info(f"MMCIF exists for {rcsb_id}, skipping")
@@ -58,9 +59,6 @@ class RawAssetHandler:
         logger.success(f"Downloaded MMCIF for {rcsb_id}")
 
 
-
-
-main_registry = RawAssetHandler(RIBETL_DATA)
     # Example of how to add another handler:
     # async def _fetch_npet_mesh(self, rcsb_id: str, force: bool = False) -> None:
     #     """Download and save NPET mesh file"""

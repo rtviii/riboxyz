@@ -1,5 +1,4 @@
 import sys
-
 from loguru import logger
 sys.dont_write_bytecode = True
 sys.path.append("/home/rtviii/dev/riboxyz")

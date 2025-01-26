@@ -17,39 +17,34 @@ ModelT = TypeVar("ModelT", bound=BaseModel)
 class AssetRegistry:
     def __init__(self, manager: RibosomeAssetManager):
         self.manager = manager
-        self.path_manager = manager.path_manager
-        self.raw_handler = RawAssetHandler(manager.path_manager.base_dir)
-
+        self.raw_handler = RawAssetHandler()
 
     def register(self, asset_type: AssetType):
-        def decorator(
-            func: Callable[[str], Awaitable[ModelT]]
-        ) -> Callable[[str, bool], Awaitable[None]]:
+        def decorator(func: Callable[[str], Awaitable[ModelT]]) -> Callable[[str, bool], Awaitable[None]]:
             @functools.wraps(func)
             async def wrapped(rcsb_id: str, overwrite: bool = False) -> None:
-                output_path = self.path_manager.get_asset_path(rcsb_id, asset_type)
+                output_path = asset_type.get_path(rcsb_id)
                 try:
                     if output_path.exists() and not overwrite:
                         logger.info(f"Asset exists at {output_path}, skipping")
                         return
 
                     output_path.parent.mkdir(parents=True, exist_ok=True)
-
                     # Load only model-based dependencies
-                    dependencies = {}
-                    if asset_type.dependencies:
-                        for dep in asset_type.dependencies:
-                            if dep.is_raw_asset:
-                                # Skip trying to load raw assets as models
-                                continue
+                    # dependencies = {}
+                    # if asset_type.dependencies:
+                    #     for dep in asset_type.dependencies:
+                    #         if dep.is_raw_asset:
+                    #             # Skip trying to load raw assets as models
+                    #             continue
 
-                            dep_path = self.path_manager.get_asset_path(rcsb_id, dep)
-                            if not dep_path.exists():
-                                await self.generate_asset(rcsb_id, dep, overwrite)
-                            model_cls = dep.model_type
-                            dependencies[dep.value.name] = (
-                                model_cls.model_validate_json(dep_path.read_text())
-                            )
+                    #         dep_path = self.path_manager.get_asset_path(rcsb_id, dep)
+                    #         if not dep_path.exists():
+                    #             await self.generate_asset(rcsb_id, dep, overwrite)
+                    #         model_cls = dep.model_type
+                    #         dependencies[dep.value.name] = (
+                    #             model_cls.model_validate_json(dep_path.read_text())
+                    #         )
 
                     # Generate and save
                     result = await func(rcsb_id)

@@ -5,7 +5,6 @@ from loguru import logger
 from pydantic import BaseModel
 
 from ribctl import RIBETL_DATA
-
 from .types import (
     AssetType,
     ModelT,
@@ -14,70 +13,29 @@ from .types import (
     AssetDefinition,
 )
 
-class AssetPathManager:
-    """Manages asset paths and directory structure"""
-
-    def __init__(self, base_dir: Path=RIBETL_DATA):
-        self.base_dir = Path(base_dir)
-
-    def get_asset_dir(self, pdb_id: str) -> Path:
-        """Get the base directory for a structure's assets"""
-        return self.base_dir / pdb_id.upper()
-
-    def get_asset_path(self, pdb_id: str, asset_type: AssetType) -> Path:
-        """Get the path for a specific asset"""
-        asset_dir = self.get_asset_dir(pdb_id)
-
-        # Define path templates for each asset type
-        templates = {
-              AssetType.MMCIF                : "{asset_dir}/{pdb_id}.cif",
-              AssetType.STRUCTURE_PROFILE    : "{asset_dir}/{pdb_id}.json",
-              AssetType.PTC                  : "{asset_dir}/{pdb_id}_PTC.json",
-              AssetType.CONSTRICTION_SITE    : "{asset_dir}/{pdb_id}_CONSTRICTION_SITE.json",
-            # AssetType.THUMBNAIL            : "{asset_dir}/{pdb_id}.png",
-            # AssetType.CLASSIFICATION_REPORT: "{asset_dir}/classification_report_{pdb_id}.json",
-            # AssetType.NPET_MESH            : "{asset_dir}/TUNNELS/{pdb_id}_NPET_MESH.ply",
-            # AssetType.RNA_HELICES          : "{asset_dir}/RNA_HELICES.json",
-            # AssetType.TRNA_SITES           : "{asset_dir}/TRNA_SITES.json",
-        }
-
-        template = templates.get(asset_type)
-        if not template:
-            raise ValueError(f"No path template defined for asset type {asset_type}")
-
-        return Path(template.format(asset_dir=asset_dir, pdb_id=pdb_id.upper()))
-
-    def load_model(self, pdb_id: str, asset_type: AssetType) -> Optional[BaseModel]:
-        """Load and validate a model from disk"""
-        if not asset_type.requires_model():
-            return None
-
-        path = self.get_asset_path(pdb_id, asset_type)
-        if not path.exists():
-            raise FileNotFoundError(f"No {asset_type.name} asset found for {pdb_id}")
-
-        model_cls = asset_type.model_type
-        return model_cls.model_validate_json(path.read_text())
-
-
 class RibosomeAssetManager:
-    """Manages assets for ribosome structures"""
+    """Manages assets for ribosome structures, handling generation, validation and loading"""
 
-    def __init__(self, base_dir: Path):
-        self.path_manager = AssetPathManager(base_dir)
+    def __init__(self, base_dir: Optional[Path] = None):
+        """
+        Initialize the asset manager
+        Args:
+            base_dir: Optional override for the base directory. If not provided, uses RIBETL_DATA
+        """
+        if base_dir:
+            AssetType._base_dir = Path(base_dir)
         self._init_asset_definitions()
 
     def _init_asset_definitions(self):
-        """Initialize asset definitions - now uses model information from AssetType"""
+        """Initialize asset definitions for all asset types"""
         self.assets: Dict[AssetType, AssetDefinition] = {}
-
+        
         for asset_type in AssetType:
             self.assets[asset_type] = AssetDefinition(
                 asset_type=asset_type,
                 dependencies=asset_type.dependencies,
-                path_template="{pdb_id}",  # Basic template, actual paths handled by PathManager
                 required=True,  # Could be made configurable per asset if needed
-                generator=None,  # Will be set by registry
+                generator=None  # Will be set by registry
             )
 
     def register_generator(
@@ -85,21 +43,59 @@ class RibosomeAssetManager:
         asset_type: AssetType,
         generator: Union[ModelGenerator[ModelT], RawGenerator],
     ) -> None:
-        """Register a generator function for an asset type"""
+        """
+        Register a generator function for an asset type
+        
+        Args:
+            asset_type: The asset type to register a generator for
+            generator: The generator function to register
+        Raises:
+            ValueError: If the asset type is unknown
+        """
         if asset_type not in self.assets:
             raise ValueError(f"Unknown asset type: {asset_type}")
         self.assets[asset_type].generator = generator
 
+    def load_model(self, pdb_id: str, asset_type: AssetType) -> Optional[BaseModel]:
+        """
+        Load and validate a model from disk
+        
+        Args:
+            pdb_id: The PDB ID of the structure
+            asset_type: The type of asset to load
+        Returns:
+            The loaded model if successful, None if asset doesn't require a model
+        Raises:
+            FileNotFoundError: If the asset file doesn't exist
+        """
+        if not asset_type.requires_model():
+            return None
+
+        path = asset_type.get_path(pdb_id)
+        if not path.exists():
+            raise FileNotFoundError(f"No {asset_type.name} asset found for {pdb_id}")
+
+        model_cls = asset_type.model_type
+        return model_cls.model_validate_json(path.read_text())
+
     async def verify_asset(self, pdb_id: str, asset_type: AssetType) -> bool:
-        """Verify that an asset exists and optionally validate its model"""
-        path = self.path_manager.get_asset_path(pdb_id, asset_type)
+        """
+        Verify that an asset exists and optionally validate its model
+        
+        Args:
+            pdb_id: The PDB ID of the structure
+            asset_type: The type of asset to verify
+        Returns:
+            True if asset exists and is valid, False otherwise
+        """
+        path = asset_type.get_path(pdb_id)
         if not path.exists():
             return False
 
         # For model-based assets, try to load and validate the model
         if asset_type.requires_model():
             try:
-                self.path_manager.load_model(pdb_id, asset_type)
+                self.load_model(pdb_id, asset_type)
             except Exception as e:
                 logger.warning(f"Asset exists but failed validation: {str(e)}")
                 return False
@@ -107,7 +103,14 @@ class RibosomeAssetManager:
         return True
 
     async def verify_all_assets(self, pdb_id: str) -> Dict[AssetType, bool]:
-        """Verify all assets for a structure"""
+        """
+        Verify all assets for a structure
+        
+        Args:
+            pdb_id: The PDB ID of the structure
+        Returns:
+            Dictionary mapping asset types to their verification status
+        """
         return {
             asset_type: await self.verify_asset(pdb_id, asset_type)
             for asset_type in AssetType
@@ -116,5 +119,13 @@ class RibosomeAssetManager:
     def load_dependency(
         self, pdb_id: str, asset_type: AssetType
     ) -> Optional[BaseModel]:
-        """Load a dependency model, returns None for raw assets"""
-        return self.path_manager.load_model(pdb_id, asset_type)
+        """
+        Load a dependency model
+        
+        Args:
+            pdb_id: The PDB ID of the structure
+            asset_type: The type of asset to load
+        Returns:
+            The loaded model if it requires one, None for raw assets
+        """
+        return self.load_model(pdb_id, asset_type)
