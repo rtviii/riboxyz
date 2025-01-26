@@ -131,13 +131,6 @@ class AssetType(Enum):
         dependencies={"MMCIF", "STRUCTURE_PROFILE"},
     )
 
-    # def get_path(self, pdb_id: str) -> Path:
-    #     """Get path for this asset type"""
-    #     asset_dir = self._base_dir / pdb_id.upper()
-    #     return Path(
-    #         self.value.path_template.format(asset_dir=asset_dir, pdb_id=pdb_id.upper())
-    #     )
-
     @property
     def model_type(self) -> Optional[Type[BaseModel]]:
         return self.value.model

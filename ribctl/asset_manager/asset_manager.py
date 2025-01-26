@@ -1,14 +1,12 @@
-from dataclasses import dataclass
 from typing import Dict, Set, Optional, Union, Type
 from pathlib import Path
 from loguru import logger
 from pydantic import BaseModel
-
-from ribctl import RIBETL_DATA
 from .types import (
     AssetType,
     ModelT,
     ModelGenerator,
+    PathResolver,
     RawGenerator,
     AssetDefinition,
 )
@@ -23,7 +21,7 @@ class RibosomeAssetManager:
             base_dir: Optional override for the base directory. If not provided, uses RIBETL_DATA
         """
         if base_dir:
-            AssetType._base_dir = Path(base_dir)
+            PathResolver.set_base_dir(base_dir)
         self._init_asset_definitions()
 
     def _init_asset_definitions(self):

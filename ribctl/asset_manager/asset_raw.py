@@ -9,6 +9,10 @@ from ribctl.asset_manager.asset_manager import RibosomeAssetManager
 from ribctl.lib.utils import download_unpack_place
 from ribctl.asset_manager.types import AssetType
 
+async def mesh_handler(rcsb_id: str, force: bool) -> None:
+    print("Mesh handler")
+
+
 class RawAssetHandler:
     """Handler for raw file assets with extensible asset type matching"""
     
@@ -21,7 +25,7 @@ class RawAssetHandler:
         self.register_handler(AssetType.MMCIF, self._fetch_mmcif)
         self.register_handler(AssetType.MMCIF, self._fetch_mmcif)
         # Add other default handlers:
-        # self.register_handler(AssetType.NPET_MESH, self._fetch_npet_mesh)
+        self.register_handler(AssetType.NPET_MESH,mesh_handler )
         # self.register_handler(AssetType.THUMBNAIL, self._fetch_thumbnail)
 
     def register_handler(

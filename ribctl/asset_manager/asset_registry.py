@@ -30,23 +30,6 @@ class AssetRegistry:
                         return
 
                     output_path.parent.mkdir(parents=True, exist_ok=True)
-                    # Load only model-based dependencies
-                    # dependencies = {}
-                    # if asset_type.dependencies:
-                    #     for dep in asset_type.dependencies:
-                    #         if dep.is_raw_asset:
-                    #             # Skip trying to load raw assets as models
-                    #             continue
-
-                    #         dep_path = self.path_manager.get_asset_path(rcsb_id, dep)
-                    #         if not dep_path.exists():
-                    #             await self.generate_asset(rcsb_id, dep, overwrite)
-                    #         model_cls = dep.model_type
-                    #         dependencies[dep.value.name] = (
-                    #             model_cls.model_validate_json(dep_path.read_text())
-                    #         )
-
-                    # Generate and save
                     result = await func(rcsb_id)
                     output_path.write_text(result.model_dump_json())
                     logger.success(f"Generated {asset_type.name} for {rcsb_id}")
