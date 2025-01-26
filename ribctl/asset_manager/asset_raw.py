@@ -4,6 +4,8 @@ from loguru import logger
 from typing import Dict, Callable, Awaitable
 from functools import partial
 
+from ribctl import RIBETL_DATA
+from ribctl.asset_manager.asset_manager import RibosomeAssetManager
 from ribctl.lib.utils import download_unpack_place
 from ribctl.asset_manager.types import AssetType
 
@@ -55,6 +57,10 @@ class RawAssetHandler:
         await download_unpack_place(rcsb_id)
         logger.success(f"Downloaded MMCIF for {rcsb_id}")
 
+
+
+
+main_registry = RawAssetHandler(RIBETL_DATA)
     # Example of how to add another handler:
     # async def _fetch_npet_mesh(self, rcsb_id: str, force: bool = False) -> None:
     #     """Download and save NPET mesh file"""

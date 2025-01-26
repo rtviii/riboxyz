@@ -1,25 +1,20 @@
 from concurrent.futures import ProcessPoolExecutor
-from functools import partial
 import multiprocessing
-from pprint import pprint
-import sys
-sys.path.append('/home/rtviii/dev/riboxyz')
-from ribctl.lib.landmarks.constriction_site import get_constriction
-from ribctl.lib.landmarks.ptc_via_trna import PTC_location
-from ribctl.ribosome_ops import RibosomeOps
 from Bio.PDB.Entity import Entity
+from Bio.PDB.MMCIFParser import FastMMCIFParser
 import numpy as np
 from Bio.PDB.Chain import Chain
-
 import numpy as np
 from typing import Callable, Literal, Tuple, List, TypeVar, Union, Optional
+import numpy as np
+import pyvista as pv
+pv.global_theme.allow_empty_mesh = True
 
 
-
-def ribosome_entities(rcsb_id:str, level=Literal['R']|Literal[ 'A' ])->list[Entity]:
-    struct = RibosomeOps(rcsb_id).assets.biopython_structure()
+def ribosome_entities(rcsb_id:str, cifpath:str, level=Literal['R']|Literal[ 'A' ])->list[Entity]:
+    structure = FastMMCIFParser(QUIET=True).get_structure(rcsb_id, cifpath)
     residues = []
-    [residues.extend(chain) for chain in struct.child_list[0] ]
+    [residues.extend(chain) for chain in structure.child_list[0] ]
     if level == 'R':
         return residues
     elif level == 'A':
@@ -28,17 +23,6 @@ def ribosome_entities(rcsb_id:str, level=Literal['R']|Literal[ 'A' ])->list[Enti
         return atoms
     else:
         raise
-
-
-def rrna_ptcloud(rcsb_id:str)->np.ndarray:
-    ro     = RibosomeOps(rcsb_id)
-    lsurna = ro.get_LSU_rRNA()
-    if lsurna is None:
-        raise ValueError("Could not find 23SrRNA, 25SrRNA, 28SrRNA, or mt16SrRNA in {}".format(rcsb_id))
-    structure = ro.assets.biopython_structure()
-    rna_chain:Chain = structure[0][lsurna.auth_asym_id]
-    return np.array([r.center_of_mass()  for r in rna_chain.child_list])
-
 
 def create_cylinder_from_points(base_point, axis_point, radius, height):
     """
@@ -150,18 +134,10 @@ def make_cylinder_predicate(
         return is_point_in_cylinder(position, base_point, axis_point, radius, height)
     return predicate
 
-
-
-
-import numpy as np
-import pyvista as pv
-pv.global_theme.allow_empty_mesh = True
-
-
-T = TypeVar('T')
-
 def get_residue_position(residue):
     return residue.center_of_mass()
+# def get_residue_position(residue):
+#     return residue.get_coord()
 
 def _worker_process_chunk(chunk_data):
     """
@@ -432,80 +408,17 @@ def is_point_in_cylinder(
     # Check if point is inside cylinder
     return (radial_distance <= radius) and (0 <= projection <= height)
 
-def get_npet_cylinder_residues(rcsb_id:str, radius, height):
-    residues   = ribosome_entities(rcsb_id, 'R')
-    base_point = np.array(PTC_location(rcsb_id).location)
-    axis_point = np.array( get_constriction(rcsb_id) )
+# def get_npet_cylinder_residues(rcsb_id:str, radius, height):
+#     residues   = ribosome_entities(rcsb_id, 'R')
+#     base_point = np.array(PTC_location(rcsb_id).location)
+#     axis_point = np.array( get_constriction(rcsb_id) )
 
-    return filter_residues_parallel(
-        residues,
-        base_point,
-        axis_point,
-        radius,
-        height,
-    ),  base_point, axis_point
+#     return filter_residues_parallel(
+#         residues,
+#         base_point,
+#         axis_point,
+#         radius,
+#         height,
+#     ),  base_point, axis_point
 
 
-if __name__ == "__main__":
-
-    residues           = ribosome_entities("3J9M", 'R')
-    ptc_point          = PTC_location('3J9M')
-    constriction_point = get_constriction('3J9M')
-    base_point         = np.array(ptc_point.location)
-    axis_point         = np.array(constriction_point)
-    radius             = 40.0
-    height             = 100.0
-    filtered_residues = filter_residues_parallel(
-        residues,
-        base_point,
-        axis_point,
-        radius,
-        height,
-    )
-    visualize_filtered_residues(
-        filtered_residues=filtered_residues,
-        all_residues=residues,
-        base_point=base_point,
-        axis_point=axis_point,
-        radius=radius,
-        height=height,
-        position_getter=lambda r: r.center_of_mass(),
-        # screenshot_path='filtered_residues.png'  # Optional
-    )
-    exit()
-    # Parameters you'll need to provide:
-    # 1. Point cloud
-    residues = rrna_ptcloud('3J9M')
-    
-    # 2. Cylinder parameters
-    base_point = np.array(ptc_point.location)  # Replace with your base point
-    axis_point = np.array(constriction_point)  # Replace with your axis point
-    radius = 40.0                         # Replace with your radius
-    height = 100.0                         # Replace with your height
-    
-    try:
-        # Compute intersection
-        result = intersect_hull_with_cylinder(
-            points     = residues,
-            base_point = base_point,
-            axis_point = axis_point,
-            radius     = radius,
-            height     = height
-        )
-        
-        # Print some information about the results
-        print("Intersection Properties:")
-        print(f"Volume: {result['intersection'].volume}")
-        print(f"Surface Area: {result['intersection'].area}")
-        print(f"Number of points: {len(result['intersection'].points)}")
-        
-        # Visualize
-        plotter = visualize_intersection(result, residues, base_point, axis_point)
-        plotter.show()
-        
-    except Exception as e:
-        print(f"Error occurred: {str(e)}")
-        print("\nDebug information:")
-        print(f"Number of points: {len(residues)}")
-        print(f"Distance between base and axis points: "
-              f"{np.linalg.norm(axis_point - base_point)}")

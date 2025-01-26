@@ -12,6 +12,7 @@ CLASSIFICATION_REPORTS = os.path.join(pathlib.Path(__file__).parent, "logs","hmm
 #! ------------- assets ----------------
 # This amounts to "assets folder is expected to exist in the root of `ribctl`(next to top-level __init__.py)"
 ASSETS_PATH        = os.path.join(pathlib.Path(__file__).parent, "assets_project")
+RIBXZ_TEMP_FILES   = os.path.join(ASSETS_PATH,"temp")
 MUSCLE_BIN         = os.path.join(ASSETS_PATH, "muscle3.8.1")
 NCBI_TAXDUMP_GZ    = os.path.join(ASSETS_PATH, "taxdump.tar.gz")
 NCBI_TAXA_SQLITE   = os.path.join(ASSETS_PATH, "taxa.sqlite")

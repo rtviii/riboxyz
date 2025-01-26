@@ -1,8 +1,10 @@
 import json
 import os
 from pprint import pprint
+from typing import List, Optional, Tuple, TypeAlias
 from django.http import JsonResponse, HttpResponseServerError
-from ninja import Router
+from ninja import Field, Router
+from pydantic import BaseModel
 from ribctl import ASSETS_PATH
 from ribctl.ribosome_ops import RibosomeOps
 from ribctl.lib.libbsite import (
@@ -74,33 +76,48 @@ def bsite_composite(
     return JsonResponse(compacted_registry, safe=False)
 
 
-# @router_lig.get("/classifyre_report", tags=[TAG], response=dict)
-# def classifyre_report(
-#     request,
-# ):
-#     file = os.path.join(ASSETS_PATH, "ligands", "ligand_classes.json")
-#     if not os.path.exists(file):
-#         return HttpResponseServerError("File not found")
-#     with open(file, "r") as f:
-#         compacted_registry = json.load(f)
-#     return JsonResponse(compacted_registry, safe=False)
+
+BindingSite: TypeAlias = List[Tuple[str, int]]
+
+class LigandInput(BaseModel):
+    """Input model for a single ligand"""
+    chemicalId: str
+    chemicalName: str
+    purported_7K00_binding_site: Optional[List[List[str | int]]] = Field(default_factory=list)
+    ribosome_ligand_categories: Optional[List[str]] = Field(default_factory=list)
+
+class ProcessedLigand(BaseModel):
+    """Model for processed ligand data"""
+    chemicalId: str
+    chemicalName: str
+    purported_7K00_binding_site: List[List[str | int]] = Field(default_factory=list)
+
+class CategoryData(BaseModel):
+    """Model for data within each category"""
+    items: List[ProcessedLigand] = Field(default_factory=list)
+    composite_bsite: List[List[str | int]] = Field(default_factory=list)
+
+class ProcessedLigands(BaseModel):
+    """
+    Root model for the processed ligands response
+    The keys are category names and values are CategoryData objects
+    """
+    class Config:
+        extra = "allow"  # Allows dynamic category names as keys
+    
+    @classmethod
+    def from_dict(cls, data: dict) -> "ProcessedLigands":
+        """Create a ProcessedLigands instance from a dictionary"""
+        return cls(**{
+            category: CategoryData(**category_data)
+            for category, category_data in data.items()
+        })
 
 
 
-# @router_lig.get("/demo_7k00", tags=[TAG], response=dict)
-# def demo_7k00(
-#     request,
-# ):
-#     file = os.path.join(ASSETS_PATH, "ligands", "7K00_ligand_predictions.json")
-#     if not os.path.exists(file):
-#         return HttpResponseServerError("File not found")
-#     with open(file, "r") as f:
-#         compacted_registry = json.load(f)
-#     return JsonResponse(compacted_registry, safe=False)
-
-@router_lig.get("/demo_7k00", tags=[TAG], response=dict)
+@router_lig.get("/demo_7k00", tags=[TAG], response=ProcessedLigands)
 def demo_7k00(request):
-    file = os.path.join(ASSETS_PATH, "ligands", "ligands_data_7k00_demo.json")
+    file = os.path.join(ASSETS_PATH, "ligands", "composite_bsites.json")
 
     if not os.path.exists(file):
         return HttpResponseServerError("File not found")
