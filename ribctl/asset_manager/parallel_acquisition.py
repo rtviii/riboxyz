@@ -10,6 +10,7 @@ from ribctl.asset_manager.types import AssetType
 from ribctl.asset_manager.asset_registry import main_registry
 
 
+
 @dataclass
 class AcquisitionResult:
 
@@ -17,6 +18,44 @@ class AcquisitionResult:
     asset_type_name: str
     success: bool
     error: Optional[str] = None
+
+
+
+def process_chunk_with_tracking(
+    chunk: List[str],
+    base_dir: str,
+    asset_type_names: List[str],
+    force: bool,
+    max_structures: int,
+    max_assets: int,
+) -> Dict[str, List[AcquisitionResult]]:
+    """Process a chunk of structures and track progress. This function needs to be at module level to be pickleable."""
+    result = process_chunk(
+        base_dir=base_dir,
+        rcsb_ids=chunk,
+        asset_type_names=asset_type_names,
+        force=force,
+        max_concurrent_structures=max_structures,
+        max_concurrent_assets=max_assets,
+    )
+
+    for rcsb_id, acquisitions in result.items():
+        success = all(acq.success for acq in acquisitions)
+        if success:
+            print(f"Successfully processed assets for {rcsb_id}")
+        else:
+            failures = [
+                f"{acq.asset_type_name}: {acq.error}"
+                for acq in acquisitions
+                if not acq.success
+            ]
+            print(f"Failed to process {rcsb_id}:", file=sys.stderr)
+            for failure in failures:
+                print(f"  - {failure}", file=sys.stderr)
+
+    return result
+
+
 
 
 def process_chunk(

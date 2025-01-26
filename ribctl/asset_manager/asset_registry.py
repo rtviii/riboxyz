@@ -5,6 +5,7 @@ from loguru import logger
 from pydantic import BaseModel
 from ribctl import RIBETL_DATA
 from ribctl.asset_manager.asset_manager import RibosomeAssetManager
+from ribctl.asset_manager.asset_raw import RawAssetHandler
 from ribctl.etl.etl_collector import ETLCollector
 from ribctl.lib.landmarks.constriction_site import get_constriction
 from ribctl.lib.landmarks.ptc_via_trna import PTC_location
@@ -17,6 +18,8 @@ class AssetRegistry:
     def __init__(self, manager: RibosomeAssetManager):
         self.manager = manager
         self.path_manager = manager.path_manager
+        self.raw_handler = RawAssetHandler(manager.path_manager.base_dir)
+
 
     def register(self, asset_type: AssetType):
         def decorator(
@@ -62,16 +65,14 @@ class AssetRegistry:
 
         return decorator
 
-    async def generate_asset(
-        self, rcsb_id: str, asset_type: AssetType, force: bool = False
-    ) -> None:
-        """Generate a single asset and its dependencies"""
-        logger.info(f"Generating {asset_type.name} for {rcsb_id}")
-        asset_def = self.manager.assets[asset_type]
-        if not asset_def.generator:
-            raise ValueError(f"No generator registered for {asset_type}")
-
-        await asset_def.generator(rcsb_id, force)
+    async def generate_asset(self, rcsb_id: str, asset_type: AssetType, force: bool = False) -> None:
+        if asset_type.is_raw_asset:
+            await self.raw_handler.handle_asset(rcsb_id, asset_type, force)
+        else:
+            asset_def = self.manager.assets[asset_type]
+            if not asset_def.generator:
+                raise ValueError(f"No generator registered for {asset_type}")
+            await asset_def.generator(rcsb_id, force)
 
     async def generate_multiple(
         self, rcsb_id: str, asset_types: list[AssetType], force: bool = False
