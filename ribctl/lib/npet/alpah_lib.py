@@ -1,6 +1,7 @@
 import warnings
 from Bio.PDB.MMCIFParser import MMCIFParser
 import numpy as np
+import random
 import os
 import alphashape
 import trimesh
@@ -10,7 +11,6 @@ from ribctl.lib.npet.tunnel_asset_manager import TunnelMeshAssetsManager
 
 data_dir = os.environ.get("DATA_DIR")
 warnings.filterwarnings("ignore")
-
 
 def cif_to_point_cloud(cif_path: str):
     parser    = MMCIFParser()
@@ -24,7 +24,7 @@ def cif_to_point_cloud(cif_path: str):
     return coordinates
 
 
-def sample_within_alpha_shape(alpha_shape_mesh, num_samples=1000):
+def sample_within_alpha_shape(alpha_shape_mesh, num_samples):
     """
     Samples points within the boundaries of a 3D alpha shape.
 
@@ -52,10 +52,6 @@ def sample_within_alpha_shape(alpha_shape_mesh, num_samples=1000):
     # Return the requested number of samples
     return np.array(sampled_points)
 
-
-import random
-
-
 def save_alpha_shape_as_ply(alpha_shape, file_path):
     """
     Save a Trimesh alpha shape as a PLY file.
@@ -67,13 +63,12 @@ def save_alpha_shape_as_ply(alpha_shape, file_path):
     if not isinstance(alpha_shape, trimesh.Trimesh):
         raise TypeError("avislpha_shape must be a trimesh.Trimesh object.")
 
-    # Save as PLYencoding='ascii'
     alpha_shape.export(file_path, file_type="ply", encoding="ascii")
     print(f"Alpha shape saved as PLY file at {file_path}")
 
 def produce_alpha_contour(RCSB_ID, alpha):
     num_samples = 5000
-    cifpath = AssetType.MMCIF.get_path(RCSB_ID)
+    cifpath     = AssetType.MMCIF.get_path(RCSB_ID)
     point_cloud = cif_to_point_cloud(cifpath)
     point_cloud = np.array(point_cloud)
     print("Produced point cloud for {}".format(RCSB_ID))

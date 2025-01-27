@@ -123,7 +123,6 @@ def index_grid(expanded_sphere_voxels: np.ndarray) :
 
     return ( vox_grid, grid_dimensions, mean_abs_vectors )
 
-
 import numpy as np
 from sklearn.neighbors import KDTree
 

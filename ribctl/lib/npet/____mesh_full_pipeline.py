@@ -29,61 +29,6 @@
 #     expanded       = expand_atomcenters_to_spheres_threadpool(SINK, sphere_sources)
 #     return np.array(expanded)
 
-import numpy as np
-from sklearn.cluster import DBSCAN
-
-
-def DBSCAN_capture(
-    ptcloud: np.ndarray,
-    eps           ,
-    min_samples   ,
-    metric        : str = "euclidean",
-): 
-
-    u_EPSILON     = eps
-    u_MIN_SAMPLES = min_samples
-    u_METRIC      = metric
-
-    print( "Running DBSCAN on {} points. eps={}, min_samples={}, distance_metric={}".format( len(ptcloud), u_EPSILON, u_MIN_SAMPLES, u_METRIC ) ) 
-
-    db     = DBSCAN(eps=eps, min_samples=min_samples, metric=metric).fit( ptcloud )
-    labels = db.labels_
-
-    CLUSTERS_CONTAINER = {}
-    for point, label in zip(ptcloud, labels):
-        if label not in CLUSTERS_CONTAINER:
-            CLUSTERS_CONTAINER[label] = []
-        CLUSTERS_CONTAINER[label].append(point)
-
-    CLUSTERS_CONTAINER = dict(sorted(CLUSTERS_CONTAINER.items()))
-    return db, CLUSTERS_CONTAINER
-
-def DBSCAN_pick_largest_cluster(clusters_container:dict[int,list], pick_manually:bool=False)->tuple[np.ndarray, int]:
-    DBSCAN_CLUSTER_ID = 0
-    # if pick_manually:
-    #     print("-------------------------------")
-    #     print("Running Manual Cluster Selection")
-    #     picked_id =  int(input("Enter Cluster ID to proceed the reconstruction with\n (options:[{}]):".format(list( clusters_container.keys() ))))
-    #     print("Choise cluster # {}".format(picked_id))
-    #     if picked_id == -2:
-    #         # if picked -2 ==> return largest
-    #         for k, v in clusters_container.items():
-    #             if int(k) == -1:
-    #                 continue
-    #             elif len(v) > len(clusters_container[DBSCAN_CLUSTER_ID]):
-    #                 DBSCAN_CLUSTER_ID = int(k)
-    #         return np.array(clusters_container[DBSCAN_CLUSTER_ID])
-
-    #     return np.array(clusters_container[picked_id])
-
-    for k, v in clusters_container.items():
-        print(f"Cluster {k} has {len(v)} points.")
-        if int(k) == -1:
-            continue
-        elif len(v) > len(clusters_container[DBSCAN_CLUSTER_ID]):
-            DBSCAN_CLUSTER_ID = int(k)
-    return np.array(clusters_container[DBSCAN_CLUSTER_ID]), DBSCAN_CLUSTER_ID
-
 # def cache_trimming_parameters( RCSB_ID:str, trim_tuple:list, file_path=TRIMMING_PARAMS_DICT_PATH):
 #     if not os.path.exists(file_path):
 #         raise FileNotFoundError(f"File {file_path} not found.")
