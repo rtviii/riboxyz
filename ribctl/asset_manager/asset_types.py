@@ -103,6 +103,7 @@ class AssetType(Enum):
     ALPHA_SHAPE = AssetInfo(
         "alpha_shape",
         path_template="{asset_dir}/{pdb_id}_ALPHA_SHAPE.ply",
+        is_raw=True,
         model=None,
         dependencies={"MMCIF"},
     )

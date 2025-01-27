@@ -10,12 +10,6 @@ data_dir = os.getenv('DATA_DIR')
 
 sys.dont_write_bytecode = True
 import pyvista as pv
-from ribctl.lib.npet.mesh_visualization import (
-    visualize_DBSCAN_CLUSTERS_particular_eps_minnbrs,
-    visualize_mesh,
-    visualize_pointcloud,
-)
-
 def generate_voxel_centers(radius: float, height: float, voxel_size: float) -> tuple:
     nx = ny = int(2 * radius / voxel_size) + 1
     nz = int(height / voxel_size) + 1

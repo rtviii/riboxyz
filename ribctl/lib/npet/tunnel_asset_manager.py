@@ -20,33 +20,7 @@ class TunnelMeshAssetsManager:
 
     @property
     def tunnel_pcd_normal_estimated(self):
-        return os.path.join(
-            RIBXZ_TEMP_FILES, "{}_tunnel_pcd_normal_estimated.ply".format(self.rcsb_id)
-        )
-
-    @property
-    def ashape_watertight(self):
-        return os.path.join(
-            RIBETL_DATA,
-            self.rcsb_id.upper(),
-            "{}_ashape_watertight.ply".format(self.rcsb_id),
-        )
-
-    @property
-    def tunnel_mesh(self):
-        return os.path.join(
-            RIBETL_DATA,
-            self.rcsb_id.upper(),
-            "{}_tunnel_poisson_recon.ply".format(self.rcsb_id),
-        )
-
-    @property
-    def tunnel_mesh_ascii(self):
-        return os.path.join(
-            RIBETL_DATA,
-            self.rcsb_id.upper(),
-            "{}_tunnel_poisson_recon_ascii.ply".format(self.rcsb_id),
-        )
+        return os.path.join( RIBXZ_TEMP_FILES, "{}_tunnel_pcd_normal_estimated.ply".format(self.rcsb_id) )
 
     @property
     def tunnel_half_mesh(self):

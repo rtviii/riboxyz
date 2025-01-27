@@ -12,6 +12,7 @@ from functools import partial
 
 from ribctl import RIBETL_DATA
 from ribctl.asset_manager.asset_manager import RibosomeAssetManager
+from ribctl.lib.npet.alpah_lib import produce_alpha_contour
 from ribctl.lib.npet.driver import create_npet_mesh
 from ribctl.lib.utils import download_unpack_place
 from ribctl.asset_manager.asset_types import AssetType
@@ -40,10 +41,8 @@ class RawAssetHandler:
     def _register_default_handlers(self) -> None:
         """Register built-in handlers for known raw asset types"""
         self.register_handler(AssetType.MMCIF, self._fetch_mmcif)
-        self.register_handler(AssetType.MMCIF, self._fetch_mmcif)
-        # Add other default handlers:
-        self.register_handler(AssetType.NPET_MESH, mesh_handler)
-        # self.register_handler(AssetType.THUMBNAIL, self._fetch_thumbnail)
+        self.register_handler(AssetType.NPET_MESH, npet_mesh_handler)
+        self.register_handler(AssetType.ALPHA_SHAPE, alphashape_handler)
 
     def register_handler(
         self, asset_type: AssetType, handler: Callable[[str, bool], Awaitable[None]]
@@ -144,9 +143,11 @@ class AssetRegistry:
             await self.generate_asset(rcsb_id, asset_type, force)
 
 
-async def mesh_handler(rcsb_id: str, force: bool) -> None:
+async def npet_mesh_handler(rcsb_id: str, force: bool) -> None:
     create_npet_mesh(rcsb_id)
 
+async def alphashape_handler(rcsb_id: str, force: bool) -> None:
+    produce_alpha_contour(rcsb_id, 0.05)
 
 main_registry = AssetRegistry(RibosomeAssetManager(RIBETL_DATA))
 
