@@ -2,11 +2,6 @@ import os
 from typing import Tuple
 import open3d as o3d
 import numpy as np
-from data.asset_manager import StructureAssets
-from mesh_generation.tunnel_bbox_ptc_constriction import (
-    filter_residues_parallel,
-    ribosome_entities,
-)
 from scipy.spatial import cKDTree
 import sys
 
@@ -15,22 +10,6 @@ data_dir = os.getenv('DATA_DIR')
 
 sys.dont_write_bytecode = True
 import pyvista as pv
-from npet.mesh_visualization import (
-    visualize_DBSCAN_CLUSTERS_particular_eps_minnbrs,
-    visualize_mesh,
-    visualize_pointcloud,
-)
-from mesh_generation.mesh_full_pipeline import (
-    DBSCAN_capture,
-    DBSCAN_pick_largest_cluster,
-)
-from mesh_generation.mesh_libsurf import (
-    apply_poisson_reconstruction,
-    estimate_normals,
-    ptcloud_convex_hull_points,
-)
-# from mesh_generation.util import landmark_constriction_site, landmark_ptc
-
 def generate_voxel_centers(radius: float, height: float, voxel_size: float) -> tuple:
     nx = ny = int(2 * radius / voxel_size) + 1
     nz = int(height / voxel_size) + 1
@@ -242,93 +221,3 @@ def clip_pcd_via_ashape(
     ashape_exterior = pcd[mask == 0]
     return ashape_interior, ashape_exterior
 
-def create_tunnel_mesh(RCSB_ID:str):
-    assets    = StructureAssets(data_dir, RCSB_ID)
-    cifpath   = assets.cif_struct
-    R         = 30
-    H         = 100
-    Vsize     = 1
-    ATOM_SIZE = 2
-    normals_pcd_path       = assets.tunnel_pcd_normal_estimated
-    ashape_watertight_mesh = pv.read(assets.ashape_watertight)
-    if not os.path.exists(assets.ashape_watertight):
-        raise FileNotFoundError(f"File {assets.ashape_watertight} not found")
-    # # All atoms
-    ptc_pt             = np.array(landmark_ptc(RCSB_ID))
-    constriction_pt    = np.array(landmark_constriction_site(RCSB_ID))
-    entities           = ribosome_entities(RCSB_ID, cifpath, "R")
-    filtered           = filter_residues_parallel(entities, ptc_pt, constriction_pt, R, H)
-    filtered_points    = np.array( [atom.get_coord() for residue in filtered for atom in residue.child_list] )
-    transformed_points = transform_points_to_C0( filtered_points, ptc_pt, constriction_pt )
-
-    mask, (x, y, z) = create_point_cloud_mask(
-        transformed_points,
-        radius=R,
-        height=H,
-        voxel_size=Vsize,
-        radius_around_point=ATOM_SIZE,
-    )
-
-    points = np.where(~mask)
-    empty_coordinates = np.column_stack((x[points[0]], y[points[1]], z[points[2]]))
-
-    back_projected = transform_points_from_C0(
-        empty_coordinates, ptc_pt, constriction_pt
-    )
-
-    if not os.path.exists(assets.ashape_watertight):
-        raise FileNotFoundError(f"File {assets.ashape_watertight} not found")
-    select                 = pv.PolyData(back_projected).select_enclosed_points(ashape_watertight_mesh)
-    mask                   = select["SelectedPoints"]
-    interior               = back_projected[mask == 1]
-    empty_in_world_coords = np.array(interior)
-
-    _u_EPSILON_initial_pass     = 5.5
-    _u_MIN_SAMPLES_initial_pass = 600
-    _u_EPSILON_refinement       = 3.5
-    _u_MIN_SAMPLES_refinement   = 175
-
-    d3d_alpha   = 2
-    d3d_tol     = 1
-    PR_depth    = 6
-    PR_ptweight = 3
-
-    db, clusters_container = DBSCAN_capture( empty_in_world_coords, _u_EPSILON_initial_pass, _u_MIN_SAMPLES_initial_pass )
-    #! [ Extract the largest cluster from the DBSCAN clustering ]
-    largest_cluster, largest_cluster_id = DBSCAN_pick_largest_cluster(clusters_container)
-    # visualize_DBSCAN_CLUSTERS_particular_eps_minnbrs( clusters_container, _u_EPSILON_initial_pass, _u_MIN_SAMPLES_initial_pass, ptc_pt, constriction_pt, np.array([[1,1,1]]))
-    # exit()
-    db             , refined_clusters_container = DBSCAN_capture( largest_cluster, _u_EPSILON_refinement, _u_MIN_SAMPLES_refinement )
-    refined_cluster, refined_cluster_id         = DBSCAN_pick_largest_cluster(refined_clusters_container)
-
-    visualize_DBSCAN_CLUSTERS_particular_eps_minnbrs(
-        clusters_container,
-        _u_EPSILON_initial_pass,
-        _u_MIN_SAMPLES_initial_pass,
-        ptc_pt,
-        constriction_pt,
-        refined_cluster,
-        R,
-        H,
-    )
-
-    #! [ Transform the cluster back into original coordinate frame ]
-    surface_pts = ptcloud_convex_hull_points(refined_cluster, d3d_alpha, d3d_tol)
-    visualize_pointcloud(surface_pts, RCSB_ID)
-
-    #! [ Transform the cluster back into Original Coordinate Frame ]
-    normal_estimated_pcd = estimate_normals(
-        surface_pts,
-        kdtree_radius=10,
-        kdtree_max_nn=15,
-        correction_tangent_planes_n=10,
-    )
-    o3d.io.write_point_cloud(normals_pcd_path, normal_estimated_pcd)
-    apply_poisson_reconstruction(
-        normals_pcd_path,
-        assets.tunnel_mesh,
-        recon_depth=PR_depth,
-        recon_pt_weight=PR_ptweight,
-    )
-
-    visualize_mesh(assets.tunnel_mesh)

@@ -1,3 +1,4 @@
+from pathlib import Path
 from pprint import pprint
 import subprocess
 from matplotlib import pyplot as plt
@@ -7,15 +8,18 @@ import numpy as np
 import plyfile
 import warnings
 
+from ribctl import POISSON_RECON_BIN
+
 warnings.filterwarnings("ignore")
 import os
+# 
+# POISSON_RECON_BIN = os.getenv("POISSON_RECON_BIN")
 
-POISSON_RECON_BIN = os.getenv("POISSON_RECON_BIN")
-
+print(f"POISSON_RECON_BIN: {POISSON_RECON_BIN}")
 
 def apply_poisson_reconstruction(
     surf_estimated_ptcloud_path: str,
-    output_path: str,
+    output_path: Path,
     recon_depth: int = 6,
     recon_pt_weight: int = 3,
 ):
@@ -40,7 +44,7 @@ def apply_poisson_reconstruction(
 
         data = plyfile.PlyData.read(output_path)
         data.text = True
-        ascii_duplicate = output_path.split(".")[0] + "_ascii.ply"
+        ascii_duplicate = output_path.as_posix().split(".")[0] + "_ascii.ply"
         data.write(ascii_duplicate)
         print(">>Wrote {}".format(ascii_duplicate))
     else:
@@ -109,11 +113,7 @@ def estimate_normals(
 ):
     pcd = o3d.geometry.PointCloud()
     pcd.points = o3d.utility.Vector3dVector(convex_hull_surface_pts)
-    pcd.estimate_normals(
-        search_param=o3d.geometry.KDTreeSearchParamHybrid(
-            radius=kdtree_radius, max_nn=kdtree_max_nn
-        )
-    )
+    pcd.estimate_normals( search_param=o3d.geometry.KDTreeSearchParamHybrid( radius=kdtree_radius, max_nn=kdtree_max_nn ) )
     pcd.orient_normals_consistent_tangent_plane(k=correction_tangent_planes_n)
     o3d.visualization.draw_geometries([pcd], point_show_normal=True)
     return pcd

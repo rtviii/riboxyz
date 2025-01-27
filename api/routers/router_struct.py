@@ -13,8 +13,9 @@ from neo4j_ribosome.db_lib_reader import (
     dbqueries,
 )
 from ribctl import ASSETS, ASSETS_PATH, RIBETL_DATA
-from ribctl.asset_manager.asset_manager import AssetPathManager
-from ribctl.asset_manager.types import AssetType
+from ribctl.asset_manager.asset_manager import RibosomeAssetManager
+from ribctl.asset_manager.asset_registry import AssetRegistry
+from ribctl.asset_manager.asset_types import AssetType
 from ribctl.ribosome_ops import RibosomeOps
 from ribctl.lib.info import StructureCompositionStats, run_composition_stats
 from ribctl.lib.types.polymer import (
@@ -169,7 +170,7 @@ def structure_ptc(request, rcsb_id: str):
     params = dict(request.GET)
     rcsb_id = str.upper(params["rcsb_id"][0])
     try:
-        ptc = AssetPathManager().load_model(rcsb_id, AssetType.PTC)
+        ptc = RibosomeAssetManager().load_model(rcsb_id, AssetType.PTC)
         if not ptc:
             return JsonResponse({"error": "No PTC found for {}".format(rcsb_id)})
         return JsonResponse(ptc.model_dump())
@@ -186,9 +187,10 @@ def constriction_site(request, rcsb_id: str):
     params = dict(request.GET)
     rcsb_id = str.upper(params["rcsb_id"][0])
     try:
-        constriction = AssetPathManager().load_model(
-            rcsb_id, AssetType.CONSTRICTION_SITE
-        )
+        # constriction = AssetPathManager().load_model(
+        #     rcsb_id, AssetType.CONSTRICTION_SITE
+        # )
+        constriction = RibosomeAssetManager().load_model(rcsb_id, AssetType.CONSTRICTION_SITE)
         if not constriction:
             return JsonResponse(
                 {"error": "No constriction site found for {}".format(rcsb_id)}

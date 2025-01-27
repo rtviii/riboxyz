@@ -1,9 +1,10 @@
 import sys
-
 from loguru import logger
+
 sys.dont_write_bytecode = True
 sys.path.append("/home/rtviii/dev/riboxyz")
 from logger_config import configure_logging
+
 configure_logging()
 from neo4j_ribosome.db_lib_reader import Neo4jReader
 from functools import partial
@@ -22,18 +23,19 @@ from pathlib import Path
 import asyncio
 from concurrent.futures import ProcessPoolExecutor
 import math
-from ribctl.asset_manager.parallel_acquisition import process_chunk, AcquisitionResult
+from ribctl.asset_manager.parallel_acquisition import (
+    process_chunk,
+    AcquisitionResult,
+    process_chunk_with_tracking,
+)
 import multiprocessing
 from ribctl.asset_manager.asset_registry import main_registry
 from concurrent.futures import (
-    ALL_COMPLETED,
-    Future,
     ProcessPoolExecutor,
-    ThreadPoolExecutor,
-    wait,
 )
 from tqdm import tqdm
-from ribctl.asset_manager.types import AssetType
+from ribctl.asset_manager.asset_types import AssetType
+
 
 def get_input_pdb_ids() -> List[str]:
     """Get PDB IDs from either stdin (if piped) or return None to handle as argument"""
@@ -123,6 +125,7 @@ def get(
 
     # Convert asset type names to enum
     asset_types = [AssetType[t] for t in asset_type]
+
     async def process_structure(rcsb_id: str):
         try:
             await main_registry.generate_multiple(rcsb_id, asset_types, force)
@@ -143,41 +146,6 @@ def get(
 
     # Run the async processing
     asyncio.run(process_all())
-
-
-def process_chunk_with_tracking(
-    chunk: List[str],
-    base_dir: str,
-    asset_type_names: List[str],
-    force: bool,
-    max_structures: int,
-    max_assets: int,
-) -> Dict[str, List[AcquisitionResult]]:
-    """Process a chunk of structures and track progress. This function needs to be at module level to be pickleable."""
-    result = process_chunk(
-        base_dir=base_dir,
-        rcsb_ids=chunk,
-        asset_type_names=asset_type_names,
-        force=force,
-        max_concurrent_structures=max_structures,
-        max_concurrent_assets=max_assets,
-    )
-
-    for rcsb_id, acquisitions in result.items():
-        success = all(acq.success for acq in acquisitions)
-        if success:
-            print(f"Successfully processed assets for {rcsb_id}")
-        else:
-            failures = [
-                f"{acq.asset_type_name}: {acq.error}"
-                for acq in acquisitions
-                if not acq.success
-            ]
-            print(f"Failed to process {rcsb_id}:", file=sys.stderr)
-            for failure in failures:
-                print(f"  - {failure}", file=sys.stderr)
-
-    return result
 
 
 @etl.command()
