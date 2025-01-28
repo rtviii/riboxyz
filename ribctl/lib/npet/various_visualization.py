@@ -1,9 +1,12 @@
 from pprint import pprint
+from typing import Callable, List, Optional
 from matplotlib import pyplot as plt
 import pyvista as pv
 import json
 import numpy as np
 import open3d as o3d
+
+from ribctl.lib.npet.kdtree_approach import T
 
 hexcolors = {
     'aliceblue'           : '#F0F8FF',
@@ -1016,12 +1019,13 @@ def visualize_DBSCAN_CLUSTERS_particular_eps_minnbrs(dbscan_cluster_dict: dict[i
     # Create cylinder
     # Calculate direction vector from base_point to axis_point
     direction = np.array(axis_point) - np.array(base_point)
-    direction = direction / np.linalg.norm(direction)  # Normalize
+    direction = direction / np.linalg.norm(direction)
+    center = np.array(base_point) + (direction * height/2)
     
-    # Create cylinder centered at base_point
+    # Create cylinder jcentered at base_point
     cylinder = pv.Cylinder(
-        center=axis_point,
-        direction=-direction,
+        center=center,  # Use calculated center
+        direction=direction,  # Remove the negative sign
         radius=radius,
         height=height
     )
@@ -1070,8 +1074,6 @@ def visualize_DBSCAN_CLUSTERS_particular_eps_minnbrs(dbscan_cluster_dict: dict[i
                 style='points'
             )
 
-    print(refined)
-    print(refined.shape)
     plotter.add_points(
         refined,
         color='blue',
@@ -1308,130 +1310,6 @@ def visualize_pointcloud_axis(ptcloud,aux_ptcloud, base_point, axis_point, radiu
     
     return transformed_ptcloud
 
-def visualize_pointcloud_axis_o3d(ptcloud, aux_ptcloud, base_point, axis_point, radius=0.1, height=None, rcsb_id:str|None=None, gif:bool=False, gif_name:str|None=None):
-    """
-    Visualize a point cloud oriented along a specified axis, with base/axis points and cylinder.
-    
-    Parameters:
-    -----------
-    ptcloud : numpy.ndarray
-        The input point cloud coordinates
-    base_point : numpy.ndarray
-        The point defining the base of the axis
-    axis_point : numpy.ndarray
-        The point defining the tip of the axis
-    radius : float, optional
-        Radius of the cylinder (default 0.1)
-    height : float, optional
-        Height of the cylinder (default: distance between base and axis points)
-    rcsb_id : str, optional
-        Identifier for the point cloud
-    gif : bool, default False
-        Whether to create an off-screen render for GIF
-    gif_name : str, optional
-        Name of the output GIF file
-    """
-    # Convert inputs to numpy arrays to ensure compatibility
-    base_point = np.asarray(base_point)
-    axis_point = np.asarray(axis_point)
-    ptcloud = np.asarray(ptcloud)
-    aux_ptcloud = np.asarray(aux_ptcloud)
-    
-    # Calculate the original axis vector
-    original_axis = axis_point - base_point
-    original_axis_length = np.linalg.norm(original_axis)
-    original_axis = original_axis / original_axis_length
-    
-    # Set height to axis length if not specified
-    if height is None:
-        height = original_axis_length
-    
-    # Define the target z-axis (pointing down)
-    target_z_axis = np.array([0, 0, -1])
-    
-    # Calculate the rotation matrix to align the original axis with the z-axis
-    rotation_axis = np.cross(original_axis, target_z_axis)
-    angle = np.arccos(np.dot(original_axis, target_z_axis))
-    if np.linalg.norm(rotation_axis) > 1e-10:
-        rotation_axis = rotation_axis / np.linalg.norm(rotation_axis)
-        R = o3d.geometry.get_rotation_matrix_from_axis_angle(angle * rotation_axis)
-    else:
-        # If the vectors are already aligned, use identity matrix
-        R = np.eye(3)
-    
-    # Transform the point cloud
-    transformed_ptcloud = np.dot(ptcloud - base_point, R.T)
-    transformed_aux_pts = np.dot(aux_ptcloud - base_point, R.T)
-    
-    # Transform the base and axis points
-    transformed_base_point = np.dot(base_point - base_point, R.T)
-    transformed_axis_point = np.dot(axis_point - base_point, R.T)
-    
-    # Create the Open3D visualization
-    vis = o3d.visualization.Visualizer()
-    vis.create_window()
-    
-    # Create the point cloud
-    mat1 = o3d.visualization.rendering.MaterialRecord()
-    mat1.shader = 'defaultLitTransparency'
-    mat1.base_color = [0.0, 0.6, 1.0, 0.5]  # Transparent blue
-    # mat1.roughness = 0.8  # Matte finish
-    
-    pcd = o3d.geometry.PointCloud()
-    pcd.points = o3d.utility.Vector3dVector(transformed_ptcloud)
-    pcd.colors = o3d.utility.Vector3dVector([ (0.8, 0.8, 0.8) for _ in range(len(transformed_ptcloud)) ])
-    
-    # Create the auxiliary point cloud
-    mat2 = o3d.visualization.rendering.MaterialRecord()
-    mat2.shader = 'defaultLitTransparency'
-    mat2.base_color = [0.0, 1.0, 0.0, 0.8]  # Semi-transparent green
-    # mat2.roughness = 0.5  # Slight gloss
-    
-    aux_pcd = o3d.geometry.PointCloud()
-    aux_pcd.points = o3d.utility.Vector3dVector(transformed_aux_pts)
-    aux_pcd.colors = o3d.utility.Vector3dVector([ (0, 0, 1) for _ in range(len(transformed_aux_pts)) ])
-    
-    # Create the cylinder
-    cylinder = o3d.geometry.TriangleMesh.create_cylinder( radius=radius, height=height )
-    cylinder.compute_vertex_normals()
-    cylinder.translate(transformed_base_point + (height/2) * np.array([0, 0, -1]))
-    cylinder.rotate(R, center=transformed_base_point)
-    cylinder.paint_uniform_color([0, 1, 0])
-    
-    mat3 = o3d.visualization.rendering.MaterialRecord()
-    mat3.shader = 'defaultLit'
-    mat3.base_color = [0, 1, 0, 0.3]  # Semi-transparent green
-    # mat3.roughness = 0.5  # Slight gloss
-    # mat3.edge_color = [0, 0, 0, 1]  # Black outline
-    
-    # cylinder.materials = [mat3]
-    
-    # Create the base and axis points
-    base_sphere = o3d.geometry.TriangleMesh.create_sphere(radius=0.02)
-    base_sphere.paint_uniform_color([1, 0, 0])
-    base_sphere.translate(transformed_base_point)
-    
-    axis_sphere = o3d.geometry.TriangleMesh.create_sphere(radius=0.02)
-    axis_sphere.paint_uniform_color([1, 0, 0])
-    axis_sphere.translate(transformed_axis_point)
-    
-    # Add the elements to the visualization
-    vis.add_geometry(pcd, mat1)
-    vis.add_geometry(aux_pcd, mat2)
-    vis.add_geometry(cylinder, mat3)
-    vis.add_geometry(base_sphere)
-    vis.add_geometry(axis_sphere)
-    
-    # Adjust the camera settings
-    ctr = vis.get_view_control()
-    ctr.set_front([0, 0, -1])
-    ctr.set_up([0, 1, 0])
-    ctr.set_zoom(1.0)
-    
-    # Render the scene
-    vis.run()
-    vis.destroy_window()
-
 def create_cylinder_from_points(base_point, axis_point, radius, height):
     """
     Create a cylinder using two points: a base point and a point defining the axis direction.
@@ -1512,3 +1390,298 @@ def visualize_pointclouds(ptcloud1:np.ndarray, ptcloud2:np.ndarray, background_p
 
 
     plotter.show()
+
+def visualize_clipping_result(
+    original_points: np.ndarray,
+    clipped_points: np.ndarray,
+    mesh_path: str,
+    show_mesh: bool = True,
+):
+    """
+    Visualizes the original points, clipped points, and the clipping mesh.
+
+    Parameters:
+        original_points (np.ndarray): The original point cloud
+        clipped_points (np.ndarray): The clipped point cloud
+        mesh_path (str): Path to the mesh file
+        show_mesh (bool): Whether to show the mesh or not
+    """
+    p = pv.Plotter()
+
+    # Add original points in red
+    original_cloud = pv.PolyData(original_points)
+    p.add_mesh(
+        original_cloud,
+        color="red",
+        point_size=5,
+        render_points_as_spheres=True,
+        label="Original Points",
+    )
+
+    # Add clipped points in blue
+    clipped_cloud = pv.PolyData(clipped_points)
+    p.add_mesh(
+        clipped_cloud,
+        color="blue",
+        point_size=5,
+        render_points_as_spheres=True,
+        label="Clipped Points",
+    )
+
+    # Add mesh if requested
+    if show_mesh:
+        mesh = pv.read(mesh_path)
+        p.add_mesh(
+            mesh, style="wireframe", color="gray", opacity=0.5, label="Clipping Mesh"
+        )
+
+    p.add_legend()
+    p.show()
+
+def visualize_filtered_residues(
+    filtered_residues: List[T],
+    all_residues: Optional[List[T]],  # If None, won't show unfiltered residues
+    base_point: np.ndarray,
+    axis_point: np.ndarray,
+    radius: float,
+    height: float,
+    position_getter: Callable[[T], np.ndarray] = lambda x: x.center_of_mass(),
+    point_size: float = 5,
+    opacity: float = 0.3,
+    show: bool = True,
+    screenshot_path: Optional[str] = None,
+    window_size: tuple = (1024, 768)
+) -> Optional[pv.Plotter]:
+
+    """
+    Visualize filtered residues alongside the cylinder that was used for filtering.
+    
+    Parameters:
+    -----------
+    filtered_residues : List[T]
+        List of residues that passed the cylinder filter
+    all_residues : Optional[List[T]]
+        Complete list of residues before filtering. If provided, will show
+        unfiltered residues in gray
+    base_point : np.ndarray
+        Center point of cylinder base
+    axis_point : np.ndarray
+        Point defining cylinder axis direction
+    radius : float
+        Radius of cylinder
+    height : float
+        Height of cylinder
+    position_getter : Callable[[T], np.ndarray]
+        Function to extract position from residue object
+    point_size : float
+        Size of points in visualization
+    opacity : float
+        Opacity of cylinder (0.0-1.0)
+    show : bool
+        Whether to display the plot immediately
+    screenshot_path : Optional[str]
+        If provided, saves screenshot to this path
+    window_size : tuple
+        Size of the visualization window (width, height)
+        
+    Returns:
+    --------
+    Optional[pv.Plotter]
+        Returns plotter if show=False, None otherwise
+    """
+    # Initialize plotter
+    plotter = pv.Plotter(window_size=window_size)
+    
+    # Get positions of filtered residues
+    filtered_positions = np.array([
+        position_getter(res) for res in filtered_residues
+    ])
+    
+    # Create and add cylinder
+    direction = axis_point - base_point
+    direction = direction / np.linalg.norm(direction)
+    
+    cylinder = pv.Cylinder(
+        center=base_point + (height/2) * direction,
+        direction=direction,
+        radius=radius,
+        height=height,
+        resolution=30
+    )
+    
+    # Add cylinder with wireframe and solid style
+    plotter.add_mesh(
+        cylinder, 
+        style='wireframe', 
+        color='red', 
+        line_width=2, 
+        label='Cylinder'
+    )
+    plotter.add_mesh(
+        cylinder, 
+        style='surface', 
+        color='red', 
+        opacity=opacity,
+    )
+    
+    # If all_residues provided, show unfiltered residues in gray
+    if all_residues is not None:
+        all_positions = np.array([
+            position_getter(res) for res in all_residues
+        ])
+        plotter.add_points(
+            all_positions, 
+            color='gray', 
+            point_size=point_size-2, 
+            opacity=0.3,
+            label='Unfiltered Residues'
+        )
+    
+    # Add filtered points
+    plotter.add_points(
+        filtered_positions, 
+        color='blue', 
+        point_size=point_size,
+        label='Filtered Residues'
+    )
+    
+    # Add base and axis points for reference
+    plotter.add_points(
+        np.array([base_point]), 
+        color='green', 
+        point_size=point_size*2, 
+        label='Base Point'
+    )
+    plotter.add_points(
+        np.array([axis_point]), 
+        color='yellow', 
+        point_size=point_size*2, 
+        label='Axis Point'
+    )
+    
+    # Add axis line
+    axis_line = pv.Line(base_point, axis_point)
+    plotter.add_mesh(
+        axis_line, 
+        color='white', 
+        line_width=2, 
+        label='Cylinder Axis'
+    )
+    
+    # Add legend
+    plotter.add_legend()
+    
+    # Set camera position for better initial view
+    plotter.camera_position = 'iso'
+    plotter.enable_eye_dome_lighting()  # Improves point visibility
+    
+    # Add text with stats
+    stats_text = (
+        f'Total filtered residues: {len(filtered_residues)}\n'
+        f'Cylinder height: {height:.1f}\n'
+        f'Cylinder radius: {radius:.1f}'
+    )
+    if all_residues:
+        stats_text = f'Total residues: {len(all_residues)}\n' + stats_text
+        
+    plotter.add_text(
+        stats_text,
+        position='upper_left',
+        font_size=12,
+        color='white'
+    )
+        
+    if show:
+        plotter.show()
+        return None
+        
+    return plotter
+
+def ptcloud_convex_hull_points_and_gif(
+    pointcloud: np.ndarray,
+    ALPHA: float,
+    TOLERANCE: float,
+    output_path: str,
+    n_frames: int = 180,
+) -> np.ndarray:
+
+    from tqdm import tqdm
+    from PIL import Image
+
+    assert pointcloud is not None
+
+    # Create the convex hull
+    cloud = pv.PolyData(pointcloud)
+    grid = cloud.delaunay_3d(alpha=ALPHA, tol=TOLERANCE, offset=2, progress_bar=True)
+    convex_hull = grid.extract_surface()
+
+    # Set up the plotter
+    plotter = pv.Plotter(off_screen=True)
+    plotter.add_mesh(convex_hull, color="lightblue", show_edges=True)
+    plotter.add_points(cloud, color="red", point_size=5)
+
+    # Set up the camera
+    plotter.camera_position = "xy"
+
+    # Create frames
+    frames = []
+    for i in tqdm(range(n_frames)):
+        plotter.camera.azimuth = i * (360 / n_frames)
+        plotter.render()
+        image = plotter.screenshot(transparent_background=False, return_img=True)
+        frames.append(Image.fromarray(image))
+
+    # Save as GIF
+    frames[0].save(
+        output_path, save_all=True, append_images=frames[1:], duration=50, loop=0
+    )
+
+    print(f"GIF saved to {output_path}")
+
+    return convex_hull.points
+
+def estimate_normals_and_create_gif(
+    convex_hull_surface_pts: np.ndarray,
+    output_path: str,
+    kdtree_radius=None,
+    kdtree_max_nn=None,
+    correction_tangent_planes_n=None,
+):
+    pcd = o3d.geometry.PointCloud()
+    pcd.points = o3d.utility.Vector3dVector(convex_hull_surface_pts)
+    pcd.estimate_normals(
+        search_param=o3d.geometry.KDTreeSearchParamHybrid(
+            radius=kdtree_radius, max_nn=kdtree_max_nn
+        )
+    )
+    pcd.orient_normals_consistent_tangent_plane(k=correction_tangent_planes_n)
+
+    # Set up the visualizer
+    vis = o3d.visualization.Visualizer()
+    vis.create_window()
+    vis.add_geometry(pcd)
+    opt = vis.get_render_option()
+    opt.point_size = 5
+    opt.point_show_normal = True
+
+    # Set up the camera
+    ctr = vis.get_view_control()
+    ctr.set_zoom(0.8)
+
+    # Capture frames
+    frames = []
+    for i in range(360):
+        ctr.rotate(10.0, 0.0)  # Rotate 10 degrees around the z-axis
+        vis.update_geometry(pcd)
+        vis.poll_events()
+        vis.update_renderer()
+        image = vis.capture_screen_float_buffer(False)
+        frames.append(Image.fromarray((np.array(image) * 255).astype(np.uint8)))
+
+    vis.destroy_window()
+
+    frames[0].save(
+        output_path, save_all=True, append_images=frames[1:], duration=50, loop=0
+    )
+
+    print(f"GIF saved to {output_path}")

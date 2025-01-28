@@ -85,7 +85,6 @@ def DBSCAN_capture(
     u_METRIC      = metric
 
     print( "Running DBSCAN on {} points. eps={}, min_samples={}, distance_metric={}".format( len(ptcloud), u_EPSILON, u_MIN_SAMPLES, u_METRIC ) ) 
-
     db     = DBSCAN(eps=eps, min_samples=min_samples, metric=metric).fit( ptcloud )
     labels = db.labels_
 
@@ -145,7 +144,6 @@ def apply_poisson_reconstruction(
         "--threads 8",
     ]
     process = subprocess.run(command, capture_output=True, text=True)
-
     if process.returncode == 0:
         data = plyfile.PlyData.read(output_path)
         data.text = True
@@ -347,10 +345,15 @@ def clip_pcd_via_ashape(
     ashape_exterior = pcd[mask == 0]
     return ashape_interior, ashape_exterior
 
-def ribosome_entities(rcsb_id:str, cifpath:str, level=Literal['R']|Literal[ 'A' ])->list[Entity]:
+def ribosome_entities(rcsb_id:str, cifpath:str, level=Literal['R']|Literal[ 'A' ], skip_nascent_chain:List[str]=[])->list[Entity]:
     structure = FastMMCIFParser(QUIET=True).get_structure(rcsb_id, cifpath)
     residues = []
-    [residues.extend(chain) for chain in structure.child_list[0] ]
+    for chain in structure.child_list[0]:
+        if  chain.id in skip_nascent_chain:
+            print("Skipping nascent chain ", chain.id)
+            continue
+        residues.extend(chain)
+    # [residues.extend(chain) for chain in structure.child_list[0] ]
     if level == 'R':
         return residues
     elif level == 'A':
