@@ -488,3 +488,114 @@ def filter_residues_parallel(
     # Flatten results and get corresponding residues
     filtered_indices = [idx for chunk_result in results for idx in chunk_result]
     return [residues[i] for i in filtered_indices]
+
+from scipy.spatial import cKDTree
+import numpy as np
+from Bio.PDB.MMCIFParser import FastMMCIFParser
+from typing import List, Tuple
+
+
+def clip_tunnel_by_chain_proximity(
+    tunnel_points: np.ndarray,
+    rcsb_id: str,
+    cif_path: str,
+    chain_id: str = 'Y2',
+    n_start_residues: int = 7,
+    start_proximity_threshold: float = 10.0,  # Tighter threshold for start residues
+    rest_proximity_threshold: float = 15.0    # Wider threshold for rest of chain
+) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    Clips a tunnel point cloud using different proximity thresholds for the start
+    and rest of the chain.
+    
+    Args:
+        tunnel_points: np.ndarray
+            Nx3 array of tunnel point cloud coordinates
+        rcsb_id: str
+            PDB/MMCIF ID of the structure
+        cif_path: str
+            Path to the MMCIF file
+        chain_id: str
+            Chain ID of the nascent peptide/reference chain
+        n_start_residues: int
+            Number of N-terminal residues to apply tighter threshold to
+        start_proximity_threshold: float
+            Maximum distance (Å) for points near start residues
+        rest_proximity_threshold: float
+            Maximum distance (Å) for points near rest of chain
+            
+    Returns:
+        Tuple[np.ndarray, np.ndarray]:
+            - Filtered point cloud (points within thresholds)
+            - Removed points (points outside thresholds)
+    """
+    # Parse structure and extract specified chain
+    parser = FastMMCIFParser(QUIET=True)
+    structure = parser.get_structure(rcsb_id, cif_path)
+    
+    # Get the first model and find the specified chain
+    model = structure[0]
+    try:
+        chain = model[chain_id]
+    except KeyError:
+        raise ValueError(f"Chain {chain_id} not found in structure {rcsb_id}")
+    
+    # Calculate centers of mass for each residue in the chain
+    residue_centers = []
+    residue_indices = []  # Track residue numbers
+    for residue in chain:
+        coords = np.array([atom.get_coord() for atom in residue])
+        center = coords.mean(axis=0)
+        residue_centers.append(center)
+        residue_indices.append(residue.id[1])  # Get residue number
+        
+    residue_centers = np.array(residue_centers)
+    residue_indices = np.array(residue_indices)
+    
+    # Split centers into start and rest based on residue numbers
+    start_centers = residue_centers[residue_indices <= n_start_residues]
+    rest_centers = residue_centers[residue_indices > n_start_residues]
+    
+    # Build KD-trees for both parts
+    start_tree = cKDTree(start_centers)
+    rest_tree = cKDTree(rest_centers) if len(rest_centers) > 0 else None
+    
+    # Find distances from each tunnel point to nearest residue center
+    start_distances, _ = start_tree.query(tunnel_points)
+    if rest_tree is not None:
+        rest_distances, _ = rest_tree.query(tunnel_points)
+    else:
+        rest_distances = np.full_like(start_distances, np.inf)
+    
+    # Point is kept if it's within threshold of either part
+    within_start = start_distances <= start_proximity_threshold
+    within_rest = rest_distances <= rest_proximity_threshold
+    keep_mask = within_start | within_rest
+    
+    # Split points into kept and removed
+    kept_points = tunnel_points[keep_mask]
+    removed_points = tunnel_points[~keep_mask]
+    
+    print(f"Kept {len(kept_points)} points:")
+    print(f"- {np.sum(within_start)} points within {start_proximity_threshold}Å of first {n_start_residues} residues")
+    print(f"- {np.sum(within_rest)} points within {rest_proximity_threshold}Å of remaining residues")
+    print(f"Removed {len(removed_points)} points")
+    
+    return kept_points, removed_points
+
+# Example usage in the driver code:
+"""
+# After getting refined_cluster:
+kept_points, removed_points = clip_tunnel_by_chain_proximity(
+    refined_cluster,
+    RCSB_ID,
+    cifpath,
+    chain_id='Y2',
+    n_start_residues=7,
+    start_proximity_threshold=10.0,  # Tighter radius for first 7 residues
+    rest_proximity_threshold=15.0    # Wider radius for rest of chain
+)
+
+# Continue with the kept points for surface reconstruction:
+surface_pts = ptcloud_convex_hull_points(kept_points, d3d_alpha, d3d_tol)
+"""

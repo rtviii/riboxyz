@@ -12,7 +12,6 @@ def polymer(request, rcsb_id:str, auth_asym_id:str):
     RO             = RibosomeOps(rcsb_id)
     chain_fullpath = os.path.join(RO.assets.paths.chains_dir, f'{rcsb_id}_{auth_asym_id}.cif')
 
-
     if not os.path.exists(chain_fullpath):
         return HttpResponse(status=404)
     

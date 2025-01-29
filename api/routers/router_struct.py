@@ -334,7 +334,7 @@ def get_shape(request, rcsb_id: str, is_ascii: bool = False):
         if not is_ascii
         else "{}_poisson_recon_ascii.ply".format(rcsb_id)
     )
-    file_path = os.path.join(RIBETL_DATA, rcsb_id, "TUNNELS", filename)
+    file_path = AssetType.NPET_MESH_ASCII.get_path(rcsb_id)
 
     if not os.path.exists(file_path):
         return Response({"error": "Shape file not found"}, status=404)

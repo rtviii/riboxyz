@@ -7,6 +7,7 @@ from ribctl.lib.npet.kdtree_approach import (
     DBSCAN_capture,
     DBSCAN_pick_largest_cluster,
     apply_poisson_reconstruction,
+    clip_tunnel_by_chain_proximity,
     create_point_cloud_mask,
     estimate_normals,
     filter_residues_parallel,
@@ -29,8 +30,8 @@ def create_npet_mesh(RCSB_ID: str):
     ashapepath = AssetType.ALPHA_SHAPE.get_path(RCSB_ID)
     meshpath   = AssetType.NPET_MESH.get_path(RCSB_ID)
 
-    R                      = 40
-    H                      = 120
+    R                      = 30
+    H                      = 200
     Vsize                  = 1
     ATOM_SIZE              = 2
 
@@ -98,10 +99,21 @@ def create_npet_mesh(RCSB_ID: str):
     refined_cluster, refined_cluster_id         = DBSCAN_pick_largest_cluster( refined_clusters_container )
     visualize_DBSCAN_CLUSTERS_particular_eps_minnbrs( clusters_container, _u_EPSILON_initial_pass, _u_MIN_SAMPLES_initial_pass, ptc_pt, constriction_pt, refined_cluster, R, H, )
 
-    exit()
+
+    kept_points, removed_points = clip_tunnel_by_chain_proximity(
+        refined_cluster,
+        RCSB_ID,
+        cifpath,
+        chain_id='Y2',
+
+        start_proximity_threshold=10,
+        rest_proximity_threshold=20
+        
+    )
+    # exit()
 
     #! [ Transform the cluster back into original coordinate frame ]
-    surface_pts = ptcloud_convex_hull_points(refined_cluster, d3d_alpha, d3d_tol)
+    surface_pts = ptcloud_convex_hull_points(kept_points, d3d_alpha, d3d_tol)
     visualize_pointcloud(surface_pts, RCSB_ID)
 
     #! [ Transform the cluster back into Original Coordinate Frame ]
@@ -120,4 +132,4 @@ def create_npet_mesh(RCSB_ID: str):
         recon_pt_weight=PR_ptweight,
     )
 
-    visualize_mesh(meshpath)
+    # visualize_mesh(meshpath)

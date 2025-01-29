@@ -51,12 +51,6 @@ class StructureAssetPaths:
     def thumbnail(self):
         return f"{self.dir}/{self.rcsb_id}.png"
 
-    @property
-    def tunnel_dir(self):
-        if not os.path.exists(os.path.join(self.dir, "TUNNELS")):
-            os.mkdir(os.path.join(self.dir, "TUNNELS"))
-        return os.path.join(self.dir, "TUNNELS")
-
 class StructureAssets:
 
     rcsb_id: str

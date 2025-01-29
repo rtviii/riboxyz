@@ -86,9 +86,24 @@ class AssetType(Enum):
         dependencies={"STRUCTURE_PROFILE", "MMCIF"},
     )
 
+
+    NPET_MESH_ASCII = AssetInfo(
+        "npet_mesh_ascii",
+        path_template="{asset_dir}/{pdb_id}_NPET_MESH_ascii.ply",
+        model=None,
+        is_raw=True,
+        dependencies={
+            "STRUCTURE_PROFILE",
+            "MMCIF",
+            "ALPHA_SHAPE",
+            "CONSTRICTION_SITE",
+            "PTC",
+        },
+    )
+
     NPET_MESH = AssetInfo(
         "npet_mesh",
-        path_template="{asset_dir}/TUNNELS/{pdb_id}_NPET_MESH.ply",
+        path_template="{asset_dir}/{pdb_id}_NPET_MESH.ply",
         model=None,
         is_raw=True,
         dependencies={
