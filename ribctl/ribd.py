@@ -1,8 +1,11 @@
+import os
+from pprint import pprint
 import sys
 from loguru import logger
 
 sys.dont_write_bytecode = True
 sys.path.append("/home/rtviii/dev/riboxyz")
+from ribctl.lib.libbsite import extract_ligand_to_mmcif
 from logger_config import configure_logging
 
 configure_logging()
@@ -255,13 +258,31 @@ def verify(ctx, pdb_ids):
 @click.pass_context
 def verify_all(ctx):
     """Verify all assets in the system"""
-    click.echo("Verifying all assets in the system...")
-    click.echo("This stuff is not implemented.")
-    # TODO: Implement full verification logic
-    # This should probably:
-    # 1. Get list of all expected assets
-    # 2. Check their existence and integrity
-    # 3. Report any issues found
+    click.echo("NOT IMPLEMENTED")
+
+
+@etl.command()
+@click.pass_context
+def ligand_mmcifs(ctx):
+    from neo4j_ribosome.db_lib_reader import dbqueries
+
+    ligs = dbqueries.ligands_per_structure()
+    for lig in ligs:
+        chemid = lig["chemicalId"]
+        structs = lig["structures"]
+        for struct in structs:
+            structure = RibosomeOps(struct).assets.biopython_structure()
+            try:
+                if os.path.exists(StructureAssets(struct).paths.nonpoly_entity(chemid)):
+                    print("Already exists: ", struct, chemid)
+                    continue
+                extract_ligand_to_mmcif(
+                    structure,
+                    chemid,
+                    StructureAssets(struct).paths.nonpoly_entity(chemid),
+                )
+            except:
+                pass
 
 
 @etl.command(name="sync_all")

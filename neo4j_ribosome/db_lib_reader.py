@@ -1,6 +1,7 @@
 from pprint import pprint
 import typing
 import sys
+sys.path.append('/home/rtviii/dev/riboxyz')
 from neo4j_ribosome import NEO4J_CURRENTDB, NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER
 from ribctl.lib.types.polymer import (
     PolynucleotideClass,
@@ -165,6 +166,17 @@ return apoc.map.merge(rib, rest)
     return collect({rcsb_id:n.rcsb_id, tax_id: p.ncbi_tax_id, tax_name:p.scientific_name, mitochondrial:n.mitochondrial, title:n.citation_title})"""
                 ).value()[0]
 
+            return session.execute_read(_)
+
+    def ligands_per_structure(self):
+        with self.adapter.driver.session() as session:
+            def _(tx: Transaction | ManagedTransaction):
+                    result =tx.run(
+                        """MATCH (n:Ligand)-[]-(r:RibosomeStructure)
+WITH n.chemicalId as chemicalId, collect(r.rcsb_id) as structs
+RETURN {chemicalId: chemicalId, structures: structs}"""
+                    )
+                    return [record[0] for record in result]
             return session.execute_read(_)
 
     def list_ligands(self, nodes_only: bool = False):

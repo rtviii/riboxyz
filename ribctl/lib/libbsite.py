@@ -1,6 +1,11 @@
 from pprint import pprint
 import sys
 from ribctl.lib.libseq import SequenceMappingContainer, SeqPairwise, map_motifs
+from Bio.PDB.Chain import Chain
+from Bio.PDB.Model import Model
+from Bio.PDB.Structure import Structure
+from Bio.PDB.Residue import Residue
+from Bio.PDB.mmcifio import  MMCIFIO
 sys.path.append("/home/rtviii/dev/riboxyz")
 # from neo4j_ribosome.db_lib_reader import Neo4jReader
 import operator
@@ -244,3 +249,65 @@ def bsite_transpose(
     return _
 
 
+
+from typing import Optional
+import os
+
+def extract_ligand_to_mmcif(
+    structure: Structure,
+    ligand_id: str,
+    output_path:str
+) -> str:
+    """
+    Extract a specific ligand from a structure and save it as a standalone mmCIF file.
+    
+    Args:
+        structure: Biopython Structure object
+        ligand_id: The chemical ID of the ligand to extract (e.g., 'ERY')
+        output_path: Optional path to save the mmCIF file. If None, uses current directory.
+    
+    Returns:
+        str: Path to the saved mmCIF file
+    """
+    # Create new structure for the ligand
+    ligand_struct = Structure('ligand')
+    model         = Model(0)
+    chain         = Chain('A')
+    
+    # Find and copy the first instance of the ligand
+    ligand_found = False
+    for model_src in structure:
+        for chain_src in model_src:
+            for residue in chain_src:
+                if residue.get_resname() == ligand_id:
+                    # Deep copy the residue to the new structure
+                    new_residue = Residue(
+                        residue.id,
+                        residue.resname,
+                        residue.segid
+                    )
+                    for atom in residue:
+                        new_residue.add(atom.copy())
+                    
+                    chain.add(new_residue)
+                    ligand_found = True
+                    break
+            if ligand_found:
+                break
+        if ligand_found:
+            break
+    
+    if not ligand_found:
+        raise ValueError(f"Ligand {ligand_id} not found in structure")
+    
+    # Add the chain to the model and the model to the structure
+    model.add(chain)
+    ligand_struct.add(model)
+    
+    
+    io = MMCIFIO()
+    io.set_structure(ligand_struct)
+    io.save(output_path)
+    print(f"Saved ligand {ligand_id} to {output_path}")
+    
+    return output_path

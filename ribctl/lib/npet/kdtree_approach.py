@@ -353,7 +353,12 @@ def ribosome_entities(rcsb_id:str, cifpath:str, level=Literal['R']|Literal[ 'A' 
             print("Skipping nascent chain ", chain.id)
             continue
         residues.extend(chain)
-    # [residues.extend(chain) for chain in structure.child_list[0] ]
+
+    for residue in residues:
+        if residue.get_resname() == 'ERY':
+            residues.remove(residue)
+            print("REMOVED", residue.get_resname(), residue.get_id())
+
     if level == 'R':
         return residues
     elif level == 'A':

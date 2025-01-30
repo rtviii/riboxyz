@@ -12,6 +12,9 @@ from neo4j_ribosome.db_lib_reader import (
     StructureFilterParams,
     dbqueries,
 )
+
+from django.http import FileResponse
+from ninja.responses import Response
 from ribctl import ASSETS, ASSETS_PATH, RIBETL_DATA
 from ribctl.asset_manager.asset_manager import RibosomeAssetManager
 from ribctl.asset_manager.asset_registry import AssetRegistry
@@ -321,9 +324,6 @@ def list_source_taxa(request, source_or_host: typing.Literal["source", "host"]):
 
     return normalize_tax_list_to_dict(tax_ids)
 
-
-from django.http import FileResponse
-from ninja.responses import Response
 
 
 @structure_router.get("/tunnel_geometry")

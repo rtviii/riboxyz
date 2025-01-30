@@ -30,6 +30,7 @@ class AssetInfo:
         self.dependencies = dependencies
         self.is_raw = is_raw
 
+
 class PathResolver:
     _base_dir = Path(RIBETL_DATA)
 
@@ -41,6 +42,7 @@ class PathResolver:
     def get_base_dir(cls) -> Path:
         return cls._base_dir
 
+
 class AssetType(Enum):
 
     @classmethod
@@ -50,10 +52,9 @@ class AssetType(Enum):
     def get_path(self, pdb_id: str) -> Path:
         """Get path for this asset type"""
         asset_dir = PathResolver.get_base_dir() / pdb_id.upper()
-        return Path(self.value.path_template.format(
-            asset_dir=asset_dir,
-            pdb_id=pdb_id.upper()
-        ))
+        return Path(
+            self.value.path_template.format(asset_dir=asset_dir, pdb_id=pdb_id.upper())
+        )
 
     # Raw assets explicitly marked
     MMCIF = AssetInfo(
@@ -85,7 +86,6 @@ class AssetType(Enum):
         is_raw=True,
         dependencies={"STRUCTURE_PROFILE", "MMCIF"},
     )
-
 
     NPET_MESH_ASCII = AssetInfo(
         "npet_mesh_ascii",

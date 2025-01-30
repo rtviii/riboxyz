@@ -30,8 +30,8 @@ def create_npet_mesh(RCSB_ID: str):
     ashapepath = AssetType.ALPHA_SHAPE.get_path(RCSB_ID)
     meshpath   = AssetType.NPET_MESH.get_path(RCSB_ID)
 
-    R                      = 30
-    H                      = 200
+    R                      = 25
+    H                      = 120
     Vsize                  = 1
     ATOM_SIZE              = 2
 
@@ -43,7 +43,7 @@ def create_npet_mesh(RCSB_ID: str):
     # # All atoms
     ptc_pt            = np.array(landmark_ptc(RCSB_ID))
     constriction_pt   = np.array(landmark_constriction_site(RCSB_ID))
-    residues          = ribosome_entities(RCSB_ID, cifpath, "R", ['Y2'])
+    residues          = ribosome_entities(RCSB_ID, cifpath, "R", ['Y2', 'a', '7'])
     filtered_residues = filter_residues_parallel(residues, ptc_pt, constriction_pt, R, H)
     filtered_points   = np.array( [atom.get_coord() for residue in filtered_residues for atom in residue.child_list] )
 
@@ -70,7 +70,6 @@ def create_npet_mesh(RCSB_ID: str):
     interior              = back_projected[mask == 1]
     empty_in_world_coords = np.array(interior)
 
-    # visualize_pointcloud_axis(empty_in_world_coords, filtered_points, ptc_pt, constriction_pt)
 
 # 2,33
 # 2.3,57
@@ -100,20 +99,20 @@ def create_npet_mesh(RCSB_ID: str):
     visualize_DBSCAN_CLUSTERS_particular_eps_minnbrs( clusters_container, _u_EPSILON_initial_pass, _u_MIN_SAMPLES_initial_pass, ptc_pt, constriction_pt, refined_cluster, R, H, )
 
 
-    kept_points, removed_points = clip_tunnel_by_chain_proximity(
-        refined_cluster,
-        RCSB_ID,
-        cifpath,
-        chain_id='Y2',
+    # kept_points, removed_points = clip_tunnel_by_chain_proximity(
+    #     refined_cluster,
+    #     RCSB_ID,
+    #     cifpath,
+    #     chain_id='Y2',
 
-        start_proximity_threshold=10,
-        rest_proximity_threshold=20
+    #     start_proximity_threshold=10,
+    #     rest_proximity_threshold=20
         
-    )
+    # )
     # exit()
 
     #! [ Transform the cluster back into original coordinate frame ]
-    surface_pts = ptcloud_convex_hull_points(kept_points, d3d_alpha, d3d_tol)
+    surface_pts = ptcloud_convex_hull_points(refined_cluster, d3d_alpha, d3d_tol)
     visualize_pointcloud(surface_pts, RCSB_ID)
 
     #! [ Transform the cluster back into Original Coordinate Frame ]

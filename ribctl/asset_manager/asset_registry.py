@@ -155,7 +155,6 @@ async def alphashape_handler(rcsb_id: str, force: bool) -> None:
 
 main_registry = AssetRegistry(RibosomeAssetManager(RIBETL_DATA))
 
-
 @main_registry.register(AssetType.STRUCTURE_PROFILE)
 async def generate_profile(rcsb_id: str) -> RibosomeStructure:
     profile = await ETLCollector(rcsb_id).generate_profile(
