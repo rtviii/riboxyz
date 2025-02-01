@@ -131,6 +131,7 @@ def apply_poisson_reconstruction(
     recon_pt_weight: int = 3,
 ):
     # The documentation can be found at https://www.cs.jhu.edu/~misha/Code/PoissonRecon/Version16.04/ in "PoissonRecon" binary
+    print("Rolling Poisson Reconstruction: {} -> {}".format(surf_estimated_ptcloud_path, output_path))
     command = [
         POISSON_RECON_BIN,
         "--in",

@@ -6,6 +6,7 @@ import os
 import alphashape
 import trimesh
 from ribctl.asset_manager.asset_types import AssetType
+
 data_dir = os.environ.get("DATA_DIR")
 warnings.filterwarnings("ignore")
 
@@ -35,28 +36,33 @@ def clean_mesh(mesh):
         return mesh
 
 
-def cif_to_point_cloud(cif_path: str, chains: list[str] | None = None):
+def cif_to_point_cloud(cif_path: str, chains: list[str] | None = None,  do_atoms:bool=False):
     """
     Convert a CIF file to a point cloud, optionally filtering for specific chains.
-    
+
     Args:
         cif_path (str): Path to the CIF file
         chains (list[str] | None): Optional list of chain IDs to include. If None, includes all chains.
-    
+
     """
     parser = MMCIFParser()
     structure = parser.get_structure("structure", cif_path)
     coordinates = []
-    
-    # Get just the first model (index 0)
+
     first_model = structure[0]
-    for chain in first_model:
-        # Skip chains not in the filter list if a filter is provided
-        if chains is not None and chain.id not in chains:
-            continue
-            
-        for residue in chain:
-            coordinates.append(residue.center_of_mass())
+    if do_atoms:
+        for chain in first_model:
+            if chains is not None and chain.id not in chains:
+                continue
+            for residue in chain:
+                for atom in residue:
+                    coordinates.append(atom.get_coord())    
+    else:
+        for chain in first_model:
+            if chains is not None and chain.id not in chains:
+                continue
+            for residue in chain:
+                coordinates.append(residue.center_of_mass())
 
     if not coordinates:
         raise ValueError(f"No coordinates found in {cif_path}")
@@ -138,7 +144,7 @@ def save_alpha_shape_as_ply(alpha_shape, file_path):
     return alpha_shape
 
 
-def validate_mesh(mesh, stage="unknown"):
+def validate_mesh_pyvista(mesh, stage="unknown"):
     """Validate and print mesh properties."""
     if mesh is None:
         print(f"WARNING: Null mesh at stage {stage}")
@@ -152,6 +158,7 @@ def validate_mesh(mesh, stage="unknown"):
     print(f"- Volume: {mesh.volume}")
     print(f"- Surface area: {mesh.area}")
     return mesh
+
 
 def produce_alpha_contour(RCSB_ID, alpha):
     """Produce a watertight alpha shape contour with normal orientation check."""
@@ -170,7 +177,7 @@ def produce_alpha_contour(RCSB_ID, alpha):
     # Create initial alpha shape
     print(f"Constructing alpha shape with a={alpha}")
     initial_shape = alphashape.alphashape(point_cloud, alpha)
-    validate_mesh(initial_shape, "initial_shape")
+    validate_mesh_pyvista(initial_shape, "initial_shape")
 
     # Split into components
     components = initial_shape.split(only_watertight=False)
@@ -182,13 +189,13 @@ def produce_alpha_contour(RCSB_ID, alpha):
     # Get largest component
     alpha_shape = max(components, key=lambda c: abs(c.volume))
     alpha_shape = clean_mesh(alpha_shape)
-    validate_mesh(alpha_shape, "after_clean")
+    validate_mesh_pyvista(alpha_shape, "after_clean")
 
     # Check orientation and flip if needed
     if alpha_shape.volume < 0:
         print("Flipping mesh orientation...")
         alpha_shape.invert()
-        validate_mesh(alpha_shape, "after_flip")
+        validate_mesh_pyvista(alpha_shape, "after_flip")
 
     # Sample points
     random.seed(10)
@@ -201,13 +208,13 @@ def produce_alpha_contour(RCSB_ID, alpha):
     # Create final alpha shape
     alpha_shape_renew = alphashape.alphashape(new_points, alpha)
     alpha_shape_renew = clean_mesh(alpha_shape_renew)
-    validate_mesh(alpha_shape_renew, "final_shape")
+    validate_mesh_pyvista(alpha_shape_renew, "final_shape")
 
     # Final orientation check
     if alpha_shape_renew.volume < 0:
         print("Flipping final mesh orientation...")
         alpha_shape_renew.invert()
-        validate_mesh(alpha_shape_renew, "after_final_flip")
+        validate_mesh_pyvista(alpha_shape_renew, "after_final_flip")
 
     path = AssetType.ALPHA_SHAPE.get_path(RCSB_ID)
     alpha_shape_renew = save_alpha_shape_as_ply(alpha_shape_renew, path)

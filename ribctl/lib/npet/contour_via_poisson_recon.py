@@ -1,10 +1,11 @@
 from pathlib import Path
 import sys
+
 sys.path.append("/home/rtviii/dev/riboxyz")
 from ribctl.lib.npet.kdtree_approach import apply_poisson_reconstruction
 
 from Bio.PDB.MMCIFParser import MMCIFParser
-from alpha_lib import cif_to_point_cloud, validate_mesh
+from alpha_lib import cif_to_point_cloud, validate_mesh_pyvista
 from ribctl.lib.npet.various_visualization import visualize_mesh, visualize_pointcloud
 from ribctl.ribosome_ops import RibosomeOps
 
@@ -13,35 +14,43 @@ import pyvista as pv
 import open3d as o3d
 
 
+def validate_mesh_pyvista(mesh, stage="unknown"):
+    """Validate and print mesh properties, focusing on watertightness."""
+    if mesh is None:
+        print(f"WARNING: Null mesh at stage {stage}")
+        return None
+
+    print(f"\nMesh properties at stage: {stage}")
+
+    # Check watertightness by looking for boundary edges
+    # A mesh is watertight if it has no boundary edges
+    edges = mesh.extract_feature_edges(
+        boundary_edges=True,
+        feature_edges=False,
+        manifold_edges=False,
+        non_manifold_edges=False,
+    )
+    is_watertight = edges.n_cells == 0
+
+    print(f"- Is watertight: {is_watertight}")
+    return mesh
+
+
 def quick_surface_points(
-    pointcloud: np.ndarray, alpha: float , tolerance: float 
+    pointcloud: np.ndarray, alpha: float, tolerance: float, offset: float
 ) -> np.ndarray:
-    """
-    Generate surface points from a point cloud using a quick Delaunay triangulation.
-    Uses relaxed parameters for faster computation.
-
-    Args:
-
-        pointcloud: Input point cloud
-        alpha     : Alpha value for surface construction (larger = more holes allowed)
-        tolerance : Tolerance for point merging
-
-    Returns:
-
-        np.ndarray: Surface points
-    """
-
     cloud = pv.PolyData(pointcloud)
     # Using larger tolerance and smaller offset for faster computation
-    grid    = cloud.delaunay_3d(alpha=alpha, tol=tolerance, progress_bar=True)
+    grid = cloud.delaunay_3d( alpha=alpha, tol=tolerance, offset=offset, progress_bar=True )
     surface = grid.extract_surface().cast_to_pointset()
     return surface.points
 
+
 def fast_normal_estimation(
     surface_pts: np.ndarray,
-    kdtree_radius: float = 5.0,  # Reduced from 10
-    max_nn: int = 10,  # Reduced from 15
-    tangent_planes_k: int = 5,  # Reduced from 10
+    kdtree_radius,
+    max_nn,
+    tangent_planes_k, 
 ) -> o3d.geometry.PointCloud:
     """
     Estimate normals for surface points with optimized parameters for speed.
@@ -69,6 +78,7 @@ def fast_normal_estimation(
     pcd.orient_normals_consistent_tangent_plane(k=tangent_planes_k)
 
     return pcd
+
 
 def create_mesh_from_pointcloud(
     pointcloud: np.ndarray,
@@ -110,31 +120,38 @@ def create_mesh_from_pointcloud(
 
 if __name__ == "__main__":
 
-
-
     rops                  = RibosomeOps("4TUA")
     cifpath               = rops.assets.paths.cif
     first_assembly_chains = rops.first_assembly_auth_asym_ids()
-    ptcloud               = cif_to_point_cloud(cifpath, first_assembly_chains)
+    ptcloud               = cif_to_point_cloud(cifpath, first_assembly_chains, do_atoms=True)
+    # np.save("4TUA_pointcloud.npy", ptcloud)
+    # ptcloud = np.load("4TUA_pointcloud.npy")
+    visualize_pointcloud(ptcloud)
 
     output_normals_pcd = "output_normals_pcd.ply"
     output_mesh = "output_mesh.ply"
-    visualize_pointcloud(ptcloud)
 
+    d3d_alpha  = 15  # Increased from 2
+    d3d_tol    = 1
+    d3d_offset = 2
 
+    # Normal estimation
+    kdtree_radius   = 10    # Reduced from 10
+    max_nn          = 20         # Reduced from 100
+    tanget_planes_k = 10
 
-    d3d_alpha   = 2
-    d3d_tol     = 1
-    surface_pts = quick_surface_points(ptcloud, d3d_alpha, d3d_tol)
+    # Poisson reconstruction
+    PR_depth = 6        # Reduced from 6
+    PR_ptweight = 4   
+
+    surface_pts = quick_surface_points(ptcloud, d3d_alpha, d3d_tol, d3d_offset)
     visualize_pointcloud(surface_pts, "4TUA")
 
-    normal_estimated_pcd = fast_normal_estimation(surface_pts, 10, 15, 10)
+    normal_estimated_pcd = fast_normal_estimation(surface_pts, kdtree_radius, max_nn, tanget_planes_k)
     o3d.visualization.draw_geometries([normal_estimated_pcd], point_show_normal=True)
 
-    o3d.io.write_point_cloud("output_with_normals.ply", normal_estimated_pcd)
+    o3d.io.write_point_cloud(output_normals_pcd, normal_estimated_pcd)
 
-    PR_depth    = 6
-    PR_ptweight = 3
 
     apply_poisson_reconstruction(
         output_normals_pcd,
@@ -142,15 +159,5 @@ if __name__ == "__main__":
         recon_depth=PR_depth,
         recon_pt_weight=PR_ptweight,
     )
-    validate_mesh(pv.read(output_mesh))
+    validate_mesh_pyvista(pv.read(output_mesh))
     visualize_mesh(output_mesh)
-    
-    # mesh = o3d.geometry.TriangleMesh.create_from_point_cloud_poisson(
-    #     pcd_with_normals, 
-    #     depth=6,
-    #     width=0,
-    #     scale=1.1,
-    #     linear_fit=False
-    # )[0]
-
-
