@@ -29,7 +29,7 @@ def create_npet_mesh(RCSB_ID: str):
     ashapepath = AssetType.ALPHA_SHAPE.get_path(RCSB_ID)
     meshpath   = AssetType.NPET_MESH.get_path(RCSB_ID)
 
-    R                      = 25
+    R                      = 35
     H                      = 120
     Vsize                  = 1
     ATOM_SIZE              = 2
@@ -44,7 +44,8 @@ def create_npet_mesh(RCSB_ID: str):
     constriction_pt = np.array(landmark_constriction_site(RCSB_ID))
     tunnel_debris   = {
     "3J7Z" : [ 'a', '7' ],
-    "7A5G" : [ 'Y2' ]
+    "7A5G" : [ 'Y2' ],
+    "5GAK" : [ 'z' ],
     }
     residues          = ribosome_entities(RCSB_ID, cifpath, "R", tunnel_debris[RCSB_ID] if RCSB_ID in tunnel_debris else [])
     filtered_residues = filter_residues_parallel(residues, ptc_pt, constriction_pt, R, H)
@@ -135,4 +136,4 @@ def create_npet_mesh(RCSB_ID: str):
         recon_pt_weight=PR_ptweight,
     )
 
-    visualize_mesh(meshpath)
+    visualize_mesh(meshpath, RCSB_ID)

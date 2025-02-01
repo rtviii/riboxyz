@@ -79,10 +79,9 @@ def quick_surface_points(
 ) -> np.ndarray:
     cloud = pv.PolyData(pointcloud)
     # Using larger tolerance and smaller offset for faster computation
-    grid = cloud.delaunay_3d( alpha=alpha, tol=tolerance, offset=offset, progress_bar=True )
+    grid = cloud.delaunay_3d(alpha=alpha, tol=tolerance, offset=offset, progress_bar=True )
     surface = grid.extract_surface().cast_to_pointset()
     return surface.points
-
 
 def fast_normal_estimation(
     surface_pts: np.ndarray,
@@ -160,7 +159,7 @@ def alpha_contour_via_poisson_recon(rcsb_id:str, verbose:bool=False):
 
     apply_poisson_reconstruction(
         output_normals_pcd,
-        Path(output_mesh),
+        output_mesh,
         recon_depth=PR_depth,
         recon_pt_weight=PR_ptweight,
     )

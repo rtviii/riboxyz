@@ -39,7 +39,7 @@ def process_chunk_with_tracking(
     for rcsb_id, acquisitions in result.items():
         success = all(acq.success for acq in acquisitions)
         if success:
-            print(f"Successfully processed assets for {rcsb_id}")
+            print(f"Successfully processed assets for {rcsb_id}\n\n")
         else:
             failures = [
                 f"{acq.asset_type_name}: {acq.error}"
