@@ -11,7 +11,9 @@ import numpy as np
 from Bio.PDB.MMCIFParser import FastMMCIFParser
 from typing import List, Tuple
 
-data_dir = os.getenv('DATA_DIR')
+from ribctl.lib.schema.types_ribosome import ResidueSummary
+
+data_dir = os.getenv("DATA_DIR")
 sys.dont_write_bytecode = True
 from Bio.PDB.Entity import Entity
 from Bio.PDB.MMCIFParser import FastMMCIFParser
@@ -31,6 +33,7 @@ from ribctl import POISSON_RECON_BIN
 import numpy as np
 from sklearn.cluster import DBSCAN
 import requests
+
 warnings.filterwarnings("ignore")
 import os
 
@@ -41,55 +44,60 @@ import os
 def landmark_constriction_site(rcsb_id: str) -> np.ndarray:
     """
     Fetches the constriction site location for a given RCSB PDB ID.
-    
+
     Args:
         rcsb_id (str): The RCSB PDB identifier (e.g., "4UG0")
-        
+
     Returns:
         np.ndarray: Array containing the x, y, z coordinates of the constriction site
     """
     url = f"http://localhost:8000/structures/constriction_site?rcsb_id={rcsb_id}"
     headers = {"Accept": "application/json"}
-    
+
     response = requests.get(url, headers=headers)
     response.raise_for_status()  # Raises an exception for 4XX/5XX status codes
-    
+
     data = response.json()
     return np.array(data["location"])
+
 
 def landmark_ptc(rcsb_id: str) -> np.ndarray:
     """
     Fetches the peptidyl transferase center (PTC) location for a given RCSB PDB ID.
-    
+
     Args:
         rcsb_id (str): The RCSB PDB identifier (e.g., "4UG0")
-        
+
     Returns:
         np.ndarray: Array containing the x, y, z coordinates of the PTC site
     """
     url = f"http://localhost:8000/structures/ptc?rcsb_id={rcsb_id}"
     headers = {"Accept": "application/json"}
-    
+
     response = requests.get(url, headers=headers)
     response.raise_for_status()
-    
+
     data = response.json()
     return np.array(data["location"])
 
 
 def DBSCAN_capture(
     ptcloud: np.ndarray,
-    eps           ,
-    min_samples   ,
-    metric        : str = "euclidean",
-): 
+    eps,
+    min_samples,
+    metric: str = "euclidean",
+):
 
-    u_EPSILON     = eps
+    u_EPSILON = eps
     u_MIN_SAMPLES = min_samples
-    u_METRIC      = metric
+    u_METRIC = metric
 
-    print( "Running DBSCAN on {} points. eps={}, min_samples={}, distance_metric={}".format( len(ptcloud), u_EPSILON, u_MIN_SAMPLES, u_METRIC ) ) 
-    db     = DBSCAN(eps=eps, min_samples=min_samples, metric=metric).fit( ptcloud )
+    print(
+        "Running DBSCAN on {} points. eps={}, min_samples={}, distance_metric={}".format(
+            len(ptcloud), u_EPSILON, u_MIN_SAMPLES, u_METRIC
+        )
+    )
+    db = DBSCAN(eps=eps, min_samples=min_samples, metric=metric).fit(ptcloud)
     labels = db.labels_
 
     CLUSTERS_CONTAINER = {}
@@ -101,7 +109,10 @@ def DBSCAN_capture(
     CLUSTERS_CONTAINER = dict(sorted(CLUSTERS_CONTAINER.items()))
     return db, CLUSTERS_CONTAINER
 
-def DBSCAN_pick_largest_cluster(clusters_container:dict[int,list], pick_manually:bool=False)->tuple[np.ndarray, int]:
+
+def DBSCAN_pick_largest_cluster(
+    clusters_container: dict[int, list], pick_manually: bool = False
+) -> tuple[np.ndarray, int]:
     DBSCAN_CLUSTER_ID = 0
     # if pick_manually:
     #     print("-------------------------------")
@@ -135,7 +146,11 @@ def apply_poisson_reconstruction(
     recon_pt_weight: int = 3,
 ):
     # The documentation can be found at https://www.cs.jhu.edu/~misha/Code/PoissonRecon/Version16.04/ in "PoissonRecon" binary
-    print("Rolling Poisson Reconstruction: {} -> {}".format(surf_estimated_ptcloud_path, output_path))
+    print(
+        "Rolling Poisson Reconstruction: {} -> {}".format(
+            surf_estimated_ptcloud_path, output_path
+        )
+    )
     command = [
         POISSON_RECON_BIN,
         "--in",
@@ -157,14 +172,18 @@ def apply_poisson_reconstruction(
     else:
         print(">>Error:", process.stderr)
 
+
 def ptcloud_convex_hull_points(
-    pointcloud: np.ndarray, ALPHA: float, TOLERANCE: float, OFFSET:float
+    pointcloud: np.ndarray, ALPHA: float, TOLERANCE: float, OFFSET: float
 ) -> np.ndarray:
     assert pointcloud is not None
     cloud = pv.PolyData(pointcloud)
-    grid = cloud.delaunay_3d(alpha=ALPHA, tol=TOLERANCE, offset=OFFSET, progress_bar=True)
+    grid = cloud.delaunay_3d(
+        alpha=ALPHA, tol=TOLERANCE, offset=OFFSET, progress_bar=True
+    )
     convex_hull = grid.extract_surface().cast_to_pointset()
     return convex_hull.points
+
 
 def estimate_normals(
     convex_hull_surface_pts: np.ndarray,
@@ -183,7 +202,9 @@ def estimate_normals(
     # o3d.visualization.draw_geometries([pcd], point_show_normal=True)
     return pcd
 
-T = TypeVar('T')
+
+T = TypeVar("T")
+
 
 def generate_voxel_centers(radius: float, height: float, voxel_size: float) -> tuple:
     nx = ny = int(2 * radius / voxel_size) + 1
@@ -195,6 +216,7 @@ def generate_voxel_centers(radius: float, height: float, voxel_size: float) -> t
     X, Y, Z = np.meshgrid(x, y, z, indexing="ij")
     voxel_centers = np.column_stack((X.ravel(), Y.ravel(), Z.ravel()))
     return voxel_centers, (X.shape, x, y, z)
+
 
 def create_point_cloud_mask(
     points: np.ndarray,
@@ -221,6 +243,7 @@ def create_point_cloud_mask(
 
     final_mask = hollow_cylinder | point_cloud_mask
     return final_mask, (x, y, z)
+
 
 def get_transformation_to_C0(
     base_point: np.ndarray, axis_point: np.ndarray
@@ -252,6 +275,7 @@ def get_transformation_to_C0(
 
     return -base_point, R
 
+
 def transform_points_to_C0(
     points: np.ndarray, base_point: np.ndarray, axis_point: np.ndarray
 ) -> np.ndarray:
@@ -260,6 +284,7 @@ def transform_points_to_C0(
     points_transformed = points_translated @ rotation.T
 
     return points_transformed
+
 
 def transform_points_from_C0(
     points: np.ndarray, base_point: np.ndarray, axis_point: np.ndarray
@@ -270,6 +295,7 @@ def transform_points_from_C0(
     points_untranslated = points_unrotated - translation
 
     return points_untranslated
+
 
 def clip_pointcloud_with_mesh(points: np.ndarray, mesh_path: str) -> np.ndarray:
     """
@@ -317,16 +343,17 @@ def clip_pointcloud_with_mesh(points: np.ndarray, mesh_path: str) -> np.ndarray:
 
     return clipped_points
 
+
 def verify_mesh_quality(mesh) -> dict:
     """
     Verifies the quality of the input mesh and returns diagnostics.
     """
     stats = {
-        "n_points"   : mesh.n_points,
-        "n_faces"    : mesh.n_faces,
+        "n_points": mesh.n_points,
+        "n_faces": mesh.n_faces,
         "is_manifold": mesh.is_manifold,
-        "bounds"     : mesh.bounds,
-        "open_edges" : mesh.n_open_edges,
+        "bounds": mesh.bounds,
+        "open_edges": mesh.n_open_edges,
     }
 
     try:
@@ -337,87 +364,98 @@ def verify_mesh_quality(mesh) -> dict:
 
     return stats
 
+
 def clip_pcd_via_ashape(
     pcd: np.ndarray, mesh: pv.PolyData
 ) -> Tuple[np.ndarray, np.ndarray]:
-    points_poly     = pv.PolyData(pcd)
-    select          = points_poly.select_enclosed_points(mesh)
-    mask            = select["SelectedPoints"]
+    points_poly = pv.PolyData(pcd)
+    select = points_poly.select_enclosed_points(mesh)
+    mask = select["SelectedPoints"]
     ashape_interior = pcd[mask == 1]
     ashape_exterior = pcd[mask == 0]
     return ashape_interior, ashape_exterior
 
-def ribosome_entities(rcsb_id:str, cifpath:str, level=Literal['R']|Literal[ 'A' ], skip_nascent_chain:List[str]=[])->list[Entity]:
+
+def ribosome_entities(
+    rcsb_id: str,
+    cifpath: str,
+    level=Literal["R"] | Literal["A"],
+    skip_nascent_chain: List[str] = [],
+) -> list[Entity]:
     structure = FastMMCIFParser(QUIET=True).get_structure(rcsb_id, cifpath)
     residues = []
     for chain in structure.child_list[0]:
-        if  chain.id in skip_nascent_chain:
+        if chain.id in skip_nascent_chain:
             print("Skipping nascent chain ", chain.id)
             continue
         residues.extend(chain)
 
     for residue in residues:
-        if residue.get_resname() == 'ERY':
+        if not ResidueSummary.is_canonical(residue.get_resname()):
             residues.remove(residue)
             print("REMOVED", residue.get_resname(), residue.get_id())
 
-    if level == 'R':
+    if level == "R":
         return residues
-    elif level == 'A':
+    elif level == "A":
         atoms = []
         [atoms.extend(a) for a in residues]
         return atoms
     else:
         raise
 
+
 def is_point_in_cylinder(
     point: np.ndarray,
     base_point: np.ndarray,
     axis_point: np.ndarray,
     radius: float,
-    height: float
-
+    height: float,
 ) -> bool:
 
-    point      = np.asarray(point)
+    point = np.asarray(point)
     base_point = np.asarray(base_point)
     axis_point = np.asarray(axis_point)
-    
+
     # Calculate cylinder axis direction vector
-    axis        = axis_point - base_point
+    axis = axis_point - base_point
     axis_length = np.linalg.norm(axis)
-    axis_unit   = axis / axis_length
-    
+    axis_unit = axis / axis_length
+
     # Calculate vector from base to point
     point_vector = point - base_point
-    
+
     # Project vector onto cylinder axis
     projection = np.dot(point_vector, axis_unit)
-    
+
     # Calculate perpendicular vector from axis to point
     projection_point = base_point + projection * axis_unit
-    radial_vector    = point - projection_point
-    
+    radial_vector = point - projection_point
+
     # Calculate radial distance
     radial_distance = np.linalg.norm(radial_vector)
-    
+
     # Check if point is inside cylinder
     return (radial_distance <= radius) and (0 <= projection <= height)
+
 
 def make_cylinder_predicate(
     base_point: np.ndarray,
     axis_point: np.ndarray,
     radius: float,
     height: float,
-    position_getter: Callable[[T], np.ndarray] 
+    position_getter: Callable[[T], np.ndarray],
 ) -> Callable[[T], bool]:
     def predicate(obj: T) -> bool:
         position = position_getter(obj)
         return is_point_in_cylinder(position, base_point, axis_point, radius, height)
+
     return predicate
+
 
 def get_residue_position(residue):
     return residue.center_of_mass()
+
 
 def _worker_process_chunk(chunk_data):
     """
@@ -426,13 +464,14 @@ def _worker_process_chunk(chunk_data):
     Returns indices of residues that are inside the cylinder.
     """
     positions, base_point, axis_point, radius, height, indices = chunk_data
-    
+
     results = []
     for i, pos in enumerate(positions):
         if is_point_in_cylinder(pos, base_point, axis_point, radius, height):
             results.append(indices[i])
-    
+
     return results
+
 
 def filter_residues_parallel(
     residues: List[T],
@@ -441,11 +480,11 @@ def filter_residues_parallel(
     radius: float,
     height: float,
     chunk_size: Optional[int] = None,
-    max_workers: Optional[int] = None
+    max_workers: Optional[int] = None,
 ) -> List[T]:
     """
     Filter residues in parallel using ProcessPoolExecutor.
-    
+
     Parameters:
     -----------
     residues : List[T]
@@ -462,7 +501,7 @@ def filter_residues_parallel(
         Size of chunks to process in parallel. If None, calculated automatically
     max_workers : Optional[int]
         Maximum number of worker processes. If None, uses CPU count
-    
+
     Returns:
     --------
     List[T]
@@ -471,48 +510,47 @@ def filter_residues_parallel(
     # Set defaults for parallel processing parameters
     if max_workers is None:
         max_workers = multiprocessing.cpu_count()
-    
+
     if chunk_size is None:
         # Aim for ~4 chunks per worker for better load balancing
         chunk_size = max(1, len(residues) // (max_workers * 4))
-    
+
     # Pre-compute all positions and create index mapping
     positions = np.array([get_residue_position(r) for r in residues])
-    
+
     indices = list(range(len(residues)))
     index_chunks = [
-        indices[i:i + chunk_size] 
-        for i in range(0, len(indices), chunk_size)
+        indices[i : i + chunk_size] for i in range(0, len(indices), chunk_size)
     ]
-    
+
     # Create data chunks for processing
-    chunks_data = [ (positions[idx], base_point, axis_point, radius, height, idx) for idx in index_chunks ]
-    
+    chunks_data = [
+        (positions[idx], base_point, axis_point, radius, height, idx)
+        for idx in index_chunks
+    ]
+
     # Process chunks in parallel
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
         results = list(executor.map(_worker_process_chunk, chunks_data))
-    
+
     # Flatten results and get corresponding residues
     filtered_indices = [idx for chunk_result in results for idx in chunk_result]
     return [residues[i] for i in filtered_indices]
 
 
-
 def clip_tunnel_by_chain_proximity(
-
-    tunnel_points            : np.ndarray,
-    rcsb_id                  : str,
-    cif_path                 : str,
-    chain_id                 : str = 'Y2',
-    n_start_residues         : int = 7,
-    start_proximity_threshold: float = 10.0, # Tighter threshold for start residues
-    rest_proximity_threshold : float = 15.0    # Wider threshold for rest of chain
-
+    tunnel_points: np.ndarray,
+    rcsb_id: str,
+    cif_path: str,
+    chain_id: str = "Y2",
+    n_start_residues: int = 7,
+    start_proximity_threshold: float = 10.0,  # Tighter threshold for start residues
+    rest_proximity_threshold: float = 15.0,  # Wider threshold for rest of chain
 ) -> Tuple[np.ndarray, np.ndarray]:
     """
     Clips a tunnel point cloud using different proximity thresholds for the start
     and rest of the chain.
-    
+
     Args:
         tunnel_points: np.ndarray
             Nx3 array of tunnel point cloud coordinates
@@ -528,7 +566,7 @@ def clip_tunnel_by_chain_proximity(
             Maximum distance (Å) for points near start residues
         rest_proximity_threshold: float
             Maximum distance (Å) for points near rest of chain
-            
+
     Returns:
         Tuple[np.ndarray, np.ndarray]:
             - Filtered point cloud (points within thresholds)
@@ -537,14 +575,14 @@ def clip_tunnel_by_chain_proximity(
     # Parse structure and extract specified chain
     parser = FastMMCIFParser(QUIET=True)
     structure = parser.get_structure(rcsb_id, cif_path)
-    
+
     # Get the first model and find the specified chain
     model = structure[0]
     try:
         chain = model[chain_id]
     except KeyError:
         raise ValueError(f"Chain {chain_id} not found in structure {rcsb_id}")
-    
+
     # Calculate centers of mass for each residue in the chain
     residue_centers = []
     residue_indices = []  # Track residue numbers
@@ -553,37 +591,41 @@ def clip_tunnel_by_chain_proximity(
         center = coords.mean(axis=0)
         residue_centers.append(center)
         residue_indices.append(residue.id[1])  # Get residue number
-        
+
     residue_centers = np.array(residue_centers)
     residue_indices = np.array(residue_indices)
-    
+
     # Split centers into start and rest based on residue numbers
     start_centers = residue_centers[residue_indices <= n_start_residues]
     rest_centers = residue_centers[residue_indices > n_start_residues]
-    
+
     # Build KD-trees for both parts
     start_tree = cKDTree(start_centers)
     rest_tree = cKDTree(rest_centers) if len(rest_centers) > 0 else None
-    
+
     # Find distances from each tunnel point to nearest residue center
     start_distances, _ = start_tree.query(tunnel_points)
     if rest_tree is not None:
         rest_distances, _ = rest_tree.query(tunnel_points)
     else:
         rest_distances = np.full_like(start_distances, np.inf)
-    
+
     # Point is kept if it's within threshold of either part
     within_start = start_distances <= start_proximity_threshold
     within_rest = rest_distances <= rest_proximity_threshold
     keep_mask = within_start | within_rest
-    
+
     # Split points into kept and removed
     kept_points = tunnel_points[keep_mask]
     removed_points = tunnel_points[~keep_mask]
-    
+
     print(f"Kept {len(kept_points)} points:")
-    print(f"- {np.sum(within_start)} points within {start_proximity_threshold}Å of first {n_start_residues} residues")
-    print(f"- {np.sum(within_rest)} points within {rest_proximity_threshold}Å of remaining residues")
+    print(
+        f"- {np.sum(within_start)} points within {start_proximity_threshold}Å of first {n_start_residues} residues"
+    )
+    print(
+        f"- {np.sum(within_rest)} points within {rest_proximity_threshold}Å of remaining residues"
+    )
     print(f"Removed {len(removed_points)} points")
-    
+
     return kept_points, removed_points

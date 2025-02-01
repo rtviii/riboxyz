@@ -476,7 +476,7 @@ class ResidueSummary(BaseModel):
 
 
     @staticmethod
-    def filter_noncanonical(resname:str):
+    def is_canonical(resname:str):
         return resname in [*AMINO_ACIDS.keys(), *NUCLEOTIDES]
 
     @staticmethod

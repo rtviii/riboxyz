@@ -40,9 +40,13 @@ def create_npet_mesh(RCSB_ID: str):
         raise FileNotFoundError(f"File {ashapepath} not found")
 
     # # All atoms
-    ptc_pt            = np.array(landmark_ptc(RCSB_ID))
-    constriction_pt   = np.array(landmark_constriction_site(RCSB_ID))
-    residues          = ribosome_entities(RCSB_ID, cifpath, "R", ['Y2', 'a', '7'])
+    ptc_pt          = np.array(landmark_ptc(RCSB_ID))
+    constriction_pt = np.array(landmark_constriction_site(RCSB_ID))
+    tunnel_debris   = {
+    "3J7Z" : [ 'a', '7' ],
+    "7A5G" : [ 'Y2' ]
+    }
+    residues          = ribosome_entities(RCSB_ID, cifpath, "R", tunnel_debris[RCSB_ID] if RCSB_ID in tunnel_debris else [])
     filtered_residues = filter_residues_parallel(residues, ptc_pt, constriction_pt, R, H)
     filtered_points   = np.array( [atom.get_coord() for residue in filtered_residues for atom in residue.child_list] )
 
@@ -93,6 +97,7 @@ def create_npet_mesh(RCSB_ID: str):
     db, clusters_container = DBSCAN_capture( empty_in_world_coords, _u_EPSILON_initial_pass, _u_MIN_SAMPLES_initial_pass )  #! [ Extract the largest cluster from the DBSCAN clustering ]
     largest_cluster, largest_cluster_id = DBSCAN_pick_largest_cluster( clusters_container )
     visualize_DBSCAN_CLUSTERS_particular_eps_minnbrs(clusters_container, _u_EPSILON_initial_pass, _u_MIN_SAMPLES_initial_pass, ptc_pt, constriction_pt, largest_cluster, R, H )
+
     db_2             , refined_clusters_container = DBSCAN_capture( largest_cluster, _u_EPSILON_refinement, _u_MIN_SAMPLES_refinement )
     refined_cluster, refined_cluster_id         = DBSCAN_pick_largest_cluster( refined_clusters_container )
     visualize_DBSCAN_CLUSTERS_particular_eps_minnbrs( clusters_container, _u_EPSILON_initial_pass, _u_MIN_SAMPLES_initial_pass, ptc_pt, constriction_pt, refined_cluster, R, H, )
