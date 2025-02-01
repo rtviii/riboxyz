@@ -5,10 +5,7 @@ import random
 import os
 import alphashape
 import trimesh
-
 from ribctl.asset_manager.asset_types import AssetType
-from ribctl.lib.npet.tunnel_asset_manager import TunnelMeshAssetsManager
-
 data_dir = os.environ.get("DATA_DIR")
 warnings.filterwarnings("ignore")
 
@@ -38,20 +35,33 @@ def clean_mesh(mesh):
         return mesh
 
 
-def cif_to_point_cloud(cif_path: str):
+def cif_to_point_cloud(cif_path: str, chains: list[str] | None = None):
+    """
+    Convert a CIF file to a point cloud, optionally filtering for specific chains.
+    
+    Args:
+        cif_path (str): Path to the CIF file
+        chains (list[str] | None): Optional list of chain IDs to include. If None, includes all chains.
+    
+    """
     parser = MMCIFParser()
     structure = parser.get_structure("structure", cif_path)
     coordinates = []
-    for model in structure:
-        for chain in model:
-            for residue in chain:
-                for atom in residue:
-                    coordinates.append(atom.coord)
+    
+    # Get just the first model (index 0)
+    first_model = structure[0]
+    for chain in first_model:
+        # Skip chains not in the filter list if a filter is provided
+        if chains is not None and chain.id not in chains:
+            continue
+            
+        for residue in chain:
+            coordinates.append(residue.center_of_mass())
 
     if not coordinates:
         raise ValueError(f"No coordinates found in {cif_path}")
 
-    return coordinates
+    return np.array(coordinates)
 
 
 def sample_within_alpha_shape(alpha_shape_mesh, num_samples):
@@ -142,7 +152,6 @@ def validate_mesh(mesh, stage="unknown"):
     print(f"- Volume: {mesh.volume}")
     print(f"- Surface area: {mesh.area}")
     return mesh
-
 
 def produce_alpha_contour(RCSB_ID, alpha):
     """Produce a watertight alpha shape contour with normal orientation check."""

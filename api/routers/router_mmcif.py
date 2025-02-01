@@ -1,4 +1,5 @@
 import os
+import re
 from django.http import HttpResponse
 from ninja import Router
 from ribctl.asset_manager.assets_structure import StructureAssets
@@ -28,6 +29,7 @@ def polymer(request, rcsb_id: str, auth_asym_id: str):
     )
 
     return response
+
 
 
 @mmcif_router.get("/nonpolymer", tags=[tag])

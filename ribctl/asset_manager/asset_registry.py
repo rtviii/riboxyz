@@ -15,7 +15,7 @@ from ribctl.asset_manager.asset_manager import RibosomeAssetManager
 # from ribctl.lib.npet.alpah_lib import produce_alpha_contour
 # from ribctl.lib.npet.alpha_lib_parallel import produce_alpha_contour
 from ribctl.lib.npet.alpha_lib import produce_alpha_contour
-from ribctl.lib.npet.driver import create_npet_mesh
+from ribctl.lib.npet.npet_driver import create_npet_mesh
 from ribctl.lib.utils import download_unpack_place
 from ribctl.asset_manager.asset_types import AssetType
 from ribctl import RIBETL_DATA

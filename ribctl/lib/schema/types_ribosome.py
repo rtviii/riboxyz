@@ -684,7 +684,7 @@ class RibosomeStructureMetadata(BaseModel):
     host_organism_ids  : list[int]
     host_organism_names: list[str]
 
-    assembly_map    : Optional[list[AssemblyInstancesMap]] = None
+    assembly_map    : Optional[list[AssemblyInstancesMap]]  = None
     mitochondrial   : bool
     subunit_presence: Optional[list[typing.Literal['ssu','lsu']]] = None
 

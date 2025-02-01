@@ -26,6 +26,43 @@ class RibosomeOps:
     def profile(self) -> RibosomeStructure:
         return self.assets.profile()
 
+
+    def first_assembly_auth_asym_ids(self) -> list[str]:
+        """
+        Returns a list of auth_asym_ids belonging to the first assembly in the structure.
+        If no assembly map is present, raises an exception.
+        
+        Returns:
+            list[str]: List of auth_asym_ids from the first assembly
+        
+        Raises:
+            Exception: If no assembly map is found in the structure
+        """
+        if not self.assets.profile().assembly_map:
+            raise Exception("No assembly map found in structure")
+        
+        # Get the first assembly from the assembly map
+        if not self.assets.profile().assembly_map:
+            raise Exception("No assembly map found in structure")
+        first_assembly = self.assets.profile().assembly_map[0]
+        auth_asym_ids = []
+        
+        # Get auth_asym_ids from polymer instances
+        if first_assembly.polymer_entity_instances:
+            auth_asym_ids.extend([
+                instance.rcsb_polymer_entity_instance_container_identifiers.auth_asym_id 
+                for instance in first_assembly.polymer_entity_instances
+            ])
+        
+        # Get auth_asym_ids from nonpolymer instances if they exist
+        if first_assembly.nonpolymer_entity_instances:
+            auth_asym_ids.extend([
+                instance.rcsb_nonpolymer_entity_instance_container_identifiers.auth_asym_id
+                for instance in first_assembly.nonpolymer_entity_instances
+            ])
+        
+        return auth_asym_ids
+
     def get_biopython_chain_by_polymer_class(self, polymer_class: PolymerClass) -> Chain:
         model = self.assets.biopython_structure()[0]
         poly = self.get_poly_by_polyclass(polymer_class)
@@ -100,6 +137,7 @@ class RibosomeOps:
 
             if class_ in  polymer.nomenclature and polymer.assembly_id == assembly and polymer.entity_poly_seq_length > 30:
                 return polymer
+
     def get_LSU_rRNA(self, assembly: int = 0) -> RNA:
         """retrieve the largest rRNA sequence in the structure
         @returns (seq, auth_asym_id, rna_type)

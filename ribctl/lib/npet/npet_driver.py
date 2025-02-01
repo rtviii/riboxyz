@@ -88,6 +88,7 @@ def create_npet_mesh(RCSB_ID: str):
 
     d3d_alpha   = 2
     d3d_tol     = 1
+    d3d_offset  = 2
     PR_depth    = 6
     PR_ptweight = 3
 
@@ -112,7 +113,7 @@ def create_npet_mesh(RCSB_ID: str):
     # exit()
 
     #! [ Transform the cluster back into original coordinate frame ]
-    surface_pts = ptcloud_convex_hull_points(refined_cluster, d3d_alpha, d3d_tol)
+    surface_pts = ptcloud_convex_hull_points(refined_cluster, d3d_alpha, d3d_tol, d3d_offset)
     visualize_pointcloud(surface_pts, RCSB_ID)
 
     #! [ Transform the cluster back into Original Coordinate Frame ]
@@ -131,4 +132,4 @@ def create_npet_mesh(RCSB_ID: str):
         recon_pt_weight=PR_ptweight,
     )
 
-    # visualize_mesh(meshpath)
+    visualize_mesh(meshpath)
