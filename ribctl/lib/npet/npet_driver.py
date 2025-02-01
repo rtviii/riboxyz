@@ -21,7 +21,6 @@ from ribctl.lib.npet.kdtree_approach import (
 from ribctl.lib.npet.tunnel_asset_manager import TunnelMeshAssetsManager
 from ribctl.lib.npet.various_visualization import visualize_DBSCAN_CLUSTERS_particular_eps_minnbrs, visualize_filtered_residues, visualize_mesh, visualize_pointcloud, visualize_pointcloud_axis
 
-
 def create_npet_mesh(RCSB_ID: str):
     print("Creating NPET mesh for", RCSB_ID)
     assets = TunnelMeshAssetsManager(RCSB_ID)
@@ -61,7 +60,6 @@ def create_npet_mesh(RCSB_ID: str):
     points            = np.where(~mask)
     empty_coordinates = np.column_stack((x[points[0]], y[points[1]], z[points[2]]))
     back_projected    = transform_points_from_C0( empty_coordinates, ptc_pt, constriction_pt )
-
 
 
     ashape_watertight_mesh = pv.read(ashapepath)

@@ -1,11 +1,12 @@
+import os
 from pathlib import Path
 import sys
-
 sys.path.append("/home/rtviii/dev/riboxyz")
+from ribctl.asset_manager.asset_types import AssetType
+from ribctl import RIBXZ_TEMP_FILES
 from ribctl.lib.npet.kdtree_approach import apply_poisson_reconstruction
 
 from Bio.PDB.MMCIFParser import MMCIFParser
-from alpha_lib import cif_to_point_cloud, validate_mesh_pyvista
 from ribctl.lib.npet.various_visualization import visualize_mesh, visualize_pointcloud
 from ribctl.ribosome_ops import RibosomeOps
 
@@ -14,7 +15,44 @@ import pyvista as pv
 import open3d as o3d
 
 
+def cif_to_point_cloud(cif_path: str, chains: list[str] | None = None,  do_atoms:bool=False):
+    """
+    Convert a CIF file to a point cloud, optionally filtering for specific chains.
+
+    Args:
+        cif_path (str): Path to the CIF file
+        chains (list[str] | None): Optional list of chain IDs to include. If None, includes all chains.
+
+    """
+    parser = MMCIFParser()
+    structure = parser.get_structure("structure", cif_path)
+    coordinates = []
+
+    first_model = structure[0]
+    if do_atoms:
+        for chain in first_model:
+            if chains is not None and chain.id not in chains:
+                continue
+            for residue in chain:
+                for atom in residue:
+                    coordinates.append(atom.get_coord())    
+    else:
+        for chain in first_model:
+            if chains is not None and chain.id not in chains:
+                continue
+            for residue in chain:
+                coordinates.append(residue.center_of_mass())
+
+    if not coordinates:
+        raise ValueError(f"No coordinates found in {cif_path}")
+
+    return np.array(coordinates)
+
+
 def validate_mesh_pyvista(mesh, stage="unknown"):
+
+
+
     """Validate and print mesh properties, focusing on watertightness."""
     if mesh is None:
         print(f"WARNING: Null mesh at stage {stage}")
@@ -34,7 +72,6 @@ def validate_mesh_pyvista(mesh, stage="unknown"):
 
     print(f"- Is watertight: {is_watertight}")
     return mesh
-
 
 def quick_surface_points(
     pointcloud: np.ndarray, alpha: float, tolerance: float, offset: float
@@ -80,78 +117,41 @@ def fast_normal_estimation(
     return pcd
 
 
-def create_mesh_from_pointcloud(
-    pointcloud: np.ndarray,
-    poisson_depth: int = 6,  # Reduced from typical 8-9
-    poisson_weight: float = 2.0,
-    visualize: bool = False,
-) -> tuple[np.ndarray, o3d.geometry.PointCloud]:
-    """
-    Complete pipeline to create a mesh from a point cloud, optimized for speed.
-
-    Args:
-        pointcloud: Input point cloud
-        poisson_depth: Depth for Poisson reconstruction (lower = faster)
-        poisson_weight: Point weight for reconstruction
-        visualize: Whether to visualize the normal estimation
-    Returns:
-        tuple: (surface points, point cloud with normals)
-    """
-    # Get surface points with relaxed parameters
-    surface_pts = quick_surface_points(
-        pointcloud,
-        alpha=2.0,  # Increased alpha for faster computation
-        tolerance=0.01,  # Increased tolerance for faster computation
-    )
-
-    # Estimate normals with reduced parameters
-    pcd_with_normals = fast_normal_estimation(
-        surface_pts,
-        kdtree_radius=5.0,  # Reduced radius
-        max_nn=10,  # Reduced neighbor count
-        tangent_planes_k=5,  # Reduced tangent plane neighbors
-    )
-
-    if visualize:
-        o3d.visualization.draw_geometries([pcd_with_normals], point_show_normal=True)
-
-    return surface_pts, pcd_with_normals
 
 
-if __name__ == "__main__":
-
-    rops                  = RibosomeOps("4TUA")
+def alpha_contour_via_poisson_recon(rcsb_id:str, verbose:bool=False):
+    rops                  = RibosomeOps(rcsb_id)
     cifpath               = rops.assets.paths.cif
     first_assembly_chains = rops.first_assembly_auth_asym_ids()
     ptcloud               = cif_to_point_cloud(cifpath, first_assembly_chains, do_atoms=True)
-    # np.save("4TUA_pointcloud.npy", ptcloud)
-    # ptcloud = np.load("4TUA_pointcloud.npy")
-    visualize_pointcloud(ptcloud)
 
-    output_normals_pcd = "output_normals_pcd.ply"
-    output_mesh = "output_mesh.ply"
+    if verbose:
+        visualize_pointcloud(ptcloud)
+
+    output_normals_pcd = os.path.join(RIBXZ_TEMP_FILES, "{}_normal_estimated_pcd.ply")
+    output_mesh        = AssetType.ALPHA_SHAPE.get_path(rcsb_id)
 
     d3d_alpha  = 15  # Increased from 2
     d3d_tol    = 1
     d3d_offset = 2
 
-    # Normal estimation
     kdtree_radius   = 10    # Reduced from 10
     max_nn          = 20         # Reduced from 100
     tanget_planes_k = 10
 
-    # Poisson reconstruction
-    PR_depth = 6        # Reduced from 6
-    PR_ptweight = 4   
+    PR_depth    = 6        # Reduced from 6
+    PR_ptweight = 4
 
     surface_pts = quick_surface_points(ptcloud, d3d_alpha, d3d_tol, d3d_offset)
-    visualize_pointcloud(surface_pts, "4TUA")
+    if verbose:
+        visualize_pointcloud(surface_pts, rcsb_id)
 
     normal_estimated_pcd = fast_normal_estimation(surface_pts, kdtree_radius, max_nn, tanget_planes_k)
-    o3d.visualization.draw_geometries([normal_estimated_pcd], point_show_normal=True)
+
+    if verbose:
+        o3d.visualization.draw_geometries([normal_estimated_pcd], point_show_normal=True)
 
     o3d.io.write_point_cloud(output_normals_pcd, normal_estimated_pcd)
-
 
     apply_poisson_reconstruction(
         output_normals_pcd,
@@ -159,5 +159,7 @@ if __name__ == "__main__":
         recon_depth=PR_depth,
         recon_pt_weight=PR_ptweight,
     )
+
     validate_mesh_pyvista(pv.read(output_mesh))
-    visualize_mesh(output_mesh)
+    if verbose:
+        visualize_mesh(output_mesh)

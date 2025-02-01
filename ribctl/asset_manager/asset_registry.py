@@ -14,7 +14,8 @@ from ribctl import RIBETL_DATA
 from ribctl.asset_manager.asset_manager import RibosomeAssetManager
 # from ribctl.lib.npet.alpah_lib import produce_alpha_contour
 # from ribctl.lib.npet.alpha_lib_parallel import produce_alpha_contour
-from ribctl.lib.npet.alpha_lib import produce_alpha_contour
+# from ribctl.lib.npet.alpha_lib import produce_alpha_contour
+from ribctl.lib.npet.contour_via_poisson_recon import alpha_contour_via_poisson_recon
 from ribctl.lib.npet.npet_driver import create_npet_mesh
 from ribctl.lib.utils import download_unpack_place
 from ribctl.asset_manager.asset_types import AssetType
@@ -149,9 +150,7 @@ async def npet_mesh_handler(rcsb_id: str, force: bool) -> None:
     create_npet_mesh(rcsb_id)
 
 async def alphashape_handler(rcsb_id: str, force: bool) -> None:
-    # produce_alpha_contour_cupy(rcsb_id, 0.05)
-    produce_alpha_contour(rcsb_id, 0.05)
-    # produce_alpha_contour(rcsb_id, 0.05)
+    alpha_contour_via_poisson_recon(rcsb_id)
 
 main_registry = AssetRegistry(RibosomeAssetManager(RIBETL_DATA))
 

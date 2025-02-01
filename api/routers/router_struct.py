@@ -175,8 +175,6 @@ def structure_ptc(request, rcsb_id: str):
     try:
         ptc = RibosomeAssetManager().load_model(rcsb_id, AssetType.PTC)
         path = AssetType.PTC.get_path(rcsb_id)
-        print(">>>>>>",path)
-        print("OPENEDD PTC:", ptc)
         if not ptc:
             return JsonResponse({"error": "No PTC found for {}".format(rcsb_id)})
         return JsonResponse(ptc.model_dump())

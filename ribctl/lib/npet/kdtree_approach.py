@@ -6,6 +6,10 @@ import open3d as o3d
 import numpy as np
 from scipy.spatial import cKDTree
 import sys
+from scipy.spatial import cKDTree
+import numpy as np
+from Bio.PDB.MMCIFParser import FastMMCIFParser
+from typing import List, Tuple
 
 data_dir = os.getenv('DATA_DIR')
 sys.dont_write_bytecode = True
@@ -318,11 +322,11 @@ def verify_mesh_quality(mesh) -> dict:
     Verifies the quality of the input mesh and returns diagnostics.
     """
     stats = {
-        "n_points": mesh.n_points,
-        "n_faces": mesh.n_faces,
+        "n_points"   : mesh.n_points,
+        "n_faces"    : mesh.n_faces,
         "is_manifold": mesh.is_manifold,
-        "bounds": mesh.bounds,
-        "open_edges": mesh.n_open_edges,
+        "bounds"     : mesh.bounds,
+        "open_edges" : mesh.n_open_edges,
     }
 
     try:
@@ -336,11 +340,9 @@ def verify_mesh_quality(mesh) -> dict:
 def clip_pcd_via_ashape(
     pcd: np.ndarray, mesh: pv.PolyData
 ) -> Tuple[np.ndarray, np.ndarray]:
-
-    # TODO
-    points_poly = pv.PolyData(pcd)
-    select = points_poly.select_enclosed_points(mesh)
-    mask = select["SelectedPoints"]
+    points_poly     = pv.PolyData(pcd)
+    select          = points_poly.select_enclosed_points(mesh)
+    mask            = select["SelectedPoints"]
     ashape_interior = pcd[mask == 1]
     ashape_exterior = pcd[mask == 0]
     return ashape_interior, ashape_exterior
@@ -494,20 +496,18 @@ def filter_residues_parallel(
     filtered_indices = [idx for chunk_result in results for idx in chunk_result]
     return [residues[i] for i in filtered_indices]
 
-from scipy.spatial import cKDTree
-import numpy as np
-from Bio.PDB.MMCIFParser import FastMMCIFParser
-from typing import List, Tuple
 
 
 def clip_tunnel_by_chain_proximity(
-    tunnel_points: np.ndarray,
-    rcsb_id: str,
-    cif_path: str,
-    chain_id: str = 'Y2',
-    n_start_residues: int = 7,
-    start_proximity_threshold: float = 10.0,  # Tighter threshold for start residues
-    rest_proximity_threshold: float = 15.0    # Wider threshold for rest of chain
+
+    tunnel_points            : np.ndarray,
+    rcsb_id                  : str,
+    cif_path                 : str,
+    chain_id                 : str = 'Y2',
+    n_start_residues         : int = 7,
+    start_proximity_threshold: float = 10.0, # Tighter threshold for start residues
+    rest_proximity_threshold : float = 15.0    # Wider threshold for rest of chain
+
 ) -> Tuple[np.ndarray, np.ndarray]:
     """
     Clips a tunnel point cloud using different proximity thresholds for the start
@@ -587,20 +587,3 @@ def clip_tunnel_by_chain_proximity(
     print(f"Removed {len(removed_points)} points")
     
     return kept_points, removed_points
-
-# Example usage in the driver code:
-"""
-# After getting refined_cluster:
-kept_points, removed_points = clip_tunnel_by_chain_proximity(
-    refined_cluster,
-    RCSB_ID,
-    cifpath,
-    chain_id='Y2',
-    n_start_residues=7,
-    start_proximity_threshold=10.0,  # Tighter radius for first 7 residues
-    rest_proximity_threshold=15.0    # Wider radius for rest of chain
-)
-
-# Continue with the kept points for surface reconstruction:
-surface_pts = ptcloud_convex_hull_points(kept_points, d3d_alpha, d3d_tol)
-"""
