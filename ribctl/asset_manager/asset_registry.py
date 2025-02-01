@@ -150,7 +150,8 @@ async def npet_mesh_handler(rcsb_id: str, force: bool) -> None:
     create_npet_mesh(rcsb_id)
 
 async def alphashape_handler(rcsb_id: str, force: bool) -> None:
-    alpha_contour_via_poisson_recon(rcsb_id)
+    alpha_contour_via_poisson_recon(rcsb_id )
+    # alpha_contour_via_poisson_recon(rcsb_id, True)
 
 main_registry = AssetRegistry(RibosomeAssetManager(RIBETL_DATA))
 

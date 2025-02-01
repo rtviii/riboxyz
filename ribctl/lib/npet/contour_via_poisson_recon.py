@@ -71,7 +71,8 @@ def validate_mesh_pyvista(mesh, stage="unknown"):
     is_watertight = edges.n_cells == 0
 
     print(f"- Is watertight: {is_watertight}")
-    return mesh
+    print("DONE\n\n ")
+    return is_watertight
 
 def quick_surface_points(
     pointcloud: np.ndarray, alpha: float, tolerance: float, offset: float
@@ -117,27 +118,31 @@ def fast_normal_estimation(
     return pcd
 
 
-
-
 def alpha_contour_via_poisson_recon(rcsb_id:str, verbose:bool=False):
+    print(f"Generating alpha shape contour for {rcsb_id}")
+    ptcloudpath = os.path.join(RIBXZ_TEMP_FILES, '{}_ptcloud.npx')
     rops                  = RibosomeOps(rcsb_id)
     cifpath               = rops.assets.paths.cif
-    first_assembly_chains = rops.first_assembly_auth_asym_ids()
-    ptcloud               = cif_to_point_cloud(cifpath, first_assembly_chains, do_atoms=True)
+    if not os.path.exists(ptcloudpath):
+        first_assembly_chains = rops.first_assembly_auth_asym_ids()
+        ptcloud               = cif_to_point_cloud(cifpath, first_assembly_chains, do_atoms=True)
+        np.save(ptcloudpath, ptcloud)
+    else:
+        ptcloud = np.load(ptcloudpath)
 
     if verbose:
-        visualize_pointcloud(ptcloud)
+        visualize_pointcloud(ptcloud, rcsb_id)
 
     output_normals_pcd = os.path.join(RIBXZ_TEMP_FILES, "{}_normal_estimated_pcd.ply")
     output_mesh        = AssetType.ALPHA_SHAPE.get_path(rcsb_id)
 
-    d3d_alpha  = 15  # Increased from 2
-    d3d_tol    = 1
-    d3d_offset = 2
+    d3d_alpha  = 45    # Increase from 35 - be more aggressive
+    d3d_tol    = 2     # Increase tolerance to smooth out small details
+    d3d_offset = 3     # Slightly larger offset
 
-    kdtree_radius   = 10    # Reduced from 10
-    max_nn          = 20         # Reduced from 100
-    tanget_planes_k = 10
+    kdtree_radius   = 30    # Larger radius to catch more global structure
+    max_nn          = 30    # More neighbors for more robust estimation
+    tanget_planes_k = 15    # Actually decrease this to avoid over-smoothing
 
     PR_depth    = 6        # Reduced from 6
     PR_ptweight = 4
@@ -160,6 +165,15 @@ def alpha_contour_via_poisson_recon(rcsb_id:str, verbose:bool=False):
         recon_pt_weight=PR_ptweight,
     )
 
-    validate_mesh_pyvista(pv.read(output_mesh))
+    mesh = pv.read(output_mesh)
+    labeled = mesh.connectivity(largest=True)  # This keeps only the largest component
+    
+    # Save the filtered mesh
+    labeled.save(output_mesh)
+    
+    watertight = validate_mesh_pyvista(labeled)
     if verbose:
-        visualize_mesh(output_mesh)
+        visualize_mesh(output_mesh, rcsb_id)
+    if not watertight:
+        print("XXXX Watertightness check failed, removing", output_mesh , " XXXX")
+        os.remove(output_mesh)
