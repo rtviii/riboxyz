@@ -43,23 +43,21 @@ from ribctl.lib.schema.types_ribosome import (
 )
 from ribctl.lib.libtax import Taxid
 
-structure_router = Router()
-TAG = "structures"
+router_structures = Router()
+TAG_STRUCTURES = "structures"
+TAG_LANDMARKS = "landmarks"
 
 
-@structure_router.get("/all_rcsb_ids", response=list[str], tags=[TAG])
+@router_structures.get("/all_rcsb_ids", response=list[str], tags=[TAG_STRUCTURES])
 def all_rcsb_ids(request):
     return dbqueries.all_ids()
 
-
-@structure_router.get(
-    "/polymer_classes_stats", response=list[tuple[str, int]], tags=[TAG]
-)
+@router_structures.get( "/polymer_classes_stats", response=list[tuple[str, int]], tags=[TAG_STRUCTURES] )
 def polymer_classes_stats(request):
     return dbqueries.polymer_classes_stats()
 
 
-@structure_router.get("/tax_dict", response=dict, tags=[TAG])
+@router_structures.get("/tax_dict", response=dict, tags=[TAG_STRUCTURES])
 def tax_dict(request):
     """Returns a dictionary of all taxonomic IDs present in the database as keys, [ scientific name, corresponding superkingdom ] as the values."""
     td = dbqueries.tax_dict()
@@ -69,7 +67,7 @@ def tax_dict(request):
     return _
 
 
-@structure_router.get("/polymer_classification_report", tags=[TAG])
+@router_structures.get("/polymer_classification_report", tags=[TAG_STRUCTURES])
 def polymer_classification_report(request, rcsb_id: str):
     if os.path.exists(RibosomeOps(rcsb_id).assets.paths.classification_report):
         with open(RibosomeOps(rcsb_id).assets.paths.classification_report, "r") as f:
@@ -78,35 +76,14 @@ def polymer_classification_report(request, rcsb_id: str):
         return []
 
 
-@structure_router.get(
-    "/structure_composition_stats", response=StructureCompositionStats, tags=[TAG]
-)
-def structure_composition_stats(request):
-    filename = os.path.join(ASSETS_PATH, "structure_composition_stats.json")
-    if os.path.exists(filename):
-        creation_time = os.path.getctime(filename)
-        creation_date = datetime.datetime.fromtimestamp(creation_time)
-        # TODO:  if past the last update date, rerun
-    else:
-        run_composition_stats()
-
-    with open(filename, "r") as infile:
-        return json.load(infile)
-
-
-@structure_router.get("/random_profile", response=RibosomeStructure, tags=[TAG])
+@router_structures.get("/random_profile", response=RibosomeStructure, tags=[TAG_STRUCTURES])
 def random_profile(request):
     return RibosomeStructure.model_validate(dbqueries.random_structure()[0])
 
 
-@structure_router.get(
-    "/list_ligands", response=list[tuple[dict, list[dict]]], tags=[TAG]
-)
-def list_ligands(request):
-    return dbqueries.list_ligands()
 
 
-@structure_router.post("/list_structures", response=dict, tags=[TAG])
+@router_structures.post("/list_structures", response=dict, tags=[TAG_STRUCTURES])
 def list_structures(request, filters: StructureFilterParams):
     parsed_filters = StructureFilterParams(**json.loads(request.body))
     print(parsed_filters)
@@ -123,31 +100,17 @@ def list_structures(request, filters: StructureFilterParams):
     }
 
 
-@structure_router.post("/list_polymers", response=dict, tags=[TAG])
-def list_polymers(request, filters: PolymersFilterParams):
-    parsed_filters = PolymersFilterParams(**json.loads(request.body))
-    print(parsed_filters)
-    polymers, next_cursor, total_polymers_count, total_structures_count = (
-        dbqueries.list_polymers_filtered(parsed_filters)
-    )
-    polymers_validated = [Polymer.model_validate(p) for p in polymers]
-    return {
-        "polymers": polymers_validated,
-        "next_cursor": next_cursor,
-        "total_polymers_count": total_polymers_count,
-        "total_structures_count": total_structures_count,
-    }
 
 
-@structure_router.get("/structures_overview", response=list[dict], tags=[TAG])
+@router_structures.get("/structures_overview", response=list[dict], tags=[TAG_STRUCTURES])
 def overview(request):
     return dbqueries.structures_overview()
 
 
-@structure_router.get(
+@router_structures.get(
     "/profile",
     response=RibosomeStructure,
-    tags=[TAG],
+    tags=[TAG_STRUCTURES],
 )
 def structure_profile(request, rcsb_id: str):
     """Return a `.json` profile of the given RCSB_ID structure."""
@@ -164,10 +127,10 @@ def structure_profile(request, rcsb_id: str):
         )
 
 
-@structure_router.get(
+@router_structures.get(
     "/ptc",
     response=PTCInfo,
-    tags=[TAG],
+    tags=[TAG_STRUCTURES, TAG_LANDMARKS ],
 )
 def structure_ptc(request, rcsb_id: str):
     params = dict(request.GET)
@@ -182,10 +145,10 @@ def structure_ptc(request, rcsb_id: str):
         return HttpResponseServerError(e)
 
 
-@structure_router.get(
+@router_structures.get(
     "/constriction_site",
     response=ConstrictionSite,
-    tags=[TAG],
+    tags=[TAG_STRUCTURES],
 )
 def constriction_site(request, rcsb_id: str):
     params = dict(request.GET)
@@ -194,7 +157,9 @@ def constriction_site(request, rcsb_id: str):
         # constriction = AssetPathManager().load_model(
         #     rcsb_id, AssetType.CONSTRICTION_SITE
         # )
-        constriction = RibosomeAssetManager().load_model(rcsb_id, AssetType.CONSTRICTION_SITE)
+        constriction = RibosomeAssetManager().load_model(
+            rcsb_id, AssetType.CONSTRICTION_SITE
+        )
         if not constriction:
             return JsonResponse(
                 {"error": "No constriction site found for {}".format(rcsb_id)}
@@ -215,7 +180,7 @@ class ChainsByStruct(Schema):
     rcsb_id: str
 
 
-@structure_router.get("/chains_by_struct", response=list[ChainsByStruct], tags=[TAG])
+@router_structures.get("/chains_by_struct", response=list[ChainsByStruct], tags=[TAG_STRUCTURES])
 def chains_by_struct(request):
     structs_response = dbqueries.list_chains_by_struct()
     return structs_response
@@ -231,7 +196,7 @@ class NomenclatureSet(Schema):
     tRNAClass: list[str]
 
 
-@structure_router.get("/list_nomenclature", response=NomenclatureSet)
+@router_structures.get("/list_nomenclature", response=NomenclatureSet)
 def polymer_classes_nomenclature(request):
     classes = {
         "ElongationFactorClass": [e.value for e in ElongationFactorClass],
@@ -245,86 +210,150 @@ def polymer_classes_nomenclature(request):
     return classes
 
 
-@structure_router.get("/list_source_taxa", response=list[dict], tags=[TAG])
+# @router_structures.get("/list_source_taxa", response=list[dict], tags=[TAG_STRUCTURES])
+# def list_source_taxa(request, source_or_host: typing.Literal["source", "host"]):
+#     """This endpoint informs the frontend about which tax ids are present in the database.
+#     Used for filters/search."""
+
+#     tax_ids = dbqueries.get_taxa(source_or_host)
+#     def normalize_tax_list_to_dict(tax_list: list[int]):
+#         # TODO: This can be done a lot better with recursive descent.
+#         # TODO: Error hnadling?
+#         # You could also parametrize the "include_only" given that all Taxid handles that.
+
+#         def inject_species(node, S: int, F: int, L: int):
+#             """This acts on the family node"""
+#             global nodes
+#             if node["taxid"] == F:
+#                 if (
+#                     len(
+#                         list(
+#                             filter(
+#                                 lambda subnode: subnode["taxid"] == S, node["children"]
+#                             )
+#                         )
+#                     )
+#                     < 1
+#                 ):
+#                     node["children"].append(
+#                         {
+#                             "taxid": S,
+#                             "value": S,
+#                             "title": Taxid.get_name(S),
+#                         }
+#                     )
+#             return node
+
+#         def inject_families(node, S: int, F: int, K: int):
+#             """This acts on the superkingdom node"""
+#             global nodes
+#             if node["taxid"] == K:
+#                 if (
+#                     len(
+#                         list(
+#                             filter(
+#                                 lambda subnode: subnode["taxid"] == F, node["children"]
+#                             )
+#                         )
+#                     )
+#                     < 1
+#                 ):
+#                     node["children"].append(
+#                         {
+#                             "taxid": F,
+#                             "value": F,
+#                             "title": Taxid.get_name(F),
+#                             "children": [],
+#                         }
+#                     )
+#                 list(map(lambda node: inject_species(node, S, F, K), node["children"]))
+#             return node
+
+#         normalized_taxa = []
+#         for tax in tax_list:
+#             p = Taxid.get_lineage(
+#                 tax, include_only=["superkingdom", "family", "species"]
+#             )
+#             K, F, S = p
+#             if len(list(filter(lambda obj: obj["taxid"] == K, normalized_taxa))) < 1:
+#                 normalized_taxa.append(
+#                     {"taxid": K, "value": K, "title": Taxid.get_name(K), "children": []}
+#                 )
+# # 
+#             list(map(lambda node: inject_families(node, S, F, K), normalized_taxa))
+
+#         return normalized_taxa
+
+#     return normalize_tax_list_to_dict(tax_ids)
+
+@router_structures.get("/list_source_taxa", response=list[dict], tags=[TAG_STRUCTURES])
 def list_source_taxa(request, source_or_host: typing.Literal["source", "host"]):
     """This endpoint informs the frontend about which tax ids are present in the database.
     Used for filters/search."""
 
-    tax_ids = dbqueries.get_taxa(source_or_host)
+    def create_node(taxid: int, include_children: bool = True) -> dict:
+        """Create a tree node with standard format"""
+        node = {
+            "taxid": taxid,
+            "value": taxid,
+            "title": Taxid.get_name(taxid)
+        }
+        if include_children:
+            node["children"] = []
+        return node
 
-    def normalize_tax_list_to_dict(tax_list: list[int]):
-        # TODO: This can be done a lot better with recursive descent.
-        # TODO: Error hnadling?
-        # You could also parametrize the "include_only" given that all Taxid handles that.
-
-        def inject_species(node, S: int, F: int, L: int):
-            """This acts on the family node"""
-            global nodes
-            if node["taxid"] == F:
-                if (
-                    len(
-                        list(
-                            filter(
-                                lambda subnode: subnode["taxid"] == S, node["children"]
-                            )
-                        )
-                    )
-                    < 1
-                ):
-                    node["children"].append(
-                        {
-                            "taxid": S,
-                            "value": S,
-                            "title": Taxid.get_name(S),
-                        }
-                    )
-            return node
-
-        def inject_families(node, S: int, F: int, K: int):
-            """This acts on the superkingdom node"""
-            global nodes
-            if node["taxid"] == K:
-                if (
-                    len(
-                        list(
-                            filter(
-                                lambda subnode: subnode["taxid"] == F, node["children"]
-                            )
-                        )
-                    )
-                    < 1
-                ):
-                    node["children"].append(
-                        {
-                            "taxid": F,
-                            "value": F,
-                            "title": Taxid.get_name(F),
-                            "children": [],
-                        }
-                    )
-                list(map(lambda node: inject_species(node, S, F, K), node["children"]))
-            return node
-
-        normalized_taxa = []
-        for tax in tax_list:
-            p = Taxid.get_lineage(
-                tax, include_only=["superkingdom", "family", "species"]
-            )
-            K, F, S = p
-            if len(list(filter(lambda obj: obj["taxid"] == K, normalized_taxa))) < 1:
-                normalized_taxa.append(
-                    {"taxid": K, "value": K, "title": Taxid.get_name(K), "children": []}
+    def build_taxonomy_tree(tax_ids: list[int]) -> list[dict]:
+        # Dictionary to store our hierarchy
+        taxonomy_tree = {}
+        
+        for taxid in tax_ids:
+            try:
+                # Get lineage for current taxid
+                lineage = Taxid.get_lineage(
+                    taxid, 
+                    include_only=["superkingdom", "family", "species"]
                 )
+                
+                if len(lineage) != 3:
+                    continue  # Skip incomplete lineages
+                    
+                superkingdom_id, family_id, species_id = lineage
+                
+                # Add superkingdom if not exists
+                if superkingdom_id not in taxonomy_tree:
+                    taxonomy_tree[superkingdom_id] = create_node(superkingdom_id)
+                
+                # Add family if not exists
+                superkingdom_node = taxonomy_tree[superkingdom_id]
+                family_exists = any(child["taxid"] == family_id 
+                                  for child in superkingdom_node["children"])
+                
+                if not family_exists:
+                    superkingdom_node["children"].append(create_node(family_id))
+                
+                # Add species if not exists
+                family_node = next(child for child in superkingdom_node["children"] 
+                                 if child["taxid"] == family_id)
+                
+                species_exists = any(child["taxid"] == species_id 
+                                   for child in family_node.get("children", []))
+                
+                if not species_exists:
+                    if "children" not in family_node:
+                        family_node["children"] = []
+                    family_node["children"].append(create_node(species_id, False))
+                    
+            except Exception as e:
+                print(f"Error processing taxid {taxid}: {str(e)}")
+                continue
+        
+        return list(taxonomy_tree.values())
 
-            list(map(lambda node: inject_families(node, S, F, K), normalized_taxa))
-
-        return normalized_taxa
-
-    return normalize_tax_list_to_dict(tax_ids)
+    tax_ids = dbqueries.get_taxa(source_or_host)
+    return build_taxonomy_tree(tax_ids)
 
 
-
-@structure_router.get("/tunnel_geometry")
+@router_structures.get("/tunnel_geometry")
 def get_shape(request, rcsb_id: str, is_ascii: bool = False):
     rcsb_id = rcsb_id.upper()
     filename = (
@@ -345,7 +374,7 @@ def get_shape(request, rcsb_id: str, is_ascii: bool = False):
         return Response({"error": "Error reading the shape file"}, status=500)
 
 
-@structure_router.get("/cylinder_residues")
+@router_structures.get("/cylinder_residues")
 def cylinder_residues(request):
     try:
         with open("/home/rtviii/dev/npet-cg-sim/cylinder_residues.json", "rb") as f:
@@ -355,7 +384,7 @@ def cylinder_residues(request):
         print("Couldn not read file")
 
 
-@structure_router.get("/half_cylinder_residues")
+@router_structures.get("/half_cylinder_residues")
 def half_cylinder_residues(request):
     try:
         with open(
@@ -367,7 +396,7 @@ def half_cylinder_residues(request):
         print("Couldn not read file")
 
 
-@structure_router.get("/landmarks/helices/{rcsb_id}")
+@router_structures.get("/landmarks/helices/{rcsb_id}")
 def get_helices(request, rcsb_id: str):
     rcsb_id = rcsb_id.upper()
     file_path = os.path.join("/home/rtviii/dev/riboxyz/7K00_rrna_helices.json")

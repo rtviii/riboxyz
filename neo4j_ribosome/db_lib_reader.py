@@ -522,7 +522,9 @@ RETURN {chemicalId: chemicalId, structures: structs}"""
             )
 
         with self.adapter.driver.session() as session:
-            return session.execute_read(_)
+            read = session.execute_read(_)
+            print(read)
+            return read
 
 dbqueries = Neo4jReader()
 

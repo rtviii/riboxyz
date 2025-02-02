@@ -5,11 +5,11 @@ from ninja import Router
 from ribctl.asset_manager.assets_structure import StructureAssets
 from ribctl.ribosome_ops import RibosomeOps
 
-mmcif_router = Router()
+router_mmcif = Router()
 tag = "mmcif"
 
 
-@mmcif_router.get("/polymer", tags=[tag])
+@router_mmcif.get("/polymer", tags=[tag])
 def polymer(request, rcsb_id: str, auth_asym_id: str):
     rcsb_id = rcsb_id.upper()
     RO = RibosomeOps(rcsb_id)
@@ -31,8 +31,7 @@ def polymer(request, rcsb_id: str, auth_asym_id: str):
     return response
 
 
-
-@mmcif_router.get("/nonpolymer", tags=[tag])
+@router_mmcif.get("/nonpolymer", tags=[tag])
 def nonpolymer(request, rcsb_id: str, chemicalId: str):
     rcsb_id = rcsb_id.upper()
     p = StructureAssets(rcsb_id).paths.nonpoly_entity(chemicalId.upper())

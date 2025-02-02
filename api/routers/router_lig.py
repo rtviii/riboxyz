@@ -15,8 +15,14 @@ from ribctl.lib.libbsite import (
 from ribctl.lib.schema.types_binding_site import BindingSite, LigandTransposition
 from ribctl.lib.seq_project_many_to_one import compact_class, prepare_mapping_sources
 
+from neo4j_ribosome.db_lib_reader import (
+    PolymersFilterParams,
+    StructureFilterParams,
+    dbqueries,
+)
+
 router_lig = Router()
-TAG = "Ligands, Antibitics & Small Molecules"
+TAG        = "Ligands, Antibitics & Small Molecules"
 
 
 @router_lig.get("/binding_pocket", tags=[TAG], response=BindingSite)
@@ -32,7 +38,6 @@ def lig_nbhd(request, source_structure: str, chemical_id: str, radius: int = 5):
 
     with open(path, "r") as f:
         return JsonResponse(json.load(f), safe=False)
-
 
 @router_lig.get("/transpose", tags=[TAG], response=LigandTransposition)
 def lig_transpose(
@@ -65,7 +70,6 @@ def lig_transpose(
 
     return JsonResponse(prediction.model_dump(), safe=False)
 
-
 @router_lig.get("/bsite_composite", tags=[TAG], response=dict)
 def bsite_composite(
     request,
@@ -74,8 +78,6 @@ def bsite_composite(
         compacted_registry = json.load(f)
         pprint("Saved to file bsite_composite.json")
     return JsonResponse(compacted_registry, safe=False)
-
-
 
 BindingSite: TypeAlias = List[Tuple[str, int]]
 
@@ -114,11 +116,13 @@ class ProcessedLigands(BaseModel):
         })
 
 
+@router_lig.get( "/list_ligands", response=list[tuple[dict, list[dict]]], tags=[TAG] )
+def list_ligands(request):
+    return dbqueries.list_ligands()
 
-@router_lig.get("/demo_7k00", tags=[TAG], response=ProcessedLigands)
+@router_lig.get("/demo_7k00", tags=[TAG], response=ProcessedLigands, include_in_schema=False )
 def demo_7k00(request):
     file = os.path.join(ASSETS_PATH, "ligands", "composite_bsites.json")
-
     if not os.path.exists(file):
         return HttpResponseServerError("File not found")
     with open(file, "r") as f:
