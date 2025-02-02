@@ -70,14 +70,6 @@ def lig_transpose(
 
     return JsonResponse(prediction.model_dump(), safe=False)
 
-@router_lig.get("/bsite_composite", tags=[TAG], response=dict)
-def bsite_composite(
-    request,
-):
-    with open("bsite_composite.json", "r") as f:
-        compacted_registry = json.load(f)
-        pprint("Saved to file bsite_composite.json")
-    return JsonResponse(compacted_registry, safe=False)
 
 BindingSite: TypeAlias = List[Tuple[str, int]]
 

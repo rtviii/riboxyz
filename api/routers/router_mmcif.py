@@ -6,7 +6,7 @@ from ribctl.asset_manager.assets_structure import StructureAssets
 from ribctl.ribosome_ops import RibosomeOps
 
 router_mmcif = Router()
-tag = "mmcif"
+tag = "Crystallographic Data (mmCIF)"
 
 
 @router_mmcif.get("/polymer", tags=[tag])

@@ -21,7 +21,7 @@ from neo4j_ribosome.db_lib_reader import (
 )
 
 router_polymers = Router()
-TAG = "Polymer Classes"
+TAG = "Individual Polymer Chains, Classification and Metadata"
 
 
 @router_polymers.get("/polynucleotide", tags=[TAG], response=list[RNA])
@@ -38,7 +38,6 @@ def polynucleotide_class(request, rna_class: PolynucleotideClass):
             agg.append(x.model_dump())
 
     return JsonResponse(agg, safe=False)
-
 
 @router_polymers.get("/polypeptide", tags=[TAG], response=list[Protein])
 def polypeptide_class(request, protein_class: PolypeptideClass):
@@ -71,7 +70,6 @@ def lifecycle_factor_class(request, factor_class: LifecycleFactorClass):
 
     return JsonResponse(agg, safe=False)
 
-
 @router_polymers.post("/list_polymers", response=dict, tags=[TAG])
 def list_polymers(request, filters: PolymersFilterParams):
     parsed_filters = PolymersFilterParams(**json.loads(request.body))
@@ -83,3 +81,7 @@ def list_polymers(request, filters: PolymersFilterParams):
         "total_polymers_count": total_polymers_count,
         "total_structures_count": total_structures_count,
     }
+
+@router_polymers.get( "/polymer_classes_stats", response=list[tuple[str, int]], tags=[TAG] )
+def polymer_classes_stats(request):
+    return dbqueries.polymer_classes_stats()

@@ -44,17 +44,12 @@ from ribctl.lib.schema.types_ribosome import (
 from ribctl.lib.libtax import Taxid
 
 router_structures = Router()
-TAG_STRUCTURES = "structures"
-TAG_LANDMARKS = "landmarks"
+TAG_STRUCTURES = "Atomic Models (Structures) and their Metadata"
 
 
 @router_structures.get("/all_rcsb_ids", response=list[str], tags=[TAG_STRUCTURES])
 def all_rcsb_ids(request):
     return dbqueries.all_ids()
-
-@router_structures.get( "/polymer_classes_stats", response=list[tuple[str, int]], tags=[TAG_STRUCTURES] )
-def polymer_classes_stats(request):
-    return dbqueries.polymer_classes_stats()
 
 
 @router_structures.get("/tax_dict", response=dict, tags=[TAG_STRUCTURES])
@@ -101,7 +96,6 @@ def list_structures(request, filters: StructureFilterParams):
 
 
 
-
 @router_structures.get("/structures_overview", response=list[dict], tags=[TAG_STRUCTURES])
 def overview(request):
     return dbqueries.structures_overview()
@@ -127,46 +121,6 @@ def structure_profile(request, rcsb_id: str):
         )
 
 
-@router_structures.get(
-    "/ptc",
-    response=PTCInfo,
-    tags=[TAG_STRUCTURES, TAG_LANDMARKS ],
-)
-def structure_ptc(request, rcsb_id: str):
-    params = dict(request.GET)
-    rcsb_id = str.upper(params["rcsb_id"][0])
-    try:
-        ptc = RibosomeAssetManager().load_model(rcsb_id, AssetType.PTC)
-        path = AssetType.PTC.get_path(rcsb_id)
-        if not ptc:
-            return JsonResponse({"error": "No PTC found for {}".format(rcsb_id)})
-        return JsonResponse(ptc.model_dump())
-    except Exception as e:
-        return HttpResponseServerError(e)
-
-
-@router_structures.get(
-    "/constriction_site",
-    response=ConstrictionSite,
-    tags=[TAG_STRUCTURES],
-)
-def constriction_site(request, rcsb_id: str):
-    params = dict(request.GET)
-    rcsb_id = str.upper(params["rcsb_id"][0])
-    try:
-        # constriction = AssetPathManager().load_model(
-        #     rcsb_id, AssetType.CONSTRICTION_SITE
-        # )
-        constriction = RibosomeAssetManager().load_model(
-            rcsb_id, AssetType.CONSTRICTION_SITE
-        )
-        if not constriction:
-            return JsonResponse(
-                {"error": "No constriction site found for {}".format(rcsb_id)}
-            )
-        return JsonResponse(constriction.model_dump())
-    except Exception as e:
-        return HttpResponseServerError(e)
 
 
 class ChainsByStruct(Schema):
@@ -186,107 +140,12 @@ def chains_by_struct(request):
     return structs_response
 
 
-class NomenclatureSet(Schema):
-    ElongationFactorClass: list[str]
-    InitiationFactorClass: list[str]
-    CytosolicProteinClass: list[str]
-    MitochondrialProteinClass: list[str]
-    CytosolicRNAClass: list[str]
-    MitochondrialRNAClass: list[str]
-    tRNAClass: list[str]
 
 
-@router_structures.get("/list_nomenclature", response=NomenclatureSet)
-def polymer_classes_nomenclature(request):
-    classes = {
-        "ElongationFactorClass": [e.value for e in ElongationFactorClass],
-        "InitiationFactorClass": [e.value for e in InitiationFactorClass],
-        "CytosolicProteinClass": [e.value for e in CytosolicProteinClass],
-        "MitochondrialProteinClass": [e.value for e in MitochondrialProteinClass],
-        "CytosolicRNAClass": [e.value for e in CytosolicRNAClass],
-        "MitochondrialRNAClass": [e.value for e in MitochondrialRNAClass],
-        "tRNAClass": [e.value for e in tRNA],
-    }
-    return classes
+# *------------------------------------------------------------------------------*
 
 
-# @router_structures.get("/list_source_taxa", response=list[dict], tags=[TAG_STRUCTURES])
-# def list_source_taxa(request, source_or_host: typing.Literal["source", "host"]):
-#     """This endpoint informs the frontend about which tax ids are present in the database.
-#     Used for filters/search."""
-
-#     tax_ids = dbqueries.get_taxa(source_or_host)
-#     def normalize_tax_list_to_dict(tax_list: list[int]):
-#         # TODO: This can be done a lot better with recursive descent.
-#         # TODO: Error hnadling?
-#         # You could also parametrize the "include_only" given that all Taxid handles that.
-
-#         def inject_species(node, S: int, F: int, L: int):
-#             """This acts on the family node"""
-#             global nodes
-#             if node["taxid"] == F:
-#                 if (
-#                     len(
-#                         list(
-#                             filter(
-#                                 lambda subnode: subnode["taxid"] == S, node["children"]
-#                             )
-#                         )
-#                     )
-#                     < 1
-#                 ):
-#                     node["children"].append(
-#                         {
-#                             "taxid": S,
-#                             "value": S,
-#                             "title": Taxid.get_name(S),
-#                         }
-#                     )
-#             return node
-
-#         def inject_families(node, S: int, F: int, K: int):
-#             """This acts on the superkingdom node"""
-#             global nodes
-#             if node["taxid"] == K:
-#                 if (
-#                     len(
-#                         list(
-#                             filter(
-#                                 lambda subnode: subnode["taxid"] == F, node["children"]
-#                             )
-#                         )
-#                     )
-#                     < 1
-#                 ):
-#                     node["children"].append(
-#                         {
-#                             "taxid": F,
-#                             "value": F,
-#                             "title": Taxid.get_name(F),
-#                             "children": [],
-#                         }
-#                     )
-#                 list(map(lambda node: inject_species(node, S, F, K), node["children"]))
-#             return node
-
-#         normalized_taxa = []
-#         for tax in tax_list:
-#             p = Taxid.get_lineage(
-#                 tax, include_only=["superkingdom", "family", "species"]
-#             )
-#             K, F, S = p
-#             if len(list(filter(lambda obj: obj["taxid"] == K, normalized_taxa))) < 1:
-#                 normalized_taxa.append(
-#                     {"taxid": K, "value": K, "title": Taxid.get_name(K), "children": []}
-#                 )
-# # 
-#             list(map(lambda node: inject_families(node, S, F, K), normalized_taxa))
-
-#         return normalized_taxa
-
-#     return normalize_tax_list_to_dict(tax_ids)
-
-@router_structures.get("/list_source_taxa", response=list[dict], tags=[TAG_STRUCTURES])
+@router_structures.get("/list_source_taxa", response=list[dict], tags=[TAG_STRUCTURES], include_in_schema=False)
 def list_source_taxa(request, source_or_host: typing.Literal["source", "host"]):
     """This endpoint informs the frontend about which tax ids are present in the database.
     Used for filters/search."""
@@ -352,57 +211,25 @@ def list_source_taxa(request, source_or_host: typing.Literal["source", "host"]):
     tax_ids = dbqueries.get_taxa(source_or_host)
     return build_taxonomy_tree(tax_ids)
 
-
-@router_structures.get("/tunnel_geometry")
-def get_shape(request, rcsb_id: str, is_ascii: bool = False):
-    rcsb_id = rcsb_id.upper()
-    filename = (
-        "{}_poisson_recon.ply".format(rcsb_id)
-        if not is_ascii
-        else "{}_poisson_recon_ascii.ply".format(rcsb_id)
-    )
-    file_path = AssetType.NPET_MESH_ASCII.get_path(rcsb_id)
-
-    if not os.path.exists(file_path):
-        return Response({"error": "Shape file not found"}, status=404)
-    try:
-        file = open(file_path, "rb")
-        return FileResponse(
-            file, content_type="application/octet-stream", filename=filename
-        )
-    except IOError:
-        return Response({"error": "Error reading the shape file"}, status=500)
+class NomenclatureSet(Schema):
+    ElongationFactorClass: list[str]
+    InitiationFactorClass: list[str]
+    CytosolicProteinClass: list[str]
+    MitochondrialProteinClass: list[str]
+    CytosolicRNAClass: list[str]
+    MitochondrialRNAClass: list[str]
+    tRNAClass: list[str]
 
 
-@router_structures.get("/cylinder_residues")
-def cylinder_residues(request):
-    try:
-        with open("/home/rtviii/dev/npet-cg-sim/cylinder_residues.json", "rb") as f:
-            map = json.load(f)
-        return Response(map)
-    except IOError:
-        print("Couldn not read file")
-
-
-@router_structures.get("/half_cylinder_residues")
-def half_cylinder_residues(request):
-    try:
-        with open(
-            "/home/rtviii/dev/npet-cg-sim/half_cylinder_residues.json", "rb"
-        ) as f:
-            map = json.load(f)
-        return Response(map)
-    except IOError:
-        print("Couldn not read file")
-
-
-@router_structures.get("/landmarks/helices/{rcsb_id}")
-def get_helices(request, rcsb_id: str):
-    rcsb_id = rcsb_id.upper()
-    file_path = os.path.join("/home/rtviii/dev/riboxyz/7K00_rrna_helices.json")
-    try:
-        with open(file_path, "rb") as f:
-            result = json.load(f)
-        return Response(result)
-    except IOError as e:
-        return Response({"error": f"Error reading the helices file {e}"}, status=500)
+@router_structures.get("/list_nomenclature", response=NomenclatureSet, include_in_schema=False)
+def polymer_classes_nomenclature(request):
+    classes = {
+        "ElongationFactorClass"    : [e.value for e in ElongationFactorClass],
+        "InitiationFactorClass"    : [e.value for e in InitiationFactorClass],
+        "CytosolicProteinClass"    : [e.value for e in CytosolicProteinClass],
+        "MitochondrialProteinClass": [e.value for e in MitochondrialProteinClass],
+        "CytosolicRNAClass"        : [e.value for e in CytosolicRNAClass],
+        "MitochondrialRNAClass"    : [e.value for e in MitochondrialRNAClass],
+        "tRNAClass"                : [e.value for e in tRNA],
+    }
+    return classes
