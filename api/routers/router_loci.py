@@ -44,10 +44,10 @@ from ribctl.lib.schema.types_ribosome import (
 from ribctl.lib.libtax import Taxid
 
 router_loci = Router()
-TAG_STRUCTURES = "Biologically Relevant Loci & Landmarks"
+TAG_LOCI = "Biologically Relevant Loci & Landmarks"
 
 
-@router_loci.get("/tunnel_geometry")
+@router_loci.get("/tunnel_geometry", tags=[TAG_LOCI])
 def get_shape(request, rcsb_id: str, is_ascii: bool = False):
     rcsb_id = rcsb_id.upper()
     filename = (
@@ -68,7 +68,7 @@ def get_shape(request, rcsb_id: str, is_ascii: bool = False):
         return Response({"error": "Error reading the shape file"}, status=500)
 
 
-@router_loci.get("/cylinder_residues")
+@router_loci.get("/cylinder_residues", tags=[TAG_LOCI], include_in_schema=False)
 def cylinder_residues(request):
     try:
         with open("/home/rtviii/dev/npet-cg-sim/cylinder_residues.json", "rb") as f:
@@ -78,7 +78,7 @@ def cylinder_residues(request):
         print("Couldn not read file")
 
 
-@router_loci.get("/half_cylinder_residues")
+@router_loci.get("/half_cylinder_residues", tags=[TAG_LOCI], include_in_schema=False)
 def half_cylinder_residues(request):
     try:
         with open(
@@ -90,7 +90,7 @@ def half_cylinder_residues(request):
         print("Couldn not read file")
 
 
-@router_loci.get("/landmarks/helices/{rcsb_id}")
+@router_loci.get("/helices/{rcsb_id}", tags=[TAG_LOCI])
 def get_helices(request, rcsb_id: str):
     rcsb_id = rcsb_id.upper()
     file_path = os.path.join("/home/rtviii/dev/riboxyz/7K00_rrna_helices.json")
@@ -105,7 +105,7 @@ def get_helices(request, rcsb_id: str):
 @router_loci.get(
     "/ptc",
     response=PTCInfo,
-    tags=[TAG_STRUCTURES ],
+    tags=[TAG_LOCI],
 )
 def structure_ptc(request, rcsb_id: str):
     params = dict(request.GET)
@@ -123,9 +123,9 @@ def structure_ptc(request, rcsb_id: str):
 @router_loci.get(
     "/constriction_site",
     response=ConstrictionSite,
-    tags=[TAG_STRUCTURES],
+    tags=[TAG_LOCI],
 )
-def constriction_site(request, rcsb_id: str):
+def constriction_site(request, rcsb_id: str,):
     params = dict(request.GET)
     rcsb_id = str.upper(params["rcsb_id"][0])
     try:

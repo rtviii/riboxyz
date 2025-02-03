@@ -70,7 +70,6 @@ def lig_transpose(
 
     return JsonResponse(prediction.model_dump(), safe=False)
 
-
 BindingSite: TypeAlias = List[Tuple[str, int]]
 
 class LigandInput(BaseModel):

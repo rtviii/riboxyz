@@ -134,7 +134,6 @@ class RibosomeOps:
         profile = self.assets.profile()
         polymer:Polymer
         for polymer in [*profile.rnas, *profile.other_polymers, *profile.proteins]: 
-
             if class_ in  polymer.nomenclature and polymer.assembly_id == assembly and polymer.entity_poly_seq_length > 30:
                 return polymer
 
