@@ -46,7 +46,6 @@ from ribctl.lib.libtax import Taxid
 router_loci = Router()
 TAG_LOCI = "Biologically Relevant Loci & Landmarks"
 
-
 @router_loci.get("/tunnel_geometry", tags=[TAG_LOCI])
 def get_shape(request, rcsb_id: str, is_ascii: bool = False):
     rcsb_id = rcsb_id.upper()

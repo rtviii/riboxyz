@@ -145,7 +145,7 @@ def chains_by_struct(request):
 # *------------------------------------------------------------------------------*
 
 
-@router_structures.get("/list_source_taxa", response=list[dict], tags=[TAG_STRUCTURES], include_in_schema=False)
+@router_structures.get("/list_source_taxa", response=list[dict], tags=[TAG_STRUCTURES])
 def list_source_taxa(request, source_or_host: typing.Literal["source", "host"]):
     """This endpoint informs the frontend about which tax ids are present in the database.
     Used for filters/search."""
@@ -221,7 +221,7 @@ class NomenclatureSet(Schema):
     tRNAClass: list[str]
 
 
-@router_structures.get("/list_nomenclature", response=NomenclatureSet, include_in_schema=False)
+@router_structures.get("/list_nomenclature", response=NomenclatureSet)
 def polymer_classes_nomenclature(request):
     classes = {
         "ElongationFactorClass"    : [e.value for e in ElongationFactorClass],

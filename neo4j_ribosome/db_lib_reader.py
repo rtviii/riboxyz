@@ -179,6 +179,22 @@ RETURN {chemicalId: chemicalId, structures: structs}"""
                     return [record[0] for record in result]
             return session.execute_read(_)
 
+
+    def ligands_in_structure(self, rcsb_id):
+        with self.adapter.driver.session() as session:
+                def _(tx: Transaction | ManagedTransaction):
+                    result = tx.run(
+                        """ 
+                        MATCH (n:Ligand)-[]-(R:RibosomeStructure{rcsb_id: $rcsb_id}) 
+                        RETURN properties(n)
+                        """,
+                        {"rcsb_id": rcsb_id}
+                    )
+                    return [record[0] for record in result]
+                return session.execute_read(_)
+
+
+
     def list_ligands(self, nodes_only: bool = False):
         with self.adapter.driver.session() as session:
             def _(tx: Transaction | ManagedTransaction):

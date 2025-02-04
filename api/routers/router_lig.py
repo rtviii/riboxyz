@@ -111,7 +111,12 @@ class ProcessedLigands(BaseModel):
 def list_ligands(request):
     return dbqueries.list_ligands()
 
-@router_lig.get("/demo_7k00", tags=[TAG], response=ProcessedLigands, include_in_schema=False )
+
+@router_lig.get("/{rcsb_id}", tags=[TAG])
+def ligands_in_structure(request, rcsb_id: str):
+    return dbqueries.ligands_in_structure(rcsb_id)
+
+@router_lig.get("/demo_7k00", tags=[TAG], response=ProcessedLigands)
 def demo_7k00(request):
     file = os.path.join(ASSETS_PATH, "ligands", "composite_bsites.json")
     if not os.path.exists(file):
