@@ -22,7 +22,7 @@ from neo4j_ribosome.db_lib_reader import (
 )
 
 router_lig = Router()
-TAG        = "Ligands, Antibitics & Small Molecules"
+TAG = "Ligands, Antibitics & Small Molecules"
 
 
 @router_lig.get("/binding_pocket", tags=[TAG], response=BindingSite)
@@ -38,6 +38,7 @@ def lig_nbhd(request, source_structure: str, chemical_id: str, radius: int = 5):
 
     with open(path, "r") as f:
         return JsonResponse(json.load(f), safe=False)
+
 
 @router_lig.get("/transpose", tags=[TAG], response=LigandTransposition)
 def lig_transpose(
@@ -57,7 +58,7 @@ def lig_transpose(
         with open(prediction_path, "r") as f:
             return JsonResponse(json.load(f), safe=False)
 
-    bsite      = bsite_ligand(chemical_id, source_structure, radius)
+    bsite = bsite_ligand(chemical_id, source_structure, radius)
     prediction = bsite_transpose(source_structure, target_structure, bsite)
 
     with open(prediction_path, "w") as f:
@@ -70,51 +71,79 @@ def lig_transpose(
 
     return JsonResponse(prediction.model_dump(), safe=False)
 
+
 BindingSite: TypeAlias = List[Tuple[str, int]]
+
 
 class LigandInput(BaseModel):
     """Input model for a single ligand"""
+
     chemicalId: str
     chemicalName: str
-    purported_7K00_binding_site: Optional[List[List[str | int]]] = Field(default_factory=list)
+    purported_7K00_binding_site: Optional[List[List[str | int]]] = Field(
+        default_factory=list
+    )
     ribosome_ligand_categories: Optional[List[str]] = Field(default_factory=list)
+
 
 class ProcessedLigand(BaseModel):
     """Model for processed ligand data"""
+
     chemicalId: str
     chemicalName: str
     purported_7K00_binding_site: List[List[str | int]] = Field(default_factory=list)
 
+
 class CategoryData(BaseModel):
     """Model for data within each category"""
+
     items: List[ProcessedLigand] = Field(default_factory=list)
     composite_bsite: List[List[str | int]] = Field(default_factory=list)
+
 
 class ProcessedLigands(BaseModel):
     """
     Root model for the processed ligands response
     The keys are category names and values are CategoryData objects
     """
+
     class Config:
         extra = "allow"  # Allows dynamic category names as keys
-    
+
     @classmethod
     def from_dict(cls, data: dict) -> "ProcessedLigands":
         """Create a ProcessedLigands instance from a dictionary"""
-        return cls(**{
-            category: CategoryData(**category_data)
-            for category, category_data in data.items()
-        })
+        return cls(
+            **{
+                category: CategoryData(**category_data)
+                for category, category_data in data.items()
+            }
+        )
 
 
-@router_lig.get( "/list_ligands", response=list[tuple[dict, list[dict]]], tags=[TAG] )
+@router_lig.get("/list_ligands", response=list[tuple[dict, list[dict]]], tags=[TAG])
 def list_ligands(request):
     return dbqueries.list_ligands()
 
+@router_lig.get("entity", tags=[TAG])
+def entity(request, rcsb_id: str):
+    print("GOT HERE  -213121", rcsb_id)
+    return None
 
-@router_lig.get("/{rcsb_id}", tags=[TAG])
-def ligands_in_structure(request, rcsb_id: str):
-    return dbqueries.ligands_in_structure(rcsb_id)
+@router_lig.get("/in_structure", tags=[TAG])
+def in_structure(request, rcsb_id: str):
+
+    params = dict(request.GET)
+    rcsb_id = str.upper(params["rcsb_id"][0])
+    print("GOT HERE", rcsb_id)
+    try:
+        ligs = dbqueries.ligands_in_structure(rcsb_id.upper())
+        print(ligs)
+        return ligs
+    except Exception as e:
+        print(f"Error processing request: {str(e)}")
+        raise
+
 
 @router_lig.get("/demo_7k00", tags=[TAG], response=ProcessedLigands)
 def demo_7k00(request):

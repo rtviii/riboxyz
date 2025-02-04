@@ -76,8 +76,6 @@ def random_profile(request):
     return RibosomeStructure.model_validate(dbqueries.random_structure()[0])
 
 
-
-
 @router_structures.post("/list_structures", response=dict, tags=[TAG_STRUCTURES])
 def list_structures(request, filters: StructureFilterParams):
     parsed_filters = StructureFilterParams(**json.loads(request.body))
@@ -138,8 +136,6 @@ class ChainsByStruct(Schema):
 def chains_by_struct(request):
     structs_response = dbqueries.list_chains_by_struct()
     return structs_response
-
-
 
 
 # *------------------------------------------------------------------------------*
