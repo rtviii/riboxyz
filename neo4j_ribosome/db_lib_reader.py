@@ -179,6 +179,25 @@ RETURN {chemicalId: chemicalId, structures: structs}"""
                     return [record[0] for record in result]
             return session.execute_read(_)
 
+
+    def ligands_in_structure(self, rcsb_id):
+        print("GOT HERE", rcsb_id)
+        with self.adapter.driver.session() as session:
+            def _(tx: Transaction | ManagedTransaction):
+                result = tx.run(
+                    """MATCH (n:Ligand)-[]-(R:RibosomeStructure {rcsb_id: $rcsb_id})
+                    RETURN properties(n)
+                    """,{
+                        "rcsb_id": rcsb_id.upper()
+                    }
+                )
+                k = [record[0] for record in result]
+                print("OGT>>>>>>>>>>>>>>>>>",k)
+                return k
+            return session.execute_read(_)
+
+
+
     def list_ligands(self, nodes_only: bool = False):
         with self.adapter.driver.session() as session:
             def _(tx: Transaction | ManagedTransaction):
@@ -522,7 +541,9 @@ RETURN {chemicalId: chemicalId, structures: structs}"""
             )
 
         with self.adapter.driver.session() as session:
-            return session.execute_read(_)
+            read = session.execute_read(_)
+            print(read)
+            return read
 
 dbqueries = Neo4jReader()
 
