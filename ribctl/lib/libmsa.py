@@ -1,4 +1,6 @@
 from io import StringIO
+import sys
+sys.path.append('/home/rtviii/dev/riboxyz')
 from pprint import pprint
 import tempfile
 import os
@@ -31,7 +33,7 @@ from ribctl import ASSETS, NCBI_TAXA_SQLITE
 from ribctl.lib.libtax import Taxid
 
 
-class Fasta:
+class Fasta :
     records: list[SeqRecord]
     def __init__( self, path: str | None = None, records: list[SeqRecord] | None = None ) -> None:
         if path is not None:
@@ -284,7 +286,6 @@ class FastaBalancer:
                            if int(record.id) in selected_taxids]
         return Fasta(records=selected_records)
 
-    # [Previous visualization methods remain unchanged]
     def print_taxonomic_tree(self, taxids: List[int], title: str):
         """Print a hierarchical view of the taxonomic distribution."""
         rich_tree = RichTree(f"[bold blue]{title}[/bold blue]")
@@ -353,7 +354,7 @@ class FastaBalancer:
         self.console.print("\n[bold]Taxonomic Distribution After Filtering:[/bold]")
         self.print_taxonomic_tree(list(selected_taxids), "Balanced Dataset")
 
-if __name__ == "__main__":
-    fasta          = Fasta(os.path.join(ASSETS["fasta_rna"], "16SrRNA.fasta"))
-    balancer       = FastaBalancer(fasta)
-    filtered_fasta = balancer.balance_dataset_sparse(target_size=10)
+# if __name__ == "__main__":
+#     fasta          = Fasta(os.path.join(ASSETS["fasta_proteins_cytosolic"], "uL4.fasta"))
+#     balancer       = FastaBalancer(fasta)
+#     filtered_fasta = balancer.balance_dataset_sparse(target_size=10)
