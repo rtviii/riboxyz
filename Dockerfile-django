@@ -44,8 +44,6 @@ RUN pip3 install -r ${RIBXZ_API}/reqs.txt
 
 
 
-
-
 # Django ports
 EXPOSE 8000 8001 8002
 
@@ -55,7 +53,13 @@ COPY ribctl ${RIBCTL}
 COPY neo4j_ribosome ${NEO4J_RIBOSOME}
 WORKDIR ${RIBXZ_API}
 ENV RIBETL_DATA ${RIBETL_DATA}
-RUN python manage.py collectstatic --noinput
+RUN mkdir -p ${RIBXZ_API}/staticfiles
+ENTRYPOINT ["sh", "-c", "\
+    python manage.py collectstatic --noinput && \
+    gunicorn --bind 0.0.0.0:8000 \
+    --workers 10 \
+    ribxz_api.wsgi:application \
+    --reload \
+    --timeout 500 \
+    --log-level debug"]
 
-
-ENTRYPOINT ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "10", "ribxz_api.wsgi:application","--reload", "--timeout", "500"]

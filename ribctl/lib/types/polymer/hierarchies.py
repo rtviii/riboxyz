@@ -1,8 +1,5 @@
 from enum import Enum
-from pprint import pprint
-from typing import Literal, Union, Type, Iterator, TypeVar, Generic, get_args
-from functools import reduce
-from operator import or_
+from typing import  Union, Type, Iterator, TypeVar, Generic
 
 from ribctl.lib.types.polymer.base import CytosolicProteinClass, CytosolicRNAClass, ElongationFactorClass, InitiationFactorClass, MitochondrialProteinClass, MitochondrialRNAClass, tRNA
 
@@ -60,3 +57,5 @@ LifecycleFactors = PolymerHierarchy( ElongationFactorClass, InitiationFactorClas
 Polypeptides     = PolymerHierarchy( MitochondrialProteinClass, CytosolicProteinClass, ElongationFactorClass, InitiationFactorClass, name="Polypeptides", )
 Polynucleotides  = PolymerHierarchy( CytosolicRNAClass, MitochondrialRNAClass, tRNA, name="Polynucleotides" )
 Polymers         = PolymerHierarchy( MitochondrialProteinClass, CytosolicProteinClass, ElongationFactorClass, InitiationFactorClass, CytosolicRNAClass, MitochondrialRNAClass, tRNA, name="Polymers" )
+
+print(Polynucleotides)

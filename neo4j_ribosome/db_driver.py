@@ -12,7 +12,7 @@ sys.dont_write_bytecode = True
 # * Recipe for initializing a new instance from the RIBETL_DATA pool
 # * - assumes the RibosomeStrucutre profiles are rendered
 def full_upload():
-    adapter = Neo4jAdapter(NEO4J_URI, NEO4J_USER, NEO4J_CURRENTDB)
+    adapter = Neo4jAdapter(NEO4J_URI, NEO4J_USER, NEO4J_CURRENTDB,NEO4J_PASSWORD)
     adapter.initialize_new_instance()
     futures: list[Future] = []
 
@@ -25,7 +25,7 @@ def full_upload():
 
 # * Add only the profiles that are missing versus the RCSB.
 def rcsb_sync():
-    adapter = Neo4jAdapter(NEO4J_URI, NEO4J_USER, NEO4J_CURRENTDB)
+    adapter = Neo4jAdapter(NEO4J_URI, NEO4J_USER, NEO4J_CURRENTDB, NEO4J_PASSWORD)
     futures: list[Future] = []
     with ThreadPoolExecutor(max_workers=10) as executor:
         for rcsb_id in sorted(StructureAssets.status_vs_rcsb()):
@@ -36,7 +36,7 @@ def rcsb_sync():
 
 # * Alter only the core structure nodes given the profile is already rendered. (Does not alter the polymer nodes, etc.)
 def upsert_all_structures():
-    adapter = Neo4jAdapter(NEO4J_URI, NEO4J_USER, NEO4J_CURRENTDB)
+    adapter = Neo4jAdapter(NEO4J_URI, NEO4J_USER, NEO4J_CURRENTDB,NEO4J_PASSWORD )
     futures: list[Future] = []
     with ThreadPoolExecutor(max_workers=10) as executor:
         for rcsb_id in sorted(GlobalView.list_all_structs()):
@@ -55,7 +55,7 @@ def upsert_all_ligands():
             ):
                 unique[ligand.chemicalId] = ligand
 
-    adapter = Neo4jAdapter(NEO4J_URI, NEO4J_USER, NEO4J_CURRENTDB)
+    adapter = Neo4jAdapter(NEO4J_URI, NEO4J_USER, NEO4J_CURRENTDB, NEO4J_PASSWORD)
     futures: list[Future] = []
 
     with ThreadPoolExecutor(max_workers=10) as executor:

@@ -4,16 +4,23 @@ services:
     container_name: neo
     image: neo4j:5.19.0-enterprise
     restart: always
+    env_file:
+          - ./.env
 
     environment:
-
-      - NEO4J_AUTH=none #this disables auth on a fresh node
+      - NEO4J_AUTH=neo4j/${NEO4J_PASSWORD}  # Format is username/password
       - NEO4J_ACCEPT_LICENSE_AGREEMENT=eval
       - NEO4J_apoc_export_file_enabled=true
       - NEO4J_apoc_import_file_enabled=true
       - NEO4J_apoc_import_file_use__neo4j__config=true
       - NEO4J_PLUGINS=\[\"apoc-extended\"\]
 
+      # - NEO4J_AUTH=none #this disables auth on a fresh node
+      # - NEO4J_ACCEPT_LICENSE_AGREEMENT=eval
+      # - NEO4J_apoc_export_file_enabled=true
+      # - NEO4J_apoc_import_file_enabled=true
+      # - NEO4J_apoc_import_file_use__neo4j__config=true
+      # - NEO4J_PLUGINS=\[\"apoc-extended\"\]
 
     ports:
 
@@ -22,10 +29,8 @@ services:
       - 7687:7687
 
     volumes:
-      # Would be nice to automate this bit: 
-      # sudo chown -R 7474:7474 /opt/ribxz_neo4j_volume && sudo chown -R 755 /opt/ribxz_neo4j_volume
-      # still not sure how to do it from hostspace and inside docker-compose(would like to avoid separate Neo4j Dockerfile).
 
+      # sudo chown -R 7474:7474 /opt/ribxz_neo4j_volume && sudo chown -R 755 /opt/ribxz_neo4j_volume
       - ${NEO4J_MOUNTPATH}/plugins:/var/lib/neo4j/plugins  #<-- don't forget to move apoc.jar to this folder
       - ${NEO4J_MOUNTPATH}/data:/var/lib/neo4j/data
       - ${NEO4J_MOUNTPATH}/conf:/var/lib/neo4j/conf
@@ -61,10 +66,9 @@ services:
 
     environment:
       - RIBETL_DATA=/home/RIBETL_DATA
-
       - NEO4J_URI=bolt://neo:7687
       - NEO4J_USER=neo4j
-      - NEO4J_PASSWORD=
+      - NEO4J_PASSWORD=${NEO4J_PASSWORD}
       - NEO4J_CURRENTDB=ribxz
 
     links:
