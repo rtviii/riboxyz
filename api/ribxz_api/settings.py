@@ -4,10 +4,13 @@ from dotenv import load_dotenv
 import sys
 load_dotenv(".env")
 
-SECRET_KEY = os.environ.get("SECRET_KEY")
-DEBUG      = bool(os.environ.get("DEBUG", default=0))
-BASE_DIR   = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-RIBCTL     = os.path.abspath(os.path.join(Path(BASE_DIR).parent.absolute()))
+SECRET_KEY  = os.environ.get("SECRET_KEY")
+DEBUG       = bool(os.environ.get("DEBUG", default=0))
+BASE_DIR    = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+STATIC_URL = '/static/'
+STATIC_ROOT = os.environ.get("DJANGO_STATIC_FILES_PATH", os.path.join(BASE_DIR, 'staticfiles'))
+RIBCTL      = os.path.abspath(os.path.join(Path(BASE_DIR).parent.absolute()))
+
 # RIBCTL     = os.path.abspath(os.path.join(Path(BASE_DIR).parent.absolute(),'ribctl'))
 # print("Sourced RIBCTL: {}".format(RIBCTL))
 sys.path.append(RIBCTL)       #! hack until ribctl is a separate pypi project
@@ -29,7 +32,7 @@ INSTALLED_APPS = [
     'ninja']
 
 MIDDLEWARE = [
-    #'django.middleware.security.SecurityMiddleware',
+    'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -86,14 +89,7 @@ USE_L10N      = True
 USE_TZ        = True
 
 
-
-# STATIC_URL lets you namespace your static files to avoid url conflicts and make them inaccessible from the browser
-STATIC_URL       = '/static/'
-
-# STATIC_ROOT is where all the static files are collected by manage.py collectstatic
-STATIC_ROOT      = os.environ.get("DJANGO_STATIC_FILES_PATH")
-STATICFILES_DIRS = [ os.path.join(BASE_DIR, 'static'), ]
-
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, "mediafiles")
-
+if DEBUG:
+    STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+else:
+    STATICFILES_DIRS = []

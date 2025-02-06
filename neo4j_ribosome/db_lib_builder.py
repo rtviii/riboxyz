@@ -27,6 +27,7 @@ from ribctl.lib.schema.types_ribosome import (
     RibosomeStructure,
     RibosomeStructureMetadata,
 )
+from ribctl.lib.types.polymer.hierarchies import Polynucleotides, Polypeptides, Polymers
 from ribctl.lib.types.polymer import     MitochondrialProteinClass, PolynucleotideClass, PolynucleotideClass
 from ribctl.ribosome_ops import StructureAssets, RibosomeOps, Structure
 from neo4j import GraphDatabase, Driver, ManagedTransaction, Transaction
@@ -80,13 +81,13 @@ class Neo4jAdapter:
         with self.driver.session() as session:
             for c in NODE_CONSTRAINTS:
                 session.execute_write(lambda tx: tx.run(c))
-                print("Added constraint: ", c)
+                print("\nAdded constraint: ", c)
 
     def init_polymer_classes(self):
         with self.driver.session() as session:
-            for polymer_class in [*list(PolynucleotideClass)]:
+            for polymer_class in [*list(Polymers)]:
                 session.execute_write(node__polymer_class(polymer_class.value))
-            print("Added polymer classes: ", [*list(PolynucleotideClass)])
+            print("\nAdded polymer classes: ", [*list(Polymers)])
 
     def add_phylogeny_node(self, taxid: int) -> Node:
         with self.driver.session() as session:
@@ -179,7 +180,7 @@ class Neo4jAdapter:
             if self.check_structure_exists(rcsb_id):
                 print("\nStruct node {} already exists.".format(rcsb_id))
                 return
-
+    
         R: RibosomeStructure = RibosomeOps(rcsb_id).profile
 
         with self.driver.session() as s:
