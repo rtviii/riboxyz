@@ -57,5 +57,3 @@ LifecycleFactors = PolymerHierarchy( ElongationFactorClass, InitiationFactorClas
 Polypeptides     = PolymerHierarchy( MitochondrialProteinClass, CytosolicProteinClass, ElongationFactorClass, InitiationFactorClass, name="Polypeptides", )
 Polynucleotides  = PolymerHierarchy( CytosolicRNAClass, MitochondrialRNAClass, tRNA, name="Polynucleotides" )
 Polymers         = PolymerHierarchy( MitochondrialProteinClass, CytosolicProteinClass, ElongationFactorClass, InitiationFactorClass, CytosolicRNAClass, MitochondrialRNAClass, tRNA, name="Polymers" )
-
-print(Polynucleotides)

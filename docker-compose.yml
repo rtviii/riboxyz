@@ -13,7 +13,7 @@ services:
       - NEO4J_apoc_export_file_enabled=true
       - NEO4J_apoc_import_file_enabled=true
       - NEO4J_apoc_import_file_use__neo4j__config=true
-      - NEO4J_PLUGINS=\[\"apoc-extended\"\]
+      - NEO4J_PLUGINS=["apoc"]  # Not "apoc-extended"
 
       # - NEO4J_AUTH=none #this disables auth on a fresh node
       # - NEO4J_ACCEPT_LICENSE_AGREEMENT=eval
@@ -36,10 +36,10 @@ services:
       - ${NEO4J_MOUNTPATH}/conf:/var/lib/neo4j/conf
       - ${NEO4J_MOUNTPATH}/logs:/var/lib/neo4j/logs
 
-      - type  : bind
-        source: ${RIBETL_DATA:?err}
-        target: /import/RIBETL_DATA
-        read_only: true
+      # - type: bind
+      #   source: ${RIBETL_DATA:?err}
+      #   target: /import/RIBETL_DATA:Z
+      #   read_only: true
 
   django:
     env_file:

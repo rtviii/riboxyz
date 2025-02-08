@@ -14,7 +14,6 @@ import numpy as np
 import pyvista as pv
 import open3d as o3d
 
-
 def cif_to_point_cloud(cif_path: str, chains: list[str] | None = None,  do_atoms:bool=False):
     """
     Convert a CIF file to a point cloud, optionally filtering for specific chains.
@@ -47,7 +46,6 @@ def cif_to_point_cloud(cif_path: str, chains: list[str] | None = None,  do_atoms
         raise ValueError(f"No coordinates found in {cif_path}")
 
     return np.array(coordinates)
-
 
 def validate_mesh_pyvista(mesh, stage="unknown"):
 
@@ -115,7 +113,6 @@ def fast_normal_estimation(
     pcd.orient_normals_consistent_tangent_plane(k=tangent_planes_k)
 
     return pcd
-
 
 def alpha_contour_via_poisson_recon(rcsb_id:str, verbose:bool=False):
     print(f"Generating alpha shape contour for {rcsb_id}")

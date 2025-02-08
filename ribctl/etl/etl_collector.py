@@ -864,8 +864,6 @@ class ETLCollector:
             PolymerEntitiesString.replace("$RCSB_ID", self.rcsb_id)
         )["entry"]
 
-        # pprint(polymers_data)
-        # exit()
         proteins, rna, other = PolymersNode(polymers_data).process(
             override_classification=reclassify
         )

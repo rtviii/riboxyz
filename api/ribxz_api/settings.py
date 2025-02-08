@@ -7,12 +7,8 @@ load_dotenv(".env")
 SECRET_KEY  = os.environ.get("SECRET_KEY")
 DEBUG       = bool(os.environ.get("DEBUG", default=0))
 BASE_DIR    = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-STATIC_URL = '/static/'
-STATIC_ROOT = os.environ.get("DJANGO_STATIC_FILES_PATH", os.path.join(BASE_DIR, 'staticfiles'))
 RIBCTL      = os.path.abspath(os.path.join(Path(BASE_DIR).parent.absolute()))
 
-# RIBCTL     = os.path.abspath(os.path.join(Path(BASE_DIR).parent.absolute(),'ribctl'))
-# print("Sourced RIBCTL: {}".format(RIBCTL))
 sys.path.append(RIBCTL)       #! hack until ribctl is a separate pypi project
 
 RIBETL_DATA = os.environ.get("RIBETL_DATA")
@@ -89,6 +85,8 @@ USE_L10N      = True
 USE_TZ        = True
 
 
+STATIC_URL = '/static/'
+STATIC_ROOT = os.environ.get("DJANGO_STATIC_FILES_PATH", os.path.join(BASE_DIR, 'staticfiles'))
 if DEBUG:
     STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 else:
