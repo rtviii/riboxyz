@@ -13,7 +13,7 @@ services:
       - NEO4J_apoc_export_file_enabled=true
       - NEO4J_apoc_import_file_enabled=true
       - NEO4J_apoc_import_file_use__neo4j__config=true
-      - NEO4J_PLUGINS=["apoc"]  # Not "apoc-extended"
+      - NEO4J_PLUGINS=["apoc"]  
 
       # - NEO4J_AUTH=none #this disables auth on a fresh node
       # - NEO4J_ACCEPT_LICENSE_AGREEMENT=eval

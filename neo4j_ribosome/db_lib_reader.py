@@ -312,10 +312,10 @@ RETURN {chemicalId: chemicalId, structures: structs}"""
 
         query_parts.extend(
             [
-                "WITH filtered_structures[0..20] AS structures,",
+                "WITH filtered_structures[0..{}] AS structures,".format(params["limit"]),
                 "     total_count,",
-                "     CASE WHEN size(filtered_structures) > 20",
-                "          THEN filtered_structures[20].rcsb_id",
+                "     CASE WHEN size(filtered_structures) > {}".format(params["limit"]),
+                "          THEN filtered_structures[{}].rcsb_id".format(params["limit"]),
                 "          ELSE null",
                 "     END AS next_cursor",
                 "RETURN",
