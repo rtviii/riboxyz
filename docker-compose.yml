@@ -4,23 +4,19 @@ services:
     container_name: neo
     image: neo4j:5.19.0-enterprise
     restart: always
-    env_file:
-          - ./.env
+
+    # ! If you activate the .env ingestion, make sure it doesnt contain NEO4J_* form vars.
+    # ! They will get injected into the neo4j.conf and fuck you. Just source the .env file before running compose.
+    # env_file:
+    #       - ./.env
 
     environment:
       - NEO4J_AUTH=neo4j/${NEO4J_PASSWORD}  # Format is username/password
-      - NEO4J_ACCEPT_LICENSE_AGREEMENT=eval
+      - NEO4J_ACCEPT_LICENSE_AGREEMENT=yes
       - NEO4J_apoc_export_file_enabled=true
       - NEO4J_apoc_import_file_enabled=true
       - NEO4J_apoc_import_file_use__neo4j__config=true
       - NEO4J_PLUGINS=["apoc"]  
-
-      # - NEO4J_AUTH=none #this disables auth on a fresh node
-      # - NEO4J_ACCEPT_LICENSE_AGREEMENT=eval
-      # - NEO4J_apoc_export_file_enabled=true
-      # - NEO4J_apoc_import_file_enabled=true
-      # - NEO4J_apoc_import_file_use__neo4j__config=true
-      # - NEO4J_PLUGINS=\[\"apoc-extended\"\]
 
     ports:
 
@@ -36,6 +32,8 @@ services:
       - ${NEO4J_MOUNTPATH}/conf:/var/lib/neo4j/conf
       - ${NEO4J_MOUNTPATH}/logs:/var/lib/neo4j/logs
 
+      # ! In theory this is not necessary since the API's adapter performs ETL now.
+      # ! If manual imports are necessary -- uncomment this.
       # - type: bind
       #   source: ${RIBETL_DATA:?err}
       #   target: /import/RIBETL_DATA:Z
@@ -56,13 +54,13 @@ services:
         source: ${RIBETL_DATA:?err}
         target: /home/RIBETL_DATA
 
-      # *FOR LIVE DEVELOPMENT -----------------------|
+      # !FOR LIVE DEVELOPMENT -----------------------|
       # - What this does is it mounts the local version of the ribxz_api folder to the container's /home/ribxz_api
       # So instead of just a static mounted version inside the container,
       # the changes made to the local ribxz folder will be reflected inside the container
       # while it is running.
       # - ./ribxz_api:/home/ribxz_api                    #|  <--- DEV ONLY
-      #* --------------------------------------------|
+      #! --------------------------------------------|
 
     environment:
       - RIBETL_DATA=/home/RIBETL_DATA

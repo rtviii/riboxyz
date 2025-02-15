@@ -49,6 +49,7 @@ def create_npet_mesh(RCSB_ID: str):
     }
     residues          = ribosome_entities(RCSB_ID, cifpath, "R", tunnel_debris[RCSB_ID] if RCSB_ID in tunnel_debris else [])
     filtered_residues = filter_residues_parallel(residues, ptc_pt, constriction_pt, R, H)
+
     filtered_points   = np.array( [atom.get_coord() for residue in filtered_residues for atom in residue.child_list] )
 
     visualize_filtered_residues(filtered_residues, residues, ptc_pt, constriction_pt, R, H)
@@ -56,10 +57,10 @@ def create_npet_mesh(RCSB_ID: str):
     transformed_points = transform_points_to_C0( filtered_points, ptc_pt, constriction_pt )
     mask, (x, y, z) = create_point_cloud_mask(
         transformed_points,
-        radius=R,
-        height=H,
-        voxel_size=Vsize,
-        radius_around_point=ATOM_SIZE,
+        radius              = R,
+        height              = H,
+        voxel_size          = Vsize,
+        radius_around_point = ATOM_SIZE,
     )
 
     points            = np.where(~mask)

@@ -37,7 +37,6 @@ import requests
 warnings.filterwarnings("ignore")
 import os
 
-#
 # POISSON_RECON_BIN = os.getenv("POISSON_RECON_BIN")
 
 
@@ -51,7 +50,7 @@ def landmark_constriction_site(rcsb_id: str) -> np.ndarray:
     Returns:
         np.ndarray: Array containing the x, y, z coordinates of the constriction site
     """
-    url = f"http://localhost:8000/structures/constriction_site?rcsb_id={rcsb_id}"
+    url = f"http://localhost:8000/loci/constriction_site?rcsb_id={rcsb_id}"
     headers = {"Accept": "application/json"}
 
     response = requests.get(url, headers=headers)
@@ -71,7 +70,7 @@ def landmark_ptc(rcsb_id: str) -> np.ndarray:
     Returns:
         np.ndarray: Array containing the x, y, z coordinates of the PTC site
     """
-    url = f"http://localhost:8000/structures/ptc?rcsb_id={rcsb_id}"
+    url = f"http://localhost:8000/loci/ptc?rcsb_id={rcsb_id}"
     headers = {"Accept": "application/json"}
 
     response = requests.get(url, headers=headers)

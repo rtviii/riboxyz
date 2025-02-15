@@ -15,14 +15,6 @@ import pyvista as pv
 import open3d as o3d
 
 def cif_to_point_cloud(cif_path: str, chains: list[str] | None = None,  do_atoms:bool=False):
-    """
-    Convert a CIF file to a point cloud, optionally filtering for specific chains.
-
-    Args:
-        cif_path (str): Path to the CIF file
-        chains (list[str] | None): Optional list of chain IDs to include. If None, includes all chains.
-
-    """
     parser = MMCIFParser()
     structure = parser.get_structure("structure", cif_path)
     coordinates = []
@@ -48,10 +40,6 @@ def cif_to_point_cloud(cif_path: str, chains: list[str] | None = None,  do_atoms
     return np.array(coordinates)
 
 def validate_mesh_pyvista(mesh, stage="unknown"):
-
-
-
-    """Validate and print mesh properties, focusing on watertightness."""
     if mesh is None:
         print(f"WARNING: Null mesh at stage {stage}")
         return None
@@ -77,7 +65,7 @@ def quick_surface_points(
 ) -> np.ndarray:
     cloud = pv.PolyData(pointcloud)
     # Using larger tolerance and smaller offset for faster computation
-    grid = cloud.delaunay_3d(alpha=alpha, tol=tolerance, offset=offset, progress_bar=True )
+    grid    = cloud.delaunay_3d(alpha=alpha, tol=tolerance, offset=offset, progress_bar=True )
     surface = grid.extract_surface().cast_to_pointset()
     return surface.points
 
@@ -88,34 +76,21 @@ def fast_normal_estimation(
     tangent_planes_k, 
 ) -> o3d.geometry.PointCloud:
     """
-    Estimate normals for surface points with optimized parameters for speed.
-
-    Args:
-        surface_pts: Input surface points
-        kdtree_radius: Search radius for neighbors (smaller = faster)
-        max_nn: Maximum number of neighbors to consider (smaller = faster)
-        tangent_planes_k: Number of neighbors for tangent plane estimation
     Returns:
         o3d.geometry.PointCloud: Point cloud with estimated normals
     """
-    pcd = o3d.geometry.PointCloud()
+    pcd        = o3d.geometry.PointCloud()
     pcd.points = o3d.utility.Vector3dVector(surface_pts)
 
     # Use hybrid search with reduced parameters
-    search_param = o3d.geometry.KDTreeSearchParamHybrid(
-        radius=kdtree_radius, max_nn=max_nn
-    )
+    search_param = o3d.geometry.KDTreeSearchParamHybrid( radius=kdtree_radius, max_nn=max_nn )
 
-    # Estimate normals
     pcd.estimate_normals(search_param=search_param)
-
-    # Orient normals with fewer neighbors
     pcd.orient_normals_consistent_tangent_plane(k=tangent_planes_k)
 
     return pcd
 
 def alpha_contour_via_poisson_recon(rcsb_id:str, verbose:bool=False):
-    print(f"Generating alpha shape contour for {rcsb_id}")
     ptcloudpath = os.path.join(RIBXZ_TEMP_FILES, '{}_ptcloud.npx')
     rops                  = RibosomeOps(rcsb_id)
     cifpath               = rops.assets.paths.cif
@@ -144,6 +119,7 @@ def alpha_contour_via_poisson_recon(rcsb_id:str, verbose:bool=False):
     PR_ptweight = 4
 
     surface_pts = quick_surface_points(ptcloud, d3d_alpha, d3d_tol, d3d_offset)
+
     if verbose:
         visualize_pointcloud(surface_pts, rcsb_id)
 

@@ -18,10 +18,10 @@ from ribctl.lib.libtax import Taxid
 from ribctl.lib.schema.types_binding_site import ResidueSummary
 from scipy.spatial.distance import pdist, squareform
 
-REFERENCE_MITO_STRUCTURE_TRNA_RRNA = ("7A5F", "24", "A3")
-REFERENCE_ARCHAEA_STRUCTURE_TRNA_RRNA = ("8HKY", "APTN", "A23S")
+REFERENCE_MITO_STRUCTURE_TRNA_RRNA     = ("7A5F", "24", "A3")
+REFERENCE_ARCHAEA_STRUCTURE_TRNA_RRNA  = ("8HKY", "APTN", "A23S")
 REFERENCE_BACTERIA_STRUCTURE_TRNA_RRNA = ("8UD8", "1x", "1A")
-REFERENCE_EUKARYA_STRUCTURE_TRNA_RRNA = ("8CCS", "Bb", "AA")
+REFERENCE_EUKARYA_STRUCTURE_TRNA_RRNA  = ("8CCS", "Bb", "AA")
 
 
 def find_closest_pair(points: np.ndarray):
@@ -38,7 +38,7 @@ def find_closest_pair(points: np.ndarray):
 
     closest_point1 = points[point1_idx]
     closest_point2 = points[point2_idx]
-    min_distance = distances[min_idx]
+    min_distance   = distances[min_idx]
 
     return closest_point1, closest_point2, min_distance
 
