@@ -248,17 +248,82 @@ def verify(ctx, pdb_ids):
         click.echo("No PDB IDs provided", err=True)
         return
 
-    # click.echo(f"Verifying assets for: {', '.join(all_pdb_ids)}")
-    click.echo(f"This stuff is not implemented")
 
-    # TODO: Implement verification logic
 
 
 @etl.command()
 @click.pass_context
 def verify_all(ctx):
-    """Verify all assets in the system"""
-    click.echo("NOT IMPLEMENTED")
+    """Verify all assets in the system by validating each structure against the RibosomeStructure model"""
+    from concurrent.futures import ThreadPoolExecutor
+    import asyncio
+    from typing import Dict, List, Tuple
+
+    structures = GlobalOps.list_profiles()
+    if not structures:
+        click.echo("No structures found in the system", err=True)
+        return
+
+    click.echo(f"Found {len(structures)} structures to verify")
+
+    # Track validation results
+    results: Dict[str, List[Tuple[str, str]]] = {
+        "valid": [],
+        "invalid": []
+    }
+
+    async def validate_structure(rcsb_id: str) -> None:
+        """Validate a single structure and update results"""
+        try:
+            ops = RibosomeOps(rcsb_id)
+            structure_data = ops.assets.profile()
+            
+            # Attempt validation
+            RibosomeStructure.model_validate(structure_data)
+            results["valid"].append(rcsb_id)
+            
+        except Exception as e:
+            results["invalid"].append((rcsb_id, str(e)))
+
+    async def process_all_structures():
+        """Process all structures concurrently with a progress bar"""
+        tasks = []
+        with click.progressbar(
+            structures,
+            label="Validating structures",
+            length=len(structures)
+        ) as progress_structures:
+            for rcsb_id in progress_structures:
+                task = asyncio.create_task(validate_structure(rcsb_id))
+                tasks.append(task)
+            await asyncio.gather(*tasks)
+
+    # Run validation
+    try:
+        asyncio.run(process_all_structures())
+    except Exception as e:
+        click.echo(f"\nError during validation: {str(e)}", err=True)
+        return
+
+    # Report results
+    total = len(structures)
+    valid_count = len(results["valid"])
+    invalid_count = len(results["invalid"])
+
+    click.echo("\nValidation Summary:")
+    click.echo(f"Total structures processed: {total}")
+    click.echo(f"Valid structures: {valid_count}")
+    click.echo(f"Invalid structures: {invalid_count}")
+
+    if invalid_count > 0:
+        click.echo("\nInvalid structures:")
+        for rcsb_id, error in results["invalid"]:
+            click.echo(f"  - {rcsb_id}: {error}")
+
+    # Return non-zero exit code if any structures failed validation
+    if invalid_count > 0:
+        ctx.exit(1)
+
 
 
 @etl.command()

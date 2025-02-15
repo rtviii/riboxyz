@@ -743,6 +743,7 @@ class ETLCollector:
         reqstring = "https://data.rcsb.org/graphql?query={}".format(gql_string)
         _resp = requests.get(reqstring)
         resp = _resp.json()
+        print("Got resp", resp)
 
         if "data" in resp:
             return resp["data"]
@@ -853,6 +854,7 @@ class ETLCollector:
     ) -> RibosomeStructure:
         #! Assemblies metadata
 
+        print("Generating rpofile", self.rcsb_id)
         assmebly_maps = self.query_rcsb_api(
             AssemblyIdentificationString.replace("$RCSB_ID", self.rcsb_id)
         )["entry"]["assemblies"]
@@ -877,12 +879,8 @@ class ETLCollector:
             o.assembly_id = self.poly_assign_to_asm(o.auth_asym_id)
 
         #! Structure Metadata
-        structure_data = self.query_rcsb_api(
-            EntryInfoString.replace("$RCSB_ID", self.rcsb_id)
-        )["entry"]
-        [externalRefs, pub, kwords_text, kwords, year] = StructureNode(
-            structure_data
-        ).process()
+        structure_data                                 = self.query_rcsb_api( EntryInfoString.replace("$RCSB_ID", self.rcsb_id) )["entry"]
+        [externalRefs, pub, kwords_text, kwords, year] = StructureNode(structure_data).process()
 
         #! Ligands
         nonpolymers_data = self.query_rcsb_api(
@@ -895,7 +893,6 @@ class ETLCollector:
             str(list(map(lambda x: x.chemicalId, ligands))).replace("'", '"'),
         )
         chemical_info = self.query_rcsb_api(ligands_chem_info_qstring)["chem_comps"]
-
         for lig in ligands:
             for chem_comp in chemical_info:
                 if chem_comp["chem_comp"]["id"] == lig.chemicalId:
@@ -919,29 +916,30 @@ class ETLCollector:
         organisms = self.infer_organisms_from_polymers([*proteins, *rna, *other])
         subunit_presence = lsu_ssu_presence(rna, is_mitochondrial)
         reshaped = RibosomeStructure(
-            rcsb_id=structure_data["rcsb_id"],
-            expMethod=structure_data["exptl"][0]["method"],
-            resolution=structure_data["rcsb_entry_info"]["resolution_combined"][0],
-            deposition_date=structure_data["rcsb_accession_info"]["deposit_date"],
-            rcsb_external_ref_id=externalRefs[0],
-            rcsb_external_ref_type=externalRefs[1],
-            rcsb_external_ref_link=externalRefs[2],
-            citation_year=year,
-            citation_rcsb_authors=pub["rcsb_authors"],
-            citation_title=pub["title"],
-            citation_pdbx_doi=pub["pdbx_database_id_DOI"],
-            pdbx_keywords_text=kwords_text,
-            pdbx_keywords=kwords,
-            src_organism_ids=organisms["src_organism_ids"],
-            src_organism_names=organisms["src_organism_names"],
-            host_organism_ids=organisms["host_organism_ids"],
-            host_organism_names=organisms["host_organism_names"],
-            proteins=proteins,
-            rnas=rna,
-            nonpolymeric_ligands=ligands,
-            other_polymers=other,
-            assembly_map=self.asm_maps,
-            mitochondrial=is_mitochondrial,
-            subunit_presence=subunit_presence,
+            rcsb_id                = structure_data["rcsb_id"],
+            expMethod              = structure_data["exptl"][0]["method"],
+            resolution             = structure_data["rcsb_entry_info"]["resolution_combined"][0],
+            deposition_date        = structure_data["rcsb_accession_info"]["deposit_date"],
+            rcsb_external_ref_id   = externalRefs[0],
+            rcsb_external_ref_type = externalRefs[1],
+            rcsb_external_ref_link = externalRefs[2],
+            citation_year          = year,
+            citation_rcsb_authors  = pub["rcsb_authors"],
+            citation_title         = pub["title"],
+            citation_pdbx_doi      = pub["pdbx_database_id_DOI"],
+            pdbx_keywords_text     = kwords_text,
+            pdbx_keywords          = kwords,
+            src_organism_ids       = organisms["src_organism_ids"],
+            src_organism_names     = organisms["src_organism_names"],
+            host_organism_ids      = organisms["host_organism_ids"],
+            host_organism_names    = organisms["host_organism_names"],
+            proteins               = proteins,
+            rnas                   = rna,
+            nonpolymeric_ligands   = ligands,
+            other_polymers         = other,
+            assembly_map           = self.asm_maps,
+            mitochondrial          = is_mitochondrial,
+            subunit_presence       = subunit_presence,
         )
+
         return reshaped
