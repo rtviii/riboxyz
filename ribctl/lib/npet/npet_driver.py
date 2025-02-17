@@ -128,6 +128,10 @@ def create_npet_mesh(RCSB_ID: str):
         kdtree_max_nn=15,
         correction_tangent_planes_n=10,
     )
+    # normal_estimated_pcd = gpu_normal_estimation(
+    #     surface_pts,
+    #     k=15
+    # )
 
     o3d.io.write_point_cloud(normals_pcd_path, normal_estimated_pcd)
     apply_poisson_reconstruction(

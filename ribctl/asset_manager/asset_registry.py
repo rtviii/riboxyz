@@ -1,21 +1,14 @@
 from typing import TypeVar, Callable, Awaitable
-from pathlib import Path
 import functools
 from loguru import logger
 from pydantic import BaseModel
 
 from pathlib import Path
-import asyncio
 from loguru import logger
 from typing import Dict, Callable, Awaitable
-from functools import partial
 
 from ribctl import RIBETL_DATA
 from ribctl.asset_manager.asset_manager import RibosomeAssetManager
-# from ribctl.lib.npet.alpah_lib import produce_alpha_contour
-# from ribctl.lib.npet.alpha_lib_parallel import produce_alpha_contour
-# from ribctl.lib.npet.alpha_lib import produce_alpha_contour
-from ribctl.lib.npet.alphalib import alpha_contour_via_poisson_recon
 from ribctl.lib.npet.npet_driver import create_npet_mesh
 from ribctl.lib.utils import download_unpack_place
 from ribctl.asset_manager.asset_types import AssetType
@@ -29,6 +22,7 @@ from ribctl.lib.schema.types_ribosome import (
     PTCInfo,
     RibosomeStructure,
 )
+
 from .asset_types import AssetType
 
 ModelT = TypeVar("ModelT", bound=BaseModel)
@@ -150,8 +144,9 @@ async def npet_mesh_handler(rcsb_id: str, force: bool) -> None:
     create_npet_mesh(rcsb_id)
 
 async def alphashape_handler(rcsb_id: str, force: bool) -> None:
-    alpha_contour_via_poisson_recon(rcsb_id )
-    # alpha_contour_via_poisson_recon(rcsb_id, True)
+    # alpha_contour_via_poisson_recon(rcsb_id )
+    # gpu_accelerated_watertight_mesh(rcsb_id)
+    alpha_contour_via_poisson_recon(rcsb_id, True)
 
 main_registry = AssetRegistry(RibosomeAssetManager(RIBETL_DATA))
 

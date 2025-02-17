@@ -24,6 +24,23 @@ router_polymers = Router()
 TAG = "Individual Polymer Chains, Classification and Metadata"
 
 
+
+@router_polymers.get("/polymer/", tags=[TAG])
+def get_polymer_data(request, rcsb_id: str, auth_asym_id:str, format: str = "json" or 'fasta'):
+    """Get metadata for a single polymer chain"""
+    
+    try:
+        x = RibosomeOps(rcsb_id.upper()).get_poly_by_auth_asym_id(auth_asym_id)
+    except Exception as e:
+        print(e)
+        return JsonResponse({"error": str(e)})
+    if format == "fasta":
+        return x.entity_poly_seq_one_letter_code_can
+    elif format == "json":
+        return JsonResponse(x.model_dump())
+
+
+
 @router_polymers.get("/polynucleotide", tags=[TAG], response=list[RNA])
 def polynucleotide_class(request, rna_class: PolynucleotideClass):
     """All members of the given RNA class: small and large subunit, cytosolic and mitochondrial RNA; tRNA."""

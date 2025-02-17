@@ -12,7 +12,6 @@ from Bio.PDB.MMCIFParser import FastMMCIFParser
 from typing import List, Tuple
 
 from ribctl.lib.schema.types_ribosome import ResidueSummary
-
 data_dir = os.getenv("DATA_DIR")
 sys.dont_write_bytecode = True
 from Bio.PDB.Entity import Entity
@@ -31,13 +30,11 @@ import plyfile
 import warnings
 from ribctl import POISSON_RECON_BIN
 import numpy as np
-from sklearn.cluster import DBSCAN
+from sklearn.cluster import DBSCAN as skDBSCAN
 import requests
 
 warnings.filterwarnings("ignore")
 import os
-
-# POISSON_RECON_BIN = os.getenv("POISSON_RECON_BIN")
 
 
 def landmark_constriction_site(rcsb_id: str) -> np.ndarray:
@@ -79,6 +76,33 @@ def landmark_ptc(rcsb_id: str) -> np.ndarray:
     data = response.json()
     return np.array(data["location"])
 
+# def cuml_DBSCAN_capture(
+#     ptcloud: np.ndarray,
+#     eps,
+#     min_samples,
+#     metric: str = "euclidean",
+# ):
+#     u_EPSILON     = eps
+#     u_MIN_SAMPLES = min_samples
+#     u_METRIC      = metric
+
+#     print(
+#         "Running DBSCAN on {} points. eps={}, min_samples={}, distance_metric={}".format(
+#             len(ptcloud), u_EPSILON, u_MIN_SAMPLES, u_METRIC
+#         )
+#     )
+#     db = cumlDBSCAN(eps=eps, min_samples=min_samples, metric=metric).fix_predict(ptcloud)
+#     pprint(db)
+#     labels = db.labels_
+
+#     CLUSTERS_CONTAINER = {}
+#     for point, label in zip(ptcloud, labels):
+#         if label not in CLUSTERS_CONTAINER:
+#             CLUSTERS_CONTAINER[label] = []
+#         CLUSTERS_CONTAINER[label].append(point)
+
+#     CLUSTERS_CONTAINER = dict(sorted(CLUSTERS_CONTAINER.items()))
+#     return db, CLUSTERS_CONTAINER
 
 def DBSCAN_capture(
     ptcloud: np.ndarray,
@@ -87,16 +111,16 @@ def DBSCAN_capture(
     metric: str = "euclidean",
 ):
 
-    u_EPSILON = eps
+    u_EPSILON     = eps
     u_MIN_SAMPLES = min_samples
-    u_METRIC = metric
+    u_METRIC      = metric
 
     print(
         "Running DBSCAN on {} points. eps={}, min_samples={}, distance_metric={}".format(
             len(ptcloud), u_EPSILON, u_MIN_SAMPLES, u_METRIC
         )
     )
-    db = DBSCAN(eps=eps, min_samples=min_samples, metric=metric).fit(ptcloud)
+    db = skDBSCAN(eps=eps, min_samples=min_samples, metric=metric).fit(ptcloud)
     labels = db.labels_
 
     CLUSTERS_CONTAINER = {}
