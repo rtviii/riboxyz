@@ -15,7 +15,7 @@ from ribctl.lib.types.polymer import (
     CytosolicRNAClass,
     MitochondrialRNAClass,
 )
-from ribctl.lib.libmsa import Taxid, ncbi
+from ribctl.lib.libmsa import Taxid, get_ncbi
 
 
 def lsu_ssu_presence(

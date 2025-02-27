@@ -15,7 +15,7 @@ import subprocess
 from typing import Callable, Iterator
 from ribctl import ASSETS, MUSCLE_BIN
 import os
-from ribctl.lib.libtax import  Taxid, ncbi
+from ribctl.lib.libtax import  Taxid, get_ncbi
 from ribctl.lib.types.polymer import CytosolicProteinClass, ElongationFactorClass, InitiationFactorClass, MitochondrialProteinClass, PolymerClass, PolynucleotideClass
 import os
 from typing import Dict, List, Set, Tuple
@@ -84,6 +84,7 @@ class Fasta :
     @staticmethod
     def fasta_display_species(taxids: list[int]):
         taxids = Taxid.coerce_all_to_rank(taxids, "species")
+        ncbi = get_ncbi()
         tree   = ncbi.get_topology(taxids)
 
         for node in tree.traverse():

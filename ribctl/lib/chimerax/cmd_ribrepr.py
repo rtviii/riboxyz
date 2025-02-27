@@ -322,9 +322,9 @@ def get_polymer_color(polymer_class: str) -> str:
 
 def ribosome_representation(session, structure: AtomicStructure):
     from chimerax.core.commands import run
+
     from chimerax.core.colors import hex_color
     from chimerax.atomic import Residue, Atom, Chain
-
     rcsb_id = str(structure.name).upper().split('.')[0]
     run(session, "set bgColor white")
     run(session, "sym #1 assembly 1")

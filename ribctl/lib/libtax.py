@@ -8,7 +8,17 @@ from ribctl import MUSCLE_BIN, NCBI_TAXA_SQLITE
 import os
 from ete3 import NCBITaxa
 
-# ? ---------------- [ Phylogeny] ----------------
+import threading
+
+
+
+_thread_local = threading.local()
+
+def get_ncbi():
+    """Get a thread-local NCBITaxa instance"""
+    if not hasattr(_thread_local, 'ncbi'):
+        _thread_local.ncbi = NCBITaxa(dbfile=NCBI_TAXA_SQLITE)
+    return _thread_local.ncbi
 
 TAXID_BACTERIA = 2
 TAXID_EUKARYOTA = 2759
@@ -46,8 +56,6 @@ PhylogenyRank = Literal[
     "subcohort",
     "subtribe",
 ]
-
-ncbi = NCBITaxa(dbfile=NCBI_TAXA_SQLITE)
 
 
 # def find_n_closest_relatives(
@@ -112,6 +120,8 @@ def find_n_closest_relatives(_taxids_base: list[int], taxid_target: str, n_neigh
     # Convert all taxids to strings for ete3 compatibility
     taxids_base = list(map(lambda x: str(x), _taxids_base))
 
+
+    ncbi = get_ncbi()
     # Get topology tree containing target and all base taxids
     tree = ncbi.get_topology(list(set([*taxids_base, str(taxid_target)])))
     target_node = tree.search_nodes(name=str(taxid_target))[0]
@@ -212,6 +222,7 @@ def print_lineage_comparison(source_taxid: int, target_taxid: int):
 class Taxid:
     @staticmethod
     def is_descendant_of(parent_taxid: int, target_taxid: int) -> bool:
+        ncbi = get_ncbi()
         lineage = ncbi.get_lineage(target_taxid)
         if lineage is None:
             raise LookupError("Lineage is None. Check if taxid is NCBI-valid.")
@@ -244,6 +255,7 @@ class Taxid:
         str_source = str(source_taxid)
         str_target = str(target_taxid)
         
+        ncbi = get_ncbi()
         # Get topology tree containing both taxids
         tree = ncbi.get_topology([str_source, str_target])
         
@@ -257,6 +269,9 @@ class Taxid:
 
     @staticmethod
     def get_name(taxid):
+
+
+        ncbi = get_ncbi()
         return list(ncbi.get_taxid_translator([taxid]).values())[0]
 
     @staticmethod
@@ -266,6 +281,7 @@ class Taxid:
         """Return ncbi lineage, except filter out the ranks that are not among the @PhylogenyRank."""
         # lin = list(filter(lambda x: Taxid.rank(x) in typing.get_args(PhylogenyRank), ncbi.get_lineage(taxid) ) )
         # lin = list(filter(lambda x: Taxid.rank(x) in typing.get_args(PhylogenyRank), ncbi.get_lineage(taxid) ) )
+        ncbi = get_ncbi()
         lin = ncbi.get_lineage(taxid)
         if include_only is not None:
             return list(filter(lambda x: Taxid.rank(x) in include_only, lin))
@@ -274,12 +290,17 @@ class Taxid:
     @staticmethod
     def rank(taxid: int) -> PhylogenyRank:
         """Given a @taxid, return the rank of the taxid"""
+
+        ncbi = get_ncbi()
         lineage = ncbi.get_lineage(taxid)
         return ncbi.get_rank(lineage)[taxid]
 
     @staticmethod
     def coerce_to_rank(taxid: int, target_rank: PhylogenyRank) -> int | None:
         """Given a @taxid and a @rank, return the taxid of the first ancestor of @taxid that is at @rank"""
+
+
+        ncbi = get_ncbi()
         lineage = ncbi.get_lineage(taxid)
         if lineage is None:
             raise LookupError("Lineage is None. Check if taxid is NCBI-valid.")
@@ -331,7 +352,9 @@ class Taxid:
     def get_descendants_of(parent: int, targets: list[int]):
         """Given a @parent taxid and a list of @taxids, return the subset of @taxids that are descendants of @parent"""
         descendants = set()
+        ncbi = get_ncbi()
         for tax_id in targets:
+
             lineage = ncbi.get_lineage(tax_id)
             if lineage == None:
                 raise LookupError("Lineage is None. Check if taxid is NCBI-valid.")
