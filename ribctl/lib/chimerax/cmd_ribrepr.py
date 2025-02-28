@@ -1,6 +1,7 @@
 import enum
 import json
 import os
+import re
 from chimerax.core.commands import register, CmdDesc
 from chimerax.atomic import Structure, AtomicStructure, Chain
 from chimerax.core.commands import run, runscript
@@ -8,8 +9,6 @@ from chimerax.core.commands import CmdDesc, register, StringArg
 from chimerax.core.colors import hex_color
 
 RIBETL_DATA = os.environ.get("RIBETL_DATA")
-
-
 
 
 CytosolicProteinsColorScheme = {
@@ -296,7 +295,6 @@ InitiationFactorsColorScheme = {
 }
 
 
-
 POLYMER_COLORS = {
     **CytosolicProteinsColorScheme,
     **MitochondrialProteinColorScheme,
@@ -307,74 +305,97 @@ POLYMER_COLORS = {
 
 
 
-
-
-
-
-
-
-
-
-
 def get_polymer_color(polymer_class: str) -> str:
     """Get the hex color for a polymer class, defaulting to gray if not found."""
     return POLYMER_COLORS.get(polymer_class, "#808080")
 
-def ribosome_representation(session, structure: AtomicStructure):
-    from chimerax.core.commands import run
+def ribosome_representation(session, structure: AtomicStructure, rcsb_id: str = None):
+    """Apply ribosome representation with custom coloring to a structure.
 
-    from chimerax.core.colors import hex_color
-    from chimerax.atomic import Residue, Atom, Chain
-    rcsb_id = str(structure.name).upper().split('.')[0]
+    Args:
+        session: ChimeraX session object.
+        structure: AtomicStructure object to process.
+        rcsb_id: Optional RCSB ID (e.g., '4UG0') to override name inference.
+    """
+    # Determine RCSB ID
+    if rcsb_id is None:
+        # Try to extract RCSB ID from structure.name
+        match = re.search(r'\b\d[A-Za-z0-9]{3}\b', structure.name)
+        if match:
+            rcsb_id = match.group(0).upper()
+        else:
+            session.logger.error(
+                "Could not extract a valid RCSB ID from the structure name "
+                f"'{structure.name}'. Please provide the 'rcsb_id' argument."
+            )
+            return
+    else:
+        rcsb_id = rcsb_id.upper()
+
+    # Initial setup: white background
     run(session, "set bgColor white")
-    run(session, "sym #1 assembly 1")
-    run(session, "hide #2")
-    run(session, "hide") 
 
+    # Load metadata
     profile_path = os.path.join(RIBETL_DATA, rcsb_id, f"{rcsb_id}.json")
-    with open(profile_path, "r") as f:
-        profile = json.load(f)
+    try:
+        with open(profile_path, "r") as f:
+            profile = json.load(f)
+    except FileNotFoundError:
+        session.logger.error(f"Metadata file not found: {profile_path}")
+        return
+    except json.JSONDecodeError:
+        session.logger.error(f"Invalid JSON in metadata file: {profile_path}")
+        return
 
-    # Create chain-to-polymer mapping
+    # Map chains to polymer info from metadata
     polymers = {}
     polymer_chains = [*profile["proteins"], *profile["rnas"], *profile["other_polymers"]]
     for chain in polymer_chains:
         polymers[chain["auth_asym_id"]] = chain
 
-    # Process each chain
+    # Step 1: Color each chain in the original structure
     for c in structure.chains:
         chain_id = c.chain_id
         if chain_id not in polymers:
-            continue
-
+            continue  # Skip chains not in metadata
         chain_info = polymers[chain_id]
         polyclass = chain_info["nomenclature"][0] if chain_info["nomenclature"] else None
-        
-        # Get color based on polymer class
         color = get_polymer_color(polyclass)
-        
-        if chain_info["entity_poly_polymer_type"] == "RNA":
-            run(session, f"surf /{chain_id}")
-            run(session, f"transp /{chain_id} 100")
-            run(session, f"color /{chain_id} {color}")
-        else:
-            # For proteins, use a single show command with cartoon style
-            run(session, f"show /{chain_id} cartoon")
-            run(session, f"color /{chain_id} {color}")
+        run(session, f"show #{structure.id_string}/{chain_id} cartoon")
+        run(session, f"color #{structure.id_string}/{chain_id} {color}")
+
+    # Step 2: Split the structure into separate models for each chain
+    model_id = structure.id_string  # e.g., "1"
+    run(session, f"hide #{model_id}")
+    existing_models = set(session.models)  # Record current models before splitting
+    run(session, f"split #{model_id} chains")
+
+    # Step 3: Rename the new models
+    new_models = [m for m in session.models if m not in existing_models and isinstance(m, AtomicStructure)]
+    for m in new_models:
+        if len(m.chains) == 1:  # Each split model should have one chain
+            chain_id = m.chains[0].chain_id
+            if chain_id in polymers:
+                chain_info = polymers[chain_id]
+                nomenclature = chain_info["nomenclature"]
+                new_name = f"{nomenclature[0]}_{chain_id}" if nomenclature else chain_id
+                m.name = new_name  # Rename the model
 
     # Final styling
     run(session, "graphics silhouettes true width 1")
     run(session, "light soft")
 
 def register_ribrepr_command(logger):
-
+    """Register the 'ribrep' command with ChimeraX."""
     from chimerax.core.commands import CmdDesc, register
-    from chimerax.atomic import AtomicStructureArg, Chain, Residue, Atom
+    from chimerax.atomic import AtomicStructureArg
+    from chimerax.core.commands import StringArg
     desc = CmdDesc(
         required=[("structure", AtomicStructureArg)],
-        required_arguments=["structure"],
+        optional=[("rcsb_id", StringArg)],
         synopsis="Apply ribosome representation with custom coloring"
     )
     register("ribrep", desc, ribosome_representation, logger=logger)
 
+# Assuming session is available in the context
 register_ribrepr_command(session.logger)

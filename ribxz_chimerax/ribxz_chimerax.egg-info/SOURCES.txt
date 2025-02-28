@@ -1,0 +1,7 @@
+ribxz_chimerax.egg-info/PKG-INFO
+ribxz_chimerax.egg-info/SOURCES.txt
+ribxz_chimerax.egg-info/dependency_links.txt
+ribxz_chimerax.egg-info/requires.txt
+ribxz_chimerax.egg-info/top_level.txt
+src/cmd.py
+src/io.py

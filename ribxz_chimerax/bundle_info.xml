@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<BundleInfo name="ribxz_chimerax"
+            version="0.1"
+            package="ribxz_chimerax"
+            minSessionVersion="1"
+            maxSessionVersion="1">
+
+  <Author>Your Name</Author>
+  <Email>your.email@example.com</Email>
+  <URL>https://your-website.com/</URL>
+
+  <Synopsis>Access and visualize ribosome metadata from remote server</Synopsis>
+  <Description>
+    This bundle allows users to fetch ribosome metadata from a remote server
+    and automatically apply visualization settings based on that data.
+  </Description>
+
+  <Dependencies>
+    <Dependency name="ChimeraX-Core" version="~=1.0"/>
+    <!-- Add other dependencies if needed -->
+  </Dependencies>
+
+  <Categories>
+    <Category name="Structure Analysis"/>
+    <Category name="Visualization"/>
+  </Categories>
+
+  <Classifiers>
+    <PythonClassifier>Development Status :: 3 - Alpha</PythonClassifier>
+    <PythonClassifier>License :: Freely Distributable</PythonClassifier>
+    <ChimeraXClassifier>Command :: ribxz repr :: Structural Analysis :: Display ribosome metadata</ChimeraXClassifier>
+  </Classifiers>
+
+</BundleInfo>

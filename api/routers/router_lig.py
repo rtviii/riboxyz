@@ -125,17 +125,12 @@ class ProcessedLigands(BaseModel):
 def list_ligands(request):
     return dbqueries.list_ligands()
 
-@router_lig.get("entity", tags=[TAG])
-def entity(request, rcsb_id: str):
-    print("GOT HERE  -213121", rcsb_id)
-    return None
 
 @router_lig.get("/in_structure", tags=[TAG])
 def in_structure(request, rcsb_id: str):
 
     params = dict(request.GET)
     rcsb_id = str.upper(params["rcsb_id"][0])
-    print("GOT HERE", rcsb_id)
     try:
         ligs = dbqueries.ligands_in_structure(rcsb_id.upper())
         print(ligs)
