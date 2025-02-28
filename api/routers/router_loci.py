@@ -1,47 +1,19 @@
-import datetime
 import json
 from urllib.request import Request
 from ninja import Router, Body
 import os
 from pprint import pprint
-import typing
 from django.http import JsonResponse, HttpResponseServerError
 from ninja import Path, Router, Schema
-from neo4j_ribosome.db_lib_reader import (
-    PolymersFilterParams,
-    StructureFilterParams,
-    dbqueries,
-)
-
 from django.http import FileResponse
 from ninja.responses import Response
 from ribctl import ASSETS, ASSETS_PATH, RIBETL_DATA
 from ribctl.asset_manager.asset_manager import RibosomeAssetManager
-from ribctl.asset_manager.asset_registry import AssetRegistry
 from ribctl.asset_manager.asset_types import AssetType
-from ribctl.ribosome_ops import RibosomeOps
-from ribctl.lib.info import StructureCompositionStats, run_composition_stats
-from ribctl.lib.types.polymer import (
-    CytosolicProteinClass,
-    CytosolicRNAClass,
-    ElongationFactorClass,
-    InitiationFactorClass,
-    MitochondrialProteinClass,
-    MitochondrialRNAClass,
-    PolymerClass,
-    tRNA,
-)
 from ribctl.lib.schema.types_ribosome import (
     ConstrictionSite,
     PTCInfo,
-    RibosomeStructure,
-    RibosomeStructureMetadata,
-    Polymer,
-    RibosomeStructure,
-    RibosomeStructureMetadata,
-    RibosomeStructureMetadata,
 )
-from ribctl.lib.libtax import Taxid
 
 router_loci = Router()
 TAG_LOCI = "Biologically Relevant Loci & Landmarks"
