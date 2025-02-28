@@ -8,8 +8,8 @@ class _RibosomeXBundleAPI(BundleAPI):
     @staticmethod
     def register_command(command_name, logger):
         # Register the command with ChimeraX
-        from . import cmd
-        cmd.register_command(command_name, logger)
+        from . import cmd_paint
+        cmd_paint.register_command(command_name, logger)
     
     @staticmethod
     def start_tool(session, tool_name):
