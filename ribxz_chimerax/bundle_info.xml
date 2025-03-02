@@ -5,14 +5,18 @@
             minSessionVersion="1"
             maxSessionVersion="1">
 
-  <Author>Your Name</Author>
-  <Email>your.email@example.com</Email>
-  <URL>https://your-website.com/</URL>
+  <Author>rtviii</Author>
+  <Email>rtkushner@gmail.com</Email>
+  <URL>https://rtviii.xyz</URL>
 
   <Synopsis>Access and visualize ribosome metadata from remote server</Synopsis>
   <Description>
     This bundle allows users to fetch ribosome metadata from a remote server
     and automatically apply visualization settings based on that data.
+    
+    Commands:
+    - ribxz loci: Visualize specific locations in ribosomes (tunnel, PTC, constriction sites)
+    - ribxz polymers: Apply custom coloring to ribosome structures based on polymer types
   </Description>
 
   <Dependencies>
@@ -28,7 +32,21 @@
   <Classifiers>
     <PythonClassifier>Development Status :: 3 - Alpha</PythonClassifier>
     <PythonClassifier>License :: Freely Distributable</PythonClassifier>
-    <ChimeraXClassifier>Command :: ribxz repr :: Structural Analysis :: Display ribosome metadata</ChimeraXClassifier>
+    <ChimeraXClassifier>Command :: ribxz :: Structural Analysis :: Ribosome visualization tools</ChimeraXClassifier>
+    <ChimeraXClassifier>Command :: ribxz loci :: Structural Analysis :: Visualize ribosome landmarks</ChimeraXClassifier>
+    <ChimeraXClassifier>Command :: ribxz polymers :: Structural Analysis :: Apply ribosome coloring</ChimeraXClassifier>
   </Classifiers>
+
+  <Commands>
+    <Command name="ribxz" category="Structural Analysis">
+      Ribosome visualization and analysis tools
+    </Command>
+    <Command name="ribxz loci" category="Structural Analysis">
+      Visualize specific locations in ribosomes (tunnel, PTC, constriction sites)
+    </Command>
+    <Command name="ribxz polymers" category="Structural Analysis">
+      Apply custom coloring to ribosome structures based on polymer types
+    </Command>
+  </Commands>
 
 </BundleInfo>

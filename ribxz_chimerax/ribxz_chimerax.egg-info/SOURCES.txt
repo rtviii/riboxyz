@@ -3,5 +3,8 @@ ribxz_chimerax.egg-info/SOURCES.txt
 ribxz_chimerax.egg-info/dependency_links.txt
 ribxz_chimerax.egg-info/requires.txt
 ribxz_chimerax.egg-info/top_level.txt
-src/cmd.py
+src/__init__.py
+src/cmd_loci.py
+src/cmd_polymers.py
+src/cmd_registry.py
 src/io.py

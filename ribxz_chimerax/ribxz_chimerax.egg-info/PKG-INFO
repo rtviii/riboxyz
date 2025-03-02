@@ -2,9 +2,9 @@ Metadata-Version: 2.1
 Name: ribxz-chimerax
 Version: 0.1
 Summary: Access and visualize ribosome metadata from remote server
-Home-page: https://your-website.com/
-Author: Your Name
-Author-email: your.email@example.com
+Home-page: https://rtviii.xyz
+Author: rtviii
+Author-email: rtkushner@gmail.com
 Classifier: Framework :: ChimeraX
 Classifier: Intended Audience :: Science/Research
 Classifier: Programming Language :: Python :: 3
@@ -20,9 +20,15 @@ Classifier: Operating System :: MacOS :: MacOS X
 Classifier: Operating System :: Microsoft :: Windows :: Windows 10
 Classifier: Operating System :: POSIX :: Linux
 Classifier: ChimeraX :: Bundle :: Structure Analysis,Visualization :: 1,1 :: ribxz_chimerax ::  :: 
-Classifier: ChimeraX :: Command :: ribxz repr :: Structural Analysis :: Display ribosome metadata
+Classifier: ChimeraX :: Command :: ribxz :: Structural Analysis :: Ribosome visualization tools
+Classifier: ChimeraX :: Command :: ribxz loci :: Structural Analysis :: Visualize ribosome landmarks
+Classifier: ChimeraX :: Command :: ribxz polymers :: Structural Analysis :: Apply ribosome coloring
 Requires-Python: >=3.7
 Requires-Dist: ChimeraX-Core~=1.0
 
 This bundle allows users to fetch ribosome metadata from a remote server
     and automatically apply visualization settings based on that data.
+    
+    Commands:
+    - ribxz loci: Visualize specific locations in ribosomes (tunnel, PTC, constriction sites)
+    - ribxz polymers: Apply custom coloring to ribosome structures based on polymer types
