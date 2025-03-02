@@ -1,16 +1,15 @@
-import enum
-import json
-import os
+"""
+Command module for 'ribxz polymers' functionality.
+This command applies ribosome representation with custom coloring based on ribosome polymer types.
+"""
+
 import re
-from chimerax.core.commands import register, CmdDesc
-from chimerax.atomic import Structure, AtomicStructure, Chain
-from chimerax.core.commands import run, runscript
-from chimerax.core.commands import CmdDesc, register, StringArg
-from chimerax.core.colors import hex_color
+import json
+import urllib.request
+from chimerax.core.commands import run
+from chimerax.atomic import AtomicStructure
 
-RIBETL_DATA = os.environ.get("RIBETL_DATA")
-
-
+# Color schemes for different polymer types
 CytosolicProteinsColorScheme = {
     "uS2": "#60a5fa",
     "uS3": "#7dd3fc",
@@ -114,6 +113,7 @@ CytosolicProteinsColorScheme = {
     "eL43": "#78350f",
     "P1P2": "#e11d48",
 }
+
 MitochondrialProteinColorScheme = {
     "uS2m":"#67e8f9",
     "uS3m":"#22d3ee",
@@ -217,6 +217,7 @@ MitochondrialProteinColorScheme = {
     "mL66":"#f0abfc",
     "mL67":"#e879f9",
 }
+
 RNAColorScheme = {
     "5SrRNA"   :"#e2e8f0",
     "16SrRNA"  :"#bfdbfe",
@@ -229,6 +230,7 @@ RNAColorScheme = {
     "mt16SrRNA":"#f1f5f9",
     "tRNA"     :"#c084fc",
 }
+
 FactorsColorScheme = {
     "eEF1A":"#fed7aa",
     "eEF1B":"#fdba74",
@@ -250,6 +252,7 @@ FactorsColorScheme = {
     "aEF1A":"#fef3c7",
     "aEF2" :"#fde68a",
 }
+
 InitiationFactorsColorScheme = {
     "eIF1"         : "#fef9c3",
     "eIF1A"        : "#fef08a",
@@ -294,7 +297,6 @@ InitiationFactorsColorScheme = {
     "aIF5B"        : "#facc15",
 }
 
-
 POLYMER_COLORS = {
     **CytosolicProteinsColorScheme,
     **MitochondrialProteinColorScheme,
@@ -303,13 +305,14 @@ POLYMER_COLORS = {
     **InitiationFactorsColorScheme
 }
 
-
+# Base URL for the API
+API_BASE_URL = "https://api.ribosome.xyz"
 
 def get_polymer_color(polymer_class: str) -> str:
     """Get the hex color for a polymer class, defaulting to gray if not found."""
     return POLYMER_COLORS.get(polymer_class, "#808080")
 
-def ribosome_representation(session, structure: AtomicStructure, rcsb_id: str = None):
+def polymers_ribosome(session, structure: AtomicStructure, rcsb_id: str = None):
     """Apply ribosome representation with custom coloring to a structure.
 
     Args:
@@ -335,16 +338,20 @@ def ribosome_representation(session, structure: AtomicStructure, rcsb_id: str = 
     # Initial setup: white background
     run(session, "set bgColor white")
 
-    # Load metadata
-    profile_path = os.path.join(RIBETL_DATA, rcsb_id, f"{rcsb_id}.json")
+    # Fetch metadata from API
+    url = f"{API_BASE_URL}/structures/profile?rcsb_id={rcsb_id}"
     try:
-        with open(profile_path, "r") as f:
-            profile = json.load(f)
-    except FileNotFoundError:
-        session.logger.error(f"Metadata file not found: {profile_path}")
+        session.logger.info(f"Fetching structure profile for {rcsb_id} from {url}")
+        with urllib.request.urlopen(url) as response:
+            if response.status != 200:
+                session.logger.error(f"Failed to fetch profile data: HTTP {response.status}")
+                return
+            profile = json.loads(response.read().decode())
+    except urllib.error.URLError as e:
+        session.logger.error(f"Network error when fetching profile: {e}")
         return
     except json.JSONDecodeError:
-        session.logger.error(f"Invalid JSON in metadata file: {profile_path}")
+        session.logger.error("Invalid JSON in profile data")
         return
 
     # Map chains to polymer info from metadata
@@ -385,17 +392,17 @@ def ribosome_representation(session, structure: AtomicStructure, rcsb_id: str = 
     run(session, "graphics silhouettes true width 1")
     run(session, "light soft")
 
-def register_ribrepr_command(logger):
-    """Register the 'ribrep' command with ChimeraX."""
+    session.logger.info(f"Applied ribosome coloring to {rcsb_id}")
+
+def register_command(command_name, logger):
+    """Register the 'ribxz polymers' command with ChimeraX."""
     from chimerax.core.commands import CmdDesc, register
     from chimerax.atomic import AtomicStructureArg
     from chimerax.core.commands import StringArg
+    
     desc = CmdDesc(
         required=[("structure", AtomicStructureArg)],
         optional=[("rcsb_id", StringArg)],
         synopsis="Apply ribosome representation with custom coloring"
     )
-    register("ribrep", desc, ribosome_representation, logger=logger)
-
-# Assuming session is available in the context
-register_ribrepr_command(session.logger)
+    register(command_name, desc, polymers_ribosome, logger=logger)

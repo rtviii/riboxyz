@@ -5,423 +5,363 @@ from chimerax.core.commands import register, CmdDesc
 from chimerax.atomic import Structure, AtomicStructure, Chain
 from chimerax.core.commands import run, runscript
 from chimerax.core.commands import CmdDesc, register, StringArg
+from chimerax.core.colors import hex_color
 
-# https://mail.cgl.ucsf.edu/mailman/archives/list/chimera-users@cgl.ucsf.edu/thread/EOUA5K3CZU6DJYVPISR3GFWHCISR6WGV/
 RIBETL_DATA = os.environ.get("RIBETL_DATA")
 
-class PolymerClass(str, enum.Enum):
-    tRNA = "tRNA"
-    bS1m  = "bS1m"
-    uS2m  = "uS2m"
-    uS3m  = "uS3m"
-    uS4m  = "uS4m"
-    uS5m  = "uS5m"
-    bS6m  = "bS6m"
-    uS7m  = "uS7m"
-    uS8m  = "uS8m"
-    uS9m  = "uS9m"
-    uS10m = "uS10m"
-    uS11m = "uS11m"
-    uS12m = "uS12m"
-    uS13m = "uS13m"
-    uS14m = "uS14m"
-    uS15m = "uS15m"
-    bS16m = "bS16m"
-    uS17m = "uS17m"
-    bS18m = "bS18m"
-    uS19m = "uS19m"
-    bS21m = "bS21m"
-    mS22  = "mS22"
-    mS23  = "mS23"
-    mS25  = "mS25"
-    mS26  = "mS26"
-    mS27  = "mS27"
-    mS29  = "mS29"
-    mS31  = "mS31"
-    mS33  = "mS33"
-    mS34  = "mS34"
-    mS35  = "mS35"
-    mS37  = "mS37"
-    mS38  = "mS38"
-    mS39  = "mS39"
-    mS40  = "mS40"
-    mS41  = "mS41"
-    mS42  = "mS42"
-    mS43  = "mS43"
-    mS44  = "mS44"
-    mS45  = "mS45"
-    mS46  = "mS46"
-    mS47  = "mS47"
-    uL1m  = "uL1m"
-    uL2m  = "uL2m"
-    uL3m  = "uL3m"
-    uL4m  = "uL4m"
-    uL5m  = "uL5m"
-    uL6m  = "uL6m"
-    bL9m  = "bL9m"
-    uL10m = "uL10m"
-    uL11m = "uL11m"
-    bL12m = "bL12m"
-    uL13m = "uL13m"
-    uL14m = "uL14m"
-    uL15m = "uL15m"
-    uL16m = "uL16m"
-    bL17m = "bL17m"
-    uL18m = "uL18m"
-    bL19m = "bL19m"
-    bL20m = "bL20m"
-    bL21m = "bL21m"
-    uL22m = "uL22m"
-    uL23m = "uL23m"
-    uL24m = "uL24m"
-    bL27m = "bL27m"
-    bL28m = "bL28m"
-    uL29m = "uL29m"
-    uL30m = "uL30m"
-    bL31m = "bL31m"
-    bL32m = "bL32m"
-    bL33m = "bL33m"
-    bL34m = "bL34m"
-    bL35m = "bL35m"
-    bL36m = "bL36m"
-    mL37  = "mL37"
-    mL38  = "mL38"
-    mL39  = "mL39"
-    mL40  = "mL40"
-    mL41  = "mL41"
-    mL42  = "mL42"
-    mL43  = "mL43"
-    mL44  = "mL44"
-    mL45  = "mL45"
-    mL46  = "mL46"
-    mL48  = "mL48"
-    mL49  = "mL49"
-    mL50  = "mL50"
-    mL51  = "mL51"
-    mL52  = "mL52"
-    mL53  = "mL53"
-    mL54  = "mL54"
-    mL57  = "mL57"
-    mL58  = "mL58"
-    mL59  = "mL59"
-    mL60  = "mL60"
-    mL61  = "mL61"
-    mL62  = "mL62"
-    mL63  = "mL63"
-    mL64  = "mL64"
-    mL65  = "mL65"
-    mL66  = "mL66"
-    mL67  = "mL67"
-    bS1   = "bS1"
-    eS1   = "eS1"
-    uS2   = "uS2"
-    uS3   = "uS3"
-    uS4   = "uS4"
-    eS4   = "eS4"
-    uS5   = "uS5"
-    bS6   = "bS6"
-    eS6   = "eS6"
-    uS7   = "uS7"
-    eS7   = "eS7"
-    uS8   = "uS8"
-    eS8   = "eS8"
-    uS9   = "uS9"
-    uS10  = "uS10"
-    eS10  = "eS10"
-    uS11  = "uS11"
-    uS12  = "uS12"
-    eS12  = "eS12"
-    uS13  = "uS13"
-    uS14  = "uS14"
-    uS15  = "uS15"
-    bS16  = "bS16"
-    uS17  = "uS17"
-    eS17  = "eS17"
-    bS18  = "bS18"
-    uS19  = "uS19"
-    eS19  = "eS19"
-    bS20  = "bS20"
-    bS21  = "bS21"
-    bTHX  = "bTHX"
-    eS21  = "eS21"
-    eS24  = "eS24"
-    eS25  = "eS25"
-    eS26  = "eS26"
-    eS27  = "eS27"
-    eS28  = "eS28"
-    eS30  = "eS30"
-    eS31  = "eS31"
-    RACK1 = "RACK1"
-    uL1  = "uL1"
-    uL2  = "uL2"
-    uL3  = "uL3"
-    uL4  = "uL4"
-    uL5  = "uL5"
-    uL6  = "uL6"
-    eL6  = "eL6"
-    eL8  = "eL8"
-    bL9  = "bL9"
-    uL10 = "uL10"
-    uL11 = "uL11"
-    bL12 = "bL12"
-    uL13 = "uL13"
-    eL13 = "eL13"
-    uL14 = "uL14"
-    eL14 = "eL14"
-    uL15 = "uL15"
-    eL15 = "eL15"
-    uL16 = "uL16"
-    bL17 = "bL17"
-    uL18 = "uL18"
-    eL18 = "eL18"
-    bL19 = "bL19"
-    eL19 = "eL19"
-    bL20 = "bL20"
-    eL20 = "eL20"
-    bL21 = "bL21"
-    eL21 = "eL21"
-    uL22 = "uL22"
-    eL22 = "eL22"
-    uL23 = "uL23"
-    uL24 = "uL24"
-    eL24 = "eL24"
-    bL25 = "bL25"
-    bL27 = "bL27"
-    eL27 = "eL27"
-    bL28 = "bL28"
-    eL28 = "eL28"
-    uL29 = "uL29"
-    eL29 = "eL29"
-    uL30 = "uL30"
-    eL30 = "eL30"
-    bL31 = "bL31"
-    eL31 = "eL31"
-    bL32 = "bL32"
-    eL32 = "eL32"
-    bL33 = "bL33"
-    eL33 = "eL33"
-    bL34 = "bL34"
-    eL34 = "eL34"
-    bL35 = "bL35"
-    bL36 = "bL36"
-    eL36 = "eL36"
-    eL37 = "eL37"
-    eL38 = "eL38"
-    eL39 = "eL39"
-    eL40 = "eL40"
-    eL41 = "eL41"
-    eL42 = "eL42"
-    eL43 = "eL43"
-    P1P2 = "P1P2"
-    mtrRNA12S = "mt12SrRNA"  # mitochondrial
-    mtrRNA16S = "mt16SrRNA"  # mitochondrial
-    rRNA_5S   = "5SrRNA"  #  bacterial or eykaryotic
-    rRNA_16S  = "16SrRNA"  #  c-bacterial or mitochondrial
-    rRNA_23S  = "23SrRNA"  # bacterial
-    rRNA_25S  = "25SrRNA"  # plants
-    rRNA_5_8S = "5.8SrRNA"  # eukaryotic
-    rRNA_18S  = "18SrRNA"  # eukaryotic
-    rRNA_28S  = "28SrRNA"  # eukaryotic
-    # Eukaryotic
-    eEF1A = "eEF1A"
-    eEF1B = "eEF1B"
-    eFSec = "eFSec"
-    eEF2  = "eEF2"
-    mtEF4 = "mtEF4"
-    eIF5A = "eIF5A"
-    eEF3  = "eEF3"
-    # Bacterial
-    EF_Tu = "EF-Tu"
-    EF_Ts = "EF-Ts"
-    SelB  = "SelB"
-    EF_G  = "EF-G"
-    EF4   = "EF4"
-    EF_P  = "EF-P"
-    Tet_O = "Tet_O"
-    Tet_M = "Tet_M"
-    RelA  = "RelA"
-    BipA  = "BipA"
-    # Archaeal
-    aEF1A = "aEF1A"
-    aEF2  = "aEF2"
-    #!Eukaryotic
-    eIF1  = "eIF1"
-    eIF1A = "eIF1A"
 
-    eIF2_alpha = "eIF2_alpha"
-    eIF2_beta  = "eIF2_beta"
-    eIF2_gamma = "eIF2_gamma"
+CytosolicProteinsColorScheme = {
+    "uS2": "#60a5fa",
+    "uS3": "#7dd3fc",
+    "uS4": "#93c5fd",
+    "uS5": "#38bdf8",
+    "uS7": "#0ea5e9",
+    "uS8": "#0284c7",
+    "uS9": "#7dd3fc",
+    "uS10": "#93c5fd",
+    "uS11": "#38bdf8",
+    "uS12": "#60a5fa",
+    "uS13": "#3b82f6",
+    "uS14": "#2563eb",
+    "uS15": "#0ea5e9",
+    "uS17": "#7dd3fc",
+    "uS19": "#93c5fd",
+    "bS1": "#6ee7b7",
+    "bS6": "#34d399",
+    "bS16": "#a7f3d0",
+    "bS18": "#6ee7b7",
+    "bS20": "#34d399",
+    "bS21": "#10b981",
+    "bTHX": "#059669",
+    "eS1": "#c084fc",
+    "eS4": "#d8b4fe",
+    "eS6": "#e9d5ff",
+    "eS7": "#a855f7",
+    "eS8": "#9333ea",
+    "eS10": "#c084fc",
+    "eS12": "#d8b4fe",
+    "eS17": "#a855f7",
+    "eS19": "#c084fc",
+    "eS21": "#d8b4fe",
+    "eS24": "#e9d5ff",
+    "eS25": "#a855f7",
+    "eS26": "#9333ea",
+    "eS27": "#c084fc",
+    "eS28": "#d8b4fe",
+    "eS30": "#e9d5ff",
+    "eS31": "#a855f7",
+    "RACK1": "#9333ea",
+    "uL1": "#f59e0b",
+    "uL2": "#dc2626",
+    "uL3": "#fbbf24",
+    "uL4": "#b45309",
+    "uL5": "#e11d48",
+    "uL6": "#d97706",
+    "uL10": "#92400e",
+    "uL11": "#fef9c3",
+    "uL13": "#9a3412",
+    "uL14": "#c2410c",
+    "uL15": "#fb923c",
+    "uL16": "#be123c",
+    "uL18": "#fde047",
+    "uL22": "#92400e",
+    "uL23": "#ff8fab",
+    "uL24": "#b45309",
+    "uL29": "#f97316",
+    "uL30": "#ea580c",
+    "bL9": "#854d0e",
+    "bL12": "#facc15",
+    "bL17": "#d97706",
+    "bL19": "#991b1b",
+    "bL20": "#fb923c",
+    "bL21": "#ef4444",
+    "bL25": "#78350f",
+    "bL27": "#fb7185",
+    "bL28": "#92400e",
+    "bL31": "#713f12",
+    "bL32": "#fef08a",
+    "bL33": "#ea580c",
+    "bL34": "#b91c1c",
+    "bL35": "#9a3412",
+    "bL36": "#f59e0b",
+    "eL6": "#fef3c7",
+    "eL8": "#b45309",
+    "eL13": "#92400e",
+    "eL14": "#dc2626",
+    "eL15": "#fbbf24",
+    "eL18": "#9f1239",
+    "eL19": "#f97316",
+    "eL20": "#fdba74",
+    "eL21": "#92400e",
+    "eL22": "#ff8fab",
+    "eL24": "#c2410c",
+    "eL27": "#fde047",
+    "eL28": "#e11d48",
+    "eL29": "#fef9c3",
+    "eL30": "#92400e",
+    "eL31": "#fb923c",
+    "eL32": "#b91c1c",
+    "eL33": "#ea580c",
+    "eL34": "#f59e0b",
+    "eL36": "#854d0e",
+    "eL37": "#fef08a",
+    "eL38": "#dc2626",
+    "eL39": "#9a3412",
+    "eL40": "#fbbf24",
+    "eL41": "#9f1239",
+    "eL42": "#fb923c",
+    "eL43": "#78350f",
+    "P1P2": "#e11d48",
+}
+MitochondrialProteinColorScheme = {
+    "uS2m":"#67e8f9",
+    "uS3m":"#22d3ee",
+    "uS4m":"#7dd3fc",
+    "uS5m":"#38bdf8",
+    "uS7m":"#0ea5e9",
+    "uS8m":"#0284c7",
+    "uS9m":"#2dd4bf",
+    "uS10m":"#14b8a6",
+    "uS11m":"#0d9488",
+    "uS12m":"#5eead4",
+    "uS13m":"#a5f3fc",
+    "uS14m":"#7dd3fc",
+    "uS15m":"#38bdf8",
+    "uS17m":"#0ea5e9",
+    "uS19m":"#0284c7",
+    "bS1m":"#a3e635",
+    "bS6m":"#84cc16",
+    "bS16m":"#bef264",
+    "bS18m":"#d9f99d",
+    "bS21m":"#65a30d",
+    "mS22":"#fcaec8",
+    "mS23":"#fda4af",
+    "mS25":"#fba5b5",
+    "mS26":"#fecaca",
+    "mS27":"#fecdd3",
+    "mS29":"#ffd4d4",
+    "mS31":"#ffe4e6",
+    "mS33":"#fce7f3",
+    "mS34":"#fdf2f8",
+    "mS35":"#fbb4c7",
+    "mS37":"#fda4af",
+    "mS38":"#fecdd3",
+    "mS39":"#fee2e2",
+    "mS40":"#fecaca",
+    "mS41":"#fee2e2",
+    "mS42":"#fef2f2",
+    "mS43":"#fbb4c7",
+    "mS44":"#fda4af",
+    "mS45":"#fecdd3",
+    "mS46":"#ffb3c1",
+    "mS47":"#ff8fab",
+    "uL1m":"#fda4af",
+    "uL2m":"#fecdd3",
+    "uL3m":"#fee2e2",
+    "uL4m":"#fecaca",
+    "uL5m":"#fee2e2",
+    "uL6m":"#fef2f2",
+    "uL10m":"#ff8fab",
+    "uL11m":"#ffb3c1",
+    "uL13m":"#fbb4c7",
+    "uL14m":"#fda4af",
+    "uL15m":"#fecdd3",
+    "uL16m":"#fee2e2",
+    "uL18m":"#fecaca",
+    "uL22m":"#fee2e2",
+    "uL23m":"#fef2f2",
+    "uL24m":"#ffb3c1",
+    "uL29m":"#fba4af",
+    "uL30m":"#fecdd3",
+    "bL9m":"#fef9c3",
+    "bL12m":"#fef08a",
+    "bL17m":"#fde047",
+    "bL19m":"#facc15",
+    "bL20m":"#eab308",
+    "bL21m":"#fbbf24",
+    "bL27m":"#fcd34d",
+    "bL28m":"#fde68a",
+    "bL31m":"#fef3c7",
+    "bL32m":"#fffbeb",
+    "bL33m":"#fde047",
+    "bL34m":"#facc15",
+    "bL35m":"#eab308",
+    "bL36m":"#fbbf24",
+    "mL37":"#fae8ff",
+    "mL38":"#f3e8ff",
+    "mL39":"#f0abfc",
+    "mL40":"#e879f9",
+    "mL41":"#d946ef",
+    "mL42":"#c084fc",
+    "mL43":"#a855f7",
+    "mL44":"#9333ea",
+    "mL45":"#fae8ff",
+    "mL46":"#f3e8ff",
+    "mL48":"#f0abfc",
+    "mL49":"#e879f9",
+    "mL50":"#d946ef",
+    "mL51":"#c084fc",
+    "mL52":"#a855f7",
+    "mL53":"#9333ea",
+    "mL54":"#fae8ff",
+    "mL57":"#f3e8ff",
+    "mL58":"#f0abfc",
+    "mL59":"#e879f9",
+    "mL60":"#d946ef",
+    "mL61":"#c084fc",
+    "mL62":"#a855f7",
+    "mL63":"#9333ea",
+    "mL64":"#fae8ff",
+    "mL65":"#f3e8ff",
+    "mL66":"#f0abfc",
+    "mL67":"#e879f9",
+}
+RNAColorScheme = {
+    "5SrRNA"   :"#e2e8f0",
+    "16SrRNA"  :"#bfdbfe",
+    "23SrRNA"  :"#93c5fd",
+    "25SrRNA"  :"#f8fafc",
+    "5.8SrRNA" :"#94a3b8",
+    "18SrRNA"  :"#d1d5db",
+    "28SrRNA"  :"#fafafa",
+    "mt12SrRNA":"#e5e7eb",
+    "mt16SrRNA":"#f1f5f9",
+    "tRNA"     :"#c084fc",
+}
+FactorsColorScheme = {
+    "eEF1A":"#fed7aa",
+    "eEF1B":"#fdba74",
+    "eFSec":"#fb923c",
+    "eEF2" :"#fcd34d",
+    "mtEF4":"#fde047",
+    "eIF5A":"#fef9c3",
+    "eEF3" :"#fef3c7",
+    "EF-Tu":"#fecaca",
+    "EF-Ts":"#fecdd3",
+    "SelB" :"#fee2e2",
+    "EF-G" :"#fef2f2",
+    "EF4"  :"#ffe4e6",
+    "EF-P" :"#fce7f3",
+    "Tet_O":"#fed7aa",
+    "Tet_M":"#fdba74",
+    "RelA" :"#fb923c",
+    "BipA" :"#fcd34d",
+    "aEF1A":"#fef3c7",
+    "aEF2" :"#fde68a",
+}
+InitiationFactorsColorScheme = {
+    "eIF1"         : "#fef9c3",
+    "eIF1A"        : "#fef08a",
+    "eIF2_alpha"   : "#fde047",
+    "eIF2_beta"    : "#facc15",
+    "eIF2_gamma"   : "#eab308",
+    "eIF2B_alpha"  : "#fef9c3",
+    "eIF2B_beta"   : "#fef08a",
+    "eIF2B_gamma"  : "#fde047",
+    "eIF2B_delta"  : "#facc15",
+    "eIF2B_epsilon": "#eab308",
+    "eIF3_subunitA": "#fef3c7",
+    "eIF3_subunitB": "#fde68a",
+    "eIF3_subunitC": "#fcd34d",
+    "eIF3_subunitD": "#fbbf24",
+    "eIF3_subunitE": "#f59e0b",
+    "eIF3_subunitF": "#fef9c3",
+    "eIF3_subunitG": "#fef08a",
+    "eIF3_subunitH": "#fde047",
+    "eIF3_subunitI": "#facc15",
+    "eIF3_subunitJ": "#eab308",
+    "eIF3_subunitK": "#fef3c7",
+    "eIF3_subunitL": "#fde68a",
+    "eIF3_subunitM": "#fcd34d",
+    "eIF4F_4A"     : "#fef9c3",
+    "eIF4F_4G"     : "#fef08a",
+    "eIF4F_4E"     : "#fde047",
+    "eIF4B"        : "#facc15",
+    "eIF5B"        : "#eab308",
+    "eIF5"         : "#fef9c3",
+    "IF1"          : "#f8fafc",
+    "IF2"          : "#f1f5f9",
+    "IF3"          : "#e2e8f0",
+    "aIF1A"        : "#fef9c3",
+    "aIF2_alpha"   : "#fef08a",
+    "aIF2_beta"    : "#fde047",
+    "aIF2_gamma"   : "#facc15",
+    "aIF2B_alpha"  : "#eab308",
+    "aIF2B_beta"   : "#fef9c3",
+    "aIF2B_delta"  : "#fef08a",
+    "aIF5A"        : "#fde047",
+    "aIF5B"        : "#facc15",
+}
 
-    eIF2B_alpha   = "eIF2B_alpha"
-    eIF2B_beta    = "eIF2B_beta"
-    eIF2B_gamma   = "eIF2B_gamma"
-    eIF2B_delta   = "eIF2B_delta"
-    eIF2B_epsilon = "eIF2B_epsilon"
 
-    eIF3_subunitA = "eIF3_subunitA"
-    eIF3_subunitB = "eIF3_subunitB"
-    eIF3_subunitC = "eIF3_subunitC"
-    eIF3_subunitD = "eIF3_subunitD"
-    eIF3_subunitE = "eIF3_subunitE"
-    eIF3_subunitF = "eIF3_subunitF"
-    eIF3_subunitG = "eIF3_subunitG"
-    eIF3_subunitH = "eIF3_subunitH"
-    eIF3_subunitI = "eIF3_subunitI"
-    eIF3_subunitJ = "eIF3_subunitJ"
-    eIF3_subunitK = "eIF3_subunitK"
-    eIF3_subunitL = "eIF3_subunitL"
-    eIF3_subunitM = "eIF3_subunitM"
+POLYMER_COLORS = {
+    **CytosolicProteinsColorScheme,
+    **MitochondrialProteinColorScheme,
+    **RNAColorScheme,
+    **FactorsColorScheme,
+    **InitiationFactorsColorScheme
+}
 
-    eIF4F_4A = "eIF4F_4A"
-    eIF4F_4G = "eIF4F_4G"
-    eIF4F_4E = "eIF4F_4E"
 
-    eIF4B = "eIF4B"
-    eIF5B = "eIF5B"
-    eIF5  = "eIF5"
 
-    #!Bacterial
-    IF1 = "IF1"
-    IF2 = "IF2"
-    IF3 = "IF3"
-
-    #!Archaeal
-    aIF_1A       = "aIF1A"
-    aIF_2_alpha  = "aIF2_alpha"
-    aIF_2_beta   = "aIF2_beta"
-    aIF_2_gamma  = "aIF2_gamma"
-    aIF_2B_alpha = "aIF2B_alpha"
-    aIF_2B_beta  = "aIF2B_beta"
-    aIF_2B_delta = "aIF2B_delta"
-    aIF5A        = "aIF5A"
-    aIF5B        = "aIF5B"
-
-CHIMERAX_COLORS = [
-    ["tan", "#d2b48c"],
-    ["sienna", "#a0522d"],
-    ["brown", "#a52a2a"],
-    ["dark red", "#8b0000"],
-    ["firebrick", "#b22222"],
-    ["salmon", "#fa8072"],
-    ["red", "#ff0000"],
-    ["coral", "#ff7f50"],
-    ["sandy brown", "#f4a460"],
-    ["orange red", "#ff4500"],
-    ["orange", "#ff7f00"],
-    ["goldenrod", "#daa520"],
-    ["gold", "#ffd700"],
-    ["yellow", "#ffff00"],
-    ["khaki", "#f0e68c"],
-    ["dark khaki", "#bdb76b"],
-    ["dark olive green", "#556b2f"],
-    ["olive drab", "#6b8e23"],
-    ["chartreuse", "#7fff00"],
-    ["green", "#00ff00"],
-    ["dark green", "#006400"],
-    ["forest green", "#228b22"],
-    ["lime green", "#32cd32"],
-    ["light green", "#90ee90"],
-    ["sea green", "#2e8b57"],
-    ["spring green", "#00ff7f"],
-    ["dark cyan", "#008b8b"],
-    ["light sea green", "#20b2aa"],
-    ["turquoise", "#40e0d0"],
-    ["aquamarine", "#7fffd4"],
-    ["cyan", "#00ffff"],
-    ["deep sky blue", "#00bfff"],
-    ["dodger blue", "#1e90ff"],
-    ["steel blue", "#4682b4"],
-    ["sky blue", "#87ceeb"],
-    ["light blue", "#add8e6"],
-    ["blue", "#0000ff"],
-    ["medium blue", "#3232cd"],
-    ["cornflower blue", "#6495ed"],
-    ["navy blue", "#000080"],
-    ["dark slate blue", "#483d8b"],
-    ["medium purple", "#9370db"],
-    ["purple", "#a020f0"],
-    ["plum", "#dda0dd"],
-    ["orchid", "#da70d6"],
-    ["magenta", "#ff00ff"],
-    ["dark magenta", "#8b008b"],
-    ["violet red", "#d02090"],
-    ["hot pink", "#ff69b4"],
-    ["pink", "#ffc0cb"],
-    ["deep pink", "#ff1493"],
-    ["rosy brown", "#bc8f8f"],
-    ["slate gray", "#708090"],
-    ["dark slate gray", "#2f4f4f"],
-    ["white", "#ffffff"],
-    ["light gray", "#d3d3d3"],
-    ["gray", "#bebebe"],
-    ["dark gray", "#a9a9a9"],
-    ["dim gray", "#696969"],
-    ["black", "#000000"],
-]
-
-def get_polymer_color(polymer_class:str):
-    polyix      = list(map(lambda x: x.value, (PolymerClass)))
-    class_index = polyix.index(polymer_class) % len(polyix)
-
-    if polymer_class == None:
-        return "gray"
-    return CHIMERAX_COLORS[(class_index % len(CHIMERAX_COLORS))][1]
+def get_polymer_color(polymer_class: str) -> str:
+    """Get the hex color for a polymer class, defaulting to gray if not found."""
+    return POLYMER_COLORS.get(polymer_class, "#808080")
 
 def ribosome_representation(session, structure: AtomicStructure):
-    for _ in list(PolymerClass):
-        print(_.name)
-
     from chimerax.core.commands import run
+
     from chimerax.core.colors import hex_color
     from chimerax.atomic import Residue, Atom, Chain
-
-    rcsb_id = str(structure.name).upper().split('.')[0] # <-- the structure gets opened with the basename ex "(5AFI.cif)"
+    rcsb_id = str(structure.name).upper().split('.')[0]
     run(session, "set bgColor white")
-    run(session, "sym #1 assembly 1") # take only one assembly if multiple are available
+    run(session, "sym #1 assembly 1")
     run(session, "hide #2")
+    run(session, "hide") 
 
-    with open(os.path.join(RIBETL_DATA, rcsb_id, "{}.json".format(rcsb_id)), "r") as f:
+    profile_path = os.path.join(RIBETL_DATA, rcsb_id, f"{rcsb_id}.json")
+    with open(profile_path, "r") as f:
         profile = json.load(f)
 
-    polymers       = {}
-    polymer_chains = [
-        *profile["proteins"],
-        *profile["rnas"],
-        *profile["other_polymers"],
-    ]
+    # Create chain-to-polymer mapping
+    polymers = {}
+    polymer_chains = [*profile["proteins"], *profile["rnas"], *profile["other_polymers"]]
+    for chain in polymer_chains:
+        polymers[chain["auth_asym_id"]] = chain
 
-    [ polymers.update(x) for x in [{chain["auth_asym_id"]: chain} for chain in polymer_chains] ]
-
-    c: Chain
+    # Process each chain
     for c in structure.chains:
-
-        aaid      = c.chain_id
-        polyclass = None
-
-        if len(polymers[aaid]["nomenclature"]) < 1:
+        chain_id = c.chain_id
+        if chain_id not in polymers:
             continue
-        else:
-            polyclass = polymers[aaid]["nomenclature"][0]
 
-        if polymers[aaid]["entity_poly_polymer_type"] == "RNA":
-            run(session, "surf /{}".format(aaid))
-            run(session, "transp /{} 100".format(aaid))
-            run(session, "color /{} gray".format(aaid))
+        chain_info = polymers[chain_id]
+        polyclass = chain_info["nomenclature"][0] if chain_info["nomenclature"] else None
+        
+        # Get color based on polymer class
+        color = get_polymer_color(polyclass)
+        
+        if chain_info["entity_poly_polymer_type"] == "RNA":
+            run(session, f"surf /{chain_id}")
+            run(session, f"transp /{chain_id} 100")
+            run(session, f"color /{chain_id} {color}")
         else:
-            run(session, "show /{} cartoon".format(aaid, get_polymer_color(polyclass)))
-            run(session, "color /{} {}".format(aaid, get_polymer_color(polyclass)))
+            # For proteins, use a single show command with cartoon style
+            run(session, f"show /{chain_id} cartoon")
+            run(session, f"color /{chain_id} {color}")
 
+    # Final styling
     run(session, "graphics silhouettes true width 1")
     run(session, "light soft")
 
 def register_ribrepr_command(logger):
+
     from chimerax.core.commands import CmdDesc, register
     from chimerax.atomic import AtomicStructureArg, Chain, Residue, Atom
-
     desc = CmdDesc(
-        required           = [("structure", AtomicStructureArg)],
-        required_arguments = ["structure"],
-        synopsis           = "representation ",
+        required=[("structure", AtomicStructureArg)],
+        required_arguments=["structure"],
+        synopsis="Apply ribosome representation with custom coloring"
     )
     register("ribrep", desc, ribosome_representation, logger=logger)
 
