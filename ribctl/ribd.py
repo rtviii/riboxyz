@@ -9,6 +9,7 @@ from ribctl.lib.libbsite import extract_ligand_to_mmcif
 from logger_config import configure_logging
 
 configure_logging()
+import concurrent.futures as cf
 from neo4j_ribosome.db_lib_reader import Neo4jReader
 from functools import partial
 from ribctl.asset_manager.asset_manager import RibosomeAssetManager
@@ -87,6 +88,7 @@ def etl(ctx):
 
 
 @etl.command()
+@click.pass_context
 @click.option(
     "-t",
     "--asset-type",
@@ -106,6 +108,7 @@ def etl(ctx):
     "--max-assets", default=3, help="Maximum number of concurrent assets per structure"
 )
 def get(
+    ctx,
     asset_type: List[str],
     pdb_id: str,
     force: bool,
@@ -117,14 +120,15 @@ def get(
     or a list of IDs via stdin pipe.
     """
     # Get structures from either argument or pipe
-    structures = get_input_structures()
+    structures = ctx.obj.get("piped_pdb_ids", [])
+    
+    # If nothing in context, try reading from stdin directly
+    if not structures:
+        structures = get_input_structures()
+        
     if pdb_id:
         structures.append(pdb_id.upper())
-
-    if not structures:
-        raise click.UsageError(
-            "No PDB IDs provided. Either pass an ID as argument or pipe IDs to stdin."
-        )
+    
 
     # Convert asset type names to enum
     asset_types = [AssetType[t] for t in asset_type]
@@ -348,7 +352,150 @@ def ligand_mmcifs(ctx):
                 )
             except:
                 pass
+# Define this outside the command function to make it picklable
+# For multiprocessing
+import concurrent.futures
+from tqdm import tqdm
+import sys
+import time
 
+def validate_structure(rcsb_id):
+    """Validate a single structure against the Pydantic model"""
+    from pydantic import ValidationError
+    
+    try:
+        ops = RibosomeOps(rcsb_id)
+        # Get structure profile
+        structure_data = ops.assets.profile()
+        
+        # Validate against Pydantic model
+        RibosomeStructure.model_validate(structure_data)
+        
+        return {
+            "rcsb_id": rcsb_id,
+            "valid": True,
+            "error": None
+        }
+    except ValidationError as e:
+        return {
+            "rcsb_id": rcsb_id,
+            "valid": False,
+            "error": str(e)
+        }
+    except Exception as e:
+        return {
+            "rcsb_id": rcsb_id,
+            "valid": False,
+            "error": f"Failed to load structure: {str(e)}"
+        }
+
+
+@etl.command()
+@click.option(
+    "--show-errors",
+    is_flag=True,
+    help="Show detailed Pydantic validation errors for failed structures",
+)
+@click.option(
+    "--verbose", "-v",
+    is_flag=True,
+    help="Show detailed progress information",
+)
+@click.option(
+    "--workers",
+    default=max(1, multiprocessing.cpu_count() - 1),
+    help="Number of worker processes for parallel validation",
+)
+def check_schema(show_errors, verbose, workers):
+    """
+    Validate all structure profiles against the Pydantic model schema.
+    
+    Attempts to load each structure profile and validates it against the
+    RibosomeStructure Pydantic model. Reports structures that fail validation.
+    
+    Examples:\n
+    \b
+    # Check all structures with minimal output
+    ribd.py etl check_schema
+    
+    \b
+    # Show detailed validation errors
+    ribd.py etl check_schema --show-errors
+    
+    \b
+    # Verbose output with 8 worker processes
+    ribd.py etl check_schema -v --workers 8
+    """
+    from concurrent.futures import ProcessPoolExecutor
+    import time
+    import concurrent.futures
+    
+    # Get all available structures
+    structures = GlobalOps.list_profiles()
+    total = len(structures)
+    
+    if not structures:
+        click.echo("No structures found.")
+        return
+    
+    click.echo(f"Validating schema for {total} structures...")
+    
+    # Results tracking
+    results = {
+        "passed": [],
+        "failed": [],
+        "errors": {}
+    }
+    
+    start_time = time.time()
+    
+    # Process structures in parallel
+    with ProcessPoolExecutor(max_workers=workers) as executor:
+        with tqdm(total=total, disable=not verbose) as progress_bar:
+            futures = [executor.submit(validate_structure, rcsb_id) for rcsb_id in structures]
+            
+            for future in concurrent.futures.as_completed(futures):
+                result = future.result()
+                rcsb_id = result["rcsb_id"]
+                
+                if result["valid"]:
+                    results["passed"].append(rcsb_id)
+                    if verbose:
+                        click.echo(f"✓ {rcsb_id}: Valid")
+                else:
+                    results["failed"].append(rcsb_id)
+                    results["errors"][rcsb_id] = result["error"]
+                    if verbose:
+                        click.echo(f"✗ {rcsb_id}: Invalid")
+                
+                progress_bar.update(1)
+    
+    # Print summary
+    elapsed_time = time.time() - start_time
+    passed_count = len(results["passed"])
+    failed_count = len(results["failed"])
+    
+    click.echo("\nValidation Summary:")
+    click.echo(f"Total structures: {total}")
+    click.echo(f"Passed: {passed_count} ({passed_count/total*100:.1f}%)")
+    click.echo(f"Failed: {failed_count} ({failed_count/total*100:.1f}%)")
+    click.echo(f"Time elapsed: {elapsed_time:.2f} seconds")
+    
+    # Print failed structures
+    if failed_count > 0:
+        click.echo("\nFailed structures:")
+        for i, rcsb_id in enumerate(sorted(results["failed"]), 1):
+            click.echo(f"{rcsb_id}")
+            
+            # Print detailed errors if requested
+            if show_errors:
+                error_msg = results["errors"][rcsb_id]
+                formatted_error = "\n".join(f"    {line}" for line in error_msg.split("\n"))
+                click.echo(f"   Error details:\n{formatted_error}\n")
+    
+    # Return non-zero exit code if any structures failed validation
+    if failed_count > 0:
+        sys.exit(1)
 
 @etl.command(name="sync_all")
 @click.option(
