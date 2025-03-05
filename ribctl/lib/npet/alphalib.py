@@ -91,20 +91,27 @@ def fast_normal_estimation(
     return pcd
 
 def alpha_contour_via_poisson_recon(rcsb_id:str, verbose:bool=False):
-    ptcloudpath = os.path.join(RIBXZ_TEMP_FILES, '{}_ptcloud.npx')
+    ptcloudpath = os.path.join(RIBXZ_TEMP_FILES, '{}_ptcloud.npx'.format(rcsb_id))
     rops                  = RibosomeOps(rcsb_id)
     cifpath               = rops.assets.paths.cif
+
+
+    print("Cifpath:", cifpath)
     if not os.path.exists(ptcloudpath):
+        print("Extracting point cloud from CIF file")
         first_assembly_chains = rops.first_assembly_auth_asym_ids()
         ptcloud               = cif_to_point_cloud(cifpath, first_assembly_chains, do_atoms=True)
         np.save(ptcloudpath, ptcloud)
     else:
+        print("Loaded.")
         ptcloud = np.load(ptcloudpath)
 
+    print("Before visualize ptclodu")
     if verbose:
         visualize_pointcloud(ptcloud, rcsb_id)
+    print("after visualize ptclodu")
 
-    output_normals_pcd = os.path.join(RIBXZ_TEMP_FILES, "{}_normal_estimated_pcd.ply")
+    output_normals_pcd = os.path.join(RIBXZ_TEMP_FILES, "{}_normal_estimated_pcd.ply".format(rcsb_id))
     output_mesh        = AssetType.ALPHA_SHAPE.get_path(rcsb_id)
 
     d3d_alpha  = 45    # Increase from 35 - be more aggressive
@@ -118,6 +125,7 @@ def alpha_contour_via_poisson_recon(rcsb_id:str, verbose:bool=False):
     PR_depth    = 6        # Reduced from 6
     PR_ptweight = 4
 
+    print("Beginning Delaunay 3d reconstruction")
     surface_pts = quick_surface_points(ptcloud, d3d_alpha, d3d_tol, d3d_offset)
 
     if verbose:

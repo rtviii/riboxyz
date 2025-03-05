@@ -42,7 +42,6 @@ def find_closest_pair(points: np.ndarray):
 
     return closest_point1, closest_point2, min_distance
 
-
 def PTC_reference_residues(
     ribosome_type: typing.Literal["euk", "bact", "arch", "mito"]
 ) -> tuple[list[Residue], Chain, tuple[str, str, str]]:
@@ -77,7 +76,7 @@ def PTC_reference_residues(
     def trna_cterm_pos() -> np.ndarray:
         trnaChain: Chain = mmcif_struct[ref_trna_aaid]
         c_terminus: Residue = list(
-            filter(lambda x: ResidueSummary.is_noncanonical(x.resname), [*trnaChain])
+            filter(lambda x: ResidueSummary.is_canonical(x.resname), [*trnaChain])
         )[-1]
         return c_terminus.center_of_mass()
 
@@ -88,7 +87,7 @@ def PTC_reference_residues(
 
     return (
         list(
-            filter(lambda x: ResidueSummary.is_noncanonical(x.resname), nearby_residues)
+            filter(lambda x: ResidueSummary.is_canonical(x.resname), nearby_residues)
         ),
         rrrna,
         (ref_rcsb_id, ref_trna_aaid, ref_rrna_aaid),

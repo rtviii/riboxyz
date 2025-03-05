@@ -54,6 +54,7 @@ def create_npet_mesh(RCSB_ID: str):
         "3J7Z": ["a", "7"],
         "7A5G": ["Y2"],
         "5GAK": ["z"],
+        "5NWY":["s"]
     }
     residues = ribosome_entities(
         RCSB_ID,

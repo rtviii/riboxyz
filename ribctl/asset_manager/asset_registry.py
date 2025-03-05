@@ -9,6 +9,7 @@ from typing import Dict, Callable, Awaitable
 
 from ribctl import RIBETL_DATA
 from ribctl.asset_manager.asset_manager import RibosomeAssetManager
+from ribctl.lib.npet.alphalib import alpha_contour_via_poisson_recon
 from ribctl.lib.npet.npet_driver import create_npet_mesh
 from ribctl.lib.utils import download_unpack_place
 from ribctl.asset_manager.asset_types import AssetType

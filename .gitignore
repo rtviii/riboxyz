@@ -23,7 +23,6 @@ rnacentral*
 *.sqlite
 **taxa.sqlite**
 
-ribctl/assets/PoissonRecon
 **/PoissonRecon
 volume/**
 **/volume/

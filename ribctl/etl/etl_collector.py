@@ -743,7 +743,6 @@ class ETLCollector:
         reqstring = "https://data.rcsb.org/graphql?query={}".format(gql_string)
         _resp = requests.get(reqstring)
         resp = _resp.json()
-        print("Got resp", resp)
 
         if "data" in resp:
             return resp["data"]
@@ -911,8 +910,8 @@ class ETLCollector:
                     k.value for k in list(MitochondrialRNAClass)
                 ]:
                     is_mitochondrial = True
-                    break
 
+        print("Assigneed mitochondrial", is_mitochondrial)
         organisms = self.infer_organisms_from_polymers([*proteins, *rna, *other])
         subunit_presence = lsu_ssu_presence(rna, is_mitochondrial)
         reshaped = RibosomeStructure(
