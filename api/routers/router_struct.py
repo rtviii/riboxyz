@@ -83,13 +83,26 @@ def list_structures(request, filters: StructureFilterParams):
     structures, next_cursor, total_count = dbqueries.list_structs_filtered(
         parsed_filters
     )
-    structures_validated = [
-        RibosomeStructureMetadata.model_validate(s) for s in structures
-    ]
+    
+    structures_validated = []
+    validation_errors = []
+    
+    for structure in structures:
+        try:
+            validated_structure = RibosomeStructureMetadata.model_validate(structure)
+            structures_validated.append(validated_structure)
+        except Exception as e:
+            validation_errors.append({
+                "structure": structure,
+                "error": str(e)
+            })
+
+    print(f"Validation errors: {validation_errors}")
     return {
         "structures": structures_validated,
         "next_cursor": next_cursor,
         "total_count": total_count,
+        "validation_errors": validation_errors
     }
 
 

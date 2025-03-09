@@ -106,20 +106,16 @@ def alpha_contour_via_poisson_recon(rcsb_id:str, verbose:bool=False):
         print("Loaded.")
         ptcloud = np.load(ptcloudpath)
 
-    print("Before visualize ptclodu")
-    if verbose:
-        visualize_pointcloud(ptcloud, rcsb_id)
-    print("after visualize ptclodu")
 
     output_normals_pcd = os.path.join(RIBXZ_TEMP_FILES, "{}_normal_estimated_pcd.ply".format(rcsb_id))
     output_mesh        = AssetType.ALPHA_SHAPE.get_path(rcsb_id)
 
-    d3d_alpha  = 45    # Increase from 35 - be more aggressive
-    d3d_tol    = 2     # Increase tolerance to smooth out small details
+    d3d_alpha  = 75    # Increase from 35 - be more aggressive
+    d3d_tol    = 4     # Increase tolerance to smooth out small details
     d3d_offset = 3     # Slightly larger offset
 
     kdtree_radius   = 30    # Larger radius to catch more global structure
-    max_nn          = 30    # More neighbors for more robust estimation
+    max_nn          = 40    # More neighbors for more robust estimation
     tanget_planes_k = 15    # Actually decrease this to avoid over-smoothing
 
     PR_depth    = 6        # Reduced from 6

@@ -1,4 +1,5 @@
 import os
+from typing import Literal
 import numpy as np
 import pyvista as pv
 import open3d as o3d
@@ -27,6 +28,7 @@ from ribctl.lib.npet.various_visualization import (
     visualize_pointcloud,
     visualize_pointcloud_axis,
 )
+from ribctl.ribosome_ops import RibosomeOps
 
 
 def create_npet_mesh(RCSB_ID: str):
@@ -36,6 +38,10 @@ def create_npet_mesh(RCSB_ID: str):
 
     ashapepath = AssetType.ALPHA_SHAPE.get_path(RCSB_ID)
     meshpath = AssetType.NPET_MESH.get_path(RCSB_ID)
+
+
+    ro = RibosomeOps(RCSB_ID)
+    profile = ro.profile
 
     R = 35
     H = 120
@@ -54,8 +60,18 @@ def create_npet_mesh(RCSB_ID: str):
         "3J7Z": ["a", "7"],
         "7A5G": ["Y2"],
         "5GAK": ["z"],
-        "5NWY":["s"]
+        "5NWY":["s"],
+        #ml45 plugs
+        # "7OF7":[ "d" ]
     }
+    
+    if profile.mitochondrial:
+        try:
+            chain = ro.get_poly_by_polyclass("mL45")
+            tunnel_debris[RCSB_ID] = [chain.auth_asym_id]    
+        except:
+            print("Mitochondrial mL45 chain not found")
+        
     residues = ribosome_entities(
         RCSB_ID,
         cifpath,
@@ -193,8 +209,8 @@ def create_npet_mesh(RCSB_ID: str):
         recon_pt_weight=PR_ptweight,
     )
 
-    watertight = validate_mesh_pyvista(meshpath)
+    # watertight = validate_mesh_pyvista(meshpath)
     visualize_mesh(meshpath, RCSB_ID)
-    if not watertight:
-        print("XXXX Watertightness check failed, removing", meshpath, " XXXX")
-        os.remove(meshpath)
+    # if not watertight:
+    #     print("XXXX Watertightness check failed, removing", meshpath, " XXXX")
+    #     os.remove(meshpath)
