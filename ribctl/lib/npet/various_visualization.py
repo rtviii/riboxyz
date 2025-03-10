@@ -996,8 +996,24 @@ dbscan_pairs = [
 ]
 
 
-def visualize_DBSCAN_CLUSTERS_particular_eps_minnbrs(dbscan_cluster_dict: dict[int, list], eps, min_nbrs, base_point, axis_point, refined, radius, height):
-    plotter = pv.Plotter()
+def visualize_DBSCAN_CLUSTERS_particular_eps_minnbrs(
+    dbscan_cluster_dict: dict[int, list], eps, min_nbrs, base_point, axis_point, 
+    refined, radius, height, output_path: str | None = None):
+    """
+    Visualize DBSCAN clustering results and optionally save to file.
+    
+    Parameters:
+        dbscan_cluster_dict: Dictionary of clusters
+        eps: Epsilon parameter used for DBSCAN
+        min_nbrs: Minimum samples parameter used for DBSCAN
+        base_point: Base point of cylinder
+        axis_point: Axis point of cylinder
+        refined: Refined points
+        radius: Cylinder radius
+        height: Cylinder height
+        output_path: Path to save the visualization image
+    """
+    plotter = pv.Plotter(off_screen=output_path is not None)
     plotter.subplot(0, 0)
 
     # Print cluster sizes
@@ -1017,20 +1033,17 @@ def visualize_DBSCAN_CLUSTERS_particular_eps_minnbrs(dbscan_cluster_dict: dict[i
         clusters_palette[k] = [*v[:3], 0.5]
 
     # Create cylinder
-    # Calculate direction vector from base_point to axis_point
     direction = np.array(axis_point) - np.array(base_point)
     direction = direction / np.linalg.norm(direction)
     center = np.array(base_point) + (direction * height/2)
     
-    # Create cylinder jcentered at base_point
     cylinder = pv.Cylinder(
-        center=center,  # Use calculated center
-        direction=direction,  # Remove the negative sign
+        center=center,
+        direction=direction,
         radius=radius,
         height=height
     )
     
-    # Add cylinder to plot with transparency
     plotter.add_mesh(cylinder, opacity=0.1, color='gray', label='Cylinder', style='wireframe')
 
     # Add each cluster separately
@@ -1038,20 +1051,17 @@ def visualize_DBSCAN_CLUSTERS_particular_eps_minnbrs(dbscan_cluster_dict: dict[i
         points = np.array(coordinates)
         if cluster_label == -1:
             # Noise points
-            # ...
             plotter.add_points(
                 points,
-                color      = 'gray',
-                opacity    = 0.1,
-                point_size = 1,
-                label      = 'Noise',
-                style      = 'points_gaussian',
-                emissive   = True
+                color='gray',
+                opacity=0.1,
+                point_size=1,
+                label='Noise',
+                style='points_gaussian',
+                emissive=True
             )
-
         elif cluster_label == largest_cluster:
-            # Largest cluster - blue spheres
-            print(points.shape)
+            # Largest cluster
             plotter.add_points(
                 points,
                 color='cyan',
@@ -1066,7 +1076,6 @@ def visualize_DBSCAN_CLUSTERS_particular_eps_minnbrs(dbscan_cluster_dict: dict[i
             color = clusters_palette[(cluster_label * 2) % len(clusters_palette)]
             plotter.add_points(
                 points,
-                # color=color[:3],
                 color='gray',
                 opacity=0.3,
                 point_size=2,
@@ -1083,6 +1092,7 @@ def visualize_DBSCAN_CLUSTERS_particular_eps_minnbrs(dbscan_cluster_dict: dict[i
         style='points',
         render_points_as_spheres=True
     )
+    
     # Add reference points
     plotter.add_points(
         np.array([base_point]),
@@ -1111,7 +1121,13 @@ def visualize_DBSCAN_CLUSTERS_particular_eps_minnbrs(dbscan_cluster_dict: dict[i
         color='black'
     )
 
-    plotter.show()
+    if output_path:
+        plotter.screenshot(output_path)
+        print(f"Saved visualization to {output_path}")
+    else:
+        plotter.show()
+    
+    return plotter
 
 def DBSCAN_CLUSTERS_visualize_largest(positive_space: np.ndarray, dbscan_cluster_dict: dict[int, list], selected_cluster: np.ndarray, gif:bool=False, gif_name:str|None=None):
     plotter               = pv.Plotter(shape=(1, 2), off_screen=True)
@@ -1181,37 +1197,83 @@ def DBSCAN_CLUSTERS_visualize_largest(positive_space: np.ndarray, dbscan_cluster
     else:
         plotter.show()
 
-def visualize_mesh(mesh_path, rcsb_id:str|None=None, gif:bool=False, gif_name:str|None=None):
-    plotter = pv.Plotter(off_screen=gif)
-
+def visualize_mesh(mesh_path, rcsb_id: str | None = None, 
+                  gif: bool = False, gif_name: str | None = None,
+                  output_path: str | None = None):
+    """
+    Visualize a mesh file and optionally save to file.
+    
+    Parameters:
+        mesh_path: Path to the mesh file
+        rcsb_id: Optional structure ID for labeling
+        gif: Whether to create a GIF
+        gif_name: Name of the GIF file
+        output_path: Path to save the visualization image
+    """
+    plotter = pv.Plotter(off_screen=output_path is not None or gif)
 
     _ = plotter.add_mesh(pv.read(mesh_path), opacity=0.8)
-    plotter.add_axes(line_width=2,cone_radius=0.7, shaft_length=0.7, tip_length=0.3, ambient=0.5, label_size=(0.2, 0.8))
-    plotter.add_text('RCSB_ID:{}'.format(rcsb_id if rcsb_id is not None else "" ), position='upper_right', font_size=14, shadow=True, font='courier', color='black')
-    plotter.show_grid( n_xlabels=8, n_ylabels=8, n_zlabels=8, font_size = 8)
+    plotter.add_axes(line_width=2, cone_radius=0.7, shaft_length=0.7, tip_length=0.3, ambient=0.5, label_size=(0.2, 0.8))
+    plotter.add_text('RCSB_ID:{}'.format(rcsb_id if rcsb_id is not None else ""), 
+                    position='upper_right', font_size=14, shadow=True, font='courier', color='black')
+    plotter.show_grid(n_xlabels=8, n_ylabels=8, n_zlabels=8, font_size=8)
+
+    if output_path:
+        plotter.screenshot(output_path)
+        print(f"Saved visualization to {output_path}")
 
     if gif:
         output_gif = gif_name
-        # plotter.camera.zoom(1.5)
         plotter.open_gif(output_gif)
-
-        # Rotate the camera 360 degrees
-        for angle in range(0, 360, 2):  # 5 degree steps
+        for angle in range(0, 360, 2):
             plotter.camera.azimuth = angle
             plotter.write_frame()
         plotter.close()
         print(f"GIF saved as {output_gif}")
     else:
-        plotter.show()
+        if not output_path:  # Only show interactive window if not saving to file
+            plotter.show()
+    
+    return plotter
 
-def visualize_pointcloud(ptcloud,  rcsb_id:str|None=None, gif:bool=False, gif_name:str|None=None):
-    plotter              = pv.Plotter(off_screen=gif)
+def visualize_pointcloud(ptcloud, rcsb_id: str | None = None, 
+                        gif: bool = False, gif_name: str | None = None,
+                        output_path: str | None = None):
+    """
+    Visualize a point cloud and optionally save to file.
+    
+    Parameters:
+        ptcloud: Point cloud data
+        rcsb_id: Optional structure ID for labeling
+        gif: Whether to create a GIF
+        gif_name: Name of the GIF file
+        output_path: Path to save the visualization image
+    """
+    plotter = pv.Plotter(off_screen=output_path is not None or gif)
     n_labels = 7
-    plotter.show_grid( n_xlabels=n_labels, n_ylabels=n_labels, n_zlabels=n_labels, font_size = 8)
-    plotter.add_axes(line_width=2,cone_radius=0.3, shaft_length=2, tip_length=1, ambient=1, label_size=(0.2, 0.6))
-    plotter.add_text('RCSB_ID:{}'.format(rcsb_id if rcsb_id is not None else "" ), position='upper_right', font_size=14, shadow=True, font='courier', color='black')
-    plotter.add_points(pv.PolyData(ptcloud), color='black', point_size=3,  opacity=0.3)
-    plotter.show()
+    plotter.show_grid(n_xlabels=n_labels, n_ylabels=n_labels, n_zlabels=n_labels, font_size=8)
+    plotter.add_axes(line_width=2, cone_radius=0.3, shaft_length=2, tip_length=1, ambient=1, label_size=(0.2, 0.6))
+    plotter.add_text('RCSB_ID:{}'.format(rcsb_id if rcsb_id is not None else ""), 
+                    position='upper_right', font_size=14, shadow=True, font='courier', color='black')
+    plotter.add_points(pv.PolyData(ptcloud), color='black', point_size=3, opacity=0.3)
+    
+    if output_path:
+        plotter.screenshot(output_path)
+        print(f"Saved visualization to {output_path}")
+        
+    if gif:
+        output_gif = gif_name
+        plotter.open_gif(output_gif)
+        for angle in range(0, 360, 2):
+            plotter.camera.azimuth = angle
+            plotter.write_frame()
+        plotter.close()
+        print(f"GIF saved as {output_gif}")
+    else:
+        if not output_path:  # Only show interactive window if not saving to file
+            plotter.show()
+    
+    return plotter
 
 def visualize_pointcloud_axis(ptcloud,aux_ptcloud, base_point, axis_point, radius=0.1, height=None, rcsb_id:str|None=None, gif:bool=False, gif_name:str|None=None):
     # Convert inputs to numpy arrays to ensure compatibility
@@ -1440,7 +1502,7 @@ def visualize_clipping_result(
 
 def visualize_filtered_residues(
     filtered_residues: List[T],
-    all_residues: Optional[List[T]],  # If None, won't show unfiltered residues
+    all_residues: Optional[List[T]],
     base_point: np.ndarray,
     axis_point: np.ndarray,
     radius: float,
@@ -1449,48 +1511,14 @@ def visualize_filtered_residues(
     point_size: float = 5,
     opacity: float = 0.3,
     show: bool = True,
-    screenshot_path: Optional[str] = None,
+    output_path: Optional[str] = None,
     window_size: tuple = (1024, 768)
 ) -> Optional[pv.Plotter]:
-
     """
     Visualize filtered residues alongside the cylinder that was used for filtering.
-    
-    Parameters:
-    -----------
-    filtered_residues : List[T]
-        List of residues that passed the cylinder filter
-    all_residues : Optional[List[T]]
-        Complete list of residues before filtering. If provided, will show
-        unfiltered residues in gray
-    base_point : np.ndarray
-        Center point of cylinder base
-    axis_point : np.ndarray
-        Point defining cylinder axis direction
-    radius : float
-        Radius of cylinder
-    height : float
-        Height of cylinder
-    position_getter : Callable[[T], np.ndarray]
-        Function to extract position from residue object
-    point_size : float
-        Size of points in visualization
-    opacity : float
-        Opacity of cylinder (0.0-1.0)
-    show : bool
-        Whether to display the plot immediately
-    screenshot_path : Optional[str]
-        If provided, saves screenshot to this path
-    window_size : tuple
-        Size of the visualization window (width, height)
-        
-    Returns:
-    --------
-    Optional[pv.Plotter]
-        Returns plotter if show=False, None otherwise
     """
     # Initialize plotter
-    plotter = pv.Plotter(window_size=window_size)
+    plotter = pv.Plotter(window_size=window_size, off_screen=output_path is not None and not show)
     
     # Get positions of filtered residues
     filtered_positions = np.array([
@@ -1590,7 +1618,12 @@ def visualize_filtered_residues(
         font_size=12,
         color='white'
     )
-        
+    
+    # Save screenshot if output path is provided
+    if output_path:
+        plotter.screenshot(output_path)
+        print(f"Saved visualization to {output_path}")
+    
     if show:
         plotter.show()
         return None

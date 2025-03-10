@@ -137,7 +137,7 @@ class AssetRegistry:
             await self.generate_asset(rcsb_id, asset_type, force)
 
 async def npet_mesh_handler(rcsb_id: str, force: bool) -> None:
-    create_npet_mesh(rcsb_id)
+    create_npet_mesh(rcsb_id, Path('/Users/rtviii/dev/riboxyz/ribctl/lib/npet/pipeline/logs'))
 
 async def alphashape_handler(rcsb_id: str, force: bool) -> None:
     # alpha_contour_via_poisson_recon(rcsb_id )
