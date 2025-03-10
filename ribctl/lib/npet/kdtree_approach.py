@@ -384,7 +384,6 @@ def ribosome_entities(
     for residue in residues:
         if not ResidueSummary.is_canonical(residue.get_resname()):
             residues.remove(residue)
-            print("REMOVED", residue.get_resname(), residue.get_id())
 
     if level == "R":
         return residues

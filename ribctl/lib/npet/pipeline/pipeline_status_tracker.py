@@ -1,5 +1,6 @@
 import copy
 import json
+import os
 import time
 import traceback
 from enum import Enum
@@ -9,6 +10,8 @@ from typing import Dict, Any, Optional, List
 class ProcessingStage(str, Enum):
     """Enum defining the stages of the NPET mesh pipeline"""
     SETUP = "setup"
+    PTC_IDENTIFICATION = "ptc_identification"           # New stage
+    CONSTRICTION_IDENTIFICATION = "constriction_identification"  # New stage
     ALPHA_SHAPE = "alpha_shape"
     LANDMARK_IDENTIFICATION = "landmark_identification"
     ENTITY_FILTERING = "entity_filtering"
@@ -85,6 +88,9 @@ class NPETProcessingTracker:
         self.current_stage = stage
         now = time.time()
         
+        # Print stage start
+        print(f"\n⏳ Starting stage: {stage}")
+        
         # Check if we can skip processing based on parameters
         can_skip = False
         if parameters is not None:
@@ -98,7 +104,7 @@ class NPETProcessingTracker:
                 artifacts_exist = all(os.path.exists(artifact) for artifact in prev_artifacts)
                 if artifacts_exist:
                     can_skip = True
-                    print(f"Stage {stage} can be skipped (parameters unchanged, artifacts exist)")
+                    print(f"⏩ Stage {stage} skipped (parameters unchanged, artifacts exist)")
                     
                     # Update status but keep existing data
                     self.stages[stage].update({
@@ -163,9 +169,18 @@ class NPETProcessingTracker:
             for skip_stage in all_stages[current_index+1:]:
                 if skip_stage != ProcessingStage.COMPLETE:
                     self.stages[skip_stage]["status"] = ProcessingStatus.SKIPPED
+                    
+            # Print failure message with emoji
+            print(f"❌ Stage FAILED: {stage} - {str(error) if error else 'Unknown error'}")
+        else:
+            # Print success message with emoji
+            duration = now - start_time
+            print(f"✅ Stage completed: {stage} ({duration:.2f}s)")
         
-        # Print artifact count for debugging
-        print(f"Stage {stage} now has {len(self.stages[stage].get('artifacts', []))} artifacts")
+        # Print artifact count
+        artifact_count = len(self.stages[stage].get("artifacts", []))
+        if artifact_count > 0:
+            print(f"   {artifact_count} artifacts generated")
         
         self._save_status()
     
@@ -173,6 +188,7 @@ class NPETProcessingTracker:
         """Mark the overall processing as complete"""
         now = time.time()
         self.end_time = now
+        total_duration = now - self.start_time
         
         # Get all generated artifacts with debugging
         artifacts = []
@@ -186,7 +202,7 @@ class NPETProcessingTracker:
         
         self.status.update({
             "overall_status": ProcessingStatus.SUCCESS if success else ProcessingStatus.FAILURE,
-            "duration": now - self.start_time,
+            "duration": total_duration,
             "summary": {
                 "success": success,
                 "watertight": watertight,
@@ -200,23 +216,90 @@ class NPETProcessingTracker:
             "duration": 0
         })
         
+        # Don't print summary here - let the caller handle it
+        # self.print_summary()
+        
         self._save_status()
     
     def add_artifact(self, stage: ProcessingStage, artifact_path: Path) -> None:
         """Add an artifact to the specified stage"""
         artifact_str = str(artifact_path)
-        print(f"Adding artifact to stage {stage}: {artifact_str}")
-        print(f"Artifact exists: {artifact_path.exists()}")
         
         if artifact_str not in self.stages[stage].get("artifacts", []):
-            print(f"  - Artifact not already in list, adding it")
             self.stages[stage].setdefault("artifacts", []).append(artifact_str)
-            
-            # Verify after adding
-            print(f"  - Current artifacts in stage: {self.stages[stage]['artifacts']}")
             self._save_status()
+    
+    def print_summary(self) -> None:
+        """Print a summary of all stages with their status"""
+        print("\n" + "=" * 60)
+        print(f"PROCESSING SUMMARY FOR {self.rcsb_id}")
+        print("=" * 60)
+        
+        # Calculate the widest stage name for nice formatting
+        stage_width = max(len(str(stage)) for stage in ProcessingStage) + 2
+        
+        # Print status for each stage
+        for stage in ProcessingStage:
+            if stage != ProcessingStage.COMPLETE:
+                status = self.stages[stage]["status"]
+                
+                # Select appropriate emoji and color based on status
+                emoji = {
+                    ProcessingStatus.SUCCESS: "✅",
+                    ProcessingStatus.FAILURE: "❌",
+                    ProcessingStatus.SKIPPED: "⏩",
+                    ProcessingStatus.IN_PROGRESS: "⏳",
+                    ProcessingStatus.PENDING: "⏱️",
+                }.get(status, "❓")
+                
+                # Get duration if available
+                duration_str = ""
+                if self.stages[stage]["duration"] is not None:
+                    duration = self.stages[stage]["duration"]
+                    if duration < 0.001:  # Skipped stages
+                        duration_str = "(skipped)"
+                    else:
+                        duration_str = f"({duration:.2f}s)"
+                
+                # Get artifacts if available
+                artifact_count = len(self.stages[stage].get("artifacts", []))
+                artifact_str = f"{artifact_count} artifacts" if artifact_count > 0 else ""
+                
+                # Get error if available
+                error_str = ""
+                if self.stages[stage]["error"]:
+                    error_str = f"ERROR: {self.stages[stage]['error']['message']}"
+                
+                # Format the line
+                stage_name = f"{stage}".ljust(stage_width)
+                status_name = f"{status.name}".ljust(10)
+                duration_str = duration_str.ljust(15)
+                artifact_str = artifact_str.ljust(15)
+                
+                print(f"{emoji} {stage_name} {status_name} {duration_str} {artifact_str} {error_str}")
+        
+        print("-" * 60)
+        
+        # Print overall status
+        total_duration = self.status.get("duration", 0)
+        duration_str = f"Total time: {total_duration:.2f}s" if total_duration else ""
+        
+        success = self.status["summary"]["success"]
+        if success:
+            print(f"✅ PIPELINE COMPLETED SUCCESSFULLY  {duration_str}")
+            if self.status["summary"]["watertight"]:
+                mesh_files = [a for a in self.status["summary"]["artifacts_generated"] 
+                            if a.endswith('.ply') and not a.endswith('_normal_estimated_pcd.ply')]
+                if mesh_files:
+                    print(f"   Watertight mesh: {os.path.basename(mesh_files[0])}")
         else:
-            print(f"  - Artifact already in list, skipping")
+            failed_stage = self.status["summary"]["failed_stage"]
+            error = self.status["summary"]["error_summary"]
+            print(f"❌ PIPELINE FAILED at stage {failed_stage}  {duration_str}")
+            if error:
+                print(f"   Error: {error}")
+        
+        print("=" * 60)
     
     def _save_status(self) -> None:
         """Save the current status to a JSON file"""

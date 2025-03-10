@@ -1,3 +1,4 @@
+import json
 import os
 from pathlib import Path
 from typing import Literal, Optional
@@ -6,6 +7,8 @@ import pyvista as pv
 import open3d as o3d
 from ribctl import RIBXZ_TEMP_FILES
 from ribctl.asset_manager.asset_types import AssetType
+from ribctl.lib.landmarks.constriction_site import get_constriction
+from ribctl.lib.landmarks.ptc_via_trna import PTC_location
 from ribctl.lib.npet.alphalib import cif_to_point_cloud, fast_normal_estimation, quick_surface_points, validate_mesh_pyvista
 from ribctl.lib.npet.kdtree_approach import (
     DBSCAN_capture,
@@ -31,6 +34,7 @@ from ribctl.lib.npet.various_visualization import (
     visualize_pointcloud,
     visualize_pointcloud_axis,
 )
+from ribctl.lib.schema.types_ribosome import ConstrictionSite, PTCInfo
 from ribctl.ribosome_ops import RibosomeOps
 
 
@@ -76,6 +80,41 @@ def create_npet_mesh(rcsb_id: str, log_dir: Optional[Path] = None, force: bool =
 
         tracker.add_artifact(ProcessingStage.SETUP, Path(cifpath))
         tracker.end_stage(ProcessingStage.SETUP, True)
+        
+        # PTC IDENTIFICATION
+        tracker.begin_stage(ProcessingStage.PTC_IDENTIFICATION)
+        try:
+            ptc_info = PTC_location(rcsb_id)
+            ptc_pt = np.array(ptc_info.location)
+            
+            # Save PTC info as JSON
+            ptc_json_path = AssetType.PTC.get_path(rcsb_id)
+            with open(ptc_json_path, 'w') as f:
+                f.write(ptc_info.model_dump_json())
+            
+            tracker.add_artifact(ProcessingStage.PTC_IDENTIFICATION, ptc_json_path)
+            tracker.end_stage(ProcessingStage.PTC_IDENTIFICATION, True)
+        except Exception as e:
+            tracker.end_stage(ProcessingStage.PTC_IDENTIFICATION, False, error=e)
+            tracker.complete_processing(False)
+            return tracker
+            
+        # CONSTRICTION IDENTIFICATION
+        tracker.begin_stage(ProcessingStage.CONSTRICTION_IDENTIFICATION)
+        try:
+            constriction_pt = get_constriction(rcsb_id)
+            
+            # Save constriction point as numpy array
+            constriction_path = AssetType.CONSTRICTION_SITE.get_path(rcsb_id)
+            with open(constriction_path, 'w') as f:
+                json.dump(ConstrictionSite(location=constriction_pt.tolist()).model_dump(), f)
+            
+            tracker.add_artifact(ProcessingStage.CONSTRICTION_IDENTIFICATION, constriction_path)
+            tracker.end_stage(ProcessingStage.CONSTRICTION_IDENTIFICATION, True)
+        except Exception as e:
+            tracker.end_stage(ProcessingStage.CONSTRICTION_IDENTIFICATION, False, error=e)
+            tracker.complete_processing(False)
+            return tracker
         
         # ALPHA SHAPE GENERATION
         alpha_params = {
@@ -203,18 +242,21 @@ def create_npet_mesh(rcsb_id: str, log_dir: Optional[Path] = None, force: bool =
         # This stage is fast, so we don't need parameter tracking
         tracker.begin_stage(ProcessingStage.LANDMARK_IDENTIFICATION)
         try:
-            ptc_pt = np.array(landmark_ptc(rcsb_id))
-            constriction_pt = np.array(landmark_constriction_site(rcsb_id))
+            # Load PTC and constriction points from previous stages
+            ptc_path = AssetType.PTC.get_path(rcsb_id)
+            constriction_path = AssetType.CONSTRICTION_SITE.get_path(rcsb_id)
             
-            # Save landmarks as numpy arrays
-            ptc_path = artifacts_dir / f"{rcsb_id}_ptc.npy"
-            constriction_path = artifacts_dir / f"{rcsb_id}_constriction.npy"
-            np.save(ptc_path, ptc_pt)
-            np.save(constriction_path, constriction_pt)
-            
-            tracker.add_artifact(ProcessingStage.LANDMARK_IDENTIFICATION, ptc_path)
-            tracker.add_artifact(ProcessingStage.LANDMARK_IDENTIFICATION, constriction_path)
-            tracker.end_stage(ProcessingStage.LANDMARK_IDENTIFICATION, True)
+            # If they exist, use them directly
+            if ptc_path.exists() and constriction_path.exists():
+                with open(ptc_path, 'r') as f:
+                    ptc_info = PTCInfo.model_validate(json.load(f))
+                with open(constriction_path, 'r') as f:
+                    constriction_site = ConstrictionSite.model_validate(json.load(f))
+                ptc_pt = np.array(ptc_info.location)
+                constriction_pt = np.array(constriction_site.location)
+            else:
+                raise FileNotFoundError("PTC or constriction site not found")
+    
         except Exception as e:
             tracker.end_stage(ProcessingStage.LANDMARK_IDENTIFICATION, False, error=e)
             tracker.complete_processing(False)
