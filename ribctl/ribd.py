@@ -72,120 +72,12 @@ def get_input_structures() -> List[str]:
     return []
 
 
-
 @click.group()
 @click.pass_context
 def cli(ctx):
     """ribctl - Command line interface for ribosome data pipeline"""
     ctx.ensure_object(dict)
     ctx.obj["piped_pdb_ids"] = get_input_pdb_ids()
-
-
-
-@cli.group()
-def npet():
-    """NPET mesh generation and visualization tools"""
-    pass
-
-@npet.command()
-@click.argument('rcsb_id')
-@click.option('--log-dir', type=click.Path(), default='logs', 
-              help='Directory to store processing logs')
-@click.option('--force', is_flag=True, help='Force regeneration of mesh')
-def process(rcsb_id, log_dir, force):
-    """Generate NPET mesh for a structure with detailed logging"""
-    log_dir_path = Path(log_dir)
-    log_dir_path.mkdir(exist_ok=True, parents=True)
-    
-    # Check if mesh already exists
-    mesh_path = AssetType.NPET_MESH.get_path(rcsb_id)
-    if os.path.exists(mesh_path) and not force:
-        click.echo(f"NPET mesh already exists for {rcsb_id}. Use --force to regenerate.")
-        return
-    
-    click.echo(f"Processing {rcsb_id}...")
-    tracker = create_npet_mesh(rcsb_id, log_dir_path)
-    
-    if tracker.status["overall_status"] == ProcessingStatus.SUCCESS:
-        click.echo(f"✅ Successfully generated mesh for {rcsb_id}")
-    else:
-        failed_stage = tracker.status["summary"]["failed_stage"]
-        error = tracker.status["summary"]["error_summary"]
-        click.echo(f"❌ Failed to generate mesh for {rcsb_id}")
-        click.echo(f"   Failed at stage: {failed_stage}")
-        click.echo(f"   Error: {error}")
-    
-    log_file = log_dir_path / f"{rcsb_id}_processing_log.json"
-    click.echo(f"Processing log saved to: {log_file}")
-
-@npet.command()
-@click.argument('rcsb_id')
-@click.option('--log-dir', type=click.Path(), default='logs',
-              help='Directory containing processing logs')
-def visualize(rcsb_id, log_dir):
-    """Visualize artifacts for a processed structure"""
-    log_file = Path(log_dir) / f"{rcsb_id.upper()}_processing_log.json"
-    
-    if not log_file.exists():
-        click.echo(f"No processing log found for {rcsb_id}")
-        return
-    
-    # Launch the visualization tool
-    import subprocess
-    subprocess.run(["python", "npet_viz.py", "structure", rcsb_id, "--log-dir", log_dir])
-
-@npet.command()
-@click.option('--log-dir', type=click.Path(), default='logs',
-              help='Directory containing processing logs')
-def list(log_dir):
-    """List all processed structures and their status"""
-    log_dir_path = Path(log_dir)
-    
-    if not log_dir_path.exists():
-        click.echo(f"Log directory {log_dir} not found")
-        return
-    
-    logs = list(log_dir_path.glob("*_processing_log.json"))
-    
-    if not logs:
-        click.echo("No processed structures found")
-        return
-    
-    click.echo(f"Found {len(logs)} processed structures:")
-    
-    # Group by status
-    success = []
-    failure = []
-    
-    for log_file in logs:
-        with open(log_file, 'r') as f:
-            log_data = json.load(f)
-        
-        rcsb_id = log_data["rcsb_id"]
-        status = log_data["overall_status"]
-        
-        if status == "SUCCESS":
-            success.append((rcsb_id, log_data.get("duration", "?")))
-        else:
-            failed_stage = log_data["summary"].get("failed_stage", "unknown")
-            error = log_data["summary"].get("error_summary", "unknown error")
-            failure.append((rcsb_id, failed_stage, error))
-    
-    # Print summary
-    click.echo(f"\nSuccessful: {len(success)}")
-    click.echo(f"Failed: {len(failure)}")
-    
-    if click.confirm("Show details?"):
-        if success:
-            click.echo("\nSuccessful structures:")
-            for rcsb_id, duration in sorted(success):
-                click.echo(f"  ✅ {rcsb_id} (took {duration:.2f}s)" if isinstance(duration, float) else f"  ✅ {rcsb_id}")
-        
-        if failure:
-            click.echo("\nFailed structures:")
-            for rcsb_id, stage, error in sorted(failure):
-                click.echo(f"  ❌ {rcsb_id} - Failed at {stage}: {error}")
-
 
 
 @cli.group()
