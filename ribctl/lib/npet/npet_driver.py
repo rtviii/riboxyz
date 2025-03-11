@@ -50,7 +50,11 @@ def create_npet_mesh(rcsb_id: str, log_dir: Optional[Path] = None, force: bool =
     Returns:
         NPETProcessingTracker: Processing tracker with detailed status information
     """
-    print(f"Creating NPET mesh for {rcsb_id}")
+
+    if os.path.exists(AssetType.NPET_MESH_ASCII.get_path(rcsb_id)):
+        print(f"\x1b[92mNPET mesh already exists for {rcsb_id}, skipping.\x1b[0m")
+
+    print(f"------------- CREATING NPET MESH FOR '\x1b[32m {rcsb_id} \x1b[0m")
     rcsb_id = rcsb_id.upper()
     tracker = NPETProcessingTracker(rcsb_id, log_dir)
     
@@ -256,7 +260,8 @@ def create_npet_mesh(rcsb_id: str, log_dir: Optional[Path] = None, force: bool =
                 constriction_pt = np.array(constriction_site.location)
             else:
                 raise FileNotFoundError("PTC or constriction site not found")
-    
+
+            tracker.end_stage(ProcessingStage.LANDMARK_IDENTIFICATION, True)
         except Exception as e:
             tracker.end_stage(ProcessingStage.LANDMARK_IDENTIFICATION, False, error=e)
             tracker.complete_processing(False)

@@ -10,6 +10,7 @@ from typing import Dict, Any, Optional, List
 class ProcessingStage(str, Enum):
     """Enum defining the stages of the NPET mesh pipeline"""
     SETUP = "setup"
+
     PTC_IDENTIFICATION = "ptc_identification"           # New stage
     CONSTRICTION_IDENTIFICATION = "constriction_identification"  # New stage
     ALPHA_SHAPE = "alpha_shape"
@@ -26,7 +27,7 @@ class ProcessingStage(str, Enum):
 
 class ProcessingStatus(str, Enum):
     """Status of a processing stage"""
-    PENDING = "pending"
+    PENDING     = "pending"
     IN_PROGRESS = "in_progress"
     SUCCESS = "success"
     FAILURE = "failure"
