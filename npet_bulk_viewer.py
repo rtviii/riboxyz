@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import os
 import sys
 import glob
@@ -5,27 +6,26 @@ import json
 import numpy as np
 import pyvista as pv
 from pyvistaqt import QtInteractor
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLineEdit, QLabel, QGridLayout, QScrollArea, QCheckBox
+from PyQt5.QtWidgets import (
+    QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, 
+    QLineEdit, QLabel, QGridLayout, QScrollArea, QCheckBox, QFileDialog
+)
 from PyQt5.QtCore import Qt
-import Bio.PDB
-from Bio.PDB.PDBParser import PDBParser
 from pathlib import Path
-from scipy.spatial.distance import cdist
-
-from ribctl.lib.schema.types_ribosome import ConstrictionSite, PTCInfo
-from ribctl.asset_manager.asset_types import AssetType
-from ribctl.ribosome_ops import RibosomeOps
 
 
 class EnhancedMeshViewer(QWidget):
     def __init__(self):
         super().__init__()
         self.meshes = {}
+        self.landmarks = {}
         self.plotter = None
         self.grid_plotters = []
         self.current_grid_page = 0
         self.meshes_per_page = 9  # 3x3 grid
         self.show_landmarks = True
+        self.mesh_dir = ""
+        self.landmarks_dir = ""
         self.init_ui()
         
     def init_ui(self):
@@ -34,15 +34,35 @@ class EnhancedMeshViewer(QWidget):
         
         main_layout = QVBoxLayout()
         
-        # Control panel
-        control_panel = QHBoxLayout()
+        # Control panel - top row
+        control_panel_top = QHBoxLayout()
         
-        # Input for mesh directory
-        self.dir_label = QLabel('Mesh Directory:')
-        self.dir_input = QLineEdit()
-        self.dir_input.setText(os.getcwd())  # Default to current directory
-        self.load_btn = QPushButton('Load Meshes')
-        self.load_btn.clicked.connect(self.load_meshes)
+        # Mesh directory selection
+        self.mesh_dir_label = QLabel('Mesh Directory:')
+        self.mesh_dir_input = QLineEdit()
+        self.mesh_dir_browse = QPushButton('Browse...')
+        self.mesh_dir_browse.clicked.connect(self.browse_mesh_dir)
+        
+        # Landmarks directory selection
+        self.landmarks_dir_label = QLabel('Landmarks Directory:')
+        self.landmarks_dir_input = QLineEdit()
+        self.landmarks_dir_browse = QPushButton('Browse...')
+        self.landmarks_dir_browse.clicked.connect(self.browse_landmarks_dir)
+        
+        # Add widgets to top control panel
+        control_panel_top.addWidget(self.mesh_dir_label)
+        control_panel_top.addWidget(self.mesh_dir_input)
+        control_panel_top.addWidget(self.mesh_dir_browse)
+        control_panel_top.addWidget(self.landmarks_dir_label)
+        control_panel_top.addWidget(self.landmarks_dir_input)
+        control_panel_top.addWidget(self.landmarks_dir_browse)
+        
+        # Control panel - bottom row
+        control_panel_bottom = QHBoxLayout()
+        
+        # Load button
+        self.load_btn = QPushButton('Load Data')
+        self.load_btn.clicked.connect(self.load_data)
         
         # Input for specific mesh ID
         self.id_label = QLabel('Mesh ID:')
@@ -62,19 +82,18 @@ class EnhancedMeshViewer(QWidget):
         self.landmarks_check.setChecked(True)
         self.landmarks_check.stateChanged.connect(self.toggle_landmarks)
         
-        # Add widgets to control panel
-        control_panel.addWidget(self.dir_label)
-        control_panel.addWidget(self.dir_input)
-        control_panel.addWidget(self.load_btn)
-        control_panel.addWidget(self.id_label)
-        control_panel.addWidget(self.id_input)
-        control_panel.addWidget(self.view_btn)
-        control_panel.addWidget(self.prev_btn)
-        control_panel.addWidget(self.page_label)
-        control_panel.addWidget(self.next_btn)
-        control_panel.addWidget(self.landmarks_check)
+        # Add widgets to bottom control panel
+        control_panel_bottom.addWidget(self.load_btn)
+        control_panel_bottom.addWidget(self.id_label)
+        control_panel_bottom.addWidget(self.id_input)
+        control_panel_bottom.addWidget(self.view_btn)
+        control_panel_bottom.addWidget(self.prev_btn)
+        control_panel_bottom.addWidget(self.page_label)
+        control_panel_bottom.addWidget(self.next_btn)
+        control_panel_bottom.addWidget(self.landmarks_check)
         
-        main_layout.addLayout(control_panel)
+        main_layout.addLayout(control_panel_top)
+        main_layout.addLayout(control_panel_bottom)
         
         # Grid layout for mesh thumbnails
         self.grid_container = QWidget()
@@ -88,14 +107,39 @@ class EnhancedMeshViewer(QWidget):
         main_layout.addWidget(scroll_area)
         
         self.setLayout(main_layout)
-        
+    
+    def browse_mesh_dir(self):
+        dir_path = QFileDialog.getExistingDirectory(self, "Select Mesh Directory")
+        if dir_path:
+            self.mesh_dir_input.setText(dir_path)
+            self.mesh_dir = dir_path
+    
+    def browse_landmarks_dir(self):
+        dir_path = QFileDialog.getExistingDirectory(self, "Select Landmarks Directory")
+        if dir_path:
+            self.landmarks_dir_input.setText(dir_path)
+            self.landmarks_dir = dir_path
+    
     def toggle_landmarks(self, state):
         self.show_landmarks = (state == Qt.Checked)
         self.update_grid()
+    
+    def load_data(self):
+        # Get directory paths from input fields
+        self.mesh_dir = self.mesh_dir_input.text()
+        self.landmarks_dir = self.landmarks_dir_input.text()
         
-    def load_meshes(self):
+        if not os.path.exists(self.mesh_dir):
+            print(f"Mesh directory not found: {self.mesh_dir}")
+            return
+        
+        if not os.path.exists(self.landmarks_dir):
+            print(f"Landmarks directory not found: {self.landmarks_dir}")
+            return
+        
         # Clear existing data
         self.meshes = {}
+        self.landmarks = {}
         for plotter in self.grid_plotters:
             plotter.close()
         self.grid_plotters = []
@@ -106,20 +150,25 @@ class EnhancedMeshViewer(QWidget):
             if widget is not None:
                 widget.setParent(None)
         
-        # Get mesh directory
-        mesh_dir = self.dir_input.text()
-        mesh_files = glob.glob(os.path.join(mesh_dir, '*_NPET_MESH.ply'))
-        
-        if not mesh_files:
-            print("No PLY mesh files found in the specified directory.")
-            return
-            
         # Load meshes
+        mesh_files = glob.glob(os.path.join(self.mesh_dir, '*_NPET_MESH.ply'))
         for file_path in mesh_files:
             mesh_id = os.path.basename(file_path).split('_')[0]
             self.meshes[mesh_id] = file_path
         
-        print(f"Loaded {len(self.meshes)} meshes.")
+        # Load landmarks
+        landmark_files = glob.glob(os.path.join(self.landmarks_dir, '*_landmarks_pts.json'))
+        for file_path in landmark_files:
+            mesh_id = os.path.basename(file_path).split('_')[0]
+            if mesh_id in self.meshes:  # Only load landmarks for meshes we have
+                try:
+                    with open(file_path, 'r') as f:
+                        landmark_data = json.load(f)
+                    self.landmarks[mesh_id] = landmark_data
+                except Exception as e:
+                    print(f"Error loading landmarks for {mesh_id}: {e}")
+        
+        print(f"Loaded {len(self.meshes)} meshes and {len(self.landmarks)} landmark files.")
         self.current_grid_page = 0
         self.update_grid()
     
@@ -158,8 +207,8 @@ class EnhancedMeshViewer(QWidget):
             mesh = pv.read(mesh_file)
             plotter.add_mesh(mesh, color='lightblue', show_edges=True, opacity=0.7)
             
-            # Add landmarks if enabled
-            if self.show_landmarks:
+            # Add landmarks if enabled and available
+            if self.show_landmarks and mesh_id in self.landmarks:
                 try:
                     self.add_landmarks_to_plotter(plotter, mesh_id)
                 except Exception as e:
@@ -189,108 +238,30 @@ class EnhancedMeshViewer(QWidget):
         self.next_btn.setEnabled(self.current_grid_page < total_pages - 1)
     
     def add_landmarks_to_plotter(self, plotter, mesh_id):
-        """Add PTC, constriction site, and protein segments to the plotter"""
-        try:
-            # Initialize RibosomeOps for access to structure data
-            ro = RibosomeOps(mesh_id)
-            
-            # Load PTC information
-            ptc_path = AssetType.PTC.get_path(mesh_id)
-            if ptc_path.exists():
-                with open(ptc_path, 'r') as f:
-                    ptc_info = PTCInfo.model_validate(json.load(f))
-                ptc_location = np.array(ptc_info.location)
-                # Add PTC as a yellow sphere
-                plotter.add_mesh(pv.Sphere(center=ptc_location, radius=5), color='yellow')
-            
-            # Load constriction site information
-            constriction_path = AssetType.CONSTRICTION_SITE.get_path(mesh_id)
-            if constriction_path.exists():
-                with open(constriction_path, 'r') as f:
-                    constriction_info = ConstrictionSite.model_validate(json.load(f))
-                constriction_location = np.array(constriction_info.location)
-                # Add constriction site as a red sphere
-                plotter.add_mesh(pv.Sphere(center=constriction_location, radius=5), color='red')
-            else:
-                # If no constriction site file exists, we can't find the closest residues
-                return
-            
-            # Find uL4 and uL22 protein chains
-            profile = ro.profile
-            ul4_chain = None
-            ul22_chain = None
-            
-            # Search through proteins to find uL4 and uL22
-            for protein in profile.proteins:
-                for nomenclature in protein.nomenclature:
-                    if nomenclature.value == "uL4":
-                        ul4_chain = protein.auth_asym_id
-                    elif nomenclature.value == "uL22":
-                        ul22_chain = protein.auth_asym_id
-            
-            # If we found the chains, get the residues closest to constriction site
-            if ul4_chain or ul22_chain:
-                model = ro.assets.biopython_structure()[0]
-                
-                # Process uL4 chain
-                if ul4_chain and ul4_chain in model.child_dict:
-                    ul4_residues = list(model[ul4_chain].get_residues())
-                    ul4_points = self.get_closest_residues(ul4_residues, constriction_location, 15)
-                    if ul4_points.size > 0:
-                        # Add uL4 residues as blue points
-                        plotter.add_mesh(pv.PolyData(ul4_points), color='blue', point_size=10, render_points_as_spheres=True)
-                
-                # Process uL22 chain
-                if ul22_chain and ul22_chain in model.child_dict:
-                    ul22_residues = list(model[ul22_chain].get_residues())
-                    ul22_points = self.get_closest_residues(ul22_residues, constriction_location, 15)
-                    if ul22_points.size > 0:
-                        # Add uL22 residues as orange points
-                        plotter.add_mesh(pv.PolyData(ul22_points), color='orange', point_size=10, render_points_as_spheres=True)
+        """Add pre-generated landmarks to the plotter"""
+        landmarks_data = self.landmarks[mesh_id]
         
-        except Exception as e:
-            print(f"Error processing landmarks for {mesh_id}: {str(e)}")
+        # Add PTC as a yellow sphere
+        if landmarks_data.get("ptc"):
+            ptc_location = np.array(landmarks_data["ptc"])
+            plotter.add_mesh(pv.Sphere(center=ptc_location, radius=5), color='yellow')
         
-    def get_closest_residues(self, residues, target_location, n=15):
-        """Get the n residues with centers closest to the target location"""
-        residue_centers = []
-        valid_residues = []
+        # Add constriction site as a red sphere
+        if landmarks_data.get("constriction"):
+            constriction_location = np.array(landmarks_data["constriction"])
+            plotter.add_mesh(pv.Sphere(center=constriction_location, radius=5), color='red')
         
-        for residue in residues:
-            try:
-                # Calculate center of residue
-                coords = np.array([atom.coord for atom in residue.get_atoms()])
-                if len(coords) > 0:
-                    center = coords.mean(axis=0)
-                    residue_centers.append(center)
-                    valid_residues.append(residue)
-            except Exception:
-                continue
+        # Add uL4 residues as blue points
+        if landmarks_data.get("uL4"):
+            ul4_points = np.array(landmarks_data["uL4"])
+            if len(ul4_points) > 0:
+                plotter.add_mesh(pv.PolyData(ul4_points), color='blue', point_size=10, render_points_as_spheres=True)
         
-        if not residue_centers:
-            return np.array([])
-        
-        # Calculate distances to target location
-        residue_centers = np.array(residue_centers)
-        distances = cdist([target_location], residue_centers)[0]
-        
-        # Get indices of n closest residues
-        closest_indices = np.argsort(distances)[:n]
-        
-        # Convert residues to points (use CA atom or average position)
-        points = []
-        for idx in closest_indices:
-            try:
-                residue = valid_residues[idx]
-                if 'CA' in residue:
-                    points.append(residue['CA'].coord)
-                else:
-                    coords = np.array([atom.coord for atom in residue.get_atoms()])
-                    points.append(coords.mean(axis=0))
-            except Exception:
-                continue
-        
-        return np.array(points)
+        # Add uL22 residues as orange points
+        if landmarks_data.get("uL22"):
+            ul22_points = np.array(landmarks_data["uL22"])
+            if len(ul22_points) > 0:
+                plotter.add_mesh(pv.PolyData(ul22_points), color='orange', point_size=10, render_points_as_spheres=True)
     
     def prev_page(self):
         if self.current_grid_page > 0:
@@ -302,11 +273,6 @@ class EnhancedMeshViewer(QWidget):
         if self.current_grid_page < total_pages - 1:
             self.current_grid_page += 1
             self.update_grid()
-    
-    def open_mesh_by_id(self, mesh_id):
-        """Helper method to open a mesh by its ID"""
-        self.id_input.setText(mesh_id)
-        self.view_single_mesh()
     
     def view_single_mesh(self):
         mesh_id = self.id_input.text().strip()
@@ -330,8 +296,8 @@ class EnhancedMeshViewer(QWidget):
         mesh = pv.read(self.meshes[mesh_id])
         self.plotter.add_mesh(mesh, color='lightblue', show_edges=True, opacity=0.7)
         
-        # Add landmarks
-        if self.show_landmarks:
+        # Add landmarks if enabled and available
+        if self.show_landmarks and mesh_id in self.landmarks:
             try:
                 self.add_landmarks_to_plotter(self.plotter, mesh_id)
             except Exception as e:
@@ -344,6 +310,35 @@ class EnhancedMeshViewer(QWidget):
             f"Faces: {mesh.n_faces}",
             f"File: {os.path.basename(self.meshes[mesh_id])}"
         ]
+        
+        # Add landmark status information
+        if mesh_id in self.landmarks:
+            lm_data = self.landmarks[mesh_id]
+            lm_info = []
+            if lm_data.get("ptc"):
+                lm_info.append("PTC: ✓")
+            else:
+                lm_info.append("PTC: ✗")
+                
+            if lm_data.get("constriction"):
+                lm_info.append("Constriction: ✓")
+            else:
+                lm_info.append("Constriction: ✗")
+                
+            if lm_data.get("uL4") and len(lm_data["uL4"]) > 0:
+                lm_info.append(f"uL4: ✓ ({len(lm_data['uL4'])} points)")
+            else:
+                lm_info.append("uL4: ✗")
+                
+            if lm_data.get("uL22") and len(lm_data["uL22"]) > 0:
+                lm_info.append(f"uL22: ✓ ({len(lm_data['uL22'])} points)")
+            else:
+                lm_info.append("uL22: ✗")
+                
+            info_text.extend(lm_info)
+        else:
+            info_text.append("No landmark data available")
+            
         self.plotter.add_text('\n'.join(info_text), position='upper_left', font_size=12)
         
         # Show the plotter
@@ -363,4 +358,4 @@ if __name__ == '__main__':
         else:
             print(f"Error: {e}")
             print("You might need to install the required packages:")
-            print("pip install pyvista pyvistaqt numpy PyQt5 scipy biopython")
+            print("pip install pyvista pyvistaqt numpy PyQt5")

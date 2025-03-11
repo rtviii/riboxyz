@@ -1,5 +1,6 @@
 **/__pycache__/**
 */__pycache__/
+**/wenjun_data/**
 
 neo4j
 !neo4j/conf/neo4j.conf
