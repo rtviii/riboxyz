@@ -1,200 +1,464 @@
+#!/usr/bin/env python
 import os
+import sys
+import glob
+import json
 import numpy as np
 import pyvista as pv
-import open3d as o3d
-from ribctl.asset_manager.asset_types import AssetType
-from ribctl.lib.npet.alphalib import validate_mesh_pyvista
-from ribctl.lib.npet.kdtree_approach import (
-    DBSCAN_capture,
-    DBSCAN_pick_largest_cluster,
-    apply_poisson_reconstruction,
-    clip_tunnel_by_chain_proximity,
-    create_point_cloud_mask,
-    estimate_normals,
-    filter_residues_parallel,
-    landmark_constriction_site,
-    landmark_ptc,
-    ptcloud_convex_hull_points,
-    ribosome_entities,
-    transform_points_from_C0,
-    transform_points_to_C0,
+from pyvistaqt import QtInteractor
+from PyQt5.QtWidgets import (
+    QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, 
+    QLineEdit, QLabel, QGridLayout, QScrollArea, QCheckBox, QFileDialog,
+    QFrame
 )
-from ribctl.lib.npet.tunnel_asset_manager import TunnelMeshAssetsManager
-from ribctl.lib.npet.various_visualization import (
-    visualize_DBSCAN_CLUSTERS_particular_eps_minnbrs,
-    visualize_filtered_residues,
-    visualize_mesh,
-    visualize_pointcloud,
-    visualize_pointcloud_axis,
-)
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QFont
+from pathlib import Path
+import pickle
 
 
-def create_npet_mesh(RCSB_ID: str):
-    print("Creating NPET mesh for", RCSB_ID)
-    assets = TunnelMeshAssetsManager(RCSB_ID)
-    cifpath = AssetType.MMCIF.get_path(RCSB_ID)
-
-    ashapepath = AssetType.ALPHA_SHAPE.get_path(RCSB_ID)
-    meshpath = AssetType.NPET_MESH.get_path(RCSB_ID)
-
-    R = 35
-    H = 120
-    Vsize = 1
-    ATOM_SIZE = 2
-
-    normals_pcd_path = assets.tunnel_pcd_normal_estimated
-
-    if not os.path.exists(ashapepath):
-        raise FileNotFoundError(f"File {ashapepath} not found")
-
-    # # All atoms
-    ptc_pt = np.array(landmark_ptc(RCSB_ID))
-    constriction_pt = np.array(landmark_constriction_site(RCSB_ID))
-    tunnel_debris = {
-        "3J7Z": ["a", "7"],
-        "7A5G": ["Y2"],
-        "5GAK": ["z"],
-        "5NWY":["s"]
-    }
-    residues = ribosome_entities(
-        RCSB_ID,
-        cifpath,
-        "R",
-        tunnel_debris[RCSB_ID] if RCSB_ID in tunnel_debris else [],
-    )
-    filtered_residues = filter_residues_parallel(
-        residues, ptc_pt, constriction_pt, R, H
-    )
-
-    filtered_points = np.array(
-        [
-            atom.get_coord()
-            for residue in filtered_residues
-            for atom in residue.child_list
+class EnhancedMeshViewer(QWidget):
+    # Configuration variables for default directories
+    DEFAULT_MESH_DIR = os.path.expanduser("~/data/meshes")
+    DEFAULT_LANDMARKS_DIR = os.path.expanduser("~/data/landmarks")
+    DEFAULT_RIBOSOME_PROFILES_DIR = os.path.expanduser("~/data/ribosome_profiles")
+    
+    # Landmark visualization parameters
+    LANDMARK_RADIUS = 2.5  # Reduced by half from the original size (assuming original was ~5)
+    
+    def __init__(self):
+        super().__init__()
+        self.meshes = {}
+        self.landmarks = {}
+        self.ribosome_profiles = {}
+        self.plotter = None
+        self.grid_plotters = []
+        self.current_grid_page = 0
+        self.meshes_per_page = 9  # 3x3 grid
+        self.show_landmarks = True
+        
+        # Set default directories from config variables
+        self.mesh_dir = self.DEFAULT_MESH_DIR
+        self.landmarks_dir = self.DEFAULT_LANDMARKS_DIR
+        self.ribosome_profiles_dir = self.DEFAULT_RIBOSOME_PROFILES_DIR
+        
+        # Create a monospace font for all annotations
+        self.mono_font = QFont("Courier New")
+        self.mono_font.setStyleHint(QFont.Monospace)
+        
+        self.init_ui()
+        
+    def init_ui(self):
+        self.setWindowTitle('Enhanced PLY Mesh Viewer')
+        self.setGeometry(100, 100, 1200, 800)
+        
+        main_layout = QVBoxLayout()
+        
+        # Control panel - top row
+        control_panel_top = QHBoxLayout()
+        
+        # Mesh directory selection
+        self.mesh_dir_label = QLabel('Mesh Directory:')
+        self.mesh_dir_label.setFont(self.mono_font)
+        self.mesh_dir_input = QLineEdit(self.mesh_dir)
+        self.mesh_dir_browse = QPushButton('Browse...')
+        self.mesh_dir_browse.clicked.connect(self.browse_mesh_dir)
+        
+        # Landmarks directory selection
+        self.landmarks_dir_label = QLabel('Landmarks Directory:')
+        self.landmarks_dir_label.setFont(self.mono_font)
+        self.landmarks_dir_input = QLineEdit(self.landmarks_dir)
+        self.landmarks_dir_browse = QPushButton('Browse...')
+        self.landmarks_dir_browse.clicked.connect(self.browse_landmarks_dir)
+        
+        # Ribosome profiles directory selection
+        self.ribosome_profiles_dir_label = QLabel('Ribosome Profiles:')
+        self.ribosome_profiles_dir_label.setFont(self.mono_font)
+        self.ribosome_profiles_dir_input = QLineEdit(self.ribosome_profiles_dir)
+        self.ribosome_profiles_dir_browse = QPushButton('Browse...')
+        self.ribosome_profiles_dir_browse.clicked.connect(self.browse_ribosome_profiles_dir)
+        
+        # Add widgets to top control panel
+        control_panel_top.addWidget(self.mesh_dir_label)
+        control_panel_top.addWidget(self.mesh_dir_input)
+        control_panel_top.addWidget(self.mesh_dir_browse)
+        control_panel_top.addWidget(self.landmarks_dir_label)
+        control_panel_top.addWidget(self.landmarks_dir_input)
+        control_panel_top.addWidget(self.landmarks_dir_browse)
+        control_panel_top.addWidget(self.ribosome_profiles_dir_label)
+        control_panel_top.addWidget(self.ribosome_profiles_dir_input)
+        control_panel_top.addWidget(self.ribosome_profiles_dir_browse)
+        
+        # Control panel - bottom row
+        control_panel_bottom = QHBoxLayout()
+        
+        # Load button
+        self.load_btn = QPushButton('Load Data')
+        self.load_btn.clicked.connect(self.load_data)
+        
+        # Input for specific mesh ID
+        self.id_label = QLabel('Mesh ID:')
+        self.id_label.setFont(self.mono_font)
+        self.id_input = QLineEdit()
+        self.view_btn = QPushButton('View Single Mesh')
+        self.view_btn.clicked.connect(self.view_single_mesh)
+        
+        # Grid navigation
+        self.prev_btn = QPushButton('Previous Page')
+        self.prev_btn.clicked.connect(self.prev_page)
+        self.next_btn = QPushButton('Next Page')
+        self.next_btn.clicked.connect(self.next_page)
+        self.page_label = QLabel('Page: 1')
+        self.page_label.setFont(self.mono_font)
+        
+        # Toggle landmarks
+        self.landmarks_check = QCheckBox('Show Landmarks')
+        self.landmarks_check.setChecked(True)
+        self.landmarks_check.stateChanged.connect(self.toggle_landmarks)
+        
+        # Add widgets to bottom control panel
+        control_panel_bottom.addWidget(self.load_btn)
+        control_panel_bottom.addWidget(self.id_label)
+        control_panel_bottom.addWidget(self.id_input)
+        control_panel_bottom.addWidget(self.view_btn)
+        control_panel_bottom.addWidget(self.prev_btn)
+        control_panel_bottom.addWidget(self.page_label)
+        control_panel_bottom.addWidget(self.next_btn)
+        control_panel_bottom.addWidget(self.landmarks_check)
+        
+        main_layout.addLayout(control_panel_top)
+        main_layout.addLayout(control_panel_bottom)
+        
+        # Grid layout for mesh thumbnails
+        self.grid_container = QWidget()
+        self.grid_layout = QGridLayout(self.grid_container)
+        
+        # Scroll area for grid
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setWidget(self.grid_container)
+        
+        main_layout.addWidget(scroll_area)
+        
+        self.setLayout(main_layout)
+    
+    def browse_mesh_dir(self):
+        dir_path = QFileDialog.getExistingDirectory(self, "Select Mesh Directory")
+        if dir_path:
+            self.mesh_dir_input.setText(dir_path)
+            self.mesh_dir = dir_path
+    
+    def browse_landmarks_dir(self):
+        dir_path = QFileDialog.getExistingDirectory(self, "Select Landmarks Directory")
+        if dir_path:
+            self.landmarks_dir_input.setText(dir_path)
+            self.landmarks_dir = dir_path
+    
+    def browse_ribosome_profiles_dir(self):
+        dir_path = QFileDialog.getExistingDirectory(self, "Select Ribosome Profiles Directory")
+        if dir_path:
+            self.ribosome_profiles_dir_input.setText(dir_path)
+            self.ribosome_profiles_dir = dir_path
+    
+    def toggle_landmarks(self, state):
+        self.show_landmarks = (state == Qt.Checked)
+        self.update_grid()
+    
+    def load_data(self):
+        # Get directory paths from input fields
+        self.mesh_dir = self.mesh_dir_input.text()
+        self.landmarks_dir = self.landmarks_dir_input.text()
+        self.ribosome_profiles_dir = self.ribosome_profiles_dir_input.text()
+        
+        if not os.path.exists(self.mesh_dir):
+            print(f"Mesh directory not found: {self.mesh_dir}")
+            return
+        
+        if not os.path.exists(self.landmarks_dir):
+            print(f"Landmarks directory not found: {self.landmarks_dir}")
+            return
+        
+        if not os.path.exists(self.ribosome_profiles_dir):
+            print(f"Ribosome profiles directory not found: {self.ribosome_profiles_dir}")
+            return
+        
+        # Clear existing data
+        self.meshes = {}
+        self.landmarks = {}
+        self.ribosome_profiles = {}
+        for plotter in self.grid_plotters:
+            plotter.close()
+        self.grid_plotters = []
+        
+        # Clear grid layout
+        for i in reversed(range(self.grid_layout.count())):
+            widget = self.grid_layout.itemAt(i).widget()
+            if widget is not None:
+                widget.setParent(None)
+        
+        # Load meshes
+        mesh_files = glob.glob(os.path.join(self.mesh_dir, '*_NPET_MESH.ply'))
+        for file_path in mesh_files:
+            mesh_id = os.path.basename(file_path).split('_')[0]
+            self.meshes[mesh_id] = file_path
+        
+        # Load landmarks
+        landmark_files = glob.glob(os.path.join(self.landmarks_dir, '*_landmarks_pts.json'))
+        for file_path in landmark_files:
+            mesh_id = os.path.basename(file_path).split('_')[0]
+            if mesh_id in self.meshes:  # Only load landmarks for meshes we have
+                try:
+                    with open(file_path, 'r') as f:
+                        landmark_data = json.load(f)
+                    self.landmarks[mesh_id] = landmark_data
+                except Exception as e:
+                    print(f"Error loading landmarks for {mesh_id}: {e}")
+        
+        # Load ribosome profiles
+        profile_files = glob.glob(os.path.join(self.ribosome_profiles_dir, '*.pkl'))
+        for file_path in profile_files:
+            try:
+                mesh_id = os.path.basename(file_path).split('.')[0]
+                if mesh_id in self.meshes:  # Only load profiles for meshes we have
+                    with open(file_path, 'rb') as f:
+                        profile_data = pickle.load(f)
+                    self.ribosome_profiles[mesh_id] = profile_data
+            except Exception as e:
+                print(f"Error loading ribosome profile for {mesh_id}: {e}")
+        
+        print(f"Loaded {len(self.meshes)} meshes, {len(self.landmarks)} landmark files, and {len(self.ribosome_profiles)} ribosome profiles.")
+        self.current_grid_page = 0
+        self.update_grid()
+    
+    def update_grid(self):
+        # Close existing plotters
+        for plotter in self.grid_plotters:
+            plotter.close()
+        self.grid_plotters = []
+        
+        # Clear grid layout
+        for i in reversed(range(self.grid_layout.count())): 
+            widget = self.grid_layout.itemAt(i).widget()
+            if widget is not None:
+                widget.setParent(None)
+        
+        # Get mesh IDs for the current page
+        mesh_ids = list(self.meshes.keys())
+        start_idx = self.current_grid_page * self.meshes_per_page
+        end_idx = min(start_idx + self.meshes_per_page, len(mesh_ids))
+        current_mesh_ids = mesh_ids[start_idx:end_idx]
+        
+        # Calculate grid dimensions for a 3x3 grid
+        grid_size = 3
+        
+        # Create grid of mesh viewers
+        for idx, mesh_id in enumerate(current_mesh_ids):
+            row = (idx // grid_size) * 2  # Multiply by 2 to leave room for labels
+            col = idx % grid_size
+            
+            # Create a small plotter for each mesh
+            plotter = QtInteractor()
+            plotter.setMinimumSize(300, 300)
+            
+            # Load and display mesh
+            mesh_file = self.meshes[mesh_id]
+            mesh = pv.read(mesh_file)
+            # Changed show_edges to False to remove wireframe
+            plotter.add_mesh(mesh, color='lightblue', show_edges=False, opacity=0.7)
+            
+            # Add landmarks if enabled and available
+            if self.show_landmarks and mesh_id in self.landmarks:
+                try:
+                    self.add_landmarks_to_plotter(plotter, mesh_id)
+                except Exception as e:
+                    print(f"Error adding landmarks for {mesh_id}: {e}")
+                    
+            plotter.add_text(mesh_id, position='upper_left', font_size=10, font_family='courier')
+            plotter.reset_camera()
+            
+            # Add plotter to grid
+            self.grid_layout.addWidget(plotter, row, col)
+            self.grid_plotters.append(plotter)
+            
+            # Add a frame to contain the labels
+            id_frame = QFrame()
+            id_frame_layout = QVBoxLayout(id_frame)
+            id_frame_layout.setContentsMargins(0, 0, 0, 0)
+            id_frame_layout.setSpacing(0)
+            
+            # Add ID label
+            id_label = QLabel(f"ID: {mesh_id}")
+            id_label.setFont(self.mono_font)
+            id_label.setAlignment(Qt.AlignCenter)
+            id_label.setStyleSheet("background-color: rgba(200, 200, 200, 150); padding: 2px;")
+            id_frame_layout.addWidget(id_label)
+            
+            # Add taxonomic and mitochondrial info if available
+            if mesh_id in self.ribosome_profiles:
+                profile = self.ribosome_profiles[mesh_id]
+                
+                # Extract taxonomic name (first organism from the list)
+                taxonomy = "Unknown"
+                if hasattr(profile, 'src_organism_names') and profile.src_organism_names:
+                    taxonomy = profile.src_organism_names[0]
+                
+                # Extract mitochondrial status
+                mito_status = "Unknown"
+                if hasattr(profile, 'mitochondrial'):
+                    mito_status = "Mito" if profile.mitochondrial else "Non-mito"
+                
+                # Create info label
+                info_label = QLabel(f"{taxonomy[:20]} | {mito_status}")
+                info_label.setFont(self.mono_font)
+                info_label.setAlignment(Qt.AlignCenter)
+                info_label.setStyleSheet("background-color: rgba(200, 200, 255, 150); padding: 2px;")
+                id_frame_layout.addWidget(info_label)
+            
+            # Add the frame to the grid layout in the cell below the plotter
+            self.grid_layout.addWidget(id_frame, row + 1, col)
+        
+        # Update page label
+        total_pages = max(1, int(np.ceil(len(self.meshes) / self.meshes_per_page)))
+        self.page_label.setText(f'Page: {self.current_grid_page + 1}/{total_pages}')
+        
+        # Enable/disable navigation buttons
+        self.prev_btn.setEnabled(self.current_grid_page > 0)
+        self.next_btn.setEnabled(self.current_grid_page < total_pages - 1)
+    
+    def add_landmarks_to_plotter(self, plotter, mesh_id):
+        """Add pre-generated landmarks to the plotter with reduced size"""
+        landmarks_data = self.landmarks[mesh_id]
+        
+        # Add PTC as a yellow sphere (half the size)
+        if landmarks_data.get("ptc"):
+            ptc_location = np.array(landmarks_data["ptc"])
+            plotter.add_mesh(pv.Sphere(center=ptc_location, radius=self.LANDMARK_RADIUS), color='yellow')
+        
+        # Add constriction site as a red sphere (half the size)
+        if landmarks_data.get("constriction"):
+            constriction_location = np.array(landmarks_data["constriction"])
+            plotter.add_mesh(pv.Sphere(center=constriction_location, radius=self.LANDMARK_RADIUS), color='red')
+        
+        # Add uL4 residues as blue points (half the size)
+        if landmarks_data.get("uL4"):
+            ul4_points = np.array(landmarks_data["uL4"])
+            if len(ul4_points) > 0:
+                plotter.add_mesh(pv.PolyData(ul4_points), color='blue', 
+                                point_size=5,  # Reduced from 10
+                                render_points_as_spheres=True)
+        
+        # Add uL22 residues as orange points (half the size)
+        if landmarks_data.get("uL22"):
+            ul22_points = np.array(landmarks_data["uL22"])
+            if len(ul22_points) > 0:
+                plotter.add_mesh(pv.PolyData(ul22_points), color='orange', 
+                                point_size=5,  # Reduced from 10
+                                render_points_as_spheres=True)
+    
+    def prev_page(self):
+        if self.current_grid_page > 0:
+            self.current_grid_page -= 1
+            self.update_grid()
+    
+    def next_page(self):
+        total_pages = int(np.ceil(len(self.meshes) / self.meshes_per_page))
+        if self.current_grid_page < total_pages - 1:
+            self.current_grid_page += 1
+            self.update_grid()
+    
+    def view_single_mesh(self):
+        mesh_id = self.id_input.text().strip()
+        
+        if not mesh_id:
+            print("Please enter a mesh ID.")
+            return
+        
+        if mesh_id not in self.meshes:
+            print(f"Mesh ID '{mesh_id}' not found.")
+            return
+        
+        # Close previous plotter if exists
+        if self.plotter is not None:
+            self.plotter.close()
+        
+        # Create new plotter window that won't kill the application when closed
+        self.plotter = pv.Plotter(off_screen=False)
+        
+        # Load and display mesh
+        mesh = pv.read(self.meshes[mesh_id])
+        # Changed show_edges to False to remove wireframe
+        self.plotter.add_mesh(mesh, color='lightblue', show_edges=False, opacity=0.7)
+        
+        # Add landmarks if enabled and available
+        if self.show_landmarks and mesh_id in self.landmarks:
+            try:
+                self.add_landmarks_to_plotter(self.plotter, mesh_id)
+            except Exception as e:
+                print(f"Error adding landmarks: {e}")
+        
+        # Add mesh information
+        info_text = [
+            f"Mesh ID: {mesh_id}",
+            f"Vertices: {mesh.n_points}",
+            f"Faces: {mesh.n_faces}",
+            f"File: {os.path.basename(self.meshes[mesh_id])}"
         ]
-    )
+        
+        # Add ribosome profile information if available
+        if mesh_id in self.ribosome_profiles:
+            profile = self.ribosome_profiles[mesh_id]
+            if hasattr(profile, 'src_organism_names') and profile.src_organism_names:
+                info_text.append(f"Organism: {profile.src_organism_names[0]}")
+            if hasattr(profile, 'mitochondrial'):
+                info_text.append(f"Mitochondrial: {'Yes' if profile.mitochondrial else 'No'}")
+            if hasattr(profile, 'resolution'):
+                info_text.append(f"Resolution: {profile.resolution:.2f}Å")
+        
+        # Add landmark status information
+        if mesh_id in self.landmarks:
+            lm_data = self.landmarks[mesh_id]
+            lm_info = []
+            if lm_data.get("ptc"):
+                lm_info.append("PTC: ✓")
+            else:
+                lm_info.append("PTC: ✗")
+                
+            if lm_data.get("constriction"):
+                lm_info.append("Constriction: ✓")
+            else:
+                lm_info.append("Constriction: ✗")
+                
+            if lm_data.get("uL4") and len(lm_data["uL4"]) > 0:
+                lm_info.append(f"uL4: ✓ ({len(lm_data['uL4'])} points)")
+            else:
+                lm_info.append("uL4: ✗")
+                
+            if lm_data.get("uL22") and len(lm_data["uL22"]) > 0:
+                lm_info.append(f"uL22: ✓ ({len(lm_data['uL22'])} points)")
+            else:
+                lm_info.append("uL22: ✗")
+                
+            info_text.extend(lm_info)
+        else:
+            info_text.append("No landmark data available")
+            
+        self.plotter.add_text('\n'.join(info_text), position='upper_left', font_size=12, font_family='courier')
+        
+        # Show the plotter in a non-blocking way that won't kill the app when closed
+        self.plotter.show(title=f"Mesh Viewer - {mesh_id}", auto_close=False)
 
-    visualize_filtered_residues(
-        filtered_residues, residues, ptc_pt, constriction_pt, R, H
-    )
 
-    transformed_points = transform_points_to_C0(
-        filtered_points, ptc_pt, constriction_pt
-    )
-    mask, (x, y, z) = create_point_cloud_mask(
-        transformed_points,
-        radius=R,
-        height=H,
-        voxel_size=Vsize,
-        radius_around_point=ATOM_SIZE,
-    )
-
-    points = np.where(~mask)
-    empty_coordinates = np.column_stack((x[points[0]], y[points[1]], z[points[2]]))
-    back_projected = transform_points_from_C0(
-        empty_coordinates, ptc_pt, constriction_pt
-    )
-
-    ashape_watertight_mesh = pv.read(ashapepath)
-    select = pv.PolyData(back_projected).select_enclosed_points(ashape_watertight_mesh)
-    mask = select["SelectedPoints"]
-    interior = back_projected[mask == 1]
-    empty_in_world_coords = np.array(interior)
-
-    # 2,33
-    # 2.3,57
-    # 3,123
-    # 3.2,145
-    # 3.5,175
-    # 4.2,280
-    # 5,490
-    # 5.5,600
-
-    _u_EPSILON_initial_pass = 5.5
-    _u_MIN_SAMPLES_initial_pass = 600
-    _u_EPSILON_refinement = 3.5
-    _u_MIN_SAMPLES_refinement = 175
-
-    d3d_alpha = 2
-    d3d_tol = 1
-    d3d_offset = 2
-    PR_depth = 6
-    PR_ptweight = 3
-
-    db, clusters_container = DBSCAN_capture(
-        empty_in_world_coords, _u_EPSILON_initial_pass, _u_MIN_SAMPLES_initial_pass
-    )  #! [ Extract the largest cluster from the DBSCAN clustering ]
-    largest_cluster, largest_cluster_id = DBSCAN_pick_largest_cluster(
-        clusters_container
-    )
-    visualize_DBSCAN_CLUSTERS_particular_eps_minnbrs(
-        clusters_container,
-        _u_EPSILON_initial_pass,
-        _u_MIN_SAMPLES_initial_pass,
-        ptc_pt,
-        constriction_pt,
-        largest_cluster,
-        R,
-        H,
-    )
-
-    db_2, refined_clusters_container = DBSCAN_capture(
-        largest_cluster, _u_EPSILON_refinement, _u_MIN_SAMPLES_refinement
-    )
-    refined_cluster, refined_cluster_id = DBSCAN_pick_largest_cluster(
-        refined_clusters_container
-    )
-    visualize_DBSCAN_CLUSTERS_particular_eps_minnbrs(
-        clusters_container,
-        _u_EPSILON_initial_pass,
-        _u_MIN_SAMPLES_initial_pass,
-        ptc_pt,
-        constriction_pt,
-        refined_cluster,
-        R,
-        H,
-    )
-
-    # kept_points, removed_points = clip_tunnel_by_chain_proximity(
-    #     refined_cluster,
-    #     RCSB_ID,
-    #     cifpath,
-    #     chain_id='Y2',
-
-    #     start_proximity_threshold=10,
-    #     rest_proximity_threshold=20
-
-    # )
-    # exit()
-
-    #! [ Transform the cluster back into original coordinate frame ]
-    surface_pts = ptcloud_convex_hull_points(
-        refined_cluster, d3d_alpha, d3d_tol, d3d_offset
-    )
-    visualize_pointcloud(surface_pts, RCSB_ID)
-
-    #! [ Transform the cluster back into Original Coordinate Frame ]
-    normal_estimated_pcd = estimate_normals(
-        surface_pts,
-        kdtree_radius=10,
-        kdtree_max_nn=15,
-        correction_tangent_planes_n=10,
-    )
-    # normal_estimated_pcd = gpu_normal_estimation(
-    #     surface_pts,
-    #     k=15
-    # )
-
-    o3d.io.write_point_cloud(normals_pcd_path, normal_estimated_pcd)
-    apply_poisson_reconstruction(
-        normals_pcd_path,
-        meshpath,
-        recon_depth=PR_depth,
-        recon_pt_weight=PR_ptweight,
-    )
-
-    watertight = validate_mesh_pyvista(meshpath)
-    visualize_mesh(meshpath, RCSB_ID)
-    if not watertight:
-        print("XXXX Watertightness check failed, removing", meshpath, " XXXX")
-        os.remove(meshpath)
+if __name__ == '__main__':
+    try:
+        app = QApplication(sys.argv)
+        viewer = EnhancedMeshViewer()
+        viewer.show()
+        sys.exit(app.exec_())
+    except ModuleNotFoundError as e:
+        if 'pyvistaqt' in str(e):
+            print("Error: Missing pyvistaqt package. Please install it with:")
+            print("pip install pyvistaqt")
+        else:
+            print(f"Error: {e}")
+            print("You might need to install the required packages:")
+            print("pip install pyvista pyvistaqt numpy PyQt5")

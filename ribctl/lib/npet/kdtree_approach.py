@@ -76,34 +76,6 @@ def landmark_ptc(rcsb_id: str) -> np.ndarray:
     data = response.json()
     return np.array(data["location"])
 
-# def cuml_DBSCAN_capture(
-#     ptcloud: np.ndarray,
-#     eps,
-#     min_samples,
-#     metric: str = "euclidean",
-# ):
-#     u_EPSILON     = eps
-#     u_MIN_SAMPLES = min_samples
-#     u_METRIC      = metric
-
-#     print(
-#         "Running DBSCAN on {} points. eps={}, min_samples={}, distance_metric={}".format(
-#             len(ptcloud), u_EPSILON, u_MIN_SAMPLES, u_METRIC
-#         )
-#     )
-#     db = cumlDBSCAN(eps=eps, min_samples=min_samples, metric=metric).fix_predict(ptcloud)
-#     pprint(db)
-#     labels = db.labels_
-
-#     CLUSTERS_CONTAINER = {}
-#     for point, label in zip(ptcloud, labels):
-#         if label not in CLUSTERS_CONTAINER:
-#             CLUSTERS_CONTAINER[label] = []
-#         CLUSTERS_CONTAINER[label].append(point)
-
-#     CLUSTERS_CONTAINER = dict(sorted(CLUSTERS_CONTAINER.items()))
-#     return db, CLUSTERS_CONTAINER
-
 def DBSCAN_capture(
     ptcloud: np.ndarray,
     eps,
@@ -412,7 +384,6 @@ def ribosome_entities(
     for residue in residues:
         if not ResidueSummary.is_canonical(residue.get_resname()):
             residues.remove(residue)
-            print("REMOVED", residue.get_resname(), residue.get_id())
 
     if level == "R":
         return residues
@@ -455,7 +426,7 @@ def is_point_in_cylinder(
     radial_distance = np.linalg.norm(radial_vector)
 
     # Check if point is inside cylinder
-    return (radial_distance <= radius) and (0 <= projection <= height)
+    return (radial_distance <= radius) and (-10 <= projection <= height)
 
 
 def make_cylinder_predicate(

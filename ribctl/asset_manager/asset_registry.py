@@ -2,11 +2,9 @@ from typing import TypeVar, Callable, Awaitable
 import functools
 from loguru import logger
 from pydantic import BaseModel
-
 from pathlib import Path
 from loguru import logger
 from typing import Dict, Callable, Awaitable
-
 from ribctl import RIBETL_DATA
 from ribctl.asset_manager.asset_manager import RibosomeAssetManager
 from ribctl.lib.npet.alphalib import alpha_contour_via_poisson_recon
@@ -25,9 +23,7 @@ from ribctl.lib.schema.types_ribosome import (
 )
 
 from .asset_types import AssetType
-
 ModelT = TypeVar("ModelT", bound=BaseModel)
-
 
 class RawAssetHandler:
     """Handler for raw file assets with extensible asset type matching"""
@@ -140,14 +136,13 @@ class AssetRegistry:
         for asset_type in asset_types:
             await self.generate_asset(rcsb_id, asset_type, force)
 
-
 async def npet_mesh_handler(rcsb_id: str, force: bool) -> None:
-    create_npet_mesh(rcsb_id)
+    create_npet_mesh(rcsb_id, Path('/Users/rtviii/dev/riboxyz/ribctl/lib/npet/pipeline/logs'))
 
 async def alphashape_handler(rcsb_id: str, force: bool) -> None:
     # alpha_contour_via_poisson_recon(rcsb_id )
     # gpu_accelerated_watertight_mesh(rcsb_id)
-    alpha_contour_via_poisson_recon(rcsb_id, True)
+    alpha_contour_via_poisson_recon(rcsb_id)
 
 main_registry = AssetRegistry(RibosomeAssetManager(RIBETL_DATA))
 

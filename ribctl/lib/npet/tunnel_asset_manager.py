@@ -107,7 +107,3 @@ class TunnelMeshAssetsManager:
         return os.path.join(
             self.structpath, "{}_dbscan_clusters.refined.xyz".format(self.rcsb_id)
         )
-
-    @property
-    def dbscan_clusters_xyz_largest(self):
-        r

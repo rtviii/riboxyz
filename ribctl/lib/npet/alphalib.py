@@ -39,26 +39,58 @@ def cif_to_point_cloud(cif_path: str, chains: list[str] | None = None,  do_atoms
 
     return np.array(coordinates)
 
-def validate_mesh_pyvista(mesh, stage="unknown"):
+def validate_mesh_pyvista(mesh_or_path, stage="unknown"):
+    """
+    Validates if a mesh is watertight.
+    
+    Parameters:
+        mesh_or_path: Either a PyVista mesh object or a path to a mesh file
+        stage: Optional identifier for logging
+        
+    Returns:
+        bool: True if the mesh is watertight, False otherwise
+    """
+    import pyvista as pv
+    import os
+    from pathlib import Path
+
+    # If mesh is a path, load it
+    if isinstance(mesh_or_path, (str, Path)):
+        if not os.path.exists(mesh_or_path):
+            print(f"WARNING: Mesh file does not exist: {mesh_or_path}")
+            return False
+        
+        try:
+            mesh = pv.read(str(mesh_or_path))
+        except Exception as e:
+            print(f"WARNING: Failed to load mesh at {mesh_or_path}: {e}")
+            return False
+    else:
+        mesh = mesh_or_path
+
     if mesh is None:
         print(f"WARNING: Null mesh at stage {stage}")
-        return None
+        return False
 
     print(f"\nMesh properties at stage: {stage}")
 
-    # Check watertightness by looking for boundary edges
-    # A mesh is watertight if it has no boundary edges
-    edges = mesh.extract_feature_edges(
-        boundary_edges=True,
-        feature_edges=False,
-        manifold_edges=False,
-        non_manifold_edges=False,
-    )
-    is_watertight = edges.n_cells == 0
+    try:
+        # Check watertightness by looking for boundary edges
+        # A mesh is watertight if it has no boundary edges
+        edges = mesh.extract_feature_edges(
+            boundary_edges=True,
+            feature_edges=False,
+            manifold_edges=False,
+            non_manifold_edges=False,
+        )
+        is_watertight = edges.n_cells == 0
 
-    print(f"- Is watertight: {is_watertight}")
-    print("DONE\n\n ")
-    return is_watertight
+        print(f"- Is watertight: {is_watertight}")
+        print("DONE\n\n ")
+        return is_watertight
+    except Exception as e:
+        print(f"WARNING: Error checking watertightness: {e}")
+        return False
 
 def quick_surface_points(
     pointcloud: np.ndarray, alpha: float, tolerance: float, offset: float
@@ -106,20 +138,16 @@ def alpha_contour_via_poisson_recon(rcsb_id:str, verbose:bool=False):
         print("Loaded.")
         ptcloud = np.load(ptcloudpath)
 
-    print("Before visualize ptclodu")
-    if verbose:
-        visualize_pointcloud(ptcloud, rcsb_id)
-    print("after visualize ptclodu")
 
     output_normals_pcd = os.path.join(RIBXZ_TEMP_FILES, "{}_normal_estimated_pcd.ply".format(rcsb_id))
     output_mesh        = AssetType.ALPHA_SHAPE.get_path(rcsb_id)
 
-    d3d_alpha  = 45    # Increase from 35 - be more aggressive
-    d3d_tol    = 2     # Increase tolerance to smooth out small details
+    d3d_alpha  = 75    # Increase from 35 - be more aggressive
+    d3d_tol    = 4     # Increase tolerance to smooth out small details
     d3d_offset = 3     # Slightly larger offset
 
     kdtree_radius   = 30    # Larger radius to catch more global structure
-    max_nn          = 30    # More neighbors for more robust estimation
+    max_nn          = 40    # More neighbors for more robust estimation
     tanget_planes_k = 15    # Actually decrease this to avoid over-smoothing
 
     PR_depth    = 6        # Reduced from 6

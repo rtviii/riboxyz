@@ -1,5 +1,6 @@
 **/__pycache__/**
 */__pycache__/
+**/wenjun_data/**
 
 neo4j
 !neo4j/conf/neo4j.conf
@@ -13,6 +14,8 @@ rnacentral*
 
 **/*.mp4
 *.mp4
+
+**/wenjun_data**
 
 **.pyc
 
