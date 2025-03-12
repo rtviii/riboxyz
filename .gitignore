@@ -15,6 +15,7 @@ rnacentral*
 **/*.mp4
 *.mp4
 
+**/wenjun_data**
 
 **.pyc
 

@@ -1,662 +1,464 @@
-import json
+#!/usr/bin/env python
 import os
-from pathlib import Path
-from typing import Literal, Optional
+import sys
+import glob
+import json
 import numpy as np
 import pyvista as pv
-import open3d as o3d
-from ribctl import RIBXZ_TEMP_FILES
-from ribctl.asset_manager.asset_types import AssetType
-from ribctl.lib.landmarks.constriction_site import get_constriction
-from ribctl.lib.landmarks.ptc_via_trna import PTC_location
-from ribctl.lib.npet.alphalib import cif_to_point_cloud, fast_normal_estimation, quick_surface_points, validate_mesh_pyvista
-from ribctl.lib.npet.kdtree_approach import (
-    DBSCAN_capture,
-    DBSCAN_pick_largest_cluster,
-    apply_poisson_reconstruction,
-    clip_tunnel_by_chain_proximity,
-    create_point_cloud_mask,
-    estimate_normals,
-    filter_residues_parallel,
-    landmark_constriction_site,
-    landmark_ptc,
-    ptcloud_convex_hull_points,
-    ribosome_entities,
-    transform_points_from_C0,
-    transform_points_to_C0,
+from pyvistaqt import QtInteractor
+from PyQt5.QtWidgets import (
+    QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, 
+    QLineEdit, QLabel, QGridLayout, QScrollArea, QCheckBox, QFileDialog,
+    QFrame
 )
-from ribctl.lib.npet.pipeline.pipeline_status_tracker import NPETProcessingTracker, ProcessingStage
-from ribctl.lib.npet.tunnel_asset_manager import TunnelMeshAssetsManager
-from ribctl.lib.npet.various_visualization import (
-    visualize_DBSCAN_CLUSTERS_particular_eps_minnbrs,
-    visualize_filtered_residues,
-    visualize_mesh,
-    visualize_pointcloud,
-    visualize_pointcloud_axis,
-)
-from ribctl.lib.schema.types_ribosome import ConstrictionSite, PTCInfo
-from ribctl.ribosome_ops import RibosomeOps
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QFont
+from pathlib import Path
+import pickle
 
 
-def create_npet_mesh(rcsb_id: str, log_dir: Optional[Path] = None, force: bool = False) -> NPETProcessingTracker:
-    """
-    Creates NPET mesh for a given RCSB ID with comprehensive tracking and logging.
+class EnhancedMeshViewer(QWidget):
+    # Configuration variables for default directories
+    DEFAULT_MESH_DIR = os.path.expanduser("~/data/meshes")
+    DEFAULT_LANDMARKS_DIR = os.path.expanduser("~/data/landmarks")
+    DEFAULT_RIBOSOME_PROFILES_DIR = os.path.expanduser("~/data/ribosome_profiles")
     
-    Args:
-        rcsb_id: The RCSB PDB identifier
-        log_dir: Directory to store logs (default: logs)
-        force: Whether to force regeneration of existing assets
-        
-    Returns:
-        NPETProcessingTracker: Processing tracker with detailed status information
-    """
-
-    if os.path.exists(AssetType.NPET_MESH_ASCII.get_path(rcsb_id)):
-        print(f"\x1b[92mNPET mesh already exists for {rcsb_id}, skipping.\x1b[0m")
-
-    print(f"------------- CREATING NPET MESH FOR '\x1b[32m {rcsb_id} \x1b[0m")
-    rcsb_id = rcsb_id.upper()
-    tracker = NPETProcessingTracker(rcsb_id, log_dir)
+    # Landmark visualization parameters
+    LANDMARK_RADIUS = 2.5  # Reduced by half from the original size (assuming original was ~5)
     
-    try:
-        # SETUP
-        tracker.begin_stage(ProcessingStage.SETUP)
-        assets = TunnelMeshAssetsManager(rcsb_id)
-        cifpath = AssetType.MMCIF.get_path(rcsb_id)
-        ashapepath = AssetType.ALPHA_SHAPE.get_path(rcsb_id)
-        meshpath = AssetType.NPET_MESH.get_path(rcsb_id)
-
-        ro = RibosomeOps(rcsb_id)
-        profile = ro.profile
+    def __init__(self):
+        super().__init__()
+        self.meshes = {}
+        self.landmarks = {}
+        self.ribosome_profiles = {}
+        self.plotter = None
+        self.grid_plotters = []
+        self.current_grid_page = 0
+        self.meshes_per_page = 9  # 3x3 grid
+        self.show_landmarks = True
         
-        # Create artifacts directory for this structure if it doesn't exist
-        structure_dir = Path(ro.assets.paths.dir)
-        artifacts_dir = structure_dir / "artifacts"
-        artifacts_dir.mkdir(exist_ok=True, parents=True)
+        # Set default directories from config variables
+        self.mesh_dir = self.DEFAULT_MESH_DIR
+        self.landmarks_dir = self.DEFAULT_LANDMARKS_DIR
+        self.ribosome_profiles_dir = self.DEFAULT_RIBOSOME_PROFILES_DIR
         
-        # Core parameters that affect multiple stages
-        R = 35
-        H = 120
-        Vsize = 1
-        ATOM_SIZE = 2
-
-        normals_pcd_path = assets.tunnel_pcd_normal_estimated
-
-        tracker.add_artifact(ProcessingStage.SETUP, Path(cifpath))
-        tracker.end_stage(ProcessingStage.SETUP, True)
+        # Create a monospace font for all annotations
+        self.mono_font = QFont("Courier New")
+        self.mono_font.setStyleHint(QFont.Monospace)
         
-        # PTC IDENTIFICATION
-        tracker.begin_stage(ProcessingStage.PTC_IDENTIFICATION)
-        try:
-            ptc_info = PTC_location(rcsb_id)
-            ptc_pt = np.array(ptc_info.location)
-            
-            # Save PTC info as JSON
-            ptc_json_path = AssetType.PTC.get_path(rcsb_id)
-            with open(ptc_json_path, 'w') as f:
-                f.write(ptc_info.model_dump_json())
-            
-            tracker.add_artifact(ProcessingStage.PTC_IDENTIFICATION, ptc_json_path)
-            tracker.end_stage(ProcessingStage.PTC_IDENTIFICATION, True)
-        except Exception as e:
-            tracker.end_stage(ProcessingStage.PTC_IDENTIFICATION, False, error=e)
-            tracker.complete_processing(False)
-            return tracker
-            
-        # CONSTRICTION IDENTIFICATION
-        tracker.begin_stage(ProcessingStage.CONSTRICTION_IDENTIFICATION)
-        try:
-            constriction_pt = get_constriction(rcsb_id)
-            
-            # Save constriction point as numpy array
-            constriction_path = AssetType.CONSTRICTION_SITE.get_path(rcsb_id)
-            with open(constriction_path, 'w') as f:
-                json.dump(ConstrictionSite(location=constriction_pt.tolist()).model_dump(), f)
-            
-            tracker.add_artifact(ProcessingStage.CONSTRICTION_IDENTIFICATION, constriction_path)
-            tracker.end_stage(ProcessingStage.CONSTRICTION_IDENTIFICATION, True)
-        except Exception as e:
-            tracker.end_stage(ProcessingStage.CONSTRICTION_IDENTIFICATION, False, error=e)
-            tracker.complete_processing(False)
-            return tracker
+        self.init_ui()
         
-        # ALPHA SHAPE GENERATION
-        alpha_params = {
-            "d3d_alpha": 75,    
-            "d3d_tol": 4,      
-            "d3d_offset": 3,    
-            "kdtree_radius": 30,    
-            "max_nn": 40,          
-            "tangent_planes_k": 15,
-            "PR_depth": 6,       
-            "PR_ptweight": 4,
-        }
+    def init_ui(self):
+        self.setWindowTitle('Enhanced PLY Mesh Viewer')
+        self.setGeometry(100, 100, 1200, 800)
         
-        should_process = tracker.begin_stage(ProcessingStage.ALPHA_SHAPE, alpha_params)
+        main_layout = QVBoxLayout()
         
-        if should_process or force:
+        # Control panel - top row
+        control_panel_top = QHBoxLayout()
+        
+        # Mesh directory selection
+        self.mesh_dir_label = QLabel('Mesh Directory:')
+        self.mesh_dir_label.setFont(self.mono_font)
+        self.mesh_dir_input = QLineEdit(self.mesh_dir)
+        self.mesh_dir_browse = QPushButton('Browse...')
+        self.mesh_dir_browse.clicked.connect(self.browse_mesh_dir)
+        
+        # Landmarks directory selection
+        self.landmarks_dir_label = QLabel('Landmarks Directory:')
+        self.landmarks_dir_label.setFont(self.mono_font)
+        self.landmarks_dir_input = QLineEdit(self.landmarks_dir)
+        self.landmarks_dir_browse = QPushButton('Browse...')
+        self.landmarks_dir_browse.clicked.connect(self.browse_landmarks_dir)
+        
+        # Ribosome profiles directory selection
+        self.ribosome_profiles_dir_label = QLabel('Ribosome Profiles:')
+        self.ribosome_profiles_dir_label.setFont(self.mono_font)
+        self.ribosome_profiles_dir_input = QLineEdit(self.ribosome_profiles_dir)
+        self.ribosome_profiles_dir_browse = QPushButton('Browse...')
+        self.ribosome_profiles_dir_browse.clicked.connect(self.browse_ribosome_profiles_dir)
+        
+        # Add widgets to top control panel
+        control_panel_top.addWidget(self.mesh_dir_label)
+        control_panel_top.addWidget(self.mesh_dir_input)
+        control_panel_top.addWidget(self.mesh_dir_browse)
+        control_panel_top.addWidget(self.landmarks_dir_label)
+        control_panel_top.addWidget(self.landmarks_dir_input)
+        control_panel_top.addWidget(self.landmarks_dir_browse)
+        control_panel_top.addWidget(self.ribosome_profiles_dir_label)
+        control_panel_top.addWidget(self.ribosome_profiles_dir_input)
+        control_panel_top.addWidget(self.ribosome_profiles_dir_browse)
+        
+        # Control panel - bottom row
+        control_panel_bottom = QHBoxLayout()
+        
+        # Load button
+        self.load_btn = QPushButton('Load Data')
+        self.load_btn.clicked.connect(self.load_data)
+        
+        # Input for specific mesh ID
+        self.id_label = QLabel('Mesh ID:')
+        self.id_label.setFont(self.mono_font)
+        self.id_input = QLineEdit()
+        self.view_btn = QPushButton('View Single Mesh')
+        self.view_btn.clicked.connect(self.view_single_mesh)
+        
+        # Grid navigation
+        self.prev_btn = QPushButton('Previous Page')
+        self.prev_btn.clicked.connect(self.prev_page)
+        self.next_btn = QPushButton('Next Page')
+        self.next_btn.clicked.connect(self.next_page)
+        self.page_label = QLabel('Page: 1')
+        self.page_label.setFont(self.mono_font)
+        
+        # Toggle landmarks
+        self.landmarks_check = QCheckBox('Show Landmarks')
+        self.landmarks_check.setChecked(True)
+        self.landmarks_check.stateChanged.connect(self.toggle_landmarks)
+        
+        # Add widgets to bottom control panel
+        control_panel_bottom.addWidget(self.load_btn)
+        control_panel_bottom.addWidget(self.id_label)
+        control_panel_bottom.addWidget(self.id_input)
+        control_panel_bottom.addWidget(self.view_btn)
+        control_panel_bottom.addWidget(self.prev_btn)
+        control_panel_bottom.addWidget(self.page_label)
+        control_panel_bottom.addWidget(self.next_btn)
+        control_panel_bottom.addWidget(self.landmarks_check)
+        
+        main_layout.addLayout(control_panel_top)
+        main_layout.addLayout(control_panel_bottom)
+        
+        # Grid layout for mesh thumbnails
+        self.grid_container = QWidget()
+        self.grid_layout = QGridLayout(self.grid_container)
+        
+        # Scroll area for grid
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setWidget(self.grid_container)
+        
+        main_layout.addWidget(scroll_area)
+        
+        self.setLayout(main_layout)
+    
+    def browse_mesh_dir(self):
+        dir_path = QFileDialog.getExistingDirectory(self, "Select Mesh Directory")
+        if dir_path:
+            self.mesh_dir_input.setText(dir_path)
+            self.mesh_dir = dir_path
+    
+    def browse_landmarks_dir(self):
+        dir_path = QFileDialog.getExistingDirectory(self, "Select Landmarks Directory")
+        if dir_path:
+            self.landmarks_dir_input.setText(dir_path)
+            self.landmarks_dir = dir_path
+    
+    def browse_ribosome_profiles_dir(self):
+        dir_path = QFileDialog.getExistingDirectory(self, "Select Ribosome Profiles Directory")
+        if dir_path:
+            self.ribosome_profiles_dir_input.setText(dir_path)
+            self.ribosome_profiles_dir = dir_path
+    
+    def toggle_landmarks(self, state):
+        self.show_landmarks = (state == Qt.Checked)
+        self.update_grid()
+    
+    def load_data(self):
+        # Get directory paths from input fields
+        self.mesh_dir = self.mesh_dir_input.text()
+        self.landmarks_dir = self.landmarks_dir_input.text()
+        self.ribosome_profiles_dir = self.ribosome_profiles_dir_input.text()
+        
+        if not os.path.exists(self.mesh_dir):
+            print(f"Mesh directory not found: {self.mesh_dir}")
+            return
+        
+        if not os.path.exists(self.landmarks_dir):
+            print(f"Landmarks directory not found: {self.landmarks_dir}")
+            return
+        
+        if not os.path.exists(self.ribosome_profiles_dir):
+            print(f"Ribosome profiles directory not found: {self.ribosome_profiles_dir}")
+            return
+        
+        # Clear existing data
+        self.meshes = {}
+        self.landmarks = {}
+        self.ribosome_profiles = {}
+        for plotter in self.grid_plotters:
+            plotter.close()
+        self.grid_plotters = []
+        
+        # Clear grid layout
+        for i in reversed(range(self.grid_layout.count())):
+            widget = self.grid_layout.itemAt(i).widget()
+            if widget is not None:
+                widget.setParent(None)
+        
+        # Load meshes
+        mesh_files = glob.glob(os.path.join(self.mesh_dir, '*_NPET_MESH.ply'))
+        for file_path in mesh_files:
+            mesh_id = os.path.basename(file_path).split('_')[0]
+            self.meshes[mesh_id] = file_path
+        
+        # Load landmarks
+        landmark_files = glob.glob(os.path.join(self.landmarks_dir, '*_landmarks_pts.json'))
+        for file_path in landmark_files:
+            mesh_id = os.path.basename(file_path).split('_')[0]
+            if mesh_id in self.meshes:  # Only load landmarks for meshes we have
+                try:
+                    with open(file_path, 'r') as f:
+                        landmark_data = json.load(f)
+                    self.landmarks[mesh_id] = landmark_data
+                except Exception as e:
+                    print(f"Error loading landmarks for {mesh_id}: {e}")
+        
+        # Load ribosome profiles
+        profile_files = glob.glob(os.path.join(self.ribosome_profiles_dir, '*.pkl'))
+        for file_path in profile_files:
             try:
-                # Check if alpha shape already exists and should be used
-                regenerate_alpha = force or not os.path.exists(ashapepath)
-                
-                if not regenerate_alpha:
-                    print(f"Using existing alpha shape mesh: {ashapepath}")
-                    tracker.add_artifact(ProcessingStage.ALPHA_SHAPE, Path(ashapepath))
-                else:
-                    print(f"Generating alpha shape mesh for {rcsb_id}")
-                    
-                    # Generate the point cloud for the structure
-                    ptcloudpath = artifacts_dir / f"{rcsb_id}_structure_ptcloud.npy"
-                    
-                    if not os.path.exists(ptcloudpath) or force:
-                        print("Extracting point cloud from CIF file")
-                        first_assembly_chains = ro.first_assembly_auth_asym_ids()
-                        ptcloud = cif_to_point_cloud(cifpath, first_assembly_chains, do_atoms=True)
-                        np.save(ptcloudpath, ptcloud)
-                    else:
-                        print(f"Loading existing point cloud from {ptcloudpath}")
-                        ptcloud = np.load(ptcloudpath)
-                    
-                    tracker.add_artifact(ProcessingStage.ALPHA_SHAPE, ptcloudpath)
-                    
-                    # Parameters for alpha shape generation
-                    d3d_alpha = alpha_params["d3d_alpha"]
-                    d3d_tol = alpha_params["d3d_tol"]
-                    d3d_offset = alpha_params["d3d_offset"]
-                    
-                    kdtree_radius = alpha_params["kdtree_radius"]
-                    max_nn = alpha_params["max_nn"]
-                    tangent_planes_k = alpha_params["tangent_planes_k"]
-                    
-                    PR_depth = alpha_params["PR_depth"]
-                    PR_ptweight = alpha_params["PR_ptweight"]
-                    
-                    print("Beginning Delaunay 3D reconstruction")
-                    surface_pts = quick_surface_points(ptcloud, d3d_alpha, d3d_tol, d3d_offset)
-                    
-                    # Save surface points
-                    surface_pts_path = artifacts_dir / f"{rcsb_id}_alpha_surface_points.npy"
-                    np.save(surface_pts_path, surface_pts)
-                    tracker.add_artifact(ProcessingStage.ALPHA_SHAPE, surface_pts_path)
-                    
-                    # Visualize if possible
-                    try:
-                        surface_viz_path = artifacts_dir / f"{rcsb_id}_alpha_surface.png"
-                        visualize_pointcloud(surface_pts, rcsb_id, output_path=str(surface_viz_path))
-                        tracker.add_artifact(ProcessingStage.ALPHA_SHAPE, surface_viz_path)
-                    except Exception as viz_error:
-                        print(f"Warning: Could not save alpha surface visualization: {str(viz_error)}")
-                    
-                    # Normal estimation
-                    normal_estimated_pcd = fast_normal_estimation(
-                        surface_pts, kdtree_radius, max_nn, tangent_planes_k
-                    )
-                    
-                    # Save normal-estimated point cloud
-                    alpha_normals_path = artifacts_dir / f"{rcsb_id}_alpha_normals.ply"
-                    o3d.io.write_point_cloud(str(alpha_normals_path), normal_estimated_pcd)
-                    tracker.add_artifact(ProcessingStage.ALPHA_SHAPE, alpha_normals_path)
-                    
-                    # Apply Poisson reconstruction
-                    apply_poisson_reconstruction(
-                        str(alpha_normals_path),
-                        ashapepath,
-                        recon_depth=PR_depth,
-                        recon_pt_weight=PR_ptweight,
-                    )
-                    
-                    # Extract largest component for better quality
-                    mesh = pv.read(ashapepath)
-                    labeled = mesh.connectivity(largest=True)  # This keeps only the largest component
-                    labeled.save(ashapepath)
-                    
-                    # Check watertightness
-                    watertight = validate_mesh_pyvista(labeled)
-                    
-                    if not watertight:
-                        print("Warning: Alpha shape mesh is not watertight, but continuing anyway")
-                    
-                    # Save mesh visualization
-                    try:
-                        mesh_viz_path = artifacts_dir / f"{rcsb_id}_alpha_mesh.png"
-                        visualize_mesh(ashapepath, rcsb_id, output_path=str(mesh_viz_path))
-                        tracker.add_artifact(ProcessingStage.ALPHA_SHAPE, mesh_viz_path)
-                    except Exception as viz_error:
-                        print(f"Warning: Could not save alpha mesh visualization: {str(viz_error)}")
-                    
-                    # Also add ASCII version as artifact if it exists
-                    ascii_path = Path(str(ashapepath).split(".")[0] + "_ascii.ply")
-                    if ascii_path.exists():
-                        tracker.add_artifact(ProcessingStage.ALPHA_SHAPE, ascii_path)
-                
-                # Add the final alpha shape as artifact
-                tracker.add_artifact(ProcessingStage.ALPHA_SHAPE, Path(ashapepath))
-                tracker.end_stage(ProcessingStage.ALPHA_SHAPE, True)
-                
-                # Verify alpha shape exists for the remaining pipeline
-                if not os.path.exists(ashapepath):
-                    raise FileNotFoundError(f"Alpha shape file {ashapepath} not found after generation")
-                
+                mesh_id = os.path.basename(file_path).split('.')[0]
+                if mesh_id in self.meshes:  # Only load profiles for meshes we have
+                    with open(file_path, 'rb') as f:
+                        profile_data = pickle.load(f)
+                    self.ribosome_profiles[mesh_id] = profile_data
             except Exception as e:
-                tracker.end_stage(ProcessingStage.ALPHA_SHAPE, False, error=e)
-                tracker.complete_processing(False)
-                return tracker
+                print(f"Error loading ribosome profile for {mesh_id}: {e}")
         
-        # LANDMARK IDENTIFICATION
-        # This stage is fast, so we don't need parameter tracking
-        tracker.begin_stage(ProcessingStage.LANDMARK_IDENTIFICATION)
-        try:
-            # Load PTC and constriction points from previous stages
-            ptc_path = AssetType.PTC.get_path(rcsb_id)
-            constriction_path = AssetType.CONSTRICTION_SITE.get_path(rcsb_id)
+        print(f"Loaded {len(self.meshes)} meshes, {len(self.landmarks)} landmark files, and {len(self.ribosome_profiles)} ribosome profiles.")
+        self.current_grid_page = 0
+        self.update_grid()
+    
+    def update_grid(self):
+        # Close existing plotters
+        for plotter in self.grid_plotters:
+            plotter.close()
+        self.grid_plotters = []
+        
+        # Clear grid layout
+        for i in reversed(range(self.grid_layout.count())): 
+            widget = self.grid_layout.itemAt(i).widget()
+            if widget is not None:
+                widget.setParent(None)
+        
+        # Get mesh IDs for the current page
+        mesh_ids = list(self.meshes.keys())
+        start_idx = self.current_grid_page * self.meshes_per_page
+        end_idx = min(start_idx + self.meshes_per_page, len(mesh_ids))
+        current_mesh_ids = mesh_ids[start_idx:end_idx]
+        
+        # Calculate grid dimensions for a 3x3 grid
+        grid_size = 3
+        
+        # Create grid of mesh viewers
+        for idx, mesh_id in enumerate(current_mesh_ids):
+            row = (idx // grid_size) * 2  # Multiply by 2 to leave room for labels
+            col = idx % grid_size
             
-            # If they exist, use them directly
-            if ptc_path.exists() and constriction_path.exists():
-                with open(ptc_path, 'r') as f:
-                    ptc_info = PTCInfo.model_validate(json.load(f))
-                with open(constriction_path, 'r') as f:
-                    constriction_site = ConstrictionSite.model_validate(json.load(f))
-                ptc_pt = np.array(ptc_info.location)
-                constriction_pt = np.array(constriction_site.location)
+            # Create a small plotter for each mesh
+            plotter = QtInteractor()
+            plotter.setMinimumSize(300, 300)
+            
+            # Load and display mesh
+            mesh_file = self.meshes[mesh_id]
+            mesh = pv.read(mesh_file)
+            # Changed show_edges to False to remove wireframe
+            plotter.add_mesh(mesh, color='lightblue', show_edges=False, opacity=0.7)
+            
+            # Add landmarks if enabled and available
+            if self.show_landmarks and mesh_id in self.landmarks:
+                try:
+                    self.add_landmarks_to_plotter(plotter, mesh_id)
+                except Exception as e:
+                    print(f"Error adding landmarks for {mesh_id}: {e}")
+                    
+            plotter.add_text(mesh_id, position='upper_left', font_size=10, font_family='courier')
+            plotter.reset_camera()
+            
+            # Add plotter to grid
+            self.grid_layout.addWidget(plotter, row, col)
+            self.grid_plotters.append(plotter)
+            
+            # Add a frame to contain the labels
+            id_frame = QFrame()
+            id_frame_layout = QVBoxLayout(id_frame)
+            id_frame_layout.setContentsMargins(0, 0, 0, 0)
+            id_frame_layout.setSpacing(0)
+            
+            # Add ID label
+            id_label = QLabel(f"ID: {mesh_id}")
+            id_label.setFont(self.mono_font)
+            id_label.setAlignment(Qt.AlignCenter)
+            id_label.setStyleSheet("background-color: rgba(200, 200, 200, 150); padding: 2px;")
+            id_frame_layout.addWidget(id_label)
+            
+            # Add taxonomic and mitochondrial info if available
+            if mesh_id in self.ribosome_profiles:
+                profile = self.ribosome_profiles[mesh_id]
+                
+                # Extract taxonomic name (first organism from the list)
+                taxonomy = "Unknown"
+                if hasattr(profile, 'src_organism_names') and profile.src_organism_names:
+                    taxonomy = profile.src_organism_names[0]
+                
+                # Extract mitochondrial status
+                mito_status = "Unknown"
+                if hasattr(profile, 'mitochondrial'):
+                    mito_status = "Mito" if profile.mitochondrial else "Non-mito"
+                
+                # Create info label
+                info_label = QLabel(f"{taxonomy[:20]} | {mito_status}")
+                info_label.setFont(self.mono_font)
+                info_label.setAlignment(Qt.AlignCenter)
+                info_label.setStyleSheet("background-color: rgba(200, 200, 255, 150); padding: 2px;")
+                id_frame_layout.addWidget(info_label)
+            
+            # Add the frame to the grid layout in the cell below the plotter
+            self.grid_layout.addWidget(id_frame, row + 1, col)
+        
+        # Update page label
+        total_pages = max(1, int(np.ceil(len(self.meshes) / self.meshes_per_page)))
+        self.page_label.setText(f'Page: {self.current_grid_page + 1}/{total_pages}')
+        
+        # Enable/disable navigation buttons
+        self.prev_btn.setEnabled(self.current_grid_page > 0)
+        self.next_btn.setEnabled(self.current_grid_page < total_pages - 1)
+    
+    def add_landmarks_to_plotter(self, plotter, mesh_id):
+        """Add pre-generated landmarks to the plotter with reduced size"""
+        landmarks_data = self.landmarks[mesh_id]
+        
+        # Add PTC as a yellow sphere (half the size)
+        if landmarks_data.get("ptc"):
+            ptc_location = np.array(landmarks_data["ptc"])
+            plotter.add_mesh(pv.Sphere(center=ptc_location, radius=self.LANDMARK_RADIUS), color='yellow')
+        
+        # Add constriction site as a red sphere (half the size)
+        if landmarks_data.get("constriction"):
+            constriction_location = np.array(landmarks_data["constriction"])
+            plotter.add_mesh(pv.Sphere(center=constriction_location, radius=self.LANDMARK_RADIUS), color='red')
+        
+        # Add uL4 residues as blue points (half the size)
+        if landmarks_data.get("uL4"):
+            ul4_points = np.array(landmarks_data["uL4"])
+            if len(ul4_points) > 0:
+                plotter.add_mesh(pv.PolyData(ul4_points), color='blue', 
+                                point_size=5,  # Reduced from 10
+                                render_points_as_spheres=True)
+        
+        # Add uL22 residues as orange points (half the size)
+        if landmarks_data.get("uL22"):
+            ul22_points = np.array(landmarks_data["uL22"])
+            if len(ul22_points) > 0:
+                plotter.add_mesh(pv.PolyData(ul22_points), color='orange', 
+                                point_size=5,  # Reduced from 10
+                                render_points_as_spheres=True)
+    
+    def prev_page(self):
+        if self.current_grid_page > 0:
+            self.current_grid_page -= 1
+            self.update_grid()
+    
+    def next_page(self):
+        total_pages = int(np.ceil(len(self.meshes) / self.meshes_per_page))
+        if self.current_grid_page < total_pages - 1:
+            self.current_grid_page += 1
+            self.update_grid()
+    
+    def view_single_mesh(self):
+        mesh_id = self.id_input.text().strip()
+        
+        if not mesh_id:
+            print("Please enter a mesh ID.")
+            return
+        
+        if mesh_id not in self.meshes:
+            print(f"Mesh ID '{mesh_id}' not found.")
+            return
+        
+        # Close previous plotter if exists
+        if self.plotter is not None:
+            self.plotter.close()
+        
+        # Create new plotter window that won't kill the application when closed
+        self.plotter = pv.Plotter(off_screen=False)
+        
+        # Load and display mesh
+        mesh = pv.read(self.meshes[mesh_id])
+        # Changed show_edges to False to remove wireframe
+        self.plotter.add_mesh(mesh, color='lightblue', show_edges=False, opacity=0.7)
+        
+        # Add landmarks if enabled and available
+        if self.show_landmarks and mesh_id in self.landmarks:
+            try:
+                self.add_landmarks_to_plotter(self.plotter, mesh_id)
+            except Exception as e:
+                print(f"Error adding landmarks: {e}")
+        
+        # Add mesh information
+        info_text = [
+            f"Mesh ID: {mesh_id}",
+            f"Vertices: {mesh.n_points}",
+            f"Faces: {mesh.n_faces}",
+            f"File: {os.path.basename(self.meshes[mesh_id])}"
+        ]
+        
+        # Add ribosome profile information if available
+        if mesh_id in self.ribosome_profiles:
+            profile = self.ribosome_profiles[mesh_id]
+            if hasattr(profile, 'src_organism_names') and profile.src_organism_names:
+                info_text.append(f"Organism: {profile.src_organism_names[0]}")
+            if hasattr(profile, 'mitochondrial'):
+                info_text.append(f"Mitochondrial: {'Yes' if profile.mitochondrial else 'No'}")
+            if hasattr(profile, 'resolution'):
+                info_text.append(f"Resolution: {profile.resolution:.2f}Å")
+        
+        # Add landmark status information
+        if mesh_id in self.landmarks:
+            lm_data = self.landmarks[mesh_id]
+            lm_info = []
+            if lm_data.get("ptc"):
+                lm_info.append("PTC: ✓")
             else:
-                raise FileNotFoundError("PTC or constriction site not found")
+                lm_info.append("PTC: ✗")
+                
+            if lm_data.get("constriction"):
+                lm_info.append("Constriction: ✓")
+            else:
+                lm_info.append("Constriction: ✗")
+                
+            if lm_data.get("uL4") and len(lm_data["uL4"]) > 0:
+                lm_info.append(f"uL4: ✓ ({len(lm_data['uL4'])} points)")
+            else:
+                lm_info.append("uL4: ✗")
+                
+            if lm_data.get("uL22") and len(lm_data["uL22"]) > 0:
+                lm_info.append(f"uL22: ✓ ({len(lm_data['uL22'])} points)")
+            else:
+                lm_info.append("uL22: ✗")
+                
+            info_text.extend(lm_info)
+        else:
+            info_text.append("No landmark data available")
+            
+        self.plotter.add_text('\n'.join(info_text), position='upper_left', font_size=12, font_family='courier')
+        
+        # Show the plotter in a non-blocking way that won't kill the app when closed
+        self.plotter.show(title=f"Mesh Viewer - {mesh_id}", auto_close=False)
 
-            tracker.end_stage(ProcessingStage.LANDMARK_IDENTIFICATION, True)
-        except Exception as e:
-            tracker.end_stage(ProcessingStage.LANDMARK_IDENTIFICATION, False, error=e)
-            tracker.complete_processing(False)
-            return tracker
-            
-        # ENTITY FILTERING
-        # Define parameters for entity filtering
-        entity_filter_params = {
-            "radius": R,
-            "height": H,
-        }
-        
-        should_process = tracker.begin_stage(ProcessingStage.ENTITY_FILTERING, entity_filter_params)
-        
-        if should_process or force:
-            try:
-                tunnel_debris = {
-                    "3J7Z": ["a", "7"],
-                    "7A5G": ["Y2"],
-                    "5GAK": ["z"],
-                    "5NWY": ["s"],
-                }
-                
-                if profile.mitochondrial:
-                    try:
-                        chain = ro.get_poly_by_polyclass("mL45")
-                        tunnel_debris[rcsb_id] = [chain.auth_asym_id]    
-                    except Exception as chain_error:
-                        print("Mitochondrial mL45 chain not found:", str(chain_error))
-                
-                residues = ribosome_entities(
-                    rcsb_id,
-                    cifpath,
-                    "R",
-                    tunnel_debris[rcsb_id] if rcsb_id in tunnel_debris else [],
-                )
-                
-                filtered_residues = filter_residues_parallel(
-                    residues, ptc_pt, constriction_pt, R, H
-                )
-                
-                filtered_points = np.array(
-                    [
-                        atom.get_coord()
-                        for residue in filtered_residues
-                        for atom in residue.child_list
-                    ]
-                )
-                
-                # Save filtered points
-                filtered_points_path = artifacts_dir / f"{rcsb_id}_filtered_points.npy"
-                np.save(filtered_points_path, filtered_points)
-                tracker.add_artifact(ProcessingStage.ENTITY_FILTERING, filtered_points_path)
-                
-                # Save visualization if possible
-                try:
-                    viz_path = artifacts_dir / f"{rcsb_id}_filtered_residues.png"
-                    visualize_filtered_residues(
-                        filtered_residues, residues, ptc_pt, constriction_pt, R, H,
-                        output_path=str(viz_path)
-                    )
-                    tracker.add_artifact(ProcessingStage.ENTITY_FILTERING, viz_path)
-                except Exception as viz_error:
-                    print(f"Warning: Could not save visualization: {str(viz_error)}")
-                
-                tracker.end_stage(ProcessingStage.ENTITY_FILTERING, True)
-            
-            except Exception as e:
-                tracker.end_stage(ProcessingStage.ENTITY_FILTERING, False, error=e)
-                tracker.complete_processing(False)
-                return tracker
-            
-        # POINT CLOUD PROCESSING
-        ptcloud_params = {
-            "radius": R,
-            "height": H,
-            "voxel_size": Vsize,
-            "atom_size": ATOM_SIZE,
-        }
-        
-        should_process = tracker.begin_stage(ProcessingStage.POINT_CLOUD_PROCESSING, ptcloud_params)
-        
-        if should_process or force:
-            try:
-                transformed_points = transform_points_to_C0(
-                    filtered_points, ptc_pt, constriction_pt
-                )
-                
-                # Save transformed points
-                transformed_points_path = artifacts_dir / f"{rcsb_id}_transformed_points.npy"
-                np.save(transformed_points_path, transformed_points)
-                tracker.add_artifact(ProcessingStage.POINT_CLOUD_PROCESSING, transformed_points_path)
-                
-                mask, (x, y, z) = create_point_cloud_mask(
-                    transformed_points,
-                    radius=R,
-                    height=H,
-                    voxel_size=Vsize,
-                    radius_around_point=ATOM_SIZE,
-                )
-                
-                points = np.where(~mask)
-                empty_coordinates = np.column_stack((x[points[0]], y[points[1]], z[points[2]]))
-                back_projected = transform_points_from_C0(
-                    empty_coordinates, ptc_pt, constriction_pt
-                )
-                
-                # Save back projected points
-                back_projected_path = artifacts_dir / f"{rcsb_id}_back_projected.npy"
-                np.save(back_projected_path, back_projected)
-                tracker.add_artifact(ProcessingStage.POINT_CLOUD_PROCESSING, back_projected_path)
-                
-                ashape_watertight_mesh = pv.read(ashapepath)
-                select = pv.PolyData(back_projected).select_enclosed_points(ashape_watertight_mesh)
-                mask = select["SelectedPoints"]
-                interior = back_projected[mask == 1]
-                empty_in_world_coords = np.array(interior)
-                
-                # Save point cloud
-                interior_points_path = artifacts_dir / f"{rcsb_id}_interior_points.npy"
-                np.save(interior_points_path, empty_in_world_coords)
-                tracker.add_artifact(ProcessingStage.POINT_CLOUD_PROCESSING, interior_points_path)
-                
-                # Save visualization if possible
-                try:
-                    pc_viz_path = artifacts_dir / f"{rcsb_id}_point_cloud.png"
-                    visualize_pointcloud(empty_in_world_coords, rcsb_id, output_path=str(pc_viz_path))
-                    tracker.add_artifact(ProcessingStage.POINT_CLOUD_PROCESSING, pc_viz_path)
-                except Exception as viz_error:
-                    print(f"Warning: Could not save point cloud visualization: {str(viz_error)}")
-                
-                tracker.end_stage(ProcessingStage.POINT_CLOUD_PROCESSING, True)
-                
-            except Exception as e:
-                tracker.end_stage(ProcessingStage.POINT_CLOUD_PROCESSING, False, error=e)
-                tracker.complete_processing(False)
-                return tracker
-        
-        # CLUSTERING
-        clustering_params = {
-            "epsilon": 5.5,
-            "min_samples": 600,
-        }
-        
-        should_process = tracker.begin_stage(ProcessingStage.CLUSTERING, clustering_params)
-        
-        if should_process or force:
-            try:
-                _u_EPSILON_initial_pass = clustering_params["epsilon"]
-                _u_MIN_SAMPLES_initial_pass = clustering_params["min_samples"]
-                
-                db, clusters_container = DBSCAN_capture(
-                    empty_in_world_coords, _u_EPSILON_initial_pass, _u_MIN_SAMPLES_initial_pass
-                )
-                
-                largest_cluster, largest_cluster_id = DBSCAN_pick_largest_cluster(
-                    clusters_container
-                )
-                
-                # Save largest cluster
-                largest_cluster_path = artifacts_dir / f"{rcsb_id}_largest_cluster.npy"
-                np.save(largest_cluster_path, largest_cluster)
-                tracker.add_artifact(ProcessingStage.CLUSTERING, largest_cluster_path)
-                
-                # Save visualization if possible
-                try:
-                    cluster_viz_path = artifacts_dir / f"{rcsb_id}_clusters.png"
-                    visualize_DBSCAN_CLUSTERS_particular_eps_minnbrs(
-                        clusters_container,
-                        _u_EPSILON_initial_pass,
-                        _u_MIN_SAMPLES_initial_pass,
-                        ptc_pt,
-                        constriction_pt,
-                        largest_cluster,
-                        R,
-                        H,
-                        output_path=str(cluster_viz_path)
-                    )
-                    tracker.add_artifact(ProcessingStage.CLUSTERING, cluster_viz_path)
-                except Exception as viz_error:
-                    print(f"Warning: Could not save cluster visualization: {str(viz_error)}")
-                
-                # Save clusters data
-                try:
-                    # Save each cluster as a separate file
-                    for cluster_id, cluster_points in clusters_container.items():
-                        if cluster_id != -1:  # Skip noise
-                            cluster_path = artifacts_dir / f"{rcsb_id}_cluster_{cluster_id}.npy"
-                            np.save(cluster_path, np.array(cluster_points))
-                            if cluster_id == largest_cluster_id:
-                                tracker.add_artifact(ProcessingStage.CLUSTERING, cluster_path)
-                except Exception as cluster_error:
-                    print(f"Warning: Could not save individual clusters: {str(cluster_error)}")
-                
-                tracker.end_stage(ProcessingStage.CLUSTERING, True)
-                
-            except Exception as e:
-                tracker.end_stage(ProcessingStage.CLUSTERING, False, error=e)
-                tracker.complete_processing(False)
-                return tracker
-        
-        # REFINEMENT
-        refinement_params = {
-            "epsilon": 3.5,
-            "min_samples": 175,
-        }
-        
-        should_process = tracker.begin_stage(ProcessingStage.REFINEMENT, refinement_params)
-        
-        if should_process or force:
-            try:
-                _u_EPSILON_refinement = refinement_params["epsilon"]
-                _u_MIN_SAMPLES_refinement = refinement_params["min_samples"]
-                
-                db_2, refined_clusters_container = DBSCAN_capture(
-                    largest_cluster, _u_EPSILON_refinement, _u_MIN_SAMPLES_refinement
-                )
-                
-                refined_cluster, refined_cluster_id = DBSCAN_pick_largest_cluster(
-                    refined_clusters_container
-                )
-                
-                # Save refined cluster
-                refined_cluster_path = artifacts_dir / f"{rcsb_id}_refined_cluster.npy"
-                np.save(refined_cluster_path, refined_cluster)
-                tracker.add_artifact(ProcessingStage.REFINEMENT, refined_cluster_path)
-                
-                # Save visualization if possible
-                try:
-                    refined_viz_path = artifacts_dir / f"{rcsb_id}_refined_clusters.png"
-                    visualize_DBSCAN_CLUSTERS_particular_eps_minnbrs(
-                        refined_clusters_container,
-                        _u_EPSILON_refinement,
-                        _u_MIN_SAMPLES_refinement,
-                        ptc_pt,
-                        constriction_pt,
-                        refined_cluster,
-                        R,
-                        H,
-                        output_path=str(refined_viz_path)
-                    )
-                    tracker.add_artifact(ProcessingStage.REFINEMENT, refined_viz_path)
-                except Exception as viz_error:
-                    print(f"Warning: Could not save refined cluster visualization: {str(viz_error)}")
-                
-                tracker.end_stage(ProcessingStage.REFINEMENT, True)
-                
-            except Exception as e:
-                tracker.end_stage(ProcessingStage.REFINEMENT, False, error=e)
-                tracker.complete_processing(False)
-                return tracker
-        
-        # SURFACE EXTRACTION
-        surface_params = {
-            "alpha": 2,
-            "tolerance": 1,
-            "offset": 2,
-        }
-        
-        should_process = tracker.begin_stage(ProcessingStage.SURFACE_EXTRACTION, surface_params)
-        
-        if should_process or force:
-            try:
-                d3d_alpha = surface_params["alpha"]
-                d3d_tol = surface_params["tolerance"]
-                d3d_offset = surface_params["offset"]
-                
-                surface_pts = ptcloud_convex_hull_points(
-                    refined_cluster, d3d_alpha, d3d_tol, d3d_offset
-                )
-                
-                # Save surface points
-                surface_pts_path = artifacts_dir / f"{rcsb_id}_surface_points.npy"
-                np.save(surface_pts_path, surface_pts)
-                tracker.add_artifact(ProcessingStage.SURFACE_EXTRACTION, surface_pts_path)
-                
-                # Save visualization if possible
-                try:
-                    surface_viz_path = artifacts_dir / f"{rcsb_id}_surface_points.png"
-                    visualize_pointcloud(surface_pts, rcsb_id, output_path=str(surface_viz_path))
-                    tracker.add_artifact(ProcessingStage.SURFACE_EXTRACTION, surface_viz_path)
-                except Exception as viz_error:
-                    print(f"Warning: Could not save surface point visualization: {str(viz_error)}")
-                
-                tracker.end_stage(ProcessingStage.SURFACE_EXTRACTION, True)
-                
-            except Exception as e:
-                tracker.end_stage(ProcessingStage.SURFACE_EXTRACTION, False, error=e)
-                tracker.complete_processing(False)
-                return tracker
-        
-        # NORMAL ESTIMATION
-        normal_params = {
-            "kdtree_radius": 10,
-            "kdtree_max_nn": 15,
-            "correction_tangent_planes_n": 10,
-        }
-        
-        should_process = tracker.begin_stage(ProcessingStage.NORMAL_ESTIMATION, normal_params)
-        
-        if should_process or force:
-            try:
-                normal_estimated_pcd = estimate_normals(
-                    surface_pts,
-                    kdtree_radius=normal_params["kdtree_radius"],
-                    kdtree_max_nn=normal_params["kdtree_max_nn"],
-                    correction_tangent_planes_n=normal_params["correction_tangent_planes_n"],
-                )
-                
-                # Instead of using a temp file, save in the structure's directory
-                normals_pcd_path = artifacts_dir / f"{rcsb_id}_normal_estimated_pcd.ply"
-                o3d.io.write_point_cloud(str(normals_pcd_path), normal_estimated_pcd)
-                tracker.add_artifact(ProcessingStage.NORMAL_ESTIMATION, normals_pcd_path)
-                
-                tracker.end_stage(ProcessingStage.NORMAL_ESTIMATION, True)
-                
-            except Exception as e:
-                tracker.end_stage(ProcessingStage.NORMAL_ESTIMATION, False, error=e)
-                tracker.complete_processing(False)
-                return tracker
-        
-        # MESH RECONSTRUCTION
-        mesh_params = {
-            "depth": 6,
-            "ptweight": 3,
-        }
-        
-        should_process = tracker.begin_stage(ProcessingStage.MESH_RECONSTRUCTION, mesh_params)
-        
-        if should_process or force:
-            try:
-                PR_depth = mesh_params["depth"]
-                PR_ptweight = mesh_params["ptweight"]
-                
-                apply_poisson_reconstruction(
-                    str(normals_pcd_path),  # Use the normals path from artifacts_dir
-                    meshpath,
-                    recon_depth=PR_depth,
-                    recon_pt_weight=PR_ptweight,
-                )
-                
-                # Add mesh as artifact
-                tracker.add_artifact(ProcessingStage.MESH_RECONSTRUCTION, Path(meshpath))
-                
-                # Also save ASCII version as artifact if it exists
-                ascii_path = Path(str(meshpath).split(".")[0] + "_ascii.ply")
-                if ascii_path.exists():
-                    tracker.add_artifact(ProcessingStage.MESH_RECONSTRUCTION, ascii_path)
-                
-                tracker.end_stage(ProcessingStage.MESH_RECONSTRUCTION, True)
-                
-            except Exception as e:
-                tracker.end_stage(ProcessingStage.MESH_RECONSTRUCTION, False, error=e)
-                tracker.complete_processing(False)
-                return tracker
-        
-        # VALIDATION
-        tracker.begin_stage(ProcessingStage.VALIDATION)
-        try:
-            # Save mesh visualization if possible
-            try:
-                mesh_viz_path = artifacts_dir / f"{rcsb_id}_mesh.png"
-                visualize_mesh(meshpath, rcsb_id, output_path=str(mesh_viz_path))
-                tracker.add_artifact(ProcessingStage.VALIDATION, mesh_viz_path)
-            except Exception as viz_error:
-                print(f"Warning: Could not save mesh visualization: {str(viz_error)}")
-            
-            # Check watertightness
-            watertight = validate_mesh_pyvista(meshpath)
-            
-            if not watertight:
-                error_msg = "Mesh is not watertight"
-                print("XXXX Watertightness check failed, removing", meshpath, " XXXX")
-                os.remove(meshpath)
-                
-                # Also remove ASCII version if it exists
-                ascii_path = str(meshpath).split(".")[0] + "_ascii.ply"
-                if os.path.exists(ascii_path):
-                    os.remove(ascii_path)
-                    
-                raise ValueError(error_msg)
-            
-            tracker.end_stage(ProcessingStage.VALIDATION, True)
-            tracker.complete_processing(True, watertight=True)
-            
-        except Exception as e:
-            tracker.end_stage(ProcessingStage.VALIDATION, False, error=e)
-            tracker.complete_processing(False, watertight=False)
-            return tracker
-        
-        return tracker
-            
-    except Exception as e:
-        # Catch any unhandled exceptions
-        if tracker.current_stage:
-            tracker.end_stage(tracker.current_stage, False, error=e)
-        tracker.complete_processing(False)
-        return tracker
+
+if __name__ == '__main__':
+    try:
+        app = QApplication(sys.argv)
+        viewer = EnhancedMeshViewer()
+        viewer.show()
+        sys.exit(app.exec_())
+    except ModuleNotFoundError as e:
+        if 'pyvistaqt' in str(e):
+            print("Error: Missing pyvistaqt package. Please install it with:")
+            print("pip install pyvistaqt")
+        else:
+            print(f"Error: {e}")
+            print("You might need to install the required packages:")
+            print("pip install pyvista pyvistaqt numpy PyQt5")
