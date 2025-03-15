@@ -18,8 +18,6 @@ from ribctl.lib.npet.kdtree_approach import (
     create_point_cloud_mask,
     estimate_normals,
     filter_residues_parallel,
-    landmark_constriction_site,
-    landmark_ptc,
     ptcloud_convex_hull_points,
     ribosome_entities,
     transform_points_from_C0,
