@@ -5,7 +5,6 @@ from typing import Literal, Optional
 import numpy as np
 import pyvista as pv
 import open3d as o3d
-from ribctl import RIBXZ_TEMP_FILES
 from ribctl.asset_manager.asset_types import AssetType
 from ribctl.lib.landmarks.constriction_site import get_constriction
 from ribctl.lib.landmarks.ptc_via_trna import PTC_location
@@ -23,7 +22,7 @@ from ribctl.lib.npet.kdtree_approach import (
     transform_points_from_C0,
     transform_points_to_C0,
 )
-from ribctl.lib.npet.pipeline.pipeline_status_tracker import NPETProcessingTracker, ProcessingStage
+from ribctl.lib.npet.pipeline_visualization.pipeline_status_tracker import NPETProcessingTracker, ProcessingStage
 from ribctl.lib.npet.tunnel_asset_manager import TunnelMeshAssetsManager
 from ribctl.lib.npet.various_visualization import (
     visualize_DBSCAN_CLUSTERS_particular_eps_minnbrs,
@@ -59,7 +58,6 @@ def create_npet_mesh(rcsb_id: str, log_dir: Optional[Path] = None, force: bool =
         cifpath = AssetType.MMCIF.get_path(rcsb_id)
         ashapepath = AssetType.ALPHA_SHAPE.get_path(rcsb_id)
         meshpath = AssetType.NPET_MESH.get_path(rcsb_id)
-
         ro = RibosomeOps(rcsb_id)
         profile = ro.profile
         
