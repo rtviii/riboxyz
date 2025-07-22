@@ -1,35 +1,191 @@
 from pathlib import Path
-from typing import Dict, Optional, Any
+from typing import Dict, List, Optional, Any
+
+import numpy as np
 
 from ribctl.asset_manager.asset_types import AssetType
+from ribctl.lib.npet.kdtree_approach import (
+    filter_residues_parallel,
+    landmark_constriction_site,
+    landmark_ptc,
+    ribosome_entities,
+)
 from ribctl.lib.npet.pipeline.setup_stage import SetupStage
 from ribctl.lib.npet.pipeline.ptc_identification_stage import PTCIdentificationStage
-from ribctl.lib.npet.pipeline.constriction_identification_stage import ConstrictionIdentificationStage
+from ribctl.lib.npet.pipeline.constriction_identification_stage import (
+    ConstrictionIdentificationStage,
+)
 from ribctl.lib.npet.pipeline.exterior_mesh_stage import AlphaShapeStage
-from ribctl.lib.npet.pipeline.landmark_identification_stage import LandmarkIdentificationStage
+from ribctl.lib.npet.pipeline.landmark_identification_stage import (
+    LandmarkIdentificationStage,
+)
 from ribctl.lib.npet.pipeline.entity_filtering_stage import EntityFilteringStage
-from ribctl.lib.npet.pipeline.point_cloud_processing_stage import PointCloudProcessingStage
-from ribctl.lib.npet.pipeline.clustering_stage import ClusteringStage
+from ribctl.lib.npet.pipeline.point_cloud_processing_stage import (
+    PointCloudProcessingStage,
+)
+from ribctl.lib.npet.pipeline.clustering_stage import ClusteringStage, generate_clusters_pdb
 from ribctl.lib.npet.pipeline.refinement_stage import RefinementStage
 from ribctl.lib.npet.pipeline.surface_extraction_stage import SurfaceExtractionStage
 from ribctl.lib.npet.pipeline.normal_estimation_stage import NormalEstimationStage
 from ribctl.lib.npet.pipeline.mesh_reconstruction_stage import MeshReconstructionStage
 from ribctl.lib.npet.pipeline.validation_stage import ValidationStage
-from ribctl.lib.npet.pipeline_visualization.pipeline_status_tracker import NPETProcessingTracker
+from ribctl.lib.npet.pipeline_visualization.pipeline_status_tracker import (
+    NPETProcessingTracker,
+)
+
+def generate_final_cluster_pdb(
+    refined_cluster: np.ndarray,
+    output_path: str,
+    rcsb_id: str
+) -> str:
+    """
+    Generate a PDB file for the final refined cluster used for mesh generation.
+    
+    Args:
+        refined_cluster: The final cluster points array
+        output_path: Where to write the PDB file
+        rcsb_id: PDB ID for header
+        
+    Returns:
+        str: Path to the generated PDB file
+    """
+    
+    with open(output_path, 'w') as pdb_file:
+        # Write PDB header
+        pdb_file.write(f"HEADER    FINAL TUNNEL CLUSTER                    {rcsb_id}\n")
+        pdb_file.write(f"TITLE     FINAL REFINED CLUSTER FOR {rcsb_id}\n")
+        pdb_file.write("REMARK    Final cluster used for mesh generation\n")
+        
+        atom_num = 1
+        connect_records = []
+        
+        print(f"Writing final cluster with {len(refined_cluster)} points")
+        
+        # Write each point as a CA atom in chain A, residue 1
+        for point_idx, (x, y, z) in enumerate(refined_cluster):
+            pdb_file.write(
+                f"ATOM  {atom_num:5d}  CA  ALA A   1    "
+                f"{x:8.3f}{y:8.3f}{z:8.3f}  1.00 20.00           C  \n"
+            )
+            
+            # Create bonds between consecutive atoms
+            if point_idx > 0:
+                connect_records.append(f"CONECT{atom_num-1:5d}{atom_num:5d}\n")
+            
+            atom_num += 1
+        
+        # Write chain terminator
+        pdb_file.write(f"TER   {atom_num:5d}      ALA A   1\n")
+        
+        # Write all CONECT records
+        for connect in connect_records:
+            pdb_file.write(connect)
+            
+        # Write end record
+        pdb_file.write("END\n")
+    
+    print(f"Generated final cluster PDB: {output_path}")
+    return output_path
+
+def generate_cylinder_residues_json(
+    rcsb_id: str,
+    cif_path: str,
+    ptc_coords: np.ndarray,
+    constriction_coords: np.ndarray,
+    output_path: str,
+    radius: float = 35.0,
+    skip_nascent_chain: List[str] = [],
+) -> dict:
+    """
+    Generate cylinder residues JSON for molstar visualization.
+
+    Args:
+        rcsb_id: PDB ID
+        cif_path: Path to mmCIF file
+        ptc_coords: PTC coordinates from pipeline context
+        constriction_coords: Constriction site coordinates from pipeline context
+        output_path: Where to write the JSON file
+        radius: Cylinder radius in Angstroms
+        skip_nascent_chain: Chain IDs to skip
+
+    Returns:
+        dict: The cylinder residues data structure
+    """
+    import json
+
+    # Define cylinder between PTC and constriction site
+    base_point = ptc_coords
+    axis_point = constriction_coords
+
+    # Calculate height as distance between landmarks plus some buffer
+    height = np.linalg.norm(axis_point - base_point) + 10.0
+
+    print(
+        f"Cylinder: base={base_point}, axis={axis_point}, radius={radius}, height={height}"
+    )
+
+    # Load structure and get residues
+    residues = ribosome_entities(
+        rcsb_id=rcsb_id,
+        cifpath=cif_path,
+        level="R",  # Residue level
+        skip_nascent_chain=skip_nascent_chain,
+    )
+
+    print(f"Loaded {len(residues)} residues from structure")
+
+    # Filter residues that fall within cylinder
+    cylinder_residues = filter_residues_parallel(
+        residues=residues,
+        base_point=base_point,
+        axis_point=axis_point,
+        radius=radius,
+        height=120,
+    )
+
+    print(f"Found {len(cylinder_residues)} residues within cylinder")
+
+    # Group by chain and extract residue numbers
+    cylinder_data = {}
+    for residue in cylinder_residues:
+        chain_id = residue.get_parent().id  # auth_asym_id
+        residue_num = residue.id[1]  # auth_seq_id
+
+        if chain_id not in cylinder_data:
+            cylinder_data[chain_id] = []
+        cylinder_data[chain_id].append(residue_num)
+
+    # Sort residue numbers within each chain
+    for chain_id in cylinder_data:
+        cylinder_data[chain_id].sort()
+
+    print(
+        f"Cylinder residues by chain: {dict((k, len(v)) for k, v in cylinder_data.items())}"
+    )
+
+    # Write to JSON file
+    with open(output_path, "w") as f:
+        json.dump(cylinder_data, f, indent=2)
+
+    print(f"Wrote cylinder residues to {output_path}")
+    return cylinder_data
 
 
-def create_npet_mesh(rcsb_id: str, log_dir: Optional[Path] = None, force: bool = False) -> NPETProcessingTracker:
+
+def create_npet_mesh(
+    rcsb_id: str, log_dir: Optional[Path] = None, force: bool = False
+) -> NPETProcessingTracker:
     """
     Creates NPET mesh for a given RCSB ID with comprehensive tracking and logging.
-    
+
     This function orchestrates the execution of all pipeline stages, handling setup,
     error management, and tracking of the overall process.
-    
+
     Args:
         rcsb_id: The RCSB PDB identifier
         log_dir: Directory to store logs (default: logs)
         force: Whether to force regeneration of existing assets
-        
+
     Returns:
         NPETProcessingTracker: Processing tracker with detailed status information
     """
