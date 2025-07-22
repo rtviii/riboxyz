@@ -133,7 +133,7 @@ def get_shape(request, rcsb_id: str, is_ascii: bool = False, format: MeshFormat 
 @router_loci.get("/cylinder_residues", tags=[TAG_LOCI], include_in_schema=False)
 def cylinder_residues(request):
     try:
-        with open("/home/rtviii/dev/npet-cg-sim/cylinder_residues.json", "rb") as f:
+        with open("/Users/rtviii/dev/RIBETL_DATA/4UG0/artifacts/cylinder_residues.json", "rb") as f:
             map = json.load(f)
         return Response(map)
     except IOError:

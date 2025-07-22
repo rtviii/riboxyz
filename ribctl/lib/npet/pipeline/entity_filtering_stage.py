@@ -64,6 +64,7 @@ class EntityFilteringStage(NPETPipelineStage):
             "5GAK": ["z"],
             "5NWY": ["s"],
             "7A5G": ["Y2"],
+            "9F1D": ["BK"],
         }
         
         # For mitochondrial ribosomes, also exclude mL45 chain

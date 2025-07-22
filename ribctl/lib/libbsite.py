@@ -248,8 +248,6 @@ def bsite_transpose(
     )
     return _
 
-
-
 from typing import Optional
 import os
 
