@@ -18,13 +18,11 @@ import pickle
 
 
 class EnhancedMeshViewer(QWidget):
-    # Configuration variables for default directories
 
     DEFAULT_MESH_DIR = os.path.expanduser("~/dev/riboxyz/wenjun_data_meshes")
     DEFAULT_LANDMARKS_DIR = os.path.expanduser("~/dev/riboxyz/wenjun_data_landmarks")
     DEFAULT_RIBOSOME_PROFILES_DIR = os.path.expanduser("~/dev/riboxyz/wenjun_data_profiles")
-    
-    # Landmark visualization parameters
+
     LANDMARK_RADIUS = 4  # Reduced by half from the original size (assuming original was ~5)
     
     def __init__(self):

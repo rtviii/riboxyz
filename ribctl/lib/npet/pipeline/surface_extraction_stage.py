@@ -4,8 +4,8 @@ from typing import Any, Dict
 
 from ribctl.lib.npet.kdtree_approach import ptcloud_convex_hull_points
 from ribctl.lib.npet.pipeline.base_stage import NPETPipelineStage
-from ribctl.lib.npet.pipeline_visualization.pipeline_status_tracker import NPETProcessingTracker, ProcessingStage
-from ribctl.lib.npet.various_visualization import visualize_pointcloud
+from ribctl.lib.npet.visualization.pipeline_status_tracker import NPETProcessingTracker, ProcessingStage
+from ribctl.lib.npet.visualization.various_visualization import visualize_pointcloud
 
 
 class SurfaceExtractionStage(NPETPipelineStage):

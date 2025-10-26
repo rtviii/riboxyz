@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-from ribctl.lib.npet.pipeline_visualization.pipeline_status_tracker import NPETProcessingTracker, ProcessingStage
+from ribctl.lib.npet.visualization.pipeline_status_tracker import NPETProcessingTracker, ProcessingStage
 
 
 

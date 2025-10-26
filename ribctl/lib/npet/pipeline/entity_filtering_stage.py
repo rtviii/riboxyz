@@ -7,8 +7,8 @@ from ribctl.lib.npet.kdtree_approach import (
     filter_residues_parallel,
 )
 from ribctl.lib.npet.pipeline.base_stage import NPETPipelineStage
-from ribctl.lib.npet.pipeline_visualization.pipeline_status_tracker import NPETProcessingTracker, ProcessingStage
-from ribctl.lib.npet.various_visualization import visualize_filtered_residues
+from ribctl.lib.npet.visualization.pipeline_status_tracker import NPETProcessingTracker, ProcessingStage
+from ribctl.lib.npet.visualization.various_visualization import visualize_filtered_residues
 
 
 class EntityFilteringStage(NPETPipelineStage):

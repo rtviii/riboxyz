@@ -18,13 +18,16 @@ import pyvista as pv
 
 from ribctl import RIBETL_DATA
 from ribctl.asset_manager.asset_types import AssetType
-from ribctl.lib.npet.pipeline_visualization.pipeline_status_tracker import NPETProcessingTracker, ProcessingStage
-from ribctl.lib.npet.various_visualization import (
+from ribctl.lib.npet.visualization.pipeline_status_tracker import (
+    NPETProcessingTracker,
+    ProcessingStage,
+)
+from ribctl.lib.npet.visualization.various_visualization import (
     visualize_mesh,
-    visualize_pointcloud,
     visualize_DBSCAN_CLUSTERS_particular_eps_minnbrs,
 )
-from ribctl.ribosome_ops import RibosomeOps
+
+pv.global_theme.allow_empty_mesh = True
 
 
 def get_structure_dir(rcsb_id: str) -> Path:
@@ -34,18 +37,20 @@ def get_structure_dir(rcsb_id: str) -> Path:
     return Path(os.path.join(RIBETL_DATA, rcsb_id.upper()))
 
 
-def get_stage_artifacts(tracker: NPETProcessingTracker) -> Dict[ProcessingStage, List[Path]]:
+def get_stage_artifacts(
+    tracker: NPETProcessingTracker,
+) -> Dict[ProcessingStage, List[Path]]:
     """Get artifacts for each stage that has completed successfully"""
     result = {}
-    
+
     for stage in ProcessingStage:
         if stage == ProcessingStage.COMPLETE:
             continue
-            
+
         stage_info = tracker.stages[stage]
         if stage_info["status"] == "success" and stage_info.get("artifacts"):
             result[stage] = [Path(p) for p in stage_info.get("artifacts", [])]
-    
+
     return result
 
 
@@ -53,10 +58,10 @@ def display_stage_menu(stage_artifacts: Dict[ProcessingStage, List[Path]]) -> No
     """Display a menu of stages with artifacts"""
     print("\nAvailable stages with artifacts:")
     print("=" * 50)
-    
+
     for i, (stage, artifacts) in enumerate(stage_artifacts.items()):
-        print(f"{i+1}. {stage} ({len(artifacts)} artifacts)")
-    
+        print(f"{i + 1}. {stage} ({len(artifacts)} artifacts)")
+
     print("=" * 50)
 
 
@@ -65,15 +70,15 @@ def get_user_choice(options: List, prompt: str = "Enter your choice") -> Optiona
     while True:
         try:
             choice = input(f"\n{prompt} (or 'q' to quit): ")
-            
-            if choice.lower() in ['q', 'quit', 'exit']:
+
+            if choice.lower() in ["q", "quit", "exit"]:
                 return None
-                
+
             choice_idx = int(choice) - 1
-            
+
             if 0 <= choice_idx < len(options):
                 return choice_idx
-                
+
             print(f"Please enter a number between 1 and {len(options)}")
         except ValueError:
             print("Please enter a valid number")
@@ -84,74 +89,92 @@ def load_landmarks(rcsb_id: str) -> Tuple[Optional[np.ndarray], Optional[np.ndar
     try:
         ptc_path = AssetType.PTC.get_path(rcsb_id)
         constriction_path = AssetType.CONSTRICTION_SITE.get_path(rcsb_id)
-        
+
         ptc_pt = None
         constriction_pt = None
-        
+
         if ptc_path.exists():
-            with open(ptc_path, 'r') as f:
+            with open(ptc_path, "r") as f:
                 ptc_info = json.load(f)
                 ptc_pt = np.array(ptc_info["location"])
-                
+
         if constriction_path.exists():
-            with open(constriction_path, 'r') as f:
+            with open(constriction_path, "r") as f:
                 constriction_site = json.load(f)
                 constriction_pt = np.array(constriction_site["location"])
-                
+
         return ptc_pt, constriction_pt
     except Exception as e:
         print(f"Warning: Could not load landmarks: {e}")
         return None, None
 
 
-def visualize_npy_pointcloud(artifact_path: Path, rcsb_id: str, landmarks: Tuple[Any, Any] = (None, None)) -> None:
+def visualize_npy_pointcloud(
+    artifact_path: Path, rcsb_id: str, landmarks: Tuple[Any, Any] = (None, None)
+) -> None:
     """Visualize a point cloud stored in a .npy file"""
     try:
         ptc_pt, constriction_pt = landmarks
         points = np.load(artifact_path)
-        
+
         # Default cylinder parameters
         radius = 35
         height = 120
-        
+
         # Basic visualization
         plotter = pv.Plotter()
-        plotter.add_points(pv.PolyData(points), color='blue', point_size=5, render_points_as_spheres=True)
-        
+        plotter.add_points(
+            pv.PolyData(points),
+            color="blue",
+            point_size=5,
+            render_points_as_spheres=True,
+        )
+
         # If landmarks are available, show cylinder
         if ptc_pt is not None and constriction_pt is not None:
             # Create cylinder
             direction = constriction_pt - ptc_pt
             direction = direction / np.linalg.norm(direction)
-            center = ptc_pt + (direction * height/2)
-            
+            center = ptc_pt + (direction * height / 2)
+
             cylinder = pv.Cylinder(
-                center=center,
-                direction=direction,
-                radius=radius,
-                height=height
+                center=center, direction=direction, radius=radius, height=height
             )
-            
-            plotter.add_mesh(cylinder, opacity=0.2, color='red', style='wireframe')
-            plotter.add_points(np.array([ptc_pt]), color='red', point_size=15, render_points_as_spheres=True)
-            plotter.add_points(np.array([constriction_pt]), color='green', point_size=15, render_points_as_spheres=True)
-            
+
+            plotter.add_mesh(cylinder, opacity=0.2, color="red", style="wireframe")
+            plotter.add_points(
+                np.array([ptc_pt]),
+                color="red",
+                point_size=15,
+                render_points_as_spheres=True,
+            )
+            plotter.add_points(
+                np.array([constriction_pt]),
+                color="green",
+                point_size=15,
+                render_points_as_spheres=True,
+            )
+
             # Add text with info
             plotter.add_text(
-                f'RCSB ID: {rcsb_id}\nPoints: {points.shape[0]}\nFile: {artifact_path.name}',
-                position='upper_left',
+                f"RCSB ID: {rcsb_id}\nPoints: {points.shape[0]}\nFile: {artifact_path.name}",
+                position="upper_left",
                 font_size=12,
-                shadow=True
+                shadow=True,
             )
-        
+
         plotter.show()
     except Exception as e:
         print(f"Error visualizing point cloud: {e}")
 
 
-def visualize_clustering(artifact_path: Path, rcsb_id: str, 
-                         landmarks: Tuple[Any, Any], artifacts_dir: Path,
-                         is_refined: bool = False) -> None:
+def visualize_clustering(
+    artifact_path: Path,
+    rcsb_id: str,
+    landmarks: Tuple[Any, Any],
+    artifacts_dir: Path,
+    is_refined: bool = False,
+) -> None:
     """Visualize DBSCAN clustering results"""
     try:
         ptc_pt, constriction_pt = landmarks
@@ -159,13 +182,13 @@ def visualize_clustering(artifact_path: Path, rcsb_id: str,
             print("Warning: Landmarks not available. Visualizing basic point cloud.")
             visualize_npy_pointcloud(artifact_path, rcsb_id)
             return
-            
+
         cluster_points = np.load(artifact_path)
-        
+
         # Default parameters
         radius = 35
         height = 120
-        
+
         # Parameters for different stages
         if is_refined:
             epsilon = 3.5
@@ -175,11 +198,11 @@ def visualize_clustering(artifact_path: Path, rcsb_id: str,
             epsilon = 5.5
             min_samples = 600
             cluster_pattern = f"{rcsb_id}_cluster_*.npy"
-        
+
         # Try to load all clusters
         clusters_container = {}
         cluster_id = 0
-        
+
         # First try to load the specific file that matches the pattern for each cluster ID
         for i in range(10):  # Assuming max 10 clusters
             pattern = cluster_pattern.replace("*", str(i))
@@ -187,24 +210,28 @@ def visualize_clustering(artifact_path: Path, rcsb_id: str,
             if cluster_files:
                 clusters_container[i] = np.load(cluster_files[0])
                 cluster_id = i  # Last one will be the largest for refined
-        
+
         # If we couldn't find clusters, use a more general approach
         if not clusters_container:
-            print("Warning: Could not find separate cluster files. Using basic visualization.")
+            print(
+                "Warning: Could not find separate cluster files. Using basic visualization."
+            )
             visualize_npy_pointcloud(artifact_path, rcsb_id, landmarks)
             return
-            
+
         # Make sure we have a valid largest cluster
         if cluster_id not in clusters_container:
-            print("Warning: Could not identify largest cluster. Using basic visualization.")
+            print(
+                "Warning: Could not identify largest cluster. Using basic visualization."
+            )
             visualize_npy_pointcloud(artifact_path, rcsb_id, landmarks)
             return
-            
+
         # Add noise cluster if we can't find it
         if -1 not in clusters_container:
             # Dummy noise cluster (empty)
             clusters_container[-1] = np.zeros((0, 3))
-        
+
         # Use the specialized visualization
         visualize_DBSCAN_CLUSTERS_particular_eps_minnbrs(
             clusters_container,
@@ -214,7 +241,7 @@ def visualize_clustering(artifact_path: Path, rcsb_id: str,
             constriction_pt,
             cluster_points,
             radius,
-            height
+            height,
         )
     except Exception as e:
         print(f"Error visualizing clusters: {e}")
@@ -222,37 +249,51 @@ def visualize_clustering(artifact_path: Path, rcsb_id: str,
         visualize_npy_pointcloud(artifact_path, rcsb_id, landmarks)
 
 
-def visualize_artifact(artifact_path: Path, rcsb_id: str, stage: ProcessingStage, 
-                       artifacts_dir: Path) -> None:
+def visualize_artifact(
+    artifact_path: Path, rcsb_id: str, stage: ProcessingStage, artifacts_dir: Path
+) -> None:
     """Visualize an artifact based on its type and stage"""
     print(f"\nVisualizing: {artifact_path}")
-    
+
     # Load landmarks for stages that need them
     landmarks = load_landmarks(rcsb_id)
-    
+
     # Visualize based on file type and stage
     if artifact_path.suffix == ".ply":
-        if stage in [ProcessingStage.ALPHA_SHAPE, ProcessingStage.MESH_RECONSTRUCTION, 
-                     ProcessingStage.VALIDATION]:
+        if stage in [
+            ProcessingStage.ALPHA_SHAPE,
+            ProcessingStage.MESH_RECONSTRUCTION,
+            ProcessingStage.VALIDATION,
+        ]:
             visualize_mesh(str(artifact_path), rcsb_id)
         else:
             # For normal-estimated point clouds
             print("This is a PLY file that may contain a point cloud with normals.")
             print("Visualizing as a mesh.")
             visualize_mesh(str(artifact_path), rcsb_id)
-    
+
     elif artifact_path.suffix == ".npy":
         # For clustering stages, use specialized visualization
-        if stage == ProcessingStage.CLUSTERING and "largest_cluster" in artifact_path.name:
-            visualize_clustering(artifact_path, rcsb_id, landmarks, artifacts_dir, is_refined=False)
-        
-        elif stage == ProcessingStage.REFINEMENT and "refined_cluster" in artifact_path.name:
-            visualize_clustering(artifact_path, rcsb_id, landmarks, artifacts_dir, is_refined=True)
-        
+        if (
+            stage == ProcessingStage.CLUSTERING
+            and "largest_cluster" in artifact_path.name
+        ):
+            visualize_clustering(
+                artifact_path, rcsb_id, landmarks, artifacts_dir, is_refined=False
+            )
+
+        elif (
+            stage == ProcessingStage.REFINEMENT
+            and "refined_cluster" in artifact_path.name
+        ):
+            visualize_clustering(
+                artifact_path, rcsb_id, landmarks, artifacts_dir, is_refined=True
+            )
+
         # For other point clouds, use basic visualization
         else:
             visualize_npy_pointcloud(artifact_path, rcsb_id, landmarks)
-    
+
     else:
         print(f"Cannot visualize artifact with extension {artifact_path.suffix}")
 
@@ -262,120 +303,140 @@ def main():
     parser = argparse.ArgumentParser(description="Inspect NPET pipeline artifacts")
     parser.add_argument("rcsb_id", help="RCSB ID of the structure to inspect")
     parser.add_argument("--log-dir", help="Directory containing logs", default="logs")
-    
+
     args = parser.parse_args()
     rcsb_id = args.rcsb_id.upper()
-    
+
     try:
         # Check if structure exists
         structure_dir = get_structure_dir(rcsb_id)
         artifacts_dir = structure_dir / "artifacts"
-        
+
         if not structure_dir.exists():
-            print(f"Error: Structure directory for {rcsb_id} not found at {structure_dir}")
+            print(
+                f"Error: Structure directory for {rcsb_id} not found at {structure_dir}"
+            )
             return 1
-            
+
         if not artifacts_dir.exists():
-            print(f"Warning: Artifacts directory for {rcsb_id} not found at {artifacts_dir}")
+            print(
+                f"Warning: Artifacts directory for {rcsb_id} not found at {artifacts_dir}"
+            )
             artifacts_dir = structure_dir  # Fall back to structure directory
-        
+
         # Try to load log
         log_dir = Path(args.log_dir)
         log_file = log_dir / f"{rcsb_id}_processing_log.json"
-        
+
         tracker = None
         stage_artifacts = {}
-        
+
         if log_file.exists():
             tracker = NPETProcessingTracker(rcsb_id, log_dir)
             stage_artifacts = get_stage_artifacts(tracker)
         else:
             print(f"Warning: No processing log found at {log_file}")
             print("Attempting to find artifacts without log...")
-            
+
             # Try to find artifacts without log
             for stage in ProcessingStage:
                 if stage == ProcessingStage.COMPLETE:
                     continue
-                
+
                 # Try to find artifacts for this stage
                 if stage == ProcessingStage.ALPHA_SHAPE:
                     alpha_shape_path = AssetType.ALPHA_SHAPE.get_path(rcsb_id)
                     if alpha_shape_path.exists():
                         stage_artifacts[stage] = [alpha_shape_path]
-                
+
                 elif stage == ProcessingStage.MESH_RECONSTRUCTION:
                     mesh_path = AssetType.NPET_MESH.get_path(rcsb_id)
                     if mesh_path.exists():
                         stage_artifacts[stage] = [mesh_path]
-                
+
                 elif stage == ProcessingStage.PTC_IDENTIFICATION:
                     ptc_path = AssetType.PTC.get_path(rcsb_id)
                     if ptc_path.exists():
                         stage_artifacts[stage] = [ptc_path]
-                
+
                 elif stage == ProcessingStage.CONSTRICTION_IDENTIFICATION:
                     constriction_path = AssetType.CONSTRICTION_SITE.get_path(rcsb_id)
                     if constriction_path.exists():
                         stage_artifacts[stage] = [constriction_path]
-            
+
             # Look for any NPY files in artifacts directory
             npy_files = list(artifacts_dir.glob(f"{rcsb_id}_*.npy"))
             if npy_files:
                 # Try to categorize by filename pattern
                 for npy_file in npy_files:
                     name = npy_file.name
-                    
+
                     if "filtered_points" in name:
-                        stage_artifacts.setdefault(ProcessingStage.ENTITY_FILTERING, []).append(npy_file)
-                    elif "interior_points" in name or "transformed_points" in name or "back_projected" in name:
-                        stage_artifacts.setdefault(ProcessingStage.POINT_CLOUD_PROCESSING, []).append(npy_file)
+                        stage_artifacts.setdefault(
+                            ProcessingStage.ENTITY_FILTERING, []
+                        ).append(npy_file)
+                    elif (
+                        "interior_points" in name
+                        or "transformed_points" in name
+                        or "back_projected" in name
+                    ):
+                        stage_artifacts.setdefault(
+                            ProcessingStage.POINT_CLOUD_PROCESSING, []
+                        ).append(npy_file)
                     elif "largest_cluster" in name:
-                        stage_artifacts.setdefault(ProcessingStage.CLUSTERING, []).append(npy_file)
+                        stage_artifacts.setdefault(
+                            ProcessingStage.CLUSTERING, []
+                        ).append(npy_file)
                     elif "refined_cluster" in name:
-                        stage_artifacts.setdefault(ProcessingStage.REFINEMENT, []).append(npy_file)
+                        stage_artifacts.setdefault(
+                            ProcessingStage.REFINEMENT, []
+                        ).append(npy_file)
                     elif "surface_points" in name:
-                        stage_artifacts.setdefault(ProcessingStage.SURFACE_EXTRACTION, []).append(npy_file)
-        
+                        stage_artifacts.setdefault(
+                            ProcessingStage.SURFACE_EXTRACTION, []
+                        ).append(npy_file)
+
         if not stage_artifacts:
             print(f"No artifacts found for {rcsb_id}")
             return 1
-        
+
         # Display stages menu
         display_stage_menu(stage_artifacts)
-        
+
         # Get user choice
-        stage_choice = get_user_choice(list(stage_artifacts.keys()), "Enter stage number")
-        
+        stage_choice = get_user_choice(
+            list(stage_artifacts.keys()), "Enter stage number"
+        )
+
         if stage_choice is None:
             print("Exiting...")
             return 0
-        
+
         # Display artifacts for chosen stage
         chosen_stage = list(stage_artifacts.keys())[stage_choice]
         artifacts = stage_artifacts[chosen_stage]
-        
+
         print(f"\nArtifacts for stage {chosen_stage}:")
         print("-" * 50)
-        
+
         for i, artifact in enumerate(artifacts):
-            print(f"{i+1}. {artifact.name}")
-        
+            print(f"{i + 1}. {artifact.name}")
+
         print("-" * 50)
-        
+
         # Get user choice of artifact
         artifact_choice = get_user_choice(artifacts, "Enter artifact number")
-        
+
         if artifact_choice is None:
             print("Exiting...")
             return 0
-        
+
         # Visualize chosen artifact
         chosen_artifact = artifacts[artifact_choice]
         visualize_artifact(chosen_artifact, rcsb_id, chosen_stage, artifacts_dir)
-        
+
         return 0
-        
+
     except KeyboardInterrupt:
         print("\nInterrupted by user. Exiting...")
         return 1
