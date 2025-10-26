@@ -94,6 +94,7 @@ class PipelineManager:
 
 # In ribctl/lib/npet/pipeline_manager.py
 
+# In ribctl/lib/npet/pipeline_manager.py
     def run_stage(self, stage_name: str, params: Dict[str, Any]) -> Dict[str, Any]:
         """
         Run a single stage by name.
@@ -101,19 +102,10 @@ class PipelineManager:
         """
         stage_def = self.stage_map[stage_name]
         
-        # 1. Clear old artifacts for this stage
-        # *** FIX: Do NOT delete artifacts for the 'Setup' stage ***
-        if stage_name != "Setup":
-            for path in self.get_stage_artifacts(stage_name).values():
-                if path.exists():
-                    print(f"Clearing old artifact: {path.name}")
-                    os.remove(path)
-        # *** END FIX ***
-                
-        # 2. Ensure dependencies (context) are met
+        # 1. Ensure dependencies (context) are met
         self._load_context_for_stage(stage_def)
         
-        # 3. Run the actual compute method
+        # 2. Run the actual compute method
         method = getattr(self, stage_def.run_method_name)
         stage_params = {**stage_def.default_params, **params}
         

@@ -28,13 +28,8 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import Qt, QThread, pyqtSignal, QTimer
 from PyQt5.QtGui import QFont, QColor, QPalette
 
-# *** NEW IMPORTS ***
-# Import our new decoupled logic
 from pipeline_manager import PipelineManager, StageDefinition
 
-# (Your other imports like visualization, etc. can stay if needed)
-
-# --- StageStatus Enum (Keep as-is) ---
 class StageStatus(Enum):
     PENDING = "pending"
     RUNNING = "running"
@@ -42,10 +37,6 @@ class StageStatus(Enum):
     FAILED = "failed"
     SKIPPED = "skipped" # We can keep this for manual override
 
-# --- PipelineStateManager (Can be removed or kept, we don't use it) ---
-# ... (omitted for brevity, it's not part of the core loop) ...
-
-# *** NEW THREADING CLASS ***
 class StageExecutor(QThread):
     """
     Worker thread for running a pipeline stage.
@@ -228,7 +219,6 @@ class ArtifactViewer(QWidget):
         super().__init__(parent)
         self.current_artifacts: Dict[str, Path] = {}
         self.setup_ui()
-        
 
     def setup_ui(self):
         layout = QVBoxLayout(self)
@@ -288,8 +278,6 @@ class ArtifactViewer(QWidget):
         else:
             self.plotter.clear()
             self.info_text.append("\nNo viewable artifacts found on disk.")
-            
-# In npet_orchestrator.py (inside ArtifactViewer class)
 
     def load_selected_artifact(self, index: int):
         if index < 0:
@@ -337,18 +325,18 @@ class ArtifactViewer(QWidget):
                 info += f"Size: {artifact_path.stat().st_size / (1024*1024):.2f} MB\n\n"
                 info += "Preview not available in this viewer."
                 self.info_text.setPlainText(info)
-                self.plotter.add_text("CIF structure file (see info panel)", position='xy')
+                self.plotter.add_text("CIF structure file (see info panel)", position='upper_left') # <-- FIX
             # *** END FIX 2 ***
 
             elif ext == '.json':
                 with open(artifact_path) as f:
                     data = json.load(f)
                 self.info_text.setPlainText(json.dumps(data, indent=2))
-                self.plotter.add_text("JSON data (see info panel)", position='xy')
+                self.plotter.add_text("JSON data (see info panel)", position='upper_left') # <-- FIX
                 
             else:
                 self.info_text.setPlainText(f"Cannot preview file type: {ext}")
-                self.plotter.add_text(f"Cannot preview {ext}", position='xy')
+                self.plotter.add_text(f"Cannot preview {ext}", position='upper_left') # <-- FIX
 
             self.plotter.reset_camera()
             
@@ -360,7 +348,6 @@ class ArtifactViewer(QWidget):
         # ... (This is the same) ...
         pass
 
-# --- NPETPipelineOrchestrator (Modified) ---
 class NPETPipelineOrchestrator(QMainWindow):
     
     def __init__(self):
@@ -660,7 +647,6 @@ class NPETPipelineOrchestrator(QMainWindow):
                 
             self.context_table.setItem(i, 1, QTableWidgetItem(value_str))
 
-# --- Main execution ---
 def main():
     # CRITICAL: Set this BEFORE importing pyvista or creating QApplication
     # This is a good practice for PyVista/Qt compatibility
