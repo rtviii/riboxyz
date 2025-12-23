@@ -4,7 +4,7 @@ import os
 
 from ribctl.lib.npet.kdtree_approach import apply_poisson_reconstruction
 from ribctl.lib.npet.pipeline.base_stage import NPETPipelineStage
-from ribctl.lib.npet.visualization.pipeline_status_tracker import NPETProcessingTracker, ProcessingStage
+from ribctl.lib.npet.pipeline_status_tracker import NPETProcessingTracker, ProcessingStage
 
 
 class MeshReconstructionStage(NPETPipelineStage):

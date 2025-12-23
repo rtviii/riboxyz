@@ -4,7 +4,7 @@ from typing import Any, Dict
 
 from ribctl.lib.npet.kdtree_approach import estimate_normals
 from ribctl.lib.npet.pipeline.base_stage import NPETPipelineStage
-from ribctl.lib.npet.visualization.pipeline_status_tracker import NPETProcessingTracker, ProcessingStage
+from ribctl.lib.npet.pipeline_status_tracker import NPETProcessingTracker, ProcessingStage
 
 
 class NormalEstimationStage(NPETPipelineStage):

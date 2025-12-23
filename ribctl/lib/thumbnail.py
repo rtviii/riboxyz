@@ -18,13 +18,13 @@ RIBETL_DATA = os.getenv("RIBETL_DATA")
 @dataclass
 class WorkflowConfig:
     """Configuration for the visualization workflow"""
-    chimerax_path: str
-    project_root: Path
-    output_dir: Path
-    fps: int = 30
-    gif_width: int = 720
+    chimerax_path  : str
+    project_root   : Path
+    output_dir     : Path
+    fps            : int = 30
+    gif_width      : int = 720
     gif_crop_factor: float = 0.5
-    gif_colors: int = 256
+    gif_colors     : int = 256
 
 
 class RibosomeVisualizer:

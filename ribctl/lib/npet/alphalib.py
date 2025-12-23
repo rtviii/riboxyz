@@ -7,14 +7,15 @@ from ribctl import RIBXZ_TEMP_FILES
 from ribctl.lib.npet.kdtree_approach import apply_poisson_reconstruction
 
 from Bio.PDB.MMCIFParser import MMCIFParser
-from ribctl.lib.npet.visualization.various_visualization import visualize_mesh, visualize_pointcloud
+from ribctl.lib.npet.various_visualization import visualize_mesh, visualize_pointcloud
 from ribctl.ribosome_ops import RibosomeOps
 
 import numpy as np
 import pyvista as pv
 import open3d as o3d
 
-def cif_to_point_cloud(cif_path: str, chains: list[str] | None = None,  do_atoms:bool=False):
+def cif_to_point_cloud(cif_path: str, chains: list[str] | None = None,  do_atoms:bool=False, exclude_chains: list[str] = []) -> np.ndarray:
+    print("Excluding chains:", exclude_chains)
     parser = MMCIFParser()
     structure = parser.get_structure("structure", cif_path)
     coordinates = []
@@ -22,6 +23,8 @@ def cif_to_point_cloud(cif_path: str, chains: list[str] | None = None,  do_atoms
     first_model = structure[0]
     if do_atoms:
         for chain in first_model:
+            if exclude_chains is not None and chain.id in exclude_chains:
+                continue
             if chains is not None and chain.id not in chains:
                 continue
             for residue in chain:
@@ -29,6 +32,8 @@ def cif_to_point_cloud(cif_path: str, chains: list[str] | None = None,  do_atoms
                     coordinates.append(atom.get_coord())    
     else:
         for chain in first_model:
+            if exclude_chains is not None and chain.id in exclude_chains:
+                continue
             if chains is not None and chain.id not in chains:
                 continue
             for residue in chain:

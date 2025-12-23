@@ -3,7 +3,7 @@ from typing import Any, Dict
 
 from ribctl.asset_manager.asset_types import AssetType
 from ribctl.lib.npet.pipeline.base_stage import NPETPipelineStage
-from ribctl.lib.npet.visualization.pipeline_status_tracker import ProcessingStage
+from ribctl.lib.npet.pipeline_status_tracker import ProcessingStage
 from ribctl.lib.npet.tunnel_asset_manager import TunnelMeshAssetsManager
 from ribctl.ribosome_ops import RibosomeOps
 

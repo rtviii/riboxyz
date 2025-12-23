@@ -12,6 +12,7 @@ from Bio.PDB.MMCIFParser import FastMMCIFParser
 from typing import List, Tuple
 
 from ribctl.lib.schema.types_ribosome import ResidueSummary
+
 data_dir = os.getenv("DATA_DIR")
 sys.dont_write_bytecode = True
 from Bio.PDB.Entity import Entity
@@ -72,9 +73,9 @@ def landmark_ptc(rcsb_id: str) -> np.ndarray:
 
     response = requests.get(url, headers=headers)
     response.raise_for_status()
-
     data = response.json()
     return np.array(data["location"])
+
 
 def DBSCAN_capture(
     ptcloud: np.ndarray,
@@ -82,7 +83,6 @@ def DBSCAN_capture(
     min_samples,
     metric: str = "euclidean",
 ):
-
     u_EPSILON     = eps
     u_MIN_SAMPLES = min_samples
     u_METRIC      = metric
@@ -141,7 +141,11 @@ def apply_poisson_reconstruction(
     recon_pt_weight: int = 3,
 ):
     # The documentation can be found at https://www.cs.jhu.edu/~misha/Code/PoissonRecon/Version16.04/ in "PoissonRecon" binary
-    print( "Rolling Poisson Reconstruction: {} -> {}".format( surf_estimated_ptcloud_path, output_path ) )
+    print(
+        "Rolling Poisson Reconstruction: {} -> {}".format(
+            surf_estimated_ptcloud_path, output_path
+        )
+    )
     command = [
         POISSON_RECON_BIN,
         "--in",
@@ -216,7 +220,6 @@ def create_point_cloud_mask(
     voxel_size: float = 1.0,
     radius_around_point: float = 2.0,
 ):
-
     voxel_centers, (grid_shape, x, y, z) = generate_voxel_centers(
         radius, height, voxel_size
     )
@@ -280,7 +283,6 @@ def transform_points_to_C0(
 def transform_points_from_C0(
     points: np.ndarray, base_point: np.ndarray, axis_point: np.ndarray
 ) -> np.ndarray:
-
     translation, rotation = get_transformation_to_C0(base_point, axis_point)
     points_unrotated = points @ rotation
     points_untranslated = points_unrotated - translation
@@ -402,7 +404,6 @@ def is_point_in_cylinder(
     radius: float,
     height: float,
 ) -> bool:
-
     point = np.asarray(point)
     base_point = np.asarray(base_point)
     axis_point = np.asarray(axis_point)

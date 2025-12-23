@@ -29,7 +29,7 @@ from ribctl.lib.npet.pipeline.surface_extraction_stage import SurfaceExtractionS
 from ribctl.lib.npet.pipeline.normal_estimation_stage import NormalEstimationStage
 from ribctl.lib.npet.pipeline.mesh_reconstruction_stage import MeshReconstructionStage
 from ribctl.lib.npet.pipeline.validation_stage import ValidationStage
-from ribctl.lib.npet.visualization.pipeline_status_tracker import (
+from ribctl.lib.npet.pipeline_status_tracker import (
     NPETProcessingTracker,
 )
 
@@ -169,8 +169,6 @@ def generate_cylinder_residues_json(
 
     print(f"Wrote cylinder residues to {output_path}")
     return cylinder_data
-
-
 
 def create_npet_mesh(
     rcsb_id: str, log_dir: Optional[Path] = None, force: bool = False

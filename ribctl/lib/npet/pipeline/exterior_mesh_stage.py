@@ -9,8 +9,8 @@ from ribctl.asset_manager.asset_types import AssetType
 from ribctl.lib.npet.alphalib import cif_to_point_cloud, fast_normal_estimation, quick_surface_points, validate_mesh_pyvista
 from ribctl.lib.npet.kdtree_approach import apply_poisson_reconstruction
 from ribctl.lib.npet.pipeline.base_stage import NPETPipelineStage
-from ribctl.lib.npet.visualization.pipeline_status_tracker import NPETProcessingTracker, ProcessingStage
-from ribctl.lib.npet.visualization.various_visualization import visualize_pointcloud, visualize_mesh
+from ribctl.lib.npet.pipeline_status_tracker import NPETProcessingTracker, ProcessingStage
+from ribctl.lib.npet.various_visualization import visualize_pointcloud, visualize_mesh
 
 
 class AlphaShapeStage(NPETPipelineStage):
