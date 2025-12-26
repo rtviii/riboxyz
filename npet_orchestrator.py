@@ -55,7 +55,7 @@ class StageStatus(Enum):
     PENDING = "pending"
     RUNNING = "running"
     SUCCESS = "success"
-    FAILED = "failed"
+    FAILED  = "failed"
     SKIPPED = "skipped"
 
 
