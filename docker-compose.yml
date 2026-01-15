@@ -24,13 +24,12 @@ services:
       - 7474:7474
       - 7687:7687
 
-    volumes:
-
       # sudo chown -R 7474:7474 /opt/ribxz_neo4j_volume && sudo chown -R 755 /opt/ribxz_neo4j_volume
-      - ${NEO4J_MOUNTPATH}/plugins:/var/lib/neo4j/plugins  #<-- don't forget to move apoc.jar to this folder
-      - ${NEO4J_MOUNTPATH}/data:/var/lib/neo4j/data
-      - ${NEO4J_MOUNTPATH}/conf:/var/lib/neo4j/conf
-      - ${NEO4J_MOUNTPATH}/logs:/var/lib/neo4j/logs
+    volumes:
+      - ${NEO4J_MOUNTPATH}/plugins:/var/lib/neo4j/plugins:Z
+      - ${NEO4J_MOUNTPATH}/data:/var/lib/neo4j/data:Z
+      - ${NEO4J_MOUNTPATH}/conf:/var/lib/neo4j/conf:Z
+      - ${NEO4J_MOUNTPATH}/logs:/var/lib/neo4j/logs:Z
 
       # ! In theory this is not necessary since the API's adapter performs ETL now.
       # ! If manual imports are necessary -- uncomment this.
@@ -53,6 +52,8 @@ services:
       - type: bind
         source: ${RIBETL_DATA:?err}
         target: /home/RIBETL_DATA
+        bind:
+          selinux: Z
 
       # !FOR LIVE DEVELOPMENT -----------------------|
       # - What this does is it mounts the local version of the ribxz_api folder to the container's /home/ribxz_api
