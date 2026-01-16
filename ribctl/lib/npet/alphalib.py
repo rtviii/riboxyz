@@ -14,7 +14,8 @@ import numpy as np
 import pyvista as pv
 import open3d as o3d
 
-def cif_to_point_cloud(cif_path: str, chains: list[str] | None = None,  do_atoms:bool=False):
+def cif_to_point_cloud(cif_path: str, chains: list[str] | None = None,  do_atoms:bool=False, exclude_chains: list[str] = []) -> np.ndarray:
+    print("Excluding chains:", exclude_chains)
     parser = MMCIFParser()
     structure = parser.get_structure("structure", cif_path)
     coordinates = []
@@ -22,6 +23,8 @@ def cif_to_point_cloud(cif_path: str, chains: list[str] | None = None,  do_atoms
     first_model = structure[0]
     if do_atoms:
         for chain in first_model:
+            if exclude_chains is not None and chain.id in exclude_chains:
+                continue
             if chains is not None and chain.id not in chains:
                 continue
             for residue in chain:
@@ -29,6 +32,8 @@ def cif_to_point_cloud(cif_path: str, chains: list[str] | None = None,  do_atoms
                     coordinates.append(atom.get_coord())    
     else:
         for chain in first_model:
+            if exclude_chains is not None and chain.id in exclude_chains:
+                continue
             if chains is not None and chain.id not in chains:
                 continue
             for residue in chain:
@@ -185,117 +190,3 @@ def alpha_contour_via_poisson_recon(rcsb_id:str, verbose:bool=False):
     if not watertight:
         print("XXXX Watertightness check failed, removing", output_mesh , " XXXX")
         os.remove(output_mesh)
-
-
-
-# import torch
-# import kaolin
-# from kaolin.ops.mesh import check_sign
-# import numpy as np
-# import pyvista as pv
-# import kaolin.ops.conversions as cvt
-
-# def compute_point_distances(query_points: torch.Tensor, reference_points: torch.Tensor) -> torch.Tensor:
-#     """
-#     Compute distances from query points to nearest reference points using GPU
-#     """
-#     # Compute pairwise distances
-#     query_points = query_points.unsqueeze(1)      # Shape: (N, 1, 3)
-#     reference_points = reference_points.unsqueeze(0)  # Shape: (1, M, 3)
-    
-#     # Efficient distance computation
-#     distances = torch.sqrt(((query_points - reference_points) ** 2).sum(-1))
-#     min_distances, _ = torch.min(distances, dim=1)
-    
-#     return min_distances
-
-# def generate_watertight_mesh(
-#     points: np.ndarray,
-#     resolution: int = 64,
-#     iso_value: float = 0.5,
-#     hole_size: float = 100  # Maximum hole size to fill
-# ) -> pv.PolyData:
-#     """
-#     Generate a watertight mesh using Kaolin's GPU implementation
-    
-#     Args:
-#         points: Point cloud coordinates
-#         resolution: Voxel grid resolution
-#         iso_value: Surface threshold value
-#         hole_size: Maximum hole size to fill
-#     """
-#     device = torch.device('cuda')
-#     points_torch = torch.from_numpy(points).float().to(device)
-    
-#     # First convert points to voxel grid using Kaolin
-#     voxels = cvt.pointclouds_to_voxelgrids(
-#         points_torch.unsqueeze(0),  # Add batch dimension
-#         resolution=resolution
-#     )
-    
-#     # Convert voxels to mesh using Kaolin's marching cubes
-#     vertices_list, faces_list = cvt.voxelgrids_to_trianglemeshes(
-#         voxels,
-#         iso_value=iso_value
-#     )
-    
-#     # Get first (and only) mesh from batch
-#     vertices = vertices_list[0].cpu().numpy()
-#     faces = faces_list[0].cpu().numpy()
-    
-#     # Create PyVista mesh
-#     mesh = pv.make_tri_mesh(vertices, faces)
-#     # Clean and ensure watertightness
-#     mesh = mesh.clean(tolerance=1e-6)
-#     mesh = mesh.fill_holes(hole_size)  # Specify maximum hole size
-#     mesh = mesh.triangulate()
-#     mesh = mesh.clean()
-    
-#     return mesh
-
-
-# def gpu_accelerated_watertight_mesh(rcsb_id: str, verbose: bool = False):
-#     ptcloudpath = os.path.join(RIBXZ_TEMP_FILES, f'{rcsb_id}_ptcloud.npx')
-#     rops = RibosomeOps(rcsb_id)
-#     cifpath = rops.assets.paths.cif
-    
-#     if not os.path.exists(ptcloudpath):
-#         first_assembly_chains = rops.first_assembly_auth_asym_ids()
-#         ptcloud = cif_to_point_cloud(cifpath, first_assembly_chains, do_atoms=True)
-#         np.save(ptcloudpath, ptcloud)
-#         print("Generated and saved point cloud:", ptcloudpath)
-#     else:
-#         ptcloud = np.load(ptcloudpath)
-    
-#     output_mesh = AssetType.ALPHA_SHAPE.get_path(rcsb_id)
-    
-#     try:
-#         mesh = generate_watertight_mesh(
-#             ptcloud,
-#             resolution = 32,
-#             iso_value  = 0.75,
-#             hole_size  = 5
-#         )
-        
-#         # Save mesh
-#         mesh.save(output_mesh)
-        
-#         # Validate
-#         watertight = validate_mesh_pyvista(mesh)
-#         if verbose:
-#             visualize_mesh(output_mesh, rcsb_id)
-        
-#         if not watertight:
-#             print("XXXX Watertightness check failed, removing", output_mesh, " XXXX")
-#             os.remove(output_mesh)
-#             return None
-        
-#         visualize_mesh(output_mesh, rcsb_id)
-#         return mesh
-        
-#     except Exception as e:
-#         print(f"Failed to generate mesh: {str(e)}")
-#         if os.path.exists(output_mesh):
-#             os.remove(output_mesh)
-#         return None
-    

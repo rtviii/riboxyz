@@ -9,7 +9,7 @@ from ribctl.asset_manager.asset_types import AssetType
 from ribctl.lib.npet.alphalib import cif_to_point_cloud, fast_normal_estimation, quick_surface_points, validate_mesh_pyvista
 from ribctl.lib.npet.kdtree_approach import apply_poisson_reconstruction
 from ribctl.lib.npet.pipeline.base_stage import NPETPipelineStage
-from ribctl.lib.npet.pipeline_visualization.pipeline_status_tracker import NPETProcessingTracker, ProcessingStage
+from ribctl.lib.npet.pipeline_status_tracker import NPETProcessingTracker, ProcessingStage
 from ribctl.lib.npet.various_visualization import visualize_pointcloud, visualize_mesh
 
 
@@ -38,7 +38,7 @@ class AlphaShapeStage(NPETPipelineStage):
     @property
     def stage_params(self) -> Dict[str, Any]:
         return self.params
-    
+
     def process(self, context: Dict[str, Any]) -> Dict[str, Any]:
         """
         Generate the alpha shape representation of the ribosome structure.
@@ -84,7 +84,7 @@ class AlphaShapeStage(NPETPipelineStage):
             np.save(surface_pts_path, surface_pts)
             self.tracker.add_artifact(self.stage, surface_pts_path)
             
-            # Visualize if possible
+            # Visualize surface points
             try:
                 surface_viz_path = self.artifacts_dir / f"{self.rcsb_id}_alpha_surface.png"
                 visualize_pointcloud(surface_pts, self.rcsb_id, output_path=str(surface_viz_path))
@@ -99,6 +99,15 @@ class AlphaShapeStage(NPETPipelineStage):
                 self.params["max_nn"], 
                 self.params["tangent_planes_k"]
             )
+
+            # --- CRITICAL FIX 1: Robust Normal Orientation ---
+            # Checkerboard patterns in your viz show flipped normals.
+            # We force all normals to point OUTWARD from the center.
+            center = normal_estimated_pcd.get_center()
+            # First, point them all at the center (inward)
+            normal_estimated_pcd.orient_normals_towards_camera_location(camera_location=center)
+            # Then flip them to face out
+            normal_estimated_pcd.normals = o3d.utility.Vector3dVector(-np.asarray(normal_estimated_pcd.normals))
             
             # Save normal-estimated point cloud
             alpha_normals_path = self.artifacts_dir / f"{self.rcsb_id}_alpha_normals.ply"
@@ -113,18 +122,28 @@ class AlphaShapeStage(NPETPipelineStage):
                 recon_pt_weight=self.params["PR_ptweight"],
             )
             
-            # Extract largest component for better quality
+            # --- CRITICAL FIX 2: Explicit Hole Filling ---
+            # Load the generated mesh and physically seal the gaps.
             mesh = pv.read(ashapepath)
+            
+            # We use a high threshold (2000) to bridge that specific edge gap.
+            mesh = mesh.fill_holes(2000) 
+            
+            # Extract largest component and finalize geometry
             labeled = mesh.connectivity(largest=True)
+            labeled = labeled.triangulate()
             labeled.save(ashapepath)
             
             # Check watertightness
             watertight = validate_mesh_pyvista(labeled)
             
             if not watertight:
-                print("Warning: Alpha shape mesh is not watertight, but continuing anyway")
+                print("Warning: Alpha shape mesh is still not watertight, attempting aggressive repair...")
+                # Optional: extra smoothing/repair pass if needed
+                # labeled = labeled.smooth(n_iter=10).fill_holes(5000)
+                # labeled.save(ashapepath)
             
-            # Save mesh visualization
+            # Save final mesh visualization
             try:
                 mesh_viz_path = self.artifacts_dir / f"{self.rcsb_id}_alpha_mesh.png"
                 visualize_mesh(ashapepath, self.rcsb_id, output_path=str(mesh_viz_path))

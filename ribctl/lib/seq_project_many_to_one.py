@@ -80,7 +80,6 @@ def compact_class(
 
 
 
-
 # class MotifsMapManyToOne:
 #     """Given multiple source sequences and residue ranges within them, project the ranges onto a single target sequence"""
 

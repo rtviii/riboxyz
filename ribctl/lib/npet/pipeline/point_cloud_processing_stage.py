@@ -9,7 +9,7 @@ from ribctl.lib.npet.kdtree_approach import (
     transform_points_from_C0,
 )
 from ribctl.lib.npet.pipeline.base_stage import NPETPipelineStage
-from ribctl.lib.npet.pipeline_visualization.pipeline_status_tracker import (
+from ribctl.lib.npet.pipeline_status_tracker import (
     NPETProcessingTracker,
     ProcessingStage,
 )
