@@ -64,3 +64,10 @@ volume/*
 *.gpg.key
 
 neotechnology.gpg.key
+
+**/muscle3.8.31/**
+**/muscle3.8.31/**
+
+**/*.npy
+*/*.npy
+**/artifacts/*.png
