@@ -67,3 +67,6 @@ neotechnology.gpg.key
 
 RIBETL_DATA
 
+**/*.npy
+*/*.npy
+**/artifacts/*.png

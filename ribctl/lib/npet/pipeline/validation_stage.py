@@ -1,10 +1,9 @@
 import os
 from pathlib import Path
 from typing import Any, Dict
-
 from ribctl.lib.npet.alphalib import validate_mesh_pyvista
 from ribctl.lib.npet.pipeline.base_stage import NPETPipelineStage
-from ribctl.lib.npet.pipeline_visualization.pipeline_status_tracker import ProcessingStage
+from ribctl.lib.npet.pipeline_status_tracker import ProcessingStage
 from ribctl.lib.npet.various_visualization import visualize_mesh
 
 

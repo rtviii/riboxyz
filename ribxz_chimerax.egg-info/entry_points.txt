@@ -1,2 +1,0 @@
-[chimerax.bundle]
-ribxz_chimerax = ribxz_chimerax:bundle_api

@@ -1,15 +1,11 @@
-from typing import List, NewType, Tuple, TypeVar
 import typing
 from ribctl.global_ops import GlobalOps
 from ribctl.lib.schema.types_ribosome import PTCInfo
 from ribctl.ribosome_ops import RibosomeOps
 import pickle
 from Bio.PDB.Residue import Residue
-import typing
-from Bio.PDB.Residue import Residue
 from Bio.PDB.Chain import Chain
 import numpy as np
-from ribctl.ribosome_ops import RibosomeOps
 from Bio.PDB.NeighborSearch import NeighborSearch
 from Bio.PDB import Selection
 from ribctl.lib.libbsite import map_motifs

@@ -21,27 +21,27 @@ from typing import Optional, List, Literal, Tuple, Union
 
 class StructureFilterParams(BaseModel):
 
-    cursor: Optional[str] = None
-    limit: int = Field(default=20, ge=1, le=100)
-    year: Optional[tuple[Optional[int], Optional[int]]] = None
-    search: Optional[str] = None
-    resolution: Optional[tuple[Optional[float], Optional[float]]] = None
-    polymer_classes: Optional[List[PolynucleotideClass | PolypeptideClass]] = None
-    source_taxa: Optional[List[int]] = None
-    host_taxa: Optional[List[int]] = None
-    subunit_presence: Optional[Literal["SSU+LSU", "LSU", "SSU"]] = None
+    cursor          : Optional[str]                                          = None
+    limit           : int                                                    = Field(default=20, ge=1, le=100)
+    year            : Optional[tuple[Optional[int], Optional[int]]]          = None
+    search          : Optional[str]                                          = None
+    resolution      : Optional[tuple[Optional[float], Optional[float]]]      = None
+    polymer_classes : Optional[List[PolynucleotideClass | PolypeptideClass]] = None
+    source_taxa     : Optional[List[int]]                                    = None
+    host_taxa       : Optional[List[int]]                                    = None
+    subunit_presence: Optional[Literal["SSU+LSU", "LSU", "SSU"]]             = None
 
 class PolymersFilterParams(BaseModel):
 
-    cursor          : Optional[ Union[Tuple[Optional[str], Optional[str]], List[Optional[str]], str] ] = None
-    limit           : int                                                                              = Field(default=20, ge=1, le=100)
-    year            : Optional[Tuple[Optional[int], Optional[int]]]                                    = None
-    search          : Optional[str]                                                                    = None
-    resolution      : Optional[Tuple[Optional[float], Optional[float]]]                                = None
-    polymer_classes : Optional[List[Union[PolynucleotideClass, PolypeptideClass]]]                     = None
-    source_taxa     : Optional[List[int]]                                                              = None
-    host_taxa       : Optional[List[int]]                                                              = None
-    subunit_presence: Optional[Literal["SSU+LSU", "LSU", "SSU"]]                                       = None
+    cursor           : Optional[ Union[Tuple[Optional[str], Optional[str]], List[Optional[str]], str] ] = None
+    limit            : int                                                                              = Field(default=20, ge=1, le=100)
+    year             : Optional[Tuple[Optional[int], Optional[int]]]                                    = None
+    search           : Optional[str]                                                                    = None
+    resolution       : Optional[Tuple[Optional[float], Optional[float]]]                                = None
+    polymer_classes  : Optional[List[Union[PolynucleotideClass, PolypeptideClass]]]                     = None
+    source_taxa      : Optional[List[int]]                                                              = None
+    host_taxa        : Optional[List[int]]                                                              = None
+    subunit_presence: Optional[Literal["SSU+LSU", "LSU", "SSU"]]                                        = None
 
     current_polymer_class: Optional[Union[PolynucleotideClass, PolypeptideClass]] = None
     uniprot_id           : Optional[str]                                          = None

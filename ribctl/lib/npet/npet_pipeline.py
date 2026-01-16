@@ -23,13 +23,13 @@ from ribctl.lib.npet.pipeline.entity_filtering_stage import EntityFilteringStage
 from ribctl.lib.npet.pipeline.point_cloud_processing_stage import (
     PointCloudProcessingStage,
 )
-from ribctl.lib.npet.pipeline.clustering_stage import ClusteringStage, generate_clusters_pdb
+from ribctl.lib.npet.pipeline.clustering_stage import ClusteringStage
 from ribctl.lib.npet.pipeline.refinement_stage import RefinementStage
 from ribctl.lib.npet.pipeline.surface_extraction_stage import SurfaceExtractionStage
 from ribctl.lib.npet.pipeline.normal_estimation_stage import NormalEstimationStage
 from ribctl.lib.npet.pipeline.mesh_reconstruction_stage import MeshReconstructionStage
 from ribctl.lib.npet.pipeline.validation_stage import ValidationStage
-from ribctl.lib.npet.pipeline_visualization.pipeline_status_tracker import (
+from ribctl.lib.npet.pipeline_status_tracker import (
     NPETProcessingTracker,
 )
 
@@ -170,8 +170,6 @@ def generate_cylinder_residues_json(
     print(f"Wrote cylinder residues to {output_path}")
     return cylinder_data
 
-
-
 def create_npet_mesh(
     rcsb_id: str, log_dir: Optional[Path] = None, force: bool = False
 ) -> NPETProcessingTracker:
@@ -206,7 +204,6 @@ def create_npet_mesh(
             "d3d_alpha": 200,
             "d3d_tol": 10,
             "d3d_offset": 3,
-
             "kdtree_radius": 40,
             "max_nn": 60,
             "tangent_planes_k": 20,
