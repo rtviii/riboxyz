@@ -1227,5 +1227,23 @@ def delete_instance(ctx, name, force):
         click.echo(f"Failed to delete database instance: {str(e)}", err=True)
 
 
+@etl.command()
+def bootstrap():
+    """Seed the local NCBI taxonomy database and other necessary binary resources."""
+    from ribctl.lib.libtax import get_ncbi
+    click.echo("Checking NCBI taxonomy database...")
+    try:
+        ncbi = get_ncbi()
+        # This force-checks if the DB is actually queryable
+        ncbi.get_taxid_translator([9606])
+        click.echo("✓ NCBI taxonomy database is ready.")
+    except Exception as e:
+        click.echo("NCBI database missing or corrupt. Initializing...")
+        from ete3 import NCBITaxa
+        ncbi = NCBITaxa(dbfile=os.environ.get("NCBI_TAXA_SQLITE"))
+        ncbi.update_taxonomy_database()
+        click.echo("✓ NCBI taxonomy database initialized.")
+
 if __name__ == "__main__":
     cli(obj={})
+
