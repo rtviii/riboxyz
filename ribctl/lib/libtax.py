@@ -4,38 +4,41 @@ import typing
 from Bio.SeqRecord import SeqRecord
 import subprocess
 from pydantic import BaseModel
-from ribctl import MUSCLE_BIN, NCBI_TAXA_SQLITE
-import os
+from loguru import logger # <--- ADD THIS
 from ete3 import NCBITaxa
-
+from ribctl import NCBI_TAXA_SQLITE # Ensure this matches your .env path
+import os
 import threading
 
-def ensure_taxid_db_exists():
-    """
-    Ensures the NCBI taxonomy database is present and initialized.
-    Call this from the main process before starting multiprocess pools.
-    """
-    from ribctl import NCBI_TAXA_SQLITE
-    from ete3 import NCBITaxa
-    import os
-
-    if not os.path.exists(NCBI_TAXA_SQLITE):
-        logger.info("NCBI taxonomy database not found. Initializing (this may take a few minutes)...")
-        # Ensure the directory exists
-        os.makedirs(os.path.dirname(NCBI_TAXA_SQLITE), exist_ok=True)
-        ncbi = NCBITaxa(dbfile=NCBI_TAXA_SQLITE)
-        # Force a small query or update to ensure the DB is fully built
-        ncbi.update_taxonomy_database()
-        logger.info("NCBI taxonomy database initialized successfully.")
-    else:
-        logger.debug(f"NCBI taxonomy database found at {NCBI_TAXA_SQLITE}")
-
-
 _thread_local = threading.local()
+
+def ensure_taxid_db_exists():
+    """Ensures the NCBI taxonomy database is present and initialized."""
+    # We use the variable imported from ribctl which should come from your .env
+    db_path = NCBI_TAXA_SQLITE
+    
+    if not os.path.exists(db_path):
+        logger.info(f"NCBI taxonomy database not found at {db_path}. Initializing...")
+        # Ensure the parent directory exists
+        os.makedirs(os.path.dirname(db_path), exist_ok=True)
+        try:
+            ncbi = NCBITaxa(dbfile=db_path)
+            ncbi.update_taxonomy_database()
+            logger.info("NCBI taxonomy database initialized successfully.")
+        except Exception as e:
+            logger.error(f"Failed to initialize NCBI taxonomy database: {e}")
+            raise e
+    else:
+        logger.debug(f"NCBI taxonomy database found at {db_path}")
+
+
 
 def get_ncbi():
     """Get a thread-local NCBITaxa instance"""
     if not hasattr(_thread_local, 'ncbi'):
+        # Just to be safe, check if the file exists before opening
+        if not os.path.exists(NCBI_TAXA_SQLITE):
+             ensure_taxid_db_exists()
         _thread_local.ncbi = NCBITaxa(dbfile=NCBI_TAXA_SQLITE)
     return _thread_local.ncbi
 
