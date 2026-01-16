@@ -2,6 +2,7 @@ import os
 from pprint import pprint
 import sys
 from loguru import logger
+from ribctl.lib.libtax import ensure_taxid_db_exists
 
 sys.dont_write_bytecode = True
 sys.path.append("/home/rtviii/dev/riboxyz")
@@ -79,13 +80,13 @@ def cli(ctx):
     ctx.ensure_object(dict)
     ctx.obj["piped_pdb_ids"] = get_input_pdb_ids()
 
-
 @cli.group()
 @click.pass_context
 def etl(ctx):
     """ETL operations for ribosome data"""
+    # Run the check here so every ETL command is safe
+    ensure_taxid_db_exists()
     pass
-
 
 @etl.command()
 @click.pass_context
@@ -568,6 +569,7 @@ def sync_all(
     from time import sleep
     import random
 
+    ensure_taxid_db_exists()
     def process_with_retry(operation, max_retries):
         """Execute operation with retries and exponential backoff"""
         for attempt in range(max_retries):

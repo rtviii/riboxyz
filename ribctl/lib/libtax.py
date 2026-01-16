@@ -10,6 +10,25 @@ from ete3 import NCBITaxa
 
 import threading
 
+def ensure_taxid_db_exists():
+    """
+    Ensures the NCBI taxonomy database is present and initialized.
+    Call this from the main process before starting multiprocess pools.
+    """
+    from ribctl import NCBI_TAXA_SQLITE
+    from ete3 import NCBITaxa
+    import os
+
+    if not os.path.exists(NCBI_TAXA_SQLITE):
+        logger.info("NCBI taxonomy database not found. Initializing (this may take a few minutes)...")
+        # Ensure the directory exists
+        os.makedirs(os.path.dirname(NCBI_TAXA_SQLITE), exist_ok=True)
+        ncbi = NCBITaxa(dbfile=NCBI_TAXA_SQLITE)
+        # Force a small query or update to ensure the DB is fully built
+        ncbi.update_taxonomy_database()
+        logger.info("NCBI taxonomy database initialized successfully.")
+    else:
+        logger.debug(f"NCBI taxonomy database found at {NCBI_TAXA_SQLITE}")
 
 
 _thread_local = threading.local()
