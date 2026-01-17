@@ -70,3 +70,14 @@ RIBETL_DATA
 **/*.npy
 */*.npy
 **/artifacts/*.png
+
+
+
+# Ignore the HMM cache directory and its contents
+**/cache_hmm/
+
+# Ignore any files or directories starting with ncbi_taxonomy (e.g., .sqlite, .pkl)
+**/ncbi_taxonomy*
+
+# Ignore the muscle binary/folder
+**/muscle3.8.1
