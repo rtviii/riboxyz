@@ -2,10 +2,16 @@ import os
 import pathlib
 from typing import Literal
 
-RIBETL_DATA     = pathlib.Path(os.environ.get("RIBETL_DATA"))
-if not os.path.exists(RIBETL_DATA):
-    raise NotADirectoryError("RIBETL_DATA directory does not exist. Most things won't work.")
+def get_env_var(name: str) -> str:
+    value = os.environ.get(name)
+    if not value:
+        raise KeyError(f"CRITICAL: Environment variable '{name}' is not set in .env.")
+    return value
 
+# Mandatory Directory Checks
+RIBETL_DATA = pathlib.Path(get_env_var("RIBETL_DATA"))
+if not RIBETL_DATA.exists():
+    raise NotADirectoryError(f"RIBETL_DATA path does not exist: {RIBETL_DATA}")
 #! ------------- logs ----------------
 CLASSIFICATION_REPORTS = os.path.join(pathlib.Path(__file__).parent, "logs","hmm_classification_reports")
 
@@ -17,17 +23,14 @@ MUSCLE_BIN         = os.path.join(ASSETS_PATH, "muscle3.8.1")
 NCBI_TAXDUMP_GZ    = os.path.join(ASSETS_PATH, "taxdump.tar.gz")
 NCBI_TAXA_SQLITE = os.environ.get("NCBI_TAXA_SQLITE")
 
-if not NCBI_TAXA_SQLITE:
-    # Fallback default if NOT provided in .env
-    NCBI_TAXA_SQLITE = os.path.join(ASSETS_PATH, "taxa.sqlite")
 
-# 2. Check if the file actually exists on disk
+# Mandatory File Checks (No more fallbacks to ASSETS_PATH)
+NCBI_TAXA_SQLITE = get_env_var("NCBI_TAXA_SQLITE")
 if not os.path.exists(NCBI_TAXA_SQLITE):
-    import warnings
-    warnings.warn(f"""
-        NCBI taxonomy sqlite file not found at {NCBI_TAXA_SQLITE}. 
-        The dump will be downloaded automatically by ete3.
-    """)
+    raise FileNotFoundError(f"NCBI_TAXA_SQLITE file not found at: {NCBI_TAXA_SQLITE}")
+
+# Assets (If these are required for production, treat them the same)
+ASSETS_PATH = get_env_var("ASSETS_PATH")
 CHAINSPLITTER_PATH = os.path.join(pathlib.Path(__file__).parent.parent, "chimerax", "chainsplitter.py")
 
 #! -------------- locations

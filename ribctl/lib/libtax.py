@@ -31,14 +31,11 @@ def ensure_taxid_db_exists():
     else:
         logger.debug(f"NCBI taxonomy database found at {db_path}")
 
-
-
 def get_ncbi():
-    """Get a thread-local NCBITaxa instance"""
+    """Get a thread-local NCBITaxa instance. 
+    Assumes file existence is already verified by ribctl.__init__"""
     if not hasattr(_thread_local, 'ncbi'):
-        # Just to be safe, check if the file exists before opening
-        if not os.path.exists(NCBI_TAXA_SQLITE):
-             ensure_taxid_db_exists()
+        # We disable auto-updates to prevent SQLite 'database is locked' errors
         _thread_local.ncbi = NCBITaxa(dbfile=NCBI_TAXA_SQLITE)
     return _thread_local.ncbi
 
