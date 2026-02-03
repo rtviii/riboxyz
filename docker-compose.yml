@@ -3,6 +3,7 @@ services:
     hostname: neo
     container_name: neo
     image: neo4j:5.19.0-enterprise
+    user: "${UID}:${GID}" # Forces Neo4j to run as the VM/localhost user
     restart: always
 
     # ! If you activate the .env ingestion, make sure it doesnt contain NEO4J_* form vars.
