@@ -60,9 +60,9 @@ asset_type  = Literal[
     "cache_hmm",
 ]
 
-if os.environ.get("RIBETL_DATA") == "" or not os.path.exists(ASSETS_PATH):
-    raise KeyError(
-        "Repostiry of static PDB files should be defined as $RIBETL_DATA environment variable.")
+# if os.environ.get("RIBETL_DATA") == "" or not os.path.exists(ASSETS_PATH):
+#     raise KeyError(
+#         "Repostiry of static PDB files should be defined as $RIBETL_DATA environment variable.")
 if os.environ.get(NCBI_TAXA_SQLITE) == "" or not os.path.exists(NCBI_TAXA_SQLITE):
     import warnings
     warnings.warn("""NCBI taxonomy sqlite file should be available at NCBI_TAXA_SQLITE environment variable. 

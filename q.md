@@ -1,4 +1,3 @@
-
 The overarchign idea is basically creating a coarse-grained simulation environment from the ribosome exit tunnel.
 We do that by first extracting the empty space from the ribosome exit tunnel as voxels, then running a poisson surface reconstruction on it and then doing the same over the actual atom coordinates of the whole ribosome itself to tget the exterior surface. Then we combine the two. That's the method in the nutshell.
 
