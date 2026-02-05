@@ -340,6 +340,9 @@ def main():
     ap.add_argument("--dbscan_show_noise", action="store_true")
     ap.add_argument("--legend", action="store_true", help="Show legend (can clutter)")
     ap.add_argument("--seed", type=int, default=0, help="Seed for random downsampling")
+    ap.add_argument("--show_mesh_level0", action="store_true", help="Show Stage50 mesh in panel 1")
+    ap.add_argument("--show_mesh_level1", action="store_true", help="Show Stage55 mesh in panel 2")
+
 
     args = ap.parse_args()
 
@@ -357,6 +360,10 @@ def main():
     st50 = stage / "50_clustering"
     st55 = stage / "55_grid_refine"
     st70 = stage / "70_mesh_validate"
+
+    mesh_level0 = st50 / "mesh_level_0.ply"
+    mesh_level1 = st55 / "mesh_level_1.ply"
+
 
     # Common assets
     alpha_shell = st20 / "alpha_shell.ply"
@@ -481,6 +488,11 @@ def main():
     # Winners for reference
     p_largest = st50 / "largest_cluster.npy"
     p_refined = st50 / "refined_cluster.npy"
+    if args.show_mesh_level0 and mesh_level0.exists():
+        m = _safe_read_mesh(mesh_level0)
+        if m is not None:
+            pl.add_mesh(m, opacity=0.25, color="gold", label="mesh level_0")
+
 
     if p_largest.exists():
         pts = load_npy_points(p_largest)
@@ -518,6 +530,11 @@ def main():
     pl.add_text("Panel 2: Stage55 DBSCAN + surface + mesh", font_size=12)
     _maybe_add_shell(pl)
     _maybe_add_roi(pl)
+    if args.show_mesh_level1 and mesh_level1.exists():
+        m = _safe_read_mesh(mesh_level1)
+        if m is not None:
+            pl.add_mesh(m, opacity=0.30, color="coral", label="mesh level_1")
+
 
     # Stage55 DBSCAN overlay (new)
     if args.stage55_dbscan != "off":

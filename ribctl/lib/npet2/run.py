@@ -18,12 +18,12 @@ from ribctl.lib.npet2.core.pipeline import Pipeline
 
 
 from ribctl.lib.npet2.stages.bootstrap import Stage00Inputs, Stage10Landmarks
+from ribctl.lib.npet2.stages.grid_refine import Stage55GridRefine
 from ribctl.lib.npet2.stages.legacy_minimal import (
     Stage20ExteriorShell,
     Stage30RegionAtoms,
     Stage40EmptySpace,
     Stage50Clustering,
-    Stage55GridRefine05,
     Stage60SurfaceNormals,
     Stage70MeshValidate,
 )
@@ -96,7 +96,7 @@ def run_npet2(
             Stage30RegionAtoms(),
             Stage40EmptySpace(),
             Stage50Clustering(),
-            Stage55GridRefine05(),   # <--- new
+            Stage55GridRefine(),   # <--- new
             Stage60SurfaceNormals(),
             Stage70MeshValidate(),
         ]

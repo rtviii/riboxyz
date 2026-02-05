@@ -1,0 +1,290 @@
+{
+  "rcsb_id": "7K00",
+  "run_id": "20260205_162937_db1c58c692f599cf",
+  "pipeline_version": "npet2-dev",
+  "created_at": 1770305377.873339,
+  "inputs": {
+    "fingerprints": {
+      "structure": "mmcif:/Users/rtviii/dev/RIBETL_DATA/7K00/7K00.cif",
+      "landmarks": "ptc_via_trna+constriction_site:v1"
+    }
+  },
+  "config_resolved": {
+    "cylinder_radius_A": 35.0,
+    "cylinder_height_A": 120.0,
+    "alpha_d3d_alpha": 200,
+    "alpha_d3d_tol": 10,
+    "alpha_d3d_offset": 3,
+    "alpha_kdtree_radius": 40,
+    "alpha_max_nn": 60,
+    "alpha_tangent_planes_k": 20,
+    "alpha_poisson_depth": 6,
+    "alpha_poisson_ptweight": 4,
+    "alpha_fill_holes": 2000,
+    "grid_levels": [
+      {
+        "name": "level_0",
+        "voxel_size_A": 1.0,
+        "atom_radius_mode": "uniform",
+        "uniform_atom_radius_A": 2.0,
+        "occupancy_backend": "legacy_kdtree",
+        "roi_backend": "full_cylinder"
+      }
+    ],
+    "dbscan_level0_coarse_eps_A": 5.5,
+    "dbscan_level0_coarse_min_samples": 600,
+    "dbscan_level0_refine_eps_A": 3.5,
+    "dbscan_level0_refine_min_samples": 175,
+    "mesh_level0_enable": true,
+    "mesh_level0_poisson_depth": 6,
+    "mesh_level0_poisson_ptweight": 3,
+    "refine_voxel_size_A": 0.5,
+    "refine_roi_pad_A": 10.0,
+    "refine_atom_radius_A": 2.5,
+    "refine_keep_within_A": 6.0,
+    "refine_occ_close_iters": 0,
+    "refine_void_open_iters": 1,
+    "refine_forbid_roi_boundary": true,
+    "dbscan_level1_coarse_eps_A": 3.0,
+    "dbscan_level1_coarse_min_samples": 30,
+    "dbscan_level1_refine_eps_A": 3.0,
+    "dbscan_level1_refine_min_samples": 20,
+    "refine_dbscan_max_points": 0,
+    "refine_dbscan_seed": 0,
+    "refine_dbscan_max_cluster_stats": 25,
+    "mesh_level1_enable": true,
+    "mesh_level1_poisson_depth": 6,
+    "mesh_level1_poisson_ptweight": 3,
+    "normals_radius": 10,
+    "normals_max_nn": 15,
+    "normals_tangent_k": 10,
+    "voxel_mesh_fill_holes_A": 50.0,
+    "voxel_mesh_smooth_iters": 0
+  },
+  "stages": {
+    "00_inputs": {
+      "name": "00_inputs",
+      "status": "success",
+      "started_at": 1770305377.873694,
+      "ended_at": 1770305379.123358,
+      "params": {},
+      "note": "elapsed_s=1.249"
+    },
+    "10_landmarks": {
+      "name": "10_landmarks",
+      "status": "success",
+      "started_at": 1770305379.123598,
+      "ended_at": 1770305386.03154,
+      "params": {},
+      "note": "elapsed_s=6.908"
+    },
+    "20_exterior_shell": {
+      "name": "20_exterior_shell",
+      "status": "success",
+      "started_at": 1770305386.031775,
+      "ended_at": 1770305386.035139,
+      "params": {
+        "d3d_alpha": 200,
+        "d3d_tol": 10,
+        "d3d_offset": 3,
+        "kdtree_radius": 40,
+        "max_nn": 60,
+        "tangent_k": 20,
+        "poisson_depth": 6,
+        "poisson_ptweight": 4,
+        "fill_holes": 2000
+      },
+      "note": "elapsed_s=0.003"
+    },
+    "30_region_atoms": {
+      "name": "30_region_atoms",
+      "status": "success",
+      "started_at": 1770305386.035433,
+      "ended_at": 1770305400.9164999,
+      "params": {
+        "radius_A": 35.0,
+        "height_A": 120.0
+      },
+      "note": "elapsed_s=14.881"
+    },
+    "40_empty_space": {
+      "name": "40_empty_space",
+      "status": "success",
+      "started_at": 1770305400.916867,
+      "ended_at": 1770305403.6511931,
+      "params": {
+        "grid_levels": [
+          {
+            "name": "level_0",
+            "voxel_size_A": 1.0,
+            "backend": "legacy_kdtree",
+            "atom_radius_mode": "uniform",
+            "uniform_atom_radius_A": 2.0
+          }
+        ],
+        "radius_A": 35.0,
+        "height_A": 120.0
+      },
+      "note": "elapsed_s=2.734"
+    },
+    "50_clustering": {
+      "name": "50_clustering",
+      "status": "success",
+      "started_at": 1770305403.651616,
+      "ended_at": 1770305408.731889,
+      "params": {
+        "coarse_eps_A": 5.5,
+        "coarse_min_samples": 600,
+        "refine_eps_A": 3.5,
+        "refine_min_samples": 175,
+        "mesh_enable": true,
+        "mesh_poisson_depth": 6,
+        "mesh_poisson_ptweight": 3
+      },
+      "note": "elapsed_s=5.080"
+    },
+    "55_grid_refine": {
+      "name": "55_grid_refine",
+      "status": "success",
+      "started_at": 1770305408.732488,
+      "ended_at": 1770305420.779511,
+      "params": {
+        "voxel_size_A": 0.5,
+        "roi_pad_A": 10.0,
+        "atom_radius_A": 2.5,
+        "keep_within_A": 6.0,
+        "occ_close_iters": 0,
+        "void_open_iters": 1,
+        "forbid_roi_boundary": true,
+        "coarse_eps_A": 3.0,
+        "coarse_min_samples": 30,
+        "refine_eps_A": 3.0,
+        "refine_min_samples": 20,
+        "dbscan_max_points": 0,
+        "dbscan_seed": 0,
+        "mesh_enable": true,
+        "mesh_poisson_depth": 6,
+        "mesh_poisson_ptweight": 3
+      },
+      "note": "elapsed_s=12.046"
+    }
+  },
+  "artifacts": [
+    {
+      "name": "atom_xyz",
+      "type": "npy",
+      "path": "/Users/rtviii/dev/riboxyz/NPET2/runs/7K00/20260205_162937_db1c58c692f599cf/stage/00_inputs/atom_xyz.npy",
+      "stage": "00_inputs",
+      "meta": {
+        "shape": [
+          149338,
+          3
+        ],
+        "dtype": "float32"
+      },
+      "depends_on": []
+    },
+    {
+      "name": "ptc",
+      "type": "json",
+      "path": "/Users/rtviii/dev/riboxyz/NPET2/runs/7K00/20260205_162937_db1c58c692f599cf/stage/10_landmarks/ptc.json",
+      "stage": "10_landmarks",
+      "meta": {
+        "units": "A"
+      },
+      "depends_on": []
+    },
+    {
+      "name": "constriction_site",
+      "type": "json",
+      "path": "/Users/rtviii/dev/riboxyz/NPET2/runs/7K00/20260205_162937_db1c58c692f599cf/stage/10_landmarks/constriction_site.json",
+      "stage": "10_landmarks",
+      "meta": {
+        "units": "A"
+      },
+      "depends_on": []
+    },
+    {
+      "name": "alpha_shell_mesh",
+      "type": "ply_mesh",
+      "path": "stage/20_exterior_shell/alpha_shell.ply",
+      "stage": "20_exterior_shell",
+      "meta": {},
+      "depends_on": []
+    },
+    {
+      "name": "alpha_shell_quality",
+      "type": "json",
+      "path": "stage/20_exterior_shell/alpha_shell_quality.json",
+      "stage": "20_exterior_shell",
+      "meta": {},
+      "depends_on": []
+    },
+    {
+      "name": "region_atom_xyz",
+      "type": "npy",
+      "path": "stage/30_region_atoms/region_atom_xyz.npy",
+      "stage": "30_region_atoms",
+      "meta": {
+        "n": 14952
+      },
+      "depends_on": []
+    },
+    {
+      "name": "clipping_note",
+      "type": "json",
+      "path": "stage/40_empty_space/clipping_note.json",
+      "stage": "40_empty_space",
+      "meta": {},
+      "depends_on": []
+    },
+    {
+      "name": "empty_points_level_0_preclip",
+      "type": "npy",
+      "path": "stage/40_empty_space/empty_points_level_0_preclip.npy",
+      "stage": "40_empty_space",
+      "meta": {
+        "voxel_size_A": 1.0,
+        "n": 274504
+      },
+      "depends_on": []
+    },
+    {
+      "name": "empty_points_level_0",
+      "type": "npy",
+      "path": "stage/40_empty_space/empty_points_level_0.npy",
+      "stage": "40_empty_space",
+      "meta": {
+        "voxel_size_A": 1.0,
+        "n": 152997,
+        "backend": "legacy_kdtree",
+        "alpha_shell_watertight": true
+      },
+      "depends_on": []
+    },
+    {
+      "name": "largest_cluster",
+      "type": "npy",
+      "path": "stage/50_clustering/largest_cluster.npy",
+      "stage": "50_clustering",
+      "meta": {
+        "cluster_id": 1,
+        "n": 84881
+      },
+      "depends_on": []
+    },
+    {
+      "name": "refined_cluster",
+      "type": "npy",
+      "path": "stage/50_clustering/refined_cluster.npy",
+      "stage": "50_clustering",
+      "meta": {
+        "cluster_id": 0,
+        "n": 69995
+      },
+      "depends_on": []
+    }
+  ],
+  "success": null,
+  "error": null
+}
