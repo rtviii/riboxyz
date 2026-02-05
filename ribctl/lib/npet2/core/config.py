@@ -73,6 +73,28 @@ class RunConfig:
     refine_topk_preview      : int   = 5
     refine_max_preview_points: int   = 50_000
 
+    # grid refinement robustness
+    refine_occ_close_iters: int = 1        # seals 0.5Å cracks
+    refine_keep_within_A: float = 8.0      # keep void near coarse tunnel (0 disables)
+    refine_forbid_roi_boundary: bool = True
+    # optionally bump atom radius a bit for fine pass:
+    refine_atom_radius_A: float = 2.5
+
+    refine_voxel_size_A = 0.5
+    refine_keep_within_A = 6.0      # keep local, but not too tight (try 5–8)
+    refine_void_open_iters = 1      # helps break bridges
+    refine_occ_close_iters = 0
+
+    # DBSCAN on boundary points
+    refine_dbscan_coarse_eps_A = 3
+    refine_dbscan_coarse_min_samples = 30
+
+    refine_dbscan_refine_eps_A = 3
+    refine_dbscan_refine_min_samples = 20
+
+    # if it’s too slow:
+    # refine_dbscan_max_points = 250000
+    # refine_dbscan_seed = 0
 
     # refinement plan (kept for later; default only one level)
     grid_levels: List[GridLevelConfig] = field(default_factory=lambda: [

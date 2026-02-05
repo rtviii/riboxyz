@@ -1,0 +1,5 @@
+{
+  "alpha_shell_path": "/Users/rtviii/dev/riboxyz/NPET2/runs/7K00/8c54c85531b076be/stage/20_exterior_shell/alpha_shell.ply",
+  "alpha_shell_watertight": true,
+  "clipping_mode": "select_enclosed_points(check_surface=True)"
+}

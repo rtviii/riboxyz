@@ -1,5 +1,5 @@
 {
-  "roi_id": "bbox_pad_v1",
+  "roi_id": "bbox_pad_dbscan",
   "frame": "C0",
   "pad_A": 10.0,
   "lo": [

@@ -702,332 +702,408 @@ class Stage50Clustering(Stage):
 
 class Stage55GridRefine05(Stage):
     """
-    0.5Å refinement:
-      - ROI bbox in C0 from coarse refined cluster (+pad)
-      - select atoms near ROI
-      - voxelize occupancy at 0.5Å inside ROI
-      - void = (~occupied) clipped to alpha shell
-      - connected components; pick component with max overlap to coarse refined
-      - export refined_cluster_level_1 (world coords) and set ctx.inputs["refined_cluster"]
+    Stage55 (refined grid) using DBSCAN segmentation (like Stage50), not connected-components selection.
+
+    Outputs (for viz, Stage60+):
+      stage/55_grid_refine/
+        refined_surface_points_level_1.npy      (WORLD coords; used downstream as refined_cluster)
+        dbscan_coarse/points.npy + labels.npy   (WORLD coords; labels from DBSCAN in C0)
+        dbscan_refine/points.npy + labels.npy   (WORLD coords; labels from DBSCAN in C0)
+        dbscan_diagnostics.json
+        roi_bbox_c0.json
+        grid_spec_level_1.json
+        void_mask_level_1.npy   (uint8, optional debug)
+        occupied_mask_level_1.npy (uint8, optional debug)
     """
 
     key = "55_grid_refine"
 
     def params(self, ctx: StageContext) -> Dict[str, Any]:
         c = ctx.config
-        # keep these in config (see config patch below), but safe defaults here
         return {
             "voxel_size_A": float(getattr(c, "refine_voxel_size_A", 0.5)),
             "roi_pad_A": float(getattr(c, "refine_roi_pad_A", 10.0)),
             "atom_radius_A": float(getattr(c, "refine_atom_radius_A", 2.0)),
-            "cc_connectivity": int(getattr(c, "refine_cc_connectivity", 26)),
-            "topk_preview": int(getattr(c, "refine_topk_preview", 5)),
-            "max_preview_points": int(getattr(c, "refine_max_preview_points", 50_000)),
+
+            # optional localization: restrict void to within this distance of Stage50 refined cluster (0=off)
+            "keep_within_A": float(getattr(c, "refine_keep_within_A", 0.0)),
+
+            # optional morphology (helps break skinny bridges BEFORE DBSCAN)
+            "occ_close_iters": int(getattr(c, "refine_occ_close_iters", 0)),   # closing on occupied
+            "void_open_iters": int(getattr(c, "refine_void_open_iters", 0)),   # opening on void (break bridges)
+
+            # prevent planar ROI faces from polluting void
+            "forbid_roi_boundary": bool(getattr(c, "refine_forbid_roi_boundary", True)),
+
+            # DBSCAN params (coarse then refine)
+            "dbscan_coarse_eps_A": float(getattr(c, "refine_dbscan_coarse_eps_A", 1.5)),
+            "dbscan_coarse_min_samples": int(getattr(c, "refine_dbscan_coarse_min_samples", 30)),
+            "dbscan_refine_eps_A": float(getattr(c, "refine_dbscan_refine_eps_A", 1.0)),
+            "dbscan_refine_min_samples": int(getattr(c, "refine_dbscan_refine_min_samples", 20)),
+
+            # safety caps (0 = no cap)
+            "dbscan_max_points": int(getattr(c, "refine_dbscan_max_points", 0)),
+            "dbscan_seed": int(getattr(c, "refine_dbscan_seed", 0)),
+
+            # diagnostics
+            "max_cluster_stats": int(getattr(c, "refine_dbscan_max_cluster_stats", 25)),
         }
 
     def run(self, ctx: StageContext) -> None:
+        import json
+        from pathlib import Path
+
+        import numpy as np
+        import pyvista as pv
+        from scipy import ndimage
+        from scipy.spatial import cKDTree
+        from sklearn.cluster import DBSCAN
+
         c = ctx.config
+        stage_dir = Path(ctx.store.stage_dir(self.key))
+        stage_dir.mkdir(parents=True, exist_ok=True)
 
-        voxel = float(getattr(c, "refine_voxel_size_A", 0.5))
-        pad = float(getattr(c, "refine_roi_pad_A", 10.0))
-        atom_r = float(getattr(c, "refine_atom_radius_A", 2.0))
-        conn = int(getattr(c, "refine_cc_connectivity", 26))
-        topk = int(getattr(c, "refine_topk_preview", 5))
-        max_preview_pts = int(getattr(c, "refine_max_preview_points", 50_000))
-
-        stage_dir = ctx.store.stage_dir(self.key)
-
-        # Inputs
+        # ----------------------------
+        # inputs
+        # ----------------------------
         refined_world = np.asarray(ctx.require("refined_cluster"), dtype=np.float32)
-        if (
-            refined_world.ndim != 2
-            or refined_world.shape[1] != 3
-            or refined_world.shape[0] == 0
-        ):
-            raise ValueError(
-                f"refined_cluster is not (N,3) or is empty: {refined_world.shape}"
-            )
+        if refined_world.ndim != 2 or refined_world.shape[1] != 3 or refined_world.shape[0] == 0:
+            raise ValueError(f"[55_grid_refine] refined_cluster invalid: {refined_world.shape}")
 
         region_xyz = np.asarray(ctx.require("region_atom_xyz"), dtype=np.float32)
         ptc = np.asarray(ctx.require("ptc_xyz"), dtype=np.float32)
         constr = np.asarray(ctx.require("constriction_xyz"), dtype=np.float32)
         alpha_shell_path = str(ctx.require("alpha_shell_path"))
+        watertight = bool(ctx.inputs.get("alpha_shell_watertight", True))
 
-        # --- Coarse refined -> C0 bbox ROI (+pad)
-        refined_c0 = transform_points_to_C0(refined_world, ptc, constr).astype(
-            np.float32
-        )
+        voxel = float(getattr(c, "refine_voxel_size_A", 0.5))
+        pad = float(getattr(c, "refine_roi_pad_A", 10.0))
+        atom_r = float(getattr(c, "refine_atom_radius_A", 2.0))
+        keep_within_A = float(getattr(c, "refine_keep_within_A", 0.0))
+        occ_close_iters = int(getattr(c, "refine_occ_close_iters", 0))
+        void_open_iters = int(getattr(c, "refine_void_open_iters", 0))
+        forbid_roi_boundary = bool(getattr(c, "refine_forbid_roi_boundary", True))
+
+        eps_c = float(getattr(c, "refine_dbscan_coarse_eps_A", 1.5))
+        ms_c = int(getattr(c, "refine_dbscan_coarse_min_samples", 30))
+        eps_r = float(getattr(c, "refine_dbscan_refine_eps_A", 1.0))
+        ms_r = int(getattr(c, "refine_dbscan_refine_min_samples", 20))
+
+        dbscan_max_points = int(getattr(c, "refine_dbscan_max_points", 0))
+        dbscan_seed = int(getattr(c, "refine_dbscan_seed", 0))
+        max_stats = int(getattr(c, "refine_dbscan_max_cluster_stats", 25))
+
+        # ----------------------------
+        # ROI in C0
+        # ----------------------------
+        refined_c0 = transform_points_to_C0(refined_world, ptc, constr).astype(np.float32)
         lo = refined_c0.min(axis=0)
         hi = refined_c0.max(axis=0)
-
         lo_pad = lo - pad
         hi_pad = hi + pad
 
         roi_obj = {
-            "roi_id": "bbox_pad10_v1",
+            "roi_id": "bbox_pad_dbscan",
             "frame": "C0",
-            "pad_A": pad,
-            "lo": lo_pad.tolist(),
-            "hi": hi_pad.tolist(),
-            "transform": {
-                "ptc": ptc.tolist(),
-                "constriction": constr.tolist(),
-            },
-            "source": {
-                "stage": "50_clustering",
-                "artifact": "refined_cluster",
-            },
+            "pad_A": float(pad),
+            "lo": [float(x) for x in lo_pad.tolist()],
+            "hi": [float(x) for x in hi_pad.tolist()],
+            "transform": {"ptc": [float(x) for x in ptc.tolist()], "constriction": [float(x) for x in constr.tolist()]},
+            "source": {"stage": "50_clustering", "artifact": "refined_cluster"},
         }
-        ctx.artifacts["roi_bbox_c0"] = ctx.store.put_json(
-            name="roi_bbox_c0",
-            stage=self.key,
-            obj=roi_obj,
-            meta={"units": "A", "frame": "C0"},
-        )
+        (stage_dir / "roi_bbox_c0.json").write_text(json.dumps(roi_obj, indent=2))
+        ctx.artifacts["roi_bbox_c0"] = str(stage_dir / "roi_bbox_c0.json")
 
-        # Save coarse refined points for viz/debug if useful
-        ctx.store.put_numpy(
-            name="refined_cluster_level_0",
-            stage=self.key,
-            arr=refined_world,
-            meta={"frame": "world", "n": int(refined_world.shape[0])},
-        )
-
-        # --- Select atoms near ROI (still uniform radius)
+        # ----------------------------
+        # select atoms near ROI in C0
+        # ----------------------------
         region_c0 = transform_points_to_C0(region_xyz, ptc, constr).astype(np.float32)
-
-        # Expand ROI by atom radius so spheres intersecting ROI are included
         lo_sel = lo_pad - atom_r
         hi_sel = hi_pad + atom_r
-
-        m_atoms = np.all(
-            (region_c0 >= lo_sel[None, :]) & (region_c0 <= hi_sel[None, :]), axis=1
-        )
+        m_atoms = np.all((region_c0 >= lo_sel[None, :]) & (region_c0 <= hi_sel[None, :]), axis=1)
         atoms_roi_c0 = region_c0[m_atoms]
         if atoms_roi_c0.shape[0] == 0:
-            raise ValueError(
-                "No atoms selected near ROI; ROI may be wrong or pad too small"
-            )
+            raise ValueError("[55_grid_refine] no atoms selected near ROI")
 
-        ctx.store.put_numpy(
-            name="atoms_near_roi_c0",
-            stage=self.key,
-            arr=atoms_roi_c0,
-            meta={"frame": "C0", "n": int(atoms_roi_c0.shape[0])},
-        )
-
-        # --- Build ROI grid and occupancy
+        # ----------------------------
+        # build bbox grid + cylinder mask
+        # ----------------------------
         grid = _make_bbox_grid(lo_pad, hi_pad, voxel)
 
-        occupied = occupancy_via_edt(atoms_roi_c0, grid, atom_radius_A=atom_r)
-        ctx.store.put_numpy(
-            name="occupied_mask_level_1",
-            stage=self.key,
-            arr=occupied,
-            meta={"voxel_size_A": voxel, "frame": "C0", "shape": list(occupied.shape)},
+        def _cylinder_mask_bbox_grid(grid: GridSpec, radius_A: float, zmin_A: float, zmax_A: float) -> np.ndarray:
+            nx, ny, nz = grid.shape
+            v = float(grid.voxel_size)
+            ox, oy, oz = grid.origin
+
+            x = ox + np.arange(nx, dtype=np.float32) * v
+            y = oy + np.arange(ny, dtype=np.float32) * v
+            z = oz + np.arange(nz, dtype=np.float32) * v
+
+            X, Y = np.meshgrid(x, y, indexing="ij")
+            inside_r = (X * X + Y * Y) <= (radius_A * radius_A)
+            inside_z = (z >= zmin_A) & (z <= zmax_A)
+            return inside_r[:, :, None] & inside_z[None, None, :]
+
+        cyl = _cylinder_mask_bbox_grid(
+            grid,
+            radius_A=float(c.cylinder_radius_A),
+            zmin_A=0.0,
+            zmax_A=float(c.cylinder_height_A),
         )
 
-        empty_mask = ~occupied
+        # ----------------------------
+        # occupancy via EDT
+        # ----------------------------
+        occupied = occupancy_via_edt(atoms_roi_c0, grid, atom_radius_A=atom_r)
 
-        # --- Clip empty voxels to alpha shell interior (in C0)
+        if occ_close_iters > 0:
+            occupied = ndimage.binary_closing(occupied, iterations=occ_close_iters)
+
+        # outside cylinder is "occupied" so void can't leak
+        occupied = occupied | (~cyl)
+
+        np.save(stage_dir / "occupied_mask_level_1.npy", occupied.astype(np.uint8))
+
+        # ----------------------------
+        # empty points (C0) inside cylinder
+        # ----------------------------
+        empty_mask = (~occupied) & cyl
+        empty_idx = np.argwhere(empty_mask)
+        if empty_idx.shape[0] == 0:
+            raise ValueError("[55_grid_refine] empty_mask had 0 voxels in ROI")
+
+        empty_pts_c0 = _voxel_centers_from_indices(grid, empty_idx).astype(np.float32)
+
+        # ----------------------------
+        # clip empties to inside alpha shell interior (C0)
+        # ----------------------------
         shell_world = pv.read(alpha_shell_path)
         if not isinstance(shell_world, pv.PolyData):
             shell_world = shell_world.extract_surface()
         shell_world = shell_world.triangulate()
 
         shell_c0 = shell_world.copy(deep=True)
-        shell_c0.points = transform_points_to_C0(
-            np.asarray(shell_world.points, dtype=np.float32), ptc, constr
-        )
+        shell_c0.points = transform_points_to_C0(np.asarray(shell_world.points, dtype=np.float32), ptc, constr)
 
-        # Convert empty voxels -> points (C0) only for selection (keeps memory reasonable)
-        empty_idx = np.argwhere(empty_mask)
-        empty_pts_c0 = _voxel_centers_from_indices(grid, empty_idx).astype(np.float32)
+        sel = pv.PolyData(empty_pts_c0).select_enclosed_points(shell_c0, check_surface=watertight)
+        inside_flags = (np.asarray(sel["SelectedPoints"], dtype=np.int8) == 1)
 
-        sel = pv.PolyData(empty_pts_c0).select_enclosed_points(shell_c0)
-        inside_flags = np.asarray(sel["SelectedPoints"], dtype=np.int8) == 1
         inside_idx = empty_idx[inside_flags]
-
         void_mask = np.zeros_like(empty_mask, dtype=np.bool_)
-        if inside_idx.shape[0] > 0:
-            void_mask[inside_idx[:, 0], inside_idx[:, 1], inside_idx[:, 2]] = True
+        if inside_idx.shape[0] == 0:
+            raise ValueError("[55_grid_refine] no empty voxels inside alpha shell in ROI")
+        void_mask[inside_idx[:, 0], inside_idx[:, 1], inside_idx[:, 2]] = True
 
-        ctx.store.put_numpy(
-            name="void_mask_level_1",
-            stage=self.key,
-            arr=void_mask,
-            meta={"voxel_size_A": voxel, "frame": "C0", "shape": list(void_mask.shape)},
-        )
+        # forbid ROI boundary to avoid planar faces contaminating the void
+        if forbid_roi_boundary:
+            void_mask[0, :, :] = False
+            void_mask[-1, :, :] = False
+            void_mask[:, 0, :] = False
+            void_mask[:, -1, :] = False
+            void_mask[:, :, 0] = False
+            void_mask[:, :, -1] = False
 
-        # --- Connected components on void mask
-        labeled, n_comp = connected_components_3d(void_mask, connectivity=conn)
+        # optional localization around Stage50 refined cluster
+        if keep_within_A > 0.0:
+            coarse_ijk = _points_to_ijk(grid, refined_c0)
+            m_valid = _valid_ijk(grid, coarse_ijk)
+            coarse_ijk = coarse_ijk[m_valid]
+            if coarse_ijk.shape[0] > 0:
+                seed = np.zeros(grid.shape, dtype=np.bool_)
+                seed[coarse_ijk[:, 0], coarse_ijk[:, 1], coarse_ijk[:, 2]] = True
+                dist_vox = ndimage.distance_transform_edt(~seed)
+                r_vox = float(keep_within_A) / float(voxel)
+                void_mask = void_mask & (dist_vox <= r_vox)
 
-        # Pick component by overlap with coarse refined points
-        coarse_ijk = _points_to_ijk(grid, refined_c0)
-        m_valid = _valid_ijk(grid, coarse_ijk)
-        coarse_ijk = coarse_ijk[m_valid]
+        # optional opening on void to break skinny bridges
+        if void_open_iters > 0:
+            st = ndimage.generate_binary_structure(3, 1)  # 6-neighborhood
+            void_mask = ndimage.binary_opening(void_mask, structure=st, iterations=void_open_iters)
 
-        chosen_label = 0
-        overlap_counts: dict[int, int] = {}
+        np.save(stage_dir / "void_mask_level_1.npy", void_mask.astype(np.uint8))
 
-        if coarse_ijk.shape[0] > 0 and n_comp > 0:
-            labs = labeled[coarse_ijk[:, 0], coarse_ijk[:, 1], coarse_ijk[:, 2]]
-            labs = labs[labs > 0]
-            if labs.size > 0:
-                u, cnt = np.unique(labs, return_counts=True)
-                overlap_counts = {int(a): int(b) for a, b in zip(u, cnt)}
-                chosen_label = int(u[np.argmax(cnt)])
+        # ----------------------------
+        # boundary extraction (surface points) in C0
+        # ----------------------------
+        st_er = ndimage.generate_binary_structure(3, 1)
+        er = ndimage.binary_erosion(void_mask, structure=st_er, iterations=1)
+        boundary_mask = void_mask & (~er)
+        boundary_idx = np.argwhere(boundary_mask)
+        if boundary_idx.shape[0] == 0:
+            raise ValueError("[55_grid_refine] boundary extraction produced 0 voxels")
 
-        if chosen_label == 0:
-            # fallback: largest component
-            sizes = np.bincount(labeled.ravel())
-            if sizes.size > 0:
-                sizes[0] = 0
-                chosen_label = int(np.argmax(sizes))
+        boundary_pts_c0 = _voxel_centers_from_indices(grid, boundary_idx).astype(np.float32)
 
-        if chosen_label == 0:
-            raise ValueError("No void component found inside shell at level_1 (0.5Å)")
+        # ----------------------------
+        # DBSCAN helper (score clusters by closeness to Stage50 refined tunnel in C0)
+        # ----------------------------
+        tree = cKDTree(refined_c0)
 
-        # --- Extract boundary (surface) voxels of the selected void component
-        tB0 = time.perf_counter()
-        selected_mask = labeled == chosen_label
-        # --- Persist selected component volume for deterministic meshing (marching cubes later)
-        # Save mask in C0 grid coordinates and a tiny spec JSON to reconstruct spacing/origin
-        p_selmask = stage_dir / "selected_void_component_mask_level_1.npy"
-        np.save(
-            p_selmask, selected_mask.astype(np.uint8)
-        )  # uint8 keeps size small & VTK-friendly
+        def _cluster_stats(points_c0: np.ndarray, labels: np.ndarray) -> list[dict]:
+            stats = []
+            for lab in np.unique(labels):
+                if lab == -1:
+                    continue
+                m = labels == lab
+                pts = points_c0[m]
+                if pts.shape[0] == 0:
+                    continue
+                d, _ = tree.query(pts, k=1)
+                stats.append(
+                    {
+                        "label": int(lab),
+                        "size": int(pts.shape[0]),
+                        "median_dist_to_stage50_A": float(np.median(d)),
+                        "p05_dist_to_stage50_A": float(np.percentile(d, 5)),
+                        "p95_dist_to_stage50_A": float(np.percentile(d, 95)),
+                    }
+                )
+            stats.sort(key=lambda x: (x["median_dist_to_stage50_A"], -x["size"]))
+            return stats
 
-        ctx.store.register_file(
-            name="selected_void_component_mask_level_1",
-            stage=self.key,
-            type=ArtifactType.NUMPY,
-            path=p_selmask,
-            meta={
-                "voxel_size_A": voxel,
-                "shape": list(selected_mask.shape),
-                "label": int(chosen_label),
-            },
-        )
+        def _choose_best_label(stats: list[dict]) -> int:
+            if not stats:
+                return -1
+            # prefer smallest median distance; tie-break by size
+            return int(stats[0]["label"])
 
+        def _maybe_cap(points_c0: np.ndarray, points_w: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+            """
+            Optionally cap points for DBSCAN speed by random subsample.
+            Returns: (points_c0_cap, points_w_cap, idx_cap)
+            """
+            n = points_c0.shape[0]
+            if dbscan_max_points and n > dbscan_max_points:
+                rng = np.random.default_rng(dbscan_seed)
+                k = int(dbscan_max_points)
+                idx = rng.choice(n, size=k, replace=False)
+                idx.sort()
+                return points_c0[idx], points_w[idx], idx
+            idx = np.arange(n, dtype=np.int64)
+            return points_c0, points_w, idx
+
+        # boundary points in WORLD for saving/viz
+        boundary_pts_w = transform_points_from_C0(boundary_pts_c0, ptc, constr).astype(np.float32)
+
+        # cap if requested
+        boundary_pts_c0_cap, boundary_pts_w_cap, idx_cap = _maybe_cap(boundary_pts_c0, boundary_pts_w)
+
+        # ----------------------------
+        # coarse DBSCAN on refined-grid boundary points
+        # ----------------------------
+        db_coarse = DBSCAN(eps=eps_c, min_samples=ms_c, metric="euclidean", n_jobs=-1)
+        labels_coarse = db_coarse.fit_predict(boundary_pts_c0_cap).astype(np.int32)
+
+        d_coarse = stage_dir / "dbscan_coarse"
+        d_coarse.mkdir(parents=True, exist_ok=True)
+        np.save(d_coarse / "points.npy", boundary_pts_w_cap.astype(np.float32))
+        np.save(d_coarse / "labels.npy", labels_coarse.astype(np.int32))
+
+        stats_coarse = _cluster_stats(boundary_pts_c0_cap, labels_coarse)
+        best_coarse = _choose_best_label(stats_coarse)
+        if best_coarse == -1:
+            raise ValueError(
+                f"[55_grid_refine] coarse DBSCAN produced no clusters (all noise). "
+                f"Try increasing eps or decreasing min_samples. eps={eps_c} min_samples={ms_c}"
+            )
+
+        # points for refine pass
+        m_best = labels_coarse == best_coarse
+        pts_refine_c0 = boundary_pts_c0_cap[m_best]
+        pts_refine_w = boundary_pts_w_cap[m_best]
+        if pts_refine_c0.shape[0] == 0:
+            raise ValueError("[55_grid_refine] best coarse cluster had 0 points (unexpected)")
+
+        # ----------------------------
+        # refine DBSCAN inside best coarse cluster
+        # ----------------------------
+        db_refine = DBSCAN(eps=eps_r, min_samples=ms_r, metric="euclidean", n_jobs=-1)
+        labels_refine = db_refine.fit_predict(pts_refine_c0).astype(np.int32)
+
+        d_ref = stage_dir / "dbscan_refine"
+        d_ref.mkdir(parents=True, exist_ok=True)
+        np.save(d_ref / "points.npy", pts_refine_w.astype(np.float32))
+        np.save(d_ref / "labels.npy", labels_refine.astype(np.int32))
+
+        stats_refine = _cluster_stats(pts_refine_c0, labels_refine)
+        best_refine = _choose_best_label(stats_refine)
+        if best_refine == -1:
+            raise ValueError(
+                f"[55_grid_refine] refine DBSCAN produced no clusters (all noise). "
+                f"Try increasing eps or decreasing min_samples. eps={eps_r} min_samples={ms_r}"
+            )
+
+        final_mask = labels_refine == best_refine
+        final_surface_w = pts_refine_w[final_mask].astype(np.float32)
+        if final_surface_w.shape[0] == 0:
+            raise ValueError("[55_grid_refine] final selected refine cluster had 0 points")
+
+        # ----------------------------
+        # diagnostics + grid spec
+        # ----------------------------
         spec_obj = {
             "frame": "C0",
             "origin": [float(x) for x in grid.origin.tolist()],
             "voxel_size_A": float(grid.voxel_size),
             "shape": [int(x) for x in grid.shape],
-            "chosen_label": int(chosen_label),
-            "transform": {
-                "ptc": [float(x) for x in ptc.tolist()],
-                "constriction": [float(x) for x in constr.tolist()],
-            },
+            "transform": {"ptc": [float(x) for x in ptc.tolist()], "constriction": [float(x) for x in constr.tolist()]},
         }
-        p_spec = stage_dir / "grid_spec_level_1.json"
-        p_spec.write_text(__import__("json").dumps(spec_obj, indent=2))
+        (stage_dir / "grid_spec_level_1.json").write_text(json.dumps(spec_obj, indent=2))
+        ctx.inputs["grid_spec_level_1_path"] = str(stage_dir / "grid_spec_level_1.json")
 
-        ctx.store.register_file(
-            name="grid_spec_level_1",
-            stage=self.key,
-            type=ArtifactType.JSON,
-            path=p_spec,
-            meta={"voxel_size_A": voxel},
-        )
-
-        # Make it easy for Stage70 to find
-        ctx.inputs["selected_void_component_mask_level_1_path"] = str(p_selmask)
-        ctx.inputs["grid_spec_level_1_path"] = str(p_spec)
-
-        # boundary = selected - eroded(selected)
-        structure = ndimage.generate_binary_structure(3, 1)  # 6-connect erosion is fine
-        er = ndimage.binary_erosion(selected_mask, structure=structure, iterations=1)
-        boundary_mask = selected_mask & (~er)
-
-        boundary_idx = np.argwhere(boundary_mask)
-        volume_n = int(selected_mask.sum())
-        boundary_n = int(boundary_idx.shape[0])
-
-        print(
-            f"[55_grid_refine] chosen_label={chosen_label} volume_vox={volume_n:,} boundary_vox={boundary_n:,}"
-        )
-
-        if boundary_idx.shape[0] == 0:
-            raise ValueError("Boundary extraction produced 0 points (unexpected)")
-
-        # Convert boundary voxel centers to points
-        boundary_pts_c0 = _voxel_centers_from_indices(grid, boundary_idx).astype(
-            np.float32
-        )
-        boundary_world = transform_points_from_C0(boundary_pts_c0, ptc, constr).astype(
-            np.float32
-        )
-
-        tB1 = time.perf_counter()
-        print(f"[55_grid_refine] boundary extraction+transform took {tB1 - tB0:,.2f}s")
-
-        # Save surface point cloud that will feed Stage60 directly
-        ctx.artifacts["refined_surface_points_level_1"] = ctx.store.put_numpy(
-            name="refined_surface_points_level_1",
-            stage=self.key,
-            arr=boundary_world,
-            meta={
-                "frame": "world",
-                "voxel_size_A": voxel,
-                "component_label": chosen_label,
-                "volume_voxels": volume_n,
-                "boundary_voxels": boundary_n,
-                "n": int(boundary_world.shape[0]),
-            },
-        )
-
-        # Tell downstream that refined_cluster is already surface-like
-        ctx.inputs["refined_cluster_surface"] = True
-        ctx.inputs["refined_cluster"] = boundary_world
-
-        # Save refined cluster (level_1) -- use boundary_world (surface) not undefined selected_world
-        ctx.artifacts["refined_cluster_level_1"] = ctx.store.put_numpy(
-            name="refined_cluster_level_1",
-            stage=self.key,
-            arr=boundary_world,
-            meta={
-                "frame": "world",
-                "voxel_size_A": voxel,
-                "component_label": chosen_label,
-                "volume_voxels": volume_n,
-                "boundary_voxels": boundary_n,
-                "n": int(boundary_world.shape[0]),
-            },
-        )
-
-        # Save some small diagnostics for viz (top components preview)
-        top_stats = _topk_component_stats(labeled, k=max(topk, 3))
         diag = {
             "voxel_size_A": voxel,
             "roi_pad_A": pad,
             "atom_radius_A": atom_r,
-            "cc_connectivity": conn,
-            "n_components": int(n_comp),
-            "chosen_label": int(chosen_label),
-            "overlap_counts": overlap_counts,
-            "top_components": top_stats,
+            "keep_within_A": keep_within_A,
+            "occ_close_iters": occ_close_iters,
+            "void_open_iters": void_open_iters,
+            "forbid_roi_boundary": forbid_roi_boundary,
+            "alpha_shell_watertight": watertight,
+            "boundary_points_total": int(boundary_pts_c0.shape[0]),
+            "boundary_points_used_for_dbscan": int(boundary_pts_c0_cap.shape[0]),
+            "dbscan_max_points": int(dbscan_max_points),
+            "dbscan_coarse": {
+                "eps_A": eps_c,
+                "min_samples": ms_c,
+                "best_label": int(best_coarse),
+                "n_clusters": int(len(stats_coarse)),
+                "clusters": stats_coarse[:max_stats],
+            },
+            "dbscan_refine": {
+                "eps_A": eps_r,
+                "min_samples": ms_r,
+                "best_label": int(best_refine),
+                "n_clusters": int(len(stats_refine)),
+                "clusters": stats_refine[:max_stats],
+            },
+            "final_surface_points": int(final_surface_w.shape[0]),
         }
-        ctx.store.put_json(name="cc_diagnostics", stage=self.key, obj=diag)
+        (stage_dir / "dbscan_diagnostics.json").write_text(json.dumps(diag, indent=2))
 
-        # optional: write previews for top-K components (capped)
-        for item in top_stats[:topk]:
-            lab = int(item["label"])
-            idx = np.argwhere(labeled == lab)
-            if idx.shape[0] == 0:
-                continue
-            if idx.shape[0] > max_preview_pts:
-                stride = int(np.ceil(idx.shape[0] / max_preview_pts))
-                idx = idx[::stride]
-            pts_c0 = _voxel_centers_from_indices(grid, idx).astype(np.float32)
-            pts_w = transform_points_from_C0(pts_c0, ptc, constr).astype(np.float32)
-            ctx.store.put_numpy(
-                name=f"component_preview_label{lab}_n{item['size']}",
-                stage=self.key,
-                arr=pts_w,
-                meta={"frame": "world", "label": lab, "size": int(item["size"])},
-            )
+        print(
+            f"[55_grid_refine] DBSCAN refined-grid boundary: "
+            f"voxel={voxel} void_vox={int(void_mask.sum()):,} boundary_vox={int(boundary_mask.sum()):,} "
+            f"coarse eps={eps_c} ms={ms_c} best={best_coarse} -> refine eps={eps_r} ms={ms_r} best={best_refine} "
+            f"final_pts={final_surface_w.shape[0]:,} cap={dbscan_max_points}"
+        )
+
+        # ----------------------------
+        # outputs for Stage60+
+        # ----------------------------
+        np.save(stage_dir / "refined_surface_points_level_1.npy", final_surface_w)
+
+        ctx.inputs["refined_cluster_surface"] = True
+        ctx.inputs["refined_cluster"] = final_surface_w
+
+        # keep artifacts consistent with your viz script expectations
+        ctx.artifacts["refined_surface_points_level_1"] = str(stage_dir / "refined_surface_points_level_1.npy")
+        ctx.artifacts["refined_cluster_level_1"] = str(stage_dir / "refined_surface_points_level_1.npy")
+
+
+
+
+
 
 
 class Stage60SurfaceNormals(Stage):
