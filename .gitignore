@@ -81,3 +81,6 @@ RIBETL_DATA
 
 # Ignore the muscle binary/folder
 **/muscle3.8.1
+
+
+NPET2/**

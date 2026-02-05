@@ -1,9 +1,0 @@
-{
-  "pass": "refine",
-  "eps_A": 3.0,
-  "min_samples": 20,
-  "n_points": 109385,
-  "labels": {
-    "0": 109385
-  }
-}
