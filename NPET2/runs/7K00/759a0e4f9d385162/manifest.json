@@ -2,7 +2,7 @@
   "rcsb_id": "7K00",
   "run_id": "759a0e4f9d385162",
   "pipeline_version": "npet2-dev",
-  "created_at": 1770224867.681917,
+  "created_at": 1770287749.491312,
   "inputs": {
     "fingerprints": {
       "structure": "mmcif:/Users/rtviii/dev/RIBETL_DATA/7K00/7K00.cif",
@@ -48,24 +48,24 @@
     "00_inputs": {
       "name": "00_inputs",
       "status": "success",
-      "started_at": 1770224867.6822479,
-      "ended_at": 1770224868.929214,
+      "started_at": 1770287749.491631,
+      "ended_at": 1770287750.731714,
       "params": {},
       "note": null
     },
     "10_landmarks": {
       "name": "10_landmarks",
       "status": "success",
-      "started_at": 1770224868.929417,
-      "ended_at": 1770224875.65279,
+      "started_at": 1770287750.731893,
+      "ended_at": 1770287757.580804,
       "params": {},
       "note": null
     },
     "20_exterior_shell": {
       "name": "20_exterior_shell",
       "status": "success",
-      "started_at": 1770224875.6530292,
-      "ended_at": 1770224936.40063,
+      "started_at": 1770287757.5810308,
+      "ended_at": 1770287757.5853791,
       "params": {
         "d3d_alpha": 200,
         "d3d_tol": 10,
@@ -82,8 +82,8 @@
     "30_region_atoms": {
       "name": "30_region_atoms",
       "status": "success",
-      "started_at": 1770224936.401081,
-      "ended_at": 1770224949.889042,
+      "started_at": 1770287757.585637,
+      "ended_at": 1770287771.912964,
       "params": {
         "radius_A": 35.0,
         "height_A": 120.0
@@ -93,14 +93,16 @@
     "40_empty_space": {
       "name": "40_empty_space",
       "status": "success",
-      "started_at": 1770224949.889533,
-      "ended_at": 1770224952.614947,
+      "started_at": 1770287771.913305,
+      "ended_at": 1770287774.682936,
       "params": {
         "grid_levels": [
           {
             "name": "level_0",
             "voxel_size_A": 1.0,
-            "backend": "legacy_kdtree"
+            "backend": "legacy_kdtree",
+            "atom_radius_mode": "uniform",
+            "uniform_atom_radius_A": 2.0
           }
         ],
         "radius_A": 35.0,
@@ -111,21 +113,22 @@
     "50_clustering": {
       "name": "50_clustering",
       "status": "success",
-      "started_at": 1770224952.615442,
-      "ended_at": 1770224957.5916228,
+      "started_at": 1770287774.683437,
+      "ended_at": 1770287779.961801,
       "params": {
         "dbscan_eps_A": 5.5,
         "dbscan_min_samples": 600,
         "refine_eps_A": 3.5,
-        "refine_min_samples": 175
+        "refine_min_samples": 175,
+        "save_all_clusters": true
       },
       "note": null
     },
     "60_surface_normals": {
       "name": "60_surface_normals",
       "status": "success",
-      "started_at": 1770224957.592275,
-      "ended_at": 1770224989.4880798,
+      "started_at": 1770287779.962425,
+      "ended_at": 1770287811.675561,
       "params": {
         "surface_alpha": 2,
         "surface_tolerance": 1,
@@ -139,8 +142,8 @@
     "70_mesh_validate": {
       "name": "70_mesh_validate",
       "status": "success",
-      "started_at": 1770224989.488658,
-      "ended_at": 1770224990.47598,
+      "started_at": 1770287811.6761842,
+      "ended_at": 1770287812.672374,
       "params": {
         "poisson_depth": 6,
         "poisson_ptweight": 3
@@ -184,25 +187,9 @@
       "depends_on": []
     },
     {
-      "name": "ribosome_ptcloud",
-      "type": "npy",
-      "path": "stage/20_exterior_shell/ribosome_ptcloud.npy",
-      "stage": "20_exterior_shell",
-      "meta": {},
-      "depends_on": []
-    },
-    {
-      "name": "alpha_surface_points",
-      "type": "npy",
-      "path": "stage/20_exterior_shell/alpha_surface_points.npy",
-      "stage": "20_exterior_shell",
-      "meta": {},
-      "depends_on": []
-    },
-    {
-      "name": "alpha_normals_pcd",
-      "type": "ply_pcd",
-      "path": "stage/20_exterior_shell/alpha_normals.ply",
+      "name": "alpha_shell_mesh",
+      "type": "ply_mesh",
+      "path": "stage/20_exterior_shell/alpha_shell.ply",
       "stage": "20_exterior_shell",
       "meta": {},
       "depends_on": []
@@ -211,14 +198,6 @@
       "name": "alpha_shell_quality",
       "type": "json",
       "path": "stage/20_exterior_shell/alpha_shell_quality.json",
-      "stage": "20_exterior_shell",
-      "meta": {},
-      "depends_on": []
-    },
-    {
-      "name": "alpha_shell_mesh",
-      "type": "ply_mesh",
-      "path": "stage/20_exterior_shell/alpha_shell.ply",
       "stage": "20_exterior_shell",
       "meta": {},
       "depends_on": []
@@ -234,14 +213,61 @@
       "depends_on": []
     },
     {
+      "name": "clipping_note",
+      "type": "json",
+      "path": "stage/40_empty_space/clipping_note.json",
+      "stage": "40_empty_space",
+      "meta": {},
+      "depends_on": []
+    },
+    {
+      "name": "empty_points_level_0_preclip",
+      "type": "npy",
+      "path": "stage/40_empty_space/empty_points_level_0_preclip.npy",
+      "stage": "40_empty_space",
+      "meta": {
+        "voxel_size_A": 1.0,
+        "n": 274504
+      },
+      "depends_on": []
+    },
+    {
       "name": "empty_points_level_0",
       "type": "npy",
       "path": "stage/40_empty_space/empty_points_level_0.npy",
       "stage": "40_empty_space",
       "meta": {
         "voxel_size_A": 1.0,
+        "n": 152997,
+        "backend": "legacy_kdtree",
+        "alpha_shell_watertight": true
+      },
+      "depends_on": []
+    },
+    {
+      "name": "empty_points_input",
+      "type": "npy",
+      "path": "stage/50_clustering/empty_points_input.npy",
+      "stage": "50_clustering",
+      "meta": {
         "n": 152997
       },
+      "depends_on": []
+    },
+    {
+      "name": "dbscan_coarse_index",
+      "type": "json",
+      "path": "stage/50_clustering/coarse/index.json",
+      "stage": "50_clustering",
+      "meta": {},
+      "depends_on": []
+    },
+    {
+      "name": "dbscan_refine_index",
+      "type": "json",
+      "path": "stage/50_clustering/refine/index.json",
+      "stage": "50_clustering",
+      "meta": {},
       "depends_on": []
     },
     {

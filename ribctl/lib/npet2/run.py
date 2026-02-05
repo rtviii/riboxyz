@@ -11,10 +11,11 @@ from ribctl.lib.npet2.adapters.riboxyz_providers import (
 from ribctl.lib.npet2.core.config import RunConfig
 from ribctl.lib.npet2.core.manifest import RunManifest
 from ribctl.lib.npet2.core.run_id import compute_run_id
-from ribctl.lib.npet2.core.settings import NPET2_RUNS_ROOT
+from ribctl.lib.npet2.core.settings import NPET2_ROOT, NPET2_RUNS_ROOT
 from ribctl.lib.npet2.core.store import LocalRunStore
 from ribctl.lib.npet2.core.types import StageContext
 from ribctl.lib.npet2.core.pipeline import Pipeline
+
 
 from ribctl.lib.npet2.stages.bootstrap import Stage00Inputs, Stage10Landmarks
 from ribctl.lib.npet2.stages.legacy_minimal import (
@@ -22,6 +23,7 @@ from ribctl.lib.npet2.stages.legacy_minimal import (
     Stage30RegionAtoms,
     Stage40EmptySpace,
     Stage50Clustering,
+    Stage55GridRefine05,
     Stage60SurfaceNormals,
     Stage70MeshValidate,
 )
@@ -40,6 +42,7 @@ def run_npet2(
 ) -> StageContext:
     rcsb_id = rcsb_id.upper()
     config = config or RunConfig()
+
 
     structure_provider = structure_provider or RiboxyzStructureProvider()
     landmark_provider = landmark_provider or RiboxyzLandmarkProvider()
@@ -80,6 +83,11 @@ def run_npet2(
         },
     )
 
+    # in run_npet2()
+    from ribctl.lib.npet2.core.cache import LocalStageCache
+    ctx.inputs["stage_cache"] = LocalStageCache(NPET2_ROOT / "cache")
+    ctx.inputs["inputs_fp"] = inputs_fp
+
     pipeline = Pipeline(
         [
             Stage00Inputs(),
@@ -88,9 +96,11 @@ def run_npet2(
             Stage30RegionAtoms(),
             Stage40EmptySpace(),
             Stage50Clustering(),
+            Stage55GridRefine05(),   # <--- new
             Stage60SurfaceNormals(),
             Stage70MeshValidate(),
         ]
     )
+
     pipeline.run(ctx)
     return ctx

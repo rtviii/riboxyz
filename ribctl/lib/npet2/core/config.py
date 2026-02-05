@@ -65,6 +65,15 @@ class RunConfig:
     mesh_poisson_depth: int = 6
     mesh_poisson_ptweight: int = 3
 
+    # --- grid refinement (0.5Å ROI pass)
+    refine_voxel_size_A      : float = 0.5
+    refine_roi_pad_A         : float = 10.0
+    refine_atom_radius_A     : float = 2.0
+    refine_cc_connectivity   : int   = 26
+    refine_topk_preview      : int   = 5
+    refine_max_preview_points: int   = 50_000
+
+
     # refinement plan (kept for later; default only one level)
     grid_levels: List[GridLevelConfig] = field(default_factory=lambda: [
         GridLevelConfig(name="level_0", voxel_size_A=1.0, occupancy_backend="legacy_kdtree"),

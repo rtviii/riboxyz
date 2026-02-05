@@ -1,0 +1,83 @@
+{
+  "voxel_size_A": 0.5,
+  "roi_pad_A": 10.0,
+  "atom_radius_A": 2.0,
+  "cc_connectivity": 26,
+  "n_components": 446,
+  "chosen_label": 1,
+  "overlap_counts": {
+    "1": 69537
+  },
+  "top_components": [
+    {
+      "label": 1,
+      "size": 4197186,
+      "bbox_min": [
+        0,
+        0,
+        0
+      ],
+      "bbox_max": [
+        175,
+        173,
+        208
+      ]
+    },
+    {
+      "label": 393,
+      "size": 34,
+      "bbox_min": [
+        122,
+        70,
+        88
+      ],
+      "bbox_max": [
+        127,
+        75,
+        92
+      ]
+    },
+    {
+      "label": 66,
+      "size": 29,
+      "bbox_min": [
+        43,
+        46,
+        98
+      ],
+      "bbox_max": [
+        46,
+        51,
+        103
+      ]
+    },
+    {
+      "label": 29,
+      "size": 22,
+      "bbox_min": [
+        34,
+        84,
+        88
+      ],
+      "bbox_max": [
+        37,
+        88,
+        92
+      ]
+    },
+    {
+      "label": 170,
+      "size": 22,
+      "bbox_min": [
+        66,
+        128,
+        105
+      ],
+      "bbox_max": [
+        74,
+        129,
+        108
+      ]
+    }
+  ]
+}
