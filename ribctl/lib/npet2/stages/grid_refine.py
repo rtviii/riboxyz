@@ -479,7 +479,6 @@ class Stage55GridRefine(Stage):
 
         surface_pts = points
 
-        # Normal estimation
         t1 = time.perf_counter()
         try:
             pcd = estimate_normals(
@@ -503,7 +502,6 @@ class Stage55GridRefine(Stage):
 
         mesh_path = stage_dir / f"mesh_{level_name}.ply"
 
-        # Open3D's built-in Poisson (won't crash-terminate on failure)
         depth = c.mesh_level1_poisson_depth
         print(f"[{self.key}]   Poisson reconstruction (o3d, depth={depth})...")
 
@@ -518,7 +516,6 @@ class Stage55GridRefine(Stage):
             print(f"[{self.key}] o3d Poisson failed for {level_name}: {e}")
             return
 
-        # Trim low-density vertices (Poisson extrapolates far from input points)
         densities = np.asarray(densities)
         density_threshold = np.quantile(densities, 0.01)
         vertices_to_remove = densities < density_threshold
@@ -526,15 +523,18 @@ class Stage55GridRefine(Stage):
 
         o3d.io.write_triangle_mesh(str(mesh_path), mesh_o3d)
 
-        # Cleanup in pyvista
         try:
             mesh = pv.read(str(mesh_path))
             mesh = mesh.fill_holes(2000.0)
             mesh = mesh.triangulate()
-            mesh = mesh.connectivity(largest=True)  # remove floating pockets last
+            mesh = mesh.connectivity(largest=True)
+
+            # Clip mesh back to void -- don't let it eat into atoms
+            region_xyz = np.asarray(ctx.require("region_atom_xyz_all"), dtype=np.float32)
+            mesh = self._clip_mesh_to_atoms(mesh, region_xyz, min_clearance_A=1.5)
+
             mesh.save(str(mesh_path))
 
-            # ASCII for pymol
             mesh_path_ascii = stage_dir / f"mesh_{level_name}_ascii.ply"
             mesh.save(str(mesh_path_ascii), binary=False)
 
@@ -557,3 +557,44 @@ class Stage55GridRefine(Stage):
             except:
                 pass
             return
+
+    def _clip_mesh_to_atoms(
+        self,
+        mesh: pv.PolyData,
+        atom_xyz: np.ndarray,
+        min_clearance_A: float = 1.5,
+    ) -> pv.PolyData:
+        """
+        Push any mesh vertices that are closer than min_clearance_A to any atom
+        back along the atom->vertex direction until they are at min_clearance_A.
+        
+        This prevents Poisson/smoothing overshoot from eating into atom-occupied space.
+        """
+        from scipy.spatial import cKDTree
+
+        tree = cKDTree(atom_xyz)
+        pts = np.asarray(mesh.points, dtype=np.float64)
+
+        dist, idx = tree.query(pts, k=1)
+        violating = dist < min_clearance_A
+        n_violations = int(violating.sum())
+
+        if n_violations == 0:
+            print(f"[{self.key}]   atom clearance check: all vertices OK (min_clearance={min_clearance_A}A)")
+            return mesh
+
+        nearest_atom = atom_xyz[idx[violating]]
+        direction = pts[violating] - nearest_atom
+        norms = np.linalg.norm(direction, axis=1, keepdims=True)
+        norms = np.maximum(norms, 1e-8)
+        direction = direction / norms
+
+        pts[violating] = nearest_atom + direction * min_clearance_A
+
+        result = mesh.copy()
+        result.points = pts.astype(np.float32)
+
+        print(f"[{self.key}]   atom clearance check: pushed {n_violations:,} vertices "
+            f"(of {pts.shape[0]:,}) to min {min_clearance_A}A clearance")
+
+        return result

@@ -1036,6 +1036,23 @@ class Stage70MeshValidate(Stage):
                 )
             except Exception:
                 pass
+            # Clip mesh to atom clearance (both Poisson and voxel paths)
+            try:
+                region_xyz = np.asarray(ctx.require("region_atom_xyz_all"), dtype=np.float32)
+                from scipy.spatial import cKDTree
+                tree = cKDTree(region_xyz)
+                pts = np.asarray(surf_w.points, dtype=np.float64)
+                dist, idx = tree.query(pts, k=1)
+                violating = dist < 1.5
+                if violating.sum() > 0:
+                    nearest = region_xyz[idx[violating]]
+                    direction = pts[violating] - nearest
+                    norms = np.maximum(np.linalg.norm(direction, axis=1, keepdims=True), 1e-8)
+                    pts[violating] = nearest + (direction / norms) * 1.5
+                    surf_w.points = pts.astype(np.float32)
+                    print(f"[{self.key}]   pushed {int(violating.sum()):,} vertices to 1.5A atom clearance")
+            except Exception as e:
+                print(f"[{self.key}]   atom clearance clip failed: {e}")
 
             surf_w.save(str(mesh_path))
 

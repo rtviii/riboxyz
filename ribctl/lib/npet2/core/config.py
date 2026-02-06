@@ -29,15 +29,15 @@ class RunConfig:
 
     # === Stage20: Exterior shell (whole ribosome surface) ===
     # Large alpha because the ribosome is roughly convex
-    alpha_d3d_alpha: float = 200
-    alpha_d3d_tol: float = 10
-    alpha_d3d_offset: float = 3
-    alpha_kdtree_radius: float = 40
-    alpha_max_nn: int = 60
-    alpha_tangent_planes_k: int = 20
-    alpha_poisson_depth: int = 6
-    alpha_poisson_ptweight: int = 4
-    alpha_fill_holes: float = 2000
+    alpha_d3d_alpha       : float = 200
+    alpha_d3d_tol         : float = 10
+    alpha_d3d_offset      : float = 3
+    alpha_kdtree_radius   : float = 40
+    alpha_max_nn          : int   = 60
+    alpha_tangent_planes_k: int   = 20
+    alpha_poisson_depth   : int   = 6
+    alpha_poisson_ptweight: int   = 4
+    alpha_fill_holes      : float = 2000
 
     # === Stage40: Grid levels ===
     grid_levels: List[GridLevelConfig] = field(
