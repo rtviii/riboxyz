@@ -66,7 +66,6 @@ def _tunnel_debris_chains(rcsb_id: str, ro, profile) -> List[str]:
             pass
     return skip
 
-
 class Stage20ExteriorShell(Stage):
     key = "20_exterior_shell"
 
@@ -323,7 +322,6 @@ class Stage30RegionAtoms(Stage):
         ctx.inputs["region_atom_xyz_all"] = all_points
         
         print(f"[{self.key}] filtered atoms: {filtered_points.shape[0]:,}, all atoms: {all_points.shape[0]:,}")
-
 
 class Stage40EmptySpace(Stage):
     key = "40_empty_space"
@@ -724,7 +722,6 @@ class Stage50Clustering(Stage):
         }
         (pass_dir / "index.json").write_text(json.dumps(index, indent=2))
 
-        # Save per-cluster arrays
         for lab, plist in clusters_dict.items():
             lab = int(lab)
             if lab == -1:  # skip noise

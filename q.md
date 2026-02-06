@@ -7,16 +7,13 @@ So my goal right now is to basically create a bit of a harness software for it t
 
 Let e show you the "orchestrator" i have going on at the moment. I'm mostly dissatisfied by it because it's slow, janky and doesn't really connect well to the artifacts that are already produced (i.e if i initialize the it with some strcutrure 7K00 -- which has already had all of its artifacts produced -- i want to be able to just load them in and inspect them rather than having to re-run the whole pipeline from scratch).
 
-
 Also pyqt is a piece of shit and im wondering if we can switch to something web-based like nicegui. My concern here of course is that we use some pretty involved software there like pyvista which is finicky as fuck as is and putting it in the browser context seems like a taller task yet. What do u think?
 
 Does that make sense? Can you help me with that?
 
-
 Don't jump straight into the code, just talk to me about the tradeoffs. Let's chart a good course for improving this junk. Because eventually i want this to be the modus operandi for other methods where lots of intermediate artifacts are involved. 
 
 I think the general architecture should be a viewer/orchestrator that is able to verify the completenes off predefined-path artifacts PER stage, knows how to visualize each and is able to rerun that stage with new parameters (ui-editable) on demand.
-
 
 
 -----------
