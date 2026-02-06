@@ -138,7 +138,7 @@ def apply_poisson_reconstruction(
     surf_estimated_ptcloud_path: str,
     output_path: Path,
     recon_depth: int = 6,
-    recon_pt_weight: int = 3,
+    recon_pt_weight: float = 3.0,  # was int
 ):
     # The documentation can be found at https://www.cs.jhu.edu/~misha/Code/PoissonRecon/Version16.04/ in "PoissonRecon" binary
     print(

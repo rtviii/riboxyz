@@ -731,27 +731,27 @@ class Stage50Clustering(Stage):
                 np.save(pass_dir / f"cluster_id{lab}.npy", arr)
 
 
+    # In ribctl/lib/npet2/stages/legacy_minimal.py, Stage50Clustering
+
     def _generate_mesh(self, ctx: StageContext, points: np.ndarray, level_name: str) -> None:
-        """
-        Generate mesh from point cloud using Poisson reconstruction.
-        """
+        """Generate mesh from tunnel point cloud using Poisson reconstruction."""
         import time
         c = ctx.config
         stage_dir = ctx.store.stage_dir(self.key)
 
         print(f"[{self.key}] generating mesh for {level_name}...")
 
-        # Surface extraction
+        # Surface extraction via tight alpha shape (alpha=2, NOT 200)
         t0 = time.perf_counter()
         try:
             surface_pts = ptcloud_convex_hull_points(
                 points,
-                ALPHA=200,      # ← FIX: uppercase parameters
-                TOLERANCE=10,
-                OFFSET=3,
+                ALPHA=c.tunnel_surface_alpha,
+                TOLERANCE=c.tunnel_surface_tolerance,
+                OFFSET=c.tunnel_surface_offset,
             ).astype(np.float32)
         except Exception as e:
-            print(f"[{self.key}] convex hull failed for {level_name}: {e}")
+            print(f"[{self.key}] surface extraction failed for {level_name}: {e}")
             return
         dt0 = time.perf_counter() - t0
         print(f"[{self.key}]   surface extraction: {dt0:.2f}s, {surface_pts.shape[0]:,} points")
@@ -761,9 +761,9 @@ class Stage50Clustering(Stage):
         try:
             pcd = estimate_normals(
                 surface_pts,
-                kdtree_radius=10.0,
-                kdtree_max_nn=15,
-                correction_tangent_planes_n=10,
+                kdtree_radius=c.normals_radius,
+                kdtree_max_nn=c.normals_max_nn,
+                correction_tangent_planes_n=c.normals_tangent_k,
             )
         except Exception as e:
             print(f"[{self.key}] normal estimation failed for {level_name}: {e}")
@@ -788,7 +788,6 @@ class Stage50Clustering(Stage):
             print(f"[{self.key}] poisson reconstruction failed for {level_name}: {e}")
             return
 
-        # Check if mesh was actually created
         if not mesh_path.exists():
             print(f"[{self.key}] poisson did not produce mesh file for {level_name}")
             return
@@ -820,9 +819,9 @@ class Stage60SurfaceNormals(Stage):
     def params(self, ctx: StageContext) -> Dict[str, Any]:
         c = ctx.config
         return {
-            "surface_alpha": c.surface_alpha,
-            "surface_tolerance": c.surface_tolerance,
-            "surface_offset": c.surface_offset,
+            "tunnel_surface_alpha": c.tunnel_surface_alpha,
+            "tunnel_surface_tolerance": c.tunnel_surface_tolerance,
+            "tunnel_surface_offset": c.tunnel_surface_offset,
             "normals_radius": c.normals_radius,
             "normals_max_nn": c.normals_max_nn,
             "normals_tangent_k": c.normals_tangent_k,
@@ -841,25 +840,24 @@ class Stage60SurfaceNormals(Stage):
 
         stage_dir = ctx.store.stage_dir(self.key)
 
-        # Decide how to get surface points
         if surface_flag:
-            # Points already represent a surface-like sampling (e.g., boundary voxels at 0.5Å)
             surface_pts = refined
             print(
                 "[60_surface_normals] using refined points directly as surface_pts (skip Delaunay)"
             )
         else:
-            # Old behavior (expensive on large point clouds)
             t0 = time.perf_counter()
             surface_pts = ptcloud_convex_hull_points(
-                refined, c.surface_alpha, c.surface_tolerance, c.surface_offset
+                refined, 
+                c.tunnel_surface_alpha,       # was c.surface_alpha
+                c.tunnel_surface_tolerance,   # was c.surface_tolerance
+                c.tunnel_surface_offset,      # was c.surface_offset
             ).astype(np.float32)
             dt = time.perf_counter() - t0
             print(
                 f"[60_surface_normals] delaunay_3d+extract_surface took {dt:,.2f}s surface_pts n={surface_pts.shape[0]:,}"
             )
 
-        # Save surface points
         p_surface = stage_dir / "surface_points.npy"
         np.save(p_surface, surface_pts)
         ctx.store.register_file(
@@ -870,7 +868,6 @@ class Stage60SurfaceNormals(Stage):
             meta={"n": int(surface_pts.shape[0])},
         )
 
-        # Normals estimation
         t1 = time.perf_counter()
         pcd = estimate_normals(
             surface_pts,
@@ -881,7 +878,6 @@ class Stage60SurfaceNormals(Stage):
         dt1 = time.perf_counter() - t1
         print(f"[60_surface_normals] estimate_normals took {dt1:,.2f}s")
 
-        # Write normals point cloud
         p_normals = stage_dir / "surface_normals.ply"
         o3d.io.write_point_cloud(str(p_normals), pcd)
         ctx.store.register_file(

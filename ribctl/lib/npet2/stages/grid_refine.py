@@ -510,8 +510,8 @@ class Stage55GridRefine(Stage):
             apply_poisson_reconstruction(
                 str(normals_path),
                 mesh_path,
-                recon_depth=int(getattr(c, "mesh_level1_poisson_depth", 8)),
-                recon_pt_weight=int(getattr(c, "mesh_level1_poisson_ptweight", 3)),
+                recon_depth=c.mesh_level1_poisson_depth,
+                recon_pt_weight=c.mesh_level1_poisson_ptweight,  # no int() cast
             )
         except subprocess.CalledProcessError as e:
             print(f"[{self.key}] poisson process failed for {level_name}: returncode={e.returncode}")
