@@ -944,6 +944,13 @@ class Stage70MeshValidate(Stage):
                 if watertight:
                     method_used = "poisson"
                     
+                    # Clean up Poisson mesh too
+                    m = m.connectivity(largest=True)
+                    m.save(str(mesh_path))
+                    
+                    mesh_path_ascii = stage_dir / "npet2_tunnel_mesh_ascii.ply"
+                    m.save(str(mesh_path_ascii), binary=False)
+                    
                     mesh_path_ascii = stage_dir / "npet2_tunnel_mesh_ascii.ply"
                     try:
                         m.save(str(mesh_path_ascii), binary=False)
@@ -1000,7 +1007,7 @@ class Stage70MeshValidate(Stage):
             if surf_c0.n_points == 0 or surf_c0.n_faces == 0:
                 raise ValueError("[70_mesh_validate] voxel contour produced empty surface")
 
-            surf_c0 = surf_c0.clean(tolerance=0.0).connectivity(largest=True)
+            surf_c0 = surf_c0.clean(tolerance=0.0)
 
             fill_holes_A = float(getattr(c, "voxel_mesh_fill_holes_A", 50.0))
             try:
@@ -1014,6 +1021,9 @@ class Stage70MeshValidate(Stage):
                     surf_c0 = surf_c0.smooth(n_iter=smooth_iters)
                 except Exception:
                     pass
+
+            # Largest component LAST -- after fill_holes and smooth
+            surf_c0 = surf_c0.connectivity(largest=True)
 
             pts_c0 = np.asarray(surf_c0.points, dtype=np.float32)
             pts_w = transform_points_from_C0(pts_c0, ptc, constr).astype(np.float32)

@@ -470,8 +470,8 @@ class Stage55GridRefine(Stage):
                 np.save(pass_dir / f"cluster_id{cid}.npy", cpts.astype(np.float32))
 
     def _generate_mesh(self, ctx: StageContext, points: np.ndarray, level_name: str) -> None:
+        """Generate mesh from refined boundary points using Poisson reconstruction."""
         import time
-        import subprocess
         c = ctx.config
         stage_dir = ctx.store.stage_dir(self.key)
 
@@ -479,19 +479,20 @@ class Stage55GridRefine(Stage):
 
         surface_pts = points
 
+        # Normal estimation
         t1 = time.perf_counter()
         try:
             pcd = estimate_normals(
                 surface_pts,
-                kdtree_radius=10.0,
-                kdtree_max_nn=15,
-                correction_tangent_planes_n=10,
+                kdtree_radius=c.normals_radius,
+                kdtree_max_nn=c.normals_max_nn,
+                correction_tangent_planes_n=c.normals_tangent_k,
             )
         except Exception as e:
             print(f"[{self.key}] normal estimation failed for {level_name}: {e}")
             return
         dt1 = time.perf_counter() - t1
-        print(f"[{self.key}]   normal estimation: {dt1:.2f}s")
+        print(f"[{self.key}]   normal estimation: {dt1:.2f}s, {len(pcd.points):,} points")
 
         normals_path = stage_dir / f"normals_{level_name}.ply"
         try:
@@ -501,54 +502,54 @@ class Stage55GridRefine(Stage):
             return
 
         mesh_path = stage_dir / f"mesh_{level_name}.ply"
-        
-        print(f"[{self.key}]   attempting Poisson reconstruction...")
-        print(f"[{self.key}]   (note: PoissonRecon may crash on non-manifold surfaces)")
-        
+
+        # Open3D's built-in Poisson (won't crash-terminate on failure)
+        depth = c.mesh_level1_poisson_depth
+        print(f"[{self.key}]   Poisson reconstruction (o3d, depth={depth})...")
+
+        t2 = time.perf_counter()
         try:
-            from ribctl.lib.npet.kdtree_approach import apply_poisson_reconstruction
-            apply_poisson_reconstruction(
-                str(normals_path),
-                mesh_path,
-                recon_depth=c.mesh_level1_poisson_depth,
-                recon_pt_weight=c.mesh_level1_poisson_ptweight,  # no int() cast
+            mesh_o3d, densities = o3d.geometry.TriangleMesh.create_from_point_cloud_poisson(
+                pcd, depth=depth, linear_fit=True
             )
-        except subprocess.CalledProcessError as e:
-            print(f"[{self.key}] poisson process failed for {level_name}: returncode={e.returncode}")
-            print(f"[{self.key}]   (this is OK; Stage70 will use voxel fallback)")
-            return
+            dt2 = time.perf_counter() - t2
+            print(f"[{self.key}]   Poisson done: {dt2:.2f}s, {len(mesh_o3d.vertices):,} verts, {len(mesh_o3d.triangles):,} faces")
         except Exception as e:
-            print(f"[{self.key}] poisson failed for {level_name}: {e}")
-            print(f"[{self.key}]   (this is OK; Stage70 will use voxel fallback)")
+            print(f"[{self.key}] o3d Poisson failed for {level_name}: {e}")
             return
 
-        if not mesh_path.exists():
-            print(f"[{self.key}] poisson did not produce mesh file for {level_name}")
-            print(f"[{self.key}]   (this is OK; Stage70 will use voxel fallback)")
-            return
+        # Trim low-density vertices (Poisson extrapolates far from input points)
+        densities = np.asarray(densities)
+        density_threshold = np.quantile(densities, 0.01)
+        vertices_to_remove = densities < density_threshold
+        mesh_o3d.remove_vertices_by_mask(vertices_to_remove)
 
+        o3d.io.write_triangle_mesh(str(mesh_path), mesh_o3d)
+
+        # Cleanup in pyvista
         try:
             mesh = pv.read(str(mesh_path))
             mesh = mesh.fill_holes(2000.0)
-            mesh = mesh.connectivity(largest=True).triangulate()
+            mesh = mesh.triangulate()
+            mesh = mesh.connectivity(largest=True)  # remove floating pockets last
             mesh.save(str(mesh_path))
-            
+
+            # ASCII for pymol
             mesh_path_ascii = stage_dir / f"mesh_{level_name}_ascii.ply"
-            try:
-                mesh.save(str(mesh_path_ascii), binary=False)
-            except:
-                pass
-            
+            mesh.save(str(mesh_path_ascii), binary=False)
+
+            print(f"[{self.key}]   cleaned mesh: {mesh.n_points:,} pts, {mesh.n_faces:,} faces, "
+                f"open_edges={mesh.n_open_edges}, manifold={mesh.is_manifold}")
+
             ctx.store.register_file(
                 name=f"mesh_{level_name}",
                 stage=self.key,
                 type=ArtifactType.PLY_MESH,
                 path=mesh_path,
-                meta={"level": level_name},
+                meta={"level": level_name, "method": "o3d_poisson", "depth": depth},
             )
-            
             print(f"[{self.key}] mesh saved: {mesh_path}")
-            
+
         except Exception as e:
             print(f"[{self.key}] mesh cleanup failed for {level_name}: {e}")
             try:

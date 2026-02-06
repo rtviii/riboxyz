@@ -92,7 +92,7 @@ class RunConfig:
 
     # Stage55 mesh generation
     mesh_level1_enable: bool = True
-    mesh_level1_poisson_depth: int = 8
+    mesh_level1_poisson_depth: int = 6
     mesh_level1_poisson_ptweight: float = 3.0
 
     # === Stage70: Final mesh validation ===
