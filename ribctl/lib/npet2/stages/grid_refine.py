@@ -64,27 +64,29 @@ def _valid_ijk(grid: GridSpec, ijk: np.ndarray) -> np.ndarray:
     return m
 
 
+
+
 class Stage55GridRefine(Stage):
     key = "55_grid_refine"
 
     def params(self, ctx: StageContext) -> Dict[str, Any]:
         c = ctx.config
         return {
-            "voxel_size_A": float(c.refine_voxel_size_A),
-            "roi_pad_A": float(c.refine_roi_pad_A),
-            "atom_radius_A": float(c.refine_atom_radius_A),
-            "keep_within_A": float(c.refine_keep_within_A),
-            "occ_close_iters": int(c.refine_occ_close_iters),
-            "void_open_iters": int(c.refine_void_open_iters),
-            "forbid_roi_boundary": bool(c.refine_forbid_roi_boundary),
-            "coarse_eps_A": float(c.dbscan_level1_coarse_eps_A),
-            "coarse_min_samples": int(c.dbscan_level1_coarse_min_samples),
-            "refine_eps_A": float(c.dbscan_level1_refine_eps_A),
-            "refine_min_samples": int(c.dbscan_level1_refine_min_samples),
-            "dbscan_max_points": int(c.refine_dbscan_max_points),
-            "dbscan_seed": int(c.refine_dbscan_seed),
-            "mesh_enable": bool(getattr(c, "mesh_level1_enable", True)),
-            "mesh_poisson_depth": int(getattr(c, "mesh_level1_poisson_depth", 8)),
+            "voxel_size_A"         : float(c.refine_voxel_size_A),
+            "roi_pad_A"            : float(c.refine_roi_pad_A),
+            "atom_radius_A"        : float(c.refine_atom_radius_A),
+            "keep_within_A"        : float(c.refine_keep_within_A),
+            "occ_close_iters"      : int(c.refine_occ_close_iters),
+            "void_open_iters"      : int(c.refine_void_open_iters),
+            "forbid_roi_boundary"  : bool(c.refine_forbid_roi_boundary),
+            "coarse_eps_A"         : float(c.dbscan_level1_coarse_eps_A),
+            "coarse_min_samples"   : int(c.dbscan_level1_coarse_min_samples),
+            "refine_eps_A"         : float(c.dbscan_level1_refine_eps_A),
+            "refine_min_samples"   : int(c.dbscan_level1_refine_min_samples),
+            "dbscan_max_points"    : int(c.refine_dbscan_max_points),
+            "dbscan_seed"          : int(c.refine_dbscan_seed),
+            "mesh_enable"          : bool(getattr(c, "mesh_level1_enable", True)),
+            "mesh_poisson_depth"   : int(getattr(c, "mesh_level1_poisson_depth", 8)),
             "mesh_poisson_ptweight": float(getattr(c, "mesh_level1_poisson_ptweight", 0.5)),
         }
 
@@ -104,8 +106,10 @@ class Stage55GridRefine(Stage):
 
         refined_world = np.asarray(ctx.require("refined_cluster"), dtype=np.float32)
         
-        # Use ALL atoms for occupancy (prevents mesh interference)
-        region_xyz = np.asarray(ctx.require("region_atom_xyz_all"), dtype=np.float32)
+        # Use occ atoms for occupancy (prevents mesh interference)
+        # region_xyz = np.asarray(ctx.require("region_atom_xyz_all"), dtype=np.float32)
+        region_xyz = np.asarray(ctx.require("region_atom_xyz_occ"), dtype=np.float32)
+
         
         ptc = np.asarray(ctx.require("ptc_xyz"), dtype=np.float32)
         constr = np.asarray(ctx.require("constriction_xyz"), dtype=np.float32)
@@ -470,93 +474,76 @@ class Stage55GridRefine(Stage):
                 np.save(pass_dir / f"cluster_id{cid}.npy", cpts.astype(np.float32))
 
     def _generate_mesh(self, ctx: StageContext, points: np.ndarray, level_name: str) -> None:
-        """Generate mesh from refined boundary points using Poisson reconstruction."""
         import time
+        import json
+        from ribctl.lib.npet.kdtree_approach import transform_points_from_C0
+        from ribctl.lib.npet2.backends.meshing import (
+            mesh_from_binary_volume,
+            clip_mesh_to_atom_clearance,
+            save_mesh_with_ascii,
+        )
+
         c = ctx.config
         stage_dir = ctx.store.stage_dir(self.key)
-
         print(f"[{self.key}] generating mesh for {level_name}...")
 
-        surface_pts = points
+        mask_path = stage_dir / "selected_void_component_mask_level_1.npy"
+        if not mask_path.exists():
+            mask_path = stage_dir / "void_mask_level_1.npy"
+        if not mask_path.exists():
+            print(f"[{self.key}] no void mask found for {level_name}, skipping mesh")
+            return
 
-        t1 = time.perf_counter()
+        mask = np.load(mask_path).astype(bool)
+        spec = json.loads((stage_dir / "grid_spec_level_1.json").read_text())
+        origin = np.asarray(spec["origin"], dtype=np.float32)
+        voxel = float(spec["voxel_size_A"])
+        ptc = np.asarray(spec["transform"]["ptc"], dtype=np.float32)
+        constr = np.asarray(spec["transform"]["constriction"], dtype=np.float32)
+
+        t0 = time.perf_counter()
         try:
-            pcd = estimate_normals(
-                surface_pts,
-                kdtree_radius=c.normals_radius,
-                kdtree_max_nn=c.normals_max_nn,
-                correction_tangent_planes_n=c.normals_tangent_k,
+            surf_c0 = mesh_from_binary_volume(
+                mask, origin, voxel,
+                gaussian_sigma_voxels=c.mesh_gaussian_sigma_voxels,
+                smooth_method=c.mesh_smooth_method,
+                smooth_iters=c.mesh_level1_smooth_iters,
+                taubin_pass_band=c.mesh_taubin_pass_band,
+                fill_holes_size=c.mesh_fill_holes_A,
+                pre_smooth_save_path=stage_dir / f"mesh_{level_name}_pre_smooth.ply",
             )
-        except Exception as e:
-            print(f"[{self.key}] normal estimation failed for {level_name}: {e}")
+        except ValueError as e:
+            print(f"[{self.key}] MC mesh failed for {level_name}: {e}")
             return
-        dt1 = time.perf_counter() - t1
-        print(f"[{self.key}]   normal estimation: {dt1:.2f}s, {len(pcd.points):,} points")
 
-        normals_path = stage_dir / f"normals_{level_name}.ply"
-        try:
-            o3d.io.write_point_cloud(str(normals_path), pcd)
-        except Exception as e:
-            print(f"[{self.key}] failed to write normals PCD for {level_name}: {e}")
-            return
+        pts_w = transform_points_from_C0(
+            np.asarray(surf_c0.points, dtype=np.float32), ptc, constr
+        ).astype(np.float32)
+        surf_w = surf_c0.copy(deep=True)
+        surf_w.points = pts_w
+
+        region_xyz = np.asarray(ctx.require("region_atom_xyz_occ"), dtype=np.float32)
+        surf_w = clip_mesh_to_atom_clearance(surf_w, region_xyz, min_clearance_A=c.mesh_atom_clearance_A)
+
+        dt = time.perf_counter() - t0
+        is_watertight = surf_w.is_manifold and surf_w.n_open_edges == 0
+        print(f"[{self.key}]   MC mesh: {dt:.2f}s, {surf_w.n_points:,} pts, "
+            f"{surf_w.n_faces:,} faces, watertight={is_watertight}")
 
         mesh_path = stage_dir / f"mesh_{level_name}.ply"
+        save_mesh_with_ascii(surf_w, mesh_path, tag=level_name)
 
-        depth = c.mesh_level1_poisson_depth
-        print(f"[{self.key}]   Poisson reconstruction (o3d, depth={depth})...")
+        ctx.store.register_file(
+            name=f"mesh_{level_name}",
+            stage=self.key,
+            type=ArtifactType.PLY_MESH,
+            path=mesh_path,
+            meta={"level": level_name, "method": "marching_cubes_taubin", "watertight": is_watertight, "voxel_size_A": voxel},
+        )
+        print(f"[{self.key}] mesh saved: {mesh_path}")
 
-        t2 = time.perf_counter()
-        try:
-            mesh_o3d, densities = o3d.geometry.TriangleMesh.create_from_point_cloud_poisson(
-                pcd, depth=depth, linear_fit=True
-            )
-            dt2 = time.perf_counter() - t2
-            print(f"[{self.key}]   Poisson done: {dt2:.2f}s, {len(mesh_o3d.vertices):,} verts, {len(mesh_o3d.triangles):,} faces")
-        except Exception as e:
-            print(f"[{self.key}] o3d Poisson failed for {level_name}: {e}")
-            return
-
-        densities = np.asarray(densities)
-        density_threshold = np.quantile(densities, 0.01)
-        vertices_to_remove = densities < density_threshold
-        mesh_o3d.remove_vertices_by_mask(vertices_to_remove)
-
-        o3d.io.write_triangle_mesh(str(mesh_path), mesh_o3d)
-
-        try:
-            mesh = pv.read(str(mesh_path))
-            mesh = mesh.fill_holes(2000.0)
-            mesh = mesh.triangulate()
-            mesh = mesh.connectivity(largest=True)
-
-            # Clip mesh back to void -- don't let it eat into atoms
-            region_xyz = np.asarray(ctx.require("region_atom_xyz_all"), dtype=np.float32)
-            mesh = self._clip_mesh_to_atoms(mesh, region_xyz, min_clearance_A=1.5)
-
-            mesh.save(str(mesh_path))
-
-            mesh_path_ascii = stage_dir / f"mesh_{level_name}_ascii.ply"
-            mesh.save(str(mesh_path_ascii), binary=False)
-
-            print(f"[{self.key}]   cleaned mesh: {mesh.n_points:,} pts, {mesh.n_faces:,} faces, "
-                f"open_edges={mesh.n_open_edges}, manifold={mesh.is_manifold}")
-
-            ctx.store.register_file(
-                name=f"mesh_{level_name}",
-                stage=self.key,
-                type=ArtifactType.PLY_MESH,
-                path=mesh_path,
-                meta={"level": level_name, "method": "o3d_poisson", "depth": depth},
-            )
-            print(f"[{self.key}] mesh saved: {mesh_path}")
-
-        except Exception as e:
-            print(f"[{self.key}] mesh cleanup failed for {level_name}: {e}")
-            try:
-                mesh_path.unlink(missing_ok=True)
-            except:
-                pass
-            return
+        ctx.inputs["level_1_mesh_path"] = str(mesh_path)
+        ctx.inputs["level_1_mesh_watertight"] = is_watertight
 
     def _clip_mesh_to_atoms(
         self,

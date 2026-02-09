@@ -96,8 +96,8 @@ def run_npet2(
             Stage30RegionAtoms(),
             Stage40EmptySpace(),
             Stage50Clustering(),
-            Stage55GridRefine(),   # <--- new
-            Stage60SurfaceNormals(),
+            Stage55GridRefine(),   
+            # Stage60SurfaceNormals(),
             Stage70MeshValidate(),
         ]
     )

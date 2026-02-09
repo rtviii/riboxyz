@@ -11,8 +11,10 @@ from ribctl.lib.npet2.backends.grid_occupancy import (
     connected_components_3d,
     occupancy_via_edt,
 )
+from ribctl.lib.npet2.backends.meshing import save_mesh_with_ascii
 from ribctl.lib.npet2.core.cache import StageCacheKey
 from ribctl.lib.npet2.core.pipeline import Stage
+from ribctl.lib.npet2.core.structure_selection import intersect_with_first_assembly, ribosome_wall_auth_asym_ids
 from ribctl.lib.npet2.core.types import StageContext, ArtifactType
 
 from scipy import ndimage
@@ -42,7 +44,20 @@ from ribctl.lib.npet2.stages.grid_refine import (
     _valid_ijk,
     _voxel_centers_from_indices,
 )
-
+def _residues_from_chain_ids(structure, chain_ids: set[str]):
+    model = structure[0]
+    residues = []
+    for cid in chain_ids:
+        if cid not in model:
+            continue
+        chain = model[cid]
+        for r in chain.get_residues():
+            # Keep everything inside the polymer chain (including modified residues)
+            # Biopython will include modified nucleotides/AAs here.
+            if len(getattr(r, "child_list", [])) == 0:
+                continue
+            residues.append(r)
+    return residues
 
 def _tunnel_debris_chains(rcsb_id: str, ro, profile) -> List[str]:
     # your legacy hardcoded exclusions
@@ -134,18 +149,35 @@ class Stage20ExteriorShell(Stage):
         ro = ctx.require("ro")
         cifpath = Path(ctx.require("mmcif_path"))
 
-        stage_dir = ctx.store.stage_dir(self.key)
-        ptcloud_path = stage_dir / "ribosome_ptcloud.npy"
+        stage_dir        = ctx.store.stage_dir(self.key)
+        ptcloud_path     = stage_dir / "ribosome_ptcloud.npy"
         surface_pts_path = stage_dir / "alpha_surface_points.npy"
         normals_pcd_path = stage_dir / "alpha_normals.ply"
-        mesh_path = stage_dir / "alpha_shell.ply"
-        quality_path = stage_dir / "alpha_shell_quality.json"
+        mesh_path        = stage_dir / "alpha_shell.ply"
+        quality_path     = stage_dir / "alpha_shell_quality.json"
 
         # point cloud from cif (legacy)
-        first_assembly_chains = ro.first_assembly_auth_asym_ids()
-        ptcloud = cif_to_point_cloud(
-            str(cifpath), first_assembly_chains, do_atoms=True
-        ).astype(np.float32)
+        # first_assembly_chains = ro.first_assembly_auth_asym_ids()
+        # ptcloud = cif_to_point_cloud(
+        #     str(cifpath), first_assembly_chains, do_atoms=True
+        # ).astype(np.float32)
+
+        ro      = ctx.require("ro")
+        profile = ctx.require("profile")
+        cifpath = Path(ctx.require("mmcif_path"))
+
+        wall = ribosome_wall_auth_asym_ids(
+            profile,
+            exclude_trna=bool(getattr(ctx.config, "occupancy_exclude_trna", True)),
+            extra_exclude=_tunnel_debris_chains(ctx.rcsb_id, ro, profile),
+        )
+        wall = intersect_with_first_assembly(ro, wall)
+
+        ptcloud = cif_to_point_cloud(str(cifpath), sorted(wall), do_atoms=True)
+
+
+
+
         np.save(ptcloud_path, ptcloud)
         ctx.store.register_file(
             name="ribosome_ptcloud",
@@ -244,23 +276,49 @@ class Stage30RegionAtoms(Stage):
         c = ctx.config
         ro = ctx.require("ro")
         profile = ctx.require("profile")
-        cifpath = ctx.require("mmcif_path")
 
         ptc = np.asarray(ctx.require("ptc_xyz"), dtype=np.float32)
         constr = np.asarray(ctx.require("constriction_xyz"), dtype=np.float32)
 
+        # your existing hardcoded exclusions
         skip = _tunnel_debris_chains(ctx.rcsb_id, ro, profile)
 
-        # Filtered residues (for clustering/DBSCAN seed)
-        residues_filtered = ribosome_entities(
-            rcsb_id=ctx.rcsb_id,
-            cifpath=cifpath,
-            level="R",
-            skip_nascent_chain=skip,
-        )
+        # plus config-specified exclusions
+        skip = list(dict.fromkeys(skip + list(getattr(c, "occupancy_exclude_auth_asym_ids", ()))))
 
-        residues_filtered = filter_residues_parallel(
-            residues=residues_filtered,
+
+        # ---- choose occupancy chains (the important part) ----
+        if getattr(c, "occupancy_chain_mode", "walls_only") == "assembly_all":
+            occ_chain_ids = set(ro.first_assembly_auth_asym_ids())
+        else:
+            occ_chain_ids = ribosome_wall_auth_asym_ids(
+                profile,
+                exclude_trna=bool(getattr(c, "occupancy_exclude_trna", True)),
+                extra_exclude=skip,
+            )
+            occ_chain_ids = intersect_with_first_assembly(ro, occ_chain_ids)
+
+        # ---- choose seed chains (usually same as occupancy; keep option to diverge later) ----
+        seed_chain_ids = set(occ_chain_ids)
+
+        # extract residues from structure once
+        structure = ro.assets.biopython_structure()
+
+        residues_seed = _residues_from_chain_ids(structure, seed_chain_ids)
+        residues_occ  = _residues_from_chain_ids(structure, occ_chain_ids)
+
+        # spatial filter (cylinder ROI)
+        residues_seed = filter_residues_parallel(
+            residues=residues_seed,
+            base_point=ptc,
+            axis_point=constr,
+            radius=c.cylinder_radius_A,
+            height=c.cylinder_height_A,
+            max_workers=1,
+            chunk_size=5000,
+        )
+        residues_occ = filter_residues_parallel(
+            residues=residues_occ,
             base_point=ptc,
             axis_point=constr,
             radius=c.cylinder_radius_A,
@@ -269,59 +327,61 @@ class Stage30RegionAtoms(Stage):
             chunk_size=5000,
         )
 
-        filtered_points = np.asarray(
-            [atom.get_coord() for r in residues_filtered for atom in r.child_list],
+        seed_points = np.asarray(
+            [atom.get_coord() for r in residues_seed for atom in r.child_list],
+            dtype=np.float32,
+        )
+        occ_points = np.asarray(
+            [atom.get_coord() for r in residues_occ for atom in r.child_list],
             dtype=np.float32,
         )
 
-        out = ctx.store.stage_dir(self.key) / "region_atom_xyz.npy"
-        np.save(out, filtered_points)
+        stage_dir = ctx.store.stage_dir(self.key)
+
+        # keep your existing artifact name for seed points
+        out_seed = stage_dir / "region_atom_xyz.npy"
+        np.save(out_seed, seed_points)
         ctx.store.register_file(
             name="region_atom_xyz",
             stage=self.key,
             type=ArtifactType.NUMPY,
-            path=out,
-            meta={"n": int(filtered_points.shape[0]), "note": "filtered atoms for clustering"},
+            path=out_seed,
+            meta={"n": int(seed_points.shape[0]), "note": "seed atoms (walls-only chains)"},
         )
+        ctx.inputs["region_atom_xyz"] = seed_points
 
-        ctx.inputs["region_atom_xyz"] = filtered_points
-
-        # ALL residues (for occupancy to prevent mesh interference)
-        residues_all = ribosome_entities(
-            rcsb_id=ctx.rcsb_id,
-            cifpath=cifpath,
-            level="R",
-            skip_nascent_chain=[],  # don't skip anything
-        )
-
-        residues_all = filter_residues_parallel(
-            residues=residues_all,
-            base_point=ptc,
-            axis_point=constr,
-            radius=c.cylinder_radius_A,
-            height=c.cylinder_height_A,
-            max_workers=1,
-            chunk_size=5000,
-        )
-
-        all_points = np.asarray(
-            [atom.get_coord() for r in residues_all for atom in r.child_list],
-            dtype=np.float32,
-        )
-
-        out_all = ctx.store.stage_dir(self.key) / "region_atom_xyz_all.npy"
-        np.save(out_all, all_points)
+        # NEW: occupancy atoms
+        out_occ = stage_dir / "region_atom_xyz_occ.npy"
+        np.save(out_occ, occ_points)
         ctx.store.register_file(
-            name="region_atom_xyz_all",
+            name="region_atom_xyz_occ",
             stage=self.key,
             type=ArtifactType.NUMPY,
-            path=out_all,
-            meta={"n": int(all_points.shape[0]), "note": "ALL atoms for occupancy (prevents mesh interference)"},
+            path=out_occ,
+            meta={"n": int(occ_points.shape[0]), "note": "occupancy atoms (walls-only chains)"},
+        )
+        ctx.inputs["region_atom_xyz_occ"] = occ_points
+
+        # Useful debug provenance
+        (stage_dir / "occupancy_chain_ids.json").write_text(
+            __import__("json").dumps(
+                {
+                    "occupancy_chain_mode": getattr(c, "occupancy_chain_mode", "walls_only"),
+                    "exclude_trna": bool(getattr(c, "occupancy_exclude_trna", True)),
+                    "skip_chains": skip,
+                    "occupancy_chain_ids": sorted(list(occ_chain_ids)),
+                    "seed_chain_ids": sorted(list(seed_chain_ids)),
+                },
+                indent=2,
+            )
         )
 
-        ctx.inputs["region_atom_xyz_all"] = all_points
-        
-        print(f"[{self.key}] filtered atoms: {filtered_points.shape[0]:,}, all atoms: {all_points.shape[0]:,}")
+        print(
+            f"[{self.key}] seed_atoms={seed_points.shape[0]:,} occ_atoms={occ_points.shape[0]:,} "
+            f"occ_chains={len(occ_chain_ids)}"
+        )
+
+
 
 class Stage40EmptySpace(Stage):
     key = "40_empty_space"
@@ -365,8 +425,10 @@ class Stage40EmptySpace(Stage):
 
         c = ctx.config
         
-        # Use ALL atoms for occupancy (prevents mesh interference)
-        region_xyz = np.asarray(ctx.require("region_atom_xyz_all"), dtype=np.float32)
+        # Use occ atoms for occupancy (prevents mesh interference)
+        # region_xyz = np.asarray(ctx.require("region_atom_xyz_all"), dtype=np.float32)
+        region_xyz = np.asarray(ctx.require("region_atom_xyz_occ"), dtype=np.float32)
+
         
         # Use filtered atoms for clustering seed reference
         region_xyz_filtered = np.asarray(ctx.require("region_atom_xyz"), dtype=np.float32)
@@ -734,82 +796,65 @@ class Stage50Clustering(Stage):
     # In ribctl/lib/npet2/stages/legacy_minimal.py, Stage50Clustering
 
     def _generate_mesh(self, ctx: StageContext, points: np.ndarray, level_name: str) -> None:
-        """Generate mesh from tunnel point cloud using Poisson reconstruction."""
         import time
+        from ribctl.lib.npet.kdtree_approach import transform_points_to_C0, transform_points_from_C0
+        from ribctl.lib.npet2.backends.meshing import (
+            mesh_from_binary_volume,
+            voxelize_points,
+            clip_mesh_to_atom_clearance,
+            save_mesh_with_ascii,
+        )
+
         c = ctx.config
         stage_dir = ctx.store.stage_dir(self.key)
-
         print(f"[{self.key}] generating mesh for {level_name}...")
 
-        # Surface extraction via tight alpha shape (alpha=2, NOT 200)
+        ptc = np.asarray(ctx.require("ptc_xyz"), dtype=np.float32)
+        constr = np.asarray(ctx.require("constriction_xyz"), dtype=np.float32)
+
+        pts_c0 = transform_points_to_C0(points, ptc, constr).astype(np.float32)
+        voxel = 1.0
+
         t0 = time.perf_counter()
-        try:
-            surface_pts = ptcloud_convex_hull_points(
-                points,
-                ALPHA=c.tunnel_surface_alpha,
-                TOLERANCE=c.tunnel_surface_tolerance,
-                OFFSET=c.tunnel_surface_offset,
-            ).astype(np.float32)
-        except Exception as e:
-            print(f"[{self.key}] surface extraction failed for {level_name}: {e}")
-            return
-        dt0 = time.perf_counter() - t0
-        print(f"[{self.key}]   surface extraction: {dt0:.2f}s, {surface_pts.shape[0]:,} points")
+        mask, origin = voxelize_points(pts_c0, voxel_size=voxel, pad_voxels=2)
 
-        # Normal estimation
-        t1 = time.perf_counter()
         try:
-            pcd = estimate_normals(
-                surface_pts,
-                kdtree_radius=c.normals_radius,
-                kdtree_max_nn=c.normals_max_nn,
-                correction_tangent_planes_n=c.normals_tangent_k,
+            surf_c0 = mesh_from_binary_volume(
+                mask, origin, voxel,
+                gaussian_sigma_voxels=c.mesh_gaussian_sigma_voxels,
+                smooth_method=c.mesh_smooth_method,
+                smooth_iters=c.mesh_level0_smooth_iters,
+                taubin_pass_band=c.mesh_taubin_pass_band,
+                fill_holes_size=c.mesh_fill_holes_A,
+                pre_smooth_save_path=stage_dir / f"mesh_{level_name}_pre_smooth.ply",
             )
-        except Exception as e:
-            print(f"[{self.key}] normal estimation failed for {level_name}: {e}")
+        except ValueError as e:
+            print(f"[{self.key}] MC mesh failed for {level_name}: {e}")
             return
-        dt1 = time.perf_counter() - t1
-        print(f"[{self.key}]   normal estimation: {dt1:.2f}s")
 
-        # Write normals PCD
-        normals_path = stage_dir / f"normals_{level_name}.ply"
-        o3d.io.write_point_cloud(str(normals_path), pcd)
+        pts_w = transform_points_from_C0(
+            np.asarray(surf_c0.points, dtype=np.float32), ptc, constr
+        ).astype(np.float32)
+        surf_w = surf_c0.copy(deep=True)
+        surf_w.points = pts_w
 
-        # Poisson reconstruction
+        region_xyz = np.asarray(ctx.require("region_atom_xyz_occ"), dtype=np.float32)
+        surf_w = clip_mesh_to_atom_clearance(surf_w, region_xyz, min_clearance_A=c.mesh_atom_clearance_A)
+
+        dt = time.perf_counter() - t0
+        print(f"[{self.key}]   MC mesh: {dt:.2f}s, {surf_w.n_points:,} pts, "
+            f"{surf_w.n_faces:,} faces, watertight={surf_w.is_manifold and surf_w.n_open_edges == 0}")
+
         mesh_path = stage_dir / f"mesh_{level_name}.ply"
-        try:
-            apply_poisson_reconstruction(
-                str(normals_path),
-                mesh_path,
-                recon_depth=c.mesh_level0_poisson_depth,
-                recon_pt_weight=c.mesh_level0_poisson_ptweight,
-            )
-        except Exception as e:
-            print(f"[{self.key}] poisson reconstruction failed for {level_name}: {e}")
-            return
-
-        if not mesh_path.exists():
-            print(f"[{self.key}] poisson did not produce mesh file for {level_name}")
-            return
-
-        # Cleanup mesh
-        try:
-            mesh = pv.read(str(mesh_path))
-            mesh = mesh.fill_holes(2000.0)
-            mesh = mesh.connectivity(largest=True).triangulate()
-            mesh.save(str(mesh_path))
-        except Exception as e:
-            print(f"[{self.key}] mesh cleanup failed for {level_name}: {e}")
-            return
+        save_mesh_with_ascii(surf_w, mesh_path, tag=level_name)
 
         ctx.store.register_file(
             name=f"mesh_{level_name}",
             stage=self.key,
             type=ArtifactType.PLY_MESH,
             path=mesh_path,
-            meta={"level": level_name},
+            meta={"level": level_name, "method": "marching_cubes_taubin"},
         )
-
         print(f"[{self.key}] mesh saved: {mesh_path}")
 
 
@@ -894,23 +939,16 @@ class Stage70MeshValidate(Stage):
     key = "70_mesh_validate"
 
     def params(self, ctx: StageContext) -> Dict[str, Any]:
-        c = ctx.config
-        return {
-            "poisson_depth": c.mesh_poisson_depth,
-            "poisson_ptweight": c.mesh_poisson_ptweight,
-            "voxel_fill_holes_A": float(getattr(c, "voxel_mesh_fill_holes_A", 50.0)),
-            "voxel_smooth_iters": int(getattr(c, "voxel_mesh_smooth_iters", 10)),
-        }
+        return {}
 
     def run(self, ctx: StageContext) -> None:
         import json
-        import numpy as np
-        import pyvista as pv
-        from scipy.spatial import cKDTree
+        import shutil
 
-        c = ctx.config
+
         stage_dir = ctx.store.stage_dir(self.key)
         mesh_path = stage_dir / "npet2_tunnel_mesh.ply"
+
 
         def _mesh_stats(m: pv.PolyData) -> dict:
             return {
@@ -921,220 +959,68 @@ class Stage70MeshValidate(Stage):
                 "bounds": [float(x) for x in m.bounds],
             }
 
-        method_used = None
-        normals_pcd_path = ctx.inputs.get("normals_pcd_path", None)
-        
-        if normals_pcd_path:
-            try:
-                apply_poisson_reconstruction(
-                    str(normals_pcd_path),
-                    mesh_path,
-                    recon_depth=c.mesh_poisson_depth,
-                    recon_pt_weight=c.mesh_poisson_ptweight,
-                )
-            except Exception as e:
-                print(f"[70_mesh_validate] poisson threw exception: {e}")
+        # Try level_1 first (higher detail), fall back to level_0
+        chosen_src = None
+        chosen_label = None
 
-        if mesh_path.exists():
-            try:
-                m = pv.read(str(mesh_path))
-                st = _mesh_stats(m)
-                print(f"[70_mesh_validate] poisson mesh stats: {st}")
-                watertight = validate_mesh_pyvista(m)
-                if watertight:
-                    method_used = "poisson"
-                    
-                    # Clean up Poisson mesh too
-                    m = m.connectivity(largest=True)
-                    m.save(str(mesh_path))
-                    
-                    mesh_path_ascii = stage_dir / "npet2_tunnel_mesh_ascii.ply"
-                    m.save(str(mesh_path_ascii), binary=False)
-                    
-                    mesh_path_ascii = stage_dir / "npet2_tunnel_mesh_ascii.ply"
-                    try:
-                        m.save(str(mesh_path_ascii), binary=False)
-                    except:
-                        pass
-                    
-                    ctx.store.register_file(
-                        name="tunnel_mesh",
-                        stage=self.key,
-                        type=ArtifactType.PLY_MESH,
-                        path=mesh_path,
-                        meta={"watertight": True, "method": "poisson"},
-                    )
-                    ctx.inputs["tunnel_mesh_path"] = str(mesh_path)
-                else:
-                    print("[70_mesh_validate] poisson mesh not watertight; falling back to voxel meshing")
-            except Exception as e:
-                print(f"[70_mesh_validate] failed reading/validating poisson mesh; falling back: {e}")
-        else:
-            print("[70_mesh_validate] poisson did not produce a mesh file; falling back to voxel meshing")
+        l1_path = ctx.inputs.get("level_1_mesh_path")
+        if l1_path and Path(l1_path).exists():
+            m = pv.read(l1_path)
+            if m.is_manifold and m.n_open_edges == 0 and m.n_points > 0:
+                chosen_src = l1_path
+                chosen_label = "level_1"
+                print(f"[{self.key}] using level_1 mesh (0.5A grid)")
 
-        if method_used != "poisson":
-            mask_p = ctx.inputs.get("selected_void_component_mask_level_1_path", None)
-            spec_p = ctx.inputs.get("grid_spec_level_1_path", None)
+        if chosen_src is None:
+            # Look for level_0
+            l0_path = ctx.store.run_dir / "stage" / "50_clustering" / "mesh_level_0.ply"
+            if l0_path.exists():
+                m = pv.read(str(l0_path))
+                if m.n_points > 0:
+                    chosen_src = str(l0_path)
+                    chosen_label = "level_0"
+                    print(f"[{self.key}] falling back to level_0 mesh (1.0A grid)")
 
-            if not (mask_p and spec_p and Path(mask_p).exists() and Path(spec_p).exists()):
-                raise ValueError(
-                    "Final mesh is not watertight and voxel fallback inputs are missing "
-                    "(expected selected_void_component_mask_level_1_path + grid_spec_level_1_path)"
-                )
+        if chosen_src is None:
+            raise ValueError(f"[{self.key}] no valid mesh found from any stage")
 
-            spec = json.loads(Path(spec_p).read_text())
-            voxel = float(spec["voxel_size_A"])
-            origin = np.asarray(spec["origin"], dtype=np.float32)
 
-            ptc = np.asarray(spec["transform"]["ptc"], dtype=np.float32)
-            constr = np.asarray(spec["transform"]["constriction"], dtype=np.float32)
+        shutil.copy2(chosen_src, mesh_path)
+        final = pv.read(str(mesh_path))
 
-            vol = np.load(mask_p).astype(np.float32)
-            if vol.ndim != 3:
-                raise ValueError(f"[70_mesh_validate] voxel volume must be 3D, got {vol.shape}")
 
-            vol_pad = np.pad(vol, 1, constant_values=0)
-            origin_pad = origin - voxel
+        mesh_path_ascii = stage_dir / "npet2_tunnel_mesh_ascii.ply"
+        final.save(str(mesh_path_ascii), binary=False)
 
-            img = pv.ImageData(
-                dimensions=vol_pad.shape,
-                spacing=(voxel, voxel, voxel),
-                origin=(float(origin_pad[0]), float(origin_pad[1]), float(origin_pad[2])),
-            )
-            img.point_data["void"] = vol_pad.ravel(order="F")
+        save_mesh_with_ascii(final, mesh_path, tag="final")
 
-            surf_c0 = img.contour(isosurfaces=[0.5], scalars="void").triangulate()
-            if surf_c0.n_points == 0 or surf_c0.n_faces == 0:
-                raise ValueError("[70_mesh_validate] voxel contour produced empty surface")
+        st = _mesh_stats(final)
+        watertight = final.is_manifold and final.n_open_edges == 0
+        print(f"[{self.key}] final mesh: {st}, watertight={watertight}")
 
-            surf_c0 = surf_c0.clean(tolerance=0.0)
-
-            fill_holes_A = float(getattr(c, "voxel_mesh_fill_holes_A", 50.0))
-            try:
-                surf_c0 = surf_c0.fill_holes(fill_holes_A)
-            except Exception:
-                pass
-
-            smooth_iters = int(getattr(c, "voxel_mesh_smooth_iters", 10))
-            if smooth_iters > 0:
-                try:
-                    surf_c0 = surf_c0.smooth(n_iter=smooth_iters)
-                except Exception:
-                    pass
-
-            # Largest component LAST -- after fill_holes and smooth
-            surf_c0 = surf_c0.connectivity(largest=True)
-
-            pts_c0 = np.asarray(surf_c0.points, dtype=np.float32)
-            pts_w = transform_points_from_C0(pts_c0, ptc, constr).astype(np.float32)
-            surf_w = surf_c0.copy(deep=True)
-            surf_w.points = pts_w
-
-            try:
-                surf_w = surf_w.compute_normals(
-                    auto_orient_normals=True, consistent_normals=True
-                )
-            except Exception:
-                pass
-            # Clip mesh to atom clearance (both Poisson and voxel paths)
-            try:
-                region_xyz = np.asarray(ctx.require("region_atom_xyz_all"), dtype=np.float32)
-                from scipy.spatial import cKDTree
-                tree = cKDTree(region_xyz)
-                pts = np.asarray(surf_w.points, dtype=np.float64)
-                dist, idx = tree.query(pts, k=1)
-                violating = dist < 1.5
-                if violating.sum() > 0:
-                    nearest = region_xyz[idx[violating]]
-                    direction = pts[violating] - nearest
-                    norms = np.maximum(np.linalg.norm(direction, axis=1, keepdims=True), 1e-8)
-                    pts[violating] = nearest + (direction / norms) * 1.5
-                    surf_w.points = pts.astype(np.float32)
-                    print(f"[{self.key}]   pushed {int(violating.sum()):,} vertices to 1.5A atom clearance")
-            except Exception as e:
-                print(f"[{self.key}]   atom clearance clip failed: {e}")
-
-            surf_w.save(str(mesh_path))
-
-            mesh_path_ascii = stage_dir / "npet2_tunnel_mesh_ascii.ply"
-            try:
-                surf_w.save(str(mesh_path_ascii), binary=False)
-                print(f"[{self.key}] saved ASCII mesh: {mesh_path_ascii}")
-            except Exception:
-                try:
-                    import plyfile
-                    data = plyfile.PlyData.read(str(mesh_path))
-                    data.text = True
-                    data.write(str(mesh_path_ascii))
-                    print(f"[{self.key}] saved ASCII mesh (via plyfile): {mesh_path_ascii}")
-                except Exception as e:
-                    print(f"[{self.key}] failed to save ASCII mesh: {e}")
-
-            st2 = _mesh_stats(surf_w)
-            print(f"[70_mesh_validate] voxel mesh stats: {st2}")
-
-            watertight = validate_mesh_pyvista(surf_w)
-            if not watertight:
-                raise ValueError("Final mesh is not watertight (voxel fallback also failed)")
-
-            method_used = "voxel_contour"
+        if not watertight:
+            raise ValueError(f"[{self.key}] final mesh is not watertight")
 
         ctx.store.register_file(
             name="tunnel_mesh",
             stage=self.key,
             type=ArtifactType.PLY_MESH,
             path=mesh_path,
-            meta={"watertight": True, "method": method_used},
+            meta={"watertight": True, "source": chosen_label},
         )
         ctx.inputs["tunnel_mesh_path"] = str(mesh_path)
 
-        print(f"[{self.key}] copying comparison meshes...")
+        # Copy comparison meshes for inspection
+        self._copy_comparison_meshes(ctx, stage_dir)
+
+    def _copy_comparison_meshes(self, ctx, stage_dir):
         import shutil
-        
-        try:
-            stage50_dir = ctx.store.run_dir / "stage" / "50_clustering"
-            mesh_l0_src = stage50_dir / "mesh_level_0.ply"
-            if mesh_l0_src.exists():
-                mesh_l0_dst = stage_dir / "comparison_mesh_level_0.ply"
-                shutil.copy2(mesh_l0_src, mesh_l0_dst)
-                
-                mesh_l0_src_ascii = stage50_dir / "mesh_level_0_ascii.ply"
-                if mesh_l0_src_ascii.exists():
-                    mesh_l0_dst_ascii = stage_dir / "comparison_mesh_level_0_ascii.ply"
-                    shutil.copy2(mesh_l0_src_ascii, mesh_l0_dst_ascii)
-                
-                ctx.store.register_file(
-                    name="comparison_mesh_level_0",
-                    stage=self.key,
-                    type=ArtifactType.PLY_MESH,
-                    path=mesh_l0_dst,
-                    meta={"source": "50_clustering", "voxel_size_A": 1.0},
-                )
-                print(f"[{self.key}]   copied level_0 mesh (1.0Å grid)")
-        except Exception as e:
-            print(f"[{self.key}]   failed to copy level_0 mesh: {e}")
-        
-        try:
-            stage55_dir = ctx.store.run_dir / "stage" / "55_grid_refine"
-            mesh_l1_src = stage55_dir / "mesh_level_1.ply"
-            if mesh_l1_src.exists():
-                mesh_l1_dst = stage_dir / "comparison_mesh_level_1.ply"
-                shutil.copy2(mesh_l1_src, mesh_l1_dst)
-                
-                mesh_l1_src_ascii = stage55_dir / "mesh_level_1_ascii.ply"
-                if mesh_l1_src_ascii.exists():
-                    mesh_l1_dst_ascii = stage_dir / "comparison_mesh_level_1_ascii.ply"
-                    shutil.copy2(mesh_l1_src_ascii, mesh_l1_dst_ascii)
-                
-                ctx.store.register_file(
-                    name="comparison_mesh_level_1",
-                    stage=self.key,
-                    type=ArtifactType.PLY_MESH,
-                    path=mesh_l1_dst,
-                    meta={"source": "55_grid_refine", "voxel_size_A": 0.5},
-                )
-                print(f"[{self.key}]   copied level_1 mesh (0.5Å grid)")
-            else:
-                print(f"[{self.key}]   level_1 mesh not found (Poisson likely failed)")
-        except Exception as e:
-            print(f"[{self.key}]   failed to copy level_1 mesh: {e}")
+        for stage_name, level, voxel in [
+            ("50_clustering", "level_0", 1.0),
+            ("55_grid_refine", "level_1", 0.5),
+        ]:
+            src = ctx.store.run_dir / "stage" / stage_name / f"mesh_{level}.ply"
+            if src.exists():
+                dst = stage_dir / f"comparison_mesh_{level}.ply"
+                shutil.copy2(src, dst)
+                print(f"[{self.key}]   copied {level} mesh ({voxel}A grid)")

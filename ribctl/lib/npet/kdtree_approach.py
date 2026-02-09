@@ -194,7 +194,6 @@ def estimate_normals(
         )
     )
     pcd.orient_normals_consistent_tangent_plane(k=correction_tangent_planes_n)
-    # o3d.visualization.draw_geometries([pcd], point_show_normal=True)
     return pcd
 
 
