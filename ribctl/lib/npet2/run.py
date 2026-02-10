@@ -24,7 +24,7 @@ from ribctl.lib.npet2.stages.legacy_minimal import (
     Stage30RegionAtoms,
     Stage40EmptySpace,
     Stage50Clustering,
-    Stage60SurfaceNormals,
+    # Stage60SurfaceNormals,
     Stage70MeshValidate,
 )
 
@@ -53,14 +53,18 @@ def run_npet2(
         "landmarks": landmark_provider.fingerprint(rcsb_id),
     }
 
+    struct_runs_dir = NPET2_RUNS_ROOT / rcsb_id
+    struct_runs_dir.mkdir(parents=True, exist_ok=True)
+
     run_id = compute_run_id(
         rcsb_id=rcsb_id,
         pipeline_version=_pipeline_version(),
         inputs_fp=inputs_fp,
         config_resolved=config_resolved,
+        runs_dir=struct_runs_dir,
     )
 
-    run_dir = NPET2_RUNS_ROOT / rcsb_id / run_id
+    run_dir = struct_runs_dir / run_id
     run_dir.mkdir(parents=True, exist_ok=True)
 
     manifest = RunManifest(

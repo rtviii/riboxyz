@@ -52,6 +52,7 @@ class Stage10Landmarks(Stage):
     def params(self, ctx: StageContext) -> Dict[str, Any]:
         return {}
 
+
     def run(self, ctx: StageContext) -> None:
         landmark_provider = ctx.require("landmark_provider")
         lm = landmark_provider.get_landmarks(ctx.rcsb_id)
@@ -61,6 +62,20 @@ class Stage10Landmarks(Stage):
 
         ctx.inputs["ptc_xyz"] = ptc
         ctx.inputs["constriction_xyz"] = constr
+
+        # Compute cylinder z-extents in C0
+        # In C0: PTC is at z=0, Constriction is at z=D
+        D = float(np.linalg.norm(constr - ptc))
+        z_min = -float(ctx.config.cylinder_ptc_extension_A)
+        z_max = float(ctx.config.cylinder_height_A)  # measured from PTC upward as before
+
+        ctx.inputs["cylinder_z_min"] = z_min
+        ctx.inputs["cylinder_z_max"] = z_max
+        ctx.inputs["landmark_distance"] = D
+
+        print(f"  [10_landmarks] PTC-Constriction distance={D:.1f}A, "
+              f"cylinder z=[{z_min:.1f}, {z_max:.1f}]A "
+              f"(ptc_extension={ctx.config.cylinder_ptc_extension_A}A)")
 
         ctx.artifacts["ptc"] = ctx.store.put_json(
             name="ptc",
@@ -72,5 +87,6 @@ class Stage10Landmarks(Stage):
             name="constriction_site",
             stage=self.key,
             obj={"location": constr.tolist()},
-            meta={"units": "A"},
+            meta={"units": "A", "landmark_distance_A": D,
+                  "cylinder_z_min": z_min, "cylinder_z_max": z_max},
         )

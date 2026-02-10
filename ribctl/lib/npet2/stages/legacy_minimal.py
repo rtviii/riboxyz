@@ -14,7 +14,10 @@ from ribctl.lib.npet2.backends.grid_occupancy import (
 from ribctl.lib.npet2.backends.meshing import save_mesh_with_ascii
 from ribctl.lib.npet2.core.cache import StageCacheKey
 from ribctl.lib.npet2.core.pipeline import Stage
-from ribctl.lib.npet2.core.structure_selection import intersect_with_first_assembly, ribosome_wall_auth_asym_ids
+from ribctl.lib.npet2.core.structure_selection import (
+    intersect_with_first_assembly,
+    ribosome_wall_auth_asym_ids,
+)
 from ribctl.lib.npet2.core.types import StageContext, ArtifactType
 
 from scipy import ndimage
@@ -59,6 +62,7 @@ def _residues_from_chain_ids(structure, chain_ids: set[str]):
             residues.append(r)
     return residues
 
+
 def _tunnel_debris_chains(rcsb_id: str, ro, profile) -> List[str]:
     # your legacy hardcoded exclusions
     tunnel_debris = {
@@ -80,6 +84,36 @@ def _tunnel_debris_chains(rcsb_id: str, ro, profile) -> List[str]:
         except Exception:
             pass
     return skip
+
+
+def _pick_tunnel_cluster(
+    clusters: dict[int, list],
+    constr: np.ndarray,
+) -> tuple[np.ndarray, int]:
+    """Pick the cluster whose points are closest to the constriction site."""
+    constr = np.asarray(constr, dtype=np.float32).reshape(1, 3)
+    best_id = -1
+    best_dist = float("inf")
+
+    for cid, pts_list in clusters.items():
+        if cid == -1:
+            continue
+        pts = np.asarray(pts_list, dtype=np.float32)
+        if pts.shape[0] == 0:
+            continue
+        dists = np.linalg.norm(pts - constr, axis=1)
+        min_dist = float(dists.min())
+        if min_dist < best_dist:
+            best_dist = min_dist
+            best_id = cid
+
+    if best_id == -1:
+        raise ValueError("No valid clusters found")
+
+    print(f"  [cluster_select] picked cluster {best_id} "
+          f"(n={len(clusters[best_id]):,}, dist_to_constriction={best_dist:.1f}A)")
+
+    return np.asarray(clusters[best_id], dtype=np.float32), best_id
 
 class Stage20ExteriorShell(Stage):
     key = "20_exterior_shell"
@@ -149,12 +183,12 @@ class Stage20ExteriorShell(Stage):
         ro = ctx.require("ro")
         cifpath = Path(ctx.require("mmcif_path"))
 
-        stage_dir        = ctx.store.stage_dir(self.key)
-        ptcloud_path     = stage_dir / "ribosome_ptcloud.npy"
+        stage_dir = ctx.store.stage_dir(self.key)
+        ptcloud_path = stage_dir / "ribosome_ptcloud.npy"
         surface_pts_path = stage_dir / "alpha_surface_points.npy"
         normals_pcd_path = stage_dir / "alpha_normals.ply"
-        mesh_path        = stage_dir / "alpha_shell.ply"
-        quality_path     = stage_dir / "alpha_shell_quality.json"
+        mesh_path = stage_dir / "alpha_shell.ply"
+        quality_path = stage_dir / "alpha_shell_quality.json"
 
         # point cloud from cif (legacy)
         # first_assembly_chains = ro.first_assembly_auth_asym_ids()
@@ -162,7 +196,7 @@ class Stage20ExteriorShell(Stage):
         #     str(cifpath), first_assembly_chains, do_atoms=True
         # ).astype(np.float32)
 
-        ro      = ctx.require("ro")
+        ro = ctx.require("ro")
         profile = ctx.require("profile")
         cifpath = Path(ctx.require("mmcif_path"))
 
@@ -174,9 +208,6 @@ class Stage20ExteriorShell(Stage):
         wall = intersect_with_first_assembly(ro, wall)
 
         ptcloud = cif_to_point_cloud(str(cifpath), sorted(wall), do_atoms=True)
-
-
-
 
         np.save(ptcloud_path, ptcloud)
         ctx.store.register_file(
@@ -279,35 +310,20 @@ class Stage30RegionAtoms(Stage):
 
         ptc = np.asarray(ctx.require("ptc_xyz"), dtype=np.float32)
         constr = np.asarray(ctx.require("constriction_xyz"), dtype=np.float32)
+        z_min = float(ctx.inputs.get("cylinder_z_min", 0.0))
 
-        # your existing hardcoded exclusions
-        skip = _tunnel_debris_chains(ctx.rcsb_id, ro, profile)
+        # --- Atom selection policy ---
+        from ribctl.lib.npet2.core.structure_selection import atom_inclusion_policy
 
-        # plus config-specified exclusions
-        skip = list(dict.fromkeys(skip + list(getattr(c, "occupancy_exclude_auth_asym_ids", ()))))
+        policy = atom_inclusion_policy(profile, c, ctx.rcsb_id, ro)
 
-
-        # ---- choose occupancy chains (the important part) ----
-        if getattr(c, "occupancy_chain_mode", "walls_only") == "assembly_all":
-            occ_chain_ids = set(ro.first_assembly_auth_asym_ids())
-        else:
-            occ_chain_ids = ribosome_wall_auth_asym_ids(
-                profile,
-                exclude_trna=bool(getattr(c, "occupancy_exclude_trna", True)),
-                extra_exclude=skip,
-            )
-            occ_chain_ids = intersect_with_first_assembly(ro, occ_chain_ids)
-
-        # ---- choose seed chains (usually same as occupancy; keep option to diverge later) ----
+        occ_chain_ids = policy["wall_chain_ids"]
         seed_chain_ids = set(occ_chain_ids)
 
-        # extract residues from structure once
         structure = ro.assets.biopython_structure()
-
         residues_seed = _residues_from_chain_ids(structure, seed_chain_ids)
-        residues_occ  = _residues_from_chain_ids(structure, occ_chain_ids)
+        residues_occ = _residues_from_chain_ids(structure, occ_chain_ids)
 
-        # spatial filter (cylinder ROI)
         residues_seed = filter_residues_parallel(
             residues=residues_seed,
             base_point=ptc,
@@ -316,6 +332,7 @@ class Stage30RegionAtoms(Stage):
             height=c.cylinder_height_A,
             max_workers=1,
             chunk_size=5000,
+            z_min=z_min,
         )
         residues_occ = filter_residues_parallel(
             residues=residues_occ,
@@ -325,6 +342,7 @@ class Stage30RegionAtoms(Stage):
             height=c.cylinder_height_A,
             max_workers=1,
             chunk_size=5000,
+            z_min=z_min,
         )
 
         seed_points = np.asarray(
@@ -338,7 +356,6 @@ class Stage30RegionAtoms(Stage):
 
         stage_dir = ctx.store.stage_dir(self.key)
 
-        # keep your existing artifact name for seed points
         out_seed = stage_dir / "region_atom_xyz.npy"
         np.save(out_seed, seed_points)
         ctx.store.register_file(
@@ -346,11 +363,13 @@ class Stage30RegionAtoms(Stage):
             stage=self.key,
             type=ArtifactType.NUMPY,
             path=out_seed,
-            meta={"n": int(seed_points.shape[0]), "note": "seed atoms (walls-only chains)"},
+            meta={
+                "n": int(seed_points.shape[0]),
+                "note": "seed atoms (walls-only chains)",
+            },
         )
         ctx.inputs["region_atom_xyz"] = seed_points
 
-        # NEW: occupancy atoms
         out_occ = stage_dir / "region_atom_xyz_occ.npy"
         np.save(out_occ, occ_points)
         ctx.store.register_file(
@@ -358,29 +377,37 @@ class Stage30RegionAtoms(Stage):
             stage=self.key,
             type=ArtifactType.NUMPY,
             path=out_occ,
-            meta={"n": int(occ_points.shape[0]), "note": "occupancy atoms (walls-only chains)"},
+            meta={
+                "n": int(occ_points.shape[0]),
+                "note": "occupancy atoms (walls-only chains)",
+            },
         )
         ctx.inputs["region_atom_xyz_occ"] = occ_points
 
-        # Useful debug provenance
-        (stage_dir / "occupancy_chain_ids.json").write_text(
-            __import__("json").dumps(
-                {
-                    "occupancy_chain_mode": getattr(c, "occupancy_chain_mode", "walls_only"),
-                    "exclude_trna": bool(getattr(c, "occupancy_exclude_trna", True)),
-                    "skip_chains": skip,
-                    "occupancy_chain_ids": sorted(list(occ_chain_ids)),
-                    "seed_chain_ids": sorted(list(seed_chain_ids)),
-                },
-                indent=2,
-            )
+        # Save full policy for provenance and debugging
+        policy_record = {
+            "occupancy_chain_mode": getattr(c, "occupancy_chain_mode", "walls_only"),
+            "exclude_trna": bool(getattr(c, "occupancy_exclude_trna", True)),
+            "wall_chain_ids": sorted(occ_chain_ids),
+            "excluded_chains": {k: v for k, v in policy["reasons"].items()},
+            "policy_summary": (
+                "INCLUDED: ribosomal proteins + rRNAs (with modified residues). "
+                "EXCLUDED: waters, ions, nonpolymer ligands, tRNAs, debris chains."
+            ),
+        }
+        (stage_dir / "atom_selection_policy.json").write_text(
+            json.dumps(policy_record, indent=2)
         )
 
         print(
-            f"[{self.key}] seed_atoms={seed_points.shape[0]:,} occ_atoms={occ_points.shape[0]:,} "
-            f"occ_chains={len(occ_chain_ids)}"
+            f"[{self.key}] seed_atoms={seed_points.shape[0]:,} "
+            f"occ_atoms={occ_points.shape[0]:,} occ_chains={len(occ_chain_ids)}"
         )
-
+        if policy["reasons"]:
+            excluded_summary = ", ".join(
+                f"{k}({v})" for k, v in sorted(policy["reasons"].items())
+            )
+            print(f"[{self.key}] excluded: {excluded_summary}")
 
 
 class Stage40EmptySpace(Stage):
@@ -424,15 +451,18 @@ class Stage40EmptySpace(Stage):
         )
 
         c = ctx.config
-        
+
+        z_min = float(ctx.inputs.get("cylinder_z_min", 0.0))
+
         # Use occ atoms for occupancy (prevents mesh interference)
         # region_xyz = np.asarray(ctx.require("region_atom_xyz_all"), dtype=np.float32)
         region_xyz = np.asarray(ctx.require("region_atom_xyz_occ"), dtype=np.float32)
 
-        
         # Use filtered atoms for clustering seed reference
-        region_xyz_filtered = np.asarray(ctx.require("region_atom_xyz"), dtype=np.float32)
-        
+        region_xyz_filtered = np.asarray(
+            ctx.require("region_atom_xyz"), dtype=np.float32
+        )
+
         ptc = np.asarray(ctx.require("ptc_xyz"), dtype=np.float32)
         constr = np.asarray(ctx.require("constriction_xyz"), dtype=np.float32)
         alpha_shell_path = ctx.require("alpha_shell_path")
@@ -478,6 +508,7 @@ class Stage40EmptySpace(Stage):
                     height=c.cylinder_height_A,
                     voxel_size=gl.voxel_size_A,
                     radius_around_point=gl.uniform_atom_radius_A,
+                    z_min=z_min,
                 )
 
                 idx = np.where(~mask)
@@ -490,6 +521,7 @@ class Stage40EmptySpace(Stage):
                     radius_A=float(c.cylinder_radius_A),
                     height_A=float(c.cylinder_height_A),
                     voxel_A=float(gl.voxel_size_A),
+                    z_min=z_min,
                 )
 
                 occ = occupancy_via_edt(
@@ -498,9 +530,7 @@ class Stage40EmptySpace(Stage):
                     atom_radius_A=float(gl.uniform_atom_radius_A),
                 )
 
-                cyl2d = cylinder_mask(
-                    grid, radius_A=float(c.cylinder_radius_A)
-                )
+                cyl2d = cylinder_mask(grid, radius_A=float(c.cylinder_radius_A))
                 cyl = np.broadcast_to(cyl2d, grid.shape)
 
                 occ = occ | (~cyl)
@@ -619,11 +649,15 @@ class Stage40EmptySpace(Stage):
 
 class Stage50Clustering(Stage):
     """
-    DBSCAN clustering on level_0 (coarse grid, typically 1.0Å).
+    DBSCAN clustering on level_0 (coarse grid, typically 1.0A).
     
     Two-pass strategy:
       1. Coarse DBSCAN: merge regions, bridge gaps
       2. Refine DBSCAN: tighten on largest cluster from pass 1
+    
+    Cluster selection uses axial proximity to the PTC-Constriction axis
+    rather than raw point count, which prevents the inter-subunit space
+    from being picked over the actual tunnel.
     
     Optionally generates a mesh from the refined cluster.
     
@@ -645,8 +679,7 @@ class Stage50Clustering(Stage):
             "refine_eps_A": c.dbscan_level0_refine_eps_A,
             "refine_min_samples": c.dbscan_level0_refine_min_samples,
             "mesh_enable": bool(getattr(c, "mesh_level0_enable", True)),
-            "mesh_poisson_depth": int(getattr(c, "mesh_level0_poisson_depth", 6)),
-            "mesh_poisson_ptweight": int(getattr(c, "mesh_level0_poisson_ptweight", 3)),
+            "cluster_selection": "axial_proximity",
         }
 
     def run(self, ctx: StageContext) -> None:
@@ -660,6 +693,9 @@ class Stage50Clustering(Stage):
         empty_pts = np.asarray(ctx.require("empty_points"), dtype=np.float32)
         if empty_pts.ndim != 2 or empty_pts.shape[1] != 3 or empty_pts.shape[0] == 0:
             raise ValueError(f"[{self.key}] empty_points must be (N,3) and non-empty, got {empty_pts.shape}")
+
+        ptc = np.asarray(ctx.require("ptc_xyz"), dtype=np.float32)
+        constr = np.asarray(ctx.require("constriction_xyz"), dtype=np.float32)
 
         print(f"[{self.key}] empty_points n={empty_pts.shape[0]:,}")
 
@@ -687,11 +723,12 @@ class Stage50Clustering(Stage):
             min_samples=c.dbscan_level0_coarse_min_samples,
         )
 
-        # Pick largest cluster from coarse
-        largest, largest_id = DBSCAN_pick_largest_cluster(clusters_coarse)
-        largest = np.asarray(largest, dtype=np.float32)
+        # Pick tunnel cluster from coarse (axial proximity, not largest)
+
+
+        largest, largest_id = _pick_tunnel_cluster(clusters_coarse, constr)
         if largest.shape[0] == 0:
-            raise ValueError(f"[{self.key}] largest cluster is empty")
+            raise ValueError(f"[{self.key}] tunnel cluster is empty")
 
         p_largest = stage_dir / "largest_cluster.npy"
         np.save(p_largest, largest)
@@ -700,7 +737,8 @@ class Stage50Clustering(Stage):
             stage=self.key,
             type=ArtifactType.NUMPY,
             path=p_largest,
-            meta={"cluster_id": int(largest_id), "n": int(largest.shape[0])},
+            meta={"cluster_id": int(largest_id), "n": int(largest.shape[0]),
+                  "selection": "axial_proximity"},
         )
 
         # -----------------------
@@ -727,9 +765,10 @@ class Stage50Clustering(Stage):
             min_samples=c.dbscan_level0_refine_min_samples,
         )
 
-        # Pick winner from refine
-        refined, refined_id = DBSCAN_pick_largest_cluster(clusters_refine)
-        refined = np.asarray(refined, dtype=np.float32)
+        # Pick tunnel cluster from refine
+
+
+        refined, refined_id = _pick_tunnel_cluster(clusters_refine, constr)
         if refined.shape[0] == 0:
             raise ValueError(f"[{self.key}] refined cluster is empty")
 
@@ -740,14 +779,15 @@ class Stage50Clustering(Stage):
             stage=self.key,
             type=ArtifactType.NUMPY,
             path=p_refined,
-            meta={"cluster_id": int(refined_id), "n": int(refined.shape[0])},
+            meta={"cluster_id": int(refined_id), "n": int(refined.shape[0]),
+                  "selection": "axial_proximity"},
         )
 
         # Output for downstream
         ctx.inputs["refined_cluster"] = refined
         ctx.inputs["largest_cluster"] = largest
 
-        print(f"[{self.key}] winner: coarse={largest.shape[0]:,} → refine={refined.shape[0]:,}")
+        print(f"[{self.key}] winner: coarse={largest.shape[0]:,} -> refine={refined.shape[0]:,}")
 
         # -----------------------
         # Optional: Mesh level_0
@@ -770,7 +810,6 @@ class Stage50Clustering(Stage):
         np.save(pass_dir / "points.npy", pts.astype(np.float32))
         np.save(pass_dir / "labels.npy", labels.astype(np.int32))
 
-        # Index for quick inspection
         counts = {}
         for lab in np.unique(labels):
             counts[int(lab)] = int((labels == lab).sum())
@@ -786,14 +825,11 @@ class Stage50Clustering(Stage):
 
         for lab, plist in clusters_dict.items():
             lab = int(lab)
-            if lab == -1:  # skip noise
+            if lab == -1:
                 continue
             arr = np.asarray(plist, dtype=np.float32)
             if arr.size > 0:
                 np.save(pass_dir / f"cluster_id{lab}.npy", arr)
-
-
-    # In ribctl/lib/npet2/stages/legacy_minimal.py, Stage50Clustering
 
     def _generate_mesh(self, ctx: StageContext, points: np.ndarray, level_name: str) -> None:
         import time
@@ -858,81 +894,81 @@ class Stage50Clustering(Stage):
         print(f"[{self.key}] mesh saved: {mesh_path}")
 
 
-class Stage60SurfaceNormals(Stage):
-    key = "60_surface_normals"
+# class Stage60SurfaceNormals(Stage):
+#     key = "60_surface_normals"
 
-    def params(self, ctx: StageContext) -> Dict[str, Any]:
-        c = ctx.config
-        return {
-            "tunnel_surface_alpha": c.tunnel_surface_alpha,
-            "tunnel_surface_tolerance": c.tunnel_surface_tolerance,
-            "tunnel_surface_offset": c.tunnel_surface_offset,
-            "normals_radius": c.normals_radius,
-            "normals_max_nn": c.normals_max_nn,
-            "normals_tangent_k": c.normals_tangent_k,
-        }
+#     def params(self, ctx: StageContext) -> Dict[str, Any]:
+#         c = ctx.config
+#         return {
+#             "tunnel_surface_alpha": c.tunnel_surface_alpha,
+#             "tunnel_surface_tolerance": c.tunnel_surface_tolerance,
+#             "tunnel_surface_offset": c.tunnel_surface_offset,
+#             "normals_radius": c.normals_radius,
+#             "normals_max_nn": c.normals_max_nn,
+#             "normals_tangent_k": c.normals_tangent_k,
+#         }
 
-    def run(self, ctx: StageContext) -> None:
-        import time
+#     def run(self, ctx: StageContext) -> None:
+#         import time
 
-        c = ctx.config
-        refined = np.asarray(ctx.require("refined_cluster"), dtype=np.float32)
+#         c = ctx.config
+#         refined = np.asarray(ctx.require("refined_cluster"), dtype=np.float32)
 
-        surface_flag = bool(ctx.inputs.get("refined_cluster_surface", False))
-        print(
-            f"[60_surface_normals] refined_cluster n={refined.shape[0]:,} surface_flag={surface_flag}"
-        )
+#         surface_flag = bool(ctx.inputs.get("refined_cluster_surface", False))
+#         print(
+#             f"[60_surface_normals] refined_cluster n={refined.shape[0]:,} surface_flag={surface_flag}"
+#         )
 
-        stage_dir = ctx.store.stage_dir(self.key)
+#         stage_dir = ctx.store.stage_dir(self.key)
 
-        if surface_flag:
-            surface_pts = refined
-            print(
-                "[60_surface_normals] using refined points directly as surface_pts (skip Delaunay)"
-            )
-        else:
-            t0 = time.perf_counter()
-            surface_pts = ptcloud_convex_hull_points(
-                refined, 
-                c.tunnel_surface_alpha,       # was c.surface_alpha
-                c.tunnel_surface_tolerance,   # was c.surface_tolerance
-                c.tunnel_surface_offset,      # was c.surface_offset
-            ).astype(np.float32)
-            dt = time.perf_counter() - t0
-            print(
-                f"[60_surface_normals] delaunay_3d+extract_surface took {dt:,.2f}s surface_pts n={surface_pts.shape[0]:,}"
-            )
+#         if surface_flag:
+#             surface_pts = refined
+#             print(
+#                 "[60_surface_normals] using refined points directly as surface_pts (skip Delaunay)"
+#             )
+#         else:
+#             t0 = time.perf_counter()
+#             surface_pts = ptcloud_convex_hull_points(
+#                 refined,
+#                 c.tunnel_surface_alpha,       # was c.surface_alpha
+#                 c.tunnel_surface_tolerance,   # was c.surface_tolerance
+#                 c.tunnel_surface_offset,      # was c.surface_offset
+#             ).astype(np.float32)
+#             dt = time.perf_counter() - t0
+#             print(
+#                 f"[60_surface_normals] delaunay_3d+extract_surface took {dt:,.2f}s surface_pts n={surface_pts.shape[0]:,}"
+#             )
 
-        p_surface = stage_dir / "surface_points.npy"
-        np.save(p_surface, surface_pts)
-        ctx.store.register_file(
-            name="surface_points",
-            stage=self.key,
-            type=ArtifactType.NUMPY,
-            path=p_surface,
-            meta={"n": int(surface_pts.shape[0])},
-        )
+#         p_surface = stage_dir / "surface_points.npy"
+#         np.save(p_surface, surface_pts)
+#         ctx.store.register_file(
+#             name="surface_points",
+#             stage=self.key,
+#             type=ArtifactType.NUMPY,
+#             path=p_surface,
+#             meta={"n": int(surface_pts.shape[0])},
+#         )
 
-        t1 = time.perf_counter()
-        pcd = estimate_normals(
-            surface_pts,
-            kdtree_radius=c.normals_radius,
-            kdtree_max_nn=c.normals_max_nn,
-            correction_tangent_planes_n=c.normals_tangent_k,
-        )
-        dt1 = time.perf_counter() - t1
-        print(f"[60_surface_normals] estimate_normals took {dt1:,.2f}s")
+#         t1 = time.perf_counter()
+#         pcd = estimate_normals(
+#             surface_pts,
+#             kdtree_radius=c.normals_radius,
+#             kdtree_max_nn=c.normals_max_nn,
+#             correction_tangent_planes_n=c.normals_tangent_k,
+#         )
+#         dt1 = time.perf_counter() - t1
+#         print(f"[60_surface_normals] estimate_normals took {dt1:,.2f}s")
 
-        p_normals = stage_dir / "surface_normals.ply"
-        o3d.io.write_point_cloud(str(p_normals), pcd)
-        ctx.store.register_file(
-            name="surface_normals_pcd",
-            stage=self.key,
-            type=ArtifactType.PLY_PCD,
-            path=p_normals,
-        )
+#         p_normals = stage_dir / "surface_normals.ply"
+#         o3d.io.write_point_cloud(str(p_normals), pcd)
+#         ctx.store.register_file(
+#             name="surface_normals_pcd",
+#             stage=self.key,
+#             type=ArtifactType.PLY_PCD,
+#             path=p_normals,
+#         )
 
-        ctx.inputs["normals_pcd_path"] = str(p_normals)
+#         ctx.inputs["normals_pcd_path"] = str(p_normals)
 
 
 class Stage70MeshValidate(Stage):
@@ -945,10 +981,8 @@ class Stage70MeshValidate(Stage):
         import json
         import shutil
 
-
         stage_dir = ctx.store.stage_dir(self.key)
         mesh_path = stage_dir / "npet2_tunnel_mesh.ply"
-
 
         def _mesh_stats(m: pv.PolyData) -> dict:
             return {
@@ -984,14 +1018,10 @@ class Stage70MeshValidate(Stage):
         if chosen_src is None:
             raise ValueError(f"[{self.key}] no valid mesh found from any stage")
 
-
         shutil.copy2(chosen_src, mesh_path)
         final = pv.read(str(mesh_path))
 
-
-        mesh_path_ascii = stage_dir / "npet2_tunnel_mesh_ascii.ply"
-        final.save(str(mesh_path_ascii), binary=False)
-
+        # Save final mesh as both binary and ASCII
         save_mesh_with_ascii(final, mesh_path, tag="final")
 
         st = _mesh_stats(final)
@@ -1010,17 +1040,46 @@ class Stage70MeshValidate(Stage):
         )
         ctx.inputs["tunnel_mesh_path"] = str(mesh_path)
 
-        # Copy comparison meshes for inspection
+        # Also copy final meshes to run root for convenience
+        root_mesh = ctx.store.run_dir / "tunnel_mesh.ply"
+        root_mesh_ascii = ctx.store.run_dir / "tunnel_mesh_ascii.ply"
+        shutil.copy2(str(mesh_path), str(root_mesh))
+        ascii_src = mesh_path.parent / f"{mesh_path.stem}_ascii.ply"
+        if ascii_src.exists():
+            shutil.copy2(str(ascii_src), str(root_mesh_ascii))
+
         self._copy_comparison_meshes(ctx, stage_dir)
 
     def _copy_comparison_meshes(self, ctx, stage_dir):
         import shutil
+
+        run_root = ctx.store.run_dir
+
         for stage_name, level, voxel in [
             ("50_clustering", "level_0", 1.0),
             ("55_grid_refine", "level_1", 0.5),
         ]:
-            src = ctx.store.run_dir / "stage" / stage_name / f"mesh_{level}.ply"
-            if src.exists():
-                dst = stage_dir / f"comparison_mesh_{level}.ply"
-                shutil.copy2(src, dst)
-                print(f"[{self.key}]   copied {level} mesh ({voxel}A grid)")
+            src_dir = ctx.store.run_dir / "stage" / stage_name
+
+            # Post-smooth mesh
+            for suffix in [f"mesh_{level}.ply", f"mesh_{level}_ascii.ply"]:
+                src = src_dir / suffix
+                if src.exists():
+                    shutil.copy2(src, stage_dir / f"comparison_{suffix}")
+                    # Also put in run root
+                    shutil.copy2(src, run_root / suffix)
+
+            # Pre-smooth mesh
+            for suffix in [
+                f"mesh_{level}_pre_smooth.ply",
+                f"mesh_{level}_pre_smooth_ascii.ply",
+            ]:
+                src = src_dir / suffix
+                if src.exists():
+                    shutil.copy2(src, stage_dir / f"comparison_{suffix}")
+                    shutil.copy2(src, run_root / suffix)
+
+            if (src_dir / f"mesh_{level}.ply").exists():
+                print(
+                    f"[{self.key}]   copied {level} mesh ({voxel}A grid) + pre-smooth"
+                )

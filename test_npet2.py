@@ -8,8 +8,6 @@ pv.set_error_output_file('vtk_errors.log')
 
 def main():
     ctx = run_npet2("7K00")
-    # ctx = run_npet2("4UG0")
     print("run_dir:", ctx.store.run_dir)
-
 if __name__ == "__main__":
     main()

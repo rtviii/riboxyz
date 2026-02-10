@@ -76,3 +76,69 @@ def intersect_with_first_assembly(ro, chain_ids: Set[str]) -> Set[str]:
         return chain_ids & asm
     except Exception:
         return chain_ids
+
+# ribctl/lib/npet2/core/structure_selection.py  -- add this function:
+
+def atom_inclusion_policy(profile, config, rcsb_id: str, ro) -> dict:
+    """
+    Central policy for which atoms go into occupancy calculations.
+
+    INCLUDED (define tunnel walls):
+      - Ribosomal proteins (all atoms, including modified residues)
+      - rRNAs (all atoms, including modified nucleotides)
+
+    EXCLUDED (treated as void / not wall):
+      - Water molecules (HOH) -- solvent, should be inside tunnel
+      - Ions (Mg2+, K+, etc.) -- solvent-associated
+      - Nonpolymer ligands (antibiotics, spermidine, paromomycin, etc.)
+      - tRNAs (configurable, default: excluded because they block PTC region)
+      - Manually specified chains (config.occupancy_exclude_auth_asym_ids)
+      - Known tunnel-debris chains (hardcoded per structure)
+
+    Note: modified residues within ribosomal polymers ARE included because
+    they are covalently part of the wall (e.g., pseudouridine, methylated bases).
+    Waters/ions/ligands are on separate mmCIF entities/chains and are excluded
+    by virtue of only selecting protein + rRNA auth_asym_ids.
+
+    Returns dict with:
+      - wall_chain_ids: set of auth_asym_ids for occupancy
+      - excluded_chain_ids: set of auth_asym_ids that were explicitly removed
+      - reason: dict mapping excluded chain_id -> reason string
+    """
+    from ribctl.lib.npet2.stages.legacy_minimal import _tunnel_debris_chains
+
+    debris = _tunnel_debris_chains(rcsb_id, ro, profile)
+    manual_exclude = list(getattr(config, "occupancy_exclude_auth_asym_ids", ()))
+    exclude_trna = bool(getattr(config, "occupancy_exclude_trna", True))
+
+    all_exclude = list(dict.fromkeys(debris + manual_exclude))
+
+    wall = ribosome_wall_auth_asym_ids(
+        profile,
+        exclude_trna=exclude_trna,
+        extra_exclude=all_exclude,
+    )
+    wall = intersect_with_first_assembly(ro, wall)
+
+    # Build reason map for logging
+    reasons = {}
+    for c in debris:
+        reasons[c] = "tunnel_debris (hardcoded)"
+    for c in manual_exclude:
+        if c not in reasons:
+            reasons[c] = "config exclude"
+
+    if exclude_trna:
+        others = getattr(profile, "other_polymers", None) or []
+        proteins = getattr(profile, "proteins", None) or []
+        rnas = getattr(profile, "rnas", None) or []
+        all_polys = list(proteins) + list(rnas) + list(others)
+        for p in all_polys:
+            if looks_like_trna(p) and p.auth_asym_id not in wall:
+                reasons[p.auth_asym_id] = "tRNA (auto-detected)"
+
+    return {
+        "wall_chain_ids": wall,
+        "excluded_chain_ids": set(reasons.keys()),
+        "reasons": reasons,
+    }

@@ -16,15 +16,18 @@ class GridSpec:
     shape: Tuple[int, int, int] # (nx, ny, nz)
 
 
-def make_cylinder_grid(radius_A: float, height_A: float, voxel_A: float) -> GridSpec:
+# ribctl/lib/npet2/backends/grid_occupancy.py
+
+def make_cylinder_grid(radius_A: float, height_A: float, voxel_A: float,
+                       z_min: float = 0.0) -> GridSpec:
     """
     Canonical cylinder in C0:
-      x in [-R, R], y in [-R, R], z in [0, H]
+      x in [-R, R], y in [-R, R], z in [z_min, z_min + H]
     """
     nx = int(np.floor((2 * radius_A) / voxel_A)) + 1
     ny = int(np.floor((2 * radius_A) / voxel_A)) + 1
     nz = int(np.floor(height_A / voxel_A)) + 1
-    origin = np.array([-radius_A, -radius_A, 0.0], dtype=np.float32)
+    origin = np.array([-radius_A, -radius_A, z_min], dtype=np.float32)
     return GridSpec(origin=origin, voxel_size=float(voxel_A), shape=(nx, ny, nz))
 
 

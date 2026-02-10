@@ -161,12 +161,14 @@ class Stage55GridRefine(Stage):
         print(f"[{self.key}] selected {atoms_roi_c0.shape[0]:,} atoms near ROI (ALL atoms, prevents interference)")
 
         grid = _make_bbox_grid(lo, hi, voxel)
-        
+        z_min = float(ctx.inputs.get("cylinder_z_min", 0.0))
+        z_max = z_min + float(c.cylinder_height_A)
+
         cyl = self._cylinder_mask_bbox_grid(
             grid,
             radius_A=float(c.cylinder_radius_A),
-            zmin_A=0.0,
-            zmax_A=float(c.cylinder_height_A),
+            zmin_A=z_min,
+            zmax_A=z_max,
         )
 
         occupied = occupancy_via_edt(atoms_roi_c0, grid, atom_radius_A=atom_r)
