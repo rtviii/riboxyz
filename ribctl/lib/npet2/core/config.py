@@ -67,16 +67,20 @@ class RunConfig:
     dbscan_level1_coarse_min_samples: int   = 30
     dbscan_level1_refine_eps_A      : float = 3.0
     dbscan_level1_refine_min_samples: int   = 20
+
     refine_dbscan_max_points        : int   = 0
     refine_dbscan_seed              : int   = 0
 
     mesh_level1_enable: bool = True
 
     # === Meshing (MC + smoothing, shared by Stage50/55/70) ===
-    mesh_gaussian_sigma_voxels: float = 1.5
     mesh_smooth_method        : str   = "taubin"
+    mesh_level0_gaussian_sigma: float = 1.0
+    mesh_level1_gaussian_sigma: float = 1.5
     mesh_taubin_pass_band     : float = 0.1
-    mesh_level0_smooth_iters  : int   = 20
-    mesh_level1_smooth_iters  : int   = 40
+
+    mesh_level0_smooth_iters  : int   = 40
+    mesh_level1_smooth_iters  : int   = 60
+
     mesh_fill_holes_A         : float = 100.0
     mesh_atom_clearance_A     : float = 1.5

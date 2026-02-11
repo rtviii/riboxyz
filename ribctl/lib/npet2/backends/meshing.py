@@ -31,16 +31,14 @@ def mesh_from_binary_volume(
     smooth_iters: int = 20,
     taubin_pass_band: float = 0.1,
     fill_holes_size: float = 100.0,
-    pre_smooth_save_path: Path | None = None,
-) -> pv.PolyData:
+) -> tuple[pv.PolyData, pv.PolyData]:
     """
     Marching cubes on a Gaussian-blurred binary volume, followed by mesh smoothing.
 
-    If pre_smooth_save_path is given, saves the mesh after MC + fill_holes but
-    before smoothing (binary + ASCII).
+    Returns (smoothed_mesh, pre_smooth_mesh).
+    Both are in the same coordinate frame as the input volume.
+    Caller is responsible for coordinate transforms and saving.
     """
-    from pathlib import Path as _Path
-
     vol = np.pad(mask.astype(np.float32), 2, constant_values=0.0)
     origin_pad = np.asarray(origin, dtype=np.float32) - 2 * voxel_size
 
@@ -65,9 +63,7 @@ def mesh_from_binary_volume(
 
     surf = surf.connectivity(largest=True)
 
-    if pre_smooth_save_path is not None:
-        pre = surf.compute_normals(auto_orient_normals=True, consistent_normals=True)
-        save_mesh_with_ascii(pre, _Path(pre_smooth_save_path), tag="pre-smooth")
+    pre_smooth = surf.compute_normals(auto_orient_normals=True, consistent_normals=True)
 
     if smooth_iters > 0:
         if smooth_method == "taubin":
@@ -76,7 +72,7 @@ def mesh_from_binary_volume(
             surf = surf.smooth(n_iter=smooth_iters)
 
     surf = surf.compute_normals(auto_orient_normals=True, consistent_normals=True)
-    return surf
+    return surf, pre_smooth
 
 
 def voxelize_points(

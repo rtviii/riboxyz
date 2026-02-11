@@ -855,31 +855,39 @@ class Stage50Clustering(Stage):
         mask, origin = voxelize_points(pts_c0, voxel_size=voxel, pad_voxels=2)
 
         try:
-            surf_c0 = mesh_from_binary_volume(
+            surf_c0, pre_smooth_c0 = mesh_from_binary_volume(
                 mask, origin, voxel,
-                gaussian_sigma_voxels=c.mesh_gaussian_sigma_voxels,
+                gaussian_sigma_voxels=c.mesh_level0_gaussian_sigma,
                 smooth_method=c.mesh_smooth_method,
                 smooth_iters=c.mesh_level0_smooth_iters,
                 taubin_pass_band=c.mesh_taubin_pass_band,
                 fill_holes_size=c.mesh_fill_holes_A,
-                pre_smooth_save_path=stage_dir / f"mesh_{level_name}_pre_smooth.ply",
             )
         except ValueError as e:
             print(f"[{self.key}] MC mesh failed for {level_name}: {e}")
             return
 
-        pts_w = transform_points_from_C0(
-            np.asarray(surf_c0.points, dtype=np.float32), ptc, constr
-        ).astype(np.float32)
-        surf_w = surf_c0.copy(deep=True)
-        surf_w.points = pts_w
+        # Transform both meshes to world coordinates
+        def _to_world(mesh_c0: pv.PolyData) -> pv.PolyData:
+            pts_w = transform_points_from_C0(
+                np.asarray(mesh_c0.points, dtype=np.float32), ptc, constr
+            ).astype(np.float32)
+            m = mesh_c0.copy(deep=True)
+            m.points = pts_w
+            return m
+
+        pre_smooth_w = _to_world(pre_smooth_c0)
+        pre_smooth_path = stage_dir / f"mesh_{level_name}_pre_smooth.ply"
+        save_mesh_with_ascii(pre_smooth_w, pre_smooth_path, tag=f"{level_name}-pre-smooth")
+
+        surf_w = _to_world(surf_c0)
 
         region_xyz = np.asarray(ctx.require("region_atom_xyz_occ"), dtype=np.float32)
         surf_w = clip_mesh_to_atom_clearance(surf_w, region_xyz, min_clearance_A=c.mesh_atom_clearance_A)
 
         dt = time.perf_counter() - t0
         print(f"[{self.key}]   MC mesh: {dt:.2f}s, {surf_w.n_points:,} pts, "
-            f"{surf_w.n_faces:,} faces, watertight={surf_w.is_manifold and surf_w.n_open_edges == 0}")
+              f"{surf_w.n_faces:,} faces, watertight={surf_w.is_manifold and surf_w.n_open_edges == 0}")
 
         mesh_path = stage_dir / f"mesh_{level_name}.ply"
         save_mesh_with_ascii(surf_w, mesh_path, tag=level_name)
