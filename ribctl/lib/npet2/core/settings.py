@@ -17,11 +17,8 @@ def _env_path(var: str, default: str) -> Path:
     return Path(os.environ.get(var, default))
 
 
-NPET2_ROOT = _env_path("NPET2_ROOT", str(Path.home() / "npet2_data"))
-NPET2_RUNS_ROOT = _env_path("NPET2_RUNS_ROOT", str(NPET2_ROOT / "runs"))
-NPET2_CACHE_ROOT = _env_path("NPET2_CACHE_ROOT", str(NPET2_ROOT / "cache"))
-
+NPET2_ROOT        = _env_path("NPET2_ROOT", str(Path.home() / "npet2_data"))
+NPET2_RUNS_ROOT   = _env_path("NPET2_RUNS_ROOT", str(NPET2_ROOT / "runs"))
+NPET2_CACHE_ROOT  = _env_path("NPET2_CACHE_ROOT", str(NPET2_ROOT / "cache"))
 POISSON_RECON_BIN = os.environ.get("NPET2_POISSON_RECON_BIN", "PoissonRecon")
-
-# API base URL for fetching profiles/landmarks when running standalone
-RIBOXYZ_API_BASE = os.environ.get("NPET2_RIBOXYZ_API_URL", "http://localhost:8000")
+RIBOXYZ_API_BASE  = os.environ.get("NPET2_RIBOXYZ_API_URL", "http://localhost:8000")

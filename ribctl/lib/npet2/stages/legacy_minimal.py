@@ -90,7 +90,6 @@ def _pick_tunnel_cluster(
           f"(n={len(clusters[best_id]):,}, dist_to_constriction={best_dist:.1f}A)")
     return np.asarray(clusters[best_id], dtype=np.float32), best_id
 
-
 def _get_biopython_structure(ctx: StageContext):
     """Get biopython structure from ctx, or parse mmcif on demand."""
     bs = ctx.inputs.get("biopython_structure")
@@ -264,7 +263,6 @@ class Stage20ExteriorShell(Stage):
         ctx.inputs["alpha_shell_watertight"] = bool(watertight)
         if watertight:
             stage_cache.put_from(key, stage_dir, cached_files)
-
 
 class Stage30RegionAtoms(Stage):
     key = "30_region_atoms"
@@ -611,7 +609,6 @@ class Stage40EmptySpace(Stage):
 
         ctx.inputs["empty_points"] = last_empty
 
-
 class Stage50Clustering(Stage):
     """
     DBSCAN clustering on level_0 (coarse grid, typically 1.0A).
@@ -865,84 +862,6 @@ class Stage50Clustering(Stage):
             meta={"level": level_name, "method": "marching_cubes_taubin"},
         )
         print(f"[{self.key}] mesh saved: {mesh_path}")
-
-
-# class Stage60SurfaceNormals(Stage):
-#     key = "60_surface_normals"
-
-#     def params(self, ctx: StageContext) -> Dict[str, Any]:
-#         c = ctx.config
-#         return {
-#             "tunnel_surface_alpha": c.tunnel_surface_alpha,
-#             "tunnel_surface_tolerance": c.tunnel_surface_tolerance,
-#             "tunnel_surface_offset": c.tunnel_surface_offset,
-#             "normals_radius": c.normals_radius,
-#             "normals_max_nn": c.normals_max_nn,
-#             "normals_tangent_k": c.normals_tangent_k,
-#         }
-
-#     def run(self, ctx: StageContext) -> None:
-#         import time
-
-#         c = ctx.config
-#         refined = np.asarray(ctx.require("refined_cluster"), dtype=np.float32)
-
-#         surface_flag = bool(ctx.inputs.get("refined_cluster_surface", False))
-#         print(
-#             f"[60_surface_normals] refined_cluster n={refined.shape[0]:,} surface_flag={surface_flag}"
-#         )
-
-#         stage_dir = ctx.store.stage_dir(self.key)
-
-#         if surface_flag:
-#             surface_pts = refined
-#             print(
-#                 "[60_surface_normals] using refined points directly as surface_pts (skip Delaunay)"
-#             )
-#         else:
-#             t0 = time.perf_counter()
-#             surface_pts = ptcloud_convex_hull_points(
-#                 refined,
-#                 c.tunnel_surface_alpha,       # was c.surface_alpha
-#                 c.tunnel_surface_tolerance,   # was c.surface_tolerance
-#                 c.tunnel_surface_offset,      # was c.surface_offset
-#             ).astype(np.float32)
-#             dt = time.perf_counter() - t0
-#             print(
-#                 f"[60_surface_normals] delaunay_3d+extract_surface took {dt:,.2f}s surface_pts n={surface_pts.shape[0]:,}"
-#             )
-
-#         p_surface = stage_dir / "surface_points.npy"
-#         np.save(p_surface, surface_pts)
-#         ctx.store.register_file(
-#             name="surface_points",
-#             stage=self.key,
-#             type=ArtifactType.NUMPY,
-#             path=p_surface,
-#             meta={"n": int(surface_pts.shape[0])},
-#         )
-
-#         t1 = time.perf_counter()
-#         pcd = estimate_normals(
-#             surface_pts,
-#             kdtree_radius=c.normals_radius,
-#             kdtree_max_nn=c.normals_max_nn,
-#             correction_tangent_planes_n=c.normals_tangent_k,
-#         )
-#         dt1 = time.perf_counter() - t1
-#         print(f"[60_surface_normals] estimate_normals took {dt1:,.2f}s")
-
-#         p_normals = stage_dir / "surface_normals.ply"
-#         o3d.io.write_point_cloud(str(p_normals), pcd)
-#         ctx.store.register_file(
-#             name="surface_normals_pcd",
-#             stage=self.key,
-#             type=ArtifactType.PLY_PCD,
-#             path=p_normals,
-#         )
-
-#         ctx.inputs["normals_pcd_path"] = str(p_normals)
-
 
 class Stage70MeshValidate(Stage):
     key = "70_mesh_validate"

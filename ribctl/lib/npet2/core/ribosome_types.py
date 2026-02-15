@@ -22,10 +22,10 @@ from .polymer_enum import PolymerClass, parse_polymer_class
 
 class PolymerEntry(BaseModel):
     """A single polymer chain as seen by the npet2 pipeline."""
-    auth_asym_id: str
-    assembly_id: int = 0
-    nomenclature: list[PolymerClass] = []
-    rcsb_pdbx_description: Optional[str] = None
+    auth_asym_id          : str
+    assembly_id           : int = 0
+    nomenclature          : list[PolymerClass] = []
+    rcsb_pdbx_description : Optional[str] = None
     entity_poly_seq_length: int = 0
 
     @field_validator("nomenclature", mode="before")
