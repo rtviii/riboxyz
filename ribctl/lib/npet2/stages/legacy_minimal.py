@@ -1,3 +1,5 @@
+# ribctl/lib/npet2/stages/legacy_minimal.py
+
 from __future__ import annotations
 import json
 from pathlib import Path
@@ -14,15 +16,17 @@ from ribctl.lib.npet2.backends.grid_occupancy import (
 from ribctl.lib.npet2.backends.meshing import save_mesh_with_ascii
 from ribctl.lib.npet2.core.cache import StageCacheKey
 from ribctl.lib.npet2.core.pipeline import Stage
+from ribctl.lib.npet2.core.ribosome_types import RibosomeProfile
 from ribctl.lib.npet2.core.structure_selection import (
     intersect_with_first_assembly,
     ribosome_wall_auth_asym_ids,
+    tunnel_debris_chains,
+    atom_inclusion_policy,
 )
 from ribctl.lib.npet2.core.types import StageContext, ArtifactType
 
 from scipy import ndimage
 
-# Legacy helpers (keep pipeline operational)
 from ribctl.lib.npet.alphalib import (
     cif_to_point_cloud,
     fast_normal_estimation,
@@ -31,14 +35,12 @@ from ribctl.lib.npet.alphalib import (
 )
 from ribctl.lib.npet.kdtree_approach import (
     apply_poisson_reconstruction,
-    ribosome_entities,
     filter_residues_parallel,
     transform_points_to_C0,
     transform_points_from_C0,
     create_point_cloud_mask,
     DBSCAN_capture,
     DBSCAN_pick_largest_cluster,
-    ptcloud_convex_hull_points,
     estimate_normals,
 )
 from ribctl.lib.npet2.stages.grid_refine import (
@@ -47,6 +49,8 @@ from ribctl.lib.npet2.stages.grid_refine import (
     _valid_ijk,
     _voxel_centers_from_indices,
 )
+
+
 def _residues_from_chain_ids(structure, chain_ids: set[str]):
     model = structure[0]
     residues = []
@@ -55,35 +59,10 @@ def _residues_from_chain_ids(structure, chain_ids: set[str]):
             continue
         chain = model[cid]
         for r in chain.get_residues():
-            # Keep everything inside the polymer chain (including modified residues)
-            # Biopython will include modified nucleotides/AAs here.
             if len(getattr(r, "child_list", [])) == 0:
                 continue
             residues.append(r)
     return residues
-
-
-def _tunnel_debris_chains(rcsb_id: str, ro, profile) -> List[str]:
-    # your legacy hardcoded exclusions
-    tunnel_debris = {
-        "3J7Z": ["a", "7"],
-        "5GAK": ["z"],
-        "5NWY": ["s"],
-        "7A5G": ["Y2"],
-        "9F1D": ["BK"],
-    }
-    rcsb_id = rcsb_id.upper()
-    skip = tunnel_debris.get(rcsb_id, []).copy()
-
-    # mitochondrial mL45 (best-effort)
-    if getattr(profile, "mitochondrial", False):
-        try:
-            chain = ro.get_poly_by_polyclass("mL45")
-            if chain is not None:
-                skip.append(chain.auth_asym_id)
-        except Exception:
-            pass
-    return skip
 
 
 def _pick_tunnel_cluster(
@@ -94,7 +73,6 @@ def _pick_tunnel_cluster(
     constr = np.asarray(constr, dtype=np.float32).reshape(1, 3)
     best_id = -1
     best_dist = float("inf")
-
     for cid, pts_list in clusters.items():
         if cid == -1:
             continue
@@ -106,14 +84,24 @@ def _pick_tunnel_cluster(
         if min_dist < best_dist:
             best_dist = min_dist
             best_id = cid
-
     if best_id == -1:
         raise ValueError("No valid clusters found")
-
     print(f"  [cluster_select] picked cluster {best_id} "
           f"(n={len(clusters[best_id]):,}, dist_to_constriction={best_dist:.1f}A)")
-
     return np.asarray(clusters[best_id], dtype=np.float32), best_id
+
+
+def _get_biopython_structure(ctx: StageContext):
+    """Get biopython structure from ctx, or parse mmcif on demand."""
+    bs = ctx.inputs.get("biopython_structure")
+    if bs is not None:
+        return bs
+    from Bio.PDB.MMCIFParser import FastMMCIFParser
+    mmcif_path = ctx.require("mmcif_path")
+    bs = FastMMCIFParser(QUIET=True).get_structure(ctx.rcsb_id, mmcif_path)
+    ctx.inputs["biopython_structure"] = bs
+    return bs
+
 
 class Stage20ExteriorShell(Stage):
     key = "20_exterior_shell"
@@ -164,7 +152,6 @@ class Stage20ExteriorShell(Stage):
                 quality.get("watertight", False)
             )
 
-            # register artifacts (paths now exist under stage_dir)
             ctx.store.register_file(
                 name="alpha_shell_mesh",
                 stage=self.key,
@@ -180,32 +167,21 @@ class Stage20ExteriorShell(Stage):
             return
 
         c = ctx.config
-        ro = ctx.require("ro")
+        profile: RibosomeProfile = ctx.require("profile")
         cifpath = Path(ctx.require("mmcif_path"))
 
-        stage_dir = ctx.store.stage_dir(self.key)
         ptcloud_path = stage_dir / "ribosome_ptcloud.npy"
         surface_pts_path = stage_dir / "alpha_surface_points.npy"
         normals_pcd_path = stage_dir / "alpha_normals.ply"
         mesh_path = stage_dir / "alpha_shell.ply"
         quality_path = stage_dir / "alpha_shell_quality.json"
 
-        # point cloud from cif (legacy)
-        # first_assembly_chains = ro.first_assembly_auth_asym_ids()
-        # ptcloud = cif_to_point_cloud(
-        #     str(cifpath), first_assembly_chains, do_atoms=True
-        # ).astype(np.float32)
-
-        ro = ctx.require("ro")
-        profile = ctx.require("profile")
-        cifpath = Path(ctx.require("mmcif_path"))
-
         wall = ribosome_wall_auth_asym_ids(
             profile,
             exclude_trna=bool(getattr(ctx.config, "occupancy_exclude_trna", True)),
-            extra_exclude=_tunnel_debris_chains(ctx.rcsb_id, ro, profile),
+            extra_exclude=tunnel_debris_chains(ctx.rcsb_id, profile),
         )
-        wall = intersect_with_first_assembly(ro, wall)
+        wall = intersect_with_first_assembly(profile, wall)
 
         ptcloud = cif_to_point_cloud(str(cifpath), sorted(wall), do_atoms=True)
 
@@ -217,7 +193,6 @@ class Stage20ExteriorShell(Stage):
             path=ptcloud_path,
         )
 
-        # surface points
         surface_pts = quick_surface_points(
             ptcloud, c.alpha_d3d_alpha, c.alpha_d3d_tol, c.alpha_d3d_offset
         ).astype(np.float32)
@@ -229,12 +204,10 @@ class Stage20ExteriorShell(Stage):
             path=surface_pts_path,
         )
 
-        # normal estimation (legacy)
         normal_estimated_pcd = fast_normal_estimation(
             surface_pts, c.alpha_kdtree_radius, c.alpha_max_nn, c.alpha_tangent_planes_k
         )
 
-        # robust-ish normal orientation: outward
         center = normal_estimated_pcd.get_center()
         normal_estimated_pcd.orient_normals_towards_camera_location(
             camera_location=center
@@ -251,7 +224,6 @@ class Stage20ExteriorShell(Stage):
             path=normals_pcd_path,
         )
 
-        # poisson reconstruction (writes mesh_path)
         apply_poisson_reconstruction(
             str(normals_pcd_path),
             mesh_path,
@@ -259,7 +231,6 @@ class Stage20ExteriorShell(Stage):
             recon_pt_weight=c.alpha_poisson_ptweight,
         )
 
-        # repair + keep largest component
         mesh = pv.read(mesh_path)
         mesh = mesh.fill_holes(c.alpha_fill_holes)
         mesh = mesh.connectivity(largest=True).triangulate()
@@ -267,7 +238,6 @@ class Stage20ExteriorShell(Stage):
 
         watertight = validate_mesh_pyvista(mesh)
 
-        # record quality
         quality = {
             "watertight": bool(watertight),
             "n_points": int(mesh.n_points),
@@ -276,7 +246,7 @@ class Stage20ExteriorShell(Stage):
             "is_manifold": bool(mesh.is_manifold),
             "bounds": list(mesh.bounds),
         }
-        quality_path.write_text(__import__("json").dumps(quality, indent=2))
+        quality_path.write_text(json.dumps(quality, indent=2))
         ctx.store.register_file(
             name="alpha_shell_quality",
             stage=self.key,
@@ -305,22 +275,19 @@ class Stage30RegionAtoms(Stage):
 
     def run(self, ctx: StageContext) -> None:
         c = ctx.config
-        ro = ctx.require("ro")
-        profile = ctx.require("profile")
+        profile: RibosomeProfile = ctx.require("profile")
 
         ptc = np.asarray(ctx.require("ptc_xyz"), dtype=np.float32)
         constr = np.asarray(ctx.require("constriction_xyz"), dtype=np.float32)
         z_min = float(ctx.inputs.get("cylinder_z_min", 0.0))
 
-        # --- Atom selection policy ---
-        from ribctl.lib.npet2.core.structure_selection import atom_inclusion_policy
-
-        policy = atom_inclusion_policy(profile, c, ctx.rcsb_id, ro)
+        policy = atom_inclusion_policy(profile, c, ctx.rcsb_id)
 
         occ_chain_ids = policy["wall_chain_ids"]
         seed_chain_ids = set(occ_chain_ids)
 
-        structure = ro.assets.biopython_structure()
+        structure = _get_biopython_structure(ctx)
+
         residues_seed = _residues_from_chain_ids(structure, seed_chain_ids)
         residues_occ = _residues_from_chain_ids(structure, occ_chain_ids)
 
@@ -384,7 +351,6 @@ class Stage30RegionAtoms(Stage):
         )
         ctx.inputs["region_atom_xyz_occ"] = occ_points
 
-        # Save full policy for provenance and debugging
         policy_record = {
             "occupancy_chain_mode": getattr(c, "occupancy_chain_mode", "walls_only"),
             "exclude_trna": bool(getattr(c, "occupancy_exclude_trna", True)),
@@ -408,7 +374,6 @@ class Stage30RegionAtoms(Stage):
                 f"{k}({v})" for k, v in sorted(policy["reasons"].items())
             )
             print(f"[{self.key}] excluded: {excluded_summary}")
-
 
 class Stage40EmptySpace(Stage):
     key = "40_empty_space"
