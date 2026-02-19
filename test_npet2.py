@@ -1,4 +1,4 @@
-from ribctl.lib.npet2.run import run_npet2
+from npet2.run import run_npet2
 import vtk
 import pyvista as pv
 import warnings

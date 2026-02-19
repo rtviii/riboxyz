@@ -1,12 +1,4 @@
-# ribctl/lib/npet2/adapters/standalone_providers.py
-"""
-Standalone providers for running npet2 without the riboxyz repo.
-
-Input sources:
-  - mmCIF file on disk
-  - Profile JSON (from riboxyz API or a local file)
-  - Landmark coordinates (from riboxyz API or a local file)
-"""
+# npet2/adapters/standalone_providers.py
 from __future__ import annotations
 
 import json
@@ -16,25 +8,11 @@ from typing import Any, Dict, Optional
 import numpy as np
 from Bio.PDB.MMCIFParser import FastMMCIFParser
 
-from ribctl.lib.npet2.core.ribosome_types import (
-    ConstrictionInfo,
-    PTCInfo,
-    RibosomeProfile,
-)
-from ribctl.lib.npet2.core.settings import RIBOXYZ_API_BASE
+from npet2.core.ribosome_types import ConstrictionInfo, PTCInfo, RibosomeProfile
+from npet2.core.config import SETTINGS
 
 
 class FileStructureProvider:
-    """
-    Load atoms from a local mmCIF file and profile from a JSON file or API.
-
-    Usage:
-        provider = FileStructureProvider(
-            mmcif_path="/data/7K00.cif",
-            profile_path="/data/7K00_profile.json",  # or None to fetch from API
-        )
-    """
-
     def __init__(
         self,
         mmcif_path: str | Path,
@@ -43,7 +21,7 @@ class FileStructureProvider:
     ):
         self.mmcif_path = Path(mmcif_path)
         self.profile_path = Path(profile_path) if profile_path else None
-        self.api_base = api_base or RIBOXYZ_API_BASE
+        self.api_base = api_base or SETTINGS.riboxyz_api_base
 
         if not self.mmcif_path.exists():
             raise FileNotFoundError(f"mmCIF file not found: {self.mmcif_path}")
@@ -56,9 +34,7 @@ class FileStructureProvider:
             data = json.loads(self.profile_path.read_text())
             return RibosomeProfile.model_validate(data)
 
-        # Fetch from API
         import requests
-
         url = f"{self.api_base}/structures/{rcsb_id.upper()}/profile"
         resp = requests.get(url, timeout=30)
         resp.raise_for_status()
@@ -76,7 +52,6 @@ class FileStructureProvider:
         elem = np.asarray(
             [getattr(a, "element", "") or a.get_id()[0] for a in atoms]
         )
-
         profile = self._load_profile(rcsb_id)
 
         return {
@@ -88,23 +63,13 @@ class FileStructureProvider:
 
 
 class FileLandmarkProvider:
-    """
-    Load PTC/constriction from a local JSON file or the riboxyz API.
-
-    Local file format:
-        {
-            "ptc": {"location": [x, y, z]},
-            "constriction": {"location": [x, y, z]}
-        }
-    """
-
     def __init__(
         self,
         landmarks_path: Optional[str | Path] = None,
         api_base: Optional[str] = None,
     ):
         self.landmarks_path = Path(landmarks_path) if landmarks_path else None
-        self.api_base = api_base or RIBOXYZ_API_BASE
+        self.api_base = api_base or SETTINGS.riboxyz_api_base
 
     def fingerprint(self, rcsb_id: str) -> str:
         if self.landmarks_path:
@@ -121,9 +86,7 @@ class FileLandmarkProvider:
                 "constriction_xyz": np.array(constr_info.location, dtype=np.float32),
             }
 
-        # Fetch from API
         import requests
-
         rcsb_id = rcsb_id.upper()
 
         ptc_resp = requests.get(
@@ -134,8 +97,7 @@ class FileLandmarkProvider:
 
         constr_resp = requests.get(
             f"{self.api_base}/loci/constriction_site",
-            params={"rcsb_id": rcsb_id},
-            timeout=30,
+            params={"rcsb_id": rcsb_id}, timeout=30,
         )
         constr_resp.raise_for_status()
         constr_info = ConstrictionInfo.model_validate(constr_resp.json())

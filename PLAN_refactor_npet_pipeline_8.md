@@ -1,74 +1,9 @@
-Alrighty, i have an NPET extraction pipeline in my riboxyz codebase that i want to clean up slightly, in particular:
-- improve the logging
-- bubble up the main computational parameters (first, make them explicit through simple cli options that can override the defaults and also log them as json file with some descriptions in the output run)
-- make the pipeline more robust to poisson reconstruction failures. Currently about 1/3 of my structure runs fail like so:
-```
-(venv) ᢹ saeta.rtviii[ dev/riboxyz ]  p3 test_npet2.py                                                                                   [npet_refactor]
-[npet2] >>> 00_inputs start
-[npet2] <<< 00_inputs done in 1.50s
-[npet2] >>> 10_landmarks start
-[npet2] <<< 10_landmarks done in 8.13s
-[npet2] >>> 20_exterior_shell start
-Excluding chains: []
-Computing 3D Triangulation: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████[00:52<00:00]
-Rolling Poisson Reconstruction: /Users/rtviii/dev/riboxyz/NPET2/runs/5AFI/20260208_160222_a141d87629bf9430/stage/20_exterior_shell/alpha_normals.ply -> /Users/rtviii/dev/riboxyz/NPET2/runs/5AFI/20260208_160222_a141d87629bf9430/stage/20_exterior_shell/alpha_shell.ply
->>Wrote /Users/rtviii/dev/riboxyz/NPET2/runs/5AFI/20260208_160222_a141d87629bf9430/stage/20_exterior_shell/alpha_shell.ply and the _ascii version.
+Alrighty, i have an NPET extraction pipeline (that i have just ported out of my bigger riboxyz) codebase that i want to separate from outer repo in which it is embedded (riboxyz). The tricky bit is that it is somewhat reliant on the riboxyz code and interfaces for now, but only weakly so. My intention is to package npet2 code separately and share it as a docker container and without any reliance on the `riboxyz` code at all so let's get rid of all the dependencies between the two. I think most of the things in `kdtree` and `alphalib` can be directly copied/ported. The interfaces for ptc and constriction sites we can talk about.
 
-Mesh properties at stage: unknown
-- Is watertight: True
-DONE
-
-
-[npet2] <<< 20_exterior_shell done in 60.33s
-[npet2] >>> 30_region_atoms start
-[30_region_atoms] seed_atoms=14,491 occ_atoms=14,491 occ_chains=56
-[npet2] <<< 30_region_atoms done in 12.51s
-[npet2] >>> 40_empty_space start
-[npet2] <<< 40_empty_space done in 2.91s
-[npet2] >>> 50_clustering start
-[50_clustering] empty_points n=161,645
-Running DBSCAN on 161645 points. eps=5.5, min_samples=600, distance_metric=euclidean
-[50_clustering] coarse DBSCAN: 3.93s, 7 clusters
-Running DBSCAN on 81724 points. eps=3.5, min_samples=175, distance_metric=euclidean
-[50_clustering] refine DBSCAN: 1.13s, 4 clusters
-[50_clustering] winner: coarse=81,724 → refine=66,212
-[50_clustering] generating mesh for level_0...
-Computing 3D Triangulation: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████[00:30<00:00]
-[50_clustering]   surface extraction: 30.46s, 11,544 points
-[50_clustering]   normal estimation: 0.28s
-Rolling Poisson Reconstruction: /Users/rtviii/dev/riboxyz/NPET2/runs/5AFI/20260208_160222_a141d87629bf9430/stage/50_clustering/normals_level_0.ply -> /Users/rtviii/dev/riboxyz/NPET2/runs/5AFI/20260208_160222_a141d87629bf9430/stage/50_clustering/mesh_level_0.ply
->>Wrote /Users/rtviii/dev/riboxyz/NPET2/runs/5AFI/20260208_160222_a141d87629bf9430/stage/50_clustering/mesh_level_0.ply and the _ascii version.
-[50_clustering] mesh saved: /Users/rtviii/dev/riboxyz/NPET2/runs/5AFI/20260208_160222_a141d87629bf9430/stage/50_clustering/mesh_level_0.ply
-[npet2] <<< 50_clustering done in 36.97s
-[npet2] >>> 55_grid_refine start
-[55_grid_refine] voxel=0.5Å, ROI pad=10.0Å, atom_r=2.5Å
-[55_grid_refine] selected 14,346 atoms near ROI (ALL atoms, prevents interference)
-[55_grid_refine] boundary points: 110,717
-[55_grid_refine] coarse DBSCAN: 0.40s, 1 clusters
-[55_grid_refine] refine DBSCAN: 0.32s, 1 clusters
-[55_grid_refine] creating selected void mask for voxel fallback...
-[55_grid_refine]   selected mask: 595,020 voxels
-[55_grid_refine] DBSCAN refined-grid: coarse=0 → refine=0, final_pts=110,613
-[55_grid_refine] generating mesh for level_1...
-[55_grid_refine]   normal estimation: 3.38s, 110,613 points
-[55_grid_refine]   Poisson reconstruction (o3d, depth=6)...
-[ERROR] /Users/runner/work/Open3D/Open3D/build/poisson/src/ext_poisson/PoissonRecon/Src/FEMTree.IsoSurface.specialized.inl (Line 1463)
-        operator()
-        Failed to close loop [5: 32 32 34] | (97696): (321,320,326)
-[ERROR] /Users/runner/work/Open3D/Open3D/build/poisson/src/ext_poisson/PoissonRecon/Src/FEMTree.IsoSurface.specialized.inl (Line 1463)
-        operator()
-        Failed to close loop [5: 31 32 34] | (97465): (320,320,325)
-/Users/rtviii/.pyenv/versions/3.12.9/lib/python3.12/multiprocessing/resource_tracker.py:255: UserWarning: resource_tracker: There appear to be 1 leaked semaphore objects to clean up at shutdown
-  warnings.warn('resource_tracker: There appear to be %d ')
-```
-
-Also when we do this we can try to fix the visualizer for a richer observability of the intermediate parts and cluster, but htat's for later.. Let me know if you need to see more from me or want to ask deepwiki about any part of this (or the software pakcages and bianries we are using...)
-
-Here is my code..
-
+Here is the full layout of the repo:
 
 ```
-(venv) ᢹ saeta.rtviii[ dev/riboxyz ]  tree -L 6 -I 'node_modules|venv|__pycache__|profiles|cache|debug_output|*.npy|*.ply|*.fasta|*.csv|assets_*|staticfiles|api|assets|*.png|TUBETL_DATA|*.pkl|*hmm|*fasta|npet|*.mdx|*.ts.map|*.d.ts|nightingale' .  e
+(venv) ᢹ saeta.rtviii[ dev/riboxyz ]  tree -L 6 -I 'node_modules|venv|__pycache__|profiles|cache|debug_output|*.fasta|*.csv|assets_*|staticfiles|api|assets|*.png|TUBETL_DATA|*.pkl|*hmm|*fasta|npet|*.mdx|*.ts.map|*.d.ts|nightingale|NPET2' .  e
 .
 ├── __scripts
 │   ├── gettrna.py
@@ -170,54 +105,14 @@ Here is my code..
 │   ├── general_directions.md
 │   ├── hmm-based-classification.md
 │   └── pymol.md
+├── NPET_cli.md
 ├── npet_orchestrator.py
-├── NPET2
-│   └── runs
-│       ├── 4UG0
-│       │   └── 20260208_160239_8d0a713d0767e2ce
-│       │       ├── manifest.json
-│       │       └── stage
-│       │           ├── 00_inputs
-│       │           ├── 10_landmarks
-│       │           ├── 20_exterior_shell
-│       │           ├── 30_region_atoms
-│       │           ├── 40_empty_space
-│       │           ├── 50_clustering
-│       │           ├── 55_grid_refine
-│       │           ├── 60_surface_normals
-│       │           └── 70_mesh_validate
-│       ├── 5AFI
-│       │   └── 20260208_160222_a141d87629bf9430
-│       │       ├── manifest.json
-│       │       └── stage
-│       │           ├── 00_inputs
-│       │           ├── 10_landmarks
-│       │           ├── 20_exterior_shell
-│       │           ├── 30_region_atoms
-│       │           ├── 40_empty_space
-│       │           ├── 50_clustering
-│       │           └── 55_grid_refine
-│       └── 7K00
-│           └── 20260206_175806_b58a7c2ff0fdab01
-│               ├── manifest.json
-│               └── stage
-│                   ├── 00_inputs
-│                   ├── 10_landmarks
-│                   ├── 20_exterior_shell
-│                   ├── 30_region_atoms
-│                   ├── 40_empty_space
-│                   ├── 50_clustering
-│                   └── 55_grid_refine
+├── NPET_README.md
 ├── npet2_viewer_usage_examples.md
 ├── pipeline_manager.py
-├── PLAN_refactor_npet_pipeline_0.md
-├── PLAN_refactor_npet_pipeline_1.md
-├── PLAN_refactor_npet_pipeline_2.md
-├── PLAN_refactor_npet_pipeline_3.md
-├── PLAN_refactor_npet_pipeline_4.md
-├── PLAN_refactor_npet_pipeline_5.md
-├── q_entity_filtering.md
-├── q_logs_and_params.md
+├── PLAN_refactor_npet_pipeline_6.md
+├── PLAN_refactor_npet_pipeline_7_cleanup.md
+├── q_mass_runs_and_packaging.md
 ├── q_poisson_still_fails.md
 ├── q.md
 ├── ribctl
@@ -273,19 +168,24 @@ Here is my code..
 │   │   ├── libtax.py
 │   │   ├── npet2
 │   │   │   ├── __init__.py
+│   │   │   ├── __main__.py
 │   │   │   ├── adapters
-│   │   │   │   └── riboxyz_providers.py
+│   │   │   │   ├── riboxyz_providers.py
+│   │   │   │   └── standalone_providers.py
 │   │   │   ├── backends
 │   │   │   │   ├── __init__.py
 │   │   │   │   ├── clustering_io.py
 │   │   │   │   ├── grid_occupancy.py
-│   │   │   │   └── legacy
+│   │   │   │   ├── legacy
+│   │   │   │   └── meshing.py
 │   │   │   ├── core
 │   │   │   │   ├── cache.py
 │   │   │   │   ├── config.py
 │   │   │   │   ├── interfaces.py
 │   │   │   │   ├── manifest.py
 │   │   │   │   ├── pipeline.py
+│   │   │   │   ├── polymer_enum.py
+│   │   │   │   ├── ribosome_types.py
 │   │   │   │   ├── run_id.py
 │   │   │   │   ├── settings.py
 │   │   │   │   ├── store.py
@@ -320,57 +220,304 @@ Here is my code..
 │   └── ribosome_ops.py
 ├── taxdump.tar.gz
 └── test_npet2.py
-69 directories, 182 files
 ```
 
+And now let me show you the actual code codebase.
 
 
 ribctl/lib/npet2/adapters/riboxyz_providers.py
 ```py
 # ribctl/lib/npet2/adapters/riboxyz_providers.py
+"""
+Providers that bridge riboxyz internals -> npet2 interfaces.
+
+These are only usable inside the riboxyz repo where RibosomeOps, AssetType,
+PTC_location, get_constriction are available. For standalone use, see
+standalone_providers.py.
+"""
 from __future__ import annotations
 
 from typing import Any, Dict
+
 import numpy as np
 
-from ribctl.ribosome_ops import RibosomeOps
-from ribctl.asset_manager.asset_types import AssetType
-from ribctl.lib.landmarks.ptc_via_trna import PTC_location
-from ribctl.lib.landmarks.constriction_site import get_constriction
+from ribctl.lib.npet2.core.ribosome_types import (
+    RibosomeProfile,
+    ProteinEntry,
+    RNAEntry,
+    PolymerEntry,
+    AssemblyInfo,
+    AssemblyPolymerInstance,
+    AssemblyNonpolymerInstance,
+)
+
+
+def _convert_profile(ribo_struct) -> RibosomeProfile:
+    """Convert a riboxyz RibosomeStructure to the npet2-internal RibosomeProfile."""
+
+    def _nomenclature_strings(poly) -> list[str]:
+        return [n.value if hasattr(n, "value") else str(n) for n in (poly.nomenclature or [])]
+
+    proteins = [
+        ProteinEntry(
+            auth_asym_id=p.auth_asym_id,
+            assembly_id=p.assembly_id,
+            nomenclature=_nomenclature_strings(p),
+            rcsb_pdbx_description=p.rcsb_pdbx_description,
+            entity_poly_seq_length=p.entity_poly_seq_length,
+        )
+        for p in (ribo_struct.proteins or [])
+    ]
+    rnas = [
+        RNAEntry(
+            auth_asym_id=r.auth_asym_id,
+            assembly_id=r.assembly_id,
+            nomenclature=_nomenclature_strings(r),
+            rcsb_pdbx_description=r.rcsb_pdbx_description,
+            entity_poly_seq_length=r.entity_poly_seq_length,
+        )
+        for r in (ribo_struct.rnas or [])
+    ]
+    others = [
+        PolymerEntry(
+            auth_asym_id=o.auth_asym_id,
+            assembly_id=o.assembly_id,
+            nomenclature=_nomenclature_strings(o),
+            rcsb_pdbx_description=o.rcsb_pdbx_description,
+            entity_poly_seq_length=o.entity_poly_seq_length,
+        )
+        for o in (ribo_struct.other_polymers or [])
+    ]
+
+    assembly_map = None
+    if ribo_struct.assembly_map:
+        assembly_map = []
+        for asm in ribo_struct.assembly_map:
+            polys = [
+                AssemblyPolymerInstance(
+                    entity_id=inst.rcsb_polymer_entity_instance_container_identifiers.entity_id,
+                    auth_asym_id=inst.rcsb_polymer_entity_instance_container_identifiers.auth_asym_id,
+                )
+                for inst in (asm.polymer_entity_instances or [])
+            ]
+            nonpolys = None
+            if asm.nonpolymer_entity_instances:
+                nonpolys = [
+                    AssemblyNonpolymerInstance(
+                        entity_id=inst.rcsb_nonpolymer_entity_instance_container_identifiers.entity_id,
+                        auth_asym_id=inst.rcsb_nonpolymer_entity_instance_container_identifiers.auth_asym_id,
+                        auth_seq_id=inst.rcsb_nonpolymer_entity_instance_container_identifiers.auth_seq_id,
+                    )
+                    for inst in asm.nonpolymer_entity_instances
+                ]
+            assembly_map.append(AssemblyInfo(
+                rcsb_id=asm.rcsb_id,
+                polymer_entity_instances=polys,
+                nonpolymer_entity_instances=nonpolys,
+            ))
+
+    return RibosomeProfile(
+        rcsb_id=ribo_struct.rcsb_id,
+        mitochondrial=bool(getattr(ribo_struct, "mitochondrial", False)),
+        proteins=proteins,
+        rnas=rnas,
+        other_polymers=others,
+        assembly_map=assembly_map,
+    )
 
 
 class RiboxyzStructureProvider:
+    """Loads atoms + profile from local riboxyz assets (RibosomeOps)."""
+
     def fingerprint(self, rcsb_id: str) -> str:
-        # You can improve later: checksum mmcif, assembly ID, etc.
+        from ribctl.asset_manager.asset_types import AssetType
         p = AssetType.MMCIF.get_path(rcsb_id)
         return f"mmcif:{p}"
 
     def load_atoms(self, rcsb_id: str) -> Dict[str, Any]:
+        from ribctl.ribosome_ops import RibosomeOps
+        from ribctl.asset_manager.asset_types import AssetType
+
         ro = RibosomeOps(rcsb_id)
         structure = ro.assets.biopython_structure()
-        # simplest: extract all atom coords for first model
-        atoms = [a for a in structure[0].get_atoms()]
+        atoms = list(structure[0].get_atoms())
         xyz = np.asarray([a.get_coord() for a in atoms], dtype=np.float32)
         elem = np.asarray([getattr(a, "element", "") or a.get_id()[0] for a in atoms])
+
+        profile = _convert_profile(ro.profile)
+
         return {
             "atom_xyz": xyz,
             "atom_element": elem,
             "mmcif_path": str(AssetType.MMCIF.get_path(rcsb_id)),
-            "profile": ro.profile,
-            "ro": ro,  # keep around for legacy stages; core doesn’t require it
+            "profile": profile,
+            # Keep ro around for legacy stages that need biopython_structure etc.
+            "ro": ro,
         }
 
 
 class RiboxyzLandmarkProvider:
     def fingerprint(self, rcsb_id: str) -> str:
-        # encode algorithm choices here later
         return "ptc_via_trna+constriction_site:v1"
 
     def get_landmarks(self, rcsb_id: str) -> Dict[str, np.ndarray]:
+        from ribctl.lib.landmarks.ptc_via_trna import PTC_location
+        from ribctl.lib.landmarks.constriction_site import get_constriction
+
         ptc = np.array(PTC_location(rcsb_id).location, dtype=np.float32)
         constr = np.array(get_constriction(rcsb_id), dtype=np.float32)
         return {"ptc_xyz": ptc, "constriction_xyz": constr}
 
+```
+
+ribctl/lib/npet2/adapters/standalone_providers.py
+```py
+# ribctl/lib/npet2/adapters/standalone_providers.py
+"""
+Standalone providers for running npet2 without the riboxyz repo.
+
+Input sources:
+  - mmCIF file on disk
+  - Profile JSON (from riboxyz API or a local file)
+  - Landmark coordinates (from riboxyz API or a local file)
+"""
+from __future__ import annotations
+
+import json
+from pathlib import Path
+from typing import Any, Dict, Optional
+
+import numpy as np
+from Bio.PDB.MMCIFParser import FastMMCIFParser
+
+from ribctl.lib.npet2.core.ribosome_types import (
+    ConstrictionInfo,
+    PTCInfo,
+    RibosomeProfile,
+)
+from ribctl.lib.npet2.core.settings import RIBOXYZ_API_BASE
+
+
+class FileStructureProvider:
+    """
+    Load atoms from a local mmCIF file and profile from a JSON file or API.
+
+    Usage:
+        provider = FileStructureProvider(
+            mmcif_path="/data/7K00.cif",
+            profile_path="/data/7K00_profile.json",  # or None to fetch from API
+        )
+    """
+
+    def __init__(
+        self,
+        mmcif_path: str | Path,
+        profile_path: Optional[str | Path] = None,
+        api_base: Optional[str] = None,
+    ):
+        self.mmcif_path = Path(mmcif_path)
+        self.profile_path = Path(profile_path) if profile_path else None
+        self.api_base = api_base or RIBOXYZ_API_BASE
+
+        if not self.mmcif_path.exists():
+            raise FileNotFoundError(f"mmCIF file not found: {self.mmcif_path}")
+
+    def fingerprint(self, rcsb_id: str) -> str:
+        return f"mmcif:{self.mmcif_path}"
+
+    def _load_profile(self, rcsb_id: str) -> RibosomeProfile:
+        if self.profile_path and self.profile_path.exists():
+            data = json.loads(self.profile_path.read_text())
+            return RibosomeProfile.model_validate(data)
+
+        # Fetch from API
+        import requests
+
+        url = f"{self.api_base}/structures/{rcsb_id.upper()}/profile"
+        resp = requests.get(url, timeout=30)
+        resp.raise_for_status()
+        return RibosomeProfile.model_validate(resp.json())
+
+    def load_atoms(self, rcsb_id: str) -> Dict[str, Any]:
+        parser = FastMMCIFParser(QUIET=True)
+        structure = parser.get_structure(rcsb_id, str(self.mmcif_path))
+        atoms = list(structure[0].get_atoms())
+
+        if not atoms:
+            raise ValueError(f"No atoms found in {self.mmcif_path}")
+
+        xyz = np.asarray([a.get_coord() for a in atoms], dtype=np.float32)
+        elem = np.asarray(
+            [getattr(a, "element", "") or a.get_id()[0] for a in atoms]
+        )
+
+        profile = self._load_profile(rcsb_id)
+
+        return {
+            "atom_xyz": xyz,
+            "atom_element": elem,
+            "mmcif_path": str(self.mmcif_path),
+            "profile": profile,
+        }
+
+
+class FileLandmarkProvider:
+    """
+    Load PTC/constriction from a local JSON file or the riboxyz API.
+
+    Local file format:
+        {
+            "ptc": {"location": [x, y, z]},
+            "constriction": {"location": [x, y, z]}
+        }
+    """
+
+    def __init__(
+        self,
+        landmarks_path: Optional[str | Path] = None,
+        api_base: Optional[str] = None,
+    ):
+        self.landmarks_path = Path(landmarks_path) if landmarks_path else None
+        self.api_base = api_base or RIBOXYZ_API_BASE
+
+    def fingerprint(self, rcsb_id: str) -> str:
+        if self.landmarks_path:
+            return f"landmarks_file:{self.landmarks_path}"
+        return f"landmarks_api:{self.api_base}"
+
+    def get_landmarks(self, rcsb_id: str) -> Dict[str, np.ndarray]:
+        if self.landmarks_path and self.landmarks_path.exists():
+            data = json.loads(self.landmarks_path.read_text())
+            ptc_info = PTCInfo.model_validate(data["ptc"])
+            constr_info = ConstrictionInfo.model_validate(data["constriction"])
+            return {
+                "ptc_xyz": np.array(ptc_info.location, dtype=np.float32),
+                "constriction_xyz": np.array(constr_info.location, dtype=np.float32),
+            }
+
+        # Fetch from API
+        import requests
+
+        rcsb_id = rcsb_id.upper()
+
+        ptc_resp = requests.get(
+            f"{self.api_base}/loci/ptc", params={"rcsb_id": rcsb_id}, timeout=30
+        )
+        ptc_resp.raise_for_status()
+        ptc_info = PTCInfo.model_validate(ptc_resp.json())
+
+        constr_resp = requests.get(
+            f"{self.api_base}/loci/constriction_site",
+            params={"rcsb_id": rcsb_id},
+            timeout=30,
+        )
+        constr_resp.raise_for_status()
+        constr_info = ConstrictionInfo.model_validate(constr_resp.json())
+
+        return {
+            "ptc_xyz": np.array(ptc_info.location, dtype=np.float32),
+            "constriction_xyz": np.array(constr_info.location, dtype=np.float32),
+        }
 ```
 
 ribctl/lib/npet2/backends/__init__.py
@@ -434,15 +581,18 @@ class GridSpec:
     shape: Tuple[int, int, int] # (nx, ny, nz)
 
 
-def make_cylinder_grid(radius_A: float, height_A: float, voxel_A: float) -> GridSpec:
+# ribctl/lib/npet2/backends/grid_occupancy.py
+
+def make_cylinder_grid(radius_A: float, height_A: float, voxel_A: float,
+                       z_min: float = 0.0) -> GridSpec:
     """
     Canonical cylinder in C0:
-      x in [-R, R], y in [-R, R], z in [0, H]
+      x in [-R, R], y in [-R, R], z in [z_min, z_min + H]
     """
     nx = int(np.floor((2 * radius_A) / voxel_A)) + 1
     ny = int(np.floor((2 * radius_A) / voxel_A)) + 1
     nz = int(np.floor(height_A / voxel_A)) + 1
-    origin = np.array([-radius_A, -radius_A, 0.0], dtype=np.float32)
+    origin = np.array([-radius_A, -radius_A, z_min], dtype=np.float32)
     return GridSpec(origin=origin, voxel_size=float(voxel_A), shape=(nx, ny, nz))
 
 
@@ -708,6 +858,132 @@ def morphological_clean(
         raise ValueError(f"Unknown operation: {operation}")
 ```
 
+ribctl/lib/npet2/backends/meshing.py
+```py
+# ribctl/lib/npet2/backends/meshing.py
+from __future__ import annotations
+from pathlib import Path
+
+import numpy as np
+import pyvista as pv
+from scipy.ndimage import binary_fill_holes, gaussian_filter
+
+def save_mesh_with_ascii(mesh: pv.PolyData, path: Path, tag: str = "") -> None:
+    """Save mesh as binary PLY + ASCII PLY side by side."""
+    mesh.save(str(path))
+    ascii_path = path.parent / f"{path.stem}_ascii.ply"
+    try:
+        mesh.save(str(ascii_path), binary=False)
+    except Exception:
+        try:
+            import plyfile
+            data = plyfile.PlyData.read(str(path))
+            data.text = True
+            data.write(str(ascii_path))
+        except Exception as e:
+            print(f"[meshing] ASCII PLY write failed{' (' + tag + ')' if tag else ''}: {e}")
+
+def mesh_from_binary_volume(
+    mask: np.ndarray,
+    origin: np.ndarray,
+    voxel_size: float,
+    *,
+    gaussian_sigma_voxels: float = 1.5,
+    smooth_method: str = "taubin",
+    smooth_iters: int = 20,
+    taubin_pass_band: float = 0.1,
+    fill_holes_size: float = 100.0,
+) -> tuple[pv.PolyData, pv.PolyData]:
+    """
+    Marching cubes on a Gaussian-blurred binary volume, followed by mesh smoothing.
+
+    Returns (smoothed_mesh, pre_smooth_mesh).
+    Both are in the same coordinate frame as the input volume.
+    Caller is responsible for coordinate transforms and saving.
+    """
+    vol = np.pad(mask.astype(np.float32), 2, constant_values=0.0)
+    origin_pad = np.asarray(origin, dtype=np.float32) - 2 * voxel_size
+
+    if gaussian_sigma_voxels > 0:
+        vol = gaussian_filter(vol, sigma=gaussian_sigma_voxels)
+
+    img = pv.ImageData(
+        dimensions=vol.shape,
+        spacing=(voxel_size, voxel_size, voxel_size),
+        origin=(float(origin_pad[0]), float(origin_pad[1]), float(origin_pad[2])),
+    )
+    img.point_data["values"] = vol.ravel(order="F")
+
+    surf = img.contour(isosurfaces=[0.5], scalars="values").triangulate()
+    if surf.n_points == 0:
+        raise ValueError("Marching cubes produced empty surface")
+
+    surf = surf.clean(tolerance=0.0)
+
+    if fill_holes_size > 0:
+        surf = surf.fill_holes(fill_holes_size)
+
+    surf = surf.connectivity(largest=True)
+
+    pre_smooth = surf.compute_normals(auto_orient_normals=True, consistent_normals=True)
+
+    if smooth_iters > 0:
+        if smooth_method == "taubin":
+            surf = surf.smooth_taubin(n_iter=smooth_iters, pass_band=taubin_pass_band)
+        else:
+            surf = surf.smooth(n_iter=smooth_iters)
+
+    surf = surf.compute_normals(auto_orient_normals=True, consistent_normals=True)
+    return surf, pre_smooth
+
+
+def voxelize_points(
+    points: np.ndarray,
+    voxel_size: float,
+    pad_voxels: int = 2,
+) -> tuple[np.ndarray, np.ndarray]:
+    lo = points.min(axis=0) - pad_voxels * voxel_size
+    hi = points.max(axis=0) + pad_voxels * voxel_size
+
+    shape = tuple(np.ceil((hi - lo) / voxel_size).astype(int) + 1)
+
+    ijk = np.floor((points - lo) / voxel_size + 0.5).astype(np.int32)
+    for d in range(3):
+        ijk[:, d] = np.clip(ijk[:, d], 0, shape[d] - 1)
+
+    mask = np.zeros(shape, dtype=bool)
+    mask[ijk[:, 0], ijk[:, 1], ijk[:, 2]] = True
+
+    mask = binary_fill_holes(mask)
+    return mask, lo.astype(np.float32)
+
+
+def clip_mesh_to_atom_clearance(
+    mesh: pv.PolyData,
+    atom_xyz: np.ndarray,
+    min_clearance_A: float = 1.5,
+) -> pv.PolyData:
+    from scipy.spatial import cKDTree
+
+    tree = cKDTree(atom_xyz)
+    pts = np.asarray(mesh.points, dtype=np.float64)
+
+    dist, idx = tree.query(pts, k=1)
+    violating = dist < min_clearance_A
+
+    if violating.sum() == 0:
+        return mesh
+
+    nearest = atom_xyz[idx[violating]]
+    direction = pts[violating] - nearest
+    norms = np.maximum(np.linalg.norm(direction, axis=1, keepdims=True), 1e-8)
+    pts[violating] = nearest + (direction / norms) * min_clearance_A
+
+    result = mesh.copy()
+    result.points = pts.astype(np.float32)
+    return result
+```
+
 ribctl/lib/npet2/core/cache.py
 ```py
 from __future__ import annotations
@@ -766,38 +1042,33 @@ ribctl/lib/npet2/core/config.py
 ```py
 # ribctl/lib/npet2/core/config.py
 from __future__ import annotations
-
 from dataclasses import dataclass, field
-from typing import List, Literal, Optional, Tuple
+from typing import List, Literal, Tuple
 
 
 @dataclass(frozen=True)
 class GridLevelConfig:
-    name: str
-    voxel_size_A: float
 
-    atom_radius_mode: Literal["uniform", "vdw_bucket"] = "uniform"
+    name                 : str
+    voxel_size_A         : float
+    atom_radius_mode     : Literal["uniform", "vdw_bucket"] = "uniform"
     uniform_atom_radius_A: float = 2.0
-
-    occupancy_backend: Literal["legacy_kdtree", "grid_stamp", "edt", "gpu"] = (
-        "legacy_kdtree"
-    )
-    roi_backend: Literal["full_cylinder", "bbox_from_prev", "tube_from_prev"] = (
-        "full_cylinder"
-    )
+    occupancy_backend    : Literal["legacy_kdtree", "edt"] = "legacy_kdtree"
 
 
 @dataclass(frozen=True)
 class RunConfig:
+    # === Chain selection ===
     occupancy_chain_mode: Literal["walls_only", "assembly_all"] = "walls_only"
     occupancy_exclude_trna: bool = True
     occupancy_exclude_auth_asym_ids: Tuple[str, ...] = ()
+
     # === Region definition ===
-    cylinder_radius_A: float = 35.0
-    cylinder_height_A: float = 120.0
+    cylinder_radius_A: float = 35
+    cylinder_height_A: float = 120
+    cylinder_ptc_extension_A: float = 20
 
     # === Stage20: Exterior shell (whole ribosome surface) ===
-    # Large alpha because the ribosome is roughly convex
     alpha_d3d_alpha       : float = 200
     alpha_d3d_tol         : float = 10
     alpha_d3d_offset      : float = 3
@@ -817,130 +1088,112 @@ class RunConfig:
         ]
     )
 
-    # === Tunnel surface extraction (Delaunay on DBSCAN cluster) ===
-    # Small alpha because the tunnel is deeply concave
-    tunnel_surface_alpha: float = 2.0
-    tunnel_surface_tolerance: float = 1.0
-    tunnel_surface_offset: float = 2.0
-
-    # === Surface normals (shared by Stage50 mesh, Stage60, Stage55) ===
-    normals_radius: float = 10
-    normals_max_nn: int = 15
-    normals_tangent_k: int = 10
-
     # === Stage50: DBSCAN clustering on level_0 (1.0A grid) ===
-    dbscan_level0_coarse_eps_A: float = 5.5
-    dbscan_level0_coarse_min_samples: int = 600
-    dbscan_level0_refine_eps_A: float = 3.5
-    dbscan_level0_refine_min_samples: int = 175
-
-    # Stage50 mesh generation
-    mesh_level0_enable: bool = True
-    mesh_level0_poisson_depth: int = 6
-    mesh_level0_poisson_ptweight: float = 3.0
+    dbscan_level0_coarse_eps_A      : float = 5.5
+    dbscan_level0_coarse_min_samples: int   = 600
+    dbscan_level0_refine_eps_A      : float = 3.5
+    dbscan_level0_refine_min_samples: int   = 175
+    mesh_level0_enable              : bool  = True
 
     # === Stage55: Grid refinement (0.5A ROI pass) ===
-    refine_voxel_size_A: float = 0.5
-    refine_roi_pad_A: float = 10.0
-    refine_atom_radius_A: float = 2.5
-
-    refine_keep_within_A: float = 6.0
-    refine_occ_close_iters: int = 0
-    refine_void_open_iters: int = 1
-    refine_forbid_roi_boundary: bool = True
+    refine_voxel_size_A       : float = 0.5
+    refine_roi_pad_A          : float = 10.0
+    refine_atom_radius_A      : float = 2.0
+    refine_keep_within_A      : float = 6.0
+    refine_occ_close_iters    : int   = 0
+    refine_void_open_iters    : int   = 1
+    refine_forbid_roi_boundary: bool  = True
 
     # DBSCAN on refined grid
-    dbscan_level1_coarse_eps_A: float = 3.0
-    dbscan_level1_coarse_min_samples: int = 30
-    dbscan_level1_refine_eps_A: float = 3.0
-    dbscan_level1_refine_min_samples: int = 20
+    dbscan_level1_coarse_eps_A      : float = 3.0
+    dbscan_level1_coarse_min_samples: int   = 30
+    dbscan_level1_refine_eps_A      : float = 3.0
+    dbscan_level1_refine_min_samples: int   = 20
 
-    refine_dbscan_max_points: int = 0
-    refine_dbscan_seed: int = 0
-    refine_dbscan_max_cluster_stats: int = 25
+    refine_dbscan_max_points        : int   = 0
+    refine_dbscan_seed              : int   = 0
 
-    # Stage55 mesh generation
     mesh_level1_enable: bool = True
-    mesh_level1_poisson_depth: int = 6
-    mesh_level1_poisson_ptweight: float = 3.0
 
-    # === Stage70: Final mesh validation ===
-    mesh_poisson_depth: int = 6
-    mesh_poisson_ptweight: float = 3.0
+    # === Meshing (MC + smoothing, shared by Stage50/55/70) ===
+    mesh_smooth_method        : str   = "taubin"
+    mesh_level0_gaussian_sigma: float = 1.0
+    mesh_level1_gaussian_sigma: float = 1.5
+    mesh_taubin_pass_band     : float = 0.1
 
-    voxel_mesh_fill_holes_A: float = 50.0
-    voxel_mesh_smooth_iters: int = 10
+    mesh_level0_smooth_iters  : int   = 40
+    mesh_level1_smooth_iters  : int   = 60
 
+    mesh_fill_holes_A         : float = 100.0
+    mesh_atom_clearance_A     : float = 1.5
 ```
 
 ribctl/lib/npet2/core/interfaces.py
 ```py
 # ribctl/lib/npet2/core/interfaces.py
+"""
+Provider protocols for npet2.
+
+These define the boundary between the pipeline and any data source.
+Implement these to plug in riboxyz, a local file system, or an API.
+"""
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Dict, Optional, Protocol, Tuple
+from typing import Any, Dict, Optional, Protocol
 
 import numpy as np
 
+from .ribosome_types import RibosomeProfile, PTCInfo, ConstrictionInfo
 from .types import ArtifactRef, ArtifactType
 
 
 class StructureProvider(Protocol):
-    """
-    Minimal structure access. Implemented by riboxyz adapters.
-    """
+    """Provides atom coordinates and the ribosome profile for a structure."""
 
-    def fingerprint(self, rcsb_id: str) -> str:
-        ...
+    def fingerprint(self, rcsb_id: str) -> str: ...
 
     def load_atoms(self, rcsb_id: str) -> Dict[str, Any]:
         """
-        Return at minimum:
-          - atom_xyz: (N,3) float32
-          - atom_element: (N,) optional
-        Can include:
-          - mmcif_path, assemblies, chain ids, etc.
+        Must return:
+          - atom_xyz: (N, 3) float32
+          - atom_element: (N,) str array (optional)
+          - mmcif_path: str
+          - profile: RibosomeProfile
         """
         ...
 
 
 class LandmarkProvider(Protocol):
-    def fingerprint(self, rcsb_id: str) -> str:
-        ...
+    """Provides PTC and constriction site coordinates."""
+
+    def fingerprint(self, rcsb_id: str) -> str: ...
 
     def get_landmarks(self, rcsb_id: str) -> Dict[str, np.ndarray]:
         """
         Must return:
-          - ptc_xyz: (3,)
-          - constriction_xyz: (3,)
+          - ptc_xyz: (3,) float32
+          - constriction_xyz: (3,) float32
         """
         ...
 
 
 class ArtifactStore(Protocol):
-    """
-    Stores artifacts into the run directory and updates the manifest.
-    """
-
     @property
-    def run_dir(self) -> Path:
-        ...
+    def run_dir(self) -> Path: ...
 
-    def put_bytes(self, *, name: str, stage: str, type: ArtifactType, data: bytes, meta: Optional[Dict[str, Any]] = None) -> ArtifactRef:
-        ...
+    def put_bytes(self, *, name: str, stage: str, type: ArtifactType,
+                  data: bytes, meta: Optional[Dict[str, Any]] = None) -> ArtifactRef: ...
 
-    def put_json(self, *, name: str, stage: str, obj: Any, meta: Optional[Dict[str, Any]] = None) -> ArtifactRef:
-        ...
+    def put_json(self, *, name: str, stage: str, obj: Any,
+                 meta: Optional[Dict[str, Any]] = None) -> ArtifactRef: ...
 
-    def put_numpy(self, *, name: str, stage: str, arr: np.ndarray, meta: Optional[Dict[str, Any]] = None) -> ArtifactRef:
-        ...
+    def put_numpy(self, *, name: str, stage: str, arr: np.ndarray,
+                  meta: Optional[Dict[str, Any]] = None) -> ArtifactRef: ...
 
-    def add_ref(self, ref: ArtifactRef) -> None:
-        ...
+    def add_ref(self, ref: ArtifactRef) -> None: ...
 
-    def finalize(self, *, success: bool, error: Optional[str] = None) -> None:
-        ...
+    def finalize(self, *, success: bool, error: Optional[str] = None) -> None: ...
 
 ```
 
@@ -1044,35 +1297,406 @@ class Stage(ABC):
     def run(self, ctx: StageContext) -> None: ...
 
 
+def _fmt_value(v: Any) -> str:
+    """Compact display for a parameter value."""
+    if isinstance(v, float):
+        # drop trailing zeros but keep one decimal
+        return f"{v:g}"
+    if isinstance(v, list) and len(v) > 3:
+        return f"[{len(v)} items]"
+    return str(v)
+
+
+def _log_params(params: Dict[str, Any], prefix: str) -> None:
+    if not params:
+        return
+    items = [f"{k}={_fmt_value(v)}" for k, v in params.items()
+             if not isinstance(v, (dict, list))]
+    # nested dicts/lists get their own lines
+    nested = {k: v for k, v in params.items() if isinstance(v, (dict, list))}
+
+    if items:
+        line = ", ".join(items)
+        # wrap at ~100 chars
+        if len(line) > 100:
+            mid = len(items) // 2
+            print(f"  [{prefix}] {', '.join(items[:mid])}")
+            print(f"  [{prefix}] {', '.join(items[mid:])}")
+        else:
+            print(f"  [{prefix}] {line}")
+    for k, v in nested.items():
+        if isinstance(v, list) and all(isinstance(x, dict) for x in v):
+            for i, entry in enumerate(v):
+                sub = ", ".join(f"{sk}={_fmt_value(sv)}" for sk, sv in entry.items())
+                print(f"  [{prefix}] {k}[{i}]: {sub}")
+        elif isinstance(v, dict):
+            sub = ", ".join(f"{sk}={_fmt_value(sv)}" for sk, sv in v.items())
+            print(f"  [{prefix}] {k}: {sub}")
+
+
 class Pipeline:
     def __init__(self, stages: List[Stage]):
         self.stages = stages
 
     def run(self, ctx: StageContext) -> StageContext:
-        for stage in self.stages:
+        n = len(self.stages)
+        wall = 60
+
+        print()
+        print("=" * wall)
+        print(f"  npet2 | {ctx.rcsb_id} | run {ctx.run_id}")
+        print(f"  stages: {n} | config: {type(ctx.config).__name__}")
+        print("=" * wall)
+
+        t_total = time.perf_counter()
+
+        for i, stage in enumerate(self.stages, 1):
             params = stage.params(ctx)
             ctx.store.begin_stage(stage.key, params=params)
 
-            t0 = time.perf_counter()
-            print(f"[npet2] >>> {stage.key} start")
+            print()
+            print(f"--- [{i}/{n}] {stage.key} " + "-" * max(0, wall - len(stage.key) - 12))
+            _log_params(params, stage.key)
 
+            t0 = time.perf_counter()
             try:
                 stage.run(ctx)
                 dt = time.perf_counter() - t0
-                print(f"[npet2] <<< {stage.key} done in {dt:,.2f}s")
+                print(f"  [{stage.key}] done in {dt:,.2f}s")
                 ctx.store.end_stage(stage.key, success=True, note=f"elapsed_s={dt:.3f}")
             except Exception as e:
                 dt = time.perf_counter() - t0
-                print(f"[npet2] !!! {stage.key} FAILED after {dt:,.2f}s: {e}")
+                print(f"  [{stage.key}] FAILED after {dt:,.2f}s: {e}")
                 ctx.store.end_stage(
                     stage.key, success=False, note=f"elapsed_s={dt:.3f} err={e}"
                 )
                 ctx.store.finalize(success=False, error=str(e))
                 raise
 
+        dt_total = time.perf_counter() - t_total
+        print()
+        print("=" * wall)
+        print(f"  npet2 | {ctx.rcsb_id} | completed in {dt_total:,.2f}s")
+        print(f"  run_dir: {ctx.store.run_dir}")
+        print("=" * wall)
+        print()
+
         ctx.store.finalize(success=True)
         return ctx
+```
 
+ribctl/lib/npet2/core/polymer_enum.py
+```py
+# ribctl/lib/npet2/core/polymer_enum.py
+"""
+Ribosomal polymer nomenclature classes.
+
+These enums encode the standard ribosomal nomenclature (Ban et al. 2014)
+and are used by the pipeline for:
+  - tRNA detection (to exclude from tunnel walls)
+  - mL45 detection (mitochondrial tunnel debris)
+
+They are intentionally duplicated from the outer riboxyz codebase so that
+npet2 can run standalone. If you're integrating with riboxyz, the adapter
+layer handles conversion.
+"""
+from __future__ import annotations
+
+from enum import Enum
+from typing import Union
+
+
+class _PolymerEnumBase(str, Enum):
+    def __repr__(self):
+        return self.value
+
+
+class tRNA(_PolymerEnumBase):
+    tRNA = "tRNA"
+
+
+class MitochondrialProteinClass(_PolymerEnumBase):
+    # mSSU
+    bS1m = "bS1m"; uS2m = "uS2m"; uS3m = "uS3m"; uS4m = "uS4m"
+    uS5m = "uS5m"; bS6m = "bS6m"; uS7m = "uS7m"; uS8m = "uS8m"
+    uS9m = "uS9m"; uS10m = "uS10m"; uS11m = "uS11m"; uS12m = "uS12m"
+    uS13m = "uS13m"; uS14m = "uS14m"; uS15m = "uS15m"; bS16m = "bS16m"
+    uS17m = "uS17m"; bS18m = "bS18m"; uS19m = "uS19m"; bS21m = "bS21m"
+    mS22 = "mS22"; mS23 = "mS23"; mS25 = "mS25"; mS26 = "mS26"
+    mS27 = "mS27"; mS29 = "mS29"; mS31 = "mS31"; mS33 = "mS33"
+    mS34 = "mS34"; mS35 = "mS35"; mS37 = "mS37"; mS38 = "mS38"
+    mS39 = "mS39"; mS40 = "mS40"; mS41 = "mS41"; mS42 = "mS42"
+    mS43 = "mS43"; mS44 = "mS44"; mS45 = "mS45"; mS46 = "mS46"
+    mS47 = "mS47"
+    # mLSU
+    uL1m = "uL1m"; uL2m = "uL2m"; uL3m = "uL3m"; uL4m = "uL4m"
+    uL5m = "uL5m"; uL6m = "uL6m"; bL9m = "bL9m"; uL10m = "uL10m"
+    uL11m = "uL11m"; bL12m = "bL12m"; uL13m = "uL13m"; uL14m = "uL14m"
+    uL15m = "uL15m"; uL16m = "uL16m"; bL17m = "bL17m"; uL18m = "uL18m"
+    bL19m = "bL19m"; bL20m = "bL20m"; bL21m = "bL21m"; uL22m = "uL22m"
+    uL23m = "uL23m"; uL24m = "uL24m"; bL27m = "bL27m"; bL28m = "bL28m"
+    uL29m = "uL29m"; uL30m = "uL30m"; bL31m = "bL31m"; bL32m = "bL32m"
+    bL33m = "bL33m"; bL34m = "bL34m"; bL35m = "bL35m"; bL36m = "bL36m"
+    mL37 = "mL37"; mL38 = "mL38"; mL39 = "mL39"; mL40 = "mL40"
+    mL41 = "mL41"; mL42 = "mL42"; mL43 = "mL43"; mL44 = "mL44"
+    mL45 = "mL45"; mL46 = "mL46"; mL48 = "mL48"; mL49 = "mL49"
+    mL50 = "mL50"; mL51 = "mL51"; mL52 = "mL52"; mL53 = "mL53"
+    mL54 = "mL54"; mL57 = "mL57"; mL58 = "mL58"; mL59 = "mL59"
+    mL60 = "mL60"; mL61 = "mL61"; mL62 = "mL62"; mL63 = "mL63"
+    mL64 = "mL64"; mL65 = "mL65"; mL66 = "mL66"; mL67 = "mL67"
+
+
+class CytosolicProteinClass(_PolymerEnumBase):
+    # SSU
+    bS1 = "bS1"; eS1 = "eS1"; uS2 = "uS2"; uS3 = "uS3"
+    uS4 = "uS4"; eS4 = "eS4"; uS5 = "uS5"; bS6 = "bS6"
+    eS6 = "eS6"; uS7 = "uS7"; eS7 = "eS7"; uS8 = "uS8"
+    eS8 = "eS8"; uS9 = "uS9"; uS10 = "uS10"; eS10 = "eS10"
+    uS11 = "uS11"; uS12 = "uS12"; eS12 = "eS12"; uS13 = "uS13"
+    uS14 = "uS14"; uS15 = "uS15"; bS16 = "bS16"; uS17 = "uS17"
+    eS17 = "eS17"; bS18 = "bS18"; uS19 = "uS19"; eS19 = "eS19"
+    bS20 = "bS20"; bS21 = "bS21"; bTHX = "bTHX"; eS21 = "eS21"
+    eS24 = "eS24"; eS25 = "eS25"; eS26 = "eS26"; eS27 = "eS27"
+    eS28 = "eS28"; eS30 = "eS30"; eS31 = "eS31"; RACK1 = "RACK1"
+    # LSU
+    uL1 = "uL1"; uL2 = "uL2"; uL3 = "uL3"; uL4 = "uL4"
+    uL5 = "uL5"; uL6 = "uL6"; eL6 = "eL6"; eL8 = "eL8"
+    bL9 = "bL9"; uL10 = "uL10"; uL11 = "uL11"; bL12 = "bL12"
+    uL13 = "uL13"; eL13 = "eL13"; uL14 = "uL14"; eL14 = "eL14"
+    uL15 = "uL15"; eL15 = "eL15"; uL16 = "uL16"; bL17 = "bL17"
+    uL18 = "uL18"; eL18 = "eL18"; bL19 = "bL19"; eL19 = "eL19"
+    bL20 = "bL20"; eL20 = "eL20"; bL21 = "bL21"; eL21 = "eL21"
+    uL22 = "uL22"; eL22 = "eL22"; uL23 = "uL23"; uL24 = "uL24"
+    eL24 = "eL24"; bL25 = "bL25"; bL27 = "bL27"; eL27 = "eL27"
+    bL28 = "bL28"; eL28 = "eL28"; uL29 = "uL29"; eL29 = "eL29"
+    uL30 = "uL30"; eL30 = "eL30"; bL31 = "bL31"; eL31 = "eL31"
+    bL32 = "bL32"; eL32 = "eL32"; bL33 = "bL33"; eL33 = "eL33"
+    bL34 = "bL34"; eL34 = "eL34"; bL35 = "bL35"; bL36 = "bL36"
+    eL36 = "eL36"; eL37 = "eL37"; eL38 = "eL38"; eL39 = "eL39"
+    eL40 = "eL40"; eL41 = "eL41"; eL42 = "eL42"; eL43 = "eL43"
+    P1P2 = "P1P2"
+
+
+class MitochondrialRNAClass(_PolymerEnumBase):
+    mtrRNA12S = "mt12SrRNA"
+    mtrRNA16S = "mt16SrRNA"
+
+
+class CytosolicRNAClass(_PolymerEnumBase):
+    rRNA_5S   = "5SrRNA"
+    rRNA_16S  = "16SrRNA"
+    rRNA_23S  = "23SrRNA"
+    rRNA_25S  = "25SrRNA"
+    rRNA_5_8S = "5.8SrRNA"
+    rRNA_18S  = "18SrRNA"
+    rRNA_28S  = "28SrRNA"
+
+
+class ElongationFactorClass(_PolymerEnumBase):
+    eEF1A = "eEF1A"; eEF1B = "eEF1B"; eFSec = "eFSec"; eEF2 = "eEF2"
+    mtEF4 = "mtEF4"; eIF5A = "eIF5A"; eEF3 = "eEF3"
+    EF_Tu = "EF-Tu"; EF_Ts = "EF-Ts"; SelB = "SelB"; EF_G = "EF-G"
+    EF4 = "EF4"; EF_P = "EF-P"; Tet_O = "Tet_O"; Tet_M = "Tet_M"
+    RelA = "RelA"; BipA = "BipA"
+    aEF1A = "aEF1A"; aEF2 = "aEF2"
+
+
+class InitiationFactorClass(_PolymerEnumBase):
+    eIF1 = "eIF1"; eIF1A = "eIF1A"
+    eIF2_alpha = "eIF2_alpha"; eIF2_beta = "eIF2_beta"; eIF2_gamma = "eIF2_gamma"
+    eIF2B_alpha = "eIF2B_alpha"; eIF2B_beta = "eIF2B_beta"
+    eIF2B_gamma = "eIF2B_gamma"; eIF2B_delta = "eIF2B_delta"; eIF2B_epsilon = "eIF2B_epsilon"
+    eIF3_subunitA = "eIF3_subunitA"; eIF3_subunitB = "eIF3_subunitB"
+    eIF3_subunitC = "eIF3_subunitC"; eIF3_subunitD = "eIF3_subunitD"
+    eIF3_subunitE = "eIF3_subunitE"; eIF3_subunitF = "eIF3_subunitF"
+    eIF3_subunitG = "eIF3_subunitG"; eIF3_subunitH = "eIF3_subunitH"
+    eIF3_subunitI = "eIF3_subunitI"; eIF3_subunitJ = "eIF3_subunitJ"
+    eIF3_subunitK = "eIF3_subunitK"; eIF3_subunitL = "eIF3_subunitL"
+    eIF3_subunitM = "eIF3_subunitM"
+    eIF4F_4A = "eIF4F_4A"; eIF4F_4G = "eIF4F_4G"; eIF4F_4E = "eIF4F_4E"
+    eIF4B = "eIF4B"; eIF5B = "eIF5B"; eIF5 = "eIF5"
+    IF1 = "IF1"; IF2 = "IF2"; IF3 = "IF3"
+    aIF_1A = "aIF1A"; aIF_2_alpha = "aIF2_alpha"; aIF_2_beta = "aIF2_beta"
+    aIF_2_gamma = "aIF2_gamma"; aIF_2B_alpha = "aIF2B_alpha"
+    aIF_2B_beta = "aIF2B_beta"; aIF_2B_delta = "aIF2B_delta"
+    aIF5A = "aIF5A"; aIF5B = "aIF5B"
+
+
+# Composite types
+ProteinClass = Union[MitochondrialProteinClass, CytosolicProteinClass]
+LifecycleFactorClass = Union[ElongationFactorClass, InitiationFactorClass]
+PolypeptideClass = Union[LifecycleFactorClass, ProteinClass]
+PolynucleotideClass = Union[CytosolicRNAClass, MitochondrialRNAClass, tRNA]
+PolymerClass = Union[PolynucleotideClass, PolypeptideClass]
+
+
+def parse_polymer_class(value: str) -> PolymerClass:
+    """Parse a string into the appropriate PolymerClass enum member.
+
+    Used when deserializing profile JSON where nomenclature entries are strings.
+    Raises ValueError if the string doesn't match any known polymer class.
+    """
+    for enum_cls in (
+        tRNA,
+        CytosolicProteinClass, MitochondrialProteinClass,
+        CytosolicRNAClass, MitochondrialRNAClass,
+        ElongationFactorClass, InitiationFactorClass,
+    ):
+        try:
+            return enum_cls(value)
+        except ValueError:
+            continue
+    raise ValueError(f"Unknown polymer class: {value!r}")
+```
+
+ribctl/lib/npet2/core/ribosome_types.py
+```py
+# ribctl/lib/npet2/core/ribosome_types.py
+"""
+Standalone pydantic models for ribosome structure profiles as consumed by npet2.
+
+These mirror the relevant subset of the riboxyz schema. When running inside the
+riboxyz repo, the adapter converts full RibosomeStructure objects to these.
+When running standalone, users provide profile JSON that validates against these
+models directly.
+"""
+from __future__ import annotations
+
+from typing import Optional
+
+from pydantic import BaseModel, field_validator
+
+from .polymer_enum import PolymerClass, parse_polymer_class
+
+
+# ---------------------------------------------------------------------------
+# Polymer entries (slim -- only what the pipeline touches)
+# ---------------------------------------------------------------------------
+
+class PolymerEntry(BaseModel):
+    """A single polymer chain as seen by the npet2 pipeline."""
+    auth_asym_id: str
+    assembly_id: int = 0
+    nomenclature: list[PolymerClass] = []
+    rcsb_pdbx_description: Optional[str] = None
+    entity_poly_seq_length: int = 0
+
+    @field_validator("nomenclature", mode="before")
+    @classmethod
+    def _coerce_nomenclature(cls, v):
+        """Accept raw strings (from JSON) and convert to enum members."""
+        if not v:
+            return []
+        out = []
+        for item in v:
+            if isinstance(item, str):
+                out.append(parse_polymer_class(item))
+            else:
+                out.append(item)
+        return out
+
+
+class ProteinEntry(PolymerEntry):
+    """Protein chain. Inherits all pipeline-relevant fields from PolymerEntry."""
+    pass
+
+
+class RNAEntry(PolymerEntry):
+    """RNA chain."""
+    pass
+
+
+# ---------------------------------------------------------------------------
+# Assembly map (for first-assembly filtering)
+# ---------------------------------------------------------------------------
+
+class AssemblyPolymerInstance(BaseModel):
+    entity_id: str
+    auth_asym_id: str
+
+
+class AssemblyNonpolymerInstance(BaseModel):
+    entity_id: str
+    auth_asym_id: str
+    auth_seq_id: str = ""
+
+
+class AssemblyInfo(BaseModel):
+    rcsb_id: str
+    polymer_entity_instances: list[AssemblyPolymerInstance] = []
+    nonpolymer_entity_instances: Optional[list[AssemblyNonpolymerInstance]] = None
+
+
+# ---------------------------------------------------------------------------
+# Top-level profile
+# ---------------------------------------------------------------------------
+
+class RibosomeProfile(BaseModel):
+    """
+    Minimal ribosome structure profile for the npet2 pipeline.
+
+    This is the only "ribosome knowledge" npet2 needs beyond the mmCIF itself
+    and the landmark coordinates. It tells the pipeline which chains form the
+    tunnel walls (proteins + rRNAs), which to exclude (tRNAs, factors), and
+    whether the structure is mitochondrial.
+
+    Can be loaded from:
+      - riboxyz API: GET /structures/{rcsb_id}/profile
+      - Local JSON file (--profile path/to/profile.json)
+      - Constructed programmatically by the riboxyz adapter
+    """
+    rcsb_id: str
+    mitochondrial: bool = False
+
+    proteins: list[ProteinEntry] = []
+    rnas: list[RNAEntry] = []
+    other_polymers: list[PolymerEntry] = []
+
+    assembly_map: Optional[list[AssemblyInfo]] = None
+
+    def all_polymers(self) -> list[PolymerEntry]:
+        return [*self.proteins, *self.rnas, *self.other_polymers]
+
+    def first_assembly_auth_asym_ids(self) -> list[str]:
+        """Return auth_asym_ids from the first assembly, or raise."""
+        if not self.assembly_map:
+            raise ValueError(
+                f"No assembly_map in profile for {self.rcsb_id}. "
+                "Provide one, or set occupancy_chain_mode='walls_only' to skip assembly filtering."
+            )
+        first = self.assembly_map[0]
+        ids = [inst.auth_asym_id for inst in first.polymer_entity_instances]
+        if first.nonpolymer_entity_instances:
+            ids.extend(inst.auth_asym_id for inst in first.nonpolymer_entity_instances)
+        return ids
+
+
+# ---------------------------------------------------------------------------
+# Landmark types
+# ---------------------------------------------------------------------------
+
+class PTCInfo(BaseModel):
+    """Peptidyl transferase center location."""
+    location: list[float]
+
+    @field_validator("location")
+    @classmethod
+    def _validate_location(cls, v):
+        if len(v) != 3:
+            raise ValueError(f"PTC location must be [x, y, z], got {len(v)} values")
+        return [float(x) for x in v]
+
+
+class ConstrictionInfo(BaseModel):
+    """Constriction site location."""
+    location: list[float]
+
+    @field_validator("location")
+    @classmethod
+    def _validate_location(cls, v):
+        if len(v) != 3:
+            raise ValueError(f"Constriction location must be [x, y, z], got {len(v)} values")
+        return [float(x) for x in v]
 ```
 
 ribctl/lib/npet2/core/run_id.py
@@ -1082,7 +1706,9 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 from datetime import datetime
+from pathlib import Path
 from typing import Any, Dict
 
 
@@ -1091,18 +1717,34 @@ def stable_hash_dict(d: Dict[str, Any]) -> str:
     return hashlib.sha256(payload).hexdigest()
 
 
+def _next_seq_index(runs_dir: Path) -> int:
+    """
+    Scan existing run directories under runs_dir for the pattern NNN_...
+    and return max+1.  If none exist, returns 1.
+    """
+    max_idx = 0
+    if runs_dir.exists():
+        for d in runs_dir.iterdir():
+            if d.is_dir():
+                m = re.match(r"^(\d{3,})_", d.name)
+                if m:
+                    max_idx = max(max_idx, int(m.group(1)))
+    return max_idx + 1
+
+
 def compute_run_id(
-    *, 
-    rcsb_id: str, 
-    pipeline_version: str, 
-    inputs_fp: Dict[str, str], 
-    config_resolved: Dict[str, Any]
+    *,
+    rcsb_id: str,
+    pipeline_version: str,
+    inputs_fp: Dict[str, str],
+    config_resolved: Dict[str, Any],
+    runs_dir: Path,
 ) -> str:
     """
-    run_id = timestamp_hash
-    
-    Format: YYYYMMDD_HHMMSS_<hash16>
-    This allows chronological sorting while keeping collision resistance.
+    run_id = SEQ_TIMESTAMP_HASH
+
+    Format: NNN_YYYYMMDD_HHMMSS_<hash16>
+    Sequential index makes it trivial to find latest run.
     """
     blob = {
         "rcsb_id": rcsb_id.upper(),
@@ -1112,16 +1754,37 @@ def compute_run_id(
     }
     hash_str = stable_hash_dict(blob)[:16]
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    return f"{timestamp}_{hash_str}"
+    seq = _next_seq_index(runs_dir)
+    return f"{seq:03d}_{timestamp}_{hash_str}"
 
 ```
 
 ribctl/lib/npet2/core/settings.py
 ```py
+# ribctl/lib/npet2/core/settings.py
+"""
+Default paths and external tool locations for npet2.
+
+All of these can be overridden via:
+  - Environment variables (NPET2_ROOT, NPET2_POISSON_RECON_BIN, etc.)
+  - CLI flags
+  - RunConfig / programmatic construction
+"""
+from __future__ import annotations
+
+import os
 from pathlib import Path
 
-NPET2_ROOT = Path("/Users/rtviii/dev/riboxyz/NPET2")
-NPET2_RUNS_ROOT = NPET2_ROOT / "runs"
+
+def _env_path(var: str, default: str) -> Path:
+    return Path(os.environ.get(var, default))
+
+
+NPET2_ROOT        = _env_path("NPET2_ROOT", str(Path.home() / "npet2_data"))
+NPET2_RUNS_ROOT   = _env_path("NPET2_RUNS_ROOT", str(NPET2_ROOT / "runs"))
+NPET2_CACHE_ROOT  = _env_path("NPET2_CACHE_ROOT", str(NPET2_ROOT / "cache"))
+POISSON_RECON_BIN = os.environ.get("NPET2_POISSON_RECON_BIN", "PoissonRecon")
+RIBOXYZ_API_BASE  = os.environ.get("NPET2_RIBOXYZ_API_URL", "http://localhost:8000")
 
 ```
 
@@ -1260,67 +1923,55 @@ class LocalRunStore(ArtifactStore):
 ribctl/lib/npet2/core/structure_selection.py
 ```py
 # ribctl/lib/npet2/core/structure_selection.py
+"""
+Chain selection policies for tunnel wall definition.
+
+Works with npet2-internal RibosomeProfile types exclusively.
+"""
+
 from __future__ import annotations
 
 from typing import Iterable, Set
 
+from .ribosome_types import RibosomeProfile, PolymerEntry
+from .polymer_enum import tRNA as tRNAClass
+
 _TRNA_HINTS = ("trna", "transfer rna")
 
 
-def _poly_description(poly) -> str:
-    return (getattr(poly, "rcsb_pdbx_description", None) or "").strip()
+def looks_like_trna(poly: PolymerEntry) -> bool:
+    """Heuristic tRNA detection from nomenclature and description."""
+    for nom in poly.nomenclature:
+        if isinstance(nom, tRNAClass):
+            return True
+        if "trna" in str(nom).lower():
+            return True
 
-
-def _poly_nomenclature_names(poly) -> list[str]:
-    noms = getattr(poly, "nomenclature", None) or []
-    out: list[str] = []
-    for x in noms:
-        # PolymerClass enum objects often have .name
-        out.append(getattr(x, "name", str(x)))
-    return out
-
-
-def looks_like_trna(poly) -> bool:
-    """
-    Heuristic: profile-provided description/nomenclature.
-    (You said you have a better classifier — you can replace this logic later.)
-    """
-    desc = _poly_description(poly).lower()
+    desc = (poly.rcsb_pdbx_description or "").lower()
     if any(h in desc for h in _TRNA_HINTS):
-        return True
-
-    noms = " ".join(n.lower() for n in _poly_nomenclature_names(poly))
-    if "trna" in noms:
         return True
 
     return False
 
 
 def ribosome_wall_auth_asym_ids(
-    profile,
+    profile: RibosomeProfile,
     *,
     exclude_trna: bool = True,
     extra_exclude: Iterable[str] = (),
 ) -> Set[str]:
     """
-    Define the tunnel 'wall' chains.
+    Tunnel wall = ribosomal proteins + rRNAs.
 
-    Core rule:
-      wall = proteins + rRNAs from the ribosome profile
-
-    Benefits:
-      - excludes HOH/ions/ligands/nonpolymers automatically (different chains/entities)
-      - includes modified residues inside ribosomal polymers automatically
+    This automatically excludes waters/ions/ligands/nonpolymers (they aren't
+    in proteins or rnas). Modified residues within ribosomal polymers are
+    included because they are covalently part of the wall.
     """
-    proteins = getattr(profile, "proteins", None) or []
-    rnas = getattr(profile, "rnas", None) or []
-
-    wall = {p.auth_asym_id for p in proteins} | {r.auth_asym_id for r in rnas}
+    wall = {p.auth_asym_id for p in profile.proteins}
+    wall |= {r.auth_asym_id for r in profile.rnas}
 
     if exclude_trna:
-        # Defensive: in some datasets a tRNA might be misfiled under rnas/other_polymers.
-        others = getattr(profile, "other_polymers", None) or []
-        all_polys = list(proteins) + list(rnas) + list(others)
+        all_polys = profile.all_polymers()
         trna_ids = {p.auth_asym_id for p in all_polys if looks_like_trna(p)}
         wall -= trna_ids
 
@@ -1328,15 +1979,83 @@ def ribosome_wall_auth_asym_ids(
     return wall
 
 
-def intersect_with_first_assembly(ro, chain_ids: Set[str]) -> Set[str]:
-    """
-    Optional safety: only use chains present in the first assembly.
-    """
+def intersect_with_first_assembly(
+    profile: RibosomeProfile, chain_ids: Set[str]
+) -> Set[str]:
+    """Only keep chains present in the first assembly (if assembly_map available)."""
     try:
-        asm = set(ro.first_assembly_auth_asym_ids())
-        return chain_ids & asm
-    except Exception:
+        asm_ids = set(profile.first_assembly_auth_asym_ids())
+        return chain_ids & asm_ids
+    except (ValueError, IndexError):
         return chain_ids
+
+
+def tunnel_debris_chains(rcsb_id: str, profile: RibosomeProfile) -> list[str]:
+    """
+    Hardcoded per-structure chain exclusions for known tunnel debris.
+
+    Also handles mitochondrial mL45 (sits inside the exit tunnel).
+    """
+    from .polymer_enum import MitochondrialProteinClass
+
+    DEBRIS_MAP = {
+        "3J7Z": ["a", "7"],
+        "5GAK": ["z"],
+        "5NWY": ["s"],
+        "7A5G": ["Y2"],
+        "9F1D": ["BK"],
+    }
+    skip = list(DEBRIS_MAP.get(rcsb_id.upper(), []))
+
+    if profile.mitochondrial:
+        for poly in profile.all_polymers():
+            if MitochondrialProteinClass.mL45 in poly.nomenclature:
+                skip.append(poly.auth_asym_id)
+                break
+
+    return skip
+
+
+def atom_inclusion_policy(
+    profile: RibosomeProfile,
+    config,
+    rcsb_id: str,
+) -> dict:
+    """
+    Central policy for which atoms go into occupancy calculations.
+
+    Returns:
+        wall_chain_ids: set of auth_asym_ids for occupancy
+        excluded_chain_ids: set of auth_asym_ids removed
+        reasons: dict mapping excluded chain_id -> reason string
+    """
+    debris = tunnel_debris_chains(rcsb_id, profile)
+    manual_exclude = list(getattr(config, "occupancy_exclude_auth_asym_ids", ()))
+    exclude_trna = bool(getattr(config, "occupancy_exclude_trna", True))
+
+    all_exclude = list(dict.fromkeys(debris + manual_exclude))
+
+    wall = ribosome_wall_auth_asym_ids(
+        profile, exclude_trna=exclude_trna, extra_exclude=all_exclude
+    )
+    wall = intersect_with_first_assembly(profile, wall)
+
+    reasons = {}
+    for c in debris:
+        reasons[c] = "tunnel_debris (hardcoded)"
+    for c in manual_exclude:
+        if c not in reasons:
+            reasons[c] = "config exclude"
+    if exclude_trna:
+        for p in profile.all_polymers():
+            if looks_like_trna(p) and p.auth_asym_id not in wall:
+                reasons[p.auth_asym_id] = "tRNA (auto-detected)"
+
+    return {
+        "wall_chain_ids": wall,
+        "excluded_chain_ids": set(reasons.keys()),
+        "reasons": reasons,
+    }
 
 ```
 
@@ -1404,15 +2123,15 @@ class StageContext:
 
 ribctl/lib/npet2/stages/bootstrap.py
 ```py
-# ribctl/lib/npet2/stages/bootstrap.py
+# ribctl/lib/npet2/stages/bootstrap.py (updated)
 from __future__ import annotations
 
-from dataclasses import asdict
 from typing import Any, Dict
 
 import numpy as np
 
 from ribctl.lib.npet2.core.pipeline import Stage
+from ribctl.lib.npet2.core.ribosome_types import RibosomeProfile
 from ribctl.lib.npet2.core.types import StageContext
 
 
@@ -1420,7 +2139,6 @@ class Stage00Inputs(Stage):
     key = "00_inputs"
 
     def params(self, ctx: StageContext) -> Dict[str, Any]:
-        # include only config fields that actually affect this stage
         return {}
 
     def run(self, ctx: StageContext) -> None:
@@ -1430,14 +2148,23 @@ class Stage00Inputs(Stage):
         atom_xyz = np.asarray(data["atom_xyz"], dtype=np.float32)
         ctx.inputs["atom_xyz"] = atom_xyz
         ctx.inputs["atom_element"] = data.get("atom_element", None)
+        ctx.inputs["mmcif_path"] = data["mmcif_path"]
 
-        # Keep adapter objects in ctx.inputs for now to support legacy backends later
-        # (core won't *require* them; stages/backends can choose to use them)
-        for k in ("mmcif_path", "profile", "ro"):
-            if k in data:
-                ctx.inputs[k] = data[k]
+        # Profile: validate it's the right type
+        profile = data["profile"]
+        if not isinstance(profile, RibosomeProfile):
+            profile = RibosomeProfile.model_validate(profile)
+        ctx.inputs["profile"] = profile
 
-        # Save minimal artifact for debugging + provenance
+        # If the provider gave us a biopython structure or RibosomeOps, stash it.
+        # Standalone providers won't -- Stage30 will parse mmcif on demand.
+        if "ro" in data:
+            ro = data["ro"]
+            ctx.inputs["ro"] = ro
+            ctx.inputs["biopython_structure"] = ro.assets.biopython_structure()
+        elif "biopython_structure" in data:
+            ctx.inputs["biopython_structure"] = data["biopython_structure"]
+
         ctx.artifacts["atom_xyz"] = ctx.store.put_numpy(
             name="atom_xyz",
             stage=self.key,
@@ -1445,7 +2172,6 @@ class Stage00Inputs(Stage):
             meta={"shape": list(atom_xyz.shape), "dtype": str(atom_xyz.dtype)},
         )
 
-        # Useful stats to carry forward
         mins = atom_xyz.min(axis=0)
         maxs = atom_xyz.max(axis=0)
         ctx.stats["atom_bounds"] = {"min": mins.tolist(), "max": maxs.tolist()}
@@ -1465,8 +2191,31 @@ class Stage10Landmarks(Stage):
         ptc = np.asarray(lm["ptc_xyz"], dtype=np.float32)
         constr = np.asarray(lm["constriction_xyz"], dtype=np.float32)
 
+        if ptc.shape != (3,):
+            raise ValueError(f"PTC must be shape (3,), got {ptc.shape}")
+        if constr.shape != (3,):
+            raise ValueError(f"Constriction must be shape (3,), got {constr.shape}")
+
         ctx.inputs["ptc_xyz"] = ptc
         ctx.inputs["constriction_xyz"] = constr
+
+        D = float(np.linalg.norm(constr - ptc))
+        if D < 1.0:
+            raise ValueError(
+                f"PTC and constriction are too close ({D:.1f}A) -- check coordinates"
+            )
+
+        z_min = -float(ctx.config.cylinder_ptc_extension_A)
+        z_max = float(ctx.config.cylinder_height_A)
+
+        ctx.inputs["cylinder_z_min"] = z_min
+        ctx.inputs["cylinder_z_max"] = z_max
+        ctx.inputs["landmark_distance"] = D
+
+        print(
+            f"  [10_landmarks] PTC-Constriction distance={D:.1f}A, "
+            f"cylinder z=[{z_min:.1f}, {z_max:.1f}]A"
+        )
 
         ctx.artifacts["ptc"] = ctx.store.put_json(
             name="ptc",
@@ -1478,7 +2227,12 @@ class Stage10Landmarks(Stage):
             name="constriction_site",
             stage=self.key,
             obj={"location": constr.tolist()},
-            meta={"units": "A"},
+            meta={
+                "units": "A",
+                "landmark_distance_A": D,
+                "cylinder_z_min": z_min,
+                "cylinder_z_max": z_max,
+            },
         )
 
 ```
@@ -1549,6 +2303,8 @@ def _valid_ijk(grid: GridSpec, ijk: np.ndarray) -> np.ndarray:
         & (ijk[:, 2] < nz)
     )
     return m
+
+
 
 
 class Stage55GridRefine(Stage):
@@ -1646,12 +2402,14 @@ class Stage55GridRefine(Stage):
         print(f"[{self.key}] selected {atoms_roi_c0.shape[0]:,} atoms near ROI (ALL atoms, prevents interference)")
 
         grid = _make_bbox_grid(lo, hi, voxel)
-        
+        z_min = float(ctx.inputs.get("cylinder_z_min", 0.0))
+        z_max = z_min + float(c.cylinder_height_A)
+
         cyl = self._cylinder_mask_bbox_grid(
             grid,
             radius_A=float(c.cylinder_radius_A),
-            zmin_A=0.0,
-            zmax_A=float(c.cylinder_height_A),
+            zmin_A=z_min,
+            zmax_A=z_max,
         )
 
         occupied = occupancy_via_edt(atoms_roi_c0, grid, atom_radius_A=atom_r)
@@ -1959,93 +2717,84 @@ class Stage55GridRefine(Stage):
                 np.save(pass_dir / f"cluster_id{cid}.npy", cpts.astype(np.float32))
 
     def _generate_mesh(self, ctx: StageContext, points: np.ndarray, level_name: str) -> None:
-        """Generate mesh from refined boundary points using Poisson reconstruction."""
         import time
+        import json
+        from ribctl.lib.npet.kdtree_approach import transform_points_from_C0
+        from ribctl.lib.npet2.backends.meshing import (
+            mesh_from_binary_volume,
+            clip_mesh_to_atom_clearance,
+            save_mesh_with_ascii,
+        )
+
         c = ctx.config
         stage_dir = ctx.store.stage_dir(self.key)
-
         print(f"[{self.key}] generating mesh for {level_name}...")
 
-        surface_pts = points
+        mask_path = stage_dir / "selected_void_component_mask_level_1.npy"
+        if not mask_path.exists():
+            mask_path = stage_dir / "void_mask_level_1.npy"
+        if not mask_path.exists():
+            print(f"[{self.key}] no void mask found for {level_name}, skipping mesh")
+            return
 
-        t1 = time.perf_counter()
+        mask = np.load(mask_path).astype(bool)
+        spec = json.loads((stage_dir / "grid_spec_level_1.json").read_text())
+        origin = np.asarray(spec["origin"], dtype=np.float32)
+        voxel = float(spec["voxel_size_A"])
+        ptc = np.asarray(spec["transform"]["ptc"], dtype=np.float32)
+        constr = np.asarray(spec["transform"]["constriction"], dtype=np.float32)
+
+        t0 = time.perf_counter()
         try:
-            pcd = estimate_normals(
-                surface_pts,
-                kdtree_radius=c.normals_radius,
-                kdtree_max_nn=c.normals_max_nn,
-                correction_tangent_planes_n=c.normals_tangent_k,
+            surf_c0, pre_smooth_c0 = mesh_from_binary_volume(
+                mask, origin, voxel,
+                gaussian_sigma_voxels=c.mesh_level1_gaussian_sigma,
+                smooth_method=c.mesh_smooth_method,
+                smooth_iters=c.mesh_level1_smooth_iters,
+                taubin_pass_band=c.mesh_taubin_pass_band,
+                fill_holes_size=c.mesh_fill_holes_A,
             )
-        except Exception as e:
-            print(f"[{self.key}] normal estimation failed for {level_name}: {e}")
+        except ValueError as e:
+            print(f"[{self.key}] MC mesh failed for {level_name}: {e}")
             return
-        dt1 = time.perf_counter() - t1
-        print(f"[{self.key}]   normal estimation: {dt1:.2f}s, {len(pcd.points):,} points")
 
-        normals_path = stage_dir / f"normals_{level_name}.ply"
-        try:
-            o3d.io.write_point_cloud(str(normals_path), pcd)
-        except Exception as e:
-            print(f"[{self.key}] failed to write normals PCD for {level_name}: {e}")
-            return
+        def _to_world(mesh_c0: pv.PolyData) -> pv.PolyData:
+            pts_w = transform_points_from_C0(
+                np.asarray(mesh_c0.points, dtype=np.float32), ptc, constr
+            ).astype(np.float32)
+            m = mesh_c0.copy(deep=True)
+            m.points = pts_w
+            return m
+
+        pre_smooth_w = _to_world(pre_smooth_c0)
+        pre_smooth_path = stage_dir / f"mesh_{level_name}_pre_smooth.ply"
+        save_mesh_with_ascii(pre_smooth_w, pre_smooth_path, tag=f"{level_name}-pre-smooth")
+
+        surf_w = _to_world(surf_c0)
+
+        region_xyz = np.asarray(ctx.require("region_atom_xyz_occ"), dtype=np.float32)
+        surf_w = clip_mesh_to_atom_clearance(surf_w, region_xyz, min_clearance_A=c.mesh_atom_clearance_A)
+
+        dt = time.perf_counter() - t0
+        is_watertight = surf_w.is_manifold and surf_w.n_open_edges == 0
+        print(f"[{self.key}]   MC mesh: {dt:.2f}s, {surf_w.n_points:,} pts, "
+              f"{surf_w.n_faces:,} faces, watertight={is_watertight}")
 
         mesh_path = stage_dir / f"mesh_{level_name}.ply"
+        save_mesh_with_ascii(surf_w, mesh_path, tag=level_name)
 
-        depth = c.mesh_level1_poisson_depth
-        print(f"[{self.key}]   Poisson reconstruction (o3d, depth={depth})...")
+        ctx.store.register_file(
+            name=f"mesh_{level_name}",
+            stage=self.key,
+            type=ArtifactType.PLY_MESH,
+            path=mesh_path,
+            meta={"level": level_name, "method": "marching_cubes_taubin",
+                  "watertight": is_watertight, "voxel_size_A": voxel},
+        )
+        print(f"[{self.key}] mesh saved: {mesh_path}")
 
-        t2 = time.perf_counter()
-        try:
-            mesh_o3d, densities = o3d.geometry.TriangleMesh.create_from_point_cloud_poisson(
-                pcd, depth=depth, linear_fit=True
-            )
-            dt2 = time.perf_counter() - t2
-            print(f"[{self.key}]   Poisson done: {dt2:.2f}s, {len(mesh_o3d.vertices):,} verts, {len(mesh_o3d.triangles):,} faces")
-        except Exception as e:
-            print(f"[{self.key}] o3d Poisson failed for {level_name}: {e}")
-            return
-
-        densities = np.asarray(densities)
-        density_threshold = np.quantile(densities, 0.01)
-        vertices_to_remove = densities < density_threshold
-        mesh_o3d.remove_vertices_by_mask(vertices_to_remove)
-
-        o3d.io.write_triangle_mesh(str(mesh_path), mesh_o3d)
-
-        try:
-            mesh = pv.read(str(mesh_path))
-            mesh = mesh.fill_holes(2000.0)
-            mesh = mesh.triangulate()
-            mesh = mesh.connectivity(largest=True)
-
-            # Clip mesh back to void -- don't let it eat into atoms
-            region_xyz = np.asarray(ctx.require("region_atom_xyz_all"), dtype=np.float32)
-            mesh = self._clip_mesh_to_atoms(mesh, region_xyz, min_clearance_A=1.5)
-
-            mesh.save(str(mesh_path))
-
-            mesh_path_ascii = stage_dir / f"mesh_{level_name}_ascii.ply"
-            mesh.save(str(mesh_path_ascii), binary=False)
-
-            print(f"[{self.key}]   cleaned mesh: {mesh.n_points:,} pts, {mesh.n_faces:,} faces, "
-                f"open_edges={mesh.n_open_edges}, manifold={mesh.is_manifold}")
-
-            ctx.store.register_file(
-                name=f"mesh_{level_name}",
-                stage=self.key,
-                type=ArtifactType.PLY_MESH,
-                path=mesh_path,
-                meta={"level": level_name, "method": "o3d_poisson", "depth": depth},
-            )
-            print(f"[{self.key}] mesh saved: {mesh_path}")
-
-        except Exception as e:
-            print(f"[{self.key}] mesh cleanup failed for {level_name}: {e}")
-            try:
-                mesh_path.unlink(missing_ok=True)
-            except:
-                pass
-            return
+        ctx.inputs["level_1_mesh_path"] = str(mesh_path)
+        ctx.inputs["level_1_mesh_watertight"] = is_watertight
 
     def _clip_mesh_to_atoms(
         self,
@@ -2091,6 +2840,8 @@ class Stage55GridRefine(Stage):
 
 ribctl/lib/npet2/stages/legacy_minimal.py
 ```py
+# ribctl/lib/npet2/stages/legacy_minimal.py
+
 from __future__ import annotations
 import json
 from pathlib import Path
@@ -2104,14 +2855,20 @@ from ribctl.lib.npet2.backends.grid_occupancy import (
     connected_components_3d,
     occupancy_via_edt,
 )
+from ribctl.lib.npet2.backends.meshing import save_mesh_with_ascii
 from ribctl.lib.npet2.core.cache import StageCacheKey
 from ribctl.lib.npet2.core.pipeline import Stage
-from ribctl.lib.npet2.core.structure_selection import intersect_with_first_assembly, ribosome_wall_auth_asym_ids
+from ribctl.lib.npet2.core.ribosome_types import RibosomeProfile
+from ribctl.lib.npet2.core.structure_selection import (
+    intersect_with_first_assembly,
+    ribosome_wall_auth_asym_ids,
+    tunnel_debris_chains,
+    atom_inclusion_policy,
+)
 from ribctl.lib.npet2.core.types import StageContext, ArtifactType
 
 from scipy import ndimage
 
-# Legacy helpers (keep pipeline operational)
 from ribctl.lib.npet.alphalib import (
     cif_to_point_cloud,
     fast_normal_estimation,
@@ -2120,14 +2877,12 @@ from ribctl.lib.npet.alphalib import (
 )
 from ribctl.lib.npet.kdtree_approach import (
     apply_poisson_reconstruction,
-    ribosome_entities,
     filter_residues_parallel,
     transform_points_to_C0,
     transform_points_from_C0,
     create_point_cloud_mask,
     DBSCAN_capture,
     DBSCAN_pick_largest_cluster,
-    ptcloud_convex_hull_points,
     estimate_normals,
 )
 from ribctl.lib.npet2.stages.grid_refine import (
@@ -2136,6 +2891,8 @@ from ribctl.lib.npet2.stages.grid_refine import (
     _valid_ijk,
     _voxel_centers_from_indices,
 )
+
+
 def _residues_from_chain_ids(structure, chain_ids: set[str]):
     model = structure[0]
     residues = []
@@ -2144,34 +2901,48 @@ def _residues_from_chain_ids(structure, chain_ids: set[str]):
             continue
         chain = model[cid]
         for r in chain.get_residues():
-            # Keep everything inside the polymer chain (including modified residues)
-            # Biopython will include modified nucleotides/AAs here.
             if len(getattr(r, "child_list", [])) == 0:
                 continue
             residues.append(r)
     return residues
 
-def _tunnel_debris_chains(rcsb_id: str, ro, profile) -> List[str]:
-    # your legacy hardcoded exclusions
-    tunnel_debris = {
-        "3J7Z": ["a", "7"],
-        "5GAK": ["z"],
-        "5NWY": ["s"],
-        "7A5G": ["Y2"],
-        "9F1D": ["BK"],
-    }
-    rcsb_id = rcsb_id.upper()
-    skip = tunnel_debris.get(rcsb_id, []).copy()
 
-    # mitochondrial mL45 (best-effort)
-    if getattr(profile, "mitochondrial", False):
-        try:
-            chain = ro.get_poly_by_polyclass("mL45")
-            if chain is not None:
-                skip.append(chain.auth_asym_id)
-        except Exception:
-            pass
-    return skip
+def _pick_tunnel_cluster(
+    clusters: dict[int, list],
+    constr: np.ndarray,
+) -> tuple[np.ndarray, int]:
+    """Pick the cluster whose points are closest to the constriction site."""
+    constr = np.asarray(constr, dtype=np.float32).reshape(1, 3)
+    best_id = -1
+    best_dist = float("inf")
+    for cid, pts_list in clusters.items():
+        if cid == -1:
+            continue
+        pts = np.asarray(pts_list, dtype=np.float32)
+        if pts.shape[0] == 0:
+            continue
+        dists = np.linalg.norm(pts - constr, axis=1)
+        min_dist = float(dists.min())
+        if min_dist < best_dist:
+            best_dist = min_dist
+            best_id = cid
+    if best_id == -1:
+        raise ValueError("No valid clusters found")
+    print(f"  [cluster_select] picked cluster {best_id} "
+          f"(n={len(clusters[best_id]):,}, dist_to_constriction={best_dist:.1f}A)")
+    return np.asarray(clusters[best_id], dtype=np.float32), best_id
+
+def _get_biopython_structure(ctx: StageContext):
+    """Get biopython structure from ctx, or parse mmcif on demand."""
+    bs = ctx.inputs.get("biopython_structure")
+    if bs is not None:
+        return bs
+    from Bio.PDB.MMCIFParser import FastMMCIFParser
+    mmcif_path = ctx.require("mmcif_path")
+    bs = FastMMCIFParser(QUIET=True).get_structure(ctx.rcsb_id, mmcif_path)
+    ctx.inputs["biopython_structure"] = bs
+    return bs
+
 
 class Stage20ExteriorShell(Stage):
     key = "20_exterior_shell"
@@ -2222,7 +2993,6 @@ class Stage20ExteriorShell(Stage):
                 quality.get("watertight", False)
             )
 
-            # register artifacts (paths now exist under stage_dir)
             ctx.store.register_file(
                 name="alpha_shell_mesh",
                 stage=self.key,
@@ -2238,37 +3008,23 @@ class Stage20ExteriorShell(Stage):
             return
 
         c = ctx.config
-        ro = ctx.require("ro")
+        profile: RibosomeProfile = ctx.require("profile")
         cifpath = Path(ctx.require("mmcif_path"))
 
-        stage_dir        = ctx.store.stage_dir(self.key)
-        ptcloud_path     = stage_dir / "ribosome_ptcloud.npy"
+        ptcloud_path = stage_dir / "ribosome_ptcloud.npy"
         surface_pts_path = stage_dir / "alpha_surface_points.npy"
         normals_pcd_path = stage_dir / "alpha_normals.ply"
-        mesh_path        = stage_dir / "alpha_shell.ply"
-        quality_path     = stage_dir / "alpha_shell_quality.json"
-
-        # point cloud from cif (legacy)
-        # first_assembly_chains = ro.first_assembly_auth_asym_ids()
-        # ptcloud = cif_to_point_cloud(
-        #     str(cifpath), first_assembly_chains, do_atoms=True
-        # ).astype(np.float32)
-
-        ro      = ctx.require("ro")
-        profile = ctx.require("profile")
-        cifpath = Path(ctx.require("mmcif_path"))
+        mesh_path = stage_dir / "alpha_shell.ply"
+        quality_path = stage_dir / "alpha_shell_quality.json"
 
         wall = ribosome_wall_auth_asym_ids(
             profile,
             exclude_trna=bool(getattr(ctx.config, "occupancy_exclude_trna", True)),
-            extra_exclude=_tunnel_debris_chains(ctx.rcsb_id, ro, profile),
+            extra_exclude=tunnel_debris_chains(ctx.rcsb_id, profile),
         )
-        wall = intersect_with_first_assembly(ro, wall)
+        wall = intersect_with_first_assembly(profile, wall)
 
         ptcloud = cif_to_point_cloud(str(cifpath), sorted(wall), do_atoms=True)
-
-
-
 
         np.save(ptcloud_path, ptcloud)
         ctx.store.register_file(
@@ -2278,7 +3034,6 @@ class Stage20ExteriorShell(Stage):
             path=ptcloud_path,
         )
 
-        # surface points
         surface_pts = quick_surface_points(
             ptcloud, c.alpha_d3d_alpha, c.alpha_d3d_tol, c.alpha_d3d_offset
         ).astype(np.float32)
@@ -2290,12 +3045,10 @@ class Stage20ExteriorShell(Stage):
             path=surface_pts_path,
         )
 
-        # normal estimation (legacy)
         normal_estimated_pcd = fast_normal_estimation(
             surface_pts, c.alpha_kdtree_radius, c.alpha_max_nn, c.alpha_tangent_planes_k
         )
 
-        # robust-ish normal orientation: outward
         center = normal_estimated_pcd.get_center()
         normal_estimated_pcd.orient_normals_towards_camera_location(
             camera_location=center
@@ -2312,7 +3065,6 @@ class Stage20ExteriorShell(Stage):
             path=normals_pcd_path,
         )
 
-        # poisson reconstruction (writes mesh_path)
         apply_poisson_reconstruction(
             str(normals_pcd_path),
             mesh_path,
@@ -2320,7 +3072,6 @@ class Stage20ExteriorShell(Stage):
             recon_pt_weight=c.alpha_poisson_ptweight,
         )
 
-        # repair + keep largest component
         mesh = pv.read(mesh_path)
         mesh = mesh.fill_holes(c.alpha_fill_holes)
         mesh = mesh.connectivity(largest=True).triangulate()
@@ -2328,7 +3079,6 @@ class Stage20ExteriorShell(Stage):
 
         watertight = validate_mesh_pyvista(mesh)
 
-        # record quality
         quality = {
             "watertight": bool(watertight),
             "n_points": int(mesh.n_points),
@@ -2337,7 +3087,7 @@ class Stage20ExteriorShell(Stage):
             "is_manifold": bool(mesh.is_manifold),
             "bounds": list(mesh.bounds),
         }
-        quality_path.write_text(__import__("json").dumps(quality, indent=2))
+        quality_path.write_text(json.dumps(quality, indent=2))
         ctx.store.register_file(
             name="alpha_shell_quality",
             stage=self.key,
@@ -2356,7 +3106,6 @@ class Stage20ExteriorShell(Stage):
         if watertight:
             stage_cache.put_from(key, stage_dir, cached_files)
 
-
 class Stage30RegionAtoms(Stage):
     key = "30_region_atoms"
 
@@ -2366,40 +3115,22 @@ class Stage30RegionAtoms(Stage):
 
     def run(self, ctx: StageContext) -> None:
         c = ctx.config
-        ro = ctx.require("ro")
-        profile = ctx.require("profile")
+        profile: RibosomeProfile = ctx.require("profile")
 
         ptc = np.asarray(ctx.require("ptc_xyz"), dtype=np.float32)
         constr = np.asarray(ctx.require("constriction_xyz"), dtype=np.float32)
+        z_min = float(ctx.inputs.get("cylinder_z_min", 0.0))
 
-        # your existing hardcoded exclusions
-        skip = _tunnel_debris_chains(ctx.rcsb_id, ro, profile)
+        policy = atom_inclusion_policy(profile, c, ctx.rcsb_id)
 
-        # plus config-specified exclusions
-        skip = list(dict.fromkeys(skip + list(getattr(c, "occupancy_exclude_auth_asym_ids", ()))))
-
-
-        # ---- choose occupancy chains (the important part) ----
-        if getattr(c, "occupancy_chain_mode", "walls_only") == "assembly_all":
-            occ_chain_ids = set(ro.first_assembly_auth_asym_ids())
-        else:
-            occ_chain_ids = ribosome_wall_auth_asym_ids(
-                profile,
-                exclude_trna=bool(getattr(c, "occupancy_exclude_trna", True)),
-                extra_exclude=skip,
-            )
-            occ_chain_ids = intersect_with_first_assembly(ro, occ_chain_ids)
-
-        # ---- choose seed chains (usually same as occupancy; keep option to diverge later) ----
+        occ_chain_ids = policy["wall_chain_ids"]
         seed_chain_ids = set(occ_chain_ids)
 
-        # extract residues from structure once
-        structure = ro.assets.biopython_structure()
+        structure = _get_biopython_structure(ctx)
 
         residues_seed = _residues_from_chain_ids(structure, seed_chain_ids)
-        residues_occ  = _residues_from_chain_ids(structure, occ_chain_ids)
+        residues_occ = _residues_from_chain_ids(structure, occ_chain_ids)
 
-        # spatial filter (cylinder ROI)
         residues_seed = filter_residues_parallel(
             residues=residues_seed,
             base_point=ptc,
@@ -2408,6 +3139,7 @@ class Stage30RegionAtoms(Stage):
             height=c.cylinder_height_A,
             max_workers=1,
             chunk_size=5000,
+            z_min=z_min,
         )
         residues_occ = filter_residues_parallel(
             residues=residues_occ,
@@ -2417,6 +3149,7 @@ class Stage30RegionAtoms(Stage):
             height=c.cylinder_height_A,
             max_workers=1,
             chunk_size=5000,
+            z_min=z_min,
         )
 
         seed_points = np.asarray(
@@ -2430,7 +3163,6 @@ class Stage30RegionAtoms(Stage):
 
         stage_dir = ctx.store.stage_dir(self.key)
 
-        # keep your existing artifact name for seed points
         out_seed = stage_dir / "region_atom_xyz.npy"
         np.save(out_seed, seed_points)
         ctx.store.register_file(
@@ -2438,11 +3170,13 @@ class Stage30RegionAtoms(Stage):
             stage=self.key,
             type=ArtifactType.NUMPY,
             path=out_seed,
-            meta={"n": int(seed_points.shape[0]), "note": "seed atoms (walls-only chains)"},
+            meta={
+                "n": int(seed_points.shape[0]),
+                "note": "seed atoms (walls-only chains)",
+            },
         )
         ctx.inputs["region_atom_xyz"] = seed_points
 
-        # NEW: occupancy atoms
         out_occ = stage_dir / "region_atom_xyz_occ.npy"
         np.save(out_occ, occ_points)
         ctx.store.register_file(
@@ -2450,30 +3184,36 @@ class Stage30RegionAtoms(Stage):
             stage=self.key,
             type=ArtifactType.NUMPY,
             path=out_occ,
-            meta={"n": int(occ_points.shape[0]), "note": "occupancy atoms (walls-only chains)"},
+            meta={
+                "n": int(occ_points.shape[0]),
+                "note": "occupancy atoms (walls-only chains)",
+            },
         )
         ctx.inputs["region_atom_xyz_occ"] = occ_points
 
-        # Useful debug provenance
-        (stage_dir / "occupancy_chain_ids.json").write_text(
-            __import__("json").dumps(
-                {
-                    "occupancy_chain_mode": getattr(c, "occupancy_chain_mode", "walls_only"),
-                    "exclude_trna": bool(getattr(c, "occupancy_exclude_trna", True)),
-                    "skip_chains": skip,
-                    "occupancy_chain_ids": sorted(list(occ_chain_ids)),
-                    "seed_chain_ids": sorted(list(seed_chain_ids)),
-                },
-                indent=2,
-            )
+        policy_record = {
+            "occupancy_chain_mode": getattr(c, "occupancy_chain_mode", "walls_only"),
+            "exclude_trna": bool(getattr(c, "occupancy_exclude_trna", True)),
+            "wall_chain_ids": sorted(occ_chain_ids),
+            "excluded_chains": {k: v for k, v in policy["reasons"].items()},
+            "policy_summary": (
+                "INCLUDED: ribosomal proteins + rRNAs (with modified residues). "
+                "EXCLUDED: waters, ions, nonpolymer ligands, tRNAs, debris chains."
+            ),
+        }
+        (stage_dir / "atom_selection_policy.json").write_text(
+            json.dumps(policy_record, indent=2)
         )
 
         print(
-            f"[{self.key}] seed_atoms={seed_points.shape[0]:,} occ_atoms={occ_points.shape[0]:,} "
-            f"occ_chains={len(occ_chain_ids)}"
+            f"[{self.key}] seed_atoms={seed_points.shape[0]:,} "
+            f"occ_atoms={occ_points.shape[0]:,} occ_chains={len(occ_chain_ids)}"
         )
-
-
+        if policy["reasons"]:
+            excluded_summary = ", ".join(
+                f"{k}({v})" for k, v in sorted(policy["reasons"].items())
+            )
+            print(f"[{self.key}] excluded: {excluded_summary}")
 
 class Stage40EmptySpace(Stage):
     key = "40_empty_space"
@@ -2516,15 +3256,18 @@ class Stage40EmptySpace(Stage):
         )
 
         c = ctx.config
-        
+
+        z_min = float(ctx.inputs.get("cylinder_z_min", 0.0))
+
         # Use occ atoms for occupancy (prevents mesh interference)
         # region_xyz = np.asarray(ctx.require("region_atom_xyz_all"), dtype=np.float32)
         region_xyz = np.asarray(ctx.require("region_atom_xyz_occ"), dtype=np.float32)
 
-        
         # Use filtered atoms for clustering seed reference
-        region_xyz_filtered = np.asarray(ctx.require("region_atom_xyz"), dtype=np.float32)
-        
+        region_xyz_filtered = np.asarray(
+            ctx.require("region_atom_xyz"), dtype=np.float32
+        )
+
         ptc = np.asarray(ctx.require("ptc_xyz"), dtype=np.float32)
         constr = np.asarray(ctx.require("constriction_xyz"), dtype=np.float32)
         alpha_shell_path = ctx.require("alpha_shell_path")
@@ -2570,6 +3313,7 @@ class Stage40EmptySpace(Stage):
                     height=c.cylinder_height_A,
                     voxel_size=gl.voxel_size_A,
                     radius_around_point=gl.uniform_atom_radius_A,
+                    z_min=z_min,
                 )
 
                 idx = np.where(~mask)
@@ -2582,6 +3326,7 @@ class Stage40EmptySpace(Stage):
                     radius_A=float(c.cylinder_radius_A),
                     height_A=float(c.cylinder_height_A),
                     voxel_A=float(gl.voxel_size_A),
+                    z_min=z_min,
                 )
 
                 occ = occupancy_via_edt(
@@ -2590,9 +3335,7 @@ class Stage40EmptySpace(Stage):
                     atom_radius_A=float(gl.uniform_atom_radius_A),
                 )
 
-                cyl2d = cylinder_mask(
-                    grid, radius_A=float(c.cylinder_radius_A)
-                )
+                cyl2d = cylinder_mask(grid, radius_A=float(c.cylinder_radius_A))
                 cyl = np.broadcast_to(cyl2d, grid.shape)
 
                 occ = occ | (~cyl)
@@ -2708,14 +3451,17 @@ class Stage40EmptySpace(Stage):
 
         ctx.inputs["empty_points"] = last_empty
 
-
 class Stage50Clustering(Stage):
     """
-    DBSCAN clustering on level_0 (coarse grid, typically 1.0Å).
+    DBSCAN clustering on level_0 (coarse grid, typically 1.0A).
     
     Two-pass strategy:
       1. Coarse DBSCAN: merge regions, bridge gaps
       2. Refine DBSCAN: tighten on largest cluster from pass 1
+    
+    Cluster selection uses axial proximity to the PTC-Constriction axis
+    rather than raw point count, which prevents the inter-subunit space
+    from being picked over the actual tunnel.
     
     Optionally generates a mesh from the refined cluster.
     
@@ -2737,8 +3483,7 @@ class Stage50Clustering(Stage):
             "refine_eps_A": c.dbscan_level0_refine_eps_A,
             "refine_min_samples": c.dbscan_level0_refine_min_samples,
             "mesh_enable": bool(getattr(c, "mesh_level0_enable", True)),
-            "mesh_poisson_depth": int(getattr(c, "mesh_level0_poisson_depth", 6)),
-            "mesh_poisson_ptweight": int(getattr(c, "mesh_level0_poisson_ptweight", 3)),
+            "cluster_selection": "axial_proximity",
         }
 
     def run(self, ctx: StageContext) -> None:
@@ -2752,6 +3497,9 @@ class Stage50Clustering(Stage):
         empty_pts = np.asarray(ctx.require("empty_points"), dtype=np.float32)
         if empty_pts.ndim != 2 or empty_pts.shape[1] != 3 or empty_pts.shape[0] == 0:
             raise ValueError(f"[{self.key}] empty_points must be (N,3) and non-empty, got {empty_pts.shape}")
+
+        ptc = np.asarray(ctx.require("ptc_xyz"), dtype=np.float32)
+        constr = np.asarray(ctx.require("constriction_xyz"), dtype=np.float32)
 
         print(f"[{self.key}] empty_points n={empty_pts.shape[0]:,}")
 
@@ -2779,11 +3527,12 @@ class Stage50Clustering(Stage):
             min_samples=c.dbscan_level0_coarse_min_samples,
         )
 
-        # Pick largest cluster from coarse
-        largest, largest_id = DBSCAN_pick_largest_cluster(clusters_coarse)
-        largest = np.asarray(largest, dtype=np.float32)
+        # Pick tunnel cluster from coarse (axial proximity, not largest)
+
+
+        largest, largest_id = _pick_tunnel_cluster(clusters_coarse, constr)
         if largest.shape[0] == 0:
-            raise ValueError(f"[{self.key}] largest cluster is empty")
+            raise ValueError(f"[{self.key}] tunnel cluster is empty")
 
         p_largest = stage_dir / "largest_cluster.npy"
         np.save(p_largest, largest)
@@ -2792,7 +3541,8 @@ class Stage50Clustering(Stage):
             stage=self.key,
             type=ArtifactType.NUMPY,
             path=p_largest,
-            meta={"cluster_id": int(largest_id), "n": int(largest.shape[0])},
+            meta={"cluster_id": int(largest_id), "n": int(largest.shape[0]),
+                  "selection": "axial_proximity"},
         )
 
         # -----------------------
@@ -2819,9 +3569,10 @@ class Stage50Clustering(Stage):
             min_samples=c.dbscan_level0_refine_min_samples,
         )
 
-        # Pick winner from refine
-        refined, refined_id = DBSCAN_pick_largest_cluster(clusters_refine)
-        refined = np.asarray(refined, dtype=np.float32)
+        # Pick tunnel cluster from refine
+
+
+        refined, refined_id = _pick_tunnel_cluster(clusters_refine, constr)
         if refined.shape[0] == 0:
             raise ValueError(f"[{self.key}] refined cluster is empty")
 
@@ -2832,14 +3583,15 @@ class Stage50Clustering(Stage):
             stage=self.key,
             type=ArtifactType.NUMPY,
             path=p_refined,
-            meta={"cluster_id": int(refined_id), "n": int(refined.shape[0])},
+            meta={"cluster_id": int(refined_id), "n": int(refined.shape[0]),
+                  "selection": "axial_proximity"},
         )
 
         # Output for downstream
         ctx.inputs["refined_cluster"] = refined
         ctx.inputs["largest_cluster"] = largest
 
-        print(f"[{self.key}] winner: coarse={largest.shape[0]:,} → refine={refined.shape[0]:,}")
+        print(f"[{self.key}] winner: coarse={largest.shape[0]:,} -> refine={refined.shape[0]:,}")
 
         # -----------------------
         # Optional: Mesh level_0
@@ -2862,7 +3614,6 @@ class Stage50Clustering(Stage):
         np.save(pass_dir / "points.npy", pts.astype(np.float32))
         np.save(pass_dir / "labels.npy", labels.astype(np.int32))
 
-        # Index for quick inspection
         counts = {}
         for lab in np.unique(labels):
             counts[int(lab)] = int((labels == lab).sum())
@@ -2878,191 +3629,92 @@ class Stage50Clustering(Stage):
 
         for lab, plist in clusters_dict.items():
             lab = int(lab)
-            if lab == -1:  # skip noise
+            if lab == -1:
                 continue
             arr = np.asarray(plist, dtype=np.float32)
             if arr.size > 0:
                 np.save(pass_dir / f"cluster_id{lab}.npy", arr)
 
-
-    # In ribctl/lib/npet2/stages/legacy_minimal.py, Stage50Clustering
-
     def _generate_mesh(self, ctx: StageContext, points: np.ndarray, level_name: str) -> None:
-        """Generate mesh from tunnel point cloud using Poisson reconstruction."""
         import time
+        from ribctl.lib.npet.kdtree_approach import transform_points_to_C0, transform_points_from_C0
+        from ribctl.lib.npet2.backends.meshing import (
+            mesh_from_binary_volume,
+            voxelize_points,
+            clip_mesh_to_atom_clearance,
+            save_mesh_with_ascii,
+        )
+
         c = ctx.config
         stage_dir = ctx.store.stage_dir(self.key)
-
         print(f"[{self.key}] generating mesh for {level_name}...")
 
-        # Surface extraction via tight alpha shape (alpha=2, NOT 200)
+        ptc = np.asarray(ctx.require("ptc_xyz"), dtype=np.float32)
+        constr = np.asarray(ctx.require("constriction_xyz"), dtype=np.float32)
+
+        pts_c0 = transform_points_to_C0(points, ptc, constr).astype(np.float32)
+        voxel = 1.0
+
         t0 = time.perf_counter()
+        mask, origin = voxelize_points(pts_c0, voxel_size=voxel, pad_voxels=2)
+
         try:
-            surface_pts = ptcloud_convex_hull_points(
-                points,
-                ALPHA=c.tunnel_surface_alpha,
-                TOLERANCE=c.tunnel_surface_tolerance,
-                OFFSET=c.tunnel_surface_offset,
+            surf_c0, pre_smooth_c0 = mesh_from_binary_volume(
+                mask, origin, voxel,
+                gaussian_sigma_voxels=c.mesh_level0_gaussian_sigma,
+                smooth_method=c.mesh_smooth_method,
+                smooth_iters=c.mesh_level0_smooth_iters,
+                taubin_pass_band=c.mesh_taubin_pass_band,
+                fill_holes_size=c.mesh_fill_holes_A,
+            )
+        except ValueError as e:
+            print(f"[{self.key}] MC mesh failed for {level_name}: {e}")
+            return
+
+        # Transform both meshes to world coordinates
+        def _to_world(mesh_c0: pv.PolyData) -> pv.PolyData:
+            pts_w = transform_points_from_C0(
+                np.asarray(mesh_c0.points, dtype=np.float32), ptc, constr
             ).astype(np.float32)
-        except Exception as e:
-            print(f"[{self.key}] surface extraction failed for {level_name}: {e}")
-            return
-        dt0 = time.perf_counter() - t0
-        print(f"[{self.key}]   surface extraction: {dt0:.2f}s, {surface_pts.shape[0]:,} points")
+            m = mesh_c0.copy(deep=True)
+            m.points = pts_w
+            return m
 
-        # Normal estimation
-        t1 = time.perf_counter()
-        try:
-            pcd = estimate_normals(
-                surface_pts,
-                kdtree_radius=c.normals_radius,
-                kdtree_max_nn=c.normals_max_nn,
-                correction_tangent_planes_n=c.normals_tangent_k,
-            )
-        except Exception as e:
-            print(f"[{self.key}] normal estimation failed for {level_name}: {e}")
-            return
-        dt1 = time.perf_counter() - t1
-        print(f"[{self.key}]   normal estimation: {dt1:.2f}s")
+        pre_smooth_w = _to_world(pre_smooth_c0)
+        pre_smooth_path = stage_dir / f"mesh_{level_name}_pre_smooth.ply"
+        save_mesh_with_ascii(pre_smooth_w, pre_smooth_path, tag=f"{level_name}-pre-smooth")
 
-        # Write normals PCD
-        normals_path = stage_dir / f"normals_{level_name}.ply"
-        o3d.io.write_point_cloud(str(normals_path), pcd)
+        surf_w = _to_world(surf_c0)
 
-        # Poisson reconstruction
+        region_xyz = np.asarray(ctx.require("region_atom_xyz_occ"), dtype=np.float32)
+        surf_w = clip_mesh_to_atom_clearance(surf_w, region_xyz, min_clearance_A=c.mesh_atom_clearance_A)
+
+        dt = time.perf_counter() - t0
+        print(f"[{self.key}]   MC mesh: {dt:.2f}s, {surf_w.n_points:,} pts, "
+              f"{surf_w.n_faces:,} faces, watertight={surf_w.is_manifold and surf_w.n_open_edges == 0}")
+
         mesh_path = stage_dir / f"mesh_{level_name}.ply"
-        try:
-            apply_poisson_reconstruction(
-                str(normals_path),
-                mesh_path,
-                recon_depth=c.mesh_level0_poisson_depth,
-                recon_pt_weight=c.mesh_level0_poisson_ptweight,
-            )
-        except Exception as e:
-            print(f"[{self.key}] poisson reconstruction failed for {level_name}: {e}")
-            return
-
-        if not mesh_path.exists():
-            print(f"[{self.key}] poisson did not produce mesh file for {level_name}")
-            return
-
-        # Cleanup mesh
-        try:
-            mesh = pv.read(str(mesh_path))
-            mesh = mesh.fill_holes(2000.0)
-            mesh = mesh.connectivity(largest=True).triangulate()
-            mesh.save(str(mesh_path))
-        except Exception as e:
-            print(f"[{self.key}] mesh cleanup failed for {level_name}: {e}")
-            return
+        save_mesh_with_ascii(surf_w, mesh_path, tag=level_name)
 
         ctx.store.register_file(
             name=f"mesh_{level_name}",
             stage=self.key,
             type=ArtifactType.PLY_MESH,
             path=mesh_path,
-            meta={"level": level_name},
+            meta={"level": level_name, "method": "marching_cubes_taubin"},
         )
-
         print(f"[{self.key}] mesh saved: {mesh_path}")
-
-
-class Stage60SurfaceNormals(Stage):
-    key = "60_surface_normals"
-
-    def params(self, ctx: StageContext) -> Dict[str, Any]:
-        c = ctx.config
-        return {
-            "tunnel_surface_alpha": c.tunnel_surface_alpha,
-            "tunnel_surface_tolerance": c.tunnel_surface_tolerance,
-            "tunnel_surface_offset": c.tunnel_surface_offset,
-            "normals_radius": c.normals_radius,
-            "normals_max_nn": c.normals_max_nn,
-            "normals_tangent_k": c.normals_tangent_k,
-        }
-
-    def run(self, ctx: StageContext) -> None:
-        import time
-
-        c = ctx.config
-        refined = np.asarray(ctx.require("refined_cluster"), dtype=np.float32)
-
-        surface_flag = bool(ctx.inputs.get("refined_cluster_surface", False))
-        print(
-            f"[60_surface_normals] refined_cluster n={refined.shape[0]:,} surface_flag={surface_flag}"
-        )
-
-        stage_dir = ctx.store.stage_dir(self.key)
-
-        if surface_flag:
-            surface_pts = refined
-            print(
-                "[60_surface_normals] using refined points directly as surface_pts (skip Delaunay)"
-            )
-        else:
-            t0 = time.perf_counter()
-            surface_pts = ptcloud_convex_hull_points(
-                refined, 
-                c.tunnel_surface_alpha,       # was c.surface_alpha
-                c.tunnel_surface_tolerance,   # was c.surface_tolerance
-                c.tunnel_surface_offset,      # was c.surface_offset
-            ).astype(np.float32)
-            dt = time.perf_counter() - t0
-            print(
-                f"[60_surface_normals] delaunay_3d+extract_surface took {dt:,.2f}s surface_pts n={surface_pts.shape[0]:,}"
-            )
-
-        p_surface = stage_dir / "surface_points.npy"
-        np.save(p_surface, surface_pts)
-        ctx.store.register_file(
-            name="surface_points",
-            stage=self.key,
-            type=ArtifactType.NUMPY,
-            path=p_surface,
-            meta={"n": int(surface_pts.shape[0])},
-        )
-
-        t1 = time.perf_counter()
-        pcd = estimate_normals(
-            surface_pts,
-            kdtree_radius=c.normals_radius,
-            kdtree_max_nn=c.normals_max_nn,
-            correction_tangent_planes_n=c.normals_tangent_k,
-        )
-        dt1 = time.perf_counter() - t1
-        print(f"[60_surface_normals] estimate_normals took {dt1:,.2f}s")
-
-        p_normals = stage_dir / "surface_normals.ply"
-        o3d.io.write_point_cloud(str(p_normals), pcd)
-        ctx.store.register_file(
-            name="surface_normals_pcd",
-            stage=self.key,
-            type=ArtifactType.PLY_PCD,
-            path=p_normals,
-        )
-
-        ctx.inputs["normals_pcd_path"] = str(p_normals)
-
 
 class Stage70MeshValidate(Stage):
     key = "70_mesh_validate"
 
     def params(self, ctx: StageContext) -> Dict[str, Any]:
-        c = ctx.config
-        return {
-            "poisson_depth": c.mesh_poisson_depth,
-            "poisson_ptweight": c.mesh_poisson_ptweight,
-            "voxel_fill_holes_A": float(getattr(c, "voxel_mesh_fill_holes_A", 50.0)),
-            "voxel_smooth_iters": int(getattr(c, "voxel_mesh_smooth_iters", 10)),
-        }
+        return {}
 
     def run(self, ctx: StageContext) -> None:
         import json
-        import numpy as np
-        import pyvista as pv
-        from scipy.spatial import cKDTree
+        import shutil
 
-        c = ctx.config
         stage_dir = ctx.store.stage_dir(self.key)
         mesh_path = stage_dir / "npet2_tunnel_mesh.ply"
 
@@ -3075,223 +3727,430 @@ class Stage70MeshValidate(Stage):
                 "bounds": [float(x) for x in m.bounds],
             }
 
-        method_used = None
-        normals_pcd_path = ctx.inputs.get("normals_pcd_path", None)
-        
-        if normals_pcd_path:
-            try:
-                apply_poisson_reconstruction(
-                    str(normals_pcd_path),
-                    mesh_path,
-                    recon_depth=c.mesh_poisson_depth,
-                    recon_pt_weight=c.mesh_poisson_ptweight,
-                )
-            except Exception as e:
-                print(f"[70_mesh_validate] poisson threw exception: {e}")
+        # Try level_1 first (higher detail), fall back to level_0
+        chosen_src = None
+        chosen_label = None
 
-        if mesh_path.exists():
-            try:
-                m = pv.read(str(mesh_path))
-                st = _mesh_stats(m)
-                print(f"[70_mesh_validate] poisson mesh stats: {st}")
-                watertight = validate_mesh_pyvista(m)
-                if watertight:
-                    method_used = "poisson"
-                    
-                    # Clean up Poisson mesh too
-                    m = m.connectivity(largest=True)
-                    m.save(str(mesh_path))
-                    
-                    mesh_path_ascii = stage_dir / "npet2_tunnel_mesh_ascii.ply"
-                    m.save(str(mesh_path_ascii), binary=False)
-                    
-                    mesh_path_ascii = stage_dir / "npet2_tunnel_mesh_ascii.ply"
-                    try:
-                        m.save(str(mesh_path_ascii), binary=False)
-                    except:
-                        pass
-                    
-                    ctx.store.register_file(
-                        name="tunnel_mesh",
-                        stage=self.key,
-                        type=ArtifactType.PLY_MESH,
-                        path=mesh_path,
-                        meta={"watertight": True, "method": "poisson"},
-                    )
-                    ctx.inputs["tunnel_mesh_path"] = str(mesh_path)
-                else:
-                    print("[70_mesh_validate] poisson mesh not watertight; falling back to voxel meshing")
-            except Exception as e:
-                print(f"[70_mesh_validate] failed reading/validating poisson mesh; falling back: {e}")
-        else:
-            print("[70_mesh_validate] poisson did not produce a mesh file; falling back to voxel meshing")
+        l1_path = ctx.inputs.get("level_1_mesh_path")
+        if l1_path and Path(l1_path).exists():
+            m = pv.read(l1_path)
+            if m.is_manifold and m.n_open_edges == 0 and m.n_points > 0:
+                chosen_src = l1_path
+                chosen_label = "level_1"
+                print(f"[{self.key}] using level_1 mesh (0.5A grid)")
 
-        if method_used != "poisson":
-            mask_p = ctx.inputs.get("selected_void_component_mask_level_1_path", None)
-            spec_p = ctx.inputs.get("grid_spec_level_1_path", None)
+        if chosen_src is None:
+            # Look for level_0
+            l0_path = ctx.store.run_dir / "stage" / "50_clustering" / "mesh_level_0.ply"
+            if l0_path.exists():
+                m = pv.read(str(l0_path))
+                if m.n_points > 0:
+                    chosen_src = str(l0_path)
+                    chosen_label = "level_0"
+                    print(f"[{self.key}] falling back to level_0 mesh (1.0A grid)")
 
-            if not (mask_p and spec_p and Path(mask_p).exists() and Path(spec_p).exists()):
-                raise ValueError(
-                    "Final mesh is not watertight and voxel fallback inputs are missing "
-                    "(expected selected_void_component_mask_level_1_path + grid_spec_level_1_path)"
-                )
+        if chosen_src is None:
+            raise ValueError(f"[{self.key}] no valid mesh found from any stage")
 
-            spec = json.loads(Path(spec_p).read_text())
-            voxel = float(spec["voxel_size_A"])
-            origin = np.asarray(spec["origin"], dtype=np.float32)
+        shutil.copy2(chosen_src, mesh_path)
+        final = pv.read(str(mesh_path))
 
-            ptc = np.asarray(spec["transform"]["ptc"], dtype=np.float32)
-            constr = np.asarray(spec["transform"]["constriction"], dtype=np.float32)
+        # Save final mesh as both binary and ASCII
+        save_mesh_with_ascii(final, mesh_path, tag="final")
 
-            vol = np.load(mask_p).astype(np.float32)
-            if vol.ndim != 3:
-                raise ValueError(f"[70_mesh_validate] voxel volume must be 3D, got {vol.shape}")
+        st = _mesh_stats(final)
+        watertight = final.is_manifold and final.n_open_edges == 0
+        print(f"[{self.key}] final mesh: {st}, watertight={watertight}")
 
-            vol_pad = np.pad(vol, 1, constant_values=0)
-            origin_pad = origin - voxel
-
-            img = pv.ImageData(
-                dimensions=vol_pad.shape,
-                spacing=(voxel, voxel, voxel),
-                origin=(float(origin_pad[0]), float(origin_pad[1]), float(origin_pad[2])),
-            )
-            img.point_data["void"] = vol_pad.ravel(order="F")
-
-            surf_c0 = img.contour(isosurfaces=[0.5], scalars="void").triangulate()
-            if surf_c0.n_points == 0 or surf_c0.n_faces == 0:
-                raise ValueError("[70_mesh_validate] voxel contour produced empty surface")
-
-            surf_c0 = surf_c0.clean(tolerance=0.0)
-
-            fill_holes_A = float(getattr(c, "voxel_mesh_fill_holes_A", 50.0))
-            try:
-                surf_c0 = surf_c0.fill_holes(fill_holes_A)
-            except Exception:
-                pass
-
-            smooth_iters = int(getattr(c, "voxel_mesh_smooth_iters", 10))
-            if smooth_iters > 0:
-                try:
-                    surf_c0 = surf_c0.smooth(n_iter=smooth_iters)
-                except Exception:
-                    pass
-
-            # Largest component LAST -- after fill_holes and smooth
-            surf_c0 = surf_c0.connectivity(largest=True)
-
-            pts_c0 = np.asarray(surf_c0.points, dtype=np.float32)
-            pts_w = transform_points_from_C0(pts_c0, ptc, constr).astype(np.float32)
-            surf_w = surf_c0.copy(deep=True)
-            surf_w.points = pts_w
-
-            try:
-                surf_w = surf_w.compute_normals(
-                    auto_orient_normals=True, consistent_normals=True
-                )
-            except Exception:
-                pass
-            # Clip mesh to atom clearance (both Poisson and voxel paths)
-            try:
-                region_xyz = np.asarray(ctx.require("region_atom_xyz_all"), dtype=np.float32)
-                from scipy.spatial import cKDTree
-                tree = cKDTree(region_xyz)
-                pts = np.asarray(surf_w.points, dtype=np.float64)
-                dist, idx = tree.query(pts, k=1)
-                violating = dist < 1.5
-                if violating.sum() > 0:
-                    nearest = region_xyz[idx[violating]]
-                    direction = pts[violating] - nearest
-                    norms = np.maximum(np.linalg.norm(direction, axis=1, keepdims=True), 1e-8)
-                    pts[violating] = nearest + (direction / norms) * 1.5
-                    surf_w.points = pts.astype(np.float32)
-                    print(f"[{self.key}]   pushed {int(violating.sum()):,} vertices to 1.5A atom clearance")
-            except Exception as e:
-                print(f"[{self.key}]   atom clearance clip failed: {e}")
-
-            surf_w.save(str(mesh_path))
-
-            mesh_path_ascii = stage_dir / "npet2_tunnel_mesh_ascii.ply"
-            try:
-                surf_w.save(str(mesh_path_ascii), binary=False)
-                print(f"[{self.key}] saved ASCII mesh: {mesh_path_ascii}")
-            except Exception:
-                try:
-                    import plyfile
-                    data = plyfile.PlyData.read(str(mesh_path))
-                    data.text = True
-                    data.write(str(mesh_path_ascii))
-                    print(f"[{self.key}] saved ASCII mesh (via plyfile): {mesh_path_ascii}")
-                except Exception as e:
-                    print(f"[{self.key}] failed to save ASCII mesh: {e}")
-
-            st2 = _mesh_stats(surf_w)
-            print(f"[70_mesh_validate] voxel mesh stats: {st2}")
-
-            watertight = validate_mesh_pyvista(surf_w)
-            if not watertight:
-                raise ValueError("Final mesh is not watertight (voxel fallback also failed)")
-
-            method_used = "voxel_contour"
+        if not watertight:
+            raise ValueError(f"[{self.key}] final mesh is not watertight")
 
         ctx.store.register_file(
             name="tunnel_mesh",
             stage=self.key,
             type=ArtifactType.PLY_MESH,
             path=mesh_path,
-            meta={"watertight": True, "method": method_used},
+            meta={"watertight": True, "source": chosen_label},
         )
         ctx.inputs["tunnel_mesh_path"] = str(mesh_path)
 
-        print(f"[{self.key}] copying comparison meshes...")
+        # Also copy final meshes to run root for convenience
+        root_mesh = ctx.store.run_dir / "tunnel_mesh.ply"
+        root_mesh_ascii = ctx.store.run_dir / "tunnel_mesh_ascii.ply"
+        shutil.copy2(str(mesh_path), str(root_mesh))
+        ascii_src = mesh_path.parent / f"{mesh_path.stem}_ascii.ply"
+        if ascii_src.exists():
+            shutil.copy2(str(ascii_src), str(root_mesh_ascii))
+
+        self._copy_comparison_meshes(ctx, stage_dir)
+
+    def _copy_comparison_meshes(self, ctx, stage_dir):
         import shutil
-        
-        try:
-            stage50_dir = ctx.store.run_dir / "stage" / "50_clustering"
-            mesh_l0_src = stage50_dir / "mesh_level_0.ply"
-            if mesh_l0_src.exists():
-                mesh_l0_dst = stage_dir / "comparison_mesh_level_0.ply"
-                shutil.copy2(mesh_l0_src, mesh_l0_dst)
-                
-                mesh_l0_src_ascii = stage50_dir / "mesh_level_0_ascii.ply"
-                if mesh_l0_src_ascii.exists():
-                    mesh_l0_dst_ascii = stage_dir / "comparison_mesh_level_0_ascii.ply"
-                    shutil.copy2(mesh_l0_src_ascii, mesh_l0_dst_ascii)
-                
-                ctx.store.register_file(
-                    name="comparison_mesh_level_0",
-                    stage=self.key,
-                    type=ArtifactType.PLY_MESH,
-                    path=mesh_l0_dst,
-                    meta={"source": "50_clustering", "voxel_size_A": 1.0},
+
+        run_root = ctx.store.run_dir
+
+        for stage_name, level, voxel in [
+            ("50_clustering", "level_0", 1.0),
+            ("55_grid_refine", "level_1", 0.5),
+        ]:
+            src_dir = ctx.store.run_dir / "stage" / stage_name
+
+            # Post-smooth mesh
+            for suffix in [f"mesh_{level}.ply", f"mesh_{level}_ascii.ply"]:
+                src = src_dir / suffix
+                if src.exists():
+                    shutil.copy2(src, stage_dir / f"comparison_{suffix}")
+                    # Also put in run root
+                    shutil.copy2(src, run_root / suffix)
+
+            # Pre-smooth mesh
+            for suffix in [
+                f"mesh_{level}_pre_smooth.ply",
+                f"mesh_{level}_pre_smooth_ascii.ply",
+            ]:
+                src = src_dir / suffix
+                if src.exists():
+                    shutil.copy2(src, stage_dir / f"comparison_{suffix}")
+                    shutil.copy2(src, run_root / suffix)
+
+            if (src_dir / f"mesh_{level}.ply").exists():
+                print(
+                    f"[{self.key}]   copied {level} mesh ({voxel}A grid) + pre-smooth"
                 )
-                print(f"[{self.key}]   copied level_0 mesh (1.0Å grid)")
-        except Exception as e:
-            print(f"[{self.key}]   failed to copy level_0 mesh: {e}")
-        
-        try:
-            stage55_dir = ctx.store.run_dir / "stage" / "55_grid_refine"
-            mesh_l1_src = stage55_dir / "mesh_level_1.ply"
-            if mesh_l1_src.exists():
-                mesh_l1_dst = stage_dir / "comparison_mesh_level_1.ply"
-                shutil.copy2(mesh_l1_src, mesh_l1_dst)
-                
-                mesh_l1_src_ascii = stage55_dir / "mesh_level_1_ascii.ply"
-                if mesh_l1_src_ascii.exists():
-                    mesh_l1_dst_ascii = stage_dir / "comparison_mesh_level_1_ascii.ply"
-                    shutil.copy2(mesh_l1_src_ascii, mesh_l1_dst_ascii)
-                
-                ctx.store.register_file(
-                    name="comparison_mesh_level_1",
-                    stage=self.key,
-                    type=ArtifactType.PLY_MESH,
-                    path=mesh_l1_dst,
-                    meta={"source": "55_grid_refine", "voxel_size_A": 0.5},
+
+```
+
+ribctl/lib/npet2/__init__.py
+```py
+
+```
+
+ribctl/lib/npet2/__main__.py
+```py
+# ribctl/lib/npet2/__main__.py
+"""
+npet2 CLI entry point.
+
+Usage:
+    python -m ribctl.lib.npet2 run 7K00 4UG0 --workers 4
+    python -m ribctl.lib.npet2 run --from-file structures.txt --output-dir ./results
+    python -m ribctl.lib.npet2 run 7K00 --cylinder-radius 40 --voxel-size 0.5
+    python -m ribctl.lib.npet2 run 7K00 --mmcif /path/to/7K00.cif --profile /path/to/profile.json --landmarks /path/to/landmarks.json
+"""
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+import traceback
+from concurrent.futures import ProcessPoolExecutor, as_completed
+from dataclasses import asdict
+from pathlib import Path
+from typing import Optional
+
+
+def _build_parser() -> argparse.ArgumentParser:
+    p = argparse.ArgumentParser(
+        prog="npet2",
+        description="Ribosome exit tunnel geometry pipeline",
+    )
+    sub = p.add_subparsers(dest="command")
+
+    # --- run ---
+    run_p = sub.add_parser("run", help="Run the pipeline on one or more structures")
+
+    # Input selection
+    run_p.add_argument("rcsb_ids", nargs="*", help="RCSB IDs to process")
+    run_p.add_argument("--from-file", type=str, default=None,
+                       help="Read RCSB IDs from a text file (one per line)")
+
+    # Provider mode
+    run_p.add_argument("--mode", choices=["riboxyz", "standalone"], default="riboxyz",
+                       help="riboxyz: use local riboxyz assets. standalone: use mmcif + profile files or API.")
+    run_p.add_argument("--mmcif", type=str, default=None,
+                       help="(standalone) Path to mmCIF file. For multiple structures, use a directory.")
+    run_p.add_argument("--profile", type=str, default=None,
+                       help="(standalone) Path to profile JSON file or directory of profiles.")
+    run_p.add_argument("--landmarks", type=str, default=None,
+                       help="(standalone) Path to landmarks JSON file or directory.")
+    run_p.add_argument("--api-url", type=str, default=None,
+                       help="(standalone) riboxyz API base URL for fetching profiles/landmarks.")
+
+    # Output
+    run_p.add_argument("--output-dir", type=str, default=None,
+                       help="Root output directory (default: NPET2_RUNS_ROOT)")
+
+    # Parallelism
+    run_p.add_argument("--workers", "-j", type=int, default=1,
+                       help="Number of parallel workers (default: 1)")
+
+    # Config overrides (the commonly-tuned ones)
+    cfg = run_p.add_argument_group("config overrides")
+    cfg.add_argument("--cylinder-radius", type=float, default=None)
+    cfg.add_argument("--cylinder-height", type=float, default=None)
+    cfg.add_argument("--ptc-extension", type=float, default=None)
+    cfg.add_argument("--voxel-size", type=float, default=None,
+                     help="Level-0 grid voxel size in Angstroms")
+    cfg.add_argument("--refine-voxel-size", type=float, default=None)
+    cfg.add_argument("--no-mesh", action="store_true", help="Disable mesh generation")
+    cfg.add_argument("--no-refine", action="store_true", help="Skip Stage55 grid refinement")
+    cfg.add_argument("--dbscan-coarse-eps", type=float, default=None)
+    cfg.add_argument("--dbscan-coarse-min-samples", type=int, default=None)
+    cfg.add_argument("--dbscan-refine-eps", type=float, default=None)
+    cfg.add_argument("--dbscan-refine-min-samples", type=int, default=None)
+    cfg.add_argument("--config-json", type=str, default=None,
+                     help="Path to a full RunConfig JSON (overrides individual flags)")
+
+    # --- show-config ---
+    sub.add_parser("show-config", help="Print the default RunConfig as JSON")
+
+    return p
+
+
+def _build_config(args) -> "RunConfig":
+    from ribctl.lib.npet2.core.config import RunConfig, GridLevelConfig
+
+    if args.config_json:
+        import json
+        data = json.loads(Path(args.config_json).read_text())
+        # Reconstruct GridLevelConfig objects
+        if "grid_levels" in data:
+            data["grid_levels"] = [GridLevelConfig(**gl) for gl in data["grid_levels"]]
+        return RunConfig(**data)
+
+    kwargs = {}
+    if args.cylinder_radius is not None:
+        kwargs["cylinder_radius_A"] = args.cylinder_radius
+    if args.cylinder_height is not None:
+        kwargs["cylinder_height_A"] = args.cylinder_height
+    if args.ptc_extension is not None:
+        kwargs["cylinder_ptc_extension_A"] = args.ptc_extension
+    if args.refine_voxel_size is not None:
+        kwargs["refine_voxel_size_A"] = args.refine_voxel_size
+    if args.no_mesh:
+        kwargs["mesh_level0_enable"] = False
+        kwargs["mesh_level1_enable"] = False
+    if args.dbscan_coarse_eps is not None:
+        kwargs["dbscan_level0_coarse_eps_A"] = args.dbscan_coarse_eps
+    if args.dbscan_coarse_min_samples is not None:
+        kwargs["dbscan_level0_coarse_min_samples"] = args.dbscan_coarse_min_samples
+    if args.dbscan_refine_eps is not None:
+        kwargs["dbscan_level0_refine_eps_A"] = args.dbscan_refine_eps
+    if args.dbscan_refine_min_samples is not None:
+        kwargs["dbscan_level0_refine_min_samples"] = args.dbscan_refine_min_samples
+
+    if args.voxel_size is not None:
+        kwargs["grid_levels"] = [
+            GridLevelConfig(name="level_0", voxel_size_A=args.voxel_size,
+                            occupancy_backend="legacy_kdtree"),
+        ]
+
+    return RunConfig(**kwargs)
+
+
+def _collect_rcsb_ids(args) -> list[str]:
+    ids = list(args.rcsb_ids) if args.rcsb_ids else []
+    if args.from_file:
+        p = Path(args.from_file)
+        if not p.exists():
+            print(f"Error: --from-file {p} does not exist", file=sys.stderr)
+            sys.exit(1)
+        for line in p.read_text().splitlines():
+            line = line.strip()
+            if line and not line.startswith("#"):
+                ids.append(line)
+    if not ids:
+        print("Error: no RCSB IDs specified", file=sys.stderr)
+        sys.exit(1)
+    return [x.upper() for x in ids]
+
+
+def _make_providers(args, rcsb_id: str):
+    """Return (structure_provider, landmark_provider) for a given structure."""
+    if args.mode == "riboxyz":
+        from ribctl.lib.npet2.adapters.riboxyz_providers import (
+            RiboxyzStructureProvider,
+            RiboxyzLandmarkProvider,
+        )
+        return RiboxyzStructureProvider(), RiboxyzLandmarkProvider()
+
+    # standalone mode
+    from ribctl.lib.npet2.adapters.standalone_providers import (
+        FileStructureProvider,
+        FileLandmarkProvider,
+    )
+
+    api_base = args.api_url
+
+    # Resolve mmcif path
+    mmcif_path = None
+    if args.mmcif:
+        p = Path(args.mmcif)
+        if p.is_dir():
+            # Look for {RCSB_ID}.cif or {rcsb_id}.cif
+            for candidate in [f"{rcsb_id}.cif", f"{rcsb_id.lower()}.cif"]:
+                if (p / candidate).exists():
+                    mmcif_path = p / candidate
+                    break
+            if mmcif_path is None:
+                raise FileNotFoundError(
+                    f"No mmCIF file found for {rcsb_id} in {p}. "
+                    f"Expected {rcsb_id}.cif"
                 )
-                print(f"[{self.key}]   copied level_1 mesh (0.5Å grid)")
-            else:
-                print(f"[{self.key}]   level_1 mesh not found (Poisson likely failed)")
-        except Exception as e:
-            print(f"[{self.key}]   failed to copy level_1 mesh: {e}")
+        else:
+            mmcif_path = p
+
+    if mmcif_path is None:
+        raise ValueError(f"--mmcif is required in standalone mode (for {rcsb_id})")
+
+    # Resolve profile path
+    profile_path = None
+    if args.profile:
+        p = Path(args.profile)
+        if p.is_dir():
+            for candidate in [f"{rcsb_id}_profile.json", f"{rcsb_id}.json"]:
+                if (p / candidate).exists():
+                    profile_path = p / candidate
+                    break
+        else:
+            profile_path = p
+
+    # Resolve landmarks path
+    landmarks_path = None
+    if args.landmarks:
+        p = Path(args.landmarks)
+        if p.is_dir():
+            for candidate in [f"{rcsb_id}_landmarks.json", f"{rcsb_id}.json"]:
+                if (p / candidate).exists():
+                    landmarks_path = p / candidate
+                    break
+        else:
+            landmarks_path = p
+
+    return (
+        FileStructureProvider(mmcif_path, profile_path=profile_path, api_base=api_base),
+        FileLandmarkProvider(landmarks_path=landmarks_path, api_base=api_base),
+    )
+
+
+def _run_single(
+    rcsb_id: str,
+    args,
+    config: "RunConfig",
+    output_root: Optional[Path],
+) -> dict:
+    """Run pipeline for a single structure. Returns a result dict."""
+    from ribctl.lib.npet2.run import run_npet2
+
+    try:
+        sp, lp = _make_providers(args, rcsb_id)
+
+        # Allow output dir override
+        if output_root:
+            import ribctl.lib.npet2.core.settings as settings
+            settings.NPET2_RUNS_ROOT = output_root
+
+        ctx = run_npet2(rcsb_id, config, structure_provider=sp, landmark_provider=lp)
+        return {
+            "rcsb_id": rcsb_id,
+            "status": "success",
+            "run_dir": str(ctx.store.run_dir),
+        }
+    except Exception as e:
+        return {
+            "rcsb_id": rcsb_id,
+            "status": "failed",
+            "error": str(e),
+            "traceback": traceback.format_exc(),
+        }
+
+
+def _run_worker(packed_args: tuple) -> dict:
+    """Wrapper for ProcessPoolExecutor."""
+    rcsb_id, args_ns, config_dict, output_root_str = packed_args
+    from ribctl.lib.npet2.core.config import RunConfig, GridLevelConfig
+
+    # Reconstruct config from dict
+    if "grid_levels" in config_dict:
+        config_dict["grid_levels"] = [GridLevelConfig(**gl) for gl in config_dict["grid_levels"]]
+    config = RunConfig(**config_dict)
+
+    output_root = Path(output_root_str) if output_root_str else None
+    return _run_single(rcsb_id, args_ns, config, output_root)
+
+
+def main():
+    parser = _build_parser()
+    args = parser.parse_args()
+
+    if args.command is None:
+        parser.print_help()
+        sys.exit(1)
+
+    if args.command == "show-config":
+        from ribctl.lib.npet2.core.config import RunConfig
+        cfg = RunConfig()
+        print(json.dumps(asdict(cfg), indent=2))
+        return
+
+    if args.command == "run":
+        rcsb_ids = _collect_rcsb_ids(args)
+        config = _build_config(args)
+        output_root = Path(args.output_dir) if args.output_dir else None
+
+        n_workers = min(args.workers, len(rcsb_ids))
+
+        if args.no_refine:
+            # We need to modify the pipeline stages -- simplest way is a flag
+            # that run.py checks. For now, store it in config as a workaround.
+            pass
+
+        print(f"npet2: processing {len(rcsb_ids)} structure(s), workers={n_workers}")
+
+        if n_workers <= 1:
+            results = []
+            for rid in rcsb_ids:
+                r = _run_single(rid, args, config, output_root)
+                results.append(r)
+                status = r["status"]
+                print(f"  {rid}: {status}" + (f" -> {r.get('run_dir', '')}" if status == "success" else f" ({r.get('error', '')})"))
+        else:
+            # Serialize config for multiprocessing
+            config_dict = asdict(config)
+            output_root_str = str(output_root) if output_root else None
+
+            packed = [
+                (rid, args, config_dict, output_root_str)
+                for rid in rcsb_ids
+            ]
+
+            results = []
+            with ProcessPoolExecutor(max_workers=n_workers) as pool:
+                futures = {pool.submit(_run_worker, p): p[0] for p in packed}
+                for fut in as_completed(futures):
+                    rid = futures[fut]
+                    try:
+                        r = fut.result()
+                    except Exception as e:
+                        r = {"rcsb_id": rid, "status": "failed", "error": str(e)}
+                    results.append(r)
+                    status = r["status"]
+                    print(f"  {rid}: {status}" + (
+                        f" -> {r.get('run_dir', '')}" if status == "success"
+                        else f" ({r.get('error', '')})"
+                    ))
+
+        # Summary
+        ok = sum(1 for r in results if r["status"] == "success")
+        fail = len(results) - ok
+        print(f"\nnpet2: {ok} succeeded, {fail} failed out of {len(results)}")
+
+        if fail > 0:
+            sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()
 ```
 
 ribctl/lib/npet2/run.py
@@ -3322,7 +4181,7 @@ from ribctl.lib.npet2.stages.legacy_minimal import (
     Stage30RegionAtoms,
     Stage40EmptySpace,
     Stage50Clustering,
-    Stage60SurfaceNormals,
+    # Stage60SurfaceNormals,
     Stage70MeshValidate,
 )
 
@@ -3351,14 +4210,18 @@ def run_npet2(
         "landmarks": landmark_provider.fingerprint(rcsb_id),
     }
 
+    struct_runs_dir = NPET2_RUNS_ROOT / rcsb_id
+    struct_runs_dir.mkdir(parents=True, exist_ok=True)
+
     run_id = compute_run_id(
         rcsb_id=rcsb_id,
         pipeline_version=_pipeline_version(),
         inputs_fp=inputs_fp,
         config_resolved=config_resolved,
+        runs_dir=struct_runs_dir,
     )
 
-    run_dir = NPET2_RUNS_ROOT / rcsb_id / run_id
+    run_dir = struct_runs_dir / run_id
     run_dir.mkdir(parents=True, exist_ok=True)
 
     manifest = RunManifest(
@@ -3394,8 +4257,8 @@ def run_npet2(
             Stage30RegionAtoms(),
             Stage40EmptySpace(),
             Stage50Clustering(),
-            Stage55GridRefine(),   # <--- new
-            Stage60SurfaceNormals(),
+            Stage55GridRefine(),   
+            # Stage60SurfaceNormals(),
             Stage70MeshValidate(),
         ]
     )
@@ -3405,9 +4268,5 @@ def run_npet2(
 
 ```
 
-ribctl/lib/npet2/__init__.py
-```py
 
-```
-
-
+Actually it would be awesome if we could also have the `settings.py` and the `config.py` merged so all of the configuration is in a single place and is eventually configurable via some simple .env file in docker. Tell me if you see any other such simplifications that we can make.

@@ -1,30 +1,26 @@
+# npet2/run.py
 from __future__ import annotations
 
 from dataclasses import asdict
 from pathlib import Path
 from typing import Optional
 
-from ribctl.lib.npet2.adapters.riboxyz_providers import (
-    RiboxyzLandmarkProvider,
-    RiboxyzStructureProvider,
-)
-from ribctl.lib.npet2.core.config import RunConfig
-from ribctl.lib.npet2.core.manifest import RunManifest
-from ribctl.lib.npet2.core.run_id import compute_run_id
-from ribctl.lib.npet2.core.settings import NPET2_ROOT, NPET2_RUNS_ROOT
-from ribctl.lib.npet2.core.store import LocalRunStore
-from ribctl.lib.npet2.core.types import StageContext
-from ribctl.lib.npet2.core.pipeline import Pipeline
+from npet2.adapters.standalone_providers import FileStructureProvider, FileLandmarkProvider
+from npet2.core.config import RunConfig, SETTINGS
+from npet2.core.manifest import RunManifest
+from npet2.core.run_id import compute_run_id
+from npet2.core.store import LocalRunStore
+from npet2.core.types import StageContext
+from npet2.core.pipeline import Pipeline
+from npet2.core.cache import LocalStageCache
 
-
-from ribctl.lib.npet2.stages.bootstrap import Stage00Inputs, Stage10Landmarks
-from ribctl.lib.npet2.stages.grid_refine import Stage55GridRefine
-from ribctl.lib.npet2.stages.legacy_minimal import (
+from npet2.stages.bootstrap import Stage00Inputs, Stage10Landmarks
+from npet2.stages.grid_refine import Stage55GridRefine
+from npet2.stages.legacy_minimal import (
     Stage20ExteriorShell,
     Stage30RegionAtoms,
     Stage40EmptySpace,
     Stage50Clustering,
-    # Stage60SurfaceNormals,
     Stage70MeshValidate,
 )
 
@@ -43,9 +39,11 @@ def run_npet2(
     rcsb_id = rcsb_id.upper()
     config = config or RunConfig()
 
-
-    structure_provider = structure_provider or RiboxyzStructureProvider()
-    landmark_provider = landmark_provider or RiboxyzLandmarkProvider()
+    if structure_provider is None or landmark_provider is None:
+        raise ValueError(
+            "Both structure_provider and landmark_provider are required. "
+            "Use FileStructureProvider / FileLandmarkProvider for standalone mode."
+        )
 
     config_resolved = asdict(config)
     inputs_fp = {
@@ -53,7 +51,7 @@ def run_npet2(
         "landmarks": landmark_provider.fingerprint(rcsb_id),
     }
 
-    struct_runs_dir = NPET2_RUNS_ROOT / rcsb_id
+    struct_runs_dir = SETTINGS.runs_root / rcsb_id
     struct_runs_dir.mkdir(parents=True, exist_ok=True)
 
     run_id = compute_run_id(
@@ -84,27 +82,21 @@ def run_npet2(
         inputs={
             "structure_provider": structure_provider,
             "landmark_provider": landmark_provider,
+            "stage_cache": LocalStageCache(SETTINGS.cache_root),
+            "inputs_fp": inputs_fp,
         },
     )
 
-    # in run_npet2()
-    from ribctl.lib.npet2.core.cache import LocalStageCache
-    ctx.inputs["stage_cache"] = LocalStageCache(NPET2_ROOT / "cache")
-    ctx.inputs["inputs_fp"] = inputs_fp
-
-    pipeline = Pipeline(
-        [
-            Stage00Inputs(),
-            Stage10Landmarks(),
-            Stage20ExteriorShell(),
-            Stage30RegionAtoms(),
-            Stage40EmptySpace(),
-            Stage50Clustering(),
-            Stage55GridRefine(),   
-            # Stage60SurfaceNormals(),
-            Stage70MeshValidate(),
-        ]
-    )
+    pipeline = Pipeline([
+        Stage00Inputs(),
+        Stage10Landmarks(),
+        Stage20ExteriorShell(),
+        Stage30RegionAtoms(),
+        Stage40EmptySpace(),
+        Stage50Clustering(),
+        Stage55GridRefine(),
+        Stage70MeshValidate(),
+    ])
 
     pipeline.run(ctx)
     return ctx

@@ -1,18 +1,55 @@
-# ribctl/lib/npet2/core/config.py
+# npet2/core/config.py
+"""
+All npet2 configuration in one place.
+
+- Settings: paths, env vars, external tool locations
+- GridLevelConfig / RunConfig: numerical pipeline parameters
+
+Everything is overridable via environment variables (for Docker)
+or programmatically.
+"""
 from __future__ import annotations
+
+import os
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import List, Literal, Tuple
 
 
+
+def _env_path(var: str, default: str) -> Path:
+    return Path(os.environ.get(var, default))
+
+
+@dataclass(frozen=True)
+class Settings:
+    npet2_root:        Path = field(default_factory=lambda: _env_path("NPET2_ROOT", str(Path.home() / "npet2_data")))
+    runs_root:         Path = field(default_factory=lambda: _env_path("NPET2_RUNS_ROOT", str(_env_path("NPET2_ROOT", str(Path.home() / "npet2_data")) / "runs")))
+    cache_root:        Path = field(default_factory=lambda: _env_path("NPET2_CACHE_ROOT", str(_env_path("NPET2_ROOT", str(Path.home() / "npet2_data")) / "cache")))
+    poisson_recon_bin: str  = field(default_factory=lambda: os.environ.get("NPET2_POISSON_RECON_BIN", "PoissonRecon"))
+    riboxyz_api_base:  str  = field(default_factory=lambda: os.environ.get("NPET2_RIBOXYZ_API_URL", "http://localhost:8000"))
+
+
+# Module-level singleton. Import this wherever you need paths.
+SETTINGS = Settings()
+
+
+# ---------------------------------------------------------------------------
+# Grid level config
+# ---------------------------------------------------------------------------
+
 @dataclass(frozen=True)
 class GridLevelConfig:
-
     name                 : str
     voxel_size_A         : float
     atom_radius_mode     : Literal["uniform", "vdw_bucket"] = "uniform"
     uniform_atom_radius_A: float = 2.0
     occupancy_backend    : Literal["legacy_kdtree", "edt"] = "legacy_kdtree"
 
+
+# ---------------------------------------------------------------------------
+# Run config (all numerical pipeline parameters)
+# ---------------------------------------------------------------------------
 
 @dataclass(frozen=True)
 class RunConfig:
@@ -46,7 +83,7 @@ class RunConfig:
         ]
     )
 
-    # === Stage50: DBSCAN clustering on level_0 (1.0A grid) ===
+    # === Stage50: DBSCAN clustering on level_0 ===
     dbscan_level0_coarse_eps_A      : float = 5.5
     dbscan_level0_coarse_min_samples: int   = 600
     dbscan_level0_refine_eps_A      : float = 3.5
@@ -62,7 +99,6 @@ class RunConfig:
     refine_void_open_iters    : int   = 1
     refine_forbid_roi_boundary: bool  = True
 
-    # DBSCAN on refined grid
     dbscan_level1_coarse_eps_A      : float = 3.0
     dbscan_level1_coarse_min_samples: int   = 30
     dbscan_level1_refine_eps_A      : float = 3.0
@@ -73,7 +109,7 @@ class RunConfig:
 
     mesh_level1_enable: bool = True
 
-    # === Meshing (MC + smoothing, shared by Stage50/55/70) ===
+    # === Meshing (MC + smoothing) ===
     mesh_smooth_method        : str   = "taubin"
     mesh_level0_gaussian_sigma: float = 1.0
     mesh_level1_gaussian_sigma: float = 1.5

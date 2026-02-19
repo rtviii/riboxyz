@@ -1,8 +1,5 @@
 Alrighty, i have an NPET extraction pipeline in my riboxyz codebase that i want to separate from outer repo in which it is embedded (riboxyz). The tricky bit is that it is somewhat reliant on the riboxyz code and interfaces for now, but only weakly so. My intention is to package npet2 code separately and share it as a docker container and without any reliance on the `riboxyz` code at all so let's get rid of all the dependencies between the two. I think most of the things in `kdtree` and `alphalib` can be directly copied/ported. The interfaces for ptc and constriction sites we can talk about.
 
-
-
-
 Here is the full layout of the repo:
 
 ```
@@ -4270,7 +4267,6 @@ def run_npet2(
     return ctx
 
 ```
-
 
 
 Actually it would be awesome if we could also have the `settings.py` and the `config.py` merged so all of the configuration is in a single place and is eventually configurable via some simple .env file in docker. Tell me if you see any other such simplifications that we can make.

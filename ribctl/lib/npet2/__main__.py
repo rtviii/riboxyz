@@ -1,12 +1,12 @@
-# ribctl/lib/npet2/__main__.py
+# npet2/__main__.py
 """
 npet2 CLI entry point.
 
 Usage:
-    python -m ribctl.lib.npet2 run 7K00 4UG0 --workers 4
-    python -m ribctl.lib.npet2 run --from-file structures.txt --output-dir ./results
-    python -m ribctl.lib.npet2 run 7K00 --cylinder-radius 40 --voxel-size 0.5
-    python -m ribctl.lib.npet2 run 7K00 --mmcif /path/to/7K00.cif --profile /path/to/profile.json --landmarks /path/to/landmarks.json
+    python -m npet2 run 7K00 --mmcif /path/to/7K00.cif --api-url http://localhost:8000
+    python -m npet2 run 7K00 --mmcif /path/to/7K00.cif --profile /path/to/profile.json --landmarks /path/to/landmarks.json
+    python -m npet2 run --from-file structures.txt --mmcif /path/to/mmcifs/ --workers 4
+    python -m npet2 show-config
 """
 from __future__ import annotations
 
@@ -35,17 +35,15 @@ def _build_parser() -> argparse.ArgumentParser:
     run_p.add_argument("--from-file", type=str, default=None,
                        help="Read RCSB IDs from a text file (one per line)")
 
-    # Provider mode
-    run_p.add_argument("--mode", choices=["riboxyz", "standalone"], default="riboxyz",
-                       help="riboxyz: use local riboxyz assets. standalone: use mmcif + profile files or API.")
-    run_p.add_argument("--mmcif", type=str, default=None,
-                       help="(standalone) Path to mmCIF file. For multiple structures, use a directory.")
+    # Data sources
+    run_p.add_argument("--mmcif", type=str, required=True,
+                       help="Path to mmCIF file, or directory of .cif files for batch runs")
     run_p.add_argument("--profile", type=str, default=None,
-                       help="(standalone) Path to profile JSON file or directory of profiles.")
+                       help="Path to profile JSON (or directory). If omitted, fetched from --api-url.")
     run_p.add_argument("--landmarks", type=str, default=None,
-                       help="(standalone) Path to landmarks JSON file or directory.")
+                       help="Path to landmarks JSON (or directory). If omitted, fetched from --api-url.")
     run_p.add_argument("--api-url", type=str, default=None,
-                       help="(standalone) riboxyz API base URL for fetching profiles/landmarks.")
+                       help="riboxyz API base URL for fetching profiles/landmarks on demand")
 
     # Output
     run_p.add_argument("--output-dir", type=str, default=None,
@@ -55,7 +53,7 @@ def _build_parser() -> argparse.ArgumentParser:
     run_p.add_argument("--workers", "-j", type=int, default=1,
                        help="Number of parallel workers (default: 1)")
 
-    # Config overrides (the commonly-tuned ones)
+    # Config overrides
     cfg = run_p.add_argument_group("config overrides")
     cfg.add_argument("--cylinder-radius", type=float, default=None)
     cfg.add_argument("--cylinder-height", type=float, default=None)
@@ -79,12 +77,10 @@ def _build_parser() -> argparse.ArgumentParser:
 
 
 def _build_config(args) -> "RunConfig":
-    from ribctl.lib.npet2.core.config import RunConfig, GridLevelConfig
+    from npet2.core.config import RunConfig, GridLevelConfig
 
     if args.config_json:
-        import json
         data = json.loads(Path(args.config_json).read_text())
-        # Reconstruct GridLevelConfig objects
         if "grid_levels" in data:
             data["grid_levels"] = [GridLevelConfig(**gl) for gl in data["grid_levels"]]
         return RunConfig(**data)
@@ -137,66 +133,48 @@ def _collect_rcsb_ids(args) -> list[str]:
 
 
 def _make_providers(args, rcsb_id: str):
-    """Return (structure_provider, landmark_provider) for a given structure."""
-    if args.mode == "riboxyz":
-        from ribctl.lib.npet2.adapters.riboxyz_providers import (
-            RiboxyzStructureProvider,
-            RiboxyzLandmarkProvider,
-        )
-        return RiboxyzStructureProvider(), RiboxyzLandmarkProvider()
-
-    # standalone mode
-    from ribctl.lib.npet2.adapters.standalone_providers import (
-        FileStructureProvider,
-        FileLandmarkProvider,
-    )
+    from npet2.adapters.standalone_providers import FileStructureProvider, FileLandmarkProvider
 
     api_base = args.api_url
 
     # Resolve mmcif path
-    mmcif_path = None
-    if args.mmcif:
-        p = Path(args.mmcif)
-        if p.is_dir():
-            # Look for {RCSB_ID}.cif or {rcsb_id}.cif
-            for candidate in [f"{rcsb_id}.cif", f"{rcsb_id.lower()}.cif"]:
-                if (p / candidate).exists():
-                    mmcif_path = p / candidate
-                    break
-            if mmcif_path is None:
-                raise FileNotFoundError(
-                    f"No mmCIF file found for {rcsb_id} in {p}. "
-                    f"Expected {rcsb_id}.cif"
-                )
-        else:
-            mmcif_path = p
-
-    if mmcif_path is None:
-        raise ValueError(f"--mmcif is required in standalone mode (for {rcsb_id})")
+    p = Path(args.mmcif)
+    if p.is_dir():
+        mmcif_path = None
+        for candidate in [f"{rcsb_id}.cif", f"{rcsb_id.lower()}.cif"]:
+            if (p / candidate).exists():
+                mmcif_path = p / candidate
+                break
+        if mmcif_path is None:
+            raise FileNotFoundError(
+                f"No mmCIF file found for {rcsb_id} in {p}. Expected {rcsb_id}.cif"
+            )
+    else:
+        mmcif_path = p
 
     # Resolve profile path
     profile_path = None
     if args.profile:
-        p = Path(args.profile)
-        if p.is_dir():
+        pp = Path(args.profile)
+        if pp.is_dir():
             for candidate in [f"{rcsb_id}_profile.json", f"{rcsb_id}.json"]:
-                if (p / candidate).exists():
-                    profile_path = p / candidate
+                if (pp / candidate).exists():
+                    profile_path = pp / candidate
                     break
         else:
-            profile_path = p
+            profile_path = pp
 
     # Resolve landmarks path
     landmarks_path = None
     if args.landmarks:
-        p = Path(args.landmarks)
-        if p.is_dir():
+        lp = Path(args.landmarks)
+        if lp.is_dir():
             for candidate in [f"{rcsb_id}_landmarks.json", f"{rcsb_id}.json"]:
-                if (p / candidate).exists():
-                    landmarks_path = p / candidate
+                if (lp / candidate).exists():
+                    landmarks_path = lp / candidate
                     break
         else:
-            landmarks_path = p
+            landmarks_path = lp
 
     return (
         FileStructureProvider(mmcif_path, profile_path=profile_path, api_base=api_base),
@@ -204,44 +182,32 @@ def _make_providers(args, rcsb_id: str):
     )
 
 
-def _run_single(
-    rcsb_id: str,
-    args,
-    config: "RunConfig",
-    output_root: Optional[Path],
-) -> dict:
-    """Run pipeline for a single structure. Returns a result dict."""
-    from ribctl.lib.npet2.run import run_npet2
+def _run_single(rcsb_id: str, args, config, output_root: Optional[Path]) -> dict:
+    from npet2.run import run_npet2
 
     try:
         sp, lp = _make_providers(args, rcsb_id)
 
-        # Allow output dir override
         if output_root:
-            import ribctl.lib.npet2.core.settings as settings
-            settings.NPET2_RUNS_ROOT = output_root
+            import npet2.core.config as cfg_mod
+            cfg_mod.SETTINGS = cfg_mod.Settings(
+                runs_root=output_root,
+                npet2_root=cfg_mod.SETTINGS.npet2_root,
+                cache_root=cfg_mod.SETTINGS.cache_root,
+                poisson_recon_bin=cfg_mod.SETTINGS.poisson_recon_bin,
+                riboxyz_api_base=cfg_mod.SETTINGS.riboxyz_api_base,
+            )
 
         ctx = run_npet2(rcsb_id, config, structure_provider=sp, landmark_provider=lp)
-        return {
-            "rcsb_id": rcsb_id,
-            "status": "success",
-            "run_dir": str(ctx.store.run_dir),
-        }
+        return {"rcsb_id": rcsb_id, "status": "success", "run_dir": str(ctx.store.run_dir)}
     except Exception as e:
-        return {
-            "rcsb_id": rcsb_id,
-            "status": "failed",
-            "error": str(e),
-            "traceback": traceback.format_exc(),
-        }
+        return {"rcsb_id": rcsb_id, "status": "failed", "error": str(e), "traceback": traceback.format_exc()}
 
 
 def _run_worker(packed_args: tuple) -> dict:
-    """Wrapper for ProcessPoolExecutor."""
     rcsb_id, args_ns, config_dict, output_root_str = packed_args
-    from ribctl.lib.npet2.core.config import RunConfig, GridLevelConfig
+    from npet2.core.config import RunConfig, GridLevelConfig
 
-    # Reconstruct config from dict
     if "grid_levels" in config_dict:
         config_dict["grid_levels"] = [GridLevelConfig(**gl) for gl in config_dict["grid_levels"]]
     config = RunConfig(**config_dict)
@@ -259,9 +225,8 @@ def main():
         sys.exit(1)
 
     if args.command == "show-config":
-        from ribctl.lib.npet2.core.config import RunConfig
-        cfg = RunConfig()
-        print(json.dumps(asdict(cfg), indent=2))
+        from npet2.core.config import RunConfig
+        print(json.dumps(asdict(RunConfig()), indent=2))
         return
 
     if args.command == "run":
@@ -270,12 +235,6 @@ def main():
         output_root = Path(args.output_dir) if args.output_dir else None
 
         n_workers = min(args.workers, len(rcsb_ids))
-
-        if args.no_refine:
-            # We need to modify the pipeline stages -- simplest way is a flag
-            # that run.py checks. For now, store it in config as a workaround.
-            pass
-
         print(f"npet2: processing {len(rcsb_ids)} structure(s), workers={n_workers}")
 
         if n_workers <= 1:
@@ -284,16 +243,14 @@ def main():
                 r = _run_single(rid, args, config, output_root)
                 results.append(r)
                 status = r["status"]
-                print(f"  {rid}: {status}" + (f" -> {r.get('run_dir', '')}" if status == "success" else f" ({r.get('error', '')})"))
+                print(f"  {rid}: {status}" + (
+                    f" -> {r.get('run_dir', '')}" if status == "success"
+                    else f" ({r.get('error', '')})"
+                ))
         else:
-            # Serialize config for multiprocessing
             config_dict = asdict(config)
             output_root_str = str(output_root) if output_root else None
-
-            packed = [
-                (rid, args, config_dict, output_root_str)
-                for rid in rcsb_ids
-            ]
+            packed = [(rid, args, config_dict, output_root_str) for rid in rcsb_ids]
 
             results = []
             with ProcessPoolExecutor(max_workers=n_workers) as pool:
@@ -311,11 +268,9 @@ def main():
                         else f" ({r.get('error', '')})"
                     ))
 
-        # Summary
         ok = sum(1 for r in results if r["status"] == "success")
         fail = len(results) - ok
         print(f"\nnpet2: {ok} succeeded, {fail} failed out of {len(results)}")
-
         if fail > 0:
             sys.exit(1)
 

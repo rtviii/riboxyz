@@ -1,4 +1,5 @@
 # ribctl/lib/npet2/stages/legacy_minimal.py
+# npet2/stages/legacy_minimal.py
 
 from __future__ import annotations
 import json
@@ -9,31 +10,29 @@ import numpy as np
 import pyvista as pv
 import open3d as o3d
 
-from ribctl.lib.npet2.backends.grid_occupancy import (
+from npet2.backends.grid_occupancy import (
     connected_components_3d,
     occupancy_via_edt,
 )
-from ribctl.lib.npet2.backends.meshing import save_mesh_with_ascii
-from ribctl.lib.npet2.core.cache import StageCacheKey
-from ribctl.lib.npet2.core.pipeline import Stage
-from ribctl.lib.npet2.core.ribosome_types import RibosomeProfile
-from ribctl.lib.npet2.core.structure_selection import (
+from npet2.backends.meshing import save_mesh_with_ascii
+from npet2.core.cache import StageCacheKey
+from npet2.core.pipeline import Stage
+from npet2.core.ribosome_types import RibosomeProfile
+from npet2.core.structure_selection import (
     intersect_with_first_assembly,
     ribosome_wall_auth_asym_ids,
     tunnel_debris_chains,
     atom_inclusion_policy,
 )
-from ribctl.lib.npet2.core.types import StageContext, ArtifactType
+from npet2.core.types import StageContext, ArtifactType
 
 from scipy import ndimage
 
-from ribctl.lib.npet.alphalib import (
+from npet2.backends.geometry import (
     cif_to_point_cloud,
     fast_normal_estimation,
     quick_surface_points,
     validate_mesh_pyvista,
-)
-from ribctl.lib.npet.kdtree_approach import (
     apply_poisson_reconstruction,
     filter_residues_parallel,
     transform_points_to_C0,
@@ -43,12 +42,20 @@ from ribctl.lib.npet.kdtree_approach import (
     DBSCAN_pick_largest_cluster,
     estimate_normals,
 )
-from ribctl.lib.npet2.stages.grid_refine import (
+from npet2.stages.grid_refine import (
     _make_bbox_grid,
     _points_to_ijk,
     _valid_ijk,
     _voxel_centers_from_indices,
 )
+
+# ... rest of the file is identical, except within _generate_mesh methods,
+# replace:
+#   from ribctl.lib.npet.kdtree_approach import ...
+#   from npet2.backends.meshing import ...
+# with:
+#   from npet2.backends.meshing import ...
+# (transform functions already imported at top)
 
 
 def _residues_from_chain_ids(structure, chain_ids: set[str]):
@@ -404,7 +411,7 @@ class Stage40EmptySpace(Stage):
             transform_points_to_C0,
         )
 
-        from ribctl.lib.npet2.backends.grid_occupancy import (
+        from npet2.backends.grid_occupancy import (
             make_cylinder_grid,
             cylinder_mask,
             occupancy_via_edt,
@@ -796,7 +803,7 @@ class Stage50Clustering(Stage):
     def _generate_mesh(self, ctx: StageContext, points: np.ndarray, level_name: str) -> None:
         import time
         from ribctl.lib.npet.kdtree_approach import transform_points_to_C0, transform_points_from_C0
-        from ribctl.lib.npet2.backends.meshing import (
+        from npet2.backends.meshing import (
             mesh_from_binary_volume,
             voxelize_points,
             clip_mesh_to_atom_clearance,

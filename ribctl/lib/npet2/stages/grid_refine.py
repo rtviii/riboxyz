@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
+# npet2/stages/grid_refine.py
 from dataclasses import asdict
 import json
 from pathlib import Path
-
 from typing import Any, Dict, Tuple
 
 import numpy as np
@@ -14,19 +14,30 @@ from scipy import ndimage
 import time
 import open3d as o3d
 
-from ribctl.lib.npet2.core.pipeline import Stage
-from ribctl.lib.npet2.core.types import StageContext, ArtifactType
+from npet2.core.pipeline import Stage
+from npet2.core.types import StageContext, ArtifactType
 
-from ribctl.lib.npet.kdtree_approach import (
+from npet2.backends.geometry import (
     transform_points_to_C0,
     transform_points_from_C0,
     estimate_normals,
 )
 
-from ribctl.lib.npet2.backends.grid_occupancy import (
+from npet2.backends.grid_occupancy import (
     GridSpec,
     occupancy_via_edt,
 )
+
+# ... rest of the file is identical, except:
+# - In _save_dbscan_pass, replace the dynamic import with:
+#     from npet2.backends.clustering_io import clusters_from_labels
+# - In _generate_mesh, replace:
+#     from ribctl.lib.npet.kdtree_approach import transform_points_from_C0
+#   with nothing (already imported at top)
+#   and replace:
+#     from npet2.backends.meshing import ...
+#   with:
+#     from npet2.backends.meshing import ...
 
 
 def _make_bbox_grid(lo: np.ndarray, hi: np.ndarray, voxel: float) -> GridSpec:
@@ -203,11 +214,11 @@ class Stage55GridRefine(Stage):
         void_mask[inside_idx[:, 0], inside_idx[:, 1], inside_idx[:, 2]] = True
 
         if forbid_roi_boundary:
-            void_mask[0, :, :] = False
+            void_mask[0, :, :]  = False
             void_mask[-1, :, :] = False
-            void_mask[:, 0, :] = False
+            void_mask[:, 0, :]  = False
             void_mask[:, -1, :] = False
-            void_mask[:, :, 0] = False
+            void_mask[:, :, 0]  = False
             void_mask[:, :, -1] = False
 
         if keep_within_A > 0.0:
@@ -467,7 +478,7 @@ class Stage55GridRefine(Stage):
         }
         (pass_dir / "index.json").write_text(json.dumps(index, indent=2))
 
-        clusters_from_labels_func = __import__('ribctl.lib.npet2.backends.clustering_io', fromlist=['clusters_from_labels']).clusters_from_labels
+        clusters_from_labels_func = __import__('npet2.backends.clustering_io', fromlist=['clusters_from_labels']).clusters_from_labels
         clusters = clusters_from_labels_func(pts, labels)
         for cid, cpts in clusters.items():
             if cid == -1:
@@ -479,7 +490,7 @@ class Stage55GridRefine(Stage):
         import time
         import json
         from ribctl.lib.npet.kdtree_approach import transform_points_from_C0
-        from ribctl.lib.npet2.backends.meshing import (
+        from npet2.backends.meshing import (
             mesh_from_binary_volume,
             clip_mesh_to_atom_clearance,
             save_mesh_with_ascii,

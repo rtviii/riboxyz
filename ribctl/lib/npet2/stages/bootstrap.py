@@ -5,9 +5,9 @@ from typing import Any, Dict
 
 import numpy as np
 
-from ribctl.lib.npet2.core.pipeline import Stage
-from ribctl.lib.npet2.core.ribosome_types import RibosomeProfile
-from ribctl.lib.npet2.core.types import StageContext
+from npet2.core.pipeline import Stage
+from npet2.core.ribosome_types import RibosomeProfile
+from npet2.core.types import StageContext
 
 
 class Stage00Inputs(Stage):

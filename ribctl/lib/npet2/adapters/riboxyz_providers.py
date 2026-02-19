@@ -12,7 +12,7 @@ from typing import Any, Dict
 
 import numpy as np
 
-from ribctl.lib.npet2.core.ribosome_types import (
+from npet2.core.ribosome_types import (
     RibosomeProfile,
     ProteinEntry,
     RNAEntry,
