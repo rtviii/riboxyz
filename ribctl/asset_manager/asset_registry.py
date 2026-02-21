@@ -1,30 +1,32 @@
-from typing import TypeVar, Callable, Awaitable
+# ribctl/asset_manager/asset_registry.py
+
+from __future__ import annotations
+
+from typing import TypeVar, Callable, Awaitable, Dict, Optional
 import functools
+from pathlib import Path
+
 from loguru import logger
 from pydantic import BaseModel
-from pathlib import Path
-from loguru import logger
-from typing import Dict, Callable, Awaitable
+
 from ribctl import RIBETL_DATA
 from ribctl.asset_manager.asset_manager import RibosomeAssetManager
-from ribctl.lib.npet.alphalib import alpha_contour_via_poisson_recon
-# from ribctl.lib.npet.npet_driver import create_npet_mesh
-from ribctl.lib.npet.npet_pipeline import create_npet_mesh
-from ribctl.lib.utils import download_unpack_place
 from ribctl.asset_manager.asset_types import AssetType
-from ribctl import RIBETL_DATA
-from ribctl.asset_manager.asset_manager import RibosomeAssetManager
 from ribctl.etl.etl_collector import ETLCollector
 from ribctl.lib.landmarks.constriction_site import get_constriction
 from ribctl.lib.landmarks.ptc_via_trna import PTC_location
+from ribctl.lib.npet.alphalib import alpha_contour_via_poisson_recon
+from ribctl.lib.npet.npet_pipeline import create_npet_mesh
+from ribctl.lib.utils import download_unpack_place
 from ribctl.lib.schema.types_ribosome import (
     ConstrictionSite,
     PTCInfo,
     RibosomeStructure,
 )
+from ribctl.lib.exceptions import SkipAsset
 
-from .asset_types import AssetType
 ModelT = TypeVar("ModelT", bound=BaseModel)
+
 
 class RawAssetHandler:
     """Handler for raw file assets with extensible asset type matching"""
@@ -74,19 +76,6 @@ class RawAssetHandler:
         await download_unpack_place(rcsb_id)
         logger.success(f"Downloaded MMCIF for {rcsb_id}")
 
-    # Example of how to add another handler:
-    # async def _fetch_npet_mesh(self, rcsb_id: str, force: bool = False) -> None:
-    #     """Download and save NPET mesh file"""
-    #     output_path = self.base_dir / rcsb_id.upper() / "TUNNELS" / f"{rcsb_id}_NPET_MESH.ply"
-    #
-    #     if output_path.exists() and not force:
-    #         logger.info(f"NPET mesh exists for {rcsb_id}, skipping")
-    #         return
-    #
-    #     output_path.parent.mkdir(parents=True, exist_ok=True)
-    #     # Add actual download/generation logic here
-    #     logger.success(f"Generated NPET mesh for {rcsb_id}")
-
 
 class AssetRegistry:
     def __init__(self, manager: RibosomeAssetManager):
@@ -95,7 +84,7 @@ class AssetRegistry:
 
     def register(self, asset_type: AssetType):
         def decorator(
-            func: Callable[[str], Awaitable[ModelT]]
+            func: Callable[[str], Awaitable[ModelT]],
         ) -> Callable[[str, bool], Awaitable[None]]:
             @functools.wraps(func)
             async def wrapped(rcsb_id: str, overwrite: bool = False) -> None:
@@ -110,6 +99,11 @@ class AssetRegistry:
                     output_path.write_text(result.model_dump_json())
                     logger.success(f"Generated {asset_type.name} for {rcsb_id}")
 
+                except SkipAsset as e:
+                    # IMPORTANT: do NOT raise; treat as "successfully skipped"
+                    logger.info(f"Skipped {asset_type.name} for {rcsb_id}: {e}")
+                    return
+
                 except Exception as e:
                     logger.exception(f"Failed {func.__name__} for {rcsb_id}: {str(e)}")
                     raise
@@ -120,8 +114,27 @@ class AssetRegistry:
         return decorator
 
     async def generate_asset(
-        self, rcsb_id: str, asset_type: AssetType, force: bool = False
+        self,
+        rcsb_id: str,
+        asset_type: AssetType,
+        force: bool = False,
+        _seen: Optional[set[AssetType]] = None,
     ) -> None:
+        """
+        Generate a single asset, ensuring dependencies are generated first.
+        """
+        if _seen is None:
+            _seen = set()
+
+        if asset_type in _seen:
+            return
+        _seen.add(asset_type)
+
+        # Ensure dependencies first
+        for dep in asset_type.dependencies:
+            await self.generate_asset(rcsb_id, dep, force=force, _seen=_seen)
+
+        # Then generate the requested asset
         if asset_type.is_raw_asset:
             await self.raw_handler.handle_asset(rcsb_id, asset_type, force)
         else:
@@ -137,13 +150,19 @@ class AssetRegistry:
         for asset_type in asset_types:
             await self.generate_asset(rcsb_id, asset_type, force)
 
+
 async def npet_mesh_handler(rcsb_id: str, force: bool) -> None:
-    create_npet_mesh(rcsb_id, Path('/Users/rtviii/dev/riboxyz/ribctl/lib/npet/pipeline/logs'))
+    create_npet_mesh(
+        rcsb_id, Path("/Users/rtviii/dev/riboxyz/ribctl/lib/npet/pipeline/logs")
+    )
+
 
 async def alphashape_handler(rcsb_id: str, force: bool) -> None:
     alpha_contour_via_poisson_recon(rcsb_id)
 
+
 main_registry = AssetRegistry(RibosomeAssetManager(RIBETL_DATA))
+
 
 @main_registry.register(AssetType.STRUCTURE_PROFILE)
 async def generate_profile(rcsb_id: str) -> RibosomeStructure:

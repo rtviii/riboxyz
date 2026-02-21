@@ -138,7 +138,7 @@ def apply_poisson_reconstruction(
     surf_estimated_ptcloud_path: str,
     output_path: Path,
     recon_depth: int = 6,
-    recon_pt_weight: int = 3,
+    recon_pt_weight: float = 3.0,  # was int
 ):
     # The documentation can be found at https://www.cs.jhu.edu/~misha/Code/PoissonRecon/Version16.04/ in "PoissonRecon" binary
     print(
@@ -194,19 +194,21 @@ def estimate_normals(
         )
     )
     pcd.orient_normals_consistent_tangent_plane(k=correction_tangent_planes_n)
-    # o3d.visualization.draw_geometries([pcd], point_show_normal=True)
     return pcd
 
 
 T = TypeVar("T")
 
 
-def generate_voxel_centers(radius: float, height: float, voxel_size: float) -> tuple:
+# ribctl/lib/npet.kdtree_approach.py
+
+def generate_voxel_centers(radius: float, height: float, voxel_size: float,
+                           z_min: float = 0.0) -> tuple:
     nx = ny = int(2 * radius / voxel_size) + 1
     nz = int(height / voxel_size) + 1
     x = np.linspace(-radius, radius, nx)
     y = np.linspace(-radius, radius, ny)
-    z = np.linspace(0, height, nz)
+    z = np.linspace(z_min, z_min + height, nz)
 
     X, Y, Z = np.meshgrid(x, y, z, indexing="ij")
     voxel_centers = np.column_stack((X.ravel(), Y.ravel(), Z.ravel()))
@@ -219,16 +221,16 @@ def create_point_cloud_mask(
     height: float,
     voxel_size: float = 1.0,
     radius_around_point: float = 2.0,
+    z_min: float = 0.0,
 ):
     voxel_centers, (grid_shape, x, y, z) = generate_voxel_centers(
-        radius, height, voxel_size
+        radius, height, voxel_size, z_min=z_min
     )
     tree = cKDTree(points)
     indices = tree.query_ball_point(voxel_centers, radius_around_point)
 
     point_cloud_mask = np.zeros(len(voxel_centers), dtype=bool)
     point_cloud_mask[[i for i, idx in enumerate(indices) if idx]] = True
-
     point_cloud_mask = point_cloud_mask.reshape(grid_shape)
 
     X, Y, Z = np.meshgrid(x, y, z, indexing="ij")
@@ -237,6 +239,9 @@ def create_point_cloud_mask(
 
     final_mask = hollow_cylinder | point_cloud_mask
     return final_mask, (x, y, z)
+
+
+
 
 
 def get_transformation_to_C0(
@@ -403,31 +408,24 @@ def is_point_in_cylinder(
     axis_point: np.ndarray,
     radius: float,
     height: float,
+    z_min: float = 0.0,
 ) -> bool:
     point = np.asarray(point)
     base_point = np.asarray(base_point)
     axis_point = np.asarray(axis_point)
 
-    # Calculate cylinder axis direction vector
     axis = axis_point - base_point
     axis_length = np.linalg.norm(axis)
     axis_unit = axis / axis_length
 
-    # Calculate vector from base to point
     point_vector = point - base_point
-
-    # Project vector onto cylinder axis
     projection = np.dot(point_vector, axis_unit)
 
-    # Calculate perpendicular vector from axis to point
     projection_point = base_point + projection * axis_unit
     radial_vector = point - projection_point
-
-    # Calculate radial distance
     radial_distance = np.linalg.norm(radial_vector)
 
-    # Check if point is inside cylinder
-    return (radial_distance <= radius) and (-10 <= projection <= height)
+    return (radial_distance <= radius) and (z_min <= projection <= height)
 
 
 def make_cylinder_predicate(
@@ -449,18 +447,11 @@ def get_residue_position(residue):
 
 
 def _worker_process_chunk(chunk_data):
-    """
-    Worker function that processes a chunk of residues.
-    Takes a tuple of (residue_positions, base_point, axis_point, radius, height, indices)
-    Returns indices of residues that are inside the cylinder.
-    """
-    positions, base_point, axis_point, radius, height, indices = chunk_data
-
+    positions, base_point, axis_point, radius, height, indices, z_min = chunk_data
     results = []
     for i, pos in enumerate(positions):
-        if is_point_in_cylinder(pos, base_point, axis_point, radius, height):
+        if is_point_in_cylinder(pos, base_point, axis_point, radius, height, z_min=z_min):
             results.append(indices[i])
-
     return results
 
 
@@ -472,59 +463,25 @@ def filter_residues_parallel(
     height: float,
     chunk_size: Optional[int] = None,
     max_workers: Optional[int] = None,
+    z_min: float = 0.0,
 ) -> List[T]:
-    """
-    Filter residues in parallel using ProcessPoolExecutor.
-
-    Parameters:
-    -----------
-    residues : List[T]
-        List of residue objects to filter
-    base_point : np.ndarray
-        Center point of cylinder base
-    axis_point : np.ndarray
-        Point defining cylinder axis direction
-    radius : float
-        Radius of cylinder
-    height : float
-        Height of cylinder
-    chunk_size : Optional[int]
-        Size of chunks to process in parallel. If None, calculated automatically
-    max_workers : Optional[int]
-        Maximum number of worker processes. If None, uses CPU count
-
-    Returns:
-    --------
-    List[T]
-        Filtered list of residues whose positions lie within the cylinder
-    """
-    # Set defaults for parallel processing parameters
     if max_workers is None:
         max_workers = multiprocessing.cpu_count()
-
     if chunk_size is None:
-        # Aim for ~4 chunks per worker for better load balancing
         chunk_size = max(1, len(residues) // (max_workers * 4))
 
-    # Pre-compute all positions and create index mapping
     positions = np.array([get_residue_position(r) for r in residues])
-
     indices = list(range(len(residues)))
-    index_chunks = [
-        indices[i : i + chunk_size] for i in range(0, len(indices), chunk_size)
-    ]
+    index_chunks = [indices[i : i + chunk_size] for i in range(0, len(indices), chunk_size)]
 
-    # Create data chunks for processing
     chunks_data = [
-        (positions[idx], base_point, axis_point, radius, height, idx)
+        (positions[idx], base_point, axis_point, radius, height, idx, z_min)
         for idx in index_chunks
     ]
 
-    # Process chunks in parallel
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
         results = list(executor.map(_worker_process_chunk, chunks_data))
 
-    # Flatten results and get corresponding residues
     filtered_indices = [idx for chunk_result in results for idx in chunk_result]
     return [residues[i] for i in filtered_indices]
 
