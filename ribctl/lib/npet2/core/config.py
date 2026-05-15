@@ -64,15 +64,12 @@ class RunConfig:
     cylinder_ptc_extension_A: float = 20
 
     # === Stage20: Exterior shell (whole ribosome surface) ===
-    alpha_d3d_alpha       : float = 200
-    alpha_d3d_tol         : float = 10
-    alpha_d3d_offset      : float = 3
-    alpha_kdtree_radius   : float = 40
-    alpha_max_nn          : int   = 60
-    alpha_tangent_planes_k: int   = 20
-    alpha_poisson_depth   : int   = 6
-    alpha_poisson_ptweight: int   = 4
-    alpha_fill_holes      : float = 2000
+    shell_voxel_size_A  : float = 3.0
+    shell_dilation_iters: int   = 2
+    shell_closing_iters : int   = 6
+    shell_gaussian_sigma: float = 1.5
+    shell_smooth_iters  : int   = 20
+    shell_fill_holes    : float = 2000.0
 
     # === Stage40: Grid levels ===
     grid_levels: List[GridLevelConfig] = field(

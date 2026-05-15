@@ -11,7 +11,7 @@ class StageCacheKey:
     stage: str
     inputs_fp: dict
     params: dict
-    impl_version: str = "v1.01"  # bump when you change semantics
+    impl_version: str = "v1.1"  # bump when you change semantics
 
     def digest(self) -> str:
         return stable_hash_dict({

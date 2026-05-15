@@ -21,12 +21,12 @@ class ArtifactRef:
     """
     A stable handle to an on-disk artifact, referenced from the manifest.
     """
-    name: str                 # semantic name: "ptc", "empty_points_level_0"
-    type: ArtifactType
-    path: Path                # absolute or run-relative; store decides
-    stage: str                # stage key: "10_landmarks"
-    meta: Dict[str, Any] = field(default_factory=dict)
-    depends_on: tuple[str, ...] = ()  # artifact names (or ids later)
+    name      : str                                           # semantic name: "ptc", "empty_points_level_0"
+    type      : ArtifactType
+    path      : Path                                          # absolute or run-relative; store decides
+    stage     : str                                           # stage key: "10_landmarks"
+    meta      : Dict[str, Any] = field(default_factory=dict)
+    depends_on: tuple[str, ...] = ()                          # artifact names (or ids later)
 
 
 @dataclass
